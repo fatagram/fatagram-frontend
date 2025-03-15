@@ -1,0 +1,14 @@
+:root {
+    --font-size: 16px;
+    --border-radius: 8px;
+}
+
+[data-them="light"] {
+    --bg-color: #ffffff;
+    --text-color: #202020;
+}
+
+[data-them="dark"] {
+    --bg-color: #202020;
+    --text-color: #ffffff;
+}

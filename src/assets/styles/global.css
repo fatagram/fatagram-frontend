@@ -1,0 +1,74 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@import url('https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&display=swap');
+
+:root {
+    /* Gradient colors */
+    --main-gradient-color: repeating-linear-gradient(45deg, 
+    #8dfeda 0%, #3dba84 20%, #2aacb0 40%, 
+    #36bcbf 60%, #47c4b0 80%, #8fffd0 100%);
+    --second-gradient-color: repeating-linear-gradient(45deg, 
+    #8de8f0 0%, #3da8ba 20%, #2a9eac 40%, 
+    #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%);
+    --main-wrong-gradient-color: rgb(255, 75, 75);
+
+    /* Single colors */
+    --main-single-color: #2bd48b;
+    --second-single-color: #2ca772;
+    --third-single-color: #003820;
+  }
+  
+  .bg-gradient-main {
+    background: var(--main-gradient-color);
+    background-size: 200% 100%;
+    transition: background-position 0.3s;
+  }
+  
+  .text-gradient-main {
+    background: var(--main-gradient-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .text-gradient-second {
+    background: var(--second-gradient-color);
+    -webkit-background-clip: text;
+    background-clip: text;
+    color: transparent;
+  }
+  
+  .hover\:bg-gradient-main-move:hover,
+  .focus\:bg-gradient-main-move:focus {
+    background-position: 50% 0;
+  }
+  
+  .bg-disabled {
+    background: #dcdcdc;
+  }
+
+  .background-image {
+    background: url('../images/login_background.jpg');
+  }
+  
+  
+
+  
+  @keyframes fadeIn {
+    from {
+      opacity: 0.5;
+      transform: scale(0.9);
+    }
+    to {
+      opacity: 1;
+      transform: scale(1);
+    }
+  }
+  
+  @layer utilities {
+    .animate-fade-in {
+      animation: fadeIn 0.25s ease-out;
+    }
+  }
