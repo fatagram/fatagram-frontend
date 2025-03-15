@@ -5,9 +5,9 @@ import Logo from  "../../../../components/common/Logo/Logo";
 import Checkbox from  "../../../../components/common/Checkbox/Checkbox";
 import Link from  "../../../../components/common/Link/Link";
 import { useNavigate } from "react-router-dom";
-import { LoginValidator } from "../../validators/LoginValidator";
-import { ErrorMessages, LoginDto, ErrorKey } from "../../../../interfaces/LoginDto";
-import AuthService from "../../../../services/AuthService"; 
+import { LoginValidator } from "../../services/LoginValidator";
+import { ErrorMessages, LoginDto, ErrorKey } from "../../../../interfaces/auth/LoginDto";
+import AuthService from "../../services/AuthService"; 
 import { ServerResponse } from "../../../../interfaces/ServerResponse";
 
 interface LoginFormProps {

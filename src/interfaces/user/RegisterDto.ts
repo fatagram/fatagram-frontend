@@ -1,5 +1,5 @@
 // Purpose: DTO for the Register endpoint.
-export interface RegisterDto {
+export default interface RegisterDto {
     username: string;
     password: string;
     email: string;

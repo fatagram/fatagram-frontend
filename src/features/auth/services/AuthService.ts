@@ -1,8 +1,8 @@
 import axios from 'axios';
-import apiUrl from '../config';
-import { getAccessToken, setAccessToken, setRefreshToken } from '../utils/token';
-import { LoginDto } from '../interfaces/LoginDto';
-import { ServerResponse } from '../interfaces/ServerResponse';
+import apiUrl from '../../../config';
+import { getAccessToken, setAccessToken, setRefreshToken } from '../../../utils/token';
+import { LoginDto } from '../../../interfaces/auth/LoginDto';
+import { ServerResponse } from '../../../interfaces/ServerResponse';
 
 const API_URL = `${apiUrl}/api/auth/`;
 

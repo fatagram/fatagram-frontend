@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/AuthService";
+import AuthService from "../features/auth/services/AuthService";
 import { getAccessToken } from "../utils/token";
 
 

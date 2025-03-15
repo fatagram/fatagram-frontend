@@ -1,7 +1,7 @@
 import axios from 'axios';
-import apiUrl from '../config';
-import { RegisterDto } from '../interfaces/RegisterDto';
-import { ServerResponse } from '../interfaces/ServerResponse';
+import apiUrl from '../../../config';
+import RegisterDto from '../../../interfaces/user/RegisterDto';
+import ServerResponse from '../../../interfaces/ServerResponse';
 
 const API_URL = `${apiUrl}/api/account/`;
 

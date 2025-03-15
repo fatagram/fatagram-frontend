@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import RegisterForm from "../features/auth/components/RegisterForm/RegisterForm";
+import RegisterForm from "../features/user/components/RegisterForm/RegisterForm";
 import Footer from "../components/layout/Footer/Footer";
 
 

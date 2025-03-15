@@ -5,10 +5,10 @@ import Logo from "../../../../components/common/Logo/Logo";
 import Checkbox from "../../../../components/common/Checkbox/Checkbox";
 import Link from "../../../../components/common/Link/Link";
 import { useNavigate } from "react-router-dom";
-import { RegisterValidator } from "../../validators/RegisterValidator";
-import { RegisterDto } from "../../../../interfaces/RegisterDto";
-import { ErrorKey, ErrorMessages } from "../../../../interfaces/RegisterDto";
-import { RegisterService } from "../../../../services/RegisterService";
+import { RegisterValidator } from "../../services/RegisterValidator";
+import { RegisterDto } from "../../../../interfaces/user/RegisterDto";
+import { ErrorKey, ErrorMessages } from "../../../../interfaces/user/RegisterDto";
+import { RegisterService } from "../../services/RegisterService";
 
 const RegisterForm: React.FC = () => {
 

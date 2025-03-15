@@ -1,7 +1,7 @@
 import { useEffect, useState, ComponentType } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../services/AuthService";
-import { getAccessToken } from "../utils/token";
+import AuthService from "../../features/auth/services/AuthService";
+import { getAccessToken } from "../../utils/token";
 
 
 // withAuth function

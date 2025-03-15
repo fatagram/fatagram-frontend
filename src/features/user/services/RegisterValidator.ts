@@ -1,4 +1,4 @@
-import { RegisterDto, ErrorCodes } from "../../../interfaces/RegisterDto";
+import { RegisterDto, ErrorCodes } from "../../../interfaces/user/RegisterDto";
 
 export class RegisterValidator {
     static validate(dto: RegisterDto): string[] {
