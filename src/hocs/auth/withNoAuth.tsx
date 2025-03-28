@@ -1,8 +1,7 @@
-import { useEffect, useState } from "react";
+import LoadingPage from "../../pages/loading/LoadingPage";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../features/auth/services/AuthService";
-import { getAccessToken } from "../utils/token";
-
+import { useAuth } from "../../contexts/AuthContext";
 
 // withNoAuth function
 // This function is a higher order component that checks if the user is not authenticated.
@@ -12,38 +11,21 @@ import { getAccessToken } from "../utils/token";
 // If the user is authenticated, it redirects the user to the home page.
 const withNoAuth = <P extends object>(WrappedComponent: React.ComponentType<P>) => {
 
-    return (props: any) => {
-        const navigate = useNavigate();
-        const accessToken = getAccessToken();
-
-        const[isBlocked, setIsBlocked] = useState<boolean>(false);
-        const[isChecking, setIsChecking] = useState<boolean>(true);
+    return (props: P) => {
+        const { isAuthenticated, isLoading } = useAuth();
+        const navigate = useNavigate(); 
 
         useEffect(() => {
-            const checkToken = async(): Promise<void> => {
-                const authService = new AuthService();
-                if (accessToken) {
-                    var result = await authService.ping();
-                    setIsBlocked(result.success);
-                }
-
-                setIsChecking(false);
+            if (isAuthenticated && !isLoading) {
+                navigate('/', { replace: true });
             }
-            checkToken();
-        }, [accessToken]);
+        }, [isAuthenticated, isLoading, navigate]);
 
-        if (isChecking) {
-            return null;
-        }
-
-        if (isBlocked) {
-            navigate("/", { replace: true });
-            return null;
-        }
-        else return <WrappedComponent {...props} />;
+        if (isLoading) return <LoadingPage />;
+        if (!isAuthenticated) return <WrappedComponent {...props} />;
+        return <LoadingPage />;
     }
 }
-
 
 // Export the withNoAuth function
 export default withNoAuth;

@@ -1,59 +1,29 @@
-import { useEffect, useState, ComponentType } from "react";
+import { ComponentType, useEffect } from "react";
+// import { useNavigate } from "react-router-dom";
+import LoadingPage from "../../pages/loading/LoadingPage";
 import { useNavigate } from "react-router-dom";
-import AuthService from "../../features/auth/services/AuthService";
-import { getAccessToken } from "../../utils/token";
+import { useAuth } from "../../contexts/AuthContext";
 
 
-// withAuth function
-// This function is a higher order component that checks if the user is authenticated.
-// The function takes a component as an argument and returns a new component.
-// The new component checks if the user is authenticated.
-// If the user is authenticated, it renders the original component.
-// If the user is not authenticated, it redirects the user to the login page.
 const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
 
     // AuthComponent function
     // This function is the new component that checks if the user is authenticated.
-    return (props: any) => {
-        const navigate = useNavigate();
-        const accessToken = getAccessToken();
-        // console.log(accessToken);
-
-        const [isAccessed, setIsAccessed] = useState<boolean>(false);
-        const [isChecking, setIsChecking] = useState<boolean>(true);
+    return (props: P) => {
+        const { isAuthenticated, isLoading } = useAuth();
+        const navigate = useNavigate(); 
 
         useEffect(() => {
-            const checkToken = async(): Promise<void> => {
-                const authService = new AuthService();
-
-                if (accessToken) {
-                    var result = await authService.ping();
-                    console.log(result);
-                    setIsAccessed(result.success);
-                }
-
-                setIsChecking(false);
+            if (!isAuthenticated && !isLoading) {
+                navigate('/login', { replace: true });
             }
+        }, [isAuthenticated, isLoading, navigate]);
 
-            checkToken();
-        }, [accessToken]);
-
-        useEffect(() => {
-            if (!isChecking && !isAccessed) {
-                navigate("/login", { replace: true });
-            }
-        }, [isChecking, isAccessed, navigate]);
-
-        if (isChecking) {
-            return null;
-        }
-
-        if (isAccessed) return <WrappedComponent {...props} />;
-        else return null;
+        if (isLoading) return <LoadingPage />;
+        if (isAuthenticated) return <WrappedComponent {...props} />;
+        return <LoadingPage />;
     }
 }
-
-
 
 // Export the withAuth function
 export default withAuth;

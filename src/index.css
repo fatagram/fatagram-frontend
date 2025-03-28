@@ -1,0 +1,6 @@
+@import url('./assets/styles/global.css');
+@import url('./assets/styles/themes.css');
+
+html {
+    background-color: var(--bg-color);
+}

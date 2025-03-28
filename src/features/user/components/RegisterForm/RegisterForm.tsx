@@ -5,10 +5,11 @@ import Logo from "../../../../components/common/Logo/Logo";
 import Checkbox from "../../../../components/common/Checkbox/Checkbox";
 import Link from "../../../../components/common/Link/Link";
 import { useNavigate } from "react-router-dom";
-import { RegisterValidator } from "../../services/RegisterValidator";
-import { RegisterDto } from "../../../../interfaces/user/RegisterDto";
-import { ErrorKey, ErrorMessages } from "../../../../interfaces/user/RegisterDto";
-import { RegisterService } from "../../services/RegisterService";
+import { RegisterValidator } from "../../services/Register/RegisterValidator";
+import RegisterDto from "../../interfaces/RegisterDto";
+import { ErrorKey, ErrorMessages } from "../../interfaces/RegisterDto";
+import { RegisterService } from "../../services/Register/RegisterService";
+import PasswordBox from "../../../../components/common/Textbox/PasswordBox";
 
 const RegisterForm: React.FC = () => {
 
@@ -32,7 +33,6 @@ const RegisterForm: React.FC = () => {
   // useNavigate hook
   const navigate = useNavigate();
 
-
   // resetErrors function
   // This function resets all the error messages.
   const resetErrors = (): void => {
@@ -44,7 +44,6 @@ const RegisterForm: React.FC = () => {
     setEmailError("");
     setPhoneError("");
   };
-
 
   // errorMap object
   // This object maps the error codes to the corresponding error state.
@@ -59,7 +58,6 @@ const RegisterForm: React.FC = () => {
     INTERNAL_SERVER_ERROR: setUnknownError,
     REGISTER_USERNAME_EXISTED: setUsernameError,
   };
-
 
   // validateInput function
   // This function validates the input fields.
@@ -79,7 +77,6 @@ const RegisterForm: React.FC = () => {
     return errorCodes.length === 0;
   };
 
-
   // handleRegister function
   // This function handles the registration process.
   const handleRegister = async () => {
@@ -89,7 +86,6 @@ const RegisterForm: React.FC = () => {
       setConfirmPasswordError("Passwords do not match");
       return;
     }
-
     const registerDto: RegisterDto = {
       firstName: firstName,
       lastName: lastName,
@@ -111,26 +107,23 @@ const RegisterForm: React.FC = () => {
     }
   };
 
-
   // JSX
   return (
-    <div
+    <form
       className="flex flex-col items-center sm:gap-[13px] gap-[13px] w-full
                 sm:max-w-[420px] max-w-[380px] p-[20px] sm:p-[30px]
-                bg-white shadow-md rounded-lg
+                bg-[var(--bg-color-secondary)] shadow-md rounded-lg
                 animate-fade-in">
 
       {/* Logo Fatagram */}
       <Logo />
-
       <h2 className="uppercase sm:text-[45px] text-[45px] text-[var(--third-single-color)] font-bold font-jua select-none">
         Sign up
       </h2>
-
       <div className="flex gap-[10px] w-full">
         <div className="w-full">
           <Textbox
-            className="text-[13px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
+            className="text-[13px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
             placeholder="First name"
             onChange={(e) => setFirstName(e.target.value)}
             isWrong={firstNameError ? true : false}
@@ -144,7 +137,7 @@ const RegisterForm: React.FC = () => {
         </div>
         <div className="w-full">
           <Textbox
-            className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
+            className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
             placeholder="Last name"
             onChange={(e) => setLastName(e.target.value)}
             isWrong={lastNameError ? true : false}
@@ -157,10 +150,9 @@ const RegisterForm: React.FC = () => {
           </span>
         </div>
       </div>
-
       <div className="w-full">
         <Textbox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder="Username"
           onChange={(e) => setUsername(e.target.value)}
           isWrong={usernameError ? true : false}
@@ -172,10 +164,9 @@ const RegisterForm: React.FC = () => {
           {usernameError}
         </span>
       </div>
-
       <div className="w-full">
-        <Textbox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
+        <PasswordBox
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder="Password"
           onChange={(e) => setPassword(e.target.value)}
           isWrong={passwordError ? true : false}
@@ -188,8 +179,8 @@ const RegisterForm: React.FC = () => {
         </span>
       </div>
       <div className="w-full">
-        <Textbox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
+        <PasswordBox
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder="Confirm Password"
           onChange={(e) => setConfirmPassword(e.target.value)}
           isWrong={confirmPasswordError ? true : false}
@@ -203,7 +194,7 @@ const RegisterForm: React.FC = () => {
       </div>
       <div className="w-full">
         <Textbox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder="Email"
           onChange={(e) => setEmail(e.target.value)}
           isWrong={emailError ? true : false}
@@ -217,7 +208,7 @@ const RegisterForm: React.FC = () => {
       </div>
       <div className="w-full">
         <Textbox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder="Phone"
           onChange={(e) => setPhone(e.target.value)}
           isWrong={phoneError ? true : false}
@@ -229,7 +220,6 @@ const RegisterForm: React.FC = () => {
           {phoneError}
         </span>
       </div>
-
       <Checkbox
         className={`
             text-[15px] text-[var(--third-single-color)] gap-[8px]
@@ -248,27 +238,24 @@ const RegisterForm: React.FC = () => {
           </label>
         }
       />
-
       <span
         className={`${unknownError ? "" : "hidden"
           } text-[13px] px-[5px] text-red-400`}
       >
         {unknownError}
       </span>
-
-      <Button
+      <Button type="button"
         className={`sm:text-[17px] text-[20px] w-full sm:py-[5px] py-[7px] font-montserrat`}
         onClick={handleRegister}
       >
         Sign up
       </Button>
-
       <div>
         <Link className={"sm:text-[14px]"} to="/login">
           Login
         </Link>
       </div>
-    </div>
+    </form>
   );
 };
 

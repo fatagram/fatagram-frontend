@@ -1,4 +1,4 @@
-import { LoginDto, ErrorCodes } from "../../../interfaces/auth/LoginDto";
+import LoginDto, { ErrorCodes } from "../interfaces/LoginDto";
 
 
 export class LoginValidator {

@@ -1,5 +1,5 @@
 // Purpose: DTO for login requests.
-export interface LoginDto {
+export default interface LoginDto {
     username: string;
     password: string;
 }
@@ -13,7 +13,6 @@ export enum ErrorCodes {
     WRONG_PASSWORD = "WRONG_PASSWORD",
     INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
 }
-
 
 // Maaping error codes to error messages
 export const ErrorMessages: Record<string, string> = {

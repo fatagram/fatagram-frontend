@@ -1,7 +1,9 @@
-export const url: { http: string; https: string; iis: string } = {
-    http: process.env.REACT_APP_HTTP_URL || '',
-    https: process.env.REACT_APP_HTTPS_URL || '',
-    iis: process.env.REACT_APP_IIS_URL || '',
+
+const url: { http: string; https: string, ngrok: string} = {
+    http: 'http://192.168.137.1:5000',
+    https: 'https://192.168.137.1:5001',
+    ngrok: 'https://e99a-14-169-56-27.ngrok-free.app'
   };
-const apiUrl = url.http;
+const apiUrl = url.https;
+
 export default apiUrl

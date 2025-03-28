@@ -1,12 +1,15 @@
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 
+// LinkProps interface
 interface LinkProps {
     to: string;
     children: React.ReactNode;
     className?: string;
 }
 
+// Link component
+// This component is a link component that can be used in the application.
 const Link: React.FC<LinkProps> = ({
     to,
     children,
