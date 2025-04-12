@@ -6,7 +6,6 @@ import { ProfileService } from "../../features/user/services/Profile/ProfileServ
 import NotFoundPage from "../not_found/NotFoundPage";
 import LoadingPage from "../loading/LoadingPage";
 
-
 const ProfilePage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
 
@@ -17,7 +16,7 @@ const ProfilePage: React.FC = () => {
     React.useEffect(() => {
         const fetchProfile = async () => {
             const service = new ProfileService();
-            const response = await service.GetProfileHeader(userId? userId : "");
+            const response = await service.GetProfile(userId? userId : "", "avatar,background,fullName");
             if (response.success) {
                 setProfile(response.data.infos);
                 setIsOwner(response.data.isOwner);
@@ -29,14 +28,17 @@ const ProfilePage: React.FC = () => {
         }
         if (userId) fetchProfile();
     }, [userId]);
-
     if (loading) return <LoadingPage/>
     
     return (
         <div className="relative justify-start items-center flex flex-col pt-2 h-screen bg-[var(--bg-color)]">
-            {profile? <div className="flex justify-center w-full pb-[280px] lg:pb-32 bg-[var(--bg-color-secondary)] pt-16">
-                 <ProfileHeader profileData={profile} isOwner={isOwner}/> 
-            </div> : <NotFoundPage/>}
+            {
+                profile ? 
+                    <div className="flex justify-center w-full pb-[280px] lg:pb-32 bg-[var(--bg-color-secondary)] pt-16">
+                        <ProfileHeader profileData={profile} isOwner={isOwner}/> 
+                    </div> : 
+                    <NotFoundPage/>
+            }
         </div>
     )
 }

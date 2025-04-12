@@ -1,10 +1,12 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
-type Theme = 'light' | 'dark' | 'neon' | 'toxic-red-death';
+type Theme = 'light' | 'dark' | 'neon' | 'toxic-red-death' | 'dark-pink-mystic';
+const themes: Theme[] = ['light', 'dark', 'neon', 'toxic-red-death', 'dark-pink-mystic'];
 
 interface ThemeContextType {
     theme: Theme;
-    toggleTheme: () => void;
+    setTheme: (e: string) => void;
+    availableThemes: Theme[];
 }
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
@@ -14,23 +16,21 @@ export const ThemeProvider: React.FC<{children: React.ReactNode}> = ({children})
         return (localStorage.getItem('theme') as Theme) || 'light';
     });
 
+    const setThemeHandler = (theme: string) => {
+        if (themes.includes(theme as Theme)) {
+            setTheme(theme as Theme);
+        } else {
+            console.error(`Theme ${theme} is not supported.`);
+        }
+    };
+
     useEffect(() => {
         document.documentElement.setAttribute('data-theme', theme);
         localStorage.setItem('theme', theme);
     }, [theme]);
 
-    const toggleTheme = () => {
-        setTheme((prevTheme) => {
-            if (prevTheme === 'light') return 'dark';
-            if (prevTheme === 'dark') return 'neon';
-            if (prevTheme === 'neon') return 'toxic-red-death';
-            if (prevTheme === 'toxic-red-death') return 'light';
-            return 'light';
-        });
-    }
-
     return (
-        <ThemeContext.Provider value={{theme, toggleTheme}}>
+        <ThemeContext.Provider value={{theme, setTheme: setThemeHandler, availableThemes: themes}}>
             {children}
         </ThemeContext.Provider>
     )

@@ -20,11 +20,18 @@ function NotFoundPage() {
     <div className="flex flex-col items-center justify-center h-screen w-full gap-[20px] bg-[var(--bg-color)]">
         <Logo hasSlogan={false} className={"text-[30px]"}/>
         <span className="text-[80px] font-bold font-roboto bg-[var(--main-single-color)] text-[var(--third-single-color)]
-             w-[200px] h-[200px] flex justify-center items-center rounded-full">404</span>
-        <span className="uppercase font-jua font-semibold sm:text- text-[40px] text-[var(--third-single-color)]">Page Not Found</span>
-        <span className="text-[20px] flex justify-center text-center">Oops! The page you're looking for doesn't exist or has been moved.</span>
+                          w-[200px] h-[200px] flex justify-center items-center rounded-full">404</span>
+        <span className="uppercase font-jua font-semibold sm:text- text-[40px] 
+                        text-[var(--third-single-color)]">Page Not Found</span>
+        <span className="text-[20px] flex justify-center text-center">
+            Oops! The page you're looking for doesn't exist or has been moved.
+        </span>
         <div className="flex gap-[10px]">
-            <Button className={'flex items-center'} onClick={() => {navigate('/')}}><ArrowLeft className="w-5 h-5 mr-2"/> Back to Home</Button>
+            <Button className={'flex items-center'} 
+                    onClick={() => {navigate('/')}}><ArrowLeft 
+                    className="w-5 h-5 mr-2"/> 
+                    Back to Home
+            </Button>
         </div>
         <Footer className="text-[#959595]"/>
     </div>

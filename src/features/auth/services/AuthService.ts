@@ -1,7 +1,7 @@
 import { apiClient } from '../../../services/setupInterceptor';
 import LoginDto from '../interfaces/LoginDto';
 import ServerResponse from '../../../interfaces/ServerResponse';
-import { setRefreshToken, setRefreshTokenToSession, removeRefreshToken  } from '../../../utils/token';
+import { setRefreshToken, setRefreshTokenToSession, removeRefreshToken, getRefreshToken, getRefreshTokenFromSession  } from '../../../utils/token';
 
 // API_URL
 
@@ -20,7 +20,7 @@ export class AuthService {
                 username: dto.username,
                 password: dto.password
             });
-            const { refreshToken } = data.data.data;
+            const { refreshToken, userId, username } = data.data.data;
 
             if (localStorage.getItem('isRememberMe') === 'true') {
                 setRefreshToken(refreshToken);
@@ -31,7 +31,7 @@ export class AuthService {
             }
 
             // console.log(localStorage.getItem('accessToken'));
-            return { success: true };
+            return { success: true, data: { refreshToken, userId, username } };
         }
         catch (error: any) {
             if (error.response) {
@@ -48,6 +48,21 @@ export class AuthService {
                     statusCode: 500,
                     errorCodes: ["INTERNAL_SERVER_ERROR"]
                 }
+            }
+        }
+    }
+
+    // logout method
+    async logout(): Promise<void> {
+        try {
+            await apiClient.post(`/api/auth/logout`, { refreshToken: getRefreshToken() || getRefreshTokenFromSession() });
+        }
+        catch (error: any) {
+            if (error.response) {
+                console.log(error.response.data);
+            }
+            else {
+                console.log("INTERNAL_SERVER_ERROR");
             }
         }
     }

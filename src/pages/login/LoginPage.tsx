@@ -16,11 +16,11 @@ function LoginPage() : React.ReactElement
     return (
         <div>
             <div className="flex flex-col items-center justify-center h-screen w-full
-                        background-image bg-cover bg-center ">
+                            background-image bg-cover bg-center ">
                         
                     <div className="w-full flex justify-center items-center flex-1 z-10">
                         {forgotPassword ? <ForgotPasswordForm switchToLogin={() => setForgotPassword(false)}/> : 
-                        <LoginForm switchForgotPassword={() => setForgotPassword(true)}/>}
+                                        <LoginForm switchForgotPassword={() => setForgotPassword(true)}/>}
                     </div>
                 <Footer className="z-10 pb-0"/>
             </div>

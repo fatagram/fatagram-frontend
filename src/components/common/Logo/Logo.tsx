@@ -1,9 +1,9 @@
 import React from "react";
 
 const sizeClasses = {
-    small: { logo: "sm:text-[20px] text-[25px]", slogan: "sm:text-[10px] text-[15px]" },
-    medium: { logo: "sm:text-[35px] text-[50px]", slogan: "sm:text-[15px] text-[20px]" },
-    large: { logo: "sm:text-[45px] text-[60px]", slogan: "sm:text-[20px] text-[25px]" }
+    small: { logo: "sm:text-[20px] text-[10px]", slogan: "sm:text-[10px] text-[15px]" },
+    medium: { logo: "sm:text-[35px] text-[30px]", slogan: "sm:text-[15px] text-[20px]" },
+    large: { logo: "sm:text-[45px] text-[40px]", slogan: "sm:text-[20px] text-[25px]" }
 }
 
 type Size = keyof typeof sizeClasses;

@@ -22,20 +22,11 @@ const apiClientFormData: AxiosInstance = axios.create(
 
 // Add Interceptors
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    // const accessToken = getAccessToken() || getAccessTokenFromSession();
-    // if (accessToken) {
-    //     config.headers.Authorization = `Bearer ${accessToken}`;
-    // }
-
     return config;
 });
 
 // Add Interceptors
 apiClientFormData.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-    // const accessToken = getAccessToken() || getAccessTokenFromSession();
-    // if (accessToken) {
-    //     config.headers.Authorization = `Bearer ${accessToken}`;
-    // }
     return config;
 });
 

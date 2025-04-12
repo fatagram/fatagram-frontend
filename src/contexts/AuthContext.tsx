@@ -7,7 +7,11 @@ interface AuthContextType {
     setAuthenticated?: (isAuthenticated: boolean) => void;
 }
 
-const AuthContext = createContext<AuthContextType>({ isAuthenticated: null, isLoading: true, setAuthenticated: (boolean) => {} });
+const AuthContext = createContext<AuthContextType>({ 
+    isAuthenticated: null, 
+    isLoading: true, 
+    setAuthenticated: (boolean) => {} 
+});
 
 export const AuthProvider = ({children} : { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
@@ -23,7 +27,11 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
         checkAuth();
     }, []);
     
-    return <AuthContext.Provider value={{ isAuthenticated, isLoading, setAuthenticated: setIsAuthenticated }}>{children}</AuthContext.Provider> 
+    return <AuthContext.Provider value={{ 
+        isAuthenticated, 
+        isLoading, 
+        setAuthenticated: setIsAuthenticated 
+    }}>{children}</AuthContext.Provider> 
 }
 
 export const useAuth = () => useContext(AuthContext);

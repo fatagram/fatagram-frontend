@@ -2,9 +2,8 @@ import ServerResponse from "../../../../interfaces/ServerResponse";
 import { apiClient, apiClientFormData } from "../../../../services/setupInterceptor";
 
 export class ProfileService {
-    async GetProfileHeader(id: string): Promise<ServerResponse> {
+    async GetProfile(id: string, fields: string): Promise<ServerResponse> {
         try {
-            const fields = 'fullName,avatar,background';
             const { data } = await apiClient.get(`api/user/${id}/profile?fields=${fields}`);
 
             return { success: true, data: data.data };

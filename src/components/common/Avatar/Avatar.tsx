@@ -3,12 +3,34 @@ import emptyAvatar from "../../../assets/images/empty_avatar.png"
 import SelectFile from "../SelectFile/SelectFile";
 
 const sizeClasses = {
-    mini: 'w-[20px] h-[20px]',
-    small: 'w-[80px] h-[80px]',
-    medium: 'w-[120px] h-[120px]',
-    large: 'w-[200px] h-[200px]',
-    xlarge: 'w-[250px] h-[250px]',
+    // Mini sizes
+    mini_1: "w-[16px] h-[16px]",
+    mini_2: "w-[24px] h-[24px]",
+    mini_3: "w-[32px] h-[32px]",
+    mini_4: "w-[40px] h-[40px]",
+
+    // Small sizes
+    small_1: "w-[48px] h-[48px]",
+    small_2: "w-[56px] h-[56px]",
+    small_3: "w-[64px] h-[64px]",
+    small: "w-[80px] h-[80px]",
+
+    // Medium sizes
+    medium_1: "w-[96px] h-[96px]",
+    medium_2: "w-[112px] h-[112px]",
+    medium: "w-[128px] h-[128px]",
+
+    // Large sizes
+    large_1: "w-[160px] h-[160px]",
+    large_2: "w-[192px] h-[192px]",
+    large: "w-[224px] h-[224px]",
+
+    // Extra Large
+    xlarge_1: "w-[256px] h-[256px]",
+    xlarge_2: "w-[288px] h-[288px]",
+    xlarge: "w-[320px] h-[320px]",
 } as const;
+
 
 // typeof is a type operator that returns the type of a value or variable
 // keyof is a type operator that returns the type of the keys of an object
@@ -38,7 +60,7 @@ const Avatar: React.FC<AvatarProps> = ({
     const [imgSrc, setImgSrc] = React.useState<string>(src);
 
     useEffect(() => {
-        setImgSrc(src === "" ? emptyAvatar : src);
+        setImgSrc((src === "" || !src) ? emptyAvatar : src);
     }, [src])
 
     return (

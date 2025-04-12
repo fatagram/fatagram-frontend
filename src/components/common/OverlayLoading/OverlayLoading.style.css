@@ -1,0 +1,6 @@
+:root {
+    --bg-color-opacity: color-mix(in srgb, var(--bg-color) 50%, transparent);
+}
+.overlay-loading-bg-color {
+    background-color: var(--bg-color-opacity);
+}

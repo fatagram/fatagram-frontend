@@ -83,5 +83,26 @@
     #660000 60%, #330000 80%, #140000 100%);
 }
 
+[data-theme="dark-pink-mystic"] {
+    --bg-color: #1a0e1f; /* Tím đen huyền bí, nền tối mềm mại */
+    --bg-color-secondary: #2b122f; /* Tím sẫm, tăng chiều sâu */
+    --bg-color-third: #3d1640; /* Tím đậm pha chút hồng, tạo sự ấm áp */
+
+    --main-single-color: #ff69b4; /* Hồng neon rực nhẹ, mang vibe cyber */
+    --second-single-color: #e84393; /* Hồng đậm, mềm mại như nhung */
+    --third-single-color: #c71585; /* Hồng fuchsia sâu, tạo điểm nhấn */
+
+    --text-color: #ffb3d9; /* Hồng pastel sáng, giúp chữ nổi bật trên nền tối */
+
+    --btn-color: #ff4081; /* Hồng neon vừa đủ rực rỡ nhưng không quá chói */
+    --btn-hover-color: #b0185d; /* Khi hover, chuyển sang hồng đậm quyến rũ */
+
+    --main-gradient-color: linear-gradient(135deg,  
+    #3d1640 0%, #e84393 25%, #ff69b4 50%,  
+    #ff4081 75%, #b0185d 100%);
+}
+
+
+
 
 

@@ -10,8 +10,16 @@ import RegisterDto from "../../interfaces/RegisterDto";
 import { ErrorKey, ErrorMessages } from "../../interfaces/RegisterDto";
 import { RegisterService } from "../../services/Register/RegisterService";
 import PasswordBox from "../../../../components/common/Textbox/PasswordBox";
+import OverlayLoading from "../../../../components/common/OverlayLoading/OverlayLoading";
 
-const RegisterForm: React.FC = () => {
+interface RegisterFormProps {
+  showLogo?: boolean;
+  showClose?: boolean;
+  onClose?: () => void;
+}
+
+
+const RegisterForm: React.FC<RegisterFormProps> = ({showLogo=true, showClose=false,onClose}) => {
 
   // useState hooks
   const [firstName, setFirstName] = React.useState<string>("");
@@ -29,6 +37,11 @@ const RegisterForm: React.FC = () => {
   const [emailError, setEmailError] = React.useState<string>("");
   const [phoneError, setPhoneError] = React.useState<string>("");
   const [unknownError, setUnknownError] = React.useState<string>("");
+  const [isShowClose] = React.useState<boolean>(showClose);
+  const [isShowLogo] = React.useState<boolean>(showLogo);
+  
+  
+  const [isLoading, setIsLoading] = React.useState<boolean>(false);
 
   // useNavigate hook
   const navigate = useNavigate();
@@ -95,6 +108,7 @@ const RegisterForm: React.FC = () => {
       phone: phone,
     };
     const authService = new RegisterService();
+    setIsLoading(true);
     const result = await authService.register(registerDto);
 
     if (result.success) {
@@ -105,18 +119,21 @@ const RegisterForm: React.FC = () => {
         errorMap[code]?.(ErrorMessages[code]);
       });
     }
+    setIsLoading(false);
   };
 
   // JSX
   return (
     <form
-      className="flex flex-col items-center sm:gap-[13px] gap-[13px] w-full
+      className="relative flex flex-col items-center sm:gap-[13px] gap-[13px] w-full
                 sm:max-w-[420px] max-w-[380px] p-[20px] sm:p-[30px]
                 bg-[var(--bg-color-secondary)] shadow-md rounded-lg
                 animate-fade-in">
-
+      
+      {/* Overlay Loading */}
+      {isLoading && <OverlayLoading />}
       {/* Logo Fatagram */}
-      <Logo />
+      {isShowLogo && <Logo /> }
       <h2 className="uppercase sm:text-[45px] text-[45px] text-[var(--third-single-color)] font-bold font-jua select-none">
         Sign up
       </h2>
@@ -244,7 +261,7 @@ const RegisterForm: React.FC = () => {
       >
         {unknownError}
       </span>
-      <Button type="button"
+      <Button type="button" size="medium"
         className={`sm:text-[17px] text-[20px] w-full sm:py-[5px] py-[7px] font-montserrat`}
         onClick={handleRegister}
       >
@@ -255,6 +272,9 @@ const RegisterForm: React.FC = () => {
           Login
         </Link>
       </div>
+
+      { isShowClose && <span className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] cursor-pointer`}
+                onClick={onClose}><i className="fa-solid fa-xmark"></i></span> }
     </form>
   );
 };

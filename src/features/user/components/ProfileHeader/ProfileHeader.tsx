@@ -47,8 +47,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({profileData, isOwner}) => 
                     onChange={handleSelectBackground}
                     accept="image/*"
                     multiple={false}
-                    className="absolute right-5 bottom-5 z-10 opacity-50 hover:opacity-85"
-                    ><i className="fa-solid fa-camera"></i> Thêm ảnh</SelectFile> }
+                    className="absolute flex items-center right-5 bottom-5 z-10 opacity-30 hover:opacity-50 gap-2"
+                    ><i className="fa-solid fa-camera"></i> <span>Add</span></SelectFile> }
             </div>
             
             <div className="absolute flex layout w-[85%] left-1/2 -translate-x-1/2 top-100 -translate-y-1/2 flex-col lg:flex-row items-center lg:items-end

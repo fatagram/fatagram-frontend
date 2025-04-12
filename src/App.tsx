@@ -13,6 +13,8 @@ import LoginPage from './pages/login/LoginPage';
 import RegisterPage from './pages/register/RegisterPage';
 import { AuthProvider } from './contexts/AuthContext';
 import LoadingPage from './pages/loading/LoadingPage';
+import SettingPage from './pages/settings/SettingPage';
+import ThemeSettingPage from './pages/settings/sub_pages/ThemeSettingPage';
 
 
 const App: React.FC = () => {
@@ -27,6 +29,14 @@ const App: React.FC = () => {
           <Routes>
             <Route element={<ProtectedLayout />} >
               <Route path='/' element={<HomePage />}/>
+              <Route path='/settings' element={<SettingPage />}>
+                <Route path='account' element={<div>Account Settings</div>} />
+                <Route path='privacy' element={<div>Privacy Settings</div>} />
+                <Route path='language' element={<div>Language Settings</div>} />
+                <Route path='notifications' element={<div>Notifications Settings</div>} />
+                <Route path='about' element={<div>About Settings</div>} />
+                <Route path='theme' element={<ThemeSettingPage/>}/>
+              </Route>
             </Route>
 
             <Route element={<AuthLayout />}>

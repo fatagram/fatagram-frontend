@@ -16,7 +16,8 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
 }) => {
     return (
         <div className={`user-bg-image 
-        ${className} `} style={{ backgroundImage: `url(${src})`}}>
+                        ${className} `} 
+            style={{ backgroundImage: `url(${src})`}}>
 
         </div>
     )
