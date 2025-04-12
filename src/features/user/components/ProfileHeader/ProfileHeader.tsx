@@ -4,22 +4,44 @@ import Button from "../../../../components/common/Button/Button";
 import Avatar from "../../../../components/common/Avatar/Avatar";
 import SelectFile from "../../../../components/common/SelectFile/SelectFile";
 import { ProfileService } from "../../services/Profile/ProfileService";
+import AvatarSkeletonLoading from "../../../../components/common/Avatar/AvatarSkeletonLoading";
+import BackgroundImageSkeletonLoading from "../../../../components/common/BackgroundImage/BackgroundImageSkeletonLoading";
+import LabelSkeletonLoading from "../../../../components/common/Label/LabelSkeletonLoading";
 
-export interface ProfileData {
-    fullName: string,
-    avatar: string,
-    background: string
-}
 
 export interface ProfileHeaderProps {
-    profileData: ProfileData,
-    isOwner: boolean
+    className?: string;
+    userId?: string;
+    onUserNotFound?: () => void;
 }
 
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({profileData, isOwner}) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId, onUserNotFound}) => {
     
-    const [background, setBackground] = React.useState<string>(profileData.background);
-    const [avatar, setAvatar] = React.useState<string>(profileData.avatar);
+    const [fullName, setFullName] = React.useState<string>("");
+    const [avatar, setAvatar] = React.useState<string>("");
+    const [background, setBackground] = React.useState<string>("");
+    const [isOwner, setIsOwner] = React.useState<boolean>(false);
+    const [isLoading, setIsLoading] = React.useState<boolean>(true);
+
+    React.useEffect(() => {
+        const fetchProfile = async () => {
+            const service = new ProfileService();
+            const response = await service.GetProfile(userId ? userId : "", "avatar,background,fullName");
+            if (response.success) {
+                setAvatar(response.data.infos.avatar);
+                setBackground(response.data.infos.background);
+                setFullName(response.data.infos.fullName);
+                setIsOwner(response.data.isOwner);
+            }
+            else {
+                console.log(response.errorCodes);
+                onUserNotFound?.();
+            }
+            setIsLoading(false);
+
+        }
+        if (userId) fetchProfile();
+    }, [userId, onUserNotFound]);
 
     const handleSelectBackground = async (file: File) => {
         const profileService = new ProfileService();
@@ -38,10 +60,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({profileData, isOwner}) => 
     }
 
     return (
-        <div className="relative w-full h-auto layout">
+        <div className={`relative w-full h-auto layout ${className}`}>
             <div>
-                <BackgroundImage src={background} alt="Background Image"
-                className="relative min-h-[200px]"></BackgroundImage>
+                { isLoading ? <BackgroundImageSkeletonLoading alt="Loading" className="relative min-h-[300px]"/> : <BackgroundImage src={background} alt="Background Image"
+                    className="relative min-h-[200px]"></BackgroundImage>
+                }
 
                 { isOwner && <SelectFile
                     onChange={handleSelectBackground}
@@ -53,18 +76,24 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({profileData, isOwner}) => 
             
             <div className="absolute flex layout w-[85%] left-1/2 -translate-x-1/2 top-100 -translate-y-1/2 flex-col lg:flex-row items-center lg:items-end
             mt-28 lg:mt-0">
-                <Avatar src={avatar} onChange={handleSelectAvatar}
+                { isLoading ? <AvatarSkeletonLoading alt="Loading" size="large" className="border-[5px] border-[var(--bg-color-secondary)]"/> 
+                    : <Avatar src={avatar} onChange={handleSelectAvatar}
                         alt="Avatar" size="large" isCanEdit={isOwner}
                         className="border-[5px] border-[var(--bg-color-secondary)]"></Avatar>
-
-                <span className="text-[35px] font-bold lg:self-end mb-2 lg:mb-8 lg:ml-5">{profileData.fullName}</span>
+                }
+                { isLoading ? <LabelSkeletonLoading size="medium" className="lg:self-end mb-2 lg:mb-8 lg:ml-5 w-[200px] mt-2 lg:mt-0"/> : 
+                    <span className="text-[35px] font-bold lg:self-end mb-2 lg:mb-8 lg:ml-5">{fullName}</span>
+                }
                 
-                <div className="flex lg:flex-1 justify-end gap-2 lg:self-end mb-8 lg:mr-5 md:w-auto">
+                
+                { isLoading ? <LabelSkeletonLoading size="large" className="w-[300px] lg:ml-auto mb-7 mt-2 lg:mt-0"/> 
+                : <div className="flex lg:flex-1 justify-end gap-2 lg:self-end mb-8 lg:mr-5 md:w-auto">
                     { isOwner ? <Button size="medium"><i className="fa-solid fa-user-pen"></i> Edit</Button> :
                          <Button size="medium"><i className="fa-solid fa-plus"></i> Add friend</Button> }
                     { !isOwner && <Button size="medium" variant="secondary"><i className="fa-solid fa-comment"></i> Message</Button> }
                     <Button size="medium" variant="secondary"><i className="fa-solid fa-circle-info"></i> More</Button>
                 </div>
+                }  
             </div>
         </div>
     )

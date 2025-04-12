@@ -6,6 +6,7 @@
     --bg-color: #ffffff;
     --bg-color-secondary: #f9f9f9;
     --bg-color-third: #ecfaf5;
+    --bg-color-fourth: #f0f0f0;
 
         /* Single colors */
     --main-single-color: #2bd48b;
@@ -32,6 +33,7 @@
     --bg-color: #343434;
     --bg-color-secondary: #2a2a2a;
     --bg-color-third: #1a1a1a;
+    --bg-color-fourth: #414141;
 
     --main-single-color: #3feca2; 
     --second-single-color: #2ce68c; 
@@ -48,6 +50,7 @@
     --bg-color: #08001a;
     --bg-color-secondary: #140033;
     --bg-color-third: #25004d;
+    --bg-color-fourth: #3d005f;
 
     --main-single-color: #00ffee; /* Neon aqua */
     --second-single-color: #ff00ff; /* Neon magenta */
@@ -68,6 +71,7 @@
     --bg-color: #0a0000; /* Gần như đen, tạo cảm giác chết chóc */
     --bg-color-secondary: #140000; /* Đỏ máu thẫm */
     --bg-color-third: #200000; /* Đỏ đậm, như sắt gỉ trong bóng tối */
+    --bg-color-fourth: #3d0000; /* Đỏ tối, như máu khô trong bóng đêm */
 
     --main-single-color: #ff1a1a; /* Đỏ neon rực cháy, như cảnh báo tử thần */
     --second-single-color: #990000; /* Đỏ đậm, tượng trưng cho máu khô */
@@ -87,6 +91,7 @@
     --bg-color: #1a0e1f; /* Tím đen huyền bí, nền tối mềm mại */
     --bg-color-secondary: #2b122f; /* Tím sẫm, tăng chiều sâu */
     --bg-color-third: #3d1640; /* Tím đậm pha chút hồng, tạo sự ấm áp */
+    --bg-color-fourth: #4e1f4f; /* Tím nhạt hơn, như ánh sáng mờ ảo trong bóng tối */
 
     --main-single-color: #ff69b4; /* Hồng neon rực nhẹ, mang vibe cyber */
     --second-single-color: #e84393; /* Hồng đậm, mềm mại như nhung */

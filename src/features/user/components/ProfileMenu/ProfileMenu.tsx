@@ -35,6 +35,7 @@ const ProfileMenu: React.FC = () => {
         const username = localStorage.getItem('username');
         const user = username === "null" ? userid : username;
         navigate(`/${user}`, {replace: true});
+        setIsOpenMenu(false);
     }
 
     const handleLogout = async () => {
