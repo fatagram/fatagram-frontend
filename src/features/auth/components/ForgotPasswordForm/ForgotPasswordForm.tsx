@@ -1,7 +1,7 @@
 import React from "react";
-import Button from "../../../../components/common/Button/Button";
-import Textbox from "../../../../components/common/Textbox/Textbox";
-import Logo from  "../../../../components/common/Logo/Logo";
+import Button from "@/components/common/ui/Button";
+import Textbox from "@/components/common/ui/Textbox";
+import Logo from  "@/components/common/ui/Logo";
 
 interface ForgotPasswordFormProps {
     switchToLogin: () => void;
@@ -19,7 +19,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({switchToLogin}) 
         <Textbox className="text-[14px] w-[100%] px-[20px] sm:py-[5px] py-[10px]" placeholder="Your username or email"/>
         <span className="hidden text-[10px] px-[5px] text-red-400">Username does not exist!</span>
     </div>
-    <Button className={`sm:text-[17px] text-[20px] w-full sm:py-[5px] py-[7px] font-montserrat`}>Confirm</Button>
+    <Button size="medium" className={`sm:text-[17px] text-[20px] w-full sm:py-[5px] py-[7px] font-montserrat`}>Confirm</Button>
     <span className="sm:text-[14px] text-[15px] text-[var(--second-single-color)] hover:text-[var(--main-single-color)] hover:cursor-pointer
             transition-all duration-100 active:scale-95 select-none"
             onClick={switchToLogin}>&larr; Back to login</span>

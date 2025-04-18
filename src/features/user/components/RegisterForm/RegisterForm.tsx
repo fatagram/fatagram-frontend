@@ -1,16 +1,16 @@
 import React from "react";
-import Button from "../../../../components/common/Button/Button";
-import Textbox from "../../../../components/common/Textbox/Textbox";
-import Logo from "../../../../components/common/Logo/Logo";
-import Checkbox from "../../../../components/common/Checkbox/Checkbox";
-import Link from "../../../../components/common/Link/Link";
+import Button from "@/components/common/ui/Button/Button";
+import Textbox from "@/components/common/ui/Textbox/Textbox";
+import Logo from "@/components/common/ui/Logo/Logo";
+import Checkbox from "@/components/common/ui/Checkbox/Checkbox";
+import Link from "@/components/common/ui/Link/Link";
 import { useNavigate } from "react-router-dom";
-import { RegisterValidator } from "../../services/Register/RegisterValidator";
-import RegisterDto from "../../interfaces/RegisterDto";
-import { ErrorKey, ErrorMessages } from "../../interfaces/RegisterDto";
-import { RegisterService } from "../../services/Register/RegisterService";
-import PasswordBox from "../../../../components/common/Textbox/PasswordBox";
-import OverlayLoading from "../../../../components/common/OverlayLoading/OverlayLoading";
+import { RegisterValidator } from "@/api/user/validate/register.dto.validate";
+import RegisterDto from "@/api/user/dto/register.dto";
+import { ErrorKey, ErrorMessages } from "@/api/user/dto/register.dto";
+import { RegisterService } from "@/api/user/register.api";
+import PasswordBox from "@/components/common/ui/Textbox/PasswordBox";
+import OverlayLoading from "@/components/common/utils/OverlayLoading/OverlayLoading";
 
 interface RegisterFormProps {
   showLogo?: boolean;
@@ -133,7 +133,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({showLogo=true, showClose=fal
       {/* Overlay Loading */}
       {isLoading && <OverlayLoading />}
       {/* Logo Fatagram */}
-      {isShowLogo && <Logo /> }
+      {isShowLogo && <Logo />}
       <h2 className="uppercase sm:text-[45px] text-[45px] text-[var(--third-single-color)] font-bold font-jua select-none">
         Sign up
       </h2>

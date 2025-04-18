@@ -1,12 +1,12 @@
-import React from "react";
-import BackgroundImage from "../../../../components/common/BackgroundImage/BackgroundImage";
-import Button from "../../../../components/common/Button/Button";
-import Avatar from "../../../../components/common/Avatar/Avatar";
-import SelectFile from "../../../../components/common/SelectFile/SelectFile";
-import { ProfileService } from "../../services/Profile/ProfileService";
-import AvatarSkeletonLoading from "../../../../components/common/Avatar/AvatarSkeletonLoading";
-import BackgroundImageSkeletonLoading from "../../../../components/common/BackgroundImage/BackgroundImageSkeletonLoading";
-import LabelSkeletonLoading from "../../../../components/common/Label/LabelSkeletonLoading";
+import React, { useMemo } from "react";
+import BackgroundImage from "../../../../components/common/display/BackgroundImage/BackgroundImage";
+import Button from "../../../../components/common/ui/Button/Button";
+import Avatar from "@/components/common/display/Avatar";
+import SelectFile from "../../../../components/common/utils/SelectFile/SelectFile";
+import { UserService } from "@/api/user/user.api";
+import AvatarSkeletonLoading from "../../../../components/common/display/Avatar/AvatarSkeletonLoading";
+import BackgroundImageSkeletonLoading from "../../../../components/common/display/BackgroundImage/BackgroundImageSkeletonLoading";
+import LabelSkeletonLoading from "../../../../components/common/ui/Label/LabelSkeletonLoading";
 
 
 export interface ProfileHeaderProps {
@@ -23,10 +23,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId, onUserN
     const [isOwner, setIsOwner] = React.useState<boolean>(false);
     const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
+    const userService = useMemo(() => {
+        return new UserService();
+    }
+    , []);
+
     React.useEffect(() => {
         const fetchProfile = async () => {
-            const service = new ProfileService();
-            const response = await service.GetProfile(userId ? userId : "", "avatar,background,fullName");
+            const response = await userService.GetProfile(userId ? userId : "", "avatar,background,fullName");
             if (response.success) {
                 setAvatar(response.data.infos.avatar);
                 setBackground(response.data.infos.background);
@@ -41,19 +45,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId, onUserN
 
         }
         if (userId) fetchProfile();
-    }, [userId, onUserNotFound]);
+    }, [userId, onUserNotFound, userService]);
 
     const handleSelectBackground = async (file: File) => {
-        const profileService = new ProfileService();
-        const result = await profileService.UploadBackground(file)
+        const result = await userService.UploadBackground(file)
         if (result.success) {
             setBackground(result.data);
         }
     }
 
     const handleSelectAvatar = async (file: File) => {
-        const profileService = new ProfileService();
-        const result = await profileService.UploadAvatar(file)
+        const result = await userService.UploadAvatar(file)
         if (result.success) {
             setAvatar(result.data);
         }
@@ -63,7 +65,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId, onUserN
         <div className={`relative w-full h-auto layout ${className}`}>
             <div>
                 { isLoading ? <BackgroundImageSkeletonLoading alt="Loading" className="relative min-h-[300px]"/> : <BackgroundImage src={background} alt="Background Image"
-                    className="relative min-h-[200px]"></BackgroundImage>
+                    className="relative min-h-[200px] mx-2 lg:mx-0" />
                 }
 
                 { isOwner && <SelectFile
@@ -75,7 +77,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId, onUserN
             </div>
             
             <div className="absolute flex layout w-[85%] left-1/2 -translate-x-1/2 top-100 -translate-y-1/2 flex-col lg:flex-row items-center lg:items-end
-            mt-28 lg:mt-0">
+                            mt-28 lg:mt-0">
                 { isLoading ? <AvatarSkeletonLoading alt="Loading" size="large" className="border-[5px] border-[var(--bg-color-secondary)]"/> 
                     : <Avatar src={avatar} onChange={handleSelectAvatar}
                         alt="Avatar" size="large" isCanEdit={isOwner}

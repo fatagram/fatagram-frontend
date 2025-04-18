@@ -1,9 +1,9 @@
 import React from "react";
 import "./ProfilePage.style.css";
-import ProfileHeader from "../../features/user/components/ProfileHeader/ProfileHeader";
+import ProfileHeader from "@/features/user/components/ProfileHeader/ProfileHeader";
 import NotFoundPage from "../not_found/NotFoundPage";
 import { useParams } from "react-router-dom";
-import { useCheckUserExist } from "../../features/user/hooks/useCheckUserExist";
+import { useCheckUserExist } from "@/hooks/useCheckUserExist";
 import LoadingPage from "../loading/LoadingPage";
 
 const ProfilePage: React.FC = () => {
@@ -11,7 +11,6 @@ const ProfilePage: React.FC = () => {
     const [userExist, isLoading] = useCheckUserExist(userId ? userId : "");
 
     if (isLoading) return <LoadingPage/>
-
     if (!userExist) return <NotFoundPage/>
 
     return (

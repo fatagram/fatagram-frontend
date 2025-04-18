@@ -1,6 +1,6 @@
 import React from "react";
 import "./LoadingPage.style.css";
-import Logo from "../../components/common/Logo/Logo";
+import Logo from "@/components/common/ui/Logo/Logo";
 
 // LoadingPage
 // This component is the loading page component.

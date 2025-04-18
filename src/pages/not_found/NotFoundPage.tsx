@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
-import Footer from "../../components/layout/Footer/Footer";
+import Footer from "@/components/layout/Footer/Footer";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
-import Logo from "../../components/common/Logo/Logo";
-import Button from "../../components/common/Button/Button";
+import Logo from "@/components/common/ui/Logo/Logo";
+import Button from "@/components/common/ui/Button/Button";
 
 // NotFoundPage function
 // This function is a React component that renders the 404 page.

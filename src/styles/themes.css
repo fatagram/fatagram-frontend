@@ -1,0 +1,30 @@
+:root {
+    --font-size: 16px;
+    --border-radius: 8px;
+    
+    --bg-color: #ffffff;
+    --bg-color-secondary: #f9f9f9;
+    --bg-color-third: #ecfaf5;
+    --bg-color-fourth: #f0f0f0;
+
+        /* Single colors */
+    --main-single-color: #2bd48b;
+    --second-single-color: #2ca772;
+    --third-single-color: #003820;
+
+    --text-color: #2e2e2e;
+
+    --btn-color: #dddddd;
+    --btn-hover-color: #eaeaea;
+
+    --main-gradient-color: repeating-linear-gradient(45deg, 
+    #8dfeda 0%, #3dba84 20%, #2aacb0 40%, 
+    #36bcbf 60%, #47c4b0 80%, #8fffd0 100%);
+
+    --second-gradient-color: repeating-linear-gradient(45deg, 
+    #8de8f0 0%, #3da8ba 20%, #2a9eac 40%, 
+    #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%);
+    --main-wrong-gradient-color: rgb(255, 75, 75);
+}
+
+

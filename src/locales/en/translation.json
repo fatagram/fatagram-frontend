@@ -1,0 +1,15 @@
+{
+    "language" : {
+        "en" : "EN English",
+        "vi" : "VN Vietnamese"
+    },
+    "home": {
+        "title" : "Home",
+        "description" : "Welcome to the home page! This is where you can find the latest updates and news."
+    },
+    "auth": {
+        "login": {
+            "title" : "Login"
+        }
+    }
+}

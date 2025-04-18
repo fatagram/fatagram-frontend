@@ -1,17 +1,18 @@
 import React from "react";
-import Button from "../../../../components/common/Button/Button";
-import Textbox from "../../../../components/common/Textbox/Textbox";
-import Logo from  "../../../../components/common/Logo/Logo";
-import Checkbox from  "../../../../components/common/Checkbox/Checkbox";
-import Link from  "../../../../components/common/Link/Link";
+import Button from "@/components/common/ui/Button";
+import Textbox from "@/components/common/ui/Textbox";
+import Logo from  "@/components/common/ui/Logo";
+import Checkbox from  "@/components/common/ui/Checkbox";
+import Link from  "@/components/common/ui/Link";
 import { useNavigate } from "react-router-dom";
-import { LoginValidator } from "../../services/LoginValidator";
-import LoginDto, { ErrorMessages, ErrorKey } from "../../interfaces/LoginDto";
-import AuthService from "../../services/AuthService";
-import ServerResponse from "../../../../interfaces/ServerResponse";
-import PasswordBox from "../../../../components/common/Textbox/PasswordBox";
-import OverlayLoading from "../../../../components/common/OverlayLoading/OverlayLoading";
-import { useAuth } from "../../../../contexts/AuthContext";
+import { LoginValidator } from "@/api/auth/validate/login.dto.validate";
+import LoginDto, { ErrorMessages, ErrorKey } from "@/api/auth/dto/login.dto";
+import AuthService from "@/api/auth/auth.api";
+import ServerResponse from "@/api/common.dto";
+import PasswordBox from "@/components/common/ui/Textbox/PasswordBox";
+import OverlayLoading from "@/components/common/utils/OverlayLoading/OverlayLoading";
+import { useAuth } from "@/contexts/AuthContext";
+import { useTranslation } from "react-i18next";
 
 interface LoginFormProps {
     switchForgotPassword?: () => void;
@@ -33,6 +34,8 @@ const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=tru
     const [isLoading, setIsLoading] = React.useState<boolean>(false);
     const [isShowClose] = React.useState<boolean>(showClose);
     const [isShowLogo] = React.useState<boolean>(showLogo);
+
+    const { t } = useTranslation() as { t: (key: string) => string };
 
     // hooks
     const navigate = useNavigate();
@@ -86,7 +89,7 @@ const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=tru
         if (result.success) {
             setAuthenticated?.(true);
             localStorage.setItem("userId", result.data.userId);
-            localStorage.setItem("username", result.data.username);
+            localStorage.setItem("urlName", result.data.urlName);
             navigate("/", { replace: true });
         }
         else {
@@ -105,7 +108,7 @@ const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=tru
 
             {isShowLogo && <Logo/> }
             <h2 className="uppercase sm:text-[45px] text-[50px] text-[var(--third-single-color)] 
-                            font-bold font-jua select-none">Log in</h2>
+                            font-bold font-jua select-none">{t("auth.login.title")}</h2>
             <div className="w-full">
                 <Textbox className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm" placeholder="Username"
                     onChange={(e) => setUsername(e.target.value)} isWrong={usernameError !== "" }/>

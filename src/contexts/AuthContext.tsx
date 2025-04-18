@@ -1,4 +1,4 @@
-import AuthService from "../features/auth/services/AuthService";
+import AuthService from "@/api/auth/auth.api";
 import { createContext, useContext, useEffect, useState } from "react";
 
 interface AuthContextType {

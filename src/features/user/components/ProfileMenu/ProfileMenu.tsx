@@ -1,13 +1,13 @@
 import React, { RefObject, useEffect, useRef, useState } from "react";
-import Button from "../../../../components/common/Button/Button";
-import Avatar from "../../../../components/common/Avatar/Avatar";
-import { ProfileService } from "../../services/Profile/ProfileService";
-import useClickOutside from "../../../../hooks/useClickOutside";
-import Label from "../../../../components/common/Label/Label";
+import Button from "@/components/common/ui/Button/Button";
+import Avatar from "@/components/common/display/Avatar/Avatar";
+import { UserService } from "@/api/user/user.api";
+import useClickOutside from "@/hooks/useClickOutside";
+import Label from "@/components/common/ui/Label/Label";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../../../../contexts/AuthContext";
-import { removeRefreshToken } from "../../../../utils/token";
-import AuthService from "../../../auth/services/AuthService";
+import { useAuth } from "@/contexts/AuthContext";
+import { removeRefreshToken } from "@/utils/token";
+import AuthService from "@/api/auth/auth.api";
 
 const ProfileMenu: React.FC = () => {
 
@@ -22,7 +22,7 @@ const ProfileMenu: React.FC = () => {
 
 
     const fetchAvatar = async() => {
-        const profileService = new ProfileService();
+        const profileService = new UserService();
         const response = await profileService.GetProfile(localStorage.getItem('userId') || "", "avatar,fullName");
         if (response.success) {
             setAvatar(response.data.infos.avatar);
@@ -32,8 +32,8 @@ const ProfileMenu: React.FC = () => {
 
     const handlePersonalPage = () => {
         const userid = localStorage.getItem('userId');
-        const username = localStorage.getItem('username');
-        const user = username === "null" ? userid : username;
+        const urlName = localStorage.getItem('urlName');
+        const user = urlName === "null" ? userid : urlName;
         navigate(`/${user}`, {replace: true});
         setIsOpenMenu(false);
     }
@@ -49,7 +49,7 @@ const ProfileMenu: React.FC = () => {
     }
 
     const handleSettings = () => {
-        navigate('/settings');
+        navigate('/settings/account');
         setIsOpenMenu(false);
     }
 

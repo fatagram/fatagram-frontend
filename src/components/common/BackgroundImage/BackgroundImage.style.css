@@ -1,8 +1,0 @@
-@tailwind components;
-
-@layer components {
-  .user-bg-image {
-    @apply w-full aspect-[3/1] bg-cover bg-center bg-no-repeat bg-[#e1e1e1]
-    rounded-xl;
-  }
-}
