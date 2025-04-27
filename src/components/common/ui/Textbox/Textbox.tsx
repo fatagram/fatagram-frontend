@@ -10,6 +10,7 @@ interface TextboxProps extends React.InputHTMLAttributes<HTMLInputElement> {
     isWrong?: boolean;
     autoComplete?: string;
     name?: string;
+    ref?: React.Ref<HTMLInputElement>;
     className?: string;
 }
 
@@ -22,12 +23,14 @@ const Textbox: React.FC<TextboxProps> = ({
     disabled=false,
     isWrong=false,
     className="",
+    ref,
     autoComplete="off",
     name="",
     ...props
 }) => {
     return (
         <input type="text"
+        ref={ref}
         name={name}
         value={value}
         placeholder={placeholder} 

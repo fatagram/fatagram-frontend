@@ -1,61 +1,50 @@
 import { apiClient } from '@/api/setupInterceptor';
 import LoginDto from './dto/login.dto';
-import ServerResponse from '../common.dto';
-import { setRefreshToken, setRefreshTokenToSession, removeRefreshToken, getRefreshToken, getRefreshTokenFromSession  } from '@/utils/token';
+import { ApiResponse, Result } from '../common';
 
-// API_URL
+export interface LoginResponse {
+    refreshToken: string;
+    userId: string;
+    urlName: string;
+}
 
 // AuthService class
 // This class is responsible for handling the login request to the server.
 export class AuthService {
 
     // login method
-    // This method is responsible for sending the login request to the server.
-    // The method takes two parameters: username and password.
-    // The method returns a promise of LoginResponse.
-    async login(dto: LoginDto): Promise<ServerResponse> {
+    async login(dto: LoginDto): Promise<Result<LoginResponse>> {
         try {
-            console.log(`login`)
-            const data = await apiClient.post(`/api/auth/login`, {
+            const res = await apiClient.post(`/api/auth/login`, {
                 username: dto.username,
                 password: dto.password
             });
-            const { refreshToken, userId, urlName } = data.data.data;
+            const response = res.data as ApiResponse<LoginResponse>;
 
-            if (localStorage.getItem('isRememberMe') === 'true') {
-                setRefreshToken(refreshToken);
-            }
-            else {
-                removeRefreshToken();
-                setRefreshTokenToSession(refreshToken);
-            }
-
-            // console.log(localStorage.getItem('accessToken'));
-            return { success: true, data: { refreshToken, userId, urlName } };
+            return { success: true, data: response.data };
         }
         catch (error: any) {
             if (error.response) {
-                console.log(error.response.data);
+                const err = error.response.data as ApiResponse<LoginResponse>;
                 return {
                     success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
+                    errorCode: err.error?.code || "UNKNOWN_ERROR",
+                    errorCodes: err.error?.codes
                 }
             }
             else {
                 return {
                     success: false,
-                    statusCode: 500,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
+                    errorCode: "INTERNAL_SERVER_ERROR",
                 }
             }
         }
     }
 
     // logout method
-    async logout(): Promise<void> {
+    async logout(refreshToken?: string): Promise<void> {
         try {
-            await apiClient.post(`/api/auth/logout`, { refreshToken: getRefreshToken() || getRefreshTokenFromSession() });
+            await apiClient.post(`/api/auth/logout`, { refreshToken: refreshToken });
         }
         catch (error: any) {
             if (error.response) {
@@ -67,11 +56,10 @@ export class AuthService {
         }
     }
 
-
     // Ping method
     // This method is responsible for sending a ping request to the server.
     // The method returns a promise of void.
-    async ping(): Promise<ServerResponse> {
+    async ping(): Promise<Result<void>> {
         try {
             // const accessToken = getAccessToken();
             await apiClient.get(`/api/auth/ping`);
@@ -81,14 +69,12 @@ export class AuthService {
             if (error.response) {
                 return {
                     success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data?.error?.code || ["UNKNOWN_ERROR"]
+                    errorCodes: error.response.data?.error?.code || []
                 }
             }
             else {
                 return {
                     success: false,
-                    statusCode: 500,
                     errorCodes: ["INTERNAL_SERVER_ERROR"]
                 }
             }

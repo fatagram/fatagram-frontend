@@ -1,0 +1,68 @@
+{
+    "navbar": {
+        "title": "Cài đặt",
+        "privacy": {
+            "title": "Thông tin riêng tư",
+            "account": "Tài khoản",
+            "privacy": "Quyền riêng tư"
+        },
+        "general": {
+            "title": "Cài đặt chung",
+            "notifications": "Thông báo",
+            "about": "Giới thiệu",
+            "language": "Ngôn ngữ",
+            "theme": "Chủ đề"
+        }
+    },
+    "editableField": {
+        "saveButton": "Lưu",
+        "cancelButton": "Hủy"
+    },
+    "account": {
+        "personalInfo": {
+            "title": "Thông tin cá nhân",
+            "yourName": "Tên của bạn",
+            "urlName": "Tên URL",
+            "changeButton": "Thay đổi",
+            "noUrlName": "Không có tên URL",
+            "urlNamePlaceholder": "Nhập tên URL của bạn",
+            "changeNameForm": {
+                "title": "Tên",
+                "firstName": "Họ",
+                "lastName": "Tên",
+                "note": "Lưu ý",
+                "noteText1": "Chỉ có thể thay đổi tên của bạn sau mỗi",
+                "day": "ngày",
+                "noteText2": "Tên của bạn phải nhiều hơn 3 ký tự và ít hơn 36 ký tự",
+                "noteText3": "Tên của bạn không được chứa các ký tự đặc biệt như",
+                "acceptButton": "Xác nhận"
+            },
+            "errorMessages": {
+                "changeUrlName": {
+                    "userNotFound": "Người dùng không tồn tại",
+                    "urlNameAlreadyExist": "Tên URL đã tồn tại",
+                    "urlNameTooShort": "Tên URL phải có ít nhất 3 ký tự",
+                    "urlNameTooLong": "Tên URL phải ít hơn 36 ký tự",
+                    "urlNameEmpty": "Tên URL không được để trống",
+                    "urlNameContainsSpace": "Tên URL không được chứa khoảng trắng",
+                    "unknownError": "Đã xảy ra lỗi không xác định",
+                    "internalServerError": "Lỗi máy chủ nội bộ"
+                },
+                "changeName": {
+                    "firstNameNotCorrectFormat": "Họ không đúng định dạng",
+                    "lastNameNotCorrectFormat": "Tên không đúng định dạng",
+                    "unknownError": "Đã xảy ra lỗi không xác định",
+                    "internalServerError": "Lỗi máy chủ nội bộ"
+                }
+            }
+        }
+    },
+    "language": {
+        "title": "Ngôn ngữ",
+        "yourLanguage": "Ngôn ngữ của bạn"
+    },
+    "theme": {
+        "title": "Chủ đề",
+        "selectTheme": "Chọn chủ đề"
+    }
+}

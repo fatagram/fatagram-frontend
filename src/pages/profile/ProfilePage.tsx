@@ -4,13 +4,17 @@ import ProfileHeader from "@/features/user/components/ProfileHeader/ProfileHeade
 import NotFoundPage from "../not_found/NotFoundPage";
 import { useParams } from "react-router-dom";
 import { useCheckUserExist } from "@/hooks/useCheckUserExist";
-import LoadingPage from "../loading/LoadingPage";
+import { useTranslation } from "react-i18next";
 
 const ProfilePage: React.FC = () => {
     const { userId } = useParams<{ userId: string }>();
-    const [userExist, isLoading] = useCheckUserExist(userId ? userId : "");
+    const [userExist ] = useCheckUserExist(userId ? userId : "");
+    const { t } = useTranslation() as { t: (key: string) => string };
 
-    if (isLoading) return <LoadingPage/>
+    React.useEffect(() => {
+        document.title = "Fatagram"
+    }, [t])
+
     if (!userExist) return <NotFoundPage/>
 
     return (

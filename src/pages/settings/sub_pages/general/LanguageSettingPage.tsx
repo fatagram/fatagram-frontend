@@ -1,0 +1,12 @@
+import LanguageSettings from "@/features/settings/components/general/LanguageSettings";
+import React from "react";
+
+const LanguageSettingPage = () => {
+    return (
+        <div className="flex justify-center w-full">
+            <LanguageSettings className="w-full !min-w-[200px]"></LanguageSettings>
+        </div>
+    )
+}
+
+export default LanguageSettingPage;

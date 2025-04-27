@@ -1,10 +1,13 @@
 import SettingCard from "@/components/common/container/SettingCard";
 import EditableField from "@/components/common/container/SettingCard/SettingItem/EditableField";
-import { LabelSkeletonLoading } from "@/components/common/ui/Label";
+import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
 import { UserService } from "@/api/user/user.api";
 import React, { useEffect } from "react";
-import ChangeUrlNameDto, { ErrorMessages } from "@/api/user/dto/change_url_name.dto";
+import ChangeUrlNameDto, { ErrorCodes } from "@/api/user/dto/change_url_name.dto";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useTranslation } from "react-i18next";
+import { ErrorKey } from "@/api/auth/dto/login.dto";
+import { useAuth } from "@/contexts/AuthContext";
 
 interface AccountSettingProps {
     className?: string;
@@ -15,8 +18,11 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
     const [urlName, setUrlName] = React.useState<string | undefined>(undefined);
     const [isLoading, setIsLoading] = React.useState<boolean>(true);
 
+    const { userId, refresh } = useAuth();
+
     const navigate = useNavigate();
     const location = useLocation();
+    const { t } = useTranslation() as { t: (key: string) => string };
 
     // URL name setting state
     const [isEditUrlName, setIsEditUrlName] = React.useState<boolean>(false);
@@ -27,6 +33,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
         return new UserService();
     }, []);
 
+    // Handle change URL name
     const handleChangeUrlName = async (urlName: string) => {
         const changeUrlNameDto : ChangeUrlNameDto = {
             urlName: urlName
@@ -34,50 +41,55 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
         const response = await userService.UpdateUrlName(changeUrlNameDto);
         if (response.success) {
             setUrlName(urlName);
-            localStorage.setItem("urlName", urlName);
             setIsEditUrlName(false);
+
+            // AuthContext refresh user info after update
+            refresh?.();
+
         }
         else {
             setIsEditUrlNameFailed(true);
-            const errorCode = response?.errorCodes?.[0];
-            setEditUrlFailedMessage(errorCode !== undefined ? ErrorMessages[errorCode] : "An error occurred");
+            const errorCode = response?.errorCode;
+            setEditUrlFailedMessage(t(ErrorCodes[errorCode as ErrorKey]));
         }
     }
 
     const handleChangeName = () => navigate("name");
 
+    // Fetch user profile
     useEffect(() => {
         const fetchProfile = async () => {
-            const userId : string = localStorage.getItem("userId") ?? "";
-            const response = await userService.GetProfile(userId, "fullName,urlName");
+            const _userId : string = userId ?? "";
+            const response = await userService.GetProfile(_userId, "fullName,urlName");
             if (response.success) {
                 setFullName(response.data.infos.fullName);
                 setUrlName(response.data.infos.urlName);
             }
-            else {
-                console.log(response.errorCodes);
-            }
             setIsLoading(false);
         }
         fetchProfile();
-    }, [userService, location.key])
+    }, [userService, location.key, userId])
 
     return (
         <div className={`${className}`}>
-            <SettingCard title="Personal Informations" className="mb-0 gap-2 lg:gap-5">
-                { isLoading ? <LabelSkeletonLoading size="medium" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
-                    <EditableField title="Your name" 
+            <SettingCard title={t("settings:account.personalInfo.title")} className="mb-0 gap-5">
+                { isLoading ? <TextSkeletonLoading size="medium" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
+                    <EditableField title={t("settings:account.personalInfo.yourName")} 
                         value={fullName} 
-                        btnChildren={<div><i className="fa-solid fa-pen mr-2"></i> Change</div>}
+                        btnChildren={<Text><i className="fa-solid fa-pen mr-2"></i> {
+                            t("settings:account.personalInfo.changeButton")
+                        }</Text>}
                         onChangeClick={handleChangeName}/> 
                 }
-                { isLoading ? <LabelSkeletonLoading size="medium" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
-                    <EditableField title="Custom URL name"
+                { isLoading ? <TextSkeletonLoading size="medium" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
+                    <EditableField title={t("settings:account.personalInfo.urlName")}
                         isEmpty={urlName === undefined}
-                        value={urlName === undefined ? "No custom URL name" : urlName}
-                        placeholder="Your custom URL name"
+                        value={urlName === undefined ? t("settings:account.personalInfo.noUrlName") : urlName}
+                        placeholder={t("settings:account.personalInfo.urlNamePlaceholder")}
                         valueClassName={`${urlName === undefined ? "!opacity-50" : ""}`}
-                        btnChildren={<div><i className="fa-solid fa-pen mr-2"></i> Change</div>}
+                        btnChildren={<Text><i className="fa-solid fa-pen mr-2"></i> {
+                            t("settings:account.personalInfo.changeButton")
+                        }</Text>}
                         editableMode="inline"
                         isEdit={isEditUrlName}
                         isError={isEditUrlNameFailed}

@@ -1,10 +1,10 @@
-import ServerResponse from "@/api/common.dto";
 import { apiClient, apiClientFormData } from "@/api/setupInterceptor";
-import ChangeUrlNameDto from "./dto/change_url_name.dto";
 import ChangeNameDto from "./dto/change_name.dto";
+import { ApiResponse, Result } from "../common";
+import ChangeUrlNameDto from "./dto/change_url_name.dto";
 
 export class UserService {
-    async CheckUserExistAsync(key: string): Promise<ServerResponse> {
+    async CheckUserExistAsync(key: string): Promise<Result<any>> {
         try {
             await apiClient.get(`api/user/user-exist?key=${key}`);
             return { success: true };
@@ -12,40 +12,66 @@ export class UserService {
         catch (error: any)
         {
             if (error.response) {
+                const err = error.response.data as ApiResponse<any>;
                 return {
                     success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
+                    errorCode: err.error?.code || "UNKNOWN_ERROR",
+                    errorCodes: err.error?.codes
                 }
             }
             else {
                 return {
                     success: false,
-                    statusCode: 500,
+                    errorCode: "INTERNAL_SERVER_ERROR"
+                }
+            }
+        }
+    }
+
+    async GetProfile(id: string, fields: string): Promise<Result<any>> {
+        try {
+            const res = await apiClient.get(`api/user/${id}/profile?fields=${fields}`);
+            const response = res.data as ApiResponse<any>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            if (error.response) {
+                const err = error.response.data as ApiResponse<any>;
+                return {
+                    success: false,
+                    errorCode: error.error?.code || "UNKNOWN_ERROR",
+                    errorCodes: err.error?.codes
+                }
+            }
+            else {
+                return {
+                    success: false,
                     errorCodes: ["INTERNAL_SERVER_ERROR"]
                 }
             }
         }
     }
 
-    async GetProfile(id: string, fields: string): Promise<ServerResponse> {
+    async GetMe(): Promise<Result<{userId: string | undefined, urlName: string | undefined}>> {
         try {
-            const { data } = await apiClient.get(`api/user/${id}/profile?fields=${fields}`);
-            return { success: true, data: data.data };
+            const res = await apiClient.get(`api/user/me`);
+            const response = res.data.data.infos as {id: string | undefined, urlName: string | undefined};
+            return { success: true, data: {userId: response?.id, urlName: response?.urlName} };
         }
         catch (error: any)
         {
             if (error.response) {
+                const err = error.response.data as ApiResponse<any>;
                 return {
                     success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
+                    errorCode: error.error?.code || "UNKNOWN_ERROR",
+                    errorCodes: err.error?.codes
                 }
             }
             else {
                 return {
                     success: false,
-                    statusCode: 500,
                     errorCodes: ["INTERNAL_SERVER_ERROR"]
                 }
             }
@@ -68,7 +94,7 @@ export class UserService {
                 return {
                     success: false,
                     statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
+                    errorCodes: error.response.data.error?.code || []
                 }
             }
             else {
@@ -96,54 +122,6 @@ export class UserService {
                 return {
                     success: false,
                     statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || ["INTERNAL_SERVER_ERROR"]
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    statusCode: 500,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
-        }
-    }
-
-    async UpdateProfile(data: any)
-    : Promise<ServerResponse> { 
-        try {
-            const { data: responseData } = await apiClient.put(`api/user`, data)
-            return { success: true, data: responseData.data }
-        }
-        catch (error: any) {
-            if (error.response) {
-                return {
-                    success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    statusCode: 500,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
-        }
-    }
-
-    async UpdateUrlName(changeUrlNameDto : ChangeUrlNameDto) : Promise<ServerResponse>
-    {
-        try {
-            const { data } = await apiClient.patch(`api/user/url-name`, changeUrlNameDto)
-            return { success: true, data: data.data }
-        }
-        catch (error: any) {
-            if (error.response) {
-                return {
-                    success: false,
-                    statusCode: error.response.status,
                     errorCodes: error.response.data.error?.code || []
                 }
             }
@@ -157,24 +135,73 @@ export class UserService {
         }
     }
 
-    async UpdateName(changeNameDto : ChangeNameDto) : Promise<ServerResponse>
+    // async UpdateProfile(data: any): Promise<ServerResponse> { 
+    //     try {
+    //         const { data: responseData } = await apiClient.put(`api/user`, data)
+    //         return { success: true, data: responseData.data }
+    //     }
+    //     catch (error: any) {
+    //         if (error.response) {
+    //             return {
+    //                 success: false,
+    //                 statusCode: error.response.status,
+    //                 errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
+    //             }
+    //         }
+    //         else {
+    //             return {
+    //                 success: false,
+    //                 statusCode: 500,
+    //                 errorCodes: ["INTERNAL_SERVER_ERROR"]
+    //             }
+    //         }
+    //     }
+    // }
+
+    async UpdateUrlName(changeUrlNameDto : ChangeUrlNameDto) : Promise<Result<ChangeUrlNameDto>>
     {
         try {
-            const { data } = await apiClient.patch(`api/user/name`, changeNameDto)
-            return { success: true, data: data.data } 
+            const res = await apiClient.patch(`api/user/url-name`, changeUrlNameDto);
+            const response = res.data as ApiResponse<ChangeUrlNameDto>;
+            return { success: true, data: response.data }
         }
         catch (error: any) {
             if (error.response) {
+                const err = error.response.data as ApiResponse<any>;
                 return {
                     success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
+                    errorCode: err.error?.code || "UNKNOWN_ERROR",
+                    errorCodes: err.error?.codes || []
                 }
             }
             else {
                 return {
                     success: false,
-                    statusCode: 500,
+                    errorCodes: ["INTERNAL_SERVER_ERROR"]
+                }
+            }
+        }
+    }
+
+    async UpdateName(changeNameDto : ChangeNameDto) : Promise<Result<ChangeNameDto>>
+    {
+        try {
+            const res = await apiClient.patch(`api/user/name`, changeNameDto);
+            const response = res.data as ApiResponse<ChangeNameDto>;
+            return { success: true, data: response.data } 
+        }
+        catch (error: any) {
+            if (error.response) {
+                const err = error.response.data as ApiResponse<any>;
+                return {
+                    success: false,
+                    errorCode: err.error?.code || "UNKNOWN_ERROR",
+                    errorCodes: err.error?.codes || []
+                }
+            }
+            else {
+                return {
+                    success: false,
                     errorCodes: ["INTERNAL_SERVER_ERROR"]
                 }
             }

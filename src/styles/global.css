@@ -2,14 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
-@import url('https://fonts.googleapis.com/css2?family=Bagel+Fat+One&family=Jua&display=swap');
-
 
   body {
-    font-family: 'Inter', sans-serif;
-    font-size: 16px;
+    font-family: "Nunito", sans-serif;
+    font-size: 1rem;
+    font-weight: 400;
     color: var(--text-color);
   }
+
   
   .bg-gradient-main {
     background: var(--main-gradient-color);
@@ -41,14 +41,26 @@
   }
 
   .background-image {
-    background: url('../assets/images/login_background.jpg');
+    background: url('@/assets/images/login_background.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
     min-height: 100vh;
-    height: auto;
+  }
+
+  .register-bg {
+    background: url('@/assets/images/register_background.jpg');
+    background-size: cover;
+    background-position: center;
   }
 
 
   [data-theme="dark"] .background-image {
-    background: url('../assets/images/login_background.jpg');
+    background: url('@/assets/images/login_background.jpg');
+    background-size: cover;
+    background-repeat: no-repeat;
+    background-position: center;
+    min-height: 100vh;
   }
 
   [data-theme="dark"] .background-image::before {
@@ -60,34 +72,3 @@
     z-index: 0;
   }
   
-  @keyframes fadeIn {
-    from {
-      opacity: 0.5;
-      transform: scale(0.9);
-    }
-    to {
-      opacity: 1;
-      transform: scale(1);
-    }
-  }
-
-  @keyframes dropdown-slide {
-    0% {
-      opacity: 0;
-      transform: translateY(-10px);
-    }
-    100% {
-        opacity: 1;
-        transform: translateY(0);
-    }
-  }
-  
-  @layer utilities {
-    .animate-fade-in {
-      animation: fadeIn 0.25s ease-out;
-    }
-
-    .animate-dropdown-slide {
-      animation: dropdown-slide 0.15s ease-out;
-    }
-  }

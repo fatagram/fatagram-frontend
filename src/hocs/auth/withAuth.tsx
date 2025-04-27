@@ -20,8 +20,7 @@ const withAuth = <P extends object>(WrappedComponent: ComponentType<P>) => {
         }, [isAuthenticated, isLoading, navigate]);
 
         if (isLoading) return <LoadingPage />;
-        if (isAuthenticated) return <WrappedComponent {...props} />;
-        return <LoadingPage />;
+        return <WrappedComponent {...props} />;
     }
 }
 

@@ -2,8 +2,7 @@ import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 
 import apiUrl from '../config';
 import { getRefreshToken, getRefreshTokenFromSession } from '../utils/token';
 
-// Instance of axios
-
+// Instance of axios for fetching data with JSON content type
 const apiClient: AxiosInstance = axios.create(
     {
         baseURL: apiUrl,
@@ -12,6 +11,7 @@ const apiClient: AxiosInstance = axios.create(
     }
 )
 
+// Instance of axios for fetching data with FormData content type
 const apiClientFormData: AxiosInstance = axios.create(
     {
         baseURL: apiUrl,
@@ -20,12 +20,12 @@ const apiClientFormData: AxiosInstance = axios.create(
     }
 )
 
-// Add Interceptors
+// Add Interceptors: apiClient
 apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     return config;
 });
 
-// Add Interceptors
+// Add Interceptors: apiClientFormData
 apiClientFormData.interceptors.request.use((config: InternalAxiosRequestConfig) => {
     return config;
 });
@@ -33,7 +33,6 @@ apiClientFormData.interceptors.request.use((config: InternalAxiosRequestConfig) 
 // Error Authorization
 apiClient.interceptors.response.use((response: AxiosResponse) => response, 
     async (error) => {
-
         if (error.response?.status === 401 || error.response?.status === 403) {
             try {
                 // Refresh token
@@ -54,7 +53,6 @@ apiClient.interceptors.response.use((response: AxiosResponse) => response,
     });
 
 // Error Authorization
-
 apiClientFormData.interceptors.response.use((response: AxiosResponse) => response, 
     async (error) => {
 

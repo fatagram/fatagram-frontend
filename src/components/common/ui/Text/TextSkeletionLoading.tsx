@@ -1,11 +1,11 @@
 import React from "react";
 
-interface LabelSkeletonLoadingProps {
+interface TextSkeletionLoadingProps {
     className?: string;
     size?: "small" | "medium" | "large"
 }
 
-const LabelSkeletonLoading: React.FC<LabelSkeletonLoadingProps> = ({
+const TextSkeletionLoading: React.FC<TextSkeletionLoadingProps> = ({
     className = "",
     size = "medium"
 }) => {
@@ -33,4 +33,4 @@ const LabelSkeletonLoading: React.FC<LabelSkeletonLoadingProps> = ({
     );
 };
 
-export default LabelSkeletonLoading;
+export default TextSkeletionLoading;

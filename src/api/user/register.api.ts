@@ -1,7 +1,7 @@
-import ServerResponse from '@/api/common.dto';
 import axios from 'axios';
 import apiUrl from '@/config';
 import RegisterDto from './dto/register.dto';
+import { ApiResponse, Result } from '../common';
 
 const API_URL = `${apiUrl}/api/account/`;
 
@@ -10,7 +10,7 @@ export class RegisterService {
     // This method is responsible for sending the register request to the server.
     // The method takes a RegisterDto object as a parameter.
     // The method returns a promise of ServerResponse.
-    async register(dto: RegisterDto): Promise<ServerResponse> {
+    async register(dto: RegisterDto): Promise<Result<void>> {
         try {
             await axios.post(`${API_URL}register`, {
                 username: dto.username,
@@ -23,18 +23,18 @@ export class RegisterService {
             return { success: true };
         }
         catch (error: any) {
+            const err = error.response.data as ApiResponse<void>;
             if (error.response) {
-                console.log(error.response.data);
                 return {
                     success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
+                    errorCode: err.error?.code || "UNKNOWN_ERROR",
+                    errorCodes: err.error?.codes
                 }
             }
             else {
                 return {
                     success: false,
-                    statusCode: 500,
+                    errorCode: "INTERNAL_SERVER_ERROR",
                     errorCodes: ["INTERNAL_SERVER_ERROR"]
                 }
             }

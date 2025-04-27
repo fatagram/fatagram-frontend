@@ -1,120 +1,138 @@
 {
-    "default": {
-      "display": "Light",
-      "colors": {
-        "--border-radius": "8px",
-        "--bg-color": "#ffffff",
-        "--bg-color-secondary": "#f9f9f9",
-        "--bg-color-third": "#ecfaf5",
-        "--bg-color-fourth": "#f0f0f0",
-        "--main-single-color": "#2bd48b",
-        "--second-single-color": "#2ca772",
-        "--third-single-color": "#003820",
-        "--text-color": "#2e2e2e",
-        "--btn-color": "#dddddd",
-        "--btn-hover-color": "#eaeaea",
-        "--main-gradient-color": "repeating-linear-gradient(45deg, #8dfeda 0%, #3dba84 20%, #2aacb0 40%, #36bcbf 60%, #47c4b0 80%, #8fffd0 100%)",
-        "--second-gradient-color": "repeating-linear-gradient(45deg, #8de8f0 0%, #3da8ba 20%, #2a9eac 40%, #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%)",
-        "--main-wrong-gradient-color": "rgb(255, 75, 75)"
-      }
-    },
-    "dark": {
-      "display": "Dark",
-      "colors": {
-        "--bg-color": "#343434",
-        "--bg-color-secondary": "#2a2a2a",
-        "--bg-color-third": "#1a1a1a",
-        "--bg-color-fourth": "#414141",
-        "--main-single-color": "#3feca2",
-        "--second-single-color": "#2ce68c",
-        "--third-single-color": "#008846",
-        "--text-color": "#ffffff",
-        "--btn-color": "#464545",
-        "--btn-hover-color": "#5a5a5a",
-        "--main-gradient-color": "repeating-linear-gradient(45deg, #8dfeda 0%, #3dba84 20%, #2aacb0 40%, #36bcbf 60%, #47c4b0 80%, #8fffd0 100%)",
-        "--second-gradient-color": "repeating-linear-gradient(45deg, #8de8f0 0%, #3da8ba 20%, #2a9eac 40%, #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%)",
-        "--main-wrong-gradient-color": "rgb(255, 75, 75)"
-      }
-    },
-    "neon": {
-      "display": "Neon",
-      "colors": {
-        "--bg-color": "#08001a",
-        "--bg-color-secondary": "#140033",
-        "--bg-color-third": "#25004d",
-        "--bg-color-fourth": "#3d005f",
-        "--main-single-color": "#00ffee",
-        "--second-single-color": "#ff00ff",
-        "--third-single-color": "#ffcc00",
-        "--text-color": "#ffffff",
-        "--btn-color": "#ff00ff",
-        "--btn-hover-color": "#330066",
-        "--main-gradient-color": "repeating-linear-gradient(45deg, #00ffee 0%, #00ccff 20%, #0099ff 40%, #ff00ff 60%, #cc00ff 80%, #ffcc00 100%)"
-      }
-    },
-    "toxic-red-death": {
-      "display": "Toxic Red Death",
-      "colors": {
-        "--bg-color": "#0a0000",
-        "--bg-color-secondary": "#140000",
-        "--bg-color-third": "#200000",
-        "--bg-color-fourth": "#3d0000",
-        "--main-single-color": "#ff1a1a",
-        "--second-single-color": "#990000",
-        "--third-single-color": "#550000",
-        "--text-color": "#ff4d4d",
-        "--btn-color": "#ff0000",
-        "--btn-hover-color": "#330000",
-        "--main-gradient-color": "repeating-linear-gradient(45deg, #ff1a1a 0%, #cc0000 20%, #990000 40%, #660000 60%, #330000 80%, #140000 100%)"
-      }
-    },
-    "dark-pink-mystic": {
-      "display": "Dark Pink Mystic",
-      "colors": {
-        "--bg-color": "#1a0e1f",
-        "--bg-color-secondary": "#2b122f",
-        "--bg-color-third": "#3d1640",
-        "--bg-color-fourth": "#4e1f4f",
-        "--main-single-color": "#ff69b4",
-        "--second-single-color": "#e84393",
-        "--third-single-color": "#c71585",
-        "--text-color": "#ffb3d9",
-        "--btn-color": "#ff4081",
-        "--btn-hover-color": "#b0185d",
-        "--main-gradient-color": "linear-gradient(135deg, #3d1640 0%, #e84393 25%, #ff69b4 50%, #ff4081 75%, #b0185d 100%)"
-      }
-    },
-    "light-yellow-cute": {
-      "display": "Light Yellow Cute",
-      "colors": {
-        "--bg-color": "#fffdf4",
-        "--bg-color-secondary": "#fdebac",
-        "--bg-color-third": "#f8f0ce",
-        "--bg-color-fourth": "#ffe6a1",
-        "--main-single-color": "#fcd770",
-        "--second-single-color": "#f8e5b1",
-        "--third-single-color": "#edd8b6",
-        "--text-color": "#604e07",
-        "--btn-color": "#fbcf71",
-        "--btn-hover-color": "#d9a837",
-        "--main-gradient-color": "linear-gradient(135deg, #f5c851 0%, #f1b94a 25%, #e6a93e 50%, #d99936 75%, #dcba32 100%)"
-      }
-    },
-    "light-honey-blush": {
-      "display": "Light Honey Blush",
-      "colors": {
-        "--bg-color": "#fffaf4",
-        "--bg-color-secondary": "#fff1ea",
-        "--bg-color-third": "#ffe3df",
-        "--bg-color-fourth": "#fdded9",
-        "--main-single-color": "#fbcad7",
-        "--second-single-color": "#f7c873",
-        "--third-single-color": "#f4a4a4",
-        "--text-color": "#5e4a3b",
-        "--btn-color": "#f7b6ad",
-        "--btn-hover-color": "#f4a892",
-        "--main-gradient-color": "linear-gradient(135deg, #f7c873 0%, #fbd0a1 25%, #fbcad7 50%, #f8b8c2 75%, #f4a4a4 100%)"
-      }
+  "default": {
+    "display": "Light",
+    "colors": {
+      "--border-radius": "8px",
+      "--bg-color": "#ffffff",
+      "--bg-color-secondary": "#f9f9f9",
+      "--bg-color-third": "#ecfaf5",
+      "--bg-color-fourth": "#f0f0f0",
+      "--main-single-color": "#2bd48b",
+      "--second-single-color": "#2ca772",
+      "--third-single-color": "#003820",
+      "--text-color": "#2e2e2e",
+      "--btn-color": "#dddddd",
+      "--btn-hover-color": "#eaeaea",
+      "--main-gradient-color": "repeating-linear-gradient(45deg, #8dfeda 0%, #3dba84 20%, #2aacb0 40%, #36bcbf 60%, #47c4b0 80%, #8fffd0 100%)",
+      "--second-gradient-color": "repeating-linear-gradient(45deg, #8de8f0 0%, #3da8ba 20%, #2a9eac 40%, #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%)",
+      "--main-wrong-gradient-color": "rgb(255, 75, 75)"
+    }
+  },
+  "dark": {
+    "display": "Dark",
+    "colors": {
+      "--bg-color": "#343434",
+      "--bg-color-secondary": "#2a2a2a",
+      "--bg-color-third": "#1a1a1a",
+      "--bg-color-fourth": "#414141",
+      "--main-single-color": "#3feca2",
+      "--second-single-color": "#2ce68c",
+      "--third-single-color": "#008846",
+      "--text-color": "#ffffff",
+      "--btn-color": "#464545",
+      "--btn-hover-color": "#5a5a5a",
+      "--main-gradient-color": "repeating-linear-gradient(45deg, #8dfeda 0%, #3dba84 20%, #2aacb0 40%, #36bcbf 60%, #47c4b0 80%, #8fffd0 100%)",
+      "--second-gradient-color": "repeating-linear-gradient(45deg, #8de8f0 0%, #3da8ba 20%, #2a9eac 40%, #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%)",
+      "--main-wrong-gradient-color": "rgb(255, 75, 75)"
+    }
+  },
+  "deep-dark": {
+    "display": "Deep Dark",
+    "colors": {
+      "--bg-color": "#0a0a0a",
+      "--bg-color-secondary": "#121212",
+      "--bg-color-third": "#1c1c1c",
+      "--bg-color-fourth": "#262626",
+      "--main-single-color": "#00ffd0",
+      "--second-single-color": "#6effff",
+      "--third-single-color": "#4deeea",
+      "--text-color": "#e0e0e0",
+      "--btn-color": "#1f1f1f",
+      "--btn-hover-color": "#2b2b2b",
+      "--main-gradient-color": "repeating-linear-gradient(45deg, #8dfeda 0%, #3dba84 20%, #2aacb0 40%, #36bcbf 60%, #47c4b0 80%, #8fffd0 100%)",
+      "--second-gradient-color": "repeating-linear-gradient(45deg, #8de8f0 0%, #3da8ba 20%, #2a9eac 40%, #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%)",
+      "--main-wrong-gradient-color": "#ff1f4c"
+    }
+  },
+
+  "galactic-dark-fantasy": {
+    "display": "Galactic Dark Fantasy",
+    "colors": {
+      "--bg-color": "#0d0c1d",
+      "--bg-color-secondary": "#1a1b2f",
+      "--bg-color-third": "#252542",
+      "--bg-color-fourth": "#30315c",
+      "--main-single-color": "#8c52ff",
+      "--second-single-color": "#00ffd5",
+      "--third-single-color": "#ff2e63",
+      "--text-color": "#eaeaea",
+      "--btn-color": "#8c52ff",
+      "--btn-hover-color": "#6c3dc9",
+      "--main-gradient-color": "linear-gradient(135deg, #8c52ff 0%, #6e3cbc 25%, #00ffd5 50%, #1f4068 75%, #ff2e63 100%)"
+    }
+  },
+  "void-spectral-night": {
+    "display": "Void Spectral Night",
+    "colors": {
+      "--bg-color": "#0b0c10",
+      "--bg-color-secondary": "#1f1f2e",
+      "--bg-color-third": "#2c2c3a",
+      "--bg-color-fourth": "#38384a",
+      "--main-single-color": "#6f42c1",
+      "--second-single-color": "#4a00e0",
+      "--third-single-color": "#ff0080",
+      "--text-color": "#e0e0e0",
+      "--btn-color": "#6f42c1",
+      "--btn-hover-color": "#5936a2",
+      "--main-gradient-color": "linear-gradient(135deg, #0f0c29 0%, #302b63 40%, #6f42c1 60%, #ff0080 100%)"
+    }
+  },
+  "peachy-sunrise-dream": {
+    "display": "Peachy Sunrise Dream",
+    "colors": {
+      "--bg-color": "#fffaf7",
+      "--bg-color-secondary": "#fff0f0",
+      "--bg-color-third": "#fff7e6",
+      "--bg-color-fourth": "#ffeae6",
+      "--main-single-color": "#ffd5d5",
+      "--second-single-color": "#fff0b3",
+      "--third-single-color": "#ffc5b3",
+      "--text-color": "#5c4b4b",
+      "--btn-color": "#ffcab3",
+      "--btn-hover-color": "#ffb3a7",
+      "--main-gradient-color": "linear-gradient(135deg, #fff0b3 0%, #ffd5d5 25%, #ffc5b3 50%, #ffcab3 75%, #ffeae6 100%)"
+    }
+  },
+  "deathly-emerald-night": {
+    "display": "Deathly Emerald Night",
+    "colors": {
+      "--bg-color": "#0b0f0f",
+      "--bg-color-secondary": "#0d1b1e",
+      "--bg-color-third": "#112627",
+      "--bg-color-fourth": "#183535",
+      "--main-single-color": "#00c2a8",
+      "--second-single-color": "#008f7a",
+      "--third-single-color": "#004c4c",
+      "--text-color": "#e0f7f4",
+      "--btn-color": "#00a896",
+      "--btn-hover-color": "#007f6f",
+      "--main-gradient-color": "repeating-linear-gradient(45deg, #8dfeda 0%, #3dba84 20%, #2aacb0 40%, #36bcbf 60%, #47c4b0 80%, #8fffd0 100%)"
+    }
+  },
+  "adorable-annihilator": {
+    "display": "Adorable Annihilator",
+    "colors": {
+      "--bg-color": "#fff0f5",
+      "--bg-color-secondary": "#ffe4f0",
+      "--bg-color-third": "#ffd6eb",
+      "--bg-color-fourth": "#ffccff",
+      "--main-single-color": "#ff69b4",
+      "--second-single-color": "#ffb6c1",
+      "--third-single-color": "#ffc0cb",
+      "--text-color": "#7a0e3a",
+      "--btn-color": "#f78fb3",
+      "--btn-hover-color": "#f77fa3",
+      "--main-gradient-color": "linear-gradient(135deg, #ffb6c1 0%, #ff69b4 25%, #ff85a2 50%, #ffaad5 75%, #ffc0cb 100%)"
     }
   }
-  
+}

@@ -1,0 +1,42 @@
+{
+    "register": {
+        "title": "Sign Up",
+        "slogan" : "Welcome to Fatagram",
+        "firstName": "First Name",
+        "lastName": "Last Name",
+        "username": "Username",
+        "password": "Password",
+        "confirmPassword": "Confirm Password",
+        "email": "Email",
+        "phone": "Phone",
+        "agree": "I agree to",
+        "termsOfService": "Terms of Service",
+        "and": "and",
+        "privacyPolicy": "Privacy Policy",
+        "registerButton": "Register",
+        "loginButton": "Login",
+        "nextButton" : "Next",
+        "gobackButton" : "Previous step",
+        "errorMessages": {
+            "usernameNotCorrectFormat": "Username format is invalid",
+            "passwordNotCorrectFormat": "Password must be at least 8 characters",
+            "emailNotCorrectFormat": "Invalid email address",
+            "firstnameNotCorrectFormat": "Firstname format is invalid",
+            "lastnameNotCorrectFormat": "Lastname format is invalid",
+            "phoneNotCorrectFormat": "Invalid phone number",
+            "unknownError": "An unknown error occurred",
+            "usernameExisted": "Username already exists",
+            "registerFailed": "Registration failed, please try again",
+            "emailExisted": "Email is already in use",
+            "internalServerError": "Internal server error"
+        }
+    },
+    "profileHeader": {
+        "editButton": "Edit",
+        "moreButton": "More",
+        "addButton": "Add",
+        "changeButton": "Change",
+        "messageButton": "Message",
+        "addFriendButton": "Add friend"
+    }
+}

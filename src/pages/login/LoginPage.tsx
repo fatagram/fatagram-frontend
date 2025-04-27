@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import LoginForm from "@/features/auth/components/LoginForm/LoginForm";
 import Footer from "@/components/layout/Footer/Footer";
-import withNoAuth from "@/hocs/auth/withNoAuth";
 import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm/ForgotPasswordForm";
 import SelectLanguage from "@/components/common/utils/SelectLanguage";
 
@@ -10,6 +9,7 @@ import SelectLanguage from "@/components/common/utils/SelectLanguage";
 function LoginPage() : React.ReactElement
 {
     const [forgotPassword, setForgotPassword] = React.useState<boolean>(false);
+
     useEffect(() => {
         document.title = forgotPassword ? "Forgot Password - Fatagram" : "Login - Fatagram";
     }, [forgotPassword]);
@@ -17,7 +17,7 @@ function LoginPage() : React.ReactElement
     return (
         <div className="relative">
             <div className="relative flex flex-col items-center justify-center h-screen w-full
-                            background-image bg-cover bg-center ">
+                            background-image">
                         
                     <div className="w-full flex justify-center items-center flex-1 z-10">
                         {forgotPassword ? <ForgotPasswordForm switchToLogin={() => setForgotPassword(false)}/> : 
@@ -25,9 +25,9 @@ function LoginPage() : React.ReactElement
                     </div>
                 <Footer className="z-10 pb-0"/>
             </div>
-            <SelectLanguage className="absolute top-2 right-2 z-50"/>
+            <SelectLanguage className="!absolute top-2 right-2 z-50"/>
         </div>
     )
 }
 
-export default withNoAuth(LoginPage);
+export default LoginPage;

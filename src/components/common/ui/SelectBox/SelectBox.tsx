@@ -1,7 +1,8 @@
 import React, { RefObject } from "react";
 import useClickOutside from "../../../../hooks/useClickOutside";
+import Label from "../Text";
 
-export type OptionKey = string | number;
+export type OptionKey = string | number | boolean;
 
 export type Option = {
     key: OptionKey;
@@ -30,7 +31,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
             <button ref={btnRef} className="w-full">
                 <div className={`flex items-center justify-between cursor-pointer bg-[var(--bg-color-fourth)] 
                         px-4 py-2 rounded-xl shadow-md gap-5 hover:bg-[var(--bg-color-secondary)]`} onClick={() => setIsOpen(!isOpen)}>
-                    <span>{options.find((opt) => opt.key === selected)?.value}</span>
+                    <Label size="md-2">{options.find((opt) => opt.key === selected)?.value}</Label>
                     <i className="fa-solid fa-caret-down"></i>
                 </div>
             </button>

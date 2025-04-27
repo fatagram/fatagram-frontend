@@ -10,6 +10,7 @@ interface PasswordBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
     className?: string;
     autoComplete?: string;
     name?: string;
+    ref?: React.Ref<HTMLInputElement>;
     showPasswordToggle?: boolean;
 }
 
@@ -19,6 +20,7 @@ const PasswordBox: React.FC<PasswordBoxProps> = ({
     showPasswordToggle = true,
     autoComplete = "current-password",
     name="",
+    ref,
     ...props
 }) => {
     const [showPassword, setShowPassword] = React.useState<boolean>(false);
@@ -26,6 +28,7 @@ const PasswordBox: React.FC<PasswordBoxProps> = ({
     return (
         <div className="relative">
             <Textbox {...props}
+                ref={ref}
                 type={showPassword ? "text" : "password"}
                 placeholder={placeholder}
                 autoComplete={autoComplete}

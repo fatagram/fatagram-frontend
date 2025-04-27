@@ -60,7 +60,7 @@ const Avatar: React.FC<AvatarProps> = ({
     const [imgSrc, setImgSrc] = React.useState<string>(src);
 
     useEffect(() => {
-        setImgSrc((src === "" || !src) ? emptyAvatar : src);
+        setImgSrc(src);
     }, [src])
 
     return (
@@ -76,7 +76,7 @@ const Avatar: React.FC<AvatarProps> = ({
 
             <div className="absolute inset-0 bg-[var(--bg-color)] rounded-full overflow-hidden">
                 <img
-                    src={imgSrc}
+                    src={imgSrc || emptyAvatar}
                     alt={alt}
                     className="relative z-0 w-full h-full object-cover"
                     onError={() => setImgSrc(emptyAvatar)}

@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useRef, useState } from "react";
 import Button from "@/components/common/ui/Button/Button";
 import Textbox from "@/components/common/ui/Textbox/Textbox";
 import Logo from "@/components/common/ui/Logo/Logo";
@@ -7,28 +7,40 @@ import Link from "@/components/common/ui/Link/Link";
 import { useNavigate } from "react-router-dom";
 import { RegisterValidator } from "@/api/user/validate/register.dto.validate";
 import RegisterDto from "@/api/user/dto/register.dto";
-import { ErrorKey, ErrorMessages } from "@/api/user/dto/register.dto";
+import { ErrorKey, ErrorCodes } from "@/api/user/dto/register.dto";
 import { RegisterService } from "@/api/user/register.api";
 import PasswordBox from "@/components/common/ui/Textbox/PasswordBox";
 import OverlayLoading from "@/components/common/utils/OverlayLoading/OverlayLoading";
+import Text from "@/components/common/ui/Text";
+import { useTranslation } from "react-i18next";
+import { Result } from "@/api/common";
 
 interface RegisterFormProps {
   showLogo?: boolean;
   showClose?: boolean;
   onClose?: () => void;
+  className?: string;
 }
 
 
-const RegisterForm: React.FC<RegisterFormProps> = ({showLogo=true, showClose=false,onClose}) => {
-
+const RegisterForm: React.FC<RegisterFormProps> = ({
+  className,
+  showLogo = true,
+  showClose = false,
+  onClose,
+}) => {
   // useState hooks
-  const [firstName, setFirstName] = React.useState<string>("");
-  const [lastName, setLastName] = React.useState<string>("");
-  const [username, setUsername] = React.useState<string>("");
-  const [password, setPassword] = React.useState<string>("");
-  const [confirmPassword, setConfirmPassword] = React.useState<string>("");
-  const [email, setEmail] = React.useState<string>("");
-  const [phone, setPhone] = React.useState<string>("");
+  const [formData, setFormData] = React.useState({
+    firstName: "",
+    lastName: "",
+    email: "",
+    phone: "",
+    username: "",
+    password: "",
+    confirmPassword: ""
+  })
+
+  // States
   const [firstNameError, setFirstNameError] = React.useState<string>("");
   const [lastNameError, setLastNameError] = React.useState<string>("");
   const [usernameError, setUsernameError] = React.useState<string>("");
@@ -39,12 +51,31 @@ const RegisterForm: React.FC<RegisterFormProps> = ({showLogo=true, showClose=fal
   const [unknownError, setUnknownError] = React.useState<string>("");
   const [isShowClose] = React.useState<boolean>(showClose);
   const [isShowLogo] = React.useState<boolean>(showLogo);
-  
-  
+  const [isFirstStep, setIsFirstStep] = React.useState<boolean>(true);
   const [isLoading, setIsLoading] = React.useState<boolean>(false);
+
+  // Refs
+  const btnNextStrepRef = React.useRef<HTMLButtonElement>(null);
+  const btnRegisterRef = React.useRef<HTMLButtonElement>(null);
+  const btnBackStepRef = React.useRef<HTMLLabelElement>(null);
+  const firstStepRefs = useRef<(HTMLInputElement | null)[]>([]); // Refs for the first step inputs
+  const secondStepRefs = useRef<(HTMLInputElement | null)[]>([]); // Refs for the second step inputs
+  const [currentIndex, setCurrentIndex] = useState<number>(0); 
+  const setRef = (stepRefs: React.RefObject<(HTMLInputElement | null)[]> ,el: HTMLInputElement | null, index: number) => {
+    stepRefs.current[index] = el;
+  }
+
+  // Other hooks
+  const { t } = useTranslation() as { t: (key: string) => string };
 
   // useNavigate hook
   const navigate = useNavigate();
+
+  // Update formData function
+  const updateFormData = (field: string, value: string) => setFormData(prev => ({
+    ...prev,
+    [field]: value
+  }));
 
   // resetErrors function
   // This function resets all the error messages.
@@ -60,7 +91,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({showLogo=true, showClose=fal
 
   // errorMap object
   // This object maps the error codes to the corresponding error state.
-  const errorMap: Record<ErrorKey, React.Dispatch<React.SetStateAction<string>>> = {
+  const errorMap: Record<
+    ErrorKey,
+    React.Dispatch<React.SetStateAction<string>>
+  > = {
     USERNAME_NOT_CORRECT_FORMAT: setUsernameError,
     PASSWORD_NOT_CORRECT_FORMAT: setPasswordError,
     EMAIL_NOT_CORRECT_FORMAT: setEmailError,
@@ -70,22 +104,26 @@ const RegisterForm: React.FC<RegisterFormProps> = ({showLogo=true, showClose=fal
     UNKNOWN_ERROR: setUnknownError,
     INTERNAL_SERVER_ERROR: setUnknownError,
     REGISTER_USERNAME_EXISTED: setUsernameError,
+    EMAIL_EXISTED: setEmailError,
   };
 
   // validateInput function
   // This function validates the input fields.
   const validateInput = (): boolean => {
     const registerDto: RegisterDto = {
-      firstName: firstName,
-      lastName: lastName,
-      username: username,
-      password: password,
-      email: email,
-      phone: phone,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      username: formData.username,
+      password: formData.password,
+      email: formData.email,
+      phone: formData.phone,
     };
-    const errorCodes = RegisterValidator.validate(registerDto);
+    const errorCodes = RegisterValidator.validate(registerDto).filter(
+      (code): code is ErrorKey => code in ErrorCodes
+    );
+
     errorCodes.forEach((code) => {
-      errorMap[code]?.(ErrorMessages[code]);
+      errorMap[code]?.(t(ErrorCodes[code]));
     });
     return errorCodes.length === 0;
   };
@@ -95,186 +133,298 @@ const RegisterForm: React.FC<RegisterFormProps> = ({showLogo=true, showClose=fal
   const handleRegister = async () => {
     resetErrors();
     if (!validateInput()) return;
-    if (password !== confirmPassword) {
+    if (formData.password !== formData.confirmPassword) {
       setConfirmPasswordError("Passwords do not match");
       return;
     }
     const registerDto: RegisterDto = {
-      firstName: firstName,
-      lastName: lastName,
-      username: username,
-      password: password,
-      email: email,
-      phone: phone,
+      firstName: formData.firstName,
+      lastName: formData.lastName,
+      username: formData.username,
+      password: formData.password,
+      email: formData.email,
+      phone: formData.phone,
     };
     const authService = new RegisterService();
     setIsLoading(true);
-    const result = await authService.register(registerDto);
+    const result: Result<void> = await authService.register(registerDto);
 
     if (result.success) {
       navigate("/login", { replace: true });
-    }
-    else {
-      result.errorCodes?.forEach((code) => {
-        errorMap[code]?.(ErrorMessages[code]);
-      });
+    } else {
+      if (result.errorCodes) {
+        const errCodes = result.errorCodes?.filter(
+          (code): code is ErrorKey => code in ErrorCodes
+        );
+        errCodes?.forEach((code) => {
+          errorMap[code]?.(t(ErrorCodes[code]));
+        });
+      } else if (result.errorCode) {
+        var code = result.errorCode as ErrorKey;
+        errorMap[code]?.(t(ErrorCodes[code]));
+      }
+      if (lastNameError || firstNameError || emailError) 
+      {
+        setIsFirstStep(true);
+      }
     }
     setIsLoading(false);
   };
 
-  // JSX
+  // Next step function: this function handles the next step button click event.
+  const handleNextStep = () => {
+    setIsFirstStep(!isFirstStep);
+  }
+
+  // Back step function: this function handles the back step button click event.
+  useEffect(() => {
+    if (isFirstStep) {
+      firstStepRefs.current[0]?.focus();
+    }
+    else {
+      secondStepRefs.current[0]?.focus();
+    }
+    setCurrentIndex(0);
+  }, [isFirstStep])
+
+  // Keyboard event listener
+  useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Enter") {
+        if (isFirstStep) btnNextStrepRef.current?.click();
+        else btnRegisterRef.current?.click();
+      }
+      else if (event.key === "ArrowUp") {
+        const index = currentIndex - 1 >= 0 ? currentIndex - 1 : currentIndex;
+        if (isFirstStep) firstStepRefs.current[index]?.focus();
+        else secondStepRefs.current[index]?.focus();
+        setCurrentIndex(index);
+      }
+      else if (event.key === "ArrowDown") {
+        if (isFirstStep) {
+          const index = currentIndex + 1 < firstStepRefs.current.length ? currentIndex + 1 : currentIndex
+          firstStepRefs.current[index]?.focus();
+          setCurrentIndex(index);
+        } 
+        else {
+          const index = currentIndex + 1 < secondStepRefs.current.length ? currentIndex + 1 : currentIndex
+          secondStepRefs.current[index]?.focus();
+          setCurrentIndex(index);
+        }
+      }
+
+    }
+    document.addEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+    }
+  }, [isFirstStep, currentIndex]);
+
   return (
     <form
-      className="relative flex flex-col items-center sm:gap-[13px] gap-[13px] w-full
-                sm:max-w-[420px] max-w-[380px] p-[20px] sm:p-[30px]
-                bg-[var(--bg-color-secondary)] shadow-md rounded-lg
-                animate-fade-in">
-      
+      className={`relative flex flex-col justify-center
+             animate-fade-in shadow-md rounded-lg p-[20px] 
+             sm:p-[30px] bg-[var(--bg-color-secondary)] gap-5
+            ${className}`}
+    >
       {/* Overlay Loading */}
       {isLoading && <OverlayLoading />}
       {/* Logo Fatagram */}
       {isShowLogo && <Logo />}
-      <h2 className="uppercase sm:text-[45px] text-[45px] text-[var(--third-single-color)] font-bold font-jua select-none">
-        Sign up
-      </h2>
-      <div className="flex gap-[10px] w-full">
-        <div className="w-full">
-          <Textbox
-            className="text-[13px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-            placeholder="First name"
-            onChange={(e) => setFirstName(e.target.value)}
-            isWrong={firstNameError ? true : false}
-          />
-          <span
-            className={`${firstNameError ? "" : "hidden"
-              } text-[13px] px-[5px] text-red-400`}
+
+      <Text size="xl-2"
+            weight="extrabold"
+            className="uppercase sm:text-[45px] text-[45px] text-[var(--third-single-color)] select-none text-center"
           >
-            {firstNameError}
-          </span>
-        </div>
-        <div className="w-full">
-          <Textbox
-            className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-            placeholder="Last name"
-            onChange={(e) => setLastName(e.target.value)}
-            isWrong={lastNameError ? true : false}
-          />
-          <span
-            className={`${lastNameError ? "" : "hidden"
-              } text-[13px] px-[5px] text-red-400`}
+            {t("user:register.title")}
+      </Text>
+
+      {isFirstStep ? (
+        <div className="animate-left-to-right relative flex flex-col items-center sm:gap-[20px] gap-[15px] w-full">
+          <div className="flex gap-[10px] w-full">
+            <div className="w-full">
+              <Textbox value={formData.firstName}
+                ref={(el) => setRef(firstStepRefs, el, 0)}
+                className="text-[13px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+                placeholder={t("user:register.firstName")}
+                onChange={(e) => updateFormData("firstName", e.target.value)}
+                isWrong={firstNameError ? true : false}
+              />
+              <Text
+                size="sm"
+                color="danger"
+                className={`${firstNameError ? "" : "hidden"} px-[5px]`}
+              >
+                {firstNameError}
+              </Text>
+            </div>
+            <div className="w-full">
+              <Textbox value={formData.lastName}
+                ref={(el) => setRef(firstStepRefs, el, 1)}
+                className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+                placeholder={t("user:register.lastName")}
+                onChange={(e) => updateFormData("lastName", e.target.value)}
+                isWrong={lastNameError ? true : false}
+              />
+              <Text
+                size="sm"
+                color="danger"
+                className={`${lastNameError ? "" : "hidden"} px-[5px]`}
+              >
+                {lastNameError}
+              </Text>
+            </div>
+          </div>
+
+          <div className="w-full">
+            <Textbox value={formData.email}
+                ref={(el) => setRef(firstStepRefs, el, 2)}
+              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+              placeholder={t("user:register.email")}
+              onChange={(e) => updateFormData("email", e.target.value)}
+              isWrong={emailError ? true : false}
+            />
+            <Text
+              size="sm"
+              color="danger"
+              className={`${emailError ? "" : "hidden"} px-[5px] `}
+            >
+              {emailError}
+            </Text>
+          </div>
+          <div className="w-full">
+            <Textbox value={formData.phone}
+              ref={(el) => setRef(firstStepRefs, el, 3)}
+              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+              placeholder={t("user:register.phone")}
+              onChange={(e) => updateFormData("phone", e.target.value)}
+              isWrong={phoneError ? true : false}
+            />
+            <Text
+              size="sm"
+              color="danger"
+              className={`${phoneError ? "" : "hidden"} px-[5px] `}
+            >
+              {phoneError}
+            </Text>
+          </div>
+
+          <Text
+            size="sm"
+            color="danger"
+            className={`${unknownError ? "" : "hidden"} px-[5px] `}
           >
-            {lastNameError}
-          </span>
+            {unknownError}
+          </Text>
+          <Button ref={btnNextStrepRef}
+            type="button"
+            size="medium"
+            className={`w-full sm:py-[5px] py-[7px]`}
+            onClick={handleNextStep}
+          >
+            <Text>{t("user:register.nextButton")}</Text>
+          </Button>
+          
         </div>
-      </div>
-      <div className="w-full">
-        <Textbox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-          placeholder="Username"
-          onChange={(e) => setUsername(e.target.value)}
-          isWrong={usernameError ? true : false}
-        />
-        <span
-          className={`${usernameError ? "" : "hidden"
-            } text-[13px] px-[5px] text-red-400`}
-        >
-          {usernameError}
-        </span>
-      </div>
-      <div className="w-full">
-        <PasswordBox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-          placeholder="Password"
-          onChange={(e) => setPassword(e.target.value)}
-          isWrong={passwordError ? true : false}
-        />
-        <span
-          className={`${passwordError ? "" : "hidden"
-            } text-[13px] px-[5px] text-red-400`}
-        >
-          {passwordError}
-        </span>
-      </div>
-      <div className="w-full">
-        <PasswordBox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-          placeholder="Confirm Password"
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          isWrong={confirmPasswordError ? true : false}
-        />
-        <span
-          className={`${confirmPasswordError ? "" : "hidden"
-            } text-[13px] px-[5px] text-red-400`}
-        >
-          {confirmPasswordError}
-        </span>
-      </div>
-      <div className="w-full">
-        <Textbox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-          placeholder="Email"
-          onChange={(e) => setEmail(e.target.value)}
-          isWrong={emailError ? true : false}
-        />
-        <span
-          className={`${emailError ? "" : "hidden"
-            } text-[13px] px-[5px] text-red-400`}
-        >
-          {emailError}
-        </span>
-      </div>
-      <div className="w-full">
-        <Textbox
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-          placeholder="Phone"
-          onChange={(e) => setPhone(e.target.value)}
-          isWrong={phoneError ? true : false}
-        />
-        <span
-          className={`${phoneError ? "" : "hidden"
-            } text-[13px] px-[5px] text-red-400`}
-        >
-          {phoneError}
-        </span>
-      </div>
-      <Checkbox
-        className={`
-            text-[15px] text-[var(--third-single-color)] gap-[8px]
-        `}
-        label={
-          <label>
-            I agree to the{" "}
-            <Link className={"sm:text-[15px]"} to="/terms">
-              Terms of Service
-            </Link>{" "}
-            and{" "}
-            <Link className={"sm:text-[15px]"} to="/policy">
-              Privacy Policy
+      ) : (
+        <div className="animate-right-to-left relative flex flex-col items-center sm:gap-[20px] gap-[15px] w-full">
+          <div className="w-full">
+            <Textbox value={formData.username}
+                ref={(el) => setRef(secondStepRefs, el, 0)}
+              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+              placeholder={t("user:register.username")}
+              onChange={(e) => updateFormData("username", e.target.value)}
+              isWrong={usernameError ? true : false}
+            />
+            <Text
+              size="sm"
+              color="danger"
+              className={`${usernameError ? "" : "hidden"} px-[5px] `}
+            >
+              {usernameError}
+            </Text>
+          </div>
+          <div className="w-full">
+            <PasswordBox value={formData.password}
+                ref={(el) => setRef(secondStepRefs, el, 1)}
+              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+              placeholder={t("user:register.password")}
+              onChange={(e) => updateFormData("password", e.target.value)}
+              isWrong={passwordError ? true : false}
+            />
+            <Text
+              size="sm"
+              color="danger"
+              className={`${passwordError ? "" : "hidden"} px-[5px] `}
+            >
+              {passwordError}
+            </Text>
+          </div>
+          <div className="w-full">
+            <PasswordBox value={formData.confirmPassword}
+                ref={(el) => setRef(secondStepRefs, el, 2)}
+              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+              placeholder={t("user:register.confirmPassword")}
+              onChange={(e) => updateFormData("confirmPassword", e.target.value)}
+              isWrong={confirmPasswordError ? true : false}
+            />
+            <Text
+              size="sm"
+              color="danger"
+              className={`${confirmPasswordError ? "" : "hidden"} px-[5px]`}
+            >
+              {confirmPasswordError}
+            </Text>
+          </div>
+          <Checkbox
+            className={`
+              text-[15px] text-[var(--third-single-color)] gap-[8px]
+          `}
+            label={
+              <div className="flex items-center">
+                {t("user:register.agree")}{" "}
+                <Link className={"sm:text-[15px] mx-1"} to="/terms">
+                  {t("user:register.termsOfService")}
+                </Link>{" "}
+                {t("user:register.and")}{" "}
+                <Link className={"sm:text-[15px] ml-1"} to="/policy">
+                  {t("user:register.privacyPolicy")}
+                </Link>
+                .
+              </div>
+            }
+          />
+          <Button ref={btnRegisterRef}
+            type="button"
+            size="medium"
+            className={`w-full sm:py-[5px] py-[7px]`}
+            onClick={handleRegister}
+          >
+            <Text>{t("user:register.registerButton")}</Text>
+          </Button>
+          <Text ref={btnBackStepRef}
+              className="flex gap-1 items-center text-[var(--second-single-color)] hover:text-[var(--main-single-color)]"
+              onClick={handleNextStep}>
+              <i className="fa-solid fa-arrow-left"></i>
+            {t("user:register.gobackButton")}
+          </Text>
+        </div>
+      )}
+      <div className="relative flex justify-center">
+            <Link className={"sm:text-[15px] font-bold"} to="/login">
+              {t("user:register.loginButton")}
             </Link>
-            .
-          </label>
-        }
-      />
-      <span
-        className={`${unknownError ? "" : "hidden"
-          } text-[13px] px-[5px] text-red-400`}
-      >
-        {unknownError}
-      </span>
-      <Button type="button" size="medium"
-        className={`sm:text-[17px] text-[20px] w-full sm:py-[5px] py-[7px] font-montserrat`}
-        onClick={handleRegister}
-      >
-        Sign up
-      </Button>
-      <div>
-        <Link className={"sm:text-[14px]"} to="/login">
-          Login
-        </Link>
       </div>
 
-      { isShowClose && <span className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] cursor-pointer`}
-                onClick={onClose}><i className="fa-solid fa-xmark"></i></span> }
+      {isShowClose && (
+        <Text
+          size="lg"
+          className={`absolute z-50 top-3 right-5 text-gradient-main hover:text-[var(--main-single-color)] cursor-pointer`}
+          onClick={onClose}
+        >
+          <i className="fa-solid fa-xmark"></i>
+        </Text>
+      )}
     </form>
   );
 };

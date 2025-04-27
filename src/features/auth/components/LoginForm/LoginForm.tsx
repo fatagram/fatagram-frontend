@@ -1,18 +1,19 @@
-import React from "react";
+import React, { useEffect } from "react";
 import Button from "@/components/common/ui/Button";
 import Textbox from "@/components/common/ui/Textbox";
-import Logo from  "@/components/common/ui/Logo";
-import Checkbox from  "@/components/common/ui/Checkbox";
-import Link from  "@/components/common/ui/Link";
+import Logo from "@/components/common/ui/Logo";
+import Checkbox from "@/components/common/ui/Checkbox";
+import Link from "@/components/common/ui/Link";
 import { useNavigate } from "react-router-dom";
 import { LoginValidator } from "@/api/auth/validate/login.dto.validate";
-import LoginDto, { ErrorMessages, ErrorKey } from "@/api/auth/dto/login.dto";
-import AuthService from "@/api/auth/auth.api";
-import ServerResponse from "@/api/common.dto";
+import LoginDto, { ErrorCodes, ErrorKey } from "@/api/auth/dto/login.dto";
+import { LoginResponse } from "@/api/auth/auth.api";
 import PasswordBox from "@/components/common/ui/Textbox/PasswordBox";
 import OverlayLoading from "@/components/common/utils/OverlayLoading/OverlayLoading";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
+import Text from "@/components/common/ui/Text";
+import { Result } from "@/api/common";
 
 interface LoginFormProps {
     switchForgotPassword?: () => void;
@@ -22,8 +23,7 @@ interface LoginFormProps {
 }
 
 // LoginForm component
-const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=true, showClose=false, onClose}) => 
- {
+const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = true, showClose = false, onClose }) => {
     // states
     const [username, setUsername] = React.useState<string>("");
     const [password, setPassword] = React.useState<string>("");
@@ -35,11 +35,15 @@ const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=tru
     const [isShowClose] = React.useState<boolean>(showClose);
     const [isShowLogo] = React.useState<boolean>(showLogo);
 
+    const btnRef = React.useRef<HTMLButtonElement>(null);
+    const inputUsernameRef = React.useRef<HTMLInputElement>(null);
+    const inputPasswordRef = React.useRef<HTMLInputElement>(null);
+
     const { t } = useTranslation() as { t: (key: string) => string };
+    const { login } = useAuth();
 
     // hooks
     const navigate = useNavigate();
-    const { setAuthenticated } = useAuth();
 
     const resetErrors = (): void => {
         setUsernameError("");
@@ -48,12 +52,12 @@ const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=tru
     }
 
     const errorMap: Record<ErrorKey, React.Dispatch<React.SetStateAction<string>>> = {
-        USERNAME_NOT_CORRECT_FORMAT : setUsernameError,
-        PASSWORD_NOT_CORRECT_FORMAT : setPasswordError,
-        UNKNOWN_ERROR : setUnknownError,
-        ACCOUNT_NOT_FOUND : setUsernameError,
-        WRONG_PASSWORD : setPasswordError,
-        INTERNAL_SERVER_ERROR : setUnknownError
+        USERNAME_NOT_CORRECT_FORMAT: setUsernameError,
+        PASSWORD_NOT_CORRECT_FORMAT: setPasswordError,
+        UNKNOWN_ERROR: setUnknownError,
+        ACCOUNT_NOT_FOUND: setUsernameError,
+        WRONG_PASSWORD: setPasswordError,
+        INTERNAL_SERVER_ERROR: setUnknownError
     }
 
     const validateInput = (): boolean => {
@@ -61,9 +65,11 @@ const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=tru
             username: username,
             password: password
         }
-        const errorCodes = LoginValidator.validate(loginDto);
+        const errorCodes = LoginValidator.validate(loginDto)
+            .filter((code): code is ErrorKey => code in ErrorCodes);
+
         errorCodes.forEach((code) => {
-            errorMap[code]?.(ErrorMessages[code]);
+            errorMap[code]?.(t(ErrorCodes[code]));
         })
 
         return errorCodes.length === 0;
@@ -75,8 +81,7 @@ const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=tru
     const handleLogin = async () => {
         resetErrors();
         if (!validateInput()) return;
-        
-        const authService = new AuthService();
+
         // Call the login API
         const loginDto: LoginDto = {
             username: username,
@@ -84,60 +89,109 @@ const LoginForm: React.FC<LoginFormProps> = ({switchForgotPassword, showLogo=tru
         };
         localStorage.setItem("isRememberMe", isRememberMe.toString());
         setIsLoading(true);
-        const result: ServerResponse = await authService.login(loginDto);
+        const result: Result<LoginResponse> = await login(loginDto);
 
         if (result.success) {
-            setAuthenticated?.(true);
-            localStorage.setItem("userId", result.data.userId);
-            localStorage.setItem("urlName", result.data.urlName);
             navigate("/", { replace: true });
         }
         else {
-            result.errorCodes?.forEach(code => {
-                errorMap[code]?.(ErrorMessages[code]);
-            })
+            if (result.errorCodes) {
+                const errCodes = result.errorCodes?.filter((code): code is ErrorKey => code in ErrorCodes);
+                errCodes?.forEach(code => {
+                    errorMap[code]?.(t(ErrorCodes[code]));
+                })
+            }
+            else 
+            {
+                var code = result.errorCode as ErrorKey;
+                errorMap[code]?.(t(ErrorCodes[code]));
+            }
+
         }
         setIsLoading(false);
     }
 
-    return ( 
-        <form className="relative flex flex-col items-center gap-[20px] w-[95%]  max-w-[380px] 
+    useEffect(() => {
+        inputUsernameRef.current?.focus();
+        const handleArrowDown = (event: KeyboardEvent) => {
+            if (event.key === "ArrowDown") 
+            {
+                inputPasswordRef.current?.focus();
+            }
+            else if (event.key === "ArrowUp") {
+                inputUsernameRef.current?.focus();
+            }
+        }
+        document.addEventListener("keydown", handleArrowDown);
+        return () => {
+            document.removeEventListener("keydown", handleArrowDown);
+        }
+    }, []) 
+
+    useEffect(() => {
+        const handleKeyDown = (event: KeyboardEvent) => {
+            if (event.key === "Enter") {
+                btnRef.current?.click();
+            }
+        }
+        document.addEventListener("keydown", handleKeyDown);
+        return () => {
+            document.removeEventListener("keydown", handleKeyDown);
+        } 
+    }, []);
+
+
+    return (
+        <form className="relative flex flex-col items-center gap-[20px] w-[95%] max-w-[380px] 
                         p-[20px] bg-[var(--bg-color-secondary)] shadow-md rounded-lg 
                         sm:max-w-[380px] sm:p-[25px] animate-fade-in overflow-hidden">
-            {isLoading && <OverlayLoading/>}
+            {isLoading && <OverlayLoading />}
 
-            {isShowLogo && <Logo/> }
-            <h2 className="uppercase sm:text-[45px] text-[50px] text-[var(--third-single-color)] 
-                            font-bold font-jua select-none">{t("auth.login.title")}</h2>
+            {isShowLogo && <Logo />}
+            <Text size="xl-2" weight="extrabold" className="uppercase text-[var(--third-single-color)] 
+                            font-bold font-inter select-none">{t("auth:login.title")}</Text>
             <div className="w-full">
-                <Textbox className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm" placeholder="Username"
-                    onChange={(e) => setUsername(e.target.value)} isWrong={usernameError !== "" }/>
-                <span className={`${usernameError === "" ? "hidden" : ""} text-[13px] px-[5px] text-red-400`}>{usernameError}</span>
+                <Textbox className="text-[14px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
+                        ref={inputUsernameRef}
+                        placeholder={t("auth:login.username")}
+                        onChange={(e) => setUsername(e.target.value)} 
+                        isWrong={usernameError !== ""} />
+                <Text size="sm" className={`${usernameError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{usernameError}</Text>
             </div>
             <div className="w-full">
-                <PasswordBox className="text-[14px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm" placeholder="Password"
-                    onChange={(e) => { setPassword(e.target.value)}} isWrong={passwordError !== ""} autoComplete="current-password"/>
-                <span className={`${passwordError === "" ? "hidden" : ""} text-[13px] px-[5px] text-red-400`}>{passwordError}</span>
+                <PasswordBox ref={inputPasswordRef}
+                     className="text-[14px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm" 
+                     placeholder={t("auth:login.password")}
+                    onChange={(e) => { setPassword(e.target.value) }} isWrong={passwordError !== ""} autoComplete="current-password" />
+                <Text size="sm" className={`${passwordError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{passwordError}</Text>
             </div>
-            <div className="flex justify-between w-[95%] items-center gap-[50px]">     
-                <Checkbox className="text-[15px] text-[#00230e]" label="Remember me" checked={isRememberMe}
-                    onChange={(e) => {setIsRememberMe(e.target.checked)}}/>
-                { switchForgotPassword && <span className="sm:text-[15px] text-[15px] text-[var(--second-single-color)] hover:text-[var(--main-single-color)] 
-                                hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
-                    onClick={switchForgotPassword}>Forget password?</span> }
+            <div className="flex justify-between w-[95%] items-center gap-[50px]">
+                <Checkbox className="text-[15px] text-[#00230e]" label={t("auth:login.rememberMe")} checked={isRememberMe}
+                    onChange={(e) => { setIsRememberMe(e.target.checked) }} />
+                {switchForgotPassword &&
+                    <Text size="sm-2" className="text-[var(--second-single-color)] hover:text-[var(--main-single-color)] 
+                                    hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
+                        onClick={switchForgotPassword}>{t("auth:login.forgotPassword")}
+                    </Text>
+                }
             </div>
-            <span className={`${unknownError === "" ? "hidden" : ""} text-[13px] px-[5px] text-red-400`}>{unknownError}</span>
+            <Text className={`${unknownError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{unknownError}</Text>
             <Button type="button" className={`sm:text-[18px] text-[20px] w-full sm:py-[7px] py-[7px] font-montserrat`}
-                    onClick={handleLogin} size="medium"
-                >Log in</Button>
-            <div>
-                <span className="sm:text-[14px] text-[15px] text-[var(--third-single-color)]">Don't have an account yet? </span>
-                <Link className={"sm:text-[14px]"} to="/register">Sign up</Link>
+                onClick={handleLogin} ref={btnRef}
+                 size="medium">
+                {t("auth:login.loginButton")}
+            </Button>
+            <div className="flex gap-1 items-center">
+                <Text size="sm-2" className="text-[var(--third-single-color)]">{t("auth:login.registerAnswer")}</Text>
+                <Link className={"sm:text-[15px] font-bold"} to="/register">{t("auth:login.registerButton")}</Link>
             </div>
 
-            { isShowClose && <span className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] cursor-pointer`}
-                onClick={onClose}><i className="fa-solid fa-xmark"></i></span> }
-        </form> 
+            {isShowClose &&
+                <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] cursor-pointer`}
+                    onClick={onClose}><i className="fa-solid fa-xmark"></i>
+                </Text>
+            }
+        </form>
     )
 }
 

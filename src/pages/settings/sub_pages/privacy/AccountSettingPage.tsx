@@ -3,9 +3,8 @@ import AccountSetting from "@/features/settings/components/privacy/AccountSettin
 import { Outlet } from "react-router-dom";
 
 const AccountSettingPage: React.FC = () => {
-
     return (
-        <div className="flex justify-center md:min-w-[700px] min-w-[300px]">
+        <div className="flex justify-center w-full">
             <AccountSetting className="w-full"/>
             <Outlet/>
         </div>

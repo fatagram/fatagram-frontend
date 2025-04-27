@@ -12,7 +12,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({className}) => {
-    const { isAuthenticated, isLoading } = useAuth();
+    const { isAuthenticated } = useAuth();
     const [showLogin, setShowLogin] = React.useState<boolean>(false);
     const [showRegister, setShowRegister] = React.useState<boolean>(false);
     
@@ -25,10 +25,6 @@ const Navbar: React.FC<NavbarProps> = ({className}) => {
         {
             setShowLogin(true);
         }
-    }
-
-    if (isLoading) {
-        return <></>;
     }
     
     return (

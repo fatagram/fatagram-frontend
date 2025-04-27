@@ -5,23 +5,13 @@ export default interface LoginDto {
 }
 
 // Error codes for the LoginValidator
-export enum ErrorCodes {
-    USERNAME_NOT_CORRECT_FORMAT = "USERNAME_NOT_CORRECT_FORMAT",
-    PASSWORD_NOT_CORRECT_FORMAT = "PASSWORD_NOT_CORRECT_FORMAT",
-    UNKNOWN_ERROR = "UNKNOWN_ERROR",
-    ACCOUNT_NOT_FOUND = "ACCOUNT_NOT_FOUND",
-    WRONG_PASSWORD = "WRONG_PASSWORD",
-    INTERNAL_SERVER_ERROR = "INTERNAL_SERVER_ERROR"
+export const ErrorCodes : Record<string, string> = {
+    USERNAME_NOT_CORRECT_FORMAT : "auth:login.errorMessages.usernameNotCorrectFormat",
+    PASSWORD_NOT_CORRECT_FORMAT : "auth:login.errorMessages.passwordNotCorrectFormat",
+    UNKNOWN_ERROR : "auth:login.errorMessages.unknownError",
+    ACCOUNT_NOT_FOUND : "auth:login.errorMessages.accountNotFound",
+    WRONG_PASSWORD : "auth:login.errorMessages.wrongPassword",
+    INTERNAL_SERVER_ERROR : "auth:login.errorMessages.internalServerError",
 }
 
-// Maaping error codes to error messages
-export const ErrorMessages: Record<string, string> = {
-    "USERNAME_NOT_CORRECT_FORMAT" : "Invalid username format.",
-    "PASSWORD_NOT_CORRECT_FORMAT" : "Password has at least 8 characters.",
-    "UNKNOWN_ERROR" : "An unknown error occurred.",
-    "ACCOUNT_NOT_FOUND" : "Username does not exist.",
-    "WRONG_PASSWORD" : "Password is incorrect.",
-    "INTERNAL_SERVER_ERROR" : "Internal server error."
-}
-
-export type ErrorKey = keyof typeof ErrorMessages;
+export type ErrorKey = keyof typeof ErrorCodes;

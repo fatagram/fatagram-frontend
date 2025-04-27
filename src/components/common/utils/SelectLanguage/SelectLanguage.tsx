@@ -23,7 +23,7 @@ const SelectLanguage: React.FC<SelectLanguageProps> = ({className}) => {
     }, [availableLanguages])
 
     return (
-        <SelectBox className={`${className} !min-w-[170px]`} options={langs} 
+        <SelectBox className={`${className}`} options={langs} 
             selectedOption={language}
             onSelect={selectLanguage}/>
     );

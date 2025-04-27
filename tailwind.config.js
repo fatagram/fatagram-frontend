@@ -7,12 +7,10 @@ module.exports = {
   theme: {
     extend: {
       fontFamily: {
-        poppins: ['Poppins', 'sans-serif'],
-        inter: ['Inter', 'sans-serif'],
-        montserrat: ['Montserrat, sans-serif'],
         bagel_fat_one: ['Bagel Fat One', 'sans-serif'],
         jua: ['Jua', 'sans-serif'],
-        roboto: ['Roboto', 'sans-serif'],
+        varela_round: ['Varela Round', 'sans-serif'],
+        nunito: ['Nunito', 'sans-serif'],
       }
     },
   },

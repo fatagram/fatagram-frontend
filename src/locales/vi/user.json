@@ -1,0 +1,42 @@
+{
+    "register": {
+        "title": "Đăng ký",
+        "slogan" : "Chào mừng đến với Fatagram",
+        "firstName": "Họ",
+        "lastName": "Tên",
+        "username": "Tên đăng nhập",
+        "password": "Mật khẩu",
+        "confirmPassword": "Xác nhận mật khẩu",
+        "email": "Email",
+        "phone": "Số điện thoại",
+        "agree": "Tôi đồng ý với",
+        "termsOfService": "Điều khoản dịch vụ",
+        "and": "và",
+        "privacyPolicy": "Chính sách bảo mật",
+        "registerButton": "Đăng ký",
+        "loginButton": "Đăng nhập",
+        "nextButton" : "Bước kế",
+        "gobackButton" : "Quay lại bước trước",
+        "errorMessages": {
+            "usernameNotCorrectFormat": "Tên đăng nhập không đúng định dạng",
+            "passwordNotCorrectFormat": "Mật khẩu phải có ít nhất 8 ký tự",
+            "emailNotCorrectFormat": "Địa chỉ email không hợp lệ",
+            "firstnameNotCorrectFormat": "Họ không đúng định dạng",
+            "lastnameNotCorrectFormat": "Tên không đúng định dạng",
+            "phoneNotCorrectFormat": "Số điện thoại không hợp lệ",
+            "unknownError": "Đã xảy ra lỗi không xác định",
+            "usernameExisted": "Tên người dùng đã tồn tại",
+            "registerFailed": "Đăng ký thất bại, vui lòng thử lại",
+            "emailExisted": "Email đã được sử dụng",
+            "internalServerError": "Lỗi máy chủ nội bộ"
+        }
+    },
+    "profileHeader": {
+        "editButton": "Sửa",
+        "moreButton": "Xem thêm",
+        "addButton": "Thêm",
+        "changeButton": "Thay đổi",
+        "messageButton": "Nhắn tin",
+        "addFriendButton": "Thêm bạn bè"
+    }
+}

@@ -1,0 +1,17 @@
+{
+    "language" : {
+        "en" : "EN Tiếng Anh",
+        "vi" : "VN Tiếng Việt"
+    },
+    "navbar" : {
+        "profileMenu" : {
+            "settings" : "Cài đặt",
+            "logout" : "Đăng xuất"
+        }
+    },
+    "notFound" : {
+        "title" : "Không tìm thấy",
+        "description" : "Xin lỗi, trang bạn đang tìm kiếm không tồn tại.",
+        "backButton" : "Quay lại trang chủ"
+    }
+}

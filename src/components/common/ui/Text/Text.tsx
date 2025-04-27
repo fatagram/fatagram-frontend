@@ -1,20 +1,22 @@
 import React from "react";
 
-interface LabelProps {
+interface TextProps {
     onClick?: () => void;
     children?: React.ReactNode;
     htmlFor?: string;
     className?: string;
-    size?: "small" | "medium" | "medium-2" | "large" | "xlarge" | "xxlarge"; 
-    weight?: "light" | "regular" | "bold";
+    ref?: React.Ref<HTMLLabelElement>;
+    size?: "sm" | "sm-2" | "md" | "md-2" | "lg" | "lg-2" | "lg-3" | "xl" | "xl-2" | "xl-3"; 
+    weight?: "light" | "regular" | "bold" | "extrabold";
     color?: "primary" | "secondary" | "danger" | "success" | "warning";
 }
 
-const Label: React.FC<LabelProps> = ({
+const Text: React.FC<TextProps> = ({
     onClick,
     children,
     htmlFor,
-    className = "",
+    className,
+    ref,
     size = "medium",
     weight = "regular",
     color = "primary",
@@ -24,23 +26,35 @@ const Label: React.FC<LabelProps> = ({
     let colorClass = "";
 
     switch (size) {
-        case "small":
+        case "sm":
             sizeClass = "text-xs";
             break;
-        case "medium":
+        case "sm-2":
             sizeClass = "text-sm";
             break;
-        case "medium-2":
+        case "md":
+            sizeClass = "text-md";
+            break;
+        case "md-2":
             sizeClass = "text-lg";
             break;
-        case "large":
+        case "lg":
             sizeClass = "text-xl";
             break;
-        case "xlarge":
+        case "lg-2":
             sizeClass = "text-2xl";
             break;
-        case "xxlarge":
+        case "lg-3":
             sizeClass = "text-3xl";
+            break;
+        case "xl":
+            sizeClass = "text-4xl";
+            break;
+        case "xl-2":
+            sizeClass = "text-5xl";
+            break;
+        case "xl-3":
+            sizeClass = "text-6xl";
             break;
         default:
     }
@@ -55,6 +69,10 @@ const Label: React.FC<LabelProps> = ({
         case "bold":
             weightClass = "font-bold";
             break;
+        case "extrabold":
+            weightClass = "font-extrabold";
+            break;
+        default:
     }
 
     switch (color) {
@@ -65,7 +83,7 @@ const Label: React.FC<LabelProps> = ({
             colorClass = "var(--text-color-secondary)";
             break;
         case "danger":
-            colorClass = "text-red-600";
+            colorClass = "text-red-400";
             break;
         case "success":
             colorClass = "text-green-600";
@@ -76,14 +94,13 @@ const Label: React.FC<LabelProps> = ({
     }
 
     return (
-        <label
+        <label ref={ref}
             onClick={onClick}
             htmlFor={htmlFor}
-            className={`cursor-pointer select-none ${sizeClass} ${weightClass} ${colorClass} ${className}`}
-        >
+            className={`cursor-pointer select-none ${sizeClass} ${weightClass} ${colorClass} ${className}`}>
             {children}
         </label>
     );
 };
 
-export default Label;
+export default Text;

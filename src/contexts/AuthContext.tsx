@@ -1,37 +1,112 @@
-import AuthService from "@/api/auth/auth.api";
-import { createContext, useContext, useEffect, useState } from "react";
+import AuthService, { LoginResponse } from "@/api/auth/auth.api";
+import LoginDto from "@/api/auth/dto/login.dto";
+import { Result } from "@/api/common";
+import { UserService } from "@/api/user/user.api";
+import LoadingPage from "@/pages/loading/LoadingPage";
+import { removeRefreshToken, removeRefreshTokenFromSession, setRefreshToken, setRefreshTokenToSession } from "@/utils/token";
+import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
 
 interface AuthContextType {
     isAuthenticated: boolean | null;
     isLoading: boolean;
-    setAuthenticated?: (isAuthenticated: boolean) => void;
+    login: (loginDto: LoginDto) => Promise<Result<LoginResponse>>;
+    logout?: () => Promise<void>;
+    refresh?: () => Promise<void>;
+    userId?: string;
+    urlName?: string;
 }
 
 const AuthContext = createContext<AuthContextType>({ 
     isAuthenticated: null, 
     isLoading: true, 
-    setAuthenticated: (boolean) => {} 
+    login: () => Promise.resolve({ success: false, data: undefined }),
+    logout: () => Promise.resolve(),
+    refresh: () => Promise.resolve(),
+    userId: undefined,
+    urlName: undefined
 });
 
 export const AuthProvider = ({children} : { children: React.ReactNode }) => {
     const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
     const [isLoading, setIsLoading] = useState<boolean>(true);
+    const [userId, setUserId] = useState<string | undefined>(undefined);
+    const [urlName, setUrlName] = useState<string | undefined>(undefined);
+
+    const authService = useMemo(() => new AuthService(), []);
+
+    const login = async (loginDto: LoginDto): Promise<Result<LoginResponse>> => {
+        const result = await authService.login(loginDto);
+        if (result.success) {
+            setUserId(result.data?.userId);
+            setUrlName(result.data?.urlName);
+            if (localStorage.getItem('isRememberMe') === 'true') {
+                setRefreshToken(result.data?.refreshToken || '');
+            }
+            else {
+                setRefreshTokenToSession(result.data?.refreshToken || '');
+            }
+            setIsAuthenticated(true);
+        }
+        return result;
+    }
+    
+    const logout = async () => {
+        await authService.logout();
+        setUserId(undefined);
+        setUrlName(undefined);
+        setIsAuthenticated(false);
+        removeRefreshToken();
+        removeRefreshTokenFromSession();
+    }
+
+    const checkAuth = useCallback(async () => {
+        const userService = new UserService();
+        const result: Result<{userId: string | undefined, urlName: string | undefined}> = await userService.GetMe();
+        // delay 200ms
+        await new Promise(resolve => setTimeout(resolve, 200));
+        if (result.success) {
+            setUserId(result.data?.userId);
+            setUrlName(result.data?.urlName);
+        }
+        else {
+            setUserId(undefined);
+            setUrlName(undefined);
+            setIsAuthenticated(false);
+        }
+        setIsLoading(false);
+    }, []);
+
+    const refresh = async () => {
+        checkAuth();
+    }
 
     useEffect(() => {
-        const checkAuth = async () => {
-            const authService = new AuthService();
-            const result = await authService.ping();
-            setIsAuthenticated(result.success);
-            setIsLoading(false);
-        }
+        setIsLoading(true);
         checkAuth();
-    }, []);
-    
-    return <AuthContext.Provider value={{ 
-        isAuthenticated, 
-        isLoading, 
-        setAuthenticated: setIsAuthenticated 
-    }}>{children}</AuthContext.Provider> 
+        setIsAuthenticated(true);
+    }, [checkAuth])
+
+    useEffect(() => {
+        const handleFocus = () => {
+          checkAuth();
+        };
+      
+        window.addEventListener("focus", handleFocus);
+        return () => window.removeEventListener("focus", handleFocus);
+      }, [checkAuth]);
+
+    return ( 
+        <AuthContext.Provider value={{ 
+            isAuthenticated, 
+            isLoading, 
+            login,
+            logout,
+            refresh,
+            userId,
+            urlName}}>
+                {isLoading || isAuthenticated === null ? <LoadingPage/> : children}
+        </AuthContext.Provider> 
+    )
 }
 
 export const useAuth = () => useContext(AuthContext);

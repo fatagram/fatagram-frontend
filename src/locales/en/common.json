@@ -1,0 +1,17 @@
+{
+    "language" : {
+        "en" : "EN English",
+        "vi" : "VN Vietnamese"
+    },
+    "navbar" : {
+        "profileMenu" : {
+            "settings" : "Settings",
+            "logout" : "Logout"
+        }
+    },
+    "notFound" : {
+        "title" : "Page Not Found",
+        "description" : "Oops! The page you're looking for doesn't exist or has been moved.",
+        "backButton" : "Back to Home"
+    }
+}

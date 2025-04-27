@@ -1,5 +1,7 @@
 @import url('./styles/global.css');
 @import url('./styles/themes.css');
+@import url('./styles/animation.css');
+@import url('./styles/fonts.css');
 
 html {
     background-color: var(--bg-color);
