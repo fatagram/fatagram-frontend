@@ -16,7 +16,7 @@ export const mainRoutes: RouteType[] = [
     {
         element: <Layout />,
         children: [
-            { path: "/:userId", element: <ProfilePage /> },
+            { path: "/:userParam", element: <ProfilePage /> },
             { path: "/loading", element: <LoadingPage /> },
             { path: "*", element: <NotFoundPage /> },
             {

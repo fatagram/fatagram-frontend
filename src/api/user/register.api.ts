@@ -1,7 +1,7 @@
 import axios from 'axios';
 import apiUrl from '@/config';
 import RegisterDto from './dto/register.dto';
-import { ApiResponse, Result } from '../common';
+import { handleApiError, Result } from '../common';
 
 const API_URL = `${apiUrl}/api/account/`;
 
@@ -23,21 +23,7 @@ export class RegisterService {
             return { success: true };
         }
         catch (error: any) {
-            const err = error.response.data as ApiResponse<void>;
-            if (error.response) {
-                return {
-                    success: false,
-                    errorCode: err.error?.code || "UNKNOWN_ERROR",
-                    errorCodes: err.error?.codes
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    errorCode: "INTERNAL_SERVER_ERROR",
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
+            return handleApiError(error);
         }
     }
 }

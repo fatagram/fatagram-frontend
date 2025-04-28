@@ -17,6 +17,7 @@ interface EditableFieldProps {
     errorMessage?: string;
     valueType?: string;
     btnChildren?: React.ReactNode;
+    noDataValue?: string;
     onChangeClick?: () => void;
     onSaveClick?: (value: string) => void;
     onCancelClick?: () => void;
@@ -33,6 +34,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
     isEdit,
     isError=false,
     errorMessage,
+    noDataValue,
     onChangeClick,
     onSaveClick,
     onCancelClick}) => {
@@ -56,7 +58,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
                         {isError && <Text size="sm" className="text-red-500 ml-2 h-[5px]">{errorMessage}</Text>}
                     </div>
                      :
-                    <Text size="lg" className={`${valueClassName}`}>{value}</Text>
+                    <Text size="lg" className={`${valueClassName}`}>{value ?? noDataValue }</Text>
                 }
                 {editableMode === "inline" && isEdit ?
                     <div className="animate-fade-in gap-1 flex">

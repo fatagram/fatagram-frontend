@@ -8,6 +8,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ErrorKey } from "@/api/auth/dto/login.dto";
 import { useAuth } from "@/contexts/AuthContext";
+import { url } from "node:inspector";
 
 interface AccountSettingProps {
     className?: string;
@@ -45,7 +46,6 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
 
             // AuthContext refresh user info after update
             refresh?.();
-
         }
         else {
             setIsEditUrlNameFailed(true);
@@ -84,9 +84,10 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
                 { isLoading ? <TextSkeletonLoading size="medium" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
                     <EditableField title={t("settings:account.personalInfo.urlName")}
                         isEmpty={urlName === undefined}
-                        value={urlName === undefined ? t("settings:account.personalInfo.noUrlName") : urlName}
+                        value={urlName}
+                        noDataValue={t("settings:account.personalInfo.noUrlName")}
                         placeholder={t("settings:account.personalInfo.urlNamePlaceholder")}
-                        valueClassName={`${urlName === undefined ? "!opacity-50" : ""}`}
+                        valueClassName={`${urlName === undefined || urlName === null ? "!opacity-50" : ""}`}
                         btnChildren={<Text><i className="fa-solid fa-pen mr-2"></i> {
                             t("settings:account.personalInfo.changeButton")
                         }</Text>}

@@ -5,7 +5,7 @@ const sizeClasses = {
     xs: 'px-2 py-1 text-xs',
     small: 'px-4 py-2 text-sm ',
     medium: 'px-6 py-3 text-base ',
-    large: 'px-8 py-4 text-xl ',
+    large: 'px-8 py-4 text-base ',
     xl: 'px-10 py-5 text-xl ',
     "2xl": 'px-12 py-6 text-2xl ',
     "3xl": 'px-14 py-7 text-3xl ',

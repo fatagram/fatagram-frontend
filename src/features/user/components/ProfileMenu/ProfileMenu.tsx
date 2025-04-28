@@ -77,7 +77,7 @@ const ProfileMenu: React.FC = () => {
             </Button>
             {isOpenMenu && 
                 <div className="absolute top-[120%] right-0 bg-[var(--bg-color)] shadow-xl rounded-xl p-2 z-10
-                    flex flex-col gap-2 min-w-[300px] min-h-[100px]"    
+                    flex flex-col gap-2 min-w-[300px] min-h-[100px] sm:w-auto w-screen sm:h-auto h-screen"    
                             ref={menuRef}>
                     <ul className="flex flex-col gap-2 w-full">
                         <li><Button size="medium" variant="third" 

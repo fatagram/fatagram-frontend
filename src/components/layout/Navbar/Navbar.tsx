@@ -13,7 +13,7 @@ interface NavbarProps {
 
 const Navbar: React.FC<NavbarProps> = ({className}) => {
     const { isAuthenticated } = useAuth();
-    const [showLogin, setShowLogin] = React.useState<boolean>(false);
+    const [showLogin, setShowLogin] = React.useState<boolean>(true);
     const [showRegister, setShowRegister] = React.useState<boolean>(false);
     
     const navigate = useNavigate();

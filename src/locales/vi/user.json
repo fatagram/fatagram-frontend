@@ -37,6 +37,14 @@
         "addButton": "Thêm",
         "changeButton": "Thay đổi",
         "messageButton": "Nhắn tin",
-        "addFriendButton": "Thêm bạn bè"
+        "addFriendButton": "Thêm bạn bè",
+        "acceptButton": "Chấp nhận",
+        "cancelRequestButton": "Hủy lời mời",
+        "friendButton": "Bạn bè",
+        "respondRequestButton": "Phản hồi",
+        "declineButton": "Từ chối",
+        "unfriendButton": "Hủy kết bạn",
+        "friendsCount" : "người bạn",
+        "noFriendsCount" : "Không có bạn bè"
     }
 }

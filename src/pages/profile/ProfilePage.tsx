@@ -3,17 +3,37 @@ import "./ProfilePage.style.css";
 import ProfileHeader from "@/features/user/components/ProfileHeader/ProfileHeader";
 import NotFoundPage from "../not_found/NotFoundPage";
 import { useParams } from "react-router-dom";
-import { useCheckUserExist } from "@/hooks/useCheckUserExist";
 import { useTranslation } from "react-i18next";
+import { UserService } from "@/api/user/user.api";
 
 const ProfilePage: React.FC = () => {
-    const { userId } = useParams<{ userId: string }>();
-    const [userExist ] = useCheckUserExist(userId ? userId : "");
+    const { userParam } = useParams<{ userParam: string }>();
+    const [userExist, setUserExist] = React.useState<boolean>(true);
+    const [userId, setUserId] = React.useState<string>("");
     const { t } = useTranslation() as { t: (key: string) => string };
 
     React.useEffect(() => {
         document.title = "Fatagram"
-    }, [t])
+    }, [t]);
+
+    React.useEffect(() => {
+        const userService = new UserService();
+        const fetchUserId = async () => {
+            if (!userParam) {
+                setUserExist(false);
+                return;
+            }
+            const response = await userService.GetProfile(userParam, "id");
+            if (response.success) {
+                setUserId(response.data.infos.id);
+                setUserExist(true);
+            }
+            else {
+                setUserExist(false);
+            }
+        }
+        fetchUserId();
+    }, [userParam]);
 
     if (!userExist) return <NotFoundPage/>
 

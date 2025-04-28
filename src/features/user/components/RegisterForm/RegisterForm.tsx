@@ -60,8 +60,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   const btnBackStepRef = React.useRef<HTMLLabelElement>(null);
   const firstStepRefs = useRef<(HTMLInputElement | null)[]>([]); // Refs for the first step inputs
   const secondStepRefs = useRef<(HTMLInputElement | null)[]>([]); // Refs for the second step inputs
-  const [currentIndex, setCurrentIndex] = useState<number>(0); 
-  const setRef = (stepRefs: React.RefObject<(HTMLInputElement | null)[]> ,el: HTMLInputElement | null, index: number) => {
+  const [currentIndex, setCurrentIndex] = useState<number>(0);
+  const setRef = (stepRefs: React.RefObject<(HTMLInputElement | null)[]>, el: HTMLInputElement | null, index: number) => {
     stepRefs.current[index] = el;
   }
 
@@ -100,7 +100,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     EMAIL_NOT_CORRECT_FORMAT: setEmailError,
     FIRSTNAME_NOT_CORRECT_FORMAT: setFirstNameError,
     LASTNAME_NOT_CORRECT_FORMAT: setLastNameError,
-    PHONE_NOT_CORRECT_FORMAT: setPhoneError,
+    PHONE_NUMBER_NOT_CORRECT_FORMAT: setPhoneError,
     UNKNOWN_ERROR: setUnknownError,
     INTERNAL_SERVER_ERROR: setUnknownError,
     REGISTER_USERNAME_EXISTED: setUsernameError,
@@ -163,8 +163,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         var code = result.errorCode as ErrorKey;
         errorMap[code]?.(t(ErrorCodes[code]));
       }
-      if (lastNameError || firstNameError || emailError) 
-      {
+      if (lastNameError || firstNameError || emailError || phoneError) {
         setIsFirstStep(true);
       }
     }
@@ -205,7 +204,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           const index = currentIndex + 1 < firstStepRefs.current.length ? currentIndex + 1 : currentIndex
           firstStepRefs.current[index]?.focus();
           setCurrentIndex(index);
-        } 
+        }
         else {
           const index = currentIndex + 1 < secondStepRefs.current.length ? currentIndex + 1 : currentIndex
           secondStepRefs.current[index]?.focus();
@@ -233,10 +232,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       {isShowLogo && <Logo />}
 
       <Text size="xl-2"
-            weight="extrabold"
-            className="uppercase sm:text-[45px] text-[45px] text-[var(--third-single-color)] select-none text-center"
-          >
-            {t("user:register.title")}
+        weight="extrabold"
+        className="uppercase sm:text-[45px] text-[45px] text-[var(--third-single-color)] select-none text-center"
+      >
+        {t("user:register.title")}
       </Text>
 
       {isFirstStep ? (
@@ -278,7 +277,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
           <div className="w-full">
             <Textbox value={formData.email}
-                ref={(el) => setRef(firstStepRefs, el, 2)}
+              ref={(el) => setRef(firstStepRefs, el, 2)}
               className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
               placeholder={t("user:register.email")}
               onChange={(e) => updateFormData("email", e.target.value)}
@@ -319,18 +318,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           <Button ref={btnNextStrepRef}
             type="button"
             size="medium"
-            className={`w-full sm:py-[5px] py-[7px]`}
+            className={`w-full`}
             onClick={handleNextStep}
           >
             <Text>{t("user:register.nextButton")}</Text>
           </Button>
-          
+
         </div>
       ) : (
         <div className="animate-right-to-left relative flex flex-col items-center sm:gap-[20px] gap-[15px] w-full">
           <div className="w-full">
             <Textbox value={formData.username}
-                ref={(el) => setRef(secondStepRefs, el, 0)}
+              ref={(el) => setRef(secondStepRefs, el, 0)}
               className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
               placeholder={t("user:register.username")}
               onChange={(e) => updateFormData("username", e.target.value)}
@@ -346,7 +345,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
           <div className="w-full">
             <PasswordBox value={formData.password}
-                ref={(el) => setRef(secondStepRefs, el, 1)}
+              ref={(el) => setRef(secondStepRefs, el, 1)}
               className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
               placeholder={t("user:register.password")}
               onChange={(e) => updateFormData("password", e.target.value)}
@@ -362,7 +361,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           </div>
           <div className="w-full">
             <PasswordBox value={formData.confirmPassword}
-                ref={(el) => setRef(secondStepRefs, el, 2)}
+              ref={(el) => setRef(secondStepRefs, el, 2)}
               className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
               placeholder={t("user:register.confirmPassword")}
               onChange={(e) => updateFormData("confirmPassword", e.target.value)}
@@ -377,43 +376,42 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             </Text>
           </div>
           <Checkbox
-            className={`
-              text-[15px] text-[var(--third-single-color)] gap-[8px]
-          `}
+            className="text-[15px] text-[var(--third-single-color)] gap-[8px]"
             label={
-              <div className="flex items-center">
-                {t("user:register.agree")}{" "}
-                <Link className={"sm:text-[15px] mx-1"} to="/terms">
+              <div className="flex items-center flex-wrap">
+                {t("user:register.agree")}&nbsp;
+                <Link className="sm:text-[15px]" to="/terms">
                   {t("user:register.termsOfService")}
-                </Link>{" "}
-                {t("user:register.and")}{" "}
-                <Link className={"sm:text-[15px] ml-1"} to="/policy">
+                </Link>&nbsp;
+                {t("user:register.and")}&nbsp;
+                <Link className="sm:text-[15px]" to="/policy">
                   {t("user:register.privacyPolicy")}
                 </Link>
                 .
               </div>
             }
           />
+
           <Button ref={btnRegisterRef}
             type="button"
             size="medium"
-            className={`w-full sm:py-[5px] py-[7px]`}
+            className={`w-full`}
             onClick={handleRegister}
           >
             <Text>{t("user:register.registerButton")}</Text>
           </Button>
           <Text ref={btnBackStepRef}
-              className="flex gap-1 items-center text-[var(--second-single-color)] hover:text-[var(--main-single-color)]"
-              onClick={handleNextStep}>
-              <i className="fa-solid fa-arrow-left"></i>
+            className="flex gap-1 items-center text-[var(--second-single-color)] hover:text-[var(--main-single-color)]"
+            onClick={handleNextStep}>
+            <i className="fa-solid fa-arrow-left"></i>
             {t("user:register.gobackButton")}
           </Text>
         </div>
       )}
       <div className="relative flex justify-center">
-            <Link className={"sm:text-[15px] font-bold"} to="/login">
-              {t("user:register.loginButton")}
-            </Link>
+        <Link className={"sm:text-[15px] font-bold"} to="/login">
+          {t("user:register.loginButton")}
+        </Link>
       </div>
 
       {isShowClose && (

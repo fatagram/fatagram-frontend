@@ -1,6 +1,6 @@
 import { apiClient } from '@/api/setupInterceptor';
 import LoginDto from './dto/login.dto';
-import { ApiResponse, Result } from '../common';
+import { ApiResponse, handleApiError, Result } from '../common';
 
 export interface LoginResponse {
     refreshToken: string;
@@ -24,20 +24,7 @@ export class AuthService {
             return { success: true, data: response.data };
         }
         catch (error: any) {
-            if (error.response) {
-                const err = error.response.data as ApiResponse<LoginResponse>;
-                return {
-                    success: false,
-                    errorCode: err.error?.code || "UNKNOWN_ERROR",
-                    errorCodes: err.error?.codes
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    errorCode: "INTERNAL_SERVER_ERROR",
-                }
-            }
+            return handleApiError(error);
         }
     }
 
@@ -47,12 +34,7 @@ export class AuthService {
             await apiClient.post(`/api/auth/logout`, { refreshToken: refreshToken });
         }
         catch (error: any) {
-            if (error.response) {
-                console.log(error.response.data);
-            }
-            else {
-                console.log("INTERNAL_SERVER_ERROR");
-            }
+            handleApiError(error);
         }
     }
 
@@ -66,18 +48,7 @@ export class AuthService {
             return { success: true };
         }
         catch (error: any) {
-            if (error.response) {
-                return {
-                    success: false,
-                    errorCodes: error.response.data?.error?.code || []
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
+            return handleApiError(error);
         }
     }
 }

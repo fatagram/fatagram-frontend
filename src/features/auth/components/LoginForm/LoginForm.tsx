@@ -176,7 +176,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
                 }
             </div>
             <Text className={`${unknownError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{unknownError}</Text>
-            <Button type="button" className={`sm:text-[18px] text-[20px] w-full sm:py-[7px] py-[7px] font-montserrat`}
+            <Button type="button" className={`w-full font-montserrat`}
                 onClick={handleLogin} ref={btnRef}
                  size="medium">
                 {t("auth:login.loginButton")}

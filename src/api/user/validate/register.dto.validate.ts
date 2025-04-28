@@ -18,8 +18,8 @@ export class RegisterValidator {
       if (!dto.lastName || !/^[\p{L}]+$/u.test(dto.lastName)) {
         errors.push(ErrorCodes.LASTNAME_NOT_CORRECT_FORMAT);
       }  
-      if (dto.phone && !/^[0-9]{10,}$/.test(dto.phone)) {
-        errors.push(ErrorCodes.PHONE_NOT_CORRECT_FORMAT);
+      if (dto.phone && !/^0[0-9]{10,}$/.test(dto.phone)) {
+        errors.push(ErrorCodes.PHONE_NUMBER_NOT_CORRECT_FORMAT);
       }  
       return errors;
     }

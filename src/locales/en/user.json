@@ -37,6 +37,14 @@
         "addButton": "Add",
         "changeButton": "Change",
         "messageButton": "Message",
-        "addFriendButton": "Add friend"
+        "addFriendButton": "Add friend",
+        "acceptButton": "Accept",
+        "cancelRequestButton": "Cancel request",
+        "respondRequestButton": "Respond",
+        "friendButton": "Friend",
+        "declineButton": "Decline",
+        "unfriendButton": "Unfriend",
+        "friendsCount" : "friends",
+        "noFriendsCount" : "No friends"
     }
 }

@@ -11,7 +11,6 @@ const App: React.FC = () => {
     document.title = "Fatagram";
   }, []);
 
-
   return (
     <LanguageProvider>
       <Router>

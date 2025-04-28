@@ -15,7 +15,7 @@ export const ErrorCodes: Record<string, string> = {
     EMAIL_NOT_CORRECT_FORMAT: "user:register.errorMessages.emailNotCorrectFormat",
     FIRSTNAME_NOT_CORRECT_FORMAT: "user:register.errorMessages.firstnameNotCorrectFormat",
     LASTNAME_NOT_CORRECT_FORMAT: "user:register.errorMessages.lastnameNotCorrectFormat",
-    PHONE_NOT_CORRECT_FORMAT: "user:register.errorMessages.phoneNotCorrectFormat",
+    PHONE_NUMBER_NOT_CORRECT_FORMAT: "user:register.errorMessages.phoneNotCorrectFormat",
     UNKNOWN_ERROR: "user:register.errorMessages.unknownError",
     REGISTER_USERNAME_EXISTED: "user:register.errorMessages.usernameExisted",
     REGISTER_FAILED: "user:register.errorMessages.registerFailed",

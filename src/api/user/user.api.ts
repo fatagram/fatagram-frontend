@@ -1,6 +1,6 @@
 import { apiClient, apiClientFormData } from "@/api/setupInterceptor";
 import ChangeNameDto from "./dto/change_name.dto";
-import { ApiResponse, Result } from "../common";
+import { ApiResponse, handleApiError, Result } from "../common";
 import ChangeUrlNameDto from "./dto/change_url_name.dto";
 
 export class UserService {
@@ -11,20 +11,7 @@ export class UserService {
         }
         catch (error: any)
         {
-            if (error.response) {
-                const err = error.response.data as ApiResponse<any>;
-                return {
-                    success: false,
-                    errorCode: err.error?.code || "UNKNOWN_ERROR",
-                    errorCodes: err.error?.codes
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    errorCode: "INTERNAL_SERVER_ERROR"
-                }
-            }
+            return handleApiError(error);
         }
     }
 
@@ -36,20 +23,7 @@ export class UserService {
         }
         catch (error: any)
         {
-            if (error.response) {
-                const err = error.response.data as ApiResponse<any>;
-                return {
-                    success: false,
-                    errorCode: error.error?.code || "UNKNOWN_ERROR",
-                    errorCodes: err.error?.codes
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
+            return handleApiError(error);
         }
     }
 
@@ -61,20 +35,91 @@ export class UserService {
         }
         catch (error: any)
         {
-            if (error.response) {
-                const err = error.response.data as ApiResponse<any>;
-                return {
-                    success: false,
-                    errorCode: error.error?.code || "UNKNOWN_ERROR",
-                    errorCodes: err.error?.codes
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
+            return handleApiError(error);
+        }
+    }
+    
+    async GetFriendshipStatus(targetId: string): Promise<Result<{status: string}>> {
+        try {
+            const res = await apiClient.get(`api/user/friend/status/${targetId}`);
+            const response = res.data as ApiResponse<{status: string}>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            return handleApiError(error);
+        }
+    } 
+
+    async SendAddFriendRequest(receiverId: string): Promise<Result<any>> {
+        try {
+            const res = await apiClient.post(`api/user/friend/add/${receiverId}`);
+            const response = res.data as ApiResponse<any>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            return handleApiError(error);
+        }
+    }
+
+    async CancelAddFriendRequest(senderId: string): Promise<Result<any>> {
+        try {
+            const res = await apiClient.delete(`api/user/friend/cancel/${senderId}`);
+            const response = res.data as ApiResponse<any>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            return handleApiError(error);
+        }
+    }
+
+    async AcceptAddFriendRequest(senderId: string): Promise<Result<any>> {
+        try {
+            const res = await apiClient.post(`api/user/friend/accept/${senderId}`);
+            const response = res.data as ApiResponse<any>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            return handleApiError(error);
+        }
+    }
+
+    async DeclineAddFriendRequest(requesterId: string): Promise<Result<any>> {
+        try {
+            const res = await apiClient.delete(`api/user/friend/decline/${requesterId}`);
+            const response = res.data as ApiResponse<any>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            return handleApiError(error);
+        }
+    }
+
+    async Unfriend(friendId: string): Promise<Result<any>> {
+        try {
+            const res = await apiClient.delete(`api/user/friend/unfriend/${friendId}`);
+            const response = res.data as ApiResponse<any>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            return handleApiError(error);
+        }
+    }
+
+    async GetNumberOfFriends(targetId: string): Promise<Result<{numberOfFriends: number}>> {
+        try {
+            const res = await apiClient.get(`api/user/friend/count/${targetId}`);
+            const response = res.data as ApiResponse<{numberOfFriends: number}>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            return handleApiError(error);
         }
     }
 
@@ -89,21 +134,7 @@ export class UserService {
             return { success: true, data: data.data }
         }
         catch (error: any) {
-            if (error.response) {
-
-                return {
-                    success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || []
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    statusCode: 500,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
+            return handleApiError(error);
         }
     }
 
@@ -117,21 +148,7 @@ export class UserService {
             return { success: true, data: data.data }
         }
         catch (error: any) {
-            console.log(error.response)
-            if (error.response) {
-                return {
-                    success: false,
-                    statusCode: error.response.status,
-                    errorCodes: error.response.data.error?.code || []
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    statusCode: 500,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
+            return handleApiError(error);
         }
     }
 
@@ -166,23 +183,11 @@ export class UserService {
             return { success: true, data: response.data }
         }
         catch (error: any) {
-            if (error.response) {
-                const err = error.response.data as ApiResponse<any>;
-                return {
-                    success: false,
-                    errorCode: err.error?.code || "UNKNOWN_ERROR",
-                    errorCodes: err.error?.codes || []
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
+            return handleApiError(error);
         }
     }
 
+    // Update user's name
     async UpdateName(changeNameDto : ChangeNameDto) : Promise<Result<ChangeNameDto>>
     {
         try {
@@ -191,20 +196,7 @@ export class UserService {
             return { success: true, data: response.data } 
         }
         catch (error: any) {
-            if (error.response) {
-                const err = error.response.data as ApiResponse<any>;
-                return {
-                    success: false,
-                    errorCode: err.error?.code || "UNKNOWN_ERROR",
-                    errorCodes: err.error?.codes || []
-                }
-            }
-            else {
-                return {
-                    success: false,
-                    errorCodes: ["INTERNAL_SERVER_ERROR"]
-                }
-            }
+            return handleApiError(error);
         }
     }
 }
