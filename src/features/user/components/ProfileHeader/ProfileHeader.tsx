@@ -115,12 +115,20 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
         if (result.success) {
             setBackground(result.data);
         }
+        else if (result.errorCode === "LARGE_FILE_ERROR")
+        {
+            alert("LARGE SIZE")
+        }
     }
 
     const handleSelectAvatar = async (file: File) => {
         const result = await userService.UploadAvatar(file)
         if (result.success) {
             setAvatar(result.data);
+        }
+        else if (result.errorCode === "LARGE_FILE_ERROR")
+        {
+            alert("LARGE SIZE")
         }
     }
 

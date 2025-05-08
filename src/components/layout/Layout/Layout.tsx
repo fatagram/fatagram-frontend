@@ -6,7 +6,7 @@ const Layout: React.FC = () => {
     return (
         <div className="relative w-screen h-screen flex flex-col bg-[var(--bg-color)]">
             <Navbar className="fixed z-40 w-full"/>
-            <main className="relative z-0 flex-1">
+            <main className="relative flex-1">
                 <Outlet />
             </main>
         </div>

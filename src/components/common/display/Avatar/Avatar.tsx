@@ -82,9 +82,7 @@ const Avatar: React.FC<AvatarProps> = ({
                     onError={() => setImgSrc(emptyAvatar)}
                 />
             </div>
-            
         </div>
-        
     )
 }
 

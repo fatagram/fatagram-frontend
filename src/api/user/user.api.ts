@@ -123,7 +123,12 @@ export class UserService {
         }
     }
 
-    async UploadAvatar(file: File): Promise<{success: boolean, data?: any, statusCode?: number, errorCodes?: string[]}> { 
+    async UploadAvatar(file: File): Promise<{
+        success: boolean, 
+        data?: any, 
+        statusCode?: number, 
+        errorCode?: string,
+        errorCodes?: string[]}> { 
         try {
             
             const formData = new FormData();
@@ -138,7 +143,12 @@ export class UserService {
         }
     }
 
-    async UploadBackground(file: File): Promise<{success: boolean, data?: any, statusCode?: number, errorCodes?: string[]}> { 
+    async UploadBackground(file: File): Promise<{
+        success: boolean,
+        data?: any,
+        statusCode?: number, 
+        errorCode?: string,
+        errorCodes?: string[]}> { 
         try {
             const formData = new FormData();
             formData.append('file', file);

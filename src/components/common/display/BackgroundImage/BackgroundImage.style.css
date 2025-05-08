@@ -7,7 +7,3 @@
   border-radius: 0.75rem;
   background-image: var(--bg-image);
 }
-
-.user-bg-image[data-bg-image] {
-  background-image: var(--bg-image);
-}

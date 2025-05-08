@@ -1,6 +1,6 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import apiUrl from '../config';
-import { getRefreshToken, getRefreshTokenFromSession } from '../utils/token';
+import { getRefreshToken, getRefreshTokenFromSession } from '@/utils/token';
 
 // Instance of axios for fetching data with JSON content type
 const apiClient: AxiosInstance = axios.create(
@@ -55,7 +55,6 @@ apiClient.interceptors.response.use((response: AxiosResponse) => response,
 // Error Authorization
 apiClientFormData.interceptors.response.use((response: AxiosResponse) => response, 
     async (error) => {
-
         if (error.response?.status === 401 || error.response?.status === 403) {
             try {
                 // Refresh token
@@ -71,6 +70,12 @@ apiClientFormData.interceptors.response.use((response: AxiosResponse) => respons
             catch (error) {
                 // Handle error if needed
             }
+        }
+        else if (error.response?.status === 413) {
+            // Custom error
+            const err = new Error("File size is too large. Please upload a smaller file.");
+            err.name = "LARGE_FILE_ERROR";
+            return Promise.reject(err);
         }
         return Promise.reject(error);
     });

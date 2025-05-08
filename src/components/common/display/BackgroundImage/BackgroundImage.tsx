@@ -24,7 +24,6 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
         <div className={`user-bg-image
                         ${src ?? "h-[200px] !bg-[var(--bg-color-third)]"}
                         ${className} `} 
-            data-bg-image={src}
             aria-label={alt}>
                 {children}
         </div>

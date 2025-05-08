@@ -9,6 +9,7 @@ import React, { createContext, useContext, useState, useCallback, useMemo, useEf
 interface AuthContextType {
     isAuthenticated: boolean | null;
     isLoading: boolean;
+    setIsLoading?: () => {};
     login: (loginDto: LoginDto) => Promise<Result<LoginResponse>>;
     logout?: () => Promise<void>;
     refresh?: () => Promise<void>;
@@ -18,7 +19,7 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType>({ 
     isAuthenticated: null, 
-    isLoading: true, 
+    isLoading: true,
     login: () => Promise.resolve({ success: false, data: undefined }),
     logout: () => Promise.resolve(),
     refresh: () => Promise.resolve(),

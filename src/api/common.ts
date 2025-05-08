@@ -18,8 +18,14 @@ export interface Result<T> {
 }
 
 export const handleApiError = (error: any): Result<any> => {
+    if (error.name === "LARGE_FILE_ERROR")
+    {
+      return {
+        success: false,
+        errorCode: "LARGE_FILE_ERROR"
+      }  
+    }
     if (error.response) {
-        console.log(error.response.data);
         const err = error.response.data as ApiResponse<any>;
         return {
             success: false,
