@@ -8,7 +8,6 @@ import LoadingPage from "../loading/LoadingPage";
 
 const ProfilePage: React.FC = () => {
     const { userParam } = useParams<{ userParam: string }>();
-
     const { userId, userExist, loading } = useUserId(userParam || "");
 
     React.useEffect(() => {
@@ -16,7 +15,7 @@ const ProfilePage: React.FC = () => {
     }, []);
     
     if (loading) return <LoadingPage/>
-    if (!userExist || !userId) return <NotFoundPage />;
+    if (!userExist || !userId) return <NotFoundPage/>;
 
     return (
         <div className="relative justify-start items-center flex flex-col pt-2 h-screen bg-[var(--bg-color)]">

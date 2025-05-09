@@ -45,6 +45,9 @@
         "declineButton": "Từ chối",
         "unfriendButton": "Hủy kết bạn",
         "friendsCount" : "người bạn",
-        "noFriendsCount" : "Không có bạn bè"
+        "noFriendsCount" : "Không có bạn bè",
+        "oversizeErrorTitle": "Tệp quá lớn",
+        "oversizeErrorMessage": "Kích thước tệp vượt quá giới hạn 1MB",
+        "oversizeErrorButton": "OK"
     }
 }

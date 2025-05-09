@@ -4,6 +4,7 @@ import "./styles/global.css";
 import { BrowserRouter as Router } from "react-router-dom";
 import AppRoutes from "./routes";
 import { LanguageProvider } from "./contexts/LanguageContext";
+import { DialogProvider } from "./contexts/DialogContext";
 
 const App: React.FC = () => {
 
@@ -12,11 +13,14 @@ const App: React.FC = () => {
   }, []);
 
   return (
-    <LanguageProvider>
-      <Router>
-        <AppRoutes />
-      </Router>
-    </LanguageProvider>
+    <DialogProvider>
+      <LanguageProvider>
+        <Router>
+          <AppRoutes />
+        </Router>
+      </LanguageProvider>
+    </DialogProvider>
+
   );
 };
 

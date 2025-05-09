@@ -1,0 +1,59 @@
+import React from "react";
+import Button from "../../ui/Button";
+import Text from "../../ui/Text";
+
+interface ButtonProps {
+    text: string;
+    onClick: () => void;
+}
+
+export interface DialogBoxProps{
+    title?: string;
+    content?: React.ReactNode;
+    primaryButton?: ButtonProps,
+    secondaryButton?: ButtonProps,
+    tertiaryButton?: ButtonProps,
+    onClose?: () => void;
+}
+
+const DialogBox: React.FC<DialogBoxProps> = ({
+    title,
+    content,
+    primaryButton,
+    secondaryButton,
+    tertiaryButton,
+    onClose
+}) => {
+
+    return (
+        <div className="relative flex flex-col gap-4 bg-[var(--bg-color-secondary)] 
+                        rounded-lg shadow-lg p-6 max-w-[500px] min-w-[300px]">
+            {title && <Text weight="bold" size="lg-2">{title}</Text>}
+            {content && <div>{content}</div>}
+            <div className="flex justify-end space-x-2">
+                {tertiaryButton && (
+                    <Button onClick={tertiaryButton.onClick} variant="secondary" size="small">
+                        {tertiaryButton.text}
+                    </Button>
+                )}
+                {secondaryButton && (
+                    <Button onClick={secondaryButton.onClick} variant="secondary" size="small">
+                        {secondaryButton.text}
+                    </Button>
+                )}
+                {primaryButton && (
+                    <Button onClick={primaryButton.onClick} variant="primary" size="small">
+                        {primaryButton.text}
+                    </Button>
+                )}
+            </div>
+            <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] 
+                                cursor-pointer`}
+                onClick={onClose}>
+                    <i className="fa-solid fa-xmark"></i>
+            </Text>
+        </div>
+    )
+}
+
+export default DialogBox;

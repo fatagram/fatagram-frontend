@@ -45,6 +45,9 @@
         "declineButton": "Decline",
         "unfriendButton": "Unfriend",
         "friendsCount" : "friends",
-        "noFriendsCount" : "No friends"
+        "noFriendsCount" : "No friends",
+        "oversizeErrorTitle": "File too large",
+        "oversizeErrorMessage": "File size exceeds the limit of 1MB",
+        "oversizeErrorButton": "OK"
     }
 }
