@@ -53,7 +53,7 @@ const ProfileMenu: React.FC = () => {
 
     // Navigation to settings page
     const handleSettings = () => {
-        navigate('/settings/account');
+        navigate('/settings');
         setIsOpenMenu(false);
     }
     
@@ -76,7 +76,8 @@ const ProfileMenu: React.FC = () => {
                 <Avatar src={avatar} alt="Profile" size="mini_4"/>
             </Button>
             {isOpenMenu && 
-                <div className="absolute top-[120%] right-0 bg-[var(--bg-color)] shadow-xl rounded-xl p-2 z-10
+                <div className="absolute top-[120%] right-0 bg-[var(--bg-color)] shadow-xl rounded-xl 
+                    sm:p-2 p-6 z-10
                     flex flex-col gap-2 min-w-[300px] min-h-[100px] sm:w-auto w-screen sm:h-auto h-screen"    
                             ref={menuRef}>
                     <ul className="flex flex-col gap-2 w-full">

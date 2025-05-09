@@ -10,10 +10,6 @@ const ProfilePage: React.FC = () => {
     const { userParam } = useParams<{ userParam: string }>();
     const { userId, userExist, loading } = useUserId(userParam || "");
 
-    React.useEffect(() => {
-        document.title = "Fatagram"
-    }, []);
-    
     if (loading) return <LoadingPage/>
     if (!userExist || !userId) return <NotFoundPage/>;
 

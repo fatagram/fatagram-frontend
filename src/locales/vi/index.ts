@@ -3,6 +3,8 @@ import common from "./common.json";
 import home from "./home.json";
 import settings from "./settings.json";
 import user from "./user.json";
+import friends from "./friends.json";
+import times from "./times.json";
 
 const vi = {
     auth,
@@ -10,6 +12,8 @@ const vi = {
     home,
     settings,
     user,
+    friends,
+    times
 };
 
 export default vi;

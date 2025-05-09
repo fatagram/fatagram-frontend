@@ -1,0 +1,34 @@
+{
+    "time": {
+        "second": {
+        "one": "{{count}} second",
+        "other": "{{count}} seconds"
+        },
+        "minute": {
+        "one": "{{count}} minute",
+        "other": "{{count}} minutes"
+        },
+        "hour": {
+        "one": "{{count}} hour",
+        "other": "{{count}} hours"
+        },
+        "day": {
+        "one": "{{count}} day",
+        "other": "{{count}} days"
+        },
+        "week": {
+        "one": "{{count}} week",
+        "other": "{{count}} weeks"
+        },
+        "month": {
+        "one": "{{count}} month",
+        "other": "{{count}} months"
+        },
+        "year": {
+        "one": "{{count}} year",
+        "other": "{{count}} years"
+        }
+    },
+    "ago": "ago",
+    "just_now": "Just now"
+}

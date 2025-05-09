@@ -1,17 +1,17 @@
-import React, { useEffect } from "react";
-import { useTranslation } from "react-i18next";
+import React, { useLayoutEffect } from "react";
 import withAuth from "@/hocs/auth/withAuth";
+import { useTranslation } from "react-i18next";
 
 const HomePage: React.FC = () => {
 
     const { t } = useTranslation() as { t: (key: string) => string };
 
-    useEffect(() => {
+    useLayoutEffect(() => {
         document.title = t("home:title")
-    });
-        
+    }, [t])
+
     return (
-        <div className="h-screen flex justify-center items-center bg-[var(--bg-color)]">
+        <div className="flex justify-center items-center">
             <h1>Home Page</h1>
         </div>
     )

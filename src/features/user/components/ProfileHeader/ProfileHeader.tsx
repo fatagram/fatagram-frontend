@@ -45,6 +45,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
     }
     , []);
 
+    React.useEffect(() => {
+        document.title = fullName
+    }, [fullName]);
+
     // Fetch user profile
     React.useEffect(() => {
         const fetchProfile = async () => {

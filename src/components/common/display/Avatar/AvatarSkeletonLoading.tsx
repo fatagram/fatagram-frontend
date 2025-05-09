@@ -36,19 +36,14 @@ const sizeClasses = {
 type Size = keyof typeof sizeClasses;
 
 interface AvatarSkeletonLoadingProps {
-    onChange?: (file: File) => void;
     alt: string;
     size?: Size;
-    isCanEdit?: boolean;
     className?: string;
 }
 
 
 const AvatarSkeletonLoading: React.FC<AvatarSkeletonLoadingProps> = ({
-    onChange = () => {},
-    alt,
     size='medium',
-    isCanEdit=false,
     className
 }) => {
     const sizeClass = sizeClasses[size];

@@ -4,7 +4,7 @@ import ThemeSettings from "../../../../features/settings/components/general/Them
 const ThemeSettingPage: React.FC = () => {
     return (
         <div className="flex justify-center w-full">
-            <ThemeSettings className="w-full"></ThemeSettings>
+            <ThemeSettings className="w-full" />
         </div>
     )
 }

@@ -33,13 +33,13 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
 
     // Close change name form
     const handleClose = () => {
-        navigate("/settings/account");
+        navigate("/settings");
     };
 
     const handleSubmit = async () => {
         const response = await userService.UpdateName({ firstName, lastName });
         if (response.success) {
-            navigate("/settings/account", { state: { reload: true } });
+            navigate("/settings", { state: { reload: true } });
         }
         else {
             const errorCode = response?.errorCodes?.[0] || response.errorCode;
@@ -108,8 +108,8 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                     </Text>
                 </Text>
                 <Button disabled={firstName === oldFirstName && lastName === oldLastName} size="medium" className="mt-2 !text-[20px]"
-                    onClick={handleSubmit}
-                >{t("settings:account.personalInfo.changeNameForm.acceptButton")}</Button>
+                    onClick={handleSubmit}>
+                    {t("settings:account.personalInfo.changeNameForm.acceptButton")}</Button>
                 <Text size="lg-2" className={`absolute top-5 right-8 hover:text-[var(--main-single-color)] cursor-pointer`}
                     onClick={handleClose}><i className="fa-solid fa-xmark"></i></Text>
             </div>

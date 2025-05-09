@@ -11,6 +11,7 @@ import LoginPage from "@/pages/login/LoginPage";
 import NoNavbarLayout from "@/components/layout/Layout/NoNavbarLayout";
 import ProtectedRoute from "../components/protected_route";
 import PublicRoute from "../components/public_route";
+import { friendsRoutes } from "./friends_routes";
 
 export const mainRoutes: RouteType[] = [
     {
@@ -27,6 +28,7 @@ export const mainRoutes: RouteType[] = [
                     </ProtectedRoute>
                 ),
             },
+            friendsRoutes,
             settingRoutes,
         ],
     },

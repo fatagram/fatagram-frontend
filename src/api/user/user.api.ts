@@ -2,6 +2,7 @@ import { apiClient, apiClientFormData } from "@/api/setupInterceptor";
 import ChangeNameDto from "./dto/change_name.dto";
 import { ApiResponse, handleApiError, Result } from "../common";
 import ChangeUrlNameDto from "./dto/change_url_name.dto";
+import { TimeUnit } from "@/utils/time_unit";
 
 export class UserService {
     async CheckUserExistAsync(key: string): Promise<Result<any>> {
@@ -115,6 +116,37 @@ export class UserService {
         try {
             const res = await apiClient.get(`api/user/friend/count/${targetId}`);
             const response = res.data as ApiResponse<{numberOfFriends: number}>;
+            return { success: true, data: response.data };
+        }
+        catch (error: any)
+        {
+            return handleApiError(error);
+        }
+    }
+
+    async GetFriendRequests(page: number, pageSize: number)
+        : Promise<Result<{friendRequests: {
+            senderId: string,
+            senderUrlName: string,
+            senderAvatar: string,
+            senderName: string,
+            createdAt: {
+                value: number,
+                unit: TimeUnit
+            },
+        }[], total: number}>> {
+        try {
+            const res = await apiClient.get(`api/user/friend/requests?page=${page}&pageSize=${pageSize}`);
+            const response = res.data as ApiResponse<{friendRequests: {
+                senderId: string,
+                senderUrlName: string,
+                senderAvatar: string,
+                senderName: string,
+                createdAt: {
+                    value: number,
+                    unit: TimeUnit
+                }
+            }[], total: number}>;
             return { success: true, data: response.data };
         }
         catch (error: any)

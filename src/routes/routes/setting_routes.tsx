@@ -15,7 +15,7 @@ export const settingRoutes : RouteType = {
     ),
     children: [
         {   
-            path: "account", 
+            path: "", 
             element: <AccountSettingPage />,
             children: [
                 { path: "name", element: <ChangeNameForm /> },

@@ -2,33 +2,39 @@ import React, { useEffect } from "react";
 import emptyAvatar from "@/assets/images/empty_avatar.png";
 import SelectFile from "@/components/common/utils/SelectFile";
 
-const sizeClasses = {
+export const sizeClasses = {
     // Mini sizes
-    mini_1: "w-[16px] h-[16px]",
-    mini_2: "w-[24px] h-[24px]",
-    mini_3: "w-[32px] h-[32px]",
-    mini_4: "w-[40px] h-[40px]",
+    mini_1: "w-[16px]",
+    mini_2: "w-[24px]",
+    mini_3: "w-[32px]",
+    mini_4: "w-[40px]",
 
     // Small sizes
-    small_1: "w-[48px] h-[48px]",
-    small_2: "w-[56px] h-[56px]",
-    small_3: "w-[64px] h-[64px]",
-    small: "w-[80px] h-[80px]",
+    small_1: "w-[48px]",
+    small_2: "w-[56px]",
+    small_3: "w-[64px]",
+    small: "w-[80px]",
 
     // Medium sizes
-    medium_1: "w-[96px] h-[96px]",
-    medium_2: "w-[112px] h-[112px]",
-    medium: "w-[128px] h-[128px]",
+    medium_1: "w-[96px]",
+    medium_2: "w-[112px] ",
+    medium: "w-[128px]",
 
     // Large sizes
-    large_1: "w-[160px] h-[160px]",
-    large_2: "w-[192px] h-[192px]",
-    large: "w-[224px] h-[224px]",
+    large_1: "w-[160px]",
+    large_2: "w-[192px]",
+    large: "w-[224px]",
 
     // Extra Large
-    xlarge_1: "w-[256px] h-[256px]",
-    xlarge_2: "w-[288px] h-[288px]",
-    xlarge: "w-[320px] h-[320px]",
+    xlarge_1: "w-[256px]",
+    xlarge_2: "w-[288px]",
+    xlarge: "w-[320px]",
+} as const;
+
+export const shapeClasses = {
+    square: "rounded-none",
+    rounded: "rounded-2xl",
+    circle: "rounded-full",
 } as const;
 
 
@@ -36,12 +42,14 @@ const sizeClasses = {
 // keyof is a type operator that returns the type of the keys of an object
 // The Size type is a union of the keys of the sizeClasses object
 type Size = keyof typeof sizeClasses;
+type Shape = keyof typeof shapeClasses;
 
 interface AvatarProps {
     onChange?: (file: File) => void;
-    src: string;
+    src?: string;
     alt: string;
     size?: Size;
+    shape?: Shape;
     isCanEdit?: boolean;
     className?: string;
 }
@@ -52,19 +60,21 @@ const Avatar: React.FC<AvatarProps> = ({
     src,
     alt,
     size='medium',
+    shape='circle',
     isCanEdit=false,
     className
 }) => {
     const sizeClass = sizeClasses[size];
+    const shapeClass = shapeClasses[shape];
 
-    const [imgSrc, setImgSrc] = React.useState<string>(src);
+    const [imgSrc, setImgSrc] = React.useState<string>(src || emptyAvatar);
 
     useEffect(() => {
-        setImgSrc(src);
+        setImgSrc(src || emptyAvatar);
     }, [src])
 
     return (
-        <div className={`relative ${sizeClass} rounded-full object-cover select-none ${className} 
+        <div className={`relative ${sizeClass} aspect-square object-contain ${shapeClass} object-cover select-none ${className} 
             overflow-hidden`}>
 
             { isCanEdit ? 
@@ -74,7 +84,7 @@ const Avatar: React.FC<AvatarProps> = ({
                     <i className="fa-solid fa-camera text-white text-2xl"></i>
                 </SelectFile> : null }
 
-            <div className="absolute inset-0 bg-[var(--bg-color)] rounded-full overflow-hidden">
+            <div className={`absolute inset-0 bg-[var(--bg-color)] overflow-hidden`}>
                 <img
                     src={imgSrc || emptyAvatar}
                     alt={alt}

@@ -1,5 +1,5 @@
-import SettingCard from "@/components/common/container/SettingCard";
-import EditableField from "@/components/common/container/SettingCard/SettingItem/EditableField";
+import SettingCard from "@/components/common/container/Card";
+import EditableField from "@/components/common/container/Card/SettingItem/EditableField";
 import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
 import { UserService } from "@/api/user/user.api";
 import React, { useEffect } from "react";
@@ -8,7 +8,6 @@ import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ErrorKey } from "@/api/auth/dto/login.dto";
 import { useAuth } from "@/contexts/AuthContext";
-import { url } from "node:inspector";
 
 interface AccountSettingProps {
     className?: string;

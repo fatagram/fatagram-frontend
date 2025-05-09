@@ -1,8 +1,7 @@
 import React from "react";
-import Button from "@/components/common/ui/Button/Button";
-import { useNavigate } from "react-router-dom";
 import Text from "@/components/common/ui/Text";
 import { useTranslation } from "react-i18next";
+import PageNavbarItem from "@/components/common/container/PageNavbar/PageNavbarItem";
 
 interface SettingsNavbarProps {
     className?: string;
@@ -23,11 +22,10 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
 
     // Other hooks
     const { t } = useTranslation() as { t: (key: string) => string }; // i18n translation hook
-    const navigate = useNavigate();
 
     // Route auth settings
     const authSettings : {icon: React.ReactNode, name: string, path: string}[] = [
-        {icon: <i className="fa-solid fa-user"></i>, name: t("settings:navbar.privacy.account"), path: "/settings/account"},
+        {icon: <i className="fa-solid fa-user"></i>, name: t("settings:navbar.privacy.account"), path: "/settings"},
         {icon: <i className="fa-solid fa-shield-halved"></i>,name: t("settings:navbar.privacy.privacy"), path: "/settings/privacy"},
     ]
 
@@ -38,10 +36,6 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
         {icon: <i className="fa-solid fa-circle-info"></i>,name: t("settings:navbar.general.about"), path: "/settings/about"},
         {icon: <i className="fa-solid fa-palette"></i>,name: t("settings:navbar.general.theme"), path: "/settings/theme"},
     ]
-
-    const handleSettingsClick = (path: string) => {
-        navigate(path, {replace: true});
-    }
 
     const handleToggleAuthSettings = () => {
         setShowAuthSettings(!showAuthSettings);
@@ -60,35 +54,21 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
             <div className="h-[1px] bg-[var(--bg-color-secondary)] w-full"></div>
             <Text onClick={handleToggleAuthSettings} size="lg" className="p-2 pl-5 !font-bold">{t("settings:navbar.privacy.title")}</Text>
                 { showAuthSettings && <ul className="w-full animate-dropdown-slide">
-                    {authSettings.map((setting, index) => (
-                        <li key={index} className="flex">
-                            <div className="flex items-center w-full">
-                                <Button variant="third"
-                                    className="!w-full text-left !text-[17px] !px-3"
-                                    onClick={() => { onSelect?.(); handleSettingsClick(setting.path) }}>
-                                    <div className="grid grid-cols-10 items-start">
-                                        <div className="flex justify-center items-center h-full col-span-2">{setting.icon}</div>
-                                        <Text size="lg" className="col-span-8 font-light !text-[17px]">{setting.name}</Text>
-                                    </div>
-                                </Button>
-                            </div>
+                    {authSettings.map((item, index) => (
+                        <li key={index} className="flex" onClick={onSelect}>
+                            <PageNavbarItem path={item.path}
+                                icon={item.icon}
+                                title={item.name}/>
                         </li>
                     ))}
                 </ul> }
             <Text onClick={handleToggleGeneralSettings} size="lg" className="p-2 pl-5 !font-bold">{t("settings:navbar.general.title")}</Text>
             { showGeneralSettings && <ul className="w-full animate-dropdown-slide">
-                {generalSettings.map((setting, index) => (
-                    <li key={index} className="flex">
-                        <div className="flex items-center w-full">
-                            <Button variant="third"
-                                className="!w-full text-left !text-[17px] !px-3"
-                                onClick={() => { onSelect?.(); handleSettingsClick(setting.path) }}>
-                                <div className="grid grid-cols-10 items-start">
-                                    <div className="flex justify-center items-center h-full col-span-2">{setting.icon}</div>
-                                    <Text size="lg" className="col-span-8 font-light !text-[17px]">{setting.name}</Text>
-                                </div>
-                            </Button>
-                        </div>
+                {generalSettings.map((item, index) => (
+                    <li key={index} className="flex" onClick={onSelect}>
+                        <PageNavbarItem path={item.path}
+                                icon={item.icon}
+                                title={item.name}/>
                     </li>
                 ))}
             </ul> }

@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Theme, useTheme } from "../../../../contexts/ThemeContext";
-import SettingCard from "@/components/common/container/SettingCard";
-import SelectBoxSetting from "@/components/common/container/SettingCard/SettingItem/SelectBoxSetting";
+import SettingCard from "@/components/common/container/Card";
+import SelectBoxSetting from "@/components/common/container/Card/SettingItem/SelectBoxSetting";
 import { Option, OptionKey } from "@/components/common/ui/SelectBox/SelectBox";
 import { useTranslation } from "react-i18next";
 

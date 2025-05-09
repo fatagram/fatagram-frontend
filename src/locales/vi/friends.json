@@ -1,0 +1,12 @@
+{
+    "title" : "Bạn bè",
+    "description" : "Welcome to the home page! This is where you can find the latest updates and news.",
+    "navbar": {
+        "title" : "Bạn bè",
+        "suggestedFriends" : "Bạn bè được gợi ý",
+        "invite" : "Lời mời kết bạn"
+    },
+    "friendRequest": {
+        "noRequests": "Không có lời mời kết bạn"
+    }
+}
