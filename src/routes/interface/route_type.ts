@@ -1,10 +1,10 @@
-import React from "react";
+import { JSX } from "react";
 
 export default interface RouteType {
-    element: React.ReactNode;
+    element: JSX.Element;
     children?: RouteType[];
     path?: string,
-    meta?: {
-        title: string 
-    }
+    keepAlive?: boolean,
+    index?: boolean,
+    hasParams?: boolean,
 }

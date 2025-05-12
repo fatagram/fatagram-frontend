@@ -38,7 +38,8 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
             <div className="w-full cursor-pointer" onClick={handleNavigate}>
                 <Avatar src={avatar} alt="avatar" shape="rounded" className="w-full"/>
             </div>
-            <Text size="md-2" weight="bold" onClick={handleNavigate}>{name}</Text>
+            <Text size="md-2" weight="bold" onClick={handleNavigate} 
+                className="truncate overflow-hidden w-full">{name}</Text>
             <Text size="sm" weight="light">{time}</Text>
             <Button variant="primary" size="small" className="w-full mt-2 mb-1" onClick={onAccept}>
                 {t("user:profileHeader:acceptButton")}

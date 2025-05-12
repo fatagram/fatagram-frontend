@@ -22,7 +22,7 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({className, onSelect}) => {
     // Route auth settings
     const authSettings : {icon: React.ReactNode, name: string, path: string}[] = [
         {icon: <i className="fa-solid fa-user-plus"></i>, name: t("friends:navbar.suggestedFriends"), path: "/friends"},
-        {icon: <i className="fa-solid fa-user-check"></i>, name: t("friends:navbar.invite"), path: "/friends/requests"},
+        {icon: <i className="fa-solid fa-user-check"></i>, name: t("friends:navbar.invite"), path: "requests"},
     ]
 
     return (
@@ -35,8 +35,7 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({className, onSelect}) => {
                     {authSettings.map((item, index) => (
                         <li key={index} className="flex" onClick={onSelect}>
                             <PageNavbarItem path={item.path}
-                                icon={item.icon}
-                                title={item.name}/>
+                                icon={item.icon} title={item.name}/>
                         </li>
                     ))}
                 </ul>

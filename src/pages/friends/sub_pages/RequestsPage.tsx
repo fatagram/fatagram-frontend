@@ -14,4 +14,4 @@ const RequestsPage: React.FC<RequestsPageProps> = () => {
     )
 }
 
-export default RequestsPage;
+export default React.memo(RequestsPage);

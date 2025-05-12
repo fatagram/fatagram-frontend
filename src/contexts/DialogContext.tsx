@@ -1,6 +1,6 @@
 import { DialogBoxProps } from "@/components/common/utils/DialogBox/DialogBox";
 import OverlayDialog from "@/components/common/utils/DialogBox/OverlayDialog";
-import React, { useContext } from "react";
+import React, { useCallback, useContext } from "react";
 
 interface DialogContextType {
     showDialog: (dialogProps: DialogBoxProps) => void;
@@ -16,15 +16,15 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
     const [dialogProps, setDialogProps] = React.useState<DialogBoxProps | null>(null);
     const [isShowDialog, setIsShowDialog] = React.useState<boolean>(false);
 
-    const showDialog = (dialogProps: DialogBoxProps) => {
+    const showDialog = useCallback((dialogProps: DialogBoxProps) => {
         setIsShowDialog(true);
         setDialogProps(dialogProps);
-    };
+    }, []);
 
-    const closeDialog = () => {
+    const closeDialog = useCallback(() => {
         setIsShowDialog(false);
         setDialogProps(null);
-    };
+    }, []);
 
     return (    
         <DialogContext.Provider value={{ showDialog, closeDialog }}>

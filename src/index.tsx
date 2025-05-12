@@ -6,20 +6,18 @@ import App from "./App";
 import reportWebVitals from "./reportWebVitals";
 import "@fortawesome/fontawesome-free/css/all.min.css";
 import "./api/setupInterceptor";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ThemeProvider } from "./contexts/ThemeContext";
+import whyDidYouRender from "@welldone-software/why-did-you-render";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
 );
 
-root.render(
-  <ThemeProvider>
-    <AuthProvider>
-        <App />
-    </AuthProvider>
-  </ThemeProvider>
+whyDidYouRender(React, {
+    trackAllPureComponents: false,
+  });
 
+root.render(
+  <App />
 );
 
 reportWebVitals();

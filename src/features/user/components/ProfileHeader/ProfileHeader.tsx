@@ -132,7 +132,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
                     handleSelectAvatar={handleSelectAvatar}/>
                 { isLoading ? <LabelSkeletonLoading size="medium" className="lg:self-end mb-2 lg:mb-8 lg:ml-5 w-[200px] mt-2 lg:mt-0"/> : 
                     <div className="flex flex-col mb-2 lg:ml-5 gap-1 lg:items-start items-center">
-                        <Text size="xl" weight="bold">{fullName}</Text>
+                        <Text size="xl" weight="bold" className=" lg:text-left text-center">{fullName}</Text>
                         <Text size="md-2" className="text-[var(--text-color)]">{
                                 numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") :
                                 t("user:profileHeader.noFriendsCount")
@@ -141,7 +141,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
                 }
                 
                 { isLoading ? <LabelSkeletonLoading size="large" className="w-[300px] lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
-                    <div className="relative flex flex-wrap w-screen lg:flex-1 lg:justify-end justify-center gap-2 mb-8 lg:mr-5 lg:w-auto">
+                    <div className="relative flex flex-wrap lg:flex-none gap-2 lg:ml-auto lg:w-auto mb-7 lg:mt-0 mt-2">
                         {isAuthenticated && <>
                             { isOwner ? (<Button size="medium"><i className="fa-solid fa-user-pen"></i> {t("user:profileHeader.editButton")}</Button>) :
                                <AddFriendButton uid={uid}/>  

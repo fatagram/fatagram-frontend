@@ -17,19 +17,26 @@ export const mainRoutes: RouteType[] = [
     {
         element: <Layout />,
         children: [
-            { path: "/:userParam", element: <ProfilePage /> },
-            { path: "/loading", element: <LoadingPage /> },
-            { path: "*", element: <NotFoundPage /> },
             {
                 path: "/",
                 element: (
                     <ProtectedRoute>
-                        <HomePage />
+                        <HomePage/>
                     </ProtectedRoute>
                 ),
+                index: true,
+                keepAlive: true
             },
             friendsRoutes,
             settingRoutes,
+            { 
+                path: "/:userParam",
+                element: (
+                    <ProfilePage/>
+                ),
+            },
+            { path: "/loading", element: <LoadingPage /> },
+            { path: "*", element: <NotFoundPage /> },
         ],
     },
     {

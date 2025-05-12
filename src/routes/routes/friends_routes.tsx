@@ -7,7 +7,7 @@ export const friendsRoutes: RouteType = {
     path: "/friends",
     element: (
         <ProtectedRoute>
-            <FriendPage />
+            <FriendPage/>
         </ProtectedRoute>
     ),
     children: [
@@ -15,7 +15,8 @@ export const friendsRoutes: RouteType = {
             path: "requests",
             element: (
                 <RequestsPage/>
-            )
+            ),
+            keepAlive: true
         }
     ]
 }

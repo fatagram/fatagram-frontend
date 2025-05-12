@@ -9,8 +9,8 @@ import ProtectedRoute from "../components/protected_route";
 export const settingRoutes : RouteType = {
     path: "/settings",
     element: (
-        <ProtectedRoute>
-            <SettingPage />
+        <ProtectedRoute key={"settings"}>
+            <SettingPage/>
         </ProtectedRoute> 
     ),
     children: [
@@ -19,7 +19,7 @@ export const settingRoutes : RouteType = {
             element: <AccountSettingPage />,
             children: [
                 { path: "name", element: <ChangeNameForm /> },
-            ]
+            ],
         },
         { path: "theme", element: <ThemeSettingPage/> },
         { path: "language", element: <LanguageSettingPage/>}

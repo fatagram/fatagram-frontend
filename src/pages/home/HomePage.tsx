@@ -1,20 +1,23 @@
-import React, { useLayoutEffect } from "react";
-import withAuth from "@/hocs/auth/withAuth";
-import { useTranslation } from "react-i18next";
+import React from "react";
 
+// Bọc component trong React.memo để tránh render lại khi không cần thiết
 const HomePage: React.FC = () => {
+    
+    React.useEffect(() => {
+        // Thực hiện các tác vụ khi component được mount
+        console.log("HomePage mounted");
 
-    const { t } = useTranslation() as { t: (key: string) => string };
-
-    useLayoutEffect(() => {
-        document.title = t("home:title")
-    }, [t])
+        // Trả về hàm cleanup nếu cần thiết
+        return () => {
+            console.log("HomePage unmounted");
+        };
+    }, []);
 
     return (
-        <div className="flex justify-center items-center">
+        <div>
             <h1>Home Page</h1>
         </div>
-    )
-}
+    );
+};
 
-export default withAuth(HomePage);
+export default HomePage;

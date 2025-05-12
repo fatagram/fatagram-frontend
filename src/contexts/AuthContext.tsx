@@ -1,10 +1,10 @@
-import AuthService, { LoginResponse } from "@/api/auth/auth.api";
+import { LoginResponse, authService } from "@/api/auth/auth.api";
 import LoginDto from "@/api/auth/dto/login.dto";
 import { Result } from "@/api/common";
 import { UserService } from "@/api/user/user.api";
 import LoadingPage from "@/pages/loading/LoadingPage";
 import { removeRefreshToken, removeRefreshTokenFromSession, setRefreshToken, setRefreshTokenToSession } from "@/utils/token";
-import React, { createContext, useContext, useState, useCallback, useMemo, useEffect } from "react";
+import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 
 interface AuthContextType {
     isAuthenticated: boolean | null;
@@ -32,8 +32,6 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true);
     const [userId, setUserId] = useState<string | undefined>(undefined);
     const [urlName, setUrlName] = useState<string | undefined>(undefined);
-
-    const authService = useMemo(() => new AuthService(), []);
 
     const login = async (loginDto: LoginDto): Promise<Result<LoginResponse>> => {
         const result = await authService.login(loginDto);
@@ -79,6 +77,7 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
 
     const refresh = async () => {
         checkAuth();
+        console.log('refresh');
     }
 
     useEffect(() => {
@@ -95,6 +94,7 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
         window.addEventListener("focus", handleFocus);
         return () => window.removeEventListener("focus", handleFocus);
       }, [checkAuth]);
+
 
     return ( 
         <AuthContext.Provider value={{ 

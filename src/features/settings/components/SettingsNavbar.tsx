@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import Text from "@/components/common/ui/Text";
 import { useTranslation } from "react-i18next";
 import PageNavbarItem from "@/components/common/container/PageNavbar/PageNavbarItem";
@@ -37,13 +37,13 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
         {icon: <i className="fa-solid fa-palette"></i>,name: t("settings:navbar.general.theme"), path: "/settings/theme"},
     ]
 
-    const handleToggleAuthSettings = () => {
+    const handleToggleAuthSettings = useCallback(() => {
         setShowAuthSettings(!showAuthSettings);
-    }
+    }, [showAuthSettings]);
     
-    const handleToggleGeneralSettings = () => {
+    const handleToggleGeneralSettings = useCallback(() => {
         setShowGeneralSettings(!showGeneralSettings);
-    }
+    }, [showGeneralSettings]);
 
     return (
         <div className={`flex flex-col gap-2

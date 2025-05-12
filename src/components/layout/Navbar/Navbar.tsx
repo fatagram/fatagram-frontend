@@ -1,10 +1,10 @@
-import React from "react";
-import Logo from "../../common/ui/Logo/Logo";
-import Button from "../../common/ui/Button/Button";
-import { useAuth } from "../../../contexts/AuthContext";
-import ProfileMenu from "../../../features/user/components/ProfileMenu/ProfileMenu";
-import OverlayLogin from "../../../features/auth/components/LoginForm/OverlayLogin";
-import OverlayRegister from "../../../features/user/components/RegisterForm/OverlayRegister";
+import React, { useCallback } from "react";
+import Logo from "@/components/common/ui/Logo/Logo";
+import Button from "@/components/common/ui/Button/Button";
+import { useAuth } from "@/contexts/AuthContext";
+import ProfileMenu from "@/features/user/components/ProfileMenu/ProfileMenu";
+import OverlayLogin from "@/features/auth/components/LoginForm/OverlayLogin";
+import OverlayRegister from "@/features/user/components/RegisterForm/OverlayRegister";
 import { useNavigate } from "react-router-dom";
 import NotificationIcon from "@/features/user/components/NotificationIcon/NotificationIcon";
 import NavbarItem from "./NavbarItem";
@@ -25,13 +25,13 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
 
     const navigate = useNavigate();
 
-    const handleGoToHome = () => {
+    const handleGoToHome = useCallback(() => {
         if (isAuthenticated) {
             navigate("/");
         } else {
             setShowLogin(true);
         }
-    }
+    }, [isAuthenticated, navigate]);
 
     return (
         <div className={`flex flex-wrap sm:flex-none py-1 sm:pl-10 sm:pr-10 pl-1 pr-1 bg-[var(--bg-color-third)] gap-3

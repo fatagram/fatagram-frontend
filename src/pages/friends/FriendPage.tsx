@@ -14,6 +14,7 @@ const FriendPage: React.FC<FriendsPageProps> = () => {
     useLayoutEffect(() => {
         document.title = t("friends:title")
     }, [t])
+    
     const [isShowNavbar, setIsShowNavbar] = React.useState<boolean>(true);
 
     return (
@@ -39,3 +40,4 @@ const FriendPage: React.FC<FriendsPageProps> = () => {
 }
 
 export default FriendPage;
+
