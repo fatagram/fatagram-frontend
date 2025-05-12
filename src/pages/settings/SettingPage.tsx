@@ -25,7 +25,7 @@ const SettingPage: React.FC<SettingPageProps> = () => {
             <div className="w-full inset-0 z-10 h-[50px] flex sm:hidden px-2">
                 <Text size="lg-3"><i className="fa-solid fa-list text-gradient-main" onClick={() => setIsShowNavbar(!isShowNavbar)}></i></Text>
             </div>
-            <SettingsNavbar className={`sm:flex sm:w-[300px] relative
+            <SettingsNavbar className={`sm:flex sm:w-[300px] sm:relative absolute
                 sm:animate-none animate-left-to-right w-full
                 ${isShowNavbar ? "absolute z-30" : "hidden"}  
                 shadow-lg rounded-2xl h-full
