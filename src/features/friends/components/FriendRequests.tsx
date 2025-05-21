@@ -24,7 +24,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     }[]>([]);
 
     const [page, setPage] = React.useState(1);
-    const [limit] = React.useState(12);
+    const [limit] = React.useState(4);
     const [isLoading, setIsLoading] = React.useState(false);
     const [isFull, setIsFull] = React.useState(false);
     const loaderRef = React.useRef<HTMLDivElement>(null);
@@ -73,6 +73,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         const response = await userService.AcceptAddFriendRequest(requestId);
         if (response.success) {
             setRequests((prevRequests) => prevRequests.filter((request) => request.senderId !== requestId));
+            setTotal((prevTotal) => prevTotal - 1);
         }
     }, []);
 
@@ -80,6 +81,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         const response = await userService.DeclineAddFriendRequest(senderId);
         if (response.success) {
             setRequests((prevRequests) => prevRequests.filter((request) => request.senderId !== senderId));
+            setTotal((prevTotal) => prevTotal - 1);
         }
     }, []);
 

@@ -10,7 +10,6 @@ import { AuthProvider } from "./contexts/AuthContext";
 
 
 const App: React.FC = () => {
-
   return (
     <ThemeProvider>
       <AuthProvider>
