@@ -1,7 +1,7 @@
 import SettingCard from "@/components/common/container/Card";
 import EditableField from "@/components/common/container/Card/SettingItem/EditableField";
 import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
-import { UserService } from "@/api/user/user.api";
+import { userProfileService } from "@/api/user/user_profile.api";
 import React, { useEffect } from "react";
 import ChangeUrlNameDto, { ErrorCodes } from "@/api/user/dto/change_url_name.dto";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -29,16 +29,16 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
     const [isEditUrlNameFailed, setIsEditUrlNameFailed] = React.useState<boolean>(false);
     const [editUrlFailedMessage, setEditUrlFailedMessage] = React.useState<string>("");
 
-    const userService = React.useMemo(() => {
-        return new UserService();
-    }, []);
+    // const userService = React.useMemo(() => {
+    //     return new UserService();
+    // }, []);
 
     // Handle change URL name
     const handleChangeUrlName = async (urlName: string) => {
         const changeUrlNameDto : ChangeUrlNameDto = {
             urlName: urlName
         }
-        const response = await userService.UpdateUrlName(changeUrlNameDto);
+        const response = await userProfileService.UpdateUrlName(changeUrlNameDto);
         if (response.success) {
             setUrlName(urlName);
             setIsEditUrlName(false);
@@ -59,7 +59,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
     useEffect(() => {
         const fetchProfile = async () => {
             const _userId : string = userId ?? "";
-            const response = await userService.GetProfile(_userId, "fullName,urlName");
+            const response = await userProfileService.GetProfile(_userId, "fullName,urlName");
             if (response.success) {
                 setFullName(response.data.infos.fullName);
                 setUrlName(response.data.infos.urlName);
@@ -67,7 +67,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
             setIsLoading(false);
         }
         fetchProfile();
-    }, [userService, location.key, userId])
+    }, [userProfileService, location.key, userId])
 
     return (
         <div className={`${className}`}>

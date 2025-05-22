@@ -1,5 +1,5 @@
 import { ErrorCodes } from "@/api/user/dto/change_name.dto";
-import { UserService } from "@/api/user/user.api";
+import { userProfileService } from "@/api/user/user_profile.api";
 import Button from "@/components/common/ui/Button";
 import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
 import Textbox from "@/components/common/ui/Textbox";
@@ -27,9 +27,9 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
     const { t } = useTranslation() as { t: (key: string) => string };
     const { userId } = useAuth();
 
-    const userService = React.useMemo(() => {
-        return new UserService();
-    }, []);
+    // const userService = React.useMemo(() => {
+    //     return new UserService();
+    // }, []);
 
     // Close change name form
     const handleClose = () => {
@@ -37,7 +37,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
     };
 
     const handleSubmit = async () => {
-        const response = await userService.UpdateName({ firstName, lastName });
+        const response = await userProfileService.UpdateName({ firstName, lastName });
         if (response.success) {
             navigate("/settings", { state: { reload: true } });
         }
@@ -60,7 +60,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
     // Fetch user profile
     useEffect(() => {
         const fetchProfile = async () => {
-            const response = await userService.GetProfile(userId ?? "", "firstName,lastName");
+            const response = await userProfileService.GetProfile(userId ?? "", "firstName,lastName");
             if (response.success) {
                 setFirstName(response.data.infos.firstName);
                 setLastName(response.data.infos.lastName);
@@ -73,7 +73,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
         setFirstNameFailed(false);
         setLastNameFailed(false);
         fetchProfile();
-    }, [userService, userId]);
+    }, [userProfileService, userId]);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 lg:pt-0 pt-10">

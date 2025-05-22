@@ -1,6 +1,7 @@
 import React, { useMemo } from "react";
 import Button from "@/components/common/ui/Button/Button";
-import { UserService } from "@/api/user/user.api";
+import { userProfileService } from "@/api/user/user_profile.api";
+import { friendshipService } from "@/api/user/friendship.api";
 import LabelSkeletonLoading from "@/components/common/ui/Text/TextSkeletionLoading";
 import Text from "@/components/common/ui/Text";
 import { useTranslation } from "react-i18next";
@@ -40,10 +41,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
     const { t } = useTranslation() as { t: (key: string) => string };
     const { showDialog, closeDialog } = useDialog();
 
-    const userService = useMemo(() => {
-        return new UserService();
-    }
-    , []);
+    // const userService = useMemo(() => {
+    //     return new UserService();
+    // }
+    // , []);
 
     React.useEffect(() => {
         document.title = fullName
@@ -52,7 +53,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
     // Fetch user profile
     React.useEffect(() => {
         const fetchProfile = async () => {
-            const response = await userService.GetProfile(uid ? uid : "", "avatar,background,fullName");
+            const response = await userProfileService.GetProfile(uid ? uid : "", "avatar,background,fullName");
             if (response.success) {
                 setAvatar(response.data.infos.avatar);
                 setBackground(response.data.infos.background);
@@ -66,7 +67,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
             setIsLoading(false);
         }
         const fetchNumberOfFriends = async() => {
-            const response = await userService.GetNumberOfFriends(uid ? uid : "");
+            const response = await friendshipService.GetNumberOfFriends(uid ? uid : "");
             if (response.success) {
                 setNumberOfFriends(response.data?.numberOfFriends ?? 0);
             }
@@ -78,11 +79,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
             fetchProfile();
             fetchNumberOfFriends();
         }
-    }, [uid, userId, onUserNotFound, userService]);
+    }, [uid, userId, onUserNotFound, friendshipService]);
 
     // Handle background and avatar selection
     const handleSelectBackground = async (file: File) => {
-        const result = await userService.UploadBackground(file)
+        const result = await userProfileService.UploadBackground(file)
         if (result.success) {
             setBackground(result.data);
         }
@@ -101,7 +102,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
     }
 
     const handleSelectAvatar = async (file: File) => {
-        const result = await userService.UploadAvatar(file)
+        const result = await userProfileService.UploadAvatar(file)
         if (result.success) {
             setAvatar(result.data);
         }

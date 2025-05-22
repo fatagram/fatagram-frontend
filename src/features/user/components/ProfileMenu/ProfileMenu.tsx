@@ -1,7 +1,7 @@
 import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/components/common/ui/Button/Button";
 import Avatar from "@/components/common/display/Avatar/Avatar";
-import { UserService } from "@/api/user/user.api";
+import { userProfileService } from "@/api/user/user_profile.api";
 import useClickOutside from "@/hooks/useClickOutside";
 import Text from "@/components/common/ui/Text";
 import { useNavigate } from "react-router-dom";
@@ -36,8 +36,8 @@ const ProfileMenu: React.FC = () => {
 
     // Fetch user avatar and full name
     const fetchProfiles = useCallback(async() => {
-        const profileService = new UserService();
-        const response = await profileService.GetProfile(userId || "", "avatar,fullName");
+        // const profileService = new UserService();
+        const response = await userProfileService.GetProfile(userId || "", "avatar,fullName");
         if (response.success) {
             setAvatar(response.data.infos.avatar);
             setFullName(response.data.infos.fullName);

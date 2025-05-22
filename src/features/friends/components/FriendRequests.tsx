@@ -1,4 +1,4 @@
-import { userService } from "@/api/user/user.api";
+import { friendshipService } from "@/api/user/friendship.api";
 import Card from "@/components/common/container/Card";
 import FriendRequestItem from "@/components/common/container/Card/FriendRequestItem/FriendRequestItem";
 import Text from "@/components/common/ui/Text";
@@ -34,7 +34,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
 
     const fetchFriendRequests = React.useCallback(async () => {
         setIsLoading(true);
-        const response = await userService.GetFriendRequests(page, limit);
+        const response = await friendshipService.GetFriendRequests(page, limit);
         if (response.success) {
             setRequests(prev => [...prev, ...response.data?.friendRequests ?? []]);
             setTotal(response.data?.total ?? 0);
@@ -70,7 +70,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     }, [loaderRef, isFull]);
 
     const handleAcceptRequest = useCallback(async (requestId: string) => {
-        const response = await userService.AcceptAddFriendRequest(requestId);
+        const response = await friendshipService.AcceptAddFriendRequest(requestId);
         if (response.success) {
             setRequests((prevRequests) => prevRequests.filter((request) => request.senderId !== requestId));
             setTotal((prevTotal) => prevTotal - 1);
@@ -78,7 +78,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     }, []);
 
     const handleRejectRequest = useCallback(async (senderId: string) => {
-        const response = await userService.DeclineAddFriendRequest(senderId);
+        const response = await friendshipService.DeclineAddFriendRequest(senderId);
         if (response.success) {
             setRequests((prevRequests) => prevRequests.filter((request) => request.senderId !== senderId));
             setTotal((prevTotal) => prevTotal - 1);

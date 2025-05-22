@@ -1,4 +1,4 @@
-import { UserService } from "@/api/user/user.api";
+import { friendshipService } from "@/api/user/friendship.api";
 import Button from "@/components/common/ui/Button";
 import Dropdown from "@/components/common/ui/Dropdown/Dropdown";
 import useClickOutside from "@/hooks/useClickOutside";
@@ -36,14 +36,14 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
         }
     );
 
-    const userService = useMemo(() => {
-            return new UserService();
-        }
-        , []);
+    // const userService = useMemo(() => {
+    //         return new UserService();
+    //     }
+    //     , []);
 
     React.useEffect(() => {
         const fetchFriendshipStatus = async () => {
-            const response = await userService.GetFriendshipStatus(uid ? uid : "");
+            const response = await friendshipService.GetFriendshipStatus(uid ? uid : "");
             if (response.success) {
                 setFriendshipStatus(response.data?.status ?? "None");
             }
@@ -52,58 +52,58 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
             }  
         }
         fetchFriendshipStatus();
-    }, [uid, userService, setFriendshipStatus]);  
+    }, [uid, friendshipService, setFriendshipStatus]);  
 
     const handleSentAddFriendRequest = useCallback(async () => {
-            const response = await userService.SendAddFriendRequest(uid ? uid : "");
+            const response = await friendshipService.SendAddFriendRequest(uid ? uid : "");
             if (response.success) {
                 setFriendshipStatus("SentByMe");
             }
             else {
                 console.log(response.errorCodes);
             }
-        }, [uid, userService]);
+        }, [uid, friendshipService]);
     
         const handleCancelAddFriendRequest = useCallback(async () => {
-            const response = await userService.CancelAddFriendRequest(uid ? uid : "");
+            const response = await friendshipService.CancelAddFriendRequest(uid ? uid : "");
             if (response.success) {
                 setFriendshipStatus("None");
             }
             else {
                 console.log(response.errorCodes);
             }
-        }, [uid, userService]);
+        }, [uid, friendshipService]);
     
         const handleAcceptAddFriendRequest = useCallback(async (id: string | undefined) => {
-            const response = await userService.AcceptAddFriendRequest(id ? id : "");
+            const response = await friendshipService.AcceptAddFriendRequest(id ? id : "");
             if (response.success) {
                 setFriendshipStatus("Friend");
             }
             else {
                 console.log(response.errorCodes);
             }
-        }, [userService]);
+        }, [friendshipService]);
     
         const handleDeclineAddFriendRequest = useCallback(async (id: string | undefined) => {
-            const response = await userService.DeclineAddFriendRequest(id ? id : "");
+            const response = await friendshipService.DeclineAddFriendRequest(id ? id : "");
             if (response.success) {
                 setFriendshipStatus("None");
             }
             else {
                 console.log(response.errorCodes);
             }
-        }, [userService]);
+        }, [friendshipService]);
     
         // Handle unfriend action
         const handleUnfriend = useCallback(async (id: string | undefined) => {
-            const response = await userService.Unfriend(id ? id : "");
+            const response = await friendshipService.Unfriend(id ? id : "");
             if (response.success) {
                 setFriendshipStatus("None");
             }
             else {
                 console.log(response.errorCodes);
             }
-        }, [userService]);
+        }, [friendshipService]);
     
         // Dropdown options for friend actions
         const friendOptions = useMemo(() => [

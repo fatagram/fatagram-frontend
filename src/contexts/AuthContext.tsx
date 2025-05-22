@@ -1,7 +1,7 @@
-import { LoginResponse, authService } from "@/api/auth/auth.api";
-import LoginDto from "@/api/auth/dto/login.dto";
+import { authService } from "@/api/auth/auth.api";
+import LoginDto, { LoginResponse } from "@/api/auth/dto/login.dto";
 import { Result } from "@/api/common";
-import { UserService } from "@/api/user/user.api";
+import { userProfileService } from "@/api/user/user_profile.api";
 import LoadingPage from "@/pages/loading/LoadingPage";
 import { removeRefreshToken, removeRefreshTokenFromSession, setRefreshToken, setRefreshTokenToSession } from "@/utils/token";
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
@@ -59,8 +59,8 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
     }
 
     const checkAuth = useCallback(async () => {
-        const userService = new UserService();
-        const result: Result<{userId: string | undefined, urlName: string | undefined}> = await userService.GetMe();
+        // const userService = new UserService();
+        const result: Result<{userId: string | undefined, urlName: string | undefined}> = await userProfileService.GetMe();
         // delay 200ms
         await new Promise(resolve => setTimeout(resolve, 200));
         if (result.success) {

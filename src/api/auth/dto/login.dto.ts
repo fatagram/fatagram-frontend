@@ -4,6 +4,12 @@ export default interface LoginDto {
     password: string;
 }
 
+export interface LoginResponse {
+    refreshToken: string;
+    userId: string;
+    urlName: string;
+}
+
 // Error codes for the LoginValidator
 export const ErrorCodes : Record<string, string> = {
     USERNAME_NOT_CORRECT_FORMAT : "auth:login.errorMessages.usernameNotCorrectFormat",

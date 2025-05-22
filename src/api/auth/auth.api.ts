@@ -1,12 +1,10 @@
 import { apiClient } from '@/api/setupInterceptor';
-import LoginDto from './dto/login.dto';
+import LoginDto, { LoginResponse } from './dto/login.dto';
 import { ApiResponse, handleApiError, Result } from '../common';
+import apiUrl from '@/config';
 
-export interface LoginResponse {
-    refreshToken: string;
-    userId: string;
-    urlName: string;
-}
+
+const API_URL = `${apiUrl}/api/auth`;
 
 // AuthService class
 // This class is responsible for handling the login request to the server.
@@ -15,7 +13,7 @@ export class AuthService {
     // login method
     async login(dto: LoginDto): Promise<Result<LoginResponse>> {
         try {
-            const res = await apiClient.post(`/api/auth/login`, {
+            const res = await apiClient.post(`${API_URL}/login`, {
                 username: dto.username,
                 password: dto.password
             });
@@ -31,7 +29,7 @@ export class AuthService {
     // logout method
     async logout(refreshToken?: string): Promise<void> {
         try {
-            await apiClient.post(`/api/auth/logout`, { refreshToken: refreshToken });
+            await apiClient.post(`${API_URL}/logout`, { refreshToken: refreshToken });
         }
         catch (error: any) {
             handleApiError(error);
@@ -44,7 +42,7 @@ export class AuthService {
     async ping(): Promise<Result<void>> {
         try {
             // const accessToken = getAccessToken();
-            await apiClient.get(`/api/auth/ping`);
+            await apiClient.get(`${API_URL}/ping`);
             return { success: true };
         }
         catch (error: any) {
