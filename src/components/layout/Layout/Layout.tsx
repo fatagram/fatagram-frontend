@@ -6,7 +6,7 @@ import { Outlet } from "react-router-dom";
 const Layout: React.FC = () => {
 
     return (
-        <div className="relative w-screen h-screen flex flex-col bg-[var(--second-bg-color)]">
+        <div className="relative h-screen flex flex-col bg-[var(--second-bg-color)]">
             <Navbar className="fixed z-40 w-full"/>
             <main className="relative flex-1 sm:pb-0 pb-16">
                 <Outlet/>
@@ -16,4 +16,4 @@ const Layout: React.FC = () => {
     )
 }
 
-export default Layout;
+export default Layout

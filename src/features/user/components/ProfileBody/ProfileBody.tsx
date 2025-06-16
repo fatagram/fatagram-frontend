@@ -10,7 +10,7 @@ const ProfileBody: React.FC<ProfileBodyProps> = ({
 }) => {
 
     return (
-        <div className="layout bg-[var(--main-bg-color)] flex flex-col">
+        <div className="layout bg-[var(--main-bg-color)] flex flex-col w-full">
             <ProfileNavbar userParam={userParam}/>
             <div>
                 <Outlet/>

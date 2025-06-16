@@ -21,7 +21,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({
     ]
 
     return (
-        <div className="flex w-screen">
+        <div className={`flex ${className}`}>
             {
                 navbarItems.map((item, index) => { 
                     return <NavbarItem key={index} 
