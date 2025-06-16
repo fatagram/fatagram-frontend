@@ -5,6 +5,7 @@ import settings from "./settings.json";
 import user from "./user.json";
 import friends from "./friends.json";
 import times from "./times.json";
+import notifications from "./notifications.json";
 
 const vi = {
     auth,
@@ -13,7 +14,8 @@ const vi = {
     settings,
     user,
     friends,
-    times
+    times,
+    notifications
 };
 
 export default vi;

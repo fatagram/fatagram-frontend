@@ -24,7 +24,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     }[]>([]);
 
     const [page, setPage] = React.useState(1);
-    const [limit] = React.useState(4);
+    const [limit] = React.useState(8);
     const [isLoading, setIsLoading] = React.useState(false);
     const [isFull, setIsFull] = React.useState(false);
     const loaderRef = React.useRef<HTMLDivElement>(null);
@@ -49,12 +49,6 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         setIsLoading(true);
         fetchFriendRequests();
     }, [fetchFriendRequests]);
-
-    React.useEffect(() => {
-        // random number and set for total
-        const randomTotal = Math.floor(Math.random() * 100) + 1;
-        setTotal(randomTotal);
-    }, [])
 
     React.useEffect(() => {
         if (!loaderRef.current || isFull) return;
@@ -101,7 +95,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
                                     request.createdAt.unit === TimeUnit.Seconds || request.createdAt.unit === TimeUnit.Miliseconds
                                         ? t("times:just_now")
                                         : `${t(`${TimeUnitTranslateMap[request.createdAt.unit]}.${
-                                            request.createdAt.value > 1 ? "one" : "other"}`, { count: request.createdAt.value })} 
+                                            request.createdAt.value === 1 ? "one" : "other"}`, { count: request.createdAt.value })} 
                                         ${t("times:ago")}`
                                 }
                                 onAccept={() => handleAcceptRequest(request.senderId)}

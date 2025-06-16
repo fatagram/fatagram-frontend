@@ -6,8 +6,8 @@ import ProfileMenu from "@/features/user/components/ProfileMenu/ProfileMenu";
 import OverlayLogin from "@/features/auth/components/LoginForm/OverlayLogin";
 import OverlayRegister from "@/features/user/components/RegisterForm/OverlayRegister";
 import { useNavigate } from "react-router-dom";
-import NotificationIcon from "@/features/user/components/NotificationIcon/NotificationIcon";
 import NavbarItem from "./NavbarItem";
+import NotificationMenu from "@/features/notifications/components/NotificationMenu/NotificationMenu";
 
 interface NavbarProps {
     className?: string;
@@ -34,7 +34,7 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
     }, [isAuthenticated, navigate]);
 
     return (
-        <div className={`flex flex-wrap sm:flex-none py-1 sm:pl-10 sm:pr-10 pl-1 pr-1 bg-[var(--bg-color-third)] gap-3
+        <div className={`flex flex-wrap sm:flex-none py-1 sm:pl-10 sm:pr-10 pl-1 pr-1 bg-[var(--third-bg-color)] gap-3
             ${className}
             shadow-md items-center justify-between`}>
             <div onClick={handleGoToHome} className="cursor-pointer items-center gap-2">
@@ -50,7 +50,7 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
                         ))}
                     </div>
                     <div className="flex gap-2 flex-1 sm:flex-none justify-end items-center">
-                        <NotificationIcon />
+                        <NotificationMenu />
                         <ProfileMenu />
                     </div>
                 </div>

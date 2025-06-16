@@ -26,7 +26,7 @@ const DialogBox: React.FC<DialogBoxProps> = ({
 }) => {
 
     return (
-        <div className="relative flex flex-col gap-4 bg-[var(--bg-color-secondary)] 
+        <div className="relative flex flex-col gap-4 bg-[var(--second-bg-color)] 
                         rounded-lg shadow-lg p-6 max-w-[500px] min-w-[300px]">
             {title && <Text weight="bold" size="lg-2">{title}</Text>}
             {content && <div>{content}</div>}

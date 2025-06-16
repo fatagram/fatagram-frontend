@@ -77,11 +77,11 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 lg:pt-0 pt-10">
-            <div className="animate-fade-in  relative flex flex-col justify-center bg-[var(--bg-color-secondary)] rounded-2xl shadow-lg px-10 py-8">
+            <div className="animate-fade-in  relative flex flex-col justify-center bg-[var(--second-bg-color)] rounded-2xl shadow-lg px-10 py-8">
                 <Text size="lg-3" className="pb-6 px-2 text-gradient-main !font-bold">{t("settings:account.personalInfo.changeNameForm.title")}</Text>
                 { isLoading ? <TextSkeletonLoading className="h-[50px]"/> : 
                     <div>
-                        <div className="animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-[var(--bg-color)] p-5">
+                        <div className="animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-[var(--main-bg-color)] p-5">
                             <div className="flex flex-col">
                                 <Text size="md-2" className="ml-2 mb-1">{t("settings:account.personalInfo.changeNameForm.firstName")}</Text>
                                 <Textbox isWrong={firstNameFailed} value={firstName} placeholder="First name" className="py-1 px-2 lg:max-w-[200px]"

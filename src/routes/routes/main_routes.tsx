@@ -12,6 +12,8 @@ import NoNavbarLayout from "@/components/layout/Layout/NoNavbarLayout";
 import ProtectedRoute from "../components/protected_route";
 import PublicRoute from "../components/public_route";
 import { friendsRoutes } from "./friends_routes";
+import PostsPage from "@/pages/profile/sub_pages/PostsPage";
+import FriendsPage from "@/pages/profile/sub_pages/FriendsPage";
 
 export const mainRoutes: RouteType[] = [
     {
@@ -34,6 +36,17 @@ export const mainRoutes: RouteType[] = [
                 element: (
                     <ProfilePage/>
                 ),
+                children: [
+                    {
+                        path: "",
+                        element: <PostsPage />,
+                        index: true
+                    },
+                    {
+                        path: "friends",
+                        element: <FriendsPage />,
+                    }
+                ]
             },
             { path: "/loading", element: <LoadingPage /> },
             { path: "*", element: <NotFoundPage /> },

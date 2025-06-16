@@ -54,6 +54,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
     React.useEffect(() => {
         const fetchProfile = async () => {
             const response = await userProfileService.GetProfile(uid ? uid : "", "avatar,background,fullName");
+            // Delay to simulate loading
             if (response.success) {
                 setAvatar(response.data.infos.avatar);
                 setBackground(response.data.infos.background);

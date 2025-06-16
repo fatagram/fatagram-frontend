@@ -1,29 +1,36 @@
-import { useEffect } from "react";
-import { connection } from "./notificationHubClient";
+import { NotificationDto } from "@/api/notification/dto/notification.dto";
+import { HubConnection } from "@microsoft/signalr";
+import { useEffect, useState } from "react";
+import { createSignalRConnection } from "./notificationHubClient";
 
-export function useNotificationHub() {
+export function useNotificationHub(onReceiveNotification: (data: NotificationDto) => void) {
+    const [connection, setConnection] = useState<HubConnection | null>(null);
     useEffect(() => {
-        connection.start()
-            .then(() => {
-                console.log("Notification Hub connected");
-            })
-            .catch((err) => {
-                console.error("Error connecting to Notification Hub: ", err);
-            })
+        const conn = createSignalRConnection();
 
-        connection.on("ReceiveNotification", (notification) => {
-            console.log("Notification received: ", notification);
-            // Handle the notification here, e.g., show a toast or update state
+        conn.start()
+            .then(() => {
+                setConnection(conn);
+            })
+            .catch((err) => console.error("Error while starting SignalR connection: ", err));
+        
+        return () => {
+            conn.stop();
+            setConnection(null);
+        }
+    }, []);
+
+    useEffect(() => {
+        if (!connection) return;
+
+        connection.on("ReceiveNotification", (data: NotificationDto) => {
+            onReceiveNotification(data);
         });
 
         return () => {
-            connection.stop()
-                .then(() => {
-                    console.log("Notification Hub disconnected");
-                })
-                .catch((err) => {
-                    console.error("Error disconnecting from Notification Hub: ", err);
-                });
+            if (connection) {
+                connection.off("ReceiveNotification");
+            }
         }
-    }, []);
+    }, [connection, onReceiveNotification]);
 }

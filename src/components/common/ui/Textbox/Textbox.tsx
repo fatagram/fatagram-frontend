@@ -37,8 +37,8 @@ const Textbox: React.FC<TextboxProps> = ({
         autoComplete={autoComplete}
         onChange={onChange} 
         disabled={disabled}
-        className={`border-[3px] bg-[var(--bg-color-secondary)] text-[var(--text-color)]
-                ${disabled ? `bg-[var(--bg-color)]` : `focus:bg-gradient-main-move 
+        className={`border-[3px] bg-[var(--second-bg-color)] text-[var(--text-color)]
+                ${disabled ? `bg-[var(--main-bg-color)]` : `focus:bg-gradient-main-move 
                 ${isWrong ? styles['primary-textbox-wrong'] : styles['primary-textbox']}`}
                 font-normal rounded-[15px] outline-none text-lg caret-[var(--main-single-color)]
                 ${className}

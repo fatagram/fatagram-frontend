@@ -223,7 +223,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     <form
       className={`relative flex flex-col justify-center
              animate-fade-in shadow-md rounded-lg p-[20px] 
-             sm:p-[30px] bg-[var(--bg-color-secondary)] gap-5
+             sm:p-[30px] bg-[var(--second-bg-color)] gap-5
             ${className}`}
     >
       {/* Overlay Loading */}

@@ -18,10 +18,10 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
     return (
         <>
             { isLoading ? <AvatarSkeletonLoading alt="Loading" size="large" 
-                    className="border-[5px] border-[var(--bg-color-secondary)]"/> 
+                    className="border-[5px] border-[var(--second-bg-color)]"/> 
                     : <Avatar src={avatar} onChange={handleSelectAvatar}
                         alt="Avatar" size="large" isCanEdit={isOwner}
-                        className="border-[5px] border-[var(--bg-color-secondary)]"/>
+                        className="border-[5px] border-[var(--second-bg-color)]"/>
             }
         </>
     )

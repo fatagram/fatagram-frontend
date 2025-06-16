@@ -28,7 +28,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             { showPolygon && <div className="absolute hidden sm:flex sm:-top-2 sm:left-[25%] -translate-x-1/2 w-0 h-0 
                                                     border-l-8 border-l-transparent 
                                                     border-r-8 border-r-transparent 
-                                                    border-b-8 border-b-[var(--bg-color)] rounded-sm"></div> }
+                                                    border-b-8 border-b-[var(--main-bg-color)] rounded-sm"></div> }
             <ul className="flex flex-col gap-2 w-full">
                 {items.map((item, index) => (
                     <li key={index}>

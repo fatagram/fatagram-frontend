@@ -143,7 +143,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
 
     return (
         <form className="relative flex flex-col items-center gap-[20px] w-[95%] max-w-[380px] 
-                        p-[20px] bg-[var(--bg-color-secondary)] shadow-md rounded-lg 
+                        p-[20px] bg-[var(--second-bg-color)] shadow-md rounded-lg 
                         sm:max-w-[380px] sm:p-[25px] animate-fade-in overflow-hidden">
             {isLoading && <OverlayLoading />}
 

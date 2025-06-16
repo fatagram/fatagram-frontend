@@ -2,7 +2,7 @@ import i18next from "i18next";
 import React, {createContext, useContext, useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
 
-const LANG_LIST = ["en", "vi"] as const;
+const LANG_LIST = ["en", "vi", "zh"] as const;
 export type Language = typeof LANG_LIST[number];
 
 interface LanguageOption {

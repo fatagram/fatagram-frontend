@@ -148,7 +148,7 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
                             <i className="fa-solid fa-reply"></i> {t("user:profileHeader.respondRequestButton")}
                         </Button>
                         {isShowRequestOptions && <Dropdown ref={requestOptionsRef}
-                            className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--bg-color)] p-2
+                            className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
                                                  rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
                             items={requestOptions} />}
                     </div>
@@ -159,7 +159,7 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
                             <i className="fa-solid fa-user-check"></i> {t("user:profileHeader.friendButton")}
                         </Button>
                         {isShowFriendOptions && <Dropdown ref={friendOptionsRef}
-                            className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--bg-color)] p-2
+                            className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
                                                  rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
                             items={friendOptions} />}
                     </div>

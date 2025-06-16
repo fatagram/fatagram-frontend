@@ -21,7 +21,9 @@ const Link: React.FC<LinkProps> = ({
         hover:text-[var(--main-single-color)] hover:cursor-pointer
         transition-all duration-100 active:scale-95 select-none
         ${className}
-        `} {...props}>{children}</RouterLink>
+        `} {...props}>
+            {children}
+        </RouterLink>
    );
 }
 

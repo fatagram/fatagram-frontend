@@ -29,18 +29,18 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
     return (
         <div className={`relative ${className}`}>
             <button ref={btnRef} className="w-full">
-                <div className={`flex items-center justify-between cursor-pointer bg-[var(--bg-color-fourth)] 
-                        px-4 py-2 rounded-xl shadow-md gap-5 hover:bg-[var(--bg-color-secondary)]`} onClick={() => setIsOpen(!isOpen)}>
+                <div className={`flex items-center justify-between cursor-pointer bg-[var(--fourth-bg-color)] 
+                        px-4 py-2 rounded-xl shadow-md gap-5 hover:bg-[var(--second-bg-color)]`} onClick={() => setIsOpen(!isOpen)}>
                     <Label size="md-2">{options.find((opt) => opt.key === selected)?.value}</Label>
                     <i className="fa-solid fa-caret-down"></i>
                 </div>
             </button>
 
-            {isOpen && <div className="absolute w-full animate-dropdown-slide bg-[var(--bg-color-fourth)] rounded-lg shadow-md mt-1 z-50"
+            {isOpen && <div className="absolute w-full animate-dropdown-slide bg-[var(--fourth-bg-color)] rounded-lg shadow-md mt-1 z-50"
                     ref={selectBoxRef}>
                     <ul className="p-1">
                         {options.map((item, index) => (
-                            <li key={index} className="px-4 py-2 hover:bg-[var(--bg-color-secondary)] cursor-pointer rounded-lg"
+                            <li key={index} className="px-4 py-2 hover:bg-[var(--second-bg-color)] cursor-pointer rounded-lg"
                                 onClick={() => {
                                     setSelected(item.key);
                                     onSelect(item.key);

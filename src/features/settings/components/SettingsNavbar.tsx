@@ -51,7 +51,7 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
         `}>
             <Text size="xl" weight="bold" className="p-2 pl-5 text-gradient-main">{t("settings:navbar.title")}</Text>
 
-            <div className="h-[1px] bg-[var(--bg-color-secondary)] w-full"></div>
+            <div className="h-[1px] bg-[var(--second-bg-color)] w-full"></div>
             <Text onClick={handleToggleAuthSettings} size="lg" className="p-2 pl-5 !font-bold">{t("settings:navbar.privacy.title")}</Text>
                 { showAuthSettings && <ul className="w-full animate-dropdown-slide">
                     {authSettings.map((item, index) => (

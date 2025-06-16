@@ -30,7 +30,7 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
     }
 
     return (
-        <div className="flex flex-col items-start bg-[var(--bg-color-secondary)] 
+        <div className="flex flex-col items-start bg-[var(--second-bg-color)] 
                 sm:w-[calc(25%-6px)] 
                 w-[calc(50%-4px)]
                 sm:min-w-[220px] h-auto

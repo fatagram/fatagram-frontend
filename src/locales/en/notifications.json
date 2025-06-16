@@ -1,0 +1,11 @@
+{
+    "notifications": {
+        "title": "Notifications",
+        "no-notifications": "No notifications available.",
+        "has-a-friend-request": "has sent you a friend request.",
+        "accepted-friend-request": "has accepted your friend request.",
+        "accepted": "Accepted friend request.",
+        "declined": "Declined friend request.",
+        "showMore": "Show more"
+    }
+}

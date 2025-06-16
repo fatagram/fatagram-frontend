@@ -30,8 +30,8 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({className, onSelect}) => {
             ${className}
         `} title={t("friends:navbar.title")}>
 
-            <div className="h-[1px] bg-[var(--bg-color-secondary)] w-full"></div>
-                <ul className="w-full animate-dropdown-slide">
+            <div className="h-[1px] bg-[var(--second-bg-color)] w-full"></div>
+                <ul className="w-full animate-dropdown-slide ">
                     {authSettings.map((item, index) => (
                         <li key={index} className="flex" onClick={onSelect}>
                             <PageNavbarItem path={item.path}

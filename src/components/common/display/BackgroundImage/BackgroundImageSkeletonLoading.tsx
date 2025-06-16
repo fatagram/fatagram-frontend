@@ -13,7 +13,7 @@ const BackgroundImageSkeletonLoading: React.FC<BackgroundImageSkeletonLoadingPro
     className
 }) => {
     return (
-        <div className={`${className} animate-pulse bg-[var(--bg-color-fourth)] rounded-2xl shadow-lg`}>
+        <div className={`${className} animate-pulse bg-[var(--fourth-bg-color)] rounded-2xl shadow-lg`}>
 
         </div>
     )

@@ -84,7 +84,7 @@ const Avatar: React.FC<AvatarProps> = ({
                     <i className="fa-solid fa-camera text-white text-2xl"></i>
                 </SelectFile> : null }
 
-            <div className={`absolute inset-0 bg-[var(--bg-color)] overflow-hidden`}>
+            <div className={`absolute inset-0 bg-[var(--main-bg-color)] overflow-hidden`}>
                 <img
                     src={imgSrc || emptyAvatar}
                     alt={alt}

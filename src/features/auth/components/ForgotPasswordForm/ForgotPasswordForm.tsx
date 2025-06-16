@@ -12,7 +12,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({switchToLogin}) 
 {
     return (
     <div className="flex flex-col items-center gap-[20px] w-[95%]  max-w-[380px] 
-                    p-[20px] bg-[var(--bg-color-secondary)] shadow-md rounded-lg 
+                    p-[20px] bg-[var(--second-bg-color)] shadow-md rounded-lg 
                     sm:max-w-[380px] sm:p-[25px] animate-fade-in">             
     <Logo hasSlogan={false}/>
     <Text size="lg-3" weight="bold" className="text-[var(--third-single-color)] font-bold select-none">Reset Password</Text>

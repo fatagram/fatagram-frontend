@@ -1,0 +1,12 @@
+{
+    "title" : "朋友",
+    "description" : "欢迎来到主页！这里您可以找到最新的更新和新闻。",
+    "navbar": {
+        "title" : "朋友",
+        "suggestedFriends" : "推荐朋友",
+        "invite" : "好友请求"
+    },
+    "friendRequest": {
+        "noRequests": "没有好友请求"
+    }
+}

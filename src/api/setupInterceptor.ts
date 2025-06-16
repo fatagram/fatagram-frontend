@@ -37,7 +37,7 @@ apiClient.interceptors.response.use((response: AxiosResponse) => response,
             try {
                 // Refresh token
                 const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
-                const refreshResult = await axios.post(`${apiUrl}/api/auth/refresh-token`, 
+                const refreshResult = await axios.post(`${apiUrl}/api/auth/refreshToken`, 
                     { refreshToken: refreshToken }, 
                     { withCredentials: true })
 

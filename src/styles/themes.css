@@ -2,10 +2,10 @@
     --font-size: 16px;
     --border-radius: 8px;
     
-    --bg-color: #ffffff;
-    --bg-color-secondary: #f9f9f9;
-    --bg-color-third: #ecfaf5;
-    --bg-color-fourth: #f0f0f0;
+    --main-bg-color: #ffffff;
+    --second-bg-color: #f9f9f9;
+    --third-bg-color: #ecfaf5;
+    --fourth-bg-color: #f0f0f0;
 
         /* Single colors */
     --main-single-color: #2bd48b;

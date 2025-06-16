@@ -76,7 +76,7 @@ const ProfileMenu: React.FC = () => {
                 <Avatar src={avatar} alt="Profile" size="mini_4"/>
             </Button>
             {isOpenMenu && 
-                <div className="absolute top-[120%] right-0 bg-[var(--bg-color)] shadow-xl rounded-xl 
+                <div className="absolute top-[120%] right-0 bg-[var(--main-bg-color)] shadow-xl rounded-xl 
                     sm:p-2 p-6 z-10
                     flex flex-col gap-2 min-w-[300px] min-h-[100px] sm:w-auto w-screen sm:h-auto h-screen"    
                             ref={menuRef}>
@@ -97,7 +97,7 @@ const ProfileMenu: React.FC = () => {
                         </li>
                         <li><Button size="medium" variant="third" className="flex items-center justify-start w-full gap-3 text-red-400"
                             onClick={handleLogout}>
-                                <Text size="md" className="flex items-center gap-3">
+                                <Text size="md" className="flex items-center gap-3" color="danger">
                                     <i className="fa-solid fa-right-from-bracket"></i>
                                     {t("navbar.profileMenu.logout")}
                                 </Text>

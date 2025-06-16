@@ -17,14 +17,14 @@ const NavbarFooter: React.FC<NavbarFooterProps> = ({
         ]
 
     return (
-        <div className={`flex flex-wrap sm:flex-none py-1 sm:pl-10 sm:pr-10 pl-1 pr-1 bg-[var(--bg-color-third)] gap-3
+        <div className={`flex flex-wrap sm:flex-none py-1 sm:pl-10 sm:pr-10 pl-1 pr-1 bg-[var(--third-bg-color)] gap-3
             ${className}
             shadow-md items-center justify-between`}>
             {isAuthenticated &&
                 <div className="flex flex-1 gap-3 items-center">
                     <div className="flex justify-center w-full md:w-auto">
                         {navItems.map((item, index) => (
-                            <NavbarItem path={item.path} key={index}>
+                            <NavbarItem path={item.path} key={index} end="/">
                                 {item.icon}
                             </NavbarItem>
                         ))}

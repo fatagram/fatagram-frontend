@@ -43,7 +43,7 @@ const Button: React.FC<ButtonProps> = ({
     const variants: Record<string, string> = {
         'primary': 'bg-gradient-main text-white hover:bg-gradient-main-move',
         'secondary': 'bg-[var(--btn-color)] transition-all duration-200 ease text-[var(--text-color)] hover:bg-[var(--btn-hover-color)] ',
-        'third' : 'bg-[var(--bg-color)] transition-all duration-200 ease text-[var(--text-color)] hover:bg-[var(--btn-color)]'
+        'third' : 'bg-[var(--main-bg-color)] transition-all duration-200 ease text-[var(--text-color)] hover:bg-[var(--btn-color)]'
     }
 
     return (

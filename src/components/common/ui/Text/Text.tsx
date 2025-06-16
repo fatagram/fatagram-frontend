@@ -77,10 +77,10 @@ const Text: React.FC<TextProps> = ({
 
     switch (color) {
         case "primary":
-            colorClass = "var(--text-color)";
+            colorClass = "text-[var(--text-color)]";
             break;
         case "secondary":
-            colorClass = "var(--text-color-secondary)";
+            colorClass = "text-[var(--main-single-color)]";
             break;
         case "danger":
             colorClass = "text-red-400";

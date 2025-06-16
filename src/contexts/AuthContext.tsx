@@ -61,8 +61,6 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
     const checkAuth = useCallback(async () => {
         // const userService = new UserService();
         const result: Result<{userId: string | undefined, urlName: string | undefined}> = await userProfileService.GetMe();
-        // delay 200ms
-        await new Promise(resolve => setTimeout(resolve, 200));
         if (result.success) {
             setUserId(result.data?.userId);
             setUrlName(result.data?.urlName);
@@ -94,7 +92,6 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
         window.addEventListener("focus", handleFocus);
         return () => window.removeEventListener("focus", handleFocus);
       }, [checkAuth]);
-
 
     return ( 
         <AuthContext.Provider value={{ 

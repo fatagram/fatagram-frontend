@@ -17,10 +17,10 @@ function RegisterPage() {
     return ( 
         <div className="relative flex flex-col items-center justify-center h-full
                         background-image">
-            <div className="relative w-full flex justify-center lg:justify-between m-2 z-10 backdrop-blur-sm bg-[var(--bg-color-secondary)]
+            <div className="relative w-full flex justify-center lg:justify-between m-2 z-10 backdrop-blur-sm bg-[var(--second-bg-color)]
                 lg:max-w-[75%] max-w-[95%] rounded-lg overflow-hidden sm:h-[95vh] h-auto">
                 <div className="hidden relative sm:flex flex-col register-bg w-full rounded-lg h-full items-center justify-center gap-1
-                        border-[15px] border-[var(--bg-color-secondary)] border-r-0">
+                        border-[15px] border-[var(--second-bg-color)] border-r-0">
                     <Text weight="extrabold" 
                         className="relative flex items-center z-50 text-white text-center shadow-lg rounded-lg backdrop-blur-sm h-[70px]
                             xl:text-[50px] lg:text-[40px] text-[30px]">

@@ -4,5 +4,5 @@
 @import url('./styles/fonts.css');
 
 html {
-    background-color: var(--bg-color);
+    background-color: var(--main-bg-color);
 }

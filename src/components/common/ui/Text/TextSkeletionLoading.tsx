@@ -25,7 +25,7 @@ const TextSkeletionLoading: React.FC<TextSkeletionLoadingProps> = ({
 
     return (
         <div
-            className={`animate-pulse select-none rounded-lg bg-[var(--bg-color-fourth)] shadow-lg
+            className={`animate-pulse select-none rounded-lg bg-[var(--fourth-bg-color)] shadow-lg
                 ${sizeClass} ${className}`}
         >
 

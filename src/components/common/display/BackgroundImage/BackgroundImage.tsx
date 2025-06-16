@@ -22,7 +22,7 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({
 
     return (
         <div className={`user-bg-image
-                        ${src ?? "h-[200px] !bg-[var(--bg-color-third)]"}
+                        ${src ?? "h-[200px] !bg-[var(--third-bg-color)]"}
                         ${className} `} 
             aria-label={alt}>
                 {children}

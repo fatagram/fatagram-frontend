@@ -52,8 +52,8 @@ const AvatarSkeletonLoading: React.FC<AvatarSkeletonLoadingProps> = ({
         <div className={`relative ${sizeClass} rounded-full object-cover select-none ${className} 
             overflow-hidden`}>
 
-            <div className="absolute inset-0 bg-[var(--bg-color)] rounded-full overflow-hidden">
-                <div className="animate-pulse bg-[var(--bg-color-fourth)] w-full h-full rounded-full"></div>
+            <div className="absolute inset-0 bg-[var(--main-bg-color)] rounded-full overflow-hidden">
+                <div className="animate-pulse bg-[var(--fourth-bg-color)] w-full h-full rounded-full"></div>
                 
             </div>
             

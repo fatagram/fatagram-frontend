@@ -1,7 +1,8 @@
 {
     "language" : {
         "en" : "EN Tiếng Anh",
-        "vi" : "VN Tiếng Việt"
+        "vi" : "VN Tiếng Việt",
+        "zh" : "CN Tiếng Trung"
     },
     "navbar" : {
         "profileMenu" : {

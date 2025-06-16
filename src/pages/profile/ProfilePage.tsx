@@ -5,6 +5,7 @@ import NotFoundPage from "../not_found/NotFoundPage";
 import { useParams } from "react-router-dom";
 import useUserId from "@/features/user/hooks/useUserId";
 import LoadingPage from "../loading/LoadingPage";
+import ProfileBody from "@/features/user/components/ProfileBody/ProfileBody";
 
 const ProfilePage: React.FC = () => {
     const { userParam } = useParams<{ userParam: string }>();
@@ -14,10 +15,11 @@ const ProfilePage: React.FC = () => {
     if (!userExist || !userId) return <NotFoundPage/>;
 
     return (
-        <div className="relative justify-start items-center flex flex-col pt-2 h-screen bg-[var(--bg-color)]">
-            <div className="flex justify-center w-full pb-[280px] lg:pb-32 bg-[var(--bg-color-secondary)] pt-16">
+        <div className="relative justify-start items-center flex flex-col pt-2 h-screen bg-[var(--main-bg-color)]">
+            <div className="flex justify-center w-full pb-[280px] lg:pb-32 bg-[var(--second-bg-color)] pt-16">
                 <ProfileHeader userId={userId ?? ""}/> 
             </div>
+            <ProfileBody userParam={userParam}/>
         </div>
     );
 };
