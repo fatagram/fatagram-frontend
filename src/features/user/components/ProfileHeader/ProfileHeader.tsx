@@ -152,7 +152,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
                         
                         { !isOwner && isAuthenticated && <Button size="medium" variant="secondary"><i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}</Button> }
                         <Button size="medium" variant="secondary"><i className="fa-solid fa-circle-info"></i> 
-                            <Text className="hidden sm:inline-flex ml-1">{t("user:profileHeader.moreButton")}</Text>
+                            {/* <Text className="hidden sm:inline-flex ml-1">{t("user:profileHeader.moreButton")}</Text> */}
                         </Button>
                     </div>
                 }  

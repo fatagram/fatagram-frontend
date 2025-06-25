@@ -3,6 +3,7 @@ import apiUrl from "@/config";
 import { apiClient } from "../setupInterceptor";
 import { ApiResponse } from "../common";
 import { TimeUnit } from '@/utils/time_unit';
+import { FriendsDto } from './dto/friend.dto';
 
 const API_URL = `${apiUrl}/api/friendship`;
 
@@ -120,6 +121,24 @@ export class FriendshipService {
         }
         catch (error: any)
         {
+            return handleApiError(error);
+        }
+    }
+
+
+    async GetFriends(userId: string, page: number, pageSize: number, keyword?: string): Promise<Result<FriendsDto>> {
+        try {
+            const params = new URLSearchParams();
+
+            if (keyword) params.append("keyword", keyword);
+            params.append("page", page.toString());
+            params.append("pageSize", pageSize.toString());
+
+            const res = await apiClient.get(`${API_URL}/friends/${userId}?${params.toString()}`);
+
+            const response = res.data as ApiResponse<FriendsDto>;
+            return { success: true, data: response.data };
+        } catch (error: any) {
             return handleApiError(error);
         }
     }

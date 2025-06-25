@@ -11,7 +11,6 @@ const sizeClasses = {
     "3xl": 'px-14 py-7 text-3xl ',
 };
 
-
 type Size = keyof typeof sizeClasses;
 
 // ButtonProps interface

@@ -1,7 +1,7 @@
 import React, { useLayoutEffect } from "react";
 import { Outlet } from "react-router-dom";
 import Text from "@/components/common/ui/Text";
-import FriendsNavbar from "@/features/friends/components/FriendsNavbar";
+import FriendsNavbar from "@/pages/friends/FriendsNavbar";
 import { useTranslation } from "react-i18next";
 
 interface FriendsPageProps{

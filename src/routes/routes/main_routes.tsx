@@ -12,8 +12,8 @@ import NoNavbarLayout from "@/components/layout/Layout/NoNavbarLayout";
 import ProtectedRoute from "../components/protected_route";
 import PublicRoute from "../components/public_route";
 import { friendsRoutes } from "./friends_routes";
-import PostsPage from "@/pages/profile/sub_pages/PostsPage";
-import FriendsPage from "@/pages/profile/sub_pages/FriendsPage";
+import PostsPage from "@/pages/profile/sub_pages/posts/PostsPage";
+import ProfileFriendsPage from "@/pages/profile/sub_pages/friends/ProfileFriendsPage";
 
 export const mainRoutes: RouteType[] = [
     {
@@ -44,7 +44,7 @@ export const mainRoutes: RouteType[] = [
                     },
                     {
                         path: "friends",
-                        element: <FriendsPage />,
+                        element: <ProfileFriendsPage />,
                     }
                 ]
             },

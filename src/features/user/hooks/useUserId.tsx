@@ -8,6 +8,7 @@ const useUserId = (userParam: string) => {
     // const userService = useMemo(() => new UserService(), []);
     
     useEffect(() => {
+        setLoading(true);
         const fetchUserId = async () => {
             if (!userParam) {
                 return;
