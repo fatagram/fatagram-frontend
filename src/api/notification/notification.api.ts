@@ -10,7 +10,12 @@ export class NotificationService {
 
     public async getNotifications(page: number, pageSize: number) : Promise<Result<NotificationsDto>> {
         try {
-            const res = await apiClient.get(`${API_URL}/getNotifications?page=${page}&pageSize=${pageSize}`);
+            const res = await apiClient.get(`${API_URL}/getNotifications`, {
+                params: {
+                    page,
+                    pageSize
+                }
+            });
             console.log(res);
             const response = res.data as ApiResponse<NotificationsDto>;
             

@@ -106,7 +106,12 @@ export class FriendshipService {
             },
         }[], total: number}>> {
         try {
-            const res = await apiClient.get(`${API_URL}/requests?page=${page}&pageSize=${pageSize}`);
+            const res = await apiClient.get(`${API_URL}/requests`, {
+                params: {
+                    page,
+                    pageSize
+                }
+            });
             const response = res.data as ApiResponse<{friendRequests: {
                 senderId: string,
                 senderUrlName: string,

@@ -10,7 +10,7 @@ import RegisterDto from "@/api/user/dto/register.dto";
 import { ErrorKey, ErrorCodes } from "@/api/user/dto/register.dto";
 import { RegisterService } from "@/api/user/register.api";
 import PasswordBox from "@/components/common/ui/Textbox/PasswordBox";
-import OverlayLoading from "@/components/common/utils/OverlayLoading/OverlayLoading";
+import OverlayLoading from "@/components/common/widgets/OverlayLoading/OverlayLoading";
 import Text from "@/components/common/ui/Text";
 import { useTranslation } from "react-i18next";
 import { Result } from "@/api/common";

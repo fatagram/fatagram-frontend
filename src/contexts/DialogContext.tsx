@@ -1,5 +1,5 @@
-import { DialogBoxProps } from "@/components/common/utils/DialogBox/DialogBox";
-import OverlayDialog from "@/components/common/utils/DialogBox/OverlayDialog";
+import { DialogBoxProps } from "@/components/common/widgets/DialogBox/DialogBox";
+import OverlayDialog from "@/components/common/widgets/DialogBox/OverlayDialog";
 import React, { useCallback, useContext } from "react";
 
 interface DialogContextType {

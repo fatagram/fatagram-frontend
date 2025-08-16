@@ -1,7 +1,7 @@
 import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/components/common/ui/Button/Button";
 import Avatar from "@/components/common/display/Avatar/Avatar";
-import { userProfileService } from "@/api/user/user_profile.api";
+import { userProfileService } from "@/api/user/user-profile";
 import useClickOutside from "@/hooks/useClickOutside";
 import Text from "@/components/common/ui/Text";
 import { useNavigate } from "react-router-dom";

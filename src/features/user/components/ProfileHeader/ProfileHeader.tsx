@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import Button from "@/components/common/ui/Button/Button";
-import { userProfileService } from "@/api/user/user_profile.api";
+import { userProfileService } from "@/api/user/user-profile";
 import { friendshipService } from "@/api/user/friendship.api";
 import LabelSkeletonLoading from "@/components/common/ui/Text/TextSkeletionLoading";
 import Text from "@/components/common/ui/Text";
@@ -9,7 +9,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProfileBackground from "./ProfileBackground";
 import ProfileAvatar from "./ProfileAvatar";
 import AddFriendButton from "./AddFriendButton";
-import OverlayDialog from "@/components/common/utils/DialogBox/OverlayDialog";
+import OverlayDialog from "@/components/common/widgets/DialogBox/OverlayDialog";
 import { useDialog } from "@/contexts/DialogContext";
 
 export interface ProfileHeaderProps {

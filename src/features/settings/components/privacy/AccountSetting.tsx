@@ -1,7 +1,7 @@
 import SettingCard from "@/components/common/container/Card";
 import EditableField from "@/components/common/container/Card/SettingItem/EditableField";
 import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
-import { userProfileService } from "@/api/user/user_profile.api";
+import { userProfileService } from "@/api/user/user-profile";
 import React, { useEffect } from "react";
 import ChangeUrlNameDto, { ErrorCodes } from "@/api/user/dto/change_url_name.dto";
 import { useLocation, useNavigate } from "react-router-dom";

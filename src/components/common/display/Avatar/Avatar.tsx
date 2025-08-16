@@ -1,6 +1,6 @@
 import React, { useEffect } from "react";
 import emptyAvatar from "@/assets/images/empty_avatar.png";
-import SelectFile from "@/components/common/utils/SelectFile";
+import SelectFile from "@/components/common/widgets/SelectFile";
 
 export const sizeClasses = {
     // Mini sizes

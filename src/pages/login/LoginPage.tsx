@@ -2,7 +2,7 @@ import React, { useEffect } from "react";
 import LoginForm from "@/features/auth/components/LoginForm/LoginForm";
 import Footer from "@/components/layout/Footer/Footer";
 import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm/ForgotPasswordForm";
-import SelectLanguage from "@/components/common/utils/SelectLanguage";
+import SelectLanguage from "@/components/common/widgets/SelectLanguage";
 
 // LoginPage function
 // This function is a React component that renders the login page.

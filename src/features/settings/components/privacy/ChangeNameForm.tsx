@@ -1,5 +1,5 @@
 import { ErrorCodes } from "@/api/user/dto/change_name.dto";
-import { userProfileService } from "@/api/user/user_profile.api";
+import { userProfileService } from "@/api/user/user-profile";
 import Button from "@/components/common/ui/Button";
 import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
 import Textbox from "@/components/common/ui/Textbox";

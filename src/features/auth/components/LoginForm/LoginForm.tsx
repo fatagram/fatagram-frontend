@@ -9,7 +9,7 @@ import { LoginValidator } from "@/api/auth/validate/login.dto.validate";
 import LoginDto, { ErrorCodes, ErrorKey } from "@/api/auth/dto/login.dto";
 import { LoginResponse } from "@/api/auth/auth.api";
 import PasswordBox from "@/components/common/ui/Textbox/PasswordBox";
-import OverlayLoading from "@/components/common/utils/OverlayLoading/OverlayLoading";
+import OverlayLoading from "@/components/common/widgets/OverlayLoading/OverlayLoading";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTranslation } from "react-i18next";
 import Text from "@/components/common/ui/Text";

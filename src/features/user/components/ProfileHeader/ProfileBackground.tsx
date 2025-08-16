@@ -3,7 +3,7 @@ import BackgroundImage from "@/components/common/display/BackgroundImage";
 import { BackgroundImageSkeletonLoading } from "@/components/common/display/BackgroundImage";
 import { useTranslation } from "react-i18next";
 import Text from "@/components/common/ui/Text";
-import SelectFile from "@/components/common/utils/SelectFile";
+import SelectFile from "@/components/common/widgets/SelectFile";
 
 interface ProfileBackgroundProps {
     isLoading: boolean;
