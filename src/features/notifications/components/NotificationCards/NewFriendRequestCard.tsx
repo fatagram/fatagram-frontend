@@ -60,18 +60,18 @@ const NewFriendRequestCard: React.FC<NewFriendRequestCardProps> = ({
                 <Text size='sm-2'>
                     <Text size='sm-2' weight='bold'>{notificationDto.actorName}</Text> {t("notifications:notifications.has-a-friend-request")}
                 </Text>
-                <Text size='sm' color='secondary'>
+                <Text size='sm-1' color='secondary'>
                     {notificationDto.timeDistance.unit === TimeUnit.Seconds || notificationDto.timeDistance.unit === TimeUnit.Miliseconds
-                                                ? t("times:just_now")
-                                                : `${t(`${TimeUnitTranslateMap[notificationDto.timeDistance.unit]}.${
-                                                    notificationDto.timeDistance.value === 1 ? "one" : "other"}`, { count: notificationDto.timeDistance.value })} 
-                                                ${t("times:ago")}`}
+                                    ? t("times:just_now")
+                                    : `${t(`${TimeUnitTranslateMap[notificationDto.timeDistance.unit]}.${
+                                        notificationDto.timeDistance.value === 1 ? "one" : "other"}`, { count: notificationDto.timeDistance.value })} 
+                                    ${t("times:ago")}`}
                 </Text>
                 { !message ? <div className='flex gap-1 mt-1 justify-start'>
-                    <Button size='small' variant='primary' onClick={handleAccept}>
+                    <Button size='sm-1' variant='primary' onClick={handleAccept}>
                         {t("user:profileHeader.acceptButton")}
                     </Button>
-                    <Button size='small' variant='secondary' onClick={handleDelete}>
+                    <Button size='sm-1' variant='secondary' onClick={handleDelete}>
                         {t("user:profileHeader.declineButton")}
                     </Button>
                 </div> : <Text size='sm-2' className='opacity-70'>{message}</Text> }

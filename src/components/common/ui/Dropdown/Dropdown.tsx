@@ -32,7 +32,7 @@ const Dropdown: React.FC<DropdownProps> = ({
             <ul className="flex flex-col gap-2 w-full">
                 {items.map((item, index) => (
                     <li key={index}>
-                        <Button size="medium" variant="third" className="w-full text-left pl-3"
+                        <Button size="md-1" variant="third" className="w-full text-left pl-3"
                                 onClick={() => { item.onClick?.(); onSelect?.(item);}}>
                             {item.content}
                         </Button>

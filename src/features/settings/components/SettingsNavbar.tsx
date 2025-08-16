@@ -49,10 +49,10 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
         <div className={`flex flex-col gap-2
             ${className}
         `}>
-            <Text size="xl" weight="bold" className="p-2 pl-5 text-gradient-main">{t("settings:navbar.title")}</Text>
+            <Text size="xl-1" weight="bold" className="p-2 pl-5 text-gradient-main">{t("settings:navbar.title")}</Text>
 
             <div className="h-[1px] bg-[var(--second-bg-color)] w-full"></div>
-            <Text onClick={handleToggleAuthSettings} size="lg" className="p-2 pl-5 !font-bold">{t("settings:navbar.privacy.title")}</Text>
+            <Text onClick={handleToggleAuthSettings} size="lg-1" className="p-2 pl-5 !font-bold">{t("settings:navbar.privacy.title")}</Text>
                 { showAuthSettings && <ul className="w-full animate-dropdown-slide">
                     {authSettings.map((item, index) => (
                         <li key={index} className="flex" onClick={onSelect}>
@@ -62,7 +62,7 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
                         </li>
                     ))}
                 </ul> }
-            <Text onClick={handleToggleGeneralSettings} size="lg" className="p-2 pl-5 !font-bold">{t("settings:navbar.general.title")}</Text>
+            <Text onClick={handleToggleGeneralSettings} size="lg-1" className="p-2 pl-5 !font-bold">{t("settings:navbar.general.title")}</Text>
             { showGeneralSettings && <ul className="w-full animate-dropdown-slide">
                 {generalSettings.map((item, index) => (
                     <li key={index} className="flex" onClick={onSelect}>

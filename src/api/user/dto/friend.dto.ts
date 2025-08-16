@@ -4,6 +4,7 @@ export interface FriendDto {
     avatar: string | null;
     name: string;
     urlName: string | null;
+    isFriend: boolean;
 }
 
 export interface FriendsDto {

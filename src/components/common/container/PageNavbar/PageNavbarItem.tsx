@@ -26,10 +26,10 @@ const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
                 onClick={() => navigate(path)}
                 className="!w-full text-left !px-3">
                 <div className="grid grid-cols-10 items-start">
-                    <Text size="lg" className="flex justify-center items-center h-full col-span-2">{icon}</Text>
+                    <Text size="lg-1" className="flex justify-center items-center h-full col-span-2">{icon}</Text>
                     <div className="col-span-8">
                         <Text size="md-2">{title}</Text>
-                        {description && <Text size="sm" weight="light">{description}</Text>}
+                        {description && <Text size="sm-1" weight="light">{description}</Text>}
                     </div>
                 </div>
             </Button>

@@ -1,16 +1,19 @@
 import { friendshipService } from "@/api/user/friendship.api";
 import Button from "@/components/common/ui/Button";
 import Dropdown from "@/components/common/ui/Dropdown/Dropdown";
+import { Size } from "@/components/common/ui/styles/size";
 import useClickOutside from "@/hooks/useClickOutside";
 import React, { RefObject, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 
 interface AddFriendButtonProps {
     uid?: string;
+    size?: Size
 }
 
 const AddFriendButton: React.FC<AddFriendButtonProps> = ({
-    uid
+    uid,
+    size="md-1"
 }) => {
 
     const { t } = useTranslation() as { t: (key: string) => string };
@@ -64,86 +67,86 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
             }
         }, [uid, friendshipService]);
     
-        const handleCancelAddFriendRequest = useCallback(async () => {
-            const response = await friendshipService.CancelAddFriendRequest(uid ? uid : "");
-            if (response.success) {
-                setFriendshipStatus("None");
-            }
-            else {
-                console.log(response.errorCodes);
-            }
-        }, [uid, friendshipService]);
-    
-        const handleAcceptAddFriendRequest = useCallback(async (id: string | undefined) => {
-            const response = await friendshipService.AcceptAddFriendRequest(id ? id : "");
-            if (response.success) {
-                setFriendshipStatus("Friend");
-            }
-            else {
-                console.log(response.errorCodes);
-            }
-        }, [friendshipService]);
-    
-        const handleDeclineAddFriendRequest = useCallback(async (id: string | undefined) => {
-            const response = await friendshipService.DeclineAddFriendRequest(id ? id : "");
-            if (response.success) {
-                setFriendshipStatus("None");
-            }
-            else {
-                console.log(response.errorCodes);
-            }
-        }, [friendshipService]);
-    
-        // Handle unfriend action
-        const handleUnfriend = useCallback(async (id: string | undefined) => {
-            const response = await friendshipService.Unfriend(id ? id : "");
-            if (response.success) {
-                setFriendshipStatus("None");
-            }
-            else {
-                console.log(response.errorCodes);
-            }
-        }, [friendshipService]);
-    
-        // Dropdown options for friend actions
-        const friendOptions = useMemo(() => [
-            {
-                id: "unfriend",
-                content: <div><i className="fa-solid fa-user-xmark mr-2"></i> {t("user:profileHeader.unfriendButton")}</div>,
-                onClick: async () => { await handleUnfriend?.(uid); },
-            }
-        ], [uid, handleUnfriend, t]);
-    
-        // Dropdown options for request actions
-        const requestOptions = useMemo(() => [
-            {
-                id: "acceptRequest",
-                content: <div><i className="fa-solid fa-check mr-2"></i> {t("user:profileHeader.acceptButton")}</div>,
-                onClick: async () => await handleAcceptAddFriendRequest?.(uid)
-            },
-            {
-                id: "cancelRequest",
-                content: <div><i className="fa-solid fa-xmark mr-2"></i> {t("user:profileHeader.declineButton")}</div>,
-                onClick: async () => await handleDeclineAddFriendRequest?.(uid)
-            }
-        ], [uid, handleAcceptAddFriendRequest, handleDeclineAddFriendRequest, t]);
+    const handleCancelAddFriendRequest = useCallback(async () => {
+        const response = await friendshipService.CancelAddFriendRequest(uid ? uid : "");
+        if (response.success) {
+            setFriendshipStatus("None");
+        }
+        else {
+            console.log(response.errorCodes);
+        }
+    }, [uid, friendshipService]);
+
+    const handleAcceptAddFriendRequest = useCallback(async (id: string | undefined) => {
+        const response = await friendshipService.AcceptAddFriendRequest(id ? id : "");
+        if (response.success) {
+            setFriendshipStatus("Friend");
+        }
+        else {
+            console.log(response.errorCodes);
+        }
+    }, [friendshipService]);
+
+    const handleDeclineAddFriendRequest = useCallback(async (id: string | undefined) => {
+        const response = await friendshipService.DeclineAddFriendRequest(id ? id : "");
+        if (response.success) {
+            setFriendshipStatus("None");
+        }
+        else {
+            console.log(response.errorCodes);
+        }
+    }, [friendshipService]);
+
+    // Handle unfriend action
+    const handleUnfriend = useCallback(async (id: string | undefined) => {
+        const response = await friendshipService.Unfriend(id ? id : "");
+        if (response.success) {
+            setFriendshipStatus("None");
+        }
+        else {
+            console.log(response.errorCodes);
+        }
+    }, [friendshipService]);
+
+    // Dropdown options for friend actions
+    const friendOptions = useMemo(() => [
+        {
+            id: "unfriend",
+            content: <div><i className="fa-solid fa-user-xmark mr-2"></i> {t("user:profileHeader.unfriendButton")}</div>,
+            onClick: async () => { await handleUnfriend?.(uid); },
+        }
+    ], [uid, handleUnfriend, t]);
+
+    // Dropdown options for request actions
+    const requestOptions = useMemo(() => [
+        {
+            id: "acceptRequest",
+            content: <div><i className="fa-solid fa-check mr-2"></i> {t("user:profileHeader.acceptButton")}</div>,
+            onClick: async () => await handleAcceptAddFriendRequest?.(uid)
+        },
+        {
+            id: "cancelRequest",
+            content: <div><i className="fa-solid fa-xmark mr-2"></i> {t("user:profileHeader.declineButton")}</div>,
+            onClick: async () => await handleDeclineAddFriendRequest?.(uid)
+        }
+    ], [uid, handleAcceptAddFriendRequest, handleDeclineAddFriendRequest, t]);
 
     return (
         <div>
             <>
                 {friendshipStatus === "None" ? (
-                    <Button size="medium"
+                    <Button size={size}
                         onClick={handleSentAddFriendRequest}>
                         <i className="fa-solid fa-plus"></i> {t("user:profileHeader.addFriendButton")}
                     </Button>
                 ) : friendshipStatus === "SentByMe" ? (
-                    <Button size="medium"
+                    <Button size={size}
                         onClick={handleCancelAddFriendRequest}>
                         <i className="fa-solid fa-xmark"></i> {t("user:profileHeader.cancelRequestButton")}
                     </Button>
                 ) : friendshipStatus === "SentByThem" ? (
                     <div className="sm:relative">
-                        <Button size="medium" ref={btnRequestRef}
+                        <Button size={size} ref={btnRequestRef}
                             onClick={() => { setIsShowRequestOptions(!isShowRequestOptions) }}>
                             <i className="fa-solid fa-reply"></i> {t("user:profileHeader.respondRequestButton")}
                         </Button>
@@ -154,7 +157,7 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
                     </div>
                 ) : (
                     <div className="sm:relative">
-                        <Button size="medium" ref={btnFriendRef}
+                        <Button size={size} ref={btnFriendRef}
                             onClick={() => { setIsShowFriendOptions(!isShowFriendOptions) }}>
                             <i className="fa-solid fa-user-check"></i> {t("user:profileHeader.friendButton")}
                         </Button>

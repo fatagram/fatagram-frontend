@@ -25,7 +25,7 @@ const AcceptedFriendRequestCard: React.FC<AcceptedFriendRequestCardProps> = ({
                 <Text size='sm-2'>
                     <Text size='sm-2' weight='bold'>{notificationDto.actorName}</Text> {t("notifications:notifications.accepted-friend-request")}
                 </Text>
-                <Text size='sm' color='secondary'>
+                <Text size='sm-1' color='secondary'>
                     {notificationDto.timeDistance.unit === TimeUnit.Seconds || notificationDto.timeDistance.unit === TimeUnit.Miliseconds
                                                 ? t("times:just_now")
                                                 : `${t(`${TimeUnitTranslateMap[notificationDto.timeDistance.unit]}.${

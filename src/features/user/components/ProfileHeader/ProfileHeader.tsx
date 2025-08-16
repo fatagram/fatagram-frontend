@@ -1,6 +1,6 @@
 import React, { useMemo } from "react";
 import Button from "@/components/common/ui/Button/Button";
-import { userProfileService } from "@/api/user/user-profile";
+import { userProfileService } from "@/api/user/user-profile.api";
 import { friendshipService } from "@/api/user/friendship.api";
 import LabelSkeletonLoading from "@/components/common/ui/Text/TextSkeletionLoading";
 import Text from "@/components/common/ui/Text";
@@ -132,9 +132,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
                             mt-[120px] lg:mt-0 lg:gap-0 gap-3">
                 <ProfileAvatar isLoading={isLoading} avatar={avatar} isOwner={isOwner}
                     handleSelectAvatar={handleSelectAvatar}/>
-                { isLoading ? <LabelSkeletonLoading size="medium" className="lg:self-end mb-2 lg:mb-8 lg:ml-5 w-[200px] mt-2 lg:mt-0"/> : 
+                { isLoading ? <LabelSkeletonLoading size="md-1" className="lg:self-end mb-2 lg:mb-8 lg:ml-5 w-[200px] mt-2 lg:mt-0"/> : 
                     <div className="flex flex-col mb-2 lg:ml-5 gap-1 lg:items-start items-center">
-                        <Text size="xl" weight="bold" className=" lg:text-left text-center">{fullName}</Text>
+                        <Text size="xl-1" weight="bold" className=" lg:text-left text-center">{fullName}</Text>
                         <Text size="md-2" className="text-[var(--text-color)]">{
                                 numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") :
                                 t("user:profileHeader.noFriendsCount")
@@ -142,16 +142,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, userId: uid , o
                     </div>
                 }
                 
-                { isLoading ? <LabelSkeletonLoading size="large" className="w-[300px] lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
+                { isLoading ? <LabelSkeletonLoading size="lg-1" className="w-[300px] lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
                     <div className="relative flex flex-wrap lg:flex-none gap-2 lg:ml-auto lg:w-auto mb-7 lg:mt-0 mt-2">
                         {isAuthenticated && <>
-                            { isOwner ? (<Button size="medium"><i className="fa-solid fa-user-pen"></i> {t("user:profileHeader.editButton")}</Button>) :
+                            { isOwner ? (<Button size="md-1"><i className="fa-solid fa-user-pen"></i> {t("user:profileHeader.editButton")}</Button>) :
                                <AddFriendButton uid={uid}/>  
                             }
                         </>}
                         
-                        { !isOwner && isAuthenticated && <Button size="medium" variant="secondary"><i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}</Button> }
-                        <Button size="medium" variant="secondary"><i className="fa-solid fa-circle-info"></i> 
+                        { !isOwner && isAuthenticated && <Button size="md-1" variant="secondary"><i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}</Button> }
+                        <Button size="md-1" variant="secondary"><i className="fa-solid fa-circle-info"></i> 
                             {/* <Text className="hidden sm:inline-flex ml-1">{t("user:profileHeader.moreButton")}</Text> */}
                         </Button>
                     </div>

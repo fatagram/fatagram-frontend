@@ -15,7 +15,7 @@ const PageNavbar: React.FC<PageNavbarProps> = ({
 
     return (
         <div className={`flex flex-col gap-2 ${className}`}>
-            <Text size="xl" weight="bold" className="p-2 pl-5 text-gradient-main">{title}</Text>
+            <Text size="xl-1" weight="bold" className="p-2 pl-5 text-gradient-main">{title}</Text>
             {children}
         </div>
     )

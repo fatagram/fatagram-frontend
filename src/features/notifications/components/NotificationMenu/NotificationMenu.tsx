@@ -126,7 +126,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                             sm:p-2 p-6 z-10 flex flex-col gap-2 min-w-[350px] max-h-[600px] 
                             min-h-[100px] sm:w-auto w-screen sm:h-auto h-screen"
                     ref={menuRef}>
-                    <Text size="lg" weight="bold" className="px-2">{t("notifications:notifications.title")}</Text>
+                    <Text size="lg-1" weight="bold" className="px-2">{t("notifications:notifications.title")}</Text>
                     {!isLoading ? <>
                         {
                             notifications && notifications.length > 0 ?
@@ -150,7 +150,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                                     }
                                     {!isShowFull ? 
                                         <li className="mt-2">
-                                            <Button size="small" variant="secondary" className="w-full"
+                                            <Button size="sm-1" variant="secondary" className="w-full"
                                                 onClick={() => {
                                                 setIsShowFull(true);
                                             }}>

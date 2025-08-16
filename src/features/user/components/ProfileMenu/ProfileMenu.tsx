@@ -1,7 +1,7 @@
 import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import Button from "@/components/common/ui/Button/Button";
 import Avatar from "@/components/common/display/Avatar/Avatar";
-import { userProfileService } from "@/api/user/user-profile";
+import { userProfileService } from "@/api/user/user-profile.api";
 import useClickOutside from "@/hooks/useClickOutside";
 import Text from "@/components/common/ui/Text";
 import { useNavigate } from "react-router-dom";
@@ -81,23 +81,23 @@ const ProfileMenu: React.FC = () => {
                     flex flex-col gap-2 min-w-[300px] min-h-[100px] sm:w-auto w-screen sm:h-auto h-screen"    
                             ref={menuRef}>
                     <ul className="flex flex-col gap-2 w-full">
-                        <li><Button size="medium" variant="third" 
+                        <li><Button size="md-1" variant="third" 
                             className="flex items-center justify-start gap-3 w-full !pl-3"
                             onClick={handlePersonalPage}>
                                 <Avatar src={avatar} alt="avatar" size="small_1"></Avatar>
-                                <Text size="lg" weight="bold">{fullName}</Text>
+                                <Text size="lg-1" weight="bold">{fullName}</Text>
                             </Button></li>
                         <li className="items-center mx-auto w-[93%] h-[0.5px] bg-[var(--text-color)]"></li>
-                        <li><Button size="medium" variant="third" className="flex items-center justify-start w-full gap-3"
+                        <li><Button size="md-1" variant="third" className="flex items-center justify-start w-full gap-3"
                             onClick={handleSettings}>
-                                <Text className="flex items-center gap-3" size="md">
+                                <Text className="flex items-center gap-3" size="md-1">
                                     <i className="fa-solid fa-gear"></i>{t("navbar.profileMenu.settings")}
                                 </Text>
                             </Button>
                         </li>
-                        <li><Button size="medium" variant="third" className="flex items-center justify-start w-full gap-3 text-red-400"
+                        <li><Button size="md-1" variant="third" className="flex items-center justify-start w-full gap-3 text-red-400"
                             onClick={handleLogout}>
-                                <Text size="md" className="flex items-center gap-3" color="danger">
+                                <Text size="md-1" className="flex items-center gap-3" color="danger">
                                     <i className="fa-solid fa-right-from-bracket"></i>
                                     {t("navbar.profileMenu.logout")}
                                 </Text>

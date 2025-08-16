@@ -1,13 +1,15 @@
 import React from "react";
 import Textbox from "./Textbox";
+import { Size } from "../styles/size";
 
-interface PasswordBoxProps extends React.InputHTMLAttributes<HTMLInputElement> {
+interface PasswordBoxProps {
     placeholder?: string;
     onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
     value?: string;
     disabled?: boolean;
     isWrong?: boolean;
     className?: string;
+    size?: Size;
     autoComplete?: string;
     name?: string;
     ref?: React.Ref<HTMLInputElement>;
@@ -20,6 +22,7 @@ const PasswordBox: React.FC<PasswordBoxProps> = ({
     showPasswordToggle = true,
     autoComplete = "current-password",
     name="",
+    size = "md-1",
     ref,
     ...props
 }) => {

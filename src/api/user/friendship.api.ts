@@ -139,7 +139,9 @@ export class FriendshipService {
             params.append("page", page.toString());
             params.append("pageSize", pageSize.toString());
 
-            const res = await apiClient.get(`${API_URL}/friends/${userId}?${params.toString()}`);
+            const res = await apiClient.get(`${API_URL}/friends/${userId}`, {
+                params
+            });
 
             const response = res.data as ApiResponse<FriendsDto>;
             return { success: true, data: response.data };

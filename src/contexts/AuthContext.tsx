@@ -1,7 +1,7 @@
 import { authService } from "@/api/auth/auth.api";
 import LoginDto, { LoginResponse } from "@/api/auth/dto/login.dto";
 import { Result } from "@/api/common";
-import { userProfileService } from "@/api/user/user-profile";
+import { userProfileService } from "@/api/user/user-profile.api";
 import LoadingPage from "@/pages/loading/LoadingPage";
 import { removeRefreshToken, removeRefreshTokenFromSession, setRefreshToken, setRefreshTokenToSession } from "@/utils/token";
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";

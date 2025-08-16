@@ -40,11 +40,11 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
             </div>
             <Text size="md-2" weight="bold" onClick={handleNavigate} 
                 className="truncate overflow-hidden w-full">{name}</Text>
-            <Text size="sm" weight="light">{time}</Text>
-            <Button variant="primary" size="small" className="w-full mt-2 mb-1" onClick={onAccept}>
+            <Text size="sm-1" weight="light">{time}</Text>
+            <Button variant="primary" size="sm-1" className="w-full mt-2 mb-1" onClick={onAccept}>
                 {t("user:profileHeader:acceptButton")}
             </Button>
-            <Button variant="secondary" size="small" className="w-full mt-2r" onClick={onCancel}>
+            <Button variant="secondary" size="sm-1" className="w-full mt-2r" onClick={onCancel}>
                 {t("user:profileHeader:declineButton")}
             </Button>
         </div>

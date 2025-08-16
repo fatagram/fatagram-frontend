@@ -1,4 +1,4 @@
-import { userProfileService } from '@/api/user/user-profile';
+import { userProfileService } from '@/api/user/user-profile.api';
 import { useEffect, useMemo, useState } from 'react';
 
 const useUserId = (userParam: string) => {

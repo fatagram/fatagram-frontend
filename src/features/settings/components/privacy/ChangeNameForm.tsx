@@ -1,5 +1,5 @@
 import { ErrorCodes } from "@/api/user/dto/change_name.dto";
-import { userProfileService } from "@/api/user/user-profile";
+import { userProfileService } from "@/api/user/user-profile.api";
 import Button from "@/components/common/ui/Button";
 import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
 import Textbox from "@/components/common/ui/Textbox";
@@ -93,7 +93,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                                     onChange={(e) => setLastName(e.target.value)}/>
                             </div>
                         </div>
-                        <Text size="md" color="danger" className="mt-2 mx-4">{errorMessage}</Text>
+                        <Text size="md-1" color="danger" className="mt-2 mx-4">{errorMessage}</Text>
                     </div>
                 }
                 <Text className="mx-8 mt-8 mb-4 h-[0.5px] bg-[var(--third-single-color)]"></Text>
@@ -104,10 +104,10 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                     </Text>
                     <Text className="opacity-80">- {t("settings:account.personalInfo.changeNameForm.noteText2")}</Text>
                     <Text className="opacity-80">- {t("settings:account.personalInfo.changeNameForm.noteText3")} &nbsp;
-                        <Text size="md">!, #, $, @, ...</Text>.
+                        <Text size="md-1">!, #, $, @, ...</Text>.
                     </Text>
                 </Text>
-                <Button disabled={firstName === oldFirstName && lastName === oldLastName} size="medium" className="mt-2 !text-[20px]"
+                <Button disabled={firstName === oldFirstName && lastName === oldLastName} size="md-1" className="mt-2 !text-[20px]"
                     onClick={handleSubmit}>
                     {t("settings:account.personalInfo.changeNameForm.acceptButton")}</Button>
                 <Text size="lg-2" className={`absolute top-5 right-8 hover:text-[var(--main-single-color)] cursor-pointer`}

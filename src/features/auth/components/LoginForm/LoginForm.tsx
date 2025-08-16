@@ -6,8 +6,7 @@ import Checkbox from "@/components/common/ui/Checkbox";
 import Link from "@/components/common/ui/Link";
 import { useNavigate } from "react-router-dom";
 import { LoginValidator } from "@/api/auth/validate/login.dto.validate";
-import LoginDto, { ErrorCodes, ErrorKey } from "@/api/auth/dto/login.dto";
-import { LoginResponse } from "@/api/auth/auth.api";
+import LoginDto, { ErrorCodes, ErrorKey, LoginResponse } from "@/api/auth/dto/login.dto";
 import PasswordBox from "@/components/common/ui/Textbox/PasswordBox";
 import OverlayLoading from "@/components/common/widgets/OverlayLoading/OverlayLoading";
 import { useAuth } from "@/contexts/AuthContext";
@@ -156,14 +155,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
                         placeholder={t("auth:login.username")}
                         onChange={(e) => setUsername(e.target.value)} 
                         isWrong={usernameError !== ""} />
-                <Text size="sm" className={`${usernameError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{usernameError}</Text>
+                <Text size="sm-1" className={`${usernameError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{usernameError}</Text>
             </div>
             <div className="w-full">
                 <PasswordBox ref={inputPasswordRef}
                      className="text-[14px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm" 
                      placeholder={t("auth:login.password")}
                     onChange={(e) => { setPassword(e.target.value) }} isWrong={passwordError !== ""} autoComplete="current-password" />
-                <Text size="sm" className={`${passwordError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{passwordError}</Text>
+                <Text size="sm-1" className={`${passwordError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{passwordError}</Text>
             </div>
             <div className="flex justify-between w-[95%] items-center gap-[50px]">
                 <Checkbox className="text-[15px] text-[#00230e]" label={t("auth:login.rememberMe")} checked={isRememberMe}
@@ -178,7 +177,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
             <Text className={`${unknownError === "" ? "hidden" : ""} px-[5px] text-red-400`}>{unknownError}</Text>
             <Button type="button" className={`w-full font-montserrat`}
                 onClick={handleLogin} ref={btnRef}
-                 size="medium">
+                 size="md-1">
                 {t("auth:login.loginButton")}
             </Button>
             <div className="flex gap-1 items-center">

@@ -1,7 +1,7 @@
 import SettingCard from "@/components/common/container/Card";
 import EditableField from "@/components/common/container/Card/SettingItem/EditableField";
 import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
-import { userProfileService } from "@/api/user/user-profile";
+import { userProfileService } from "@/api/user/user-profile.api";
 import React, { useEffect } from "react";
 import ChangeUrlNameDto, { ErrorCodes } from "@/api/user/dto/change_url_name.dto";
 import { useLocation, useNavigate } from "react-router-dom";
@@ -72,7 +72,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
     return (
         <div className={`${className}`}>
             <SettingCard title={t("settings:account.personalInfo.title")} className="mb-0 gap-5">
-                { isLoading ? <TextSkeletonLoading size="medium" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
+                { isLoading ? <TextSkeletonLoading size="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
                     <EditableField title={t("settings:account.personalInfo.yourName")} 
                         value={fullName} 
                         btnChildren={<Text><i className="fa-solid fa-pen mr-2"></i> {
@@ -80,7 +80,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
                         }</Text>}
                         onChangeClick={handleChangeName}/> 
                 }
-                { isLoading ? <TextSkeletonLoading size="medium" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
+                { isLoading ? <TextSkeletonLoading size="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
                     <EditableField title={t("settings:account.personalInfo.urlName")}
                         isEmpty={urlName === undefined}
                         value={urlName}

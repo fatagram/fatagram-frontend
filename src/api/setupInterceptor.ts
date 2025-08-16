@@ -79,7 +79,6 @@ apiClientFormData.interceptors.response.use((response: AxiosResponse) => respons
         }
         return Promise.reject(error);
     });
-
-
+    
 // Export the apiClient
 export { apiClientFormData, apiClient };

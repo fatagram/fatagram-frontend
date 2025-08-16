@@ -35,7 +35,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = (
                             className="absolute flex items-center right-2 bottom-2 z-10 opacity-40 hover:opacity-70 gap-2">
                             <i className="fa-solid fa-camera"></i>
                             <Text className="sm:flex hidden"
-                                size="md">{background ? t("user:profileHeader.changeButton") : t("user:profileHeader.addButton")}</Text>
+                                size="md-1">{background ? t("user:profileHeader.changeButton") : t("user:profileHeader.addButton")}</Text>
                         </SelectFile>
                     }
                 </BackgroundImage>

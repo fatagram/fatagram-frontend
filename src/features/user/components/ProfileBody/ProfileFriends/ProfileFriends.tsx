@@ -1,5 +1,5 @@
 import { FriendDto, FriendsDto } from "@/api/user/dto/friend.dto";
-import FriendItem from "@/components/common/container/Card/FriendItem/FriendItem";
+import FriendItem from "@/features/user/components/ProfileBody/ProfileFriends/FriendItem/FriendItem";
 import SearchBox from "@/components/common/ui/Textbox/SearchBox";
 import useFriends from "@/features/user/hooks/useFriends";
 import React, { useEffect } from "react";

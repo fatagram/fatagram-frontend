@@ -1,17 +1,22 @@
 import React from "react";
 import styles from "./Textbox.module.css";
+import { Size } from "../styles/size";
 
-const sizeClasses = {
-    xs: 'px-2 py-1 text-xs',
-    sm: 'px-3 py-1 text-[15px] ',
-    md: 'px-6 py-3 text-base ',
-    lg: 'px-8 py-4 text-base ',
-    xl: 'px-10 py-5 text-xl ',
-    "2xl": 'px-12 py-6 text-2xl ',
-    "3xl": 'px-14 py-7 text-3xl ',
-};
-
-export type Size = keyof typeof sizeClasses;
+const sizeClasses: Record<Size, string> = {
+    "xs": 'px-2 py-1 text-xs',
+    "sm-1": 'px-3 py-1 text-[15px] ',
+    "sm-2": 'px-4 py-2 text-[15px] ',
+    "sm-3": 'px-5 py-2 text-[15px] ',
+    "md-1": 'px-6 py-3 text-base ',
+    "md-2": 'px-7 py-3 text-base ',
+    "md-3": 'px-8 py-4 text-base ',
+    "lg-1": 'px-8 py-4 text-base ',
+    "lg-2": 'px-9 py-4 text-base ',
+    "lg-3": 'px-10 py-5 text-base ',
+    "xl-1": 'px-10 py-5 text-xl ',
+    "xl-2": 'px-12 py-6 text-2xl ',
+    "xl-3": 'px-14 py-7 text-3xl ',
+}
 
 // TextboxProps interface
 interface TextboxProps {
@@ -21,6 +26,7 @@ interface TextboxProps {
     disabled?: boolean;
     isWrong?: boolean;
     autoComplete?: string;
+    type?: string;
     name?: string;
     size?: Size;
     ref?: React.Ref<HTMLInputElement>;
@@ -37,7 +43,7 @@ const Textbox: React.FC<TextboxProps> = ({
     isWrong=false,
     className="",
     ref,
-    size = "sm",
+    size = "sm-1",
     autoComplete="off",
     name="",
     ...props
@@ -45,21 +51,21 @@ const Textbox: React.FC<TextboxProps> = ({
 
     return (
         <input type="text"
-        ref={ref}
-        name={name}
-        value={value}
-        placeholder={placeholder} 
-        autoComplete={autoComplete}
-        onChange={onChange} 
-        disabled={disabled}
-        className={`border-[3px] bg-[var(--second-bg-color)] text-[var(--text-color)]
-            ${disabled ? `bg-[var(--main-bg-color)]` : `focus:bg-gradient-main-move 
-            ${isWrong ? styles['primary-textbox-wrong'] : styles['primary-textbox']}`}
-            font-normal rounded-[15px] outline-none text-lg caret-[var(--main-single-color)]
-            ${className}
-            ${sizeClasses[size]}
-        `}
-        {...props}/>
+            ref={ref}
+            name={name}
+            value={value}
+            placeholder={placeholder} 
+            autoComplete={autoComplete}
+            onChange={onChange} 
+            disabled={disabled}
+            className={`border-[3px] bg-[var(--second-bg-color)] text-[var(--text-color)]
+                ${disabled ? `bg-[var(--main-bg-color)]` : `focus:bg-gradient-main-move 
+                ${isWrong ? styles['primary-textbox-wrong'] : styles['primary-textbox']}`}
+                font-normal rounded-[15px] outline-none text-lg caret-[var(--main-single-color)]
+                ${className}
+                ${sizeClasses[size]}`}
+            {...props}
+        />
     );
 }
 

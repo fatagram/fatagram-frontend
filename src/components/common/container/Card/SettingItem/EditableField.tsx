@@ -48,28 +48,28 @@ const EditableField: React.FC<EditableFieldProps> = ({
 
     return (
         <div className="flex justify-between items-center w-full">
-            <Text size="lg" className="font-light m-2">{title}</Text>
+            <Text size="lg-1" className="font-light m-2">{title}</Text>
             <div className="flex sm:items-center items-end gap-4 sm:flex-row flex-col">
                 {editableMode === "inline" && isEdit ? 
                     <div className="relative flex flex-col gap-1">
                         <Textbox className={`animate-fade-in px-2 py-1 ${isError && "mt-[5px]"}`} placeholder={placeholder} value={inputValue}
                             isWrong={isError} 
                             onChange={(e) => setInputValue(e.target.value)}/>
-                        {isError && <Text size="sm" className="text-red-500 ml-2 h-[5px]">{errorMessage}</Text>}
+                        {isError && <Text size="sm-1" className="text-red-500 ml-2 h-[5px]">{errorMessage}</Text>}
                     </div>
                      :
-                    <Text size="lg" className={`${valueClassName}`}>{value ?? noDataValue }</Text>
+                    <Text size="lg-1" className={`${valueClassName}`}>{value ?? noDataValue }</Text>
                 }
                 {editableMode === "inline" && isEdit ?
                     <div className="animate-fade-in gap-1 flex">
-                        <Button disabled={value === inputValue} size="small" variant="primary" onClick={() => {onSaveClick?.(inputValue);}}>
+                        <Button disabled={value === inputValue} size="sm-1" variant="primary" onClick={() => {onSaveClick?.(inputValue);}}>
                             <i className="fa-solid fa-floppy-disk mr-2"></i>{t("settings:editableField.saveButton")}
                         </Button>
-                        <Button size="small" variant="secondary" onClick={() => {onCancelClick?.();}}>
+                        <Button size="sm-1" variant="secondary" onClick={() => {onCancelClick?.();}}>
                             {t("settings:editableField.cancelButton")}
                         </Button>
                     </div> :
-                    <Button size="small" variant="secondary" onClick={() => {onChangeClick?.();}}>{btnChildren}</Button> 
+                    <Button size="sm-1" variant="secondary" onClick={() => {onChangeClick?.();}}>{btnChildren}</Button> 
                 }
             </div>
         </div>
