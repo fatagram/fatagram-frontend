@@ -105,7 +105,6 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
                 var code = result.errorCode as ErrorKey;
                 errorMap[code]?.(t(ErrorCodes[code]));
             }
-
         }
         setIsLoading(false);
     }

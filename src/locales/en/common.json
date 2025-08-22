@@ -1,8 +1,7 @@
 {
     "language" : {
         "en" : "EN English",
-        "vi" : "VN Vietnamese",
-        "zh" : "CN Chinese"
+        "vi" : "VN Vietnamese"
     },
     "navbar" : {
         "profileMenu" : {

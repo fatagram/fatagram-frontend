@@ -12,6 +12,7 @@ interface FriendRequestsProps {
 
 const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
 
+    // State to hold friend requests
     const [requests, setRequests] = React.useState<{
         senderId: string;
         senderUrlName: string;
@@ -32,6 +33,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
 
     const { t } = useTranslation() as { t: (key: string, options?: any) => string };
 
+    // Fetch friend requests from the API
     const fetchFriendRequests = React.useCallback(async () => {
         setIsLoading(true);
         const response = await friendshipService.GetFriendRequests(page, limit);
@@ -45,6 +47,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         setIsLoading(false);
     }, [page, limit]);
 
+    // Fetch friend requests on mount
     React.useEffect(() => {
         setIsLoading(true);
         fetchFriendRequests();
@@ -63,6 +66,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         return () => observer.disconnect(); 
     }, [loaderRef, isFull]);
 
+    // Handle accept friend request
     const handleAcceptRequest = useCallback(async (requestId: string) => {
         const response = await friendshipService.AcceptAddFriendRequest(requestId);
         if (response.success) {
@@ -71,6 +75,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         }
     }, []);
 
+    // Handle reject friend request
     const handleRejectRequest = useCallback(async (senderId: string) => {
         const response = await friendshipService.DeclineAddFriendRequest(senderId);
         if (response.success) {

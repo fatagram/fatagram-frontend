@@ -27,6 +27,8 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
     const [isFull, setIsFull] = React.useState<boolean>(false);
 
     const { t } = useTranslation() as { t: (key: string, options?: any) => string };
+
+    // ToastContext (pushToast to show toast)
     const { pushToast } = useToast();
 
     // Refs for the menu and button
@@ -70,8 +72,9 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
     }, [page]);
 
     const handleNewNotification = (data: NotificationDto) => {
-        console.log("New notification received:", data);
+        // console.log("New notification received:", data);
         if (data.type === "CancelNotification") {
+            // If notification type is CancelNotification, remove it from the list
             setNotification(prevNotifications => prevNotifications.filter(n => n.id !== data.data.noticationId));
             if (!data.isRead) {
                 setUnreadCount(prevCount => prevCount - 1);
@@ -172,8 +175,6 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                             ))
                         }
                     </div>}
-
-             
                 </div>
             }
         </div>

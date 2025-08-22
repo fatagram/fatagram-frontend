@@ -9,6 +9,7 @@ export interface NotificationDto {
     actorName: string;
     actorImageUrl?: string;
     link: string;
+    content?: string;
     isRead: boolean;
     timeDistance: {
         value: number;

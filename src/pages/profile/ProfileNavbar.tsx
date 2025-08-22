@@ -24,7 +24,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({
         <div className={`flex ${className}`}>
             {
                 navbarItems.map((item, index) => { 
-                    return <NavbarItem key={index} 
+                    return <NavbarItem key={index}
                         path={item.href ?? ""} 
                         children={item.name}
                         end={`/${userParam}`}/>

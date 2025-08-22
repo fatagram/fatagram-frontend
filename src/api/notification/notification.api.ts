@@ -16,7 +16,6 @@ export class NotificationService {
                     pageSize
                 }
             });
-            console.log(res);
             const response = res.data as ApiResponse<NotificationsDto>;
             
             return {

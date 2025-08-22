@@ -13,17 +13,17 @@ import { ToastProvider } from "./contexts/ToastContext";
 const App: React.FC = () => {
   return (
     <ThemeProvider>
-      <AuthProvider>
-        <DialogProvider>
-          <LanguageProvider>
-            <BrowserRouter>
-              <ToastProvider>
-                <AppRoutes />
-              </ToastProvider>
-            </BrowserRouter>
-          </LanguageProvider>
-        </DialogProvider>
-      </AuthProvider>
+      <LanguageProvider>
+        <AuthProvider>
+          <DialogProvider>
+              <BrowserRouter>
+                <ToastProvider>
+                  <AppRoutes />
+                </ToastProvider>
+              </BrowserRouter>
+          </DialogProvider>
+        </AuthProvider>
+      </LanguageProvider>
     </ThemeProvider>
   );
 };

@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import RegisterForm from "../../features/user/components/RegisterForm/RegisterForm";
 import Footer from "../../components/layout/Footer/Footer";
-import SelectLanguage from "@/components/common/widgets/SelectLanguage";
+import SelectLanguage from "@/features/settings/components/general/SelectLanguage";
 import Text from "@/components/common/ui/Text";
 
 // RegisterPage function

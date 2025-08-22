@@ -1,0 +1,3 @@
+interface ChangeLanguageDto {
+    LanguageCode: string;
+}

@@ -2,27 +2,31 @@ import i18next from "i18next";
 import React, {createContext, useContext, useEffect, useState} from "react";
 import { useTranslation } from "react-i18next";
 
-const LANG_LIST = ["en", "vi", "zh"] as const;
-export type Language = typeof LANG_LIST[number];
+export const LANG_LIST = ["en", "vi"] as const; // Array of supported languages
+export type Language = typeof LANG_LIST[number]; // Type of supported languages
 
+// Language option type
 interface LanguageOption {
     language: Language,
     display: string
 }
 
+// Language context type
 interface LanguageContextType {
     language: Language,
     setLanguage: (lang: Language) => void,
     availableLanguages: LanguageOption[]
 }
 
+// Language context
 const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
+// Language provider props
 interface LanguageProviderProps {
     children?: React.ReactNode
 }
 
-// Provider
+// Language Provider
 export const LanguageProvider: React.FC<LanguageProviderProps> = ({children}) => {
     const { t } = useTranslation() as { t: (key: string) => string } ;
     const [lang, setLang] = useState<Language>(() => localStorage.getItem("language") as Language || "en");

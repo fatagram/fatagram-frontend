@@ -1,6 +1,6 @@
 import SettingCard from "@/components/common/container/Card";
 import SelectBoxSetting from "@/components/common/container/Card/SettingItem/SelectBoxSetting";
-import SelectLanguage from "@/components/common/widgets/SelectLanguage";
+import SelectLanguage from "@/features/settings/components/general/SelectLanguage";
 import React from "react";
 import { useTranslation } from "react-i18next";
 

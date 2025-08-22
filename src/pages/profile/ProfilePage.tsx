@@ -16,7 +16,7 @@ const ProfilePage: React.FC = () => {
 
     return (
         <div className="relative justify-start items-center flex flex-col pt-2 h-screen bg-[var(--main-bg-color)]">
-            <div className="flex justify-center w-full pb-[280px] lg:pb-32 bg-[var(--second-bg-color)] pt-16">
+            <div className="flex justify-center w-full pb-[280px] lg:pb-32 bg-[var(--second-bg-color)] pt-16 z-10">
                 <ProfileHeader userId={userId ?? ""}/> 
             </div>
             <ProfileBody userId={userId} userParam={userParam}/>

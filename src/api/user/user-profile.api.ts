@@ -30,11 +30,11 @@ export class UserProfileService {
         }
     }
 
-    async GetMe(): Promise<Result<{userId: string | undefined, urlName: string | undefined}>> {
+    async GetMe(): Promise<Result<{userId: string | undefined, urlName: string | undefined, languageCode: string}>> {
         try {
             const res = await apiClient.get(`${API_URL}/me`);
-            const response = res.data.data.infos as {id: string | undefined, urlName: string | undefined};
-            return { success: true, data: {userId: response?.id, urlName: response?.urlName} };
+            const response = res.data.data.infos as {id: string | undefined, urlName: string | undefined, languageCode: string};
+            return { success: true, data: {userId: response?.id, urlName: response?.urlName, languageCode: response.languageCode} };
         }
         catch (error: any)
         {

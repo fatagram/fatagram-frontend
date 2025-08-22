@@ -3,7 +3,8 @@ import Avatar from "@/components/common/display/Avatar";
 import Button from "@/components/common/ui/Button";
 import Text from "@/components/common/ui/Text";
 import { TimeUnit, TimeUnitTranslateMap } from "@/utils/time_unit";
-import { useTranslation } from "react-i18next";
+import { Trans, useTranslation } from "react-i18next";
+import { renderContent } from "../../helper/renderContent";
 
 interface AcceptedFriendRequestCardProps {
     notificationDto: NotificationDto;
@@ -23,7 +24,11 @@ const AcceptedFriendRequestCard: React.FC<AcceptedFriendRequestCardProps> = ({
             </div>
             <div className='flex flex-col gap-1'>
                 <Text size='sm-2'>
-                    <Text size='sm-2' weight='bold'>{notificationDto.actorName}</Text> {t("notifications:notifications.accepted-friend-request")}
+                    {
+                        renderContent(notificationDto.content ?? "", {
+                            actorName: <Text size='sm-2' weight='bold'>{notificationDto.actorName}</Text>
+                        })
+                    }
                 </Text>
                 <Text size='sm-1' color='secondary'>
                     {notificationDto.timeDistance.unit === TimeUnit.Seconds || notificationDto.timeDistance.unit === TimeUnit.Miliseconds

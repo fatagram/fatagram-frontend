@@ -5,7 +5,9 @@ import { userProfileService } from "@/api/user/user-profile.api";
 import LoadingPage from "@/pages/loading/LoadingPage";
 import { removeRefreshToken, removeRefreshTokenFromSession, setRefreshToken, setRefreshTokenToSession } from "@/utils/token";
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
+import { LANG_LIST, Language, LanguageProvider, useLanguage } from "./LanguageContext";
 
+// Authentication context
 interface AuthContextType {
     isAuthenticated: boolean | null;
     isLoading: boolean;
@@ -17,6 +19,7 @@ interface AuthContextType {
     urlName?: string;
 }
 
+// Create AuthContext
 const AuthContext = createContext<AuthContextType>({ 
     isAuthenticated: null, 
     isLoading: true,
@@ -27,12 +30,24 @@ const AuthContext = createContext<AuthContextType>({
     urlName: undefined
 });
 
+// Create AuthProvider
 export const AuthProvider = ({children} : { children: React.ReactNode }) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null);
-    const [isLoading, setIsLoading] = useState<boolean>(true);
-    const [userId, setUserId] = useState<string | undefined>(undefined);
-    const [urlName, setUrlName] = useState<string | undefined>(undefined);
+    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // Authentication state
+    const [isLoading, setIsLoading] = useState<boolean>(true); // Loading state
+    const [userId, setUserId] = useState<string | undefined>(undefined); // Current user ID
+    const [urlName, setUrlName] = useState<string | undefined>(undefined); // Current user URL name
 
+    // Language context (setLanguage to change language)
+    const { setLanguage } = useLanguage(); 
+
+    // Function to set language when reload or login
+    const setLang = (langCode: string) => {
+        if (LANG_LIST.includes(langCode as Language)) {
+            setLanguage(langCode as Language);
+        }
+    }
+
+    // Function to login
     const login = async (loginDto: LoginDto): Promise<Result<LoginResponse>> => {
         const result = await authService.login(loginDto);
         if (result.success) {
@@ -49,6 +64,7 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
         return result;
     }
     
+    // Function to logout
     const logout = async () => {
         await authService.logout();
         setUserId(undefined);
@@ -58,12 +74,17 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
         removeRefreshTokenFromSession();
     }
 
+    // Function to check authentication status
     const checkAuth = useCallback(async () => {
         // const userService = new UserService();
-        const result: Result<{userId: string | undefined, urlName: string | undefined}> = await userProfileService.GetMe();
+        const result: Result<{
+            userId: string | undefined, 
+            urlName: string | undefined, 
+            languageCode: string}> = await userProfileService.GetMe();
         if (result.success) {
             setUserId(result.data?.userId);
             setUrlName(result.data?.urlName);
+            setLang(result.data?.languageCode || "en");
         }
         else {
             setUserId(undefined);
@@ -73,11 +94,13 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
         setIsLoading(false);
     }, []);
 
+    // Function to refresh authentication status
     const refresh = async () => {
         checkAuth();
         console.log('refresh');
     }
 
+    // Check authentication status on mount
     useEffect(() => {
         setIsLoading(true);
         checkAuth();
@@ -86,12 +109,13 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
 
     useEffect(() => {
         const handleFocus = () => {
-          checkAuth();
+            checkAuth();
         };
-      
+        
+        // Set event to check token when re-focusing to window
         window.addEventListener("focus", handleFocus);
         return () => window.removeEventListener("focus", handleFocus);
-      }, [checkAuth]);
+    }, [checkAuth]);
 
     return ( 
         <AuthContext.Provider value={{ 

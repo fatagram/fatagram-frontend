@@ -4,6 +4,7 @@ import NotificationFactory from "@/features/notifications/components/Notificatio
 import React from "react";
 import { useNavigate } from "react-router-dom";
 
+// Toast item type
 interface ToastItem {
     id: string;
     type: "notification" | "error"
@@ -11,39 +12,42 @@ interface ToastItem {
     duration?: number;
 }
 
+// Toast context type
 interface ToastContextType {
     pushToast: (item: ToastItem) => void;
 }
 
+// Toast manager props
 interface ToastManagerProps {
     className?: string,
     children?: React.ReactNode;
 }
 
+// Toast context
 const ToastContext = React.createContext<ToastContextType>({
     pushToast: () => {}
 })
 
+// Toast manager
 const ToastManager: React.FC<ToastManagerProps> = ({
     className,
     children
 }) => {
 
-    const [toast, setToast] = React.useState<ToastItem | null>(null);
-    const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null);
+    const [toast, setToast] = React.useState<ToastItem | null>(null); // Current toast item
+    const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null); // Toast timer
 
-    const navigate = useNavigate();
+    const navigate = useNavigate(); 
 
+    // Push a new toast
     const pushToast = (item: ToastItem) => {
         if (timer) {
             clearTimeout(timer);
         }
-
         setToast(item);
         const newTimer = setTimeout(() => {
             setToast(null);
         }, item.duration || 3000);
-
         setTimer(newTimer);
     }
 
@@ -65,7 +69,7 @@ const ToastManager: React.FC<ToastManagerProps> = ({
                             <div>More</div>
                         )
                     }
-                    <Button size="small" variant="third" className="absolute top-2 right-2" onClick={() => setToast(null)}>
+                    <Button size="sm-1" variant="third" className="absolute top-2 right-2" onClick={() => setToast(null)}>
                         <i className="fa-solid fa-xmark"></i>
                     </Button>
                 </div>
