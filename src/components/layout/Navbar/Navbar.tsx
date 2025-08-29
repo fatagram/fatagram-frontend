@@ -56,8 +56,8 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
                 </div>
                 :
                 <div className="flex gap-2">
-                    <Button size="small" variant="secondary" onClick={() => setShowLogin(true)}>Sign in</Button>
-                    <Button size="small" variant="primary" onClick={() => setShowRegister(true)}>Sign up</Button>
+                    <Button size="sm-1" variant="secondary" onClick={() => setShowLogin(true)}>Sign in</Button>
+                    <Button size="sm-1" variant="primary" onClick={() => setShowRegister(true)}>Sign up</Button>
                 </div>
             }
 
