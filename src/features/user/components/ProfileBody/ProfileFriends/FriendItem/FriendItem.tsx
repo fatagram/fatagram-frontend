@@ -50,7 +50,7 @@ const FriendItem: React.FC<FriendItemProps> = ({
         }
     ], [friendDto.id, handleUnfriend, t]);
 
-    console.log("FriendItem render", friendDto);
+    // console.log("FriendItem render", friendDto);
 
     return (
         <div className={`relative bg-[var(--second-bg-color)] rounded-xl  
@@ -64,7 +64,7 @@ const FriendItem: React.FC<FriendItemProps> = ({
                     <Text size="md-2" weight="bold">{friendDto.name}</Text>
                 </div>
             </div>
-            <div className="absolute top-1/2 -translate-y-1/2 right-[10px]">
+            <div className="absolute z-10 top-1/2 -translate-y-1/2 right-[10px]">
                 { isFriend ? <>
                 <button aria-label="More options"
                     ref={btnRef}
@@ -76,16 +76,12 @@ const FriendItem: React.FC<FriendItemProps> = ({
                         <i className="fa-solid fa-ellipsis-v"></i>
                 </button>
                 
-                    {
-                        isShowDrowdown && (
-                            <Dropdown 
-                                className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
-                                            rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
-                                ref={dropdownRef}
-                                items={requestOptions}
-                            />
-                        )
-                    }
+                <Dropdown isShow={isShowDrowdown}
+                    className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
+                                rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
+                    ref={dropdownRef}
+                    items={requestOptions}
+                />
                 </> : <AddFriendButton size="sm-1" uid={friendDto.id}/>}
             </div>
         </div>

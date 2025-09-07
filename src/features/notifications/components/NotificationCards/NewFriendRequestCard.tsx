@@ -32,7 +32,7 @@ const NewFriendRequestCard: React.FC<NewFriendRequestCardProps> = ({
             if (response.success) {
                 setMessage(t("notifications:notifications.accepted"));
                 messageMap[notificationDto.id] = t("notifications:notifications.accepted");
-                console.log(notificationDto.id);
+                // console.log(message);
             }
         }
         acceptFriendRequest();
@@ -60,7 +60,7 @@ const NewFriendRequestCard: React.FC<NewFriendRequestCardProps> = ({
             <div className='flex flex-col gap-1'>
                 <Text size='sm-2'>
                     {renderContent(notificationDto.content ?? "", {
-                        actorName: <Text size='sm-2' weight='bold'>{notificationDto.actorName}</Text>
+                        actorName: <Text key={notificationDto.actorId} size='sm-2' weight='bold'>{notificationDto.actorName}</Text>
                     })}
                 </Text>
                 <Text size='sm-1' color='secondary'>

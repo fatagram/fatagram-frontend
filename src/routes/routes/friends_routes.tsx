@@ -1,5 +1,5 @@
 import FriendPage from "@/pages/friends/FriendPage";
-import ProtectedRoute from "../components/protected_route";
+import ProtectedRoute from "../components/protected-route";
 import RouteType from "../interface/route_type";
 import RequestsPage from "@/pages/friends/sub_pages/RequestsPage";
 

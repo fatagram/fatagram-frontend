@@ -23,7 +23,7 @@ const NotificationToast: React.FC<NotificationProps> = ({
                 notificationDto={notification}
                 onClick={() => {
                     navigate(notification.link);
-                    console.log("Notification clicked:", notification);
+                    // console.log("Notification clicked:", notification);
                 }}/>
         </div>
     )

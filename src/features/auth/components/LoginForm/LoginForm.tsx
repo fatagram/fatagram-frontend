@@ -19,10 +19,17 @@ interface LoginFormProps {
     showLogo?: boolean;
     showClose?: boolean;
     onClose?: () => void;
+    onSwitchRegister?: () => void;
 }
 
 // LoginForm component
-const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = true, showClose = false, onClose }) => {
+const LoginForm: React.FC<LoginFormProps> = ({ 
+        switchForgotPassword, 
+        showLogo = true, 
+        showClose = false, 
+        onClose,
+        onSwitchRegister
+    }) => {
     // states
     const [username, setUsername] = React.useState<string>("");
     const [password, setPassword] = React.useState<string>("");
@@ -40,6 +47,8 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
 
     const { t } = useTranslation() as { t: (key: string) => string };
     const { login } = useAuth();
+    // console.log("Login Function: ", login);
+
 
     // hooks
     const navigate = useNavigate();
@@ -78,6 +87,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
     // This function handles the login process.
     // It calls the login API and handles the response.
     const handleLogin = async () => {
+
         resetErrors();
         if (!validateInput()) return;
 
@@ -140,9 +150,9 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
 
 
     return (
-        <form className="relative flex flex-col items-center gap-[20px] w-[95%] max-w-[380px] 
-                        p-[20px] bg-[var(--second-bg-color)] shadow-md rounded-lg 
-                        sm:max-w-[380px] sm:p-[25px] animate-fade-in overflow-hidden">
+        <form className="relative flex flex-col items-center gap-[20px] min-w-[380px]
+                        p-[20px] bg-[var(--second-bg-color)] rounded-lg
+                        sm:p-[25px] animate-fade-in overflow-hidden">
             {isLoading && <OverlayLoading />}
 
             {isShowLogo && <Logo />}
@@ -181,7 +191,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ switchForgotPassword, showLogo = 
             </Button>
             <div className="flex gap-1 items-center">
                 <Text size="sm-2" className="text-[var(--third-single-color)]">{t("auth:login.registerAnswer")}</Text>
-                <Link className={"sm:text-[15px] font-bold"} to="/register">{t("auth:login.registerButton")}</Link>
+                <Link onClick={onSwitchRegister} className={"sm:text-[15px] font-bold"} to="/register">{t("auth:login.registerButton")}</Link>
             </div>
 
             {isShowClose &&

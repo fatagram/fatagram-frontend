@@ -24,9 +24,12 @@
             "title": "Thông tin cá nhân",
             "yourName": "Tên của bạn",
             "urlName": "Tên URL",
+            "nickname": "Biệt danh",
             "changeButton": "Thay đổi",
             "noUrlName": "Không có tên URL",
+            "noNickname": "Không có biệt danh",
             "urlNamePlaceholder": "Nhập tên URL của bạn",
+            "nicknamePlaceholder": "Nhập biệt danh của bạn",
             "changeNameForm": {
                 "title": "Tên",
                 "firstName": "Họ",

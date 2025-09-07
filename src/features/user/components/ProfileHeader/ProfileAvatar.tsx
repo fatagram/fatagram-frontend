@@ -21,7 +21,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
                     className="border-[5px] border-[var(--second-bg-color)]"/> 
                     : <Avatar src={avatar} onChange={handleSelectAvatar}
                         alt="Avatar" size="large" isCanEdit={isOwner}
-                        className="border-[5px] border-[var(--second-bg-color)]"/>
+                        className="border-[5px] border-[var(--second-bg-color)] flex-shrink-0"/>
             }
         </>
     )

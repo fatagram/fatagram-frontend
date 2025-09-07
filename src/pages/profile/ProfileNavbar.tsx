@@ -3,11 +3,13 @@ import NavbarItem from "@/components/layout/Navbar/NavbarItem";
 
 interface ProfileNavbarProps {
     userParam?: string;
+    isOwner?: boolean;
     className?: string;
 }
 
 const ProfileNavbar: React.FC<ProfileNavbarProps> = ({
     userParam,
+    isOwner,
     className = ""
 }) => {
 

@@ -37,7 +37,7 @@ export class FriendshipService {
             const res = await apiClient.delete(`${API_URL}/cancel/${senderId}`);
             const response = res.data as ApiResponse<any>;
 
-            console.log(response);
+            // console.log(response);
             return { success: true, data: response.data };
         }
         catch (error: any)

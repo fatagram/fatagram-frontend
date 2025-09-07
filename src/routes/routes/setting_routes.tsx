@@ -4,7 +4,7 @@ import AccountSettingPage from "@/pages/settings/sub_pages/privacy/AccountSettin
 import ThemeSettingPage from "@/pages/settings/sub_pages/general/ThemeSettingPage";
 import ChangeNameForm from "@/features/settings/components/privacy/ChangeNameForm";
 import LanguageSettingPage from "@/pages/settings/sub_pages/general/LanguageSettingPage";
-import ProtectedRoute from "../components/protected_route";
+import ProtectedRoute from "../components/protected-route";
 
 export const settingRoutes : RouteType = {
     path: "/settings",

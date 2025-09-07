@@ -24,9 +24,12 @@
             "title": "Personal Informations",
             "yourName": "Your Name",
             "urlName": "URL Name",
+            "nickname": "Nickname",
             "changeButton": "Change",
             "noUrlName": "No URL Name",
+            "noNickname": "No Nickname",
             "urlNamePlaceholder": "Enter your URL name",
+            "nicknamePlaceholder": "Enter your nickname",
             "changeNameForm": {
                 "title": "Name",
                 "firstName": "First name",

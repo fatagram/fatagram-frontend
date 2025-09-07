@@ -16,7 +16,7 @@ const SelectLanguage: React.FC<SelectLanguageProps> = ({className}) => {
     const selectLanguage = async (opt: OptionKey) => {
         setLanguage(opt as Language);
         await userConfigService.changeLanguage({ LanguageCode: opt as string });
-        console.log("Change language to ", opt);
+        // ("Change language to ", opt);
 
         window.location.reload();
     }

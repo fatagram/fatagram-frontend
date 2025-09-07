@@ -63,7 +63,7 @@ const Text: React.FC<TextProps> = ({
         <label ref={ref}
             onClick={onClick}
             htmlFor={htmlFor}
-            className={`cursor-pointer select-none 
+            className={`cursor-pointer select-none
                 ${textSizes[size]} 
                 ${weightClasses[weight]} 
                 ${colorClasses[color]} 

@@ -1,7 +1,7 @@
 import { apiClient, apiClientFormData } from "@/api/setupInterceptor";
-import ChangeNameDto from "./dto/change_name.dto";
+import ChangeNameDto from "./dto/change-name.dto";
 import { ApiResponse, handleApiError, Result } from "../common";
-import ChangeUrlNameDto from "./dto/change_url_name.dto";
+import ChangeUrlNameDto from "./dto/change-url-name.dto";
 import apiUrl from "@/config";
 
 const API_URL = `${apiUrl}/api/userprofile`;

@@ -20,6 +20,7 @@ interface RegisterFormProps {
   showClose?: boolean;
   onClose?: () => void;
   className?: string;
+  onSwitchLogin?: () => void;
 }
 
 
@@ -28,6 +29,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   showLogo = true,
   showClose = false,
   onClose,
+  onSwitchLogin
 }) => {
   // useState hooks
   const [formData, setFormData] = React.useState({
@@ -222,7 +224,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   return (
     <form
       className={`relative flex flex-col justify-center
-             animate-fade-in shadow-md rounded-lg p-[20px] 
+             animate-fade-in rounded-lg p-[20px] 
              sm:p-[30px] bg-[var(--second-bg-color)] gap-5
             ${className}`}
     >
@@ -409,7 +411,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         </div>
       )}
       <div className="relative flex justify-center">
-        <Link className={"sm:text-[15px] font-bold"} to="/login">
+        <Link onClick={onSwitchLogin} className={"sm:text-[15px] font-bold"} to="/login">
           {t("user:register.loginButton")}
         </Link>
       </div>

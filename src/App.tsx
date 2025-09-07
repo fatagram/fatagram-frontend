@@ -4,7 +4,7 @@ import "./styles/global.css";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import { DialogProvider } from "./contexts/DialogContext";
+import GlobalDialog from "./components/common/widgets/DialogBox/GlobalDialog";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
@@ -12,19 +12,18 @@ import { ToastProvider } from "./contexts/ToastContext";
 
 const App: React.FC = () => {
   return (
-    <ThemeProvider>
-      <LanguageProvider>
-        <AuthProvider>
-          <DialogProvider>
-              <BrowserRouter>
-                <ToastProvider>
-                  <AppRoutes />
-                </ToastProvider>
-              </BrowserRouter>
-          </DialogProvider>
-        </AuthProvider>
-      </LanguageProvider>
-    </ThemeProvider>
+    <BrowserRouter>
+      <ThemeProvider>
+          <LanguageProvider>
+            <AuthProvider>
+              <ToastProvider>
+                <AppRoutes />
+                <GlobalDialog />
+              </ToastProvider>
+            </AuthProvider>
+          </LanguageProvider>
+      </ThemeProvider>
+    </BrowserRouter>
   );
 };
 

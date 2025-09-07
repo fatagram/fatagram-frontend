@@ -1,4 +1,4 @@
-import { ErrorCodes } from "@/api/user/dto/change_name.dto";
+import { ErrorCodes } from "@/api/user/dto/change-name.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
 import Button from "@/components/common/ui/Button";
 import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";

@@ -136,15 +136,14 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                                 <ul className="py-1 overflow-y-scroll scrollbar-none">
                                     {
                                         notifications.map((notification: NotificationDto, index: number) => (
-                                            <li key={index} className="px-2 py-2 hover:bg-[var(--second-bg-color)] rounded-lg 
+                                            <li key={notification.id} className="px-2 py-2 hover:bg-[var(--second-bg-color)] rounded-lg 
                                                 cursor-pointer"
                                             >
                                                 <NotificationFactory notificationDto={notification}
-                                                    key={notification.id}
                                                     onClick={async () => {
                                                         navigate(notification.link || "/");
                                                         setShowNotifications(false);
-                                                        notification.isRead = true;
+                                                        notification.isRead = true; 
                                                         setUnreadCount(prevCount => prevCount - 1);
                                                         await notificationService.markAsRead(notification.id);
                                                     }} />

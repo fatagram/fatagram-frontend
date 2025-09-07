@@ -6,6 +6,13 @@ import LoadingPage from "@/pages/loading/LoadingPage";
 import { removeRefreshToken, removeRefreshTokenFromSession, setRefreshToken, setRefreshTokenToSession } from "@/utils/token";
 import React, { createContext, useContext, useState, useCallback, useEffect } from "react";
 import { LANG_LIST, Language, LanguageProvider, useLanguage } from "./LanguageContext";
+import { authEvents } from "@/events/authEvents";
+import { useLocation } from "react-router-dom";
+// import { useDialog } from "./DialogContext";
+import LoginForm from "@/features/auth/components/LoginForm/LoginForm";
+import RegisterForm from "@/features/user/components/RegisterForm/RegisterForm";
+import { useDispatch } from "react-redux";
+import { closeDialog, openDialog } from "@/store/dialogSlice";
 
 // Authentication context
 interface AuthContextType {
@@ -17,6 +24,8 @@ interface AuthContextType {
     refresh?: () => Promise<void>;
     userId?: string;
     urlName?: string;
+    openLoginOverlay: () => void;
+    openRegisterOverlay: () => void
 }
 
 // Create AuthContext
@@ -27,7 +36,9 @@ const AuthContext = createContext<AuthContextType>({
     logout: () => Promise.resolve(),
     refresh: () => Promise.resolve(),
     userId: undefined,
-    urlName: undefined
+    urlName: undefined,
+    openLoginOverlay: () => {},
+    openRegisterOverlay: () => {}
 });
 
 // Create AuthProvider
@@ -36,6 +47,42 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
     const [isLoading, setIsLoading] = useState<boolean>(true); // Loading state
     const [userId, setUserId] = useState<string | undefined>(undefined); // Current user ID
     const [urlName, setUrlName] = useState<string | undefined>(undefined); // Current user URL name
+
+    const location = useLocation();
+    // const { showDialog, closeDialog } = useDialog();
+    const dispatch = useDispatch();
+
+    const openLoginOverlay = () => {
+        dispatch(openDialog({
+            props: {
+                content: <LoginForm onSwitchRegister={() => dispatch(closeDialog())} showLogo={false}/>,
+                className: "p-4 pb-0"
+            }
+        }))
+    }
+
+    const openRegisterOverlay = () => {
+        dispatch(openDialog({
+            props: {
+                content: <RegisterForm onSwitchLogin={() => dispatch(closeDialog())} showLogo={false}/>,
+            }
+        }))
+    }
+
+    // Event to open login overlay
+    useEffect(() => {
+        const handler = () => { 
+            if (location.pathname !== "/login" && location.pathname !== "/register") {
+                console.log('openLoginOverlay event received');
+                openLoginOverlay();
+            }
+        }
+        authEvents.on("openLoginOverlay", handler);
+
+        return () => {
+            authEvents.off("openLoginOverlay", handler);
+        }
+    }, []);
 
     // Language context (setLanguage to change language)
     const { setLanguage } = useLanguage(); 
@@ -60,6 +107,7 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
                 setRefreshTokenToSession(result.data?.refreshToken || '');
             }
             setIsAuthenticated(true);
+            dispatch(closeDialog());
         }
         return result;
     }
@@ -90,6 +138,7 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
             setUserId(undefined);
             setUrlName(undefined);
             setIsAuthenticated(false);
+            // setLoginOverlay(true);
         }
         setIsLoading(false);
     }, []);
@@ -97,7 +146,7 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
     // Function to refresh authentication status
     const refresh = async () => {
         checkAuth();
-        console.log('refresh');
+        // console.log('refresh');
     }
 
     // Check authentication status on mount
@@ -125,8 +174,11 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
             logout,
             refresh,
             userId,
-            urlName}}>
-                {isLoading || isAuthenticated === null ? <LoadingPage/> : children}
+            urlName,
+            openLoginOverlay,
+            openRegisterOverlay
+        }}>
+            {isLoading || isAuthenticated === null ? <LoadingPage/> : children}
         </AuthContext.Provider> 
     )
 }

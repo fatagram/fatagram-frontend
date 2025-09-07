@@ -22,11 +22,11 @@ const AcceptedFriendRequestCard: React.FC<AcceptedFriendRequestCardProps> = ({
             <div className='flex items-start'>
                 <Avatar src={notificationDto.actorImageUrl} alt='Avatar' size='small_1' />
             </div>
-            <div className='flex flex-col gap-1'>
+            <div className='flex flex-col gap-1 flex-1'>
                 <Text size='sm-2'>
                     {
                         renderContent(notificationDto.content ?? "", {
-                            actorName: <Text size='sm-2' weight='bold'>{notificationDto.actorName}</Text>
+                            actorName: <Text key={notificationDto.actorId} size='sm-2' weight='bold'>{notificationDto.actorName}</Text>
                         })
                     }
                 </Text>

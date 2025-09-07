@@ -3,8 +3,6 @@ import Logo from "@/components/common/ui/Logo/Logo";
 import Button from "@/components/common/ui/Button/Button";
 import { useAuth } from "@/contexts/AuthContext";
 import ProfileMenu from "@/features/user/components/ProfileMenu/ProfileMenu";
-import OverlayLogin from "@/features/auth/components/LoginForm/OverlayLogin";
-import OverlayRegister from "@/features/user/components/RegisterForm/OverlayRegister";
 import { useNavigate } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
 import NotificationMenu from "@/features/notifications/components/NotificationMenu/NotificationMenu";
@@ -14,9 +12,7 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ className }) => {
-    const { isAuthenticated } = useAuth();
-    const [showLogin, setShowLogin] = React.useState<boolean>(true);
-    const [showRegister, setShowRegister] = React.useState<boolean>(false);
+    const { isAuthenticated, openLoginOverlay, openRegisterOverlay } = useAuth();
 
     const navItems: { icon: React.ReactNode, path: string }[] = [
         { icon: <i className="fa-solid fa-house"></i>, path: "/" },
@@ -29,7 +25,7 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
         if (isAuthenticated) {
             navigate("/");
         } else {
-            setShowLogin(true);
+            openLoginOverlay();
         }
     }, [isAuthenticated, navigate]);
 
@@ -56,13 +52,10 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
                 </div>
                 :
                 <div className="flex gap-2">
-                    <Button size="sm-1" variant="secondary" onClick={() => setShowLogin(true)}>Sign in</Button>
-                    <Button size="sm-1" variant="primary" onClick={() => setShowRegister(true)}>Sign up</Button>
+                    <Button size="sm-1" variant="secondary" onClick={() => openLoginOverlay()}>Sign in</Button>
+                    <Button size="sm-1" variant="primary" onClick={() => openRegisterOverlay()}>Sign up</Button>
                 </div>
             }
-
-            {(showLogin && !isAuthenticated) && <OverlayLogin onClose={() => setShowLogin(false)} />}
-            {(showRegister && !isAuthenticated) && <OverlayRegister onClose={() => setShowRegister(false)} />}
         </div>
     )
 }

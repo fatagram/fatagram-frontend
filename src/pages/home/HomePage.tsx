@@ -5,11 +5,11 @@ const HomePage: React.FC = () => {
     
     React.useEffect(() => {
         // Thực hiện các tác vụ khi component được mount
-        console.log("HomePage mounted");
+        // console.log("HomePage mounted");
 
         // Trả về hàm cleanup nếu cần thiết
         return () => {
-            console.log("HomePage unmounted");
+            // console.log("HomePage unmounted");
         };
     }, []);
 

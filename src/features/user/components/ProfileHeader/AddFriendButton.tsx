@@ -50,9 +50,9 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
             if (response.success) {
                 setFriendshipStatus(response.data?.status ?? "None");
             }
-            else {
-                console.log(response.errorCodes);
-            }  
+            // else {
+            //     console.log(response.errorCodes);
+            // }  
         }
         fetchFriendshipStatus();
     }, [uid, friendshipService, setFriendshipStatus]);  
@@ -62,9 +62,9 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
             if (response.success) {
                 setFriendshipStatus("SentByMe");
             }
-            else {
-                console.log(response.errorCodes);
-            }
+            // else {
+            //     console.log(response.errorCodes);
+            // }
         }, [uid, friendshipService]);
     
     const handleCancelAddFriendRequest = useCallback(async () => {
@@ -72,9 +72,9 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
         if (response.success) {
             setFriendshipStatus("None");
         }
-        else {
-            console.log(response.errorCodes);
-        }
+        // else {
+        //     console.log(response.errorCodes);
+        // }
     }, [uid, friendshipService]);
 
     const handleAcceptAddFriendRequest = useCallback(async (id: string | undefined) => {
@@ -82,9 +82,9 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
         if (response.success) {
             setFriendshipStatus("Friend");
         }
-        else {
-            console.log(response.errorCodes);
-        }
+        // else {
+        //     console.log(response.errorCodes);
+        // }
     }, [friendshipService]);
 
     const handleDeclineAddFriendRequest = useCallback(async (id: string | undefined) => {
@@ -92,9 +92,9 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
         if (response.success) {
             setFriendshipStatus("None");
         }
-        else {
-            console.log(response.errorCodes);
-        }
+        // else {
+        //     console.log(response.errorCodes);
+        // }
     }, [friendshipService]);
 
     // Handle unfriend action
@@ -102,9 +102,6 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
         const response = await friendshipService.Unfriend(id ? id : "");
         if (response.success) {
             setFriendshipStatus("None");
-        }
-        else {
-            console.log(response.errorCodes);
         }
     }, [friendshipService]);
 
@@ -133,41 +130,40 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
 
     return (
         <div>
-            <>
-                {friendshipStatus === "None" ? (
-                    <Button size={size}
-                        onClick={handleSentAddFriendRequest}>
-                        <i className="fa-solid fa-plus"></i> {t("user:profileHeader.addFriendButton")}
+            {friendshipStatus === "None" ? (
+                <Button size={size}
+                    onClick={handleSentAddFriendRequest}>
+                    <i className="fa-solid fa-plus"></i> {t("user:profileHeader.addFriendButton")}
+                </Button>
+            ) : friendshipStatus === "SentByMe" ? (
+                <Button size={size}
+                    onClick={handleCancelAddFriendRequest}>
+                    <i className="fa-solid fa-xmark"></i> {t("user:profileHeader.cancelRequestButton")}
+                </Button>
+            ) : friendshipStatus === "SentByThem" ? (
+                <div className="sm:relative">
+                    <Button size={size} ref={btnRequestRef}
+                        onClick={() => { setIsShowRequestOptions(!isShowRequestOptions) }}>
+                        <i className="fa-solid fa-reply"></i> {t("user:profileHeader.respondRequestButton")}
                     </Button>
-                ) : friendshipStatus === "SentByMe" ? (
-                    <Button size={size}
-                        onClick={handleCancelAddFriendRequest}>
-                        <i className="fa-solid fa-xmark"></i> {t("user:profileHeader.cancelRequestButton")}
+                    <Dropdown ref={requestOptionsRef} isShow={isShowRequestOptions}
+                        className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
+                                                rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
+                        items={requestOptions} />
+                </div>
+            ) : (
+                <div className="sm:relative z-50">
+                    <Button size={size} ref={btnFriendRef}
+                        onClick={() => { setIsShowFriendOptions(!isShowFriendOptions) }}>
+                        <i className="fa-solid fa-user-check"></i> {t("user:profileHeader.friendButton")}
                     </Button>
-                ) : friendshipStatus === "SentByThem" ? (
-                    <div className="sm:relative">
-                        <Button size={size} ref={btnRequestRef}
-                            onClick={() => { setIsShowRequestOptions(!isShowRequestOptions) }}>
-                            <i className="fa-solid fa-reply"></i> {t("user:profileHeader.respondRequestButton")}
-                        </Button>
-                        {isShowRequestOptions && <Dropdown ref={requestOptionsRef}
-                            className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
-                                                 rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
-                            items={requestOptions} />}
-                    </div>
-                ) : (
-                    <div className="sm:relative">
-                        <Button size={size} ref={btnFriendRef}
-                            onClick={() => { setIsShowFriendOptions(!isShowFriendOptions) }}>
-                            <i className="fa-solid fa-user-check"></i> {t("user:profileHeader.friendButton")}
-                        </Button>
-                        {isShowFriendOptions && <Dropdown ref={friendOptionsRef}
-                            className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
-                                                 rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
-                            items={friendOptions} />}
-                    </div>
-                )}
-            </>
+                    <Dropdown ref={friendOptionsRef} isShow = {isShowFriendOptions}
+                        className="absolute sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
+                                    rounded-lg shadow-md z-[10] sm:min-w-[200px] w-[calc(100%-2%)] "
+                        items={friendOptions} />
+                </div>
+
+            )} 
         </div>
     )
 }

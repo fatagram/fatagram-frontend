@@ -14,6 +14,7 @@ export interface DialogBoxProps{
     secondaryButton?: ButtonProps,
     tertiaryButton?: ButtonProps,
     onClose?: () => void;
+    className?: string;
 }
 
 const DialogBox: React.FC<DialogBoxProps> = ({
@@ -22,34 +23,35 @@ const DialogBox: React.FC<DialogBoxProps> = ({
     primaryButton,
     secondaryButton,
     tertiaryButton,
-    onClose
+    onClose,
+    className
 }) => {
 
     return (
-        <div className="relative flex flex-col gap-4 bg-[var(--second-bg-color)] 
-                        rounded-lg shadow-lg p-6 max-w-[500px] min-w-[300px]">
+        <div className={`relative flex flex-col gap-4 bg-[var(--second-bg-color)] 
+                        rounded-lg shadow-lg ${className}`}>
             {title && <Text weight="bold" size="lg-2">{title}</Text>}
             {content && <div>{content}</div>}
             <div className="flex justify-end space-x-2">
                 {tertiaryButton && (
-                    <Button onClick={tertiaryButton.onClick} variant="secondary" size="small">
+                    <Button onClick={tertiaryButton.onClick} variant="secondary" size="sm-1">
                         {tertiaryButton.text}
                     </Button>
                 )}
                 {secondaryButton && (
-                    <Button onClick={secondaryButton.onClick} variant="secondary" size="small">
+                    <Button onClick={secondaryButton.onClick} variant="secondary" size="sm-1">
                         {secondaryButton.text}
                     </Button>
                 )}
                 {primaryButton && (
-                    <Button onClick={primaryButton.onClick} variant="primary" size="small">
+                    <Button onClick={primaryButton.onClick} variant="primary" size="sm-1">
                         {primaryButton.text}
                     </Button>
                 )}
             </div>
             <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] 
                                 cursor-pointer`}
-                onClick={onClose}>
+                onClick= {onClose}>
                     <i className="fa-solid fa-xmark"></i>
             </Text>
         </div>

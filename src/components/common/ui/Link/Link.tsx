@@ -4,6 +4,7 @@ import { Link as RouterLink } from "react-router-dom";
 // LinkProps interface
 interface LinkProps {
     to: string;
+    onClick?: () => void;
     children: React.ReactNode;
     className?: string;
 }
@@ -13,6 +14,7 @@ interface LinkProps {
 const Link: React.FC<LinkProps> = ({
     to,
     children,
+    onClick,
     className = "",
     ...props
 }) => {
@@ -21,7 +23,9 @@ const Link: React.FC<LinkProps> = ({
         hover:text-[var(--main-single-color)] hover:cursor-pointer
         transition-all duration-100 active:scale-95 select-none
         ${className}
-        `} {...props}>
+        `}
+        onClick={onClick} 
+        {...props}>
             {children}
         </RouterLink>
    );

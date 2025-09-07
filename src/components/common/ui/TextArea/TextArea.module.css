@@ -1,0 +1,57 @@
+.my-textarea {
+  position: relative;
+  border-style: solid;
+  border-color: transparent;
+
+  /* Gradient border */
+  background: linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box, 
+              var(--main-gradient-color) border-box;
+  background-size: 200% 100%;
+  background-position: 0 100%;
+  transition: background-position 0.3s ease-out;
+
+  /* Firefox scrollbar */
+  scrollbar-width: thin;                          /* mảnh hơn */
+  scrollbar-color: var(--main-single-color) transparent; /* thumb | track */
+}
+
+.my-textarea-wrong {
+  position: relative;
+  border-style: solid;
+  border-color: transparent;
+
+  /* Gradient border */
+  background: linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box, 
+              var(--main-wrong-gradient-color) border-box;
+  background-size: 200% 100%;
+  background-position: 0 100%;
+  transition: background-position 0.3s ease-out;
+
+  /* Firefox scrollbar */
+  scrollbar-width: thin;
+  scrollbar-color: var(--main-single-color) transparent;
+}
+
+.my-textarea::selection {
+  background: var(--main-single-color);
+  color: white;
+}
+
+/* Webkit browsers (Chrome, Safari, Edge) */
+.my-textarea::-webkit-scrollbar {
+  width: 8px;         /* độ rộng scrollbar dọc */
+  height: 8px;        /* độ cao scrollbar ngang */
+}
+
+.my-textarea::-webkit-scrollbar-track {
+  background: transparent; 
+}
+
+.my-textarea::-webkit-scrollbar-thumb {
+  background-color: var(--main-background-color);
+  border-radius: 6px;
+}
+
+.my-textarea::-webkit-scrollbar-thumb:hover {
+  background-color: #888; /* hover màu nhạt hơn */
+}

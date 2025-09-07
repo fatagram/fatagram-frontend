@@ -13,7 +13,7 @@ export const renderContent = (template: string, values: Record<string, string | 
         }
         parts.push(values[match[1]]);
         lastIndex = match.index + match[0].length;
-        console.log(match);
+        // console.log(match);
     }
     
     if (lastIndex < template.length) {

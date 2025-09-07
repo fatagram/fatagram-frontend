@@ -1,6 +1,7 @@
 import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios';
 import apiUrl from '../config';
 import { getRefreshToken, getRefreshTokenFromSession } from '@/utils/token';
+import { authEvents } from '@/events/authEvents';
 
 // Instance of axios for fetching data with JSON content type
 const apiClient: AxiosInstance = axios.create(
@@ -46,7 +47,7 @@ apiClient.interceptors.response.use((response: AxiosResponse) => response,
                 }
             }
             catch (error) {
-                // Handle error if needed
+                authEvents.emit("openLoginOverlay");
             }
         }
         return Promise.reject(error);

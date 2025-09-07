@@ -9,25 +9,22 @@ interface EditableFieldProps {
     valueClassName?: string;
     title?: string;
     value?: string;
-    isEmpty?: boolean;
     placeholder?: string;
     editableMode?: "inline" | "none";
     isEdit?: boolean;
     isError?: boolean;
     errorMessage?: string;
-    valueType?: string;
     btnChildren?: React.ReactNode;
     noDataValue?: string;
     onChangeClick?: () => void;
-    onSaveClick?: (value: string) => void;
+    onSaveClick?: (value: string | undefined) => void;
     onCancelClick?: () => void;
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
     editableMode="none", 
     title, 
-    value, 
-    isEmpty=false,
+    value,
     placeholder,
     valueClassName, 
     btnChildren,
@@ -39,12 +36,10 @@ const EditableField: React.FC<EditableFieldProps> = ({
     onSaveClick,
     onCancelClick}) => {
 
-    const [inputValue, setInputValue] = React.useState<string>(isEmpty ? "" : value ?? "");
-    const { t } = useTranslation() as { t: (key: string) => string };
+    //const [inputValue, setInputValue] = React.useState<string>(isEmpty ? "" : value ?? "");
+    const [inputValue, setInputValue] = React.useState<string | undefined>(value);
     
-    useEffect(() => {
-        setInputValue(isEmpty ? "" : value ?? "");
-    }, [isEmpty, isEdit, value]);
+    const { t } = useTranslation() as { t: (key: string) => string };
 
     return (
         <div className="flex justify-between items-center w-full">

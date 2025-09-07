@@ -1,31 +1,31 @@
 .primary-textbox {
-    position: relative;
-    border-style: solid;
-    border-color: transparent;
-    
-    /* Gradient border */
-    background: linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box, 
-                var(--main-gradient-color) border-box;
-    background-size: 200% 100%;
-    background-position: 0 100%;
-    transition: background-position 0.3s ease-out;
-  }
+  position: relative;
+  border-style: solid;
+  border-color: transparent;
   
-  .primary-textbox-wrong {
-    position: relative;
-    border-style: solid;
-    border-color: transparent;
-    
-    /* Gradient border */
-    background: linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box, 
-                var(--main-wrong-gradient-color) border-box;
-    background-size: 200% 100%;
-    background-position: 0 100%;
-    transition: background-position 0.3s ease-out;
-  }
+  /* Gradient border */
+  background: linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box, 
+              var(--main-gradient-color) border-box;
+  background-size: 200% 100%;
+  background-position: 0 100%;
+  transition: background-position 0.3s ease-out;
+}
+
+.primary-textbox-wrong {
+  position: relative;
+  border-style: solid;
+  border-color: transparent;
   
-  .primary-textbox::selection {
-    background: var(--main-single-color);
-    color: white;
-  }
+  /* Gradient border */
+  background: linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box, 
+              var(--main-wrong-gradient-color) border-box;
+  background-size: 200% 100%;
+  background-position: 0 100%;
+  transition: background-position 0.3s ease-out;
+}
+
+.primary-textbox::selection {
+  background: var(--main-single-color);
+  color: white;
+}
   
