@@ -10,7 +10,6 @@ import { ErrorKey } from "@/api/auth/dto/login.dto";
 import { useAuth } from "@/contexts/AuthContext";
 import ChangeNicknameDto from "@/api/user/dto/change-nickname.dto";
 import { userInfoService } from "@/api/user/user-info.api";
-import { url } from "inspector";
 
 interface AccountSettingProps {
     className?: string;
@@ -114,7 +113,6 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
                 }
                 { isLoading ? <TextSkeletonLoading size="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
                     <EditableField title={t("settings:account.personalInfo.urlName")}
-                        isEmpty={urlName === undefined || urlName === "" || urlName === null}
                         value={urlName}
                         noDataValue={t("settings:account.personalInfo.noUrlName")}
                         placeholder={t("settings:account.personalInfo.urlNamePlaceholder")}
@@ -132,7 +130,6 @@ const AccountSetting: React.FC<AccountSettingProps> = ({className}) => {
                 }
                 { isLoading ? <TextSkeletonLoading size="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
                     <EditableField title={t("settings:account.personalInfo.nickname")}
-                        isEmpty={nickname === undefined}
                         value={nickname}
                         noDataValue={t("settings:account.personalInfo.noNickname")}
                         placeholder={t("settings:account.personalInfo.nicknamePlaceholder")}

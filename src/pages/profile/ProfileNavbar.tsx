@@ -1,5 +1,7 @@
 import Link from "@/components/common/ui/Link";
 import NavbarItem from "@/components/layout/Navbar/NavbarItem";
+import { useTransition } from "react";
+import { useTranslation } from "react-i18next";
 
 interface ProfileNavbarProps {
     userParam?: string;
@@ -13,13 +15,15 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({
     className = ""
 }) => {
 
+    const { t } = useTranslation() as { t: (key: string) => string };
+
     const navbarItems = [
-        { name: 'Posts', href: `/${userParam}` },
-        { name: 'Friends', href: `/${userParam}/friends` },
-        { name: 'Photos', href: `/${userParam}/photos` },
-        { name: 'Videos', href: `/${userParam}/videos` },
-        { name: 'About', href: `/${userParam}/about` },
-        { name: 'Settings', href: `/${userParam}/settings` },
+        { name: t('user:profileMenu.posts'), href: `/${userParam}` },
+        { name: t('user:profileMenu.friends'), href: `/${userParam}/friends` },
+        { name: t('user:profileMenu.photos'), href: `/${userParam}/photos` },
+        { name: t('user:profileMenu.videos'), href: `/${userParam}/videos` },
+        { name: t('user:profileMenu.about'), href: `/${userParam}/about` },
+        { name: t('user:profileMenu.settings'), href: `/${userParam}/settings` },
     ]
 
     return (

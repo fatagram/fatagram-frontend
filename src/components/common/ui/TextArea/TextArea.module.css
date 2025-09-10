@@ -13,6 +13,8 @@
   /* Firefox scrollbar */
   scrollbar-width: thin;                          /* mảnh hơn */
   scrollbar-color: var(--main-single-color) transparent; /* thumb | track */
+  
+  /* Height should not override Tailwind classes */
 }
 
 .my-textarea-wrong {
@@ -30,6 +32,8 @@
   /* Firefox scrollbar */
   scrollbar-width: thin;
   scrollbar-color: var(--main-single-color) transparent;
+  
+  /* Height should not override Tailwind classes */
 }
 
 .my-textarea::selection {

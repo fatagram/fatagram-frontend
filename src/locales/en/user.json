@@ -49,5 +49,25 @@
         "oversizeErrorTitle": "File too large",
         "oversizeErrorMessage": "File size exceeds the limit of 1MB",
         "oversizeErrorButton": "OK"
+    },
+    "profileMenu": {
+        "posts": "Posts",
+        "about": "About",
+        "friends": "Friends",
+        "photos": "Photos",
+        "videos": "Videos",
+        "settings": "Settings"
+    },
+    "profilePosts": {
+        "overview": "Overview",
+        "description": "Description",
+        "bioBtn": "Update your bio",
+        "descriptionBtn": "Update your description",
+        "bioPlaceholder": "Enter your bio",
+        "descriptionPlaceholder": "Enter your description"
+    },
+    "profileFriends": {
+        "friends":"Friends",
+        "searchFriends":"Search friends"
     }
 }

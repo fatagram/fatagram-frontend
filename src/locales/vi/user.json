@@ -49,5 +49,25 @@
         "oversizeErrorTitle": "Tệp quá lớn",
         "oversizeErrorMessage": "Kích thước tệp vượt quá giới hạn 1MB",
         "oversizeErrorButton": "OK"
+    },
+    "profileMenu": {
+        "posts": "Bài viết",
+        "about": "Giới thiệu",
+        "friends": "Bạn bè",
+        "photos": "Ảnh",
+        "videos": "Video",
+        "settings": "Cài đặt"
+    },
+    "profilePosts": {
+        "overview": "Tổng quan",
+        "description": "Mô tả",
+        "bioBtn": "Cập nhật tiểu sử",
+        "descriptionBtn": "Cập nhật mô tả",
+        "bioPlaceholder": "Nhập tiểu sử",
+        "descriptionPlaceholder": "Nhập mô tả"
+    },
+    "profileFriends": {
+        "friends":"Bạn bè",
+        "searchFriends":"Tìm kiếm bạn bè"
     }
 }

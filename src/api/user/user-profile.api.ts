@@ -4,9 +4,10 @@ import { ApiResponse, handleApiError, Result } from "../common";
 import ChangeUrlNameDto from "./dto/change-url-name.dto";
 import apiUrl from "@/config";
 
-const API_URL = `${apiUrl}/api/userprofile`;
+const API_URL = `${apiUrl}/api/UserProfile`;
 
 export class UserProfileService {
+    // Check if user exists by id or urlName
     async CheckUserExistAsync(key: string): Promise<Result<any>> {
         try {
             await apiClient.get(`${API_URL}/exist?key=${key}`);
@@ -18,6 +19,7 @@ export class UserProfileService {
         }
     }
 
+    // Get user profile by id or urlName
     async GetProfile(id: string, fields: string): Promise<Result<any>> {
         try {
             const res = await apiClient.get(`${API_URL}/${id}?fields=${fields}`);
@@ -30,6 +32,7 @@ export class UserProfileService {
         }
     }
 
+    // Get current user profile
     async GetMe(): Promise<Result<{userId: string | undefined, urlName: string | undefined, languageCode: string}>> {
         try {
             const res = await apiClient.get(`${API_URL}/me`);
@@ -42,12 +45,8 @@ export class UserProfileService {
         }
     }
 
-    async UploadAvatar(file: File): Promise<{
-        success: boolean, 
-        data?: any, 
-        statusCode?: number, 
-        errorCode?: string,
-        errorCodes?: string[]}> { 
+    // Upload avatar
+    async UploadAvatar(file: File): Promise<Result<any>> { 
         try 
         {
             const formData = new FormData();
@@ -60,12 +59,8 @@ export class UserProfileService {
         }
     }
 
-    async UploadBackground(file: File): Promise<{
-        success: boolean,
-        data?: any,
-        statusCode?: number, 
-        errorCode?: string,
-        errorCodes?: string[]}> { 
+    // Upload background image
+    async UploadBackground(file: File): Promise<Result<any>> { 
         try {
             const formData = new FormData();
             formData.append('file', file);
@@ -77,29 +72,19 @@ export class UserProfileService {
         }
     }
 
-    // async UpdateProfile(data: any): Promise<ServerResponse> { 
-    //     try {
-    //         const { data: responseData } = await apiClient.put(`api/user`, data)
-    //         return { success: true, data: responseData.data }
-    //     }
-    //     catch (error: any) {
-    //         if (error.response) {
-    //             return {
-    //                 success: false,
-    //                 statusCode: error.response.status,
-    //                 errorCodes: error.response.data.error?.code || ["UNKNOWN_ERROR"]
-    //             }
-    //         }
-    //         else {
-    //             return {
-    //                 success: false,
-    //                 statusCode: 500,
-    //                 errorCodes: ["INTERNAL_SERVER_ERROR"]
-    //             }
-    //         }
-    //     }
-    // }
+    // Update simple profile fields such as bio, description, etc.
+    async UpdateProfile(data: any): Promise<Result<any>> { 
+        try {
+            const res = await apiClient.put(`${API_URL}`, data);
+            const response = res.data as ApiResponse<any>;
+            return { success: true, data: response.data }
+        }
+        catch (error: any) {
+            return handleApiError(error);
+        }
+    }
 
+    // Update user's URL name
     async UpdateUrlName(changeUrlNameDto : ChangeUrlNameDto) : Promise<Result<ChangeUrlNameDto>>
     {
         try {

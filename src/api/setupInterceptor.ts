@@ -78,8 +78,10 @@ apiClientFormData.interceptors.response.use((response: AxiosResponse) => respons
             err.name = "LARGE_FILE_ERROR";
             return Promise.reject(err);
         }
+        console.log(error);
         return Promise.reject(error);
-    });
+    }
+);
     
 // Export the apiClient
 export { apiClientFormData, apiClient };

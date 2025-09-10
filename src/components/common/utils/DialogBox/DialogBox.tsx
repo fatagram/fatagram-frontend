@@ -32,17 +32,17 @@ const DialogBox: React.FC<DialogBoxProps> = ({
             {content && <div>{content}</div>}
             <div className="flex justify-end space-x-2">
                 {tertiaryButton && (
-                    <Button onClick={tertiaryButton.onClick} variant="secondary" size="small">
+                    <Button onClick={tertiaryButton.onClick} variant="secondary" size="sm-1">
                         {tertiaryButton.text}
                     </Button>
                 )}
                 {secondaryButton && (
-                    <Button onClick={secondaryButton.onClick} variant="secondary" size="small">
+                    <Button onClick={secondaryButton.onClick} variant="secondary" size="sm-1">
                         {secondaryButton.text}
                     </Button>
                 )}
                 {primaryButton && (
-                    <Button onClick={primaryButton.onClick} variant="primary" size="small">
+                    <Button onClick={primaryButton.onClick} variant="primary" size="sm-1">
                         {primaryButton.text}
                     </Button>
                 )}

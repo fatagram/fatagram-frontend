@@ -38,7 +38,7 @@ const colorClasses: Record<string, string> = {
 type Color = keyof typeof colorClasses;
 
 // Text props
-interface TextProps {
+type TextProps = {
     onClick?: () => void;
     children?: React.ReactNode;
     htmlFor?: string;
@@ -47,6 +47,7 @@ interface TextProps {
     size?: Size;
     weight?: Weight;
     color?: Color;
+    wrap?: "whitespace-pre-wrap" | "whitespace-normal";
 }
 
 const Text: React.FC<TextProps> = ({
@@ -58,12 +59,14 @@ const Text: React.FC<TextProps> = ({
     size = "md-1",
     weight = "regular",
     color = "primary",
+    wrap,
 }) => {
     return (
         <label ref={ref}
             onClick={onClick}
             htmlFor={htmlFor}
-            className={`cursor-pointer select-none
+            className={`cursor-pointer select-none 
+                ${wrap ? wrap : "whitespace-normal"}
                 ${textSizes[size]} 
                 ${weightClasses[weight]} 
                 ${colorClasses[color]} 

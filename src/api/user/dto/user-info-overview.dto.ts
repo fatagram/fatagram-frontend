@@ -1,7 +1,7 @@
 export default interface UserInfoOverviewDto {
-    bio: string | null;
-    description: string | null;
-    email: string | null;
-    phone: string | null;
+    bio: string | undefined;
+    description: string | undefined;
+    email: string | undefined;
+    phone: string | undefined;
     isOwner: boolean;
 }
