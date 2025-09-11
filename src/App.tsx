@@ -8,12 +8,14 @@ import GlobalDialog from "./components/common/widgets/DialogBox/GlobalDialog";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
+import { DialogProvider } from "./contexts/DialogContext";
 
 
 const App: React.FC = () => {
   return (
     <BrowserRouter>
-      <ThemeProvider>
+      <DialogProvider>
+        <ThemeProvider>
           <LanguageProvider>
             <AuthProvider>
               <ToastProvider>
@@ -22,7 +24,8 @@ const App: React.FC = () => {
               </ToastProvider>
             </AuthProvider>
           </LanguageProvider>
-      </ThemeProvider>
+        </ThemeProvider>
+      </DialogProvider>
     </BrowserRouter>
   );
 };

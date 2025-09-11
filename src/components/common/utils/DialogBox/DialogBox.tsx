@@ -30,7 +30,7 @@ const DialogBox: React.FC<DialogBoxProps> = ({
                         rounded-lg shadow-lg p-6 max-w-[500px] min-w-[300px]">
             {title && <Text weight="bold" size="lg-2">{title}</Text>}
             {content && <div>{content}</div>}
-            <div className="flex justify-end space-x-2">
+            { (tertiaryButton || secondaryButton || primaryButton) && <div className="flex justify-end space-x-2">
                 {tertiaryButton && (
                     <Button onClick={tertiaryButton.onClick} variant="secondary" size="sm-1">
                         {tertiaryButton.text}
@@ -46,7 +46,7 @@ const DialogBox: React.FC<DialogBoxProps> = ({
                         {primaryButton.text}
                     </Button>
                 )}
-            </div>
+            </div> }
             <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] 
                                 cursor-pointer`}
                 onClick={onClose}>

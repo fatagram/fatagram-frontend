@@ -17,7 +17,7 @@ export interface DialogBoxProps{
     className?: string;
 }
 
-const DialogBox: React.FC<DialogBoxProps> = ({
+const Dialog: React.FC<DialogBoxProps> = ({
     title,
     content,
     primaryButton,
@@ -33,21 +33,21 @@ const DialogBox: React.FC<DialogBoxProps> = ({
             {title && <Text weight="bold" size="lg-2">{title}</Text>}
             {content && <div>{content}</div>}
             <div className="flex justify-end space-x-2">
-                {tertiaryButton && (
+                {tertiaryButton && 
                     <Button onClick={tertiaryButton.onClick} variant="secondary" size="sm-1">
                         {tertiaryButton.text}
                     </Button>
-                )}
-                {secondaryButton && (
+                }
+                {secondaryButton && 
                     <Button onClick={secondaryButton.onClick} variant="secondary" size="sm-1">
                         {secondaryButton.text}
                     </Button>
-                )}
-                {primaryButton && (
+                }
+                {primaryButton && 
                     <Button onClick={primaryButton.onClick} variant="primary" size="sm-1">
                         {primaryButton.text}
                     </Button>
-                )}
+                }
             </div>
             <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] 
                                 cursor-pointer`}
@@ -58,4 +58,4 @@ const DialogBox: React.FC<DialogBoxProps> = ({
     )
 }
 
-export default DialogBox;
+export default Dialog;

@@ -3,6 +3,7 @@ import LoginForm from "@/features/auth/components/LoginForm/LoginForm";
 import Footer from "@/components/layout/Footer/Footer";
 import ForgotPasswordForm from "@/features/auth/components/ForgotPasswordForm/ForgotPasswordForm";
 import SelectLanguage from "@/features/settings/components/general/SelectLanguage";
+import { useDialog } from "@/contexts/DialogContext";
 
 // LoginPage function
 // This function is a React component that renders the login page.

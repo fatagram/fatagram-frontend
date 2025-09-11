@@ -47,7 +47,7 @@ apiClient.interceptors.response.use((response: AxiosResponse) => response,
                 }
             }
             catch (error) {
-                authEvents.emit("openLoginOverlay");
+                // authEvents.emit("openLoginOverlay");
             }
         }
         return Promise.reject(error);

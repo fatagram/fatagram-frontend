@@ -12,7 +12,7 @@ import { useLocation } from "react-router-dom";
 import LoginForm from "@/features/auth/components/LoginForm/LoginForm";
 import RegisterForm from "@/features/user/components/RegisterForm/RegisterForm";
 import { useDispatch } from "react-redux";
-import { closeDialog, openDialog } from "@/store/dialogSlice";
+import { useDialog } from "./DialogContext";
 
 // Authentication context
 interface AuthContextType {
@@ -49,40 +49,33 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
     const [urlName, setUrlName] = useState<string | undefined>(undefined); // Current user URL name
 
     const location = useLocation();
-    // const { showDialog, closeDialog } = useDialog();
-    const dispatch = useDispatch();
+    const { openDialog, closeDialog } = useDialog();
+    // const dispatch = useDispatch();
 
     const openLoginOverlay = () => {
-        dispatch(openDialog({
-            props: {
-                content: <LoginForm onSwitchRegister={() => dispatch(closeDialog())} showLogo={false}/>,
-                className: "p-4 pb-0"
-            }
-        }))
+        openDialog({
+            content: <LoginForm showLogo={false}/>,
+        })
     }
 
     const openRegisterOverlay = () => {
-        dispatch(openDialog({
-            props: {
-                content: <RegisterForm onSwitchLogin={() => dispatch(closeDialog())} showLogo={false}/>,
-            }
-        }))
+        openDialog({    
+            content: <RegisterForm showLogo={false}/>,
+        })
     }
 
-    // Event to open login overlay
     useEffect(() => {
-        const handler = () => { 
-            if (location.pathname !== "/login" && location.pathname !== "/register") {
-                console.log('openLoginOverlay event received');
+        const timer = setTimeout(() => {
+            if (!isAuthenticated && location.pathname !== "/login" && location.pathname !== "/register") {
                 openLoginOverlay();
+            } 
+            else {
+                closeDialog();
             }
-        }
-        authEvents.on("openLoginOverlay", handler);
+        }, 0); // đợi router settle
 
-        return () => {
-            authEvents.off("openLoginOverlay", handler);
-        }
-    }, []);
+        return () => clearTimeout(timer);
+    }, [isAuthenticated, location.pathname]);
 
     // Language context (setLanguage to change language)
     const { setLanguage } = useLanguage(); 
@@ -107,7 +100,7 @@ export const AuthProvider = ({children} : { children: React.ReactNode }) => {
                 setRefreshTokenToSession(result.data?.refreshToken || '');
             }
             setIsAuthenticated(true);
-            dispatch(closeDialog());
+            closeDialog();
         }
         return result;
     }

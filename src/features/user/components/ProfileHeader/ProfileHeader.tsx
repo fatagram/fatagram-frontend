@@ -13,8 +13,8 @@ import AddFriendButton from "./AddFriendButton";
 import { useNavigate } from "react-router-dom";
 import { AuthStatus } from "@/pages/profile/AuthStatus";
 import { useDispatch } from "react-redux";
-import { closeDialog, openDialog } from "@/store/dialogSlice";
 import { c } from "vite/dist/node/moduleRunnerTransport.d-DJ_mE5sf";
+import { useDialog } from "@/contexts/DialogContext";
 
 export interface ProfileHeaderProps {
     className?: string;
@@ -46,7 +46,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
     // const { userId, isAuthenticated } = useAuth(); 
     const { t } = useTranslation() as { t: (key: string) => string };
     const navigate = useNavigate();
-    const dispatch = useDispatch();
+    // const dispatch = useDispatch();
+    const { openDialog, closeDialog } = useDialog(); 
 
     React.useEffect(() => {
         document.title = fullName
@@ -95,16 +96,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
         }
         else if (result.errorCode === "LARGE_FILE_ERROR")
         {
-            dispatch(openDialog({
-                props: {
-                    title: t("user:profileHeader.oversizeErrorTitle"),
-                    content: t("user:profileHeader.oversizeErrorMessage"),
-                    primaryButton: {
-                        text: t("user:profileHeader.oversizeErrorButton"),
-                        onClick: () => { dispatch(closeDialog()); }
-                    },
-                }
-            }))
+            openDialog({
+                title: t("user:profileHeader.oversizeErrorTitle"),
+                content: t("user:profileHeader.oversizeErrorMessage"),
+                primaryButton: {
+                    text: t("user:profileHeader.oversizeErrorButton"),
+                    onClick: closeDialog
+                },
+            });
         }
     }
 
@@ -115,16 +114,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
         }
         else if (result.errorCode === "LARGE_FILE_ERROR")
         {
-            dispatch(openDialog({
-                props: {
-                    title: t("user:profileHeader.oversizeErrorTitle"),
-                    content: t("user:profileHeader.oversizeErrorMessage"),
-                    primaryButton: {
-                        text: t("user:profileHeader.oversizeErrorButton"),
-                        onClick: () => { dispatch(closeDialog()); }
-                    },
-                }
-            }))
+            openDialog({
+                title: t("user:profileHeader.oversizeErrorTitle"),
+                content: t("user:profileHeader.oversizeErrorMessage"),
+                primaryButton: {
+                    text: t("user:profileHeader.oversizeErrorButton"),
+                    onClick: closeDialog
+                },
+            })
         }
     }
 

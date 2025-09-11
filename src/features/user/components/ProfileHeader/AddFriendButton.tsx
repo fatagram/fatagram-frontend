@@ -2,9 +2,11 @@ import { friendshipService } from "@/api/user/friendship.api";
 import Button from "@/components/common/ui/Button";
 import Dropdown from "@/components/common/ui/Dropdown/Dropdown";
 import { Size } from "@/components/common/ui/styles/size";
+import { useAuth } from "@/contexts/AuthContext";
 import useClickOutside from "@/hooks/useClickOutside";
 import React, { RefObject, useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import { useActionData } from "react-router-dom";
 
 interface AddFriendButtonProps {
     uid?: string;
@@ -17,6 +19,8 @@ const AddFriendButton: React.FC<AddFriendButtonProps> = ({
 }) => {
 
     const { t } = useTranslation() as { t: (key: string) => string };
+
+    if (!useAuth().isAuthenticated) return null;
 
     const [friendshipStatus, setFriendshipStatus] = React.useState<string>("None");
     const [isShowFriendOptions, setIsShowFriendOptions] = React.useState<boolean>(false);

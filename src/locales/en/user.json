@@ -47,7 +47,7 @@
         "friendsCount" : "friends",
         "noFriendsCount" : "No friends",
         "oversizeErrorTitle": "File too large",
-        "oversizeErrorMessage": "File size exceeds the limit of 1MB",
+        "oversizeErrorMessage": "File size exceeds the limit of 2MB",
         "oversizeErrorButton": "OK"
     },
     "profileMenu": {

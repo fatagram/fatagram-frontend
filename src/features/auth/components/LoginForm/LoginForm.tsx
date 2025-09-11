@@ -19,7 +19,6 @@ interface LoginFormProps {
     showLogo?: boolean;
     showClose?: boolean;
     onClose?: () => void;
-    onSwitchRegister?: () => void;
 }
 
 // LoginForm component
@@ -28,7 +27,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
         showLogo = true, 
         showClose = false, 
         onClose,
-        onSwitchRegister
     }) => {
     // states
     const [username, setUsername] = React.useState<string>("");
@@ -191,7 +189,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             </Button>
             <div className="flex gap-1 items-center">
                 <Text size="sm-2" className="text-[var(--third-single-color)]">{t("auth:login.registerAnswer")}</Text>
-                <Link onClick={onSwitchRegister} className={"sm:text-[15px] font-bold"} to="/register">{t("auth:login.registerButton")}</Link>
+                <Link className={"sm:text-[15px] font-bold"} to="/register">{t("auth:login.registerButton")}</Link>
             </div>
 
             {isShowClose &&

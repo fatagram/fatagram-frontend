@@ -47,7 +47,7 @@
         "friendsCount" : "người bạn",
         "noFriendsCount" : "Không có bạn bè",
         "oversizeErrorTitle": "Tệp quá lớn",
-        "oversizeErrorMessage": "Kích thước tệp vượt quá giới hạn 1MB",
+        "oversizeErrorMessage": "Kích thước tệp vượt quá giới hạn 2MB",
         "oversizeErrorButton": "OK"
     },
     "profileMenu": {
@@ -59,7 +59,7 @@
         "settings": "Cài đặt"
     },
     "profilePosts": {
-        "overview": "Tổng quan",
+        "overview": "Giới thiệu",
         "description": "Mô tả",
         "bioBtn": "Cập nhật tiểu sử",
         "descriptionBtn": "Cập nhật mô tả",
