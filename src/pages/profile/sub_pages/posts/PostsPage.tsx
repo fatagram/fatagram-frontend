@@ -7,7 +7,7 @@ const PostsPage = () => {
     const authStatus = useOutletContext<AuthStatus>();
 
     return (
-        <div className="flex gap-2">
+        <div className="flex gap-2 lg:flex-row flex-col ">
             <ProfileOverview className="flex-[4]" authStatus={authStatus}/>
             <Card className="bg-[var(--second-bg-color)] rounded-md mt-2 flex-[8]">
 

@@ -53,18 +53,18 @@ const FriendItem: React.FC<FriendItemProps> = ({
     // console.log("FriendItem render", friendDto);
 
     return (
-        <div className={`relative bg-[var(--second-bg-color)] rounded-xl  
+        <div className={`relative flex items-center justify-between bg-[var(--second-bg-color)] rounded-xl 
                 hover:bg-[var(--fourth-bg-color)] cursor-pointer transition-colors ${className}`}>
             <div className={`relative flex p-3 gap-4 items-center`}
                 onClick={() => navigate(`/${friendDto.id}`)}>
                 <div>
-                    <Avatar alt="Avatar" src={friendDto.avatar ?? undefined} size="small_3"/>
+                    <Avatar alt="Avatar" src={friendDto.avatar ?? undefined} size="small_1"/>
                 </div>
                 <div className="flex flex-col h-full justify-center flex-1">
                     <Text size="md-2" weight="bold">{friendDto.name}</Text>
                 </div>
             </div>
-            <div className="absolute z-10 top-1/2 -translate-y-1/2 right-[10px]">
+            <div className="relative pr-2">
                 { isFriend ? <>
                 <button aria-label="More options"
                     ref={btnRef}
@@ -78,7 +78,7 @@ const FriendItem: React.FC<FriendItemProps> = ({
                 
                 <Dropdown isShow={isShowDrowdown}
                     className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
-                                rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
+                                rounded-lg shadow-md z-10 min-w-[200px] w-[calc(100%-2%)]"
                     ref={dropdownRef}
                     items={requestOptions}
                 />

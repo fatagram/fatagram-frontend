@@ -27,7 +27,7 @@
 
     const EditableTextArea: React.FC<EditatableTextAreaProps> = ({
         editableMode="none", 
-        title, 
+        title,
         value,
         placeholder,
         valueClassName, 
@@ -51,7 +51,7 @@
         return (
             <div className="flex justify-between items-center w-full">
                 { title && <Text size="lg-1" className="font-light m-2">{title}</Text> }
-                <div className="flex sm:items-center items-end gap-1 flex-col w-full">
+                <div className="flex items-center gap-1 flex-col w-full">
                     {editableMode === "inline" && isEdit ? 
                         <div className="relative flex flex-col gap-1 w-full">
                             <TextArea className={`animate-fade-in px-2 py-1 ${isError && "mt-[5px]"}
@@ -65,7 +65,7 @@
                         </div>
                         :
                         <Text size="lg-1" 
-                            className={`${valueClassName} select-auto`}
+                            className={` ${valueClassName} select-auto`}
                             wrap="whitespace-pre-wrap"
                         >
                             {value ?? noDataValue }

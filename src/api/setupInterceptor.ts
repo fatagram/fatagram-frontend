@@ -51,7 +51,7 @@ apiClient.interceptors.response.use((response: AxiosResponse) => response,
             }
         }
         return Promise.reject(error);
-    });
+});
 
 // Error Authorization
 apiClientFormData.interceptors.response.use((response: AxiosResponse) => response, 
