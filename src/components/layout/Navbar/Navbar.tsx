@@ -5,7 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import ProfileMenu from "@/features/user/components/ProfileMenu/ProfileMenu";
 import { useNavigate } from "react-router-dom";
 import NavbarItem from "./NavbarItem";
-import NotificationMenu from "@/features/notifications/components/NotificationMenu/NotificationMenu";
+import NotificationMenu from "@/features/notifications/components/NotificationMenu/NotificationButton";
 
 interface NavbarProps {
     className?: string;
@@ -40,7 +40,7 @@ const Navbar: React.FC<NavbarProps> = ({ className }) => {
                 <div className="flex flex-1 gap-3 items-center">
                     <div className="hidden sm:flex flex-1 justify-center w-full md:w-auto">
                         {navItems.map((item, index) => (
-                            <NavbarItem path={item.path} key={index}>
+                            <NavbarItem path={item.path} key={index} className="!px-10">
                                 {item.icon}
                             </NavbarItem>
                         ))}

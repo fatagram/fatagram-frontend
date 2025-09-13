@@ -1,6 +1,6 @@
 import React, { useCallback } from "react";
 import { Route, Routes } from "react-router-dom";
-import { mainRoutes } from "./routes/main_routes";
+import { mainRoutes } from "./routes/main-routes";
 import RouteType from "./interface/route_type";
 import { KeepAlive, AliveScope } from "react-activation";
 

@@ -1,16 +1,18 @@
 import React from "react";
 import Text from "../../ui/Text";
+import PageNavbarSection from "./PageNavbarSection";
+import PageNavbarItem from "./PageNavbarItem";
 
-interface PageNavbarProps {
+type PageNavbarProps = {
     title?: string;
     className?: string;
     children?: React.ReactNode;
 }
 
-const PageNavbar: React.FC<PageNavbarProps> = ({
+const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSection } & { Item: typeof PageNavbarItem } = ({
     title,
     className,
-    children
+    children,
 }) => {
 
     return (
@@ -19,6 +21,9 @@ const PageNavbar: React.FC<PageNavbarProps> = ({
             {children}
         </div>
     )
-}
+};
+
+PageNavbar.Section = PageNavbarSection;
+PageNavbar.Item = PageNavbarItem;
 
 export default PageNavbar;

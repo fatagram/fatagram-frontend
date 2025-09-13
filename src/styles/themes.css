@@ -2,20 +2,20 @@
     --font-size: 16px;
     --border-radius: 8px;
     
-    --main-bg-color: #ffffff;
-    --second-bg-color: #f9f9f9;
-    --third-bg-color: #ecfaf5;
-    --fourth-bg-color: #f0f0f0;
+    --main-bg-color: rgb(255, 255, 255);
+    --second-bg-color: rgb(249, 249, 249);
+    --third-bg-color: rgb(236, 250, 245);
+    --fourth-bg-color: rgb(240, 240, 240);
 
         /* Single colors */
-    --main-single-color: #2bd48b;
-    --second-single-color: #2ca772;
-    --third-single-color: #003820;
+    --main-single-color: 43, 212, 139;
+    --second-single-color: 44, 167, 114;
+    --third-single-color: 0, 56, 32;
 
-    --text-color: #2e2e2e;
+    --text-color: rgb(46, 46, 46);
 
-    --btn-color: #dddddd;
-    --btn-hover-color: #eaeaea;
+    --btn-color: rgb(221, 221, 221);
+    --btn-hover-color: rgb(234, 234, 234);
 
     --main-gradient-color: repeating-linear-gradient(45deg, 
     #8dfeda 0%, #3dba84 20%, #2aacb0 40%, 
@@ -26,5 +26,3 @@
     #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%);
     --main-wrong-gradient-color: rgb(255, 75, 75);
 }
-
-

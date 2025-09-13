@@ -1,14 +1,13 @@
 import Card from "@/components/common/container/Card";
-import ProfileOverview from "../../../../features/user/components/ProfileBody/ProfilePosts/ProfileOverview";
+import ProfileOverview from "../../../../features/user/components/ProfileBody/ProfilePosts/ProfileIntroduction";
 import { useOutletContext } from "react-router-dom";
 import { AuthStatus } from "../../AuthStatus";
 
 const PostsPage = () => {
-    const authStatus = useOutletContext<AuthStatus>();
 
     return (
         <div className="flex gap-2 lg:flex-row flex-col ">
-            <ProfileOverview className="flex-[4]" authStatus={authStatus}/>
+            <ProfileOverview className="flex-[4] bg-[var(--second-bg-color)] rounded-md mt-2"/>
             <Card className="bg-[var(--second-bg-color)] rounded-md mt-2 flex-[8]">
 
             </Card>

@@ -175,7 +175,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 <Checkbox className="text-[15px] text-[#00230e]" label={t("auth:login.rememberMe")} checked={isRememberMe}
                     onChange={(e) => { setIsRememberMe(e.target.checked) }} />
                 {switchForgotPassword &&
-                    <Text size="sm-2" className="text-[var(--third-single-color)] hover:text-[var(--main-single-color)] 
+                    <Text size="sm-2" className="text-[var(--third-single-color)] hover:text-single-main 
                                     hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
                         onClick={switchForgotPassword}>{t("auth:login.forgotPassword")}
                     </Text>
@@ -193,7 +193,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             </div>
 
             {isShowClose &&
-                <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] cursor-pointer`}
+                <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer`}
                     onClick={onClose}><i className="fa-solid fa-xmark"></i>
                 </Text>
             }

@@ -68,6 +68,13 @@
     },
     "profileFriends": {
         "friends":"Bạn bè",
-        "searchFriends":"Tìm kiếm bạn bè"
+        "searchFriends":"Tìm kiếm bạn bè",
+        "noFriends": "Không có bạn bè để hiển thị"
+    },
+    "profileAbout": {
+        "title": "Giới thiệu",
+        "overview": "Tổng quan",
+        "workAndEducation": "Công việc và học vấn",
+        "placesLived": "Nơi đã sống"
     }
 }

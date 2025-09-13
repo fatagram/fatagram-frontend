@@ -401,7 +401,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             <Text>{t("user:register.registerButton")}</Text>
           </Button>
           <Text ref={btnBackStepRef}
-            className="flex gap-1 items-center text-[var(--second-single-color)] hover:text-[var(--main-single-color)]"
+            className="flex gap-1 items-center text-single-second hover:text-single-main"
             onClick={handleNextStep}>
             <i className="fa-solid fa-arrow-left"></i>
             {t("user:register.gobackButton")}
@@ -417,7 +417,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       {isShowClose && (
         <Text
           size="lg-1"
-          className={`absolute z-50 top-3 right-5 text-gradient-main hover:text-[var(--main-single-color)] cursor-pointer`}
+          className={`absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer`}
           onClick={onClose}
         >
           <i className="fa-solid fa-xmark"></i>

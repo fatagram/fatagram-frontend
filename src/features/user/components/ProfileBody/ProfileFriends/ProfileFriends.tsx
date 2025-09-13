@@ -3,16 +3,22 @@ import FriendItem from "@/features/user/components/ProfileBody/ProfileFriends/Fr
 import SearchBox from "@/components/common/ui/Textbox/SearchBox";
 import useFriends from "@/features/user/hooks/useFriends";
 import React, { useEffect } from "react";
+import { useTranslation } from "react-i18next";
+import Text from "@/components/common/ui/Text";
+import { useOutletContext } from "react-router-dom";
+import { AuthStatus } from "@/pages/profile/AuthStatus";
 
 interface ProfileFriendsProps {
     className?: string;
-    userId?: string;
 }
 
 const ProfileFriends: React.FC<ProfileFriendsProps> = ({
     className = "",
-    userId
 }) => {
+
+    const { t } = useTranslation() as { t: (key: string) => string };
+    const authStatus = useOutletContext<AuthStatus>();
+
 
     const [friends, setFriends] = React.useState<FriendDto[]>([]);
     const [page, setPage] = React.useState<number>(1);
@@ -21,7 +27,7 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({
     const [keyword, setKeyword] = React.useState<string>("");
     
     const { isLoading, refetch } = useFriends({
-        userId: userId || "",
+        userId: authStatus.userId || "",
         keyword: keyword,
         page: page,
         pageSize: pageSize
@@ -51,14 +57,32 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({
 
     return (
         <div className={`flex flex-1 justify-end ${className} flex-col w-full`}>
-            <SearchBox placeholder="Search friends" className="p-1"
+            <SearchBox placeholder={t("user:profileFriends.searchFriends")} className="p-1"
                 onChange={handleOnChange}
             />
+            { !isLoading ? 
             <div className="relative flex flex-wrap gap-2 w-full mt-2">
                 {friends.map((friend, index) => (
                     <FriendItem className="w-[calc(50%-4px)]" friendDto={friend} key={index} />    
                 ))}
+                {
+                    friends.length === 0 && 
+                    <div className="flex w-full justify-center mb-10 mt-10">
+                        <div className="flex flex-col items-center text-[var(--text-color)] opacity-30">
+                            <Text size="xl-3" weight="bold">
+                                <i className="fa-solid fa-user-xmark"></i>
+                            </Text>
+                            <Text size="md-2" className="mt-2">
+                                {t("user:profileFriends.noFriends")}
+                            </Text>
+                        </div>
+                    </div>
+                }
             </div>
+             : 
+            <div className="relative flex flex-wrap gap-2 w-full mt-4 items-center justify-center">
+                <div className="fa-solid fa-spinner animate-spin text-2xl text-single-main"></div>
+            </div>}
         </div>
     )
 }

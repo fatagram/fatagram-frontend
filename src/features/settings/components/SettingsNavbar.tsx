@@ -2,6 +2,7 @@ import React, { useCallback } from "react";
 import Text from "@/components/common/ui/Text";
 import { useTranslation } from "react-i18next";
 import PageNavbarItem from "@/components/common/container/PageNavbar/PageNavbarItem";
+import PageNavbar from "@/components/common/container/PageNavbar/PageNavbar";
 
 interface SettingsNavbarProps {
     className?: string;
@@ -17,8 +18,8 @@ interface SettingsNavbarProps {
 const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) => {
 
     // State
-    const [showAuthSettings, setShowAuthSettings] = React.useState<boolean>(true); 
-    const [showGeneralSettings, setShowGeneralSettings] = React.useState<boolean>(true); 
+    // const [showAuthSettings, setShowAuthSettings] = React.useState<boolean>(true); 
+    // const [showGeneralSettings, setShowGeneralSettings] = React.useState<boolean>(true); 
 
     // Other hooks
     const { t } = useTranslation() as { t: (key: string) => string }; // i18n translation hook
@@ -37,42 +38,22 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
         {icon: <i className="fa-solid fa-palette"></i>,name: t("settings:navbar.general.theme"), path: "/settings/theme"},
     ]
 
-    const handleToggleAuthSettings = useCallback(() => {
-        setShowAuthSettings(!showAuthSettings);
-    }, [showAuthSettings]);
-    
-    const handleToggleGeneralSettings = useCallback(() => {
-        setShowGeneralSettings(!showGeneralSettings);
-    }, [showGeneralSettings]);
+    // const createSettingItems = useCallback()
+
 
     return (
-        <div className={`flex flex-col gap-2
-            ${className}
-        `}>
-            <Text size="xl-1" weight="bold" className="p-2 pl-5 text-gradient-main">{t("settings:navbar.title")}</Text>
-
-            <div className="h-[1px] bg-[var(--second-bg-color)] w-full"></div>
-            <Text onClick={handleToggleAuthSettings} size="lg-1" className="p-2 pl-5 !font-bold">{t("settings:navbar.privacy.title")}</Text>
-                { showAuthSettings && <ul className="w-full animate-dropdown-slide">
-                    {authSettings.map((item, index) => (
-                        <li key={index} className="flex" onClick={onSelect}>
-                            <PageNavbarItem path={item.path}
-                                icon={item.icon}
-                                title={item.name}/>
-                        </li>
-                    ))}
-                </ul> }
-            <Text onClick={handleToggleGeneralSettings} size="lg-1" className="p-2 pl-5 !font-bold">{t("settings:navbar.general.title")}</Text>
-            { showGeneralSettings && <ul className="w-full animate-dropdown-slide">
-                {generalSettings.map((item, index) => (
-                    <li key={index} className="flex" onClick={onSelect}>
-                        <PageNavbarItem path={item.path}
-                                icon={item.icon}
-                                title={item.name}/>
-                    </li>
+        <PageNavbar title={t("settings:navbar.title")} className={className}>
+            <PageNavbar.Section title={t("settings:navbar.privacy.title")}>
+                {authSettings.map((item, index) => (
+                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} />
                 ))}
-            </ul> }
-        </div>
+            </PageNavbar.Section>
+            <PageNavbar.Section title={t("settings:navbar.general.title")}>
+                {generalSettings.map((item, index) => (
+                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} />
+                ))}
+            </PageNavbar.Section>
+        </PageNavbar>
     )
 }
 

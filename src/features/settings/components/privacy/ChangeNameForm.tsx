@@ -98,9 +98,9 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                 }
                 <Text className="mx-8 mt-8 mb-4 h-[0.5px] bg-[var(--third-single-color)]"></Text>
                 <Text size="sm-2" className="font-light px-2 mb-4 flex flex-col gap-1">
-                    <Text weight="bold" className="text-[var(--second-single-color)]">* {t("settings:account.personalInfo.changeNameForm.note")}:</Text>
+                    <Text weight="bold" className="text-single-second">* {t("settings:account.personalInfo.changeNameForm.note")}:</Text>
                     <Text className="opacity-80">- {t("settings:account.personalInfo.changeNameForm.noteText1")} &nbsp;
-                        <Text weight="bold" className="text-[var(--main-single-color)]">7 {t("settings:account.personalInfo.changeNameForm.day")}</Text>.
+                        <Text weight="bold" className="text-single-main">7 {t("settings:account.personalInfo.changeNameForm.day")}</Text>.
                     </Text>
                     <Text className="opacity-80">- {t("settings:account.personalInfo.changeNameForm.noteText2")}</Text>
                     <Text className="opacity-80">- {t("settings:account.personalInfo.changeNameForm.noteText3")} &nbsp;
@@ -110,7 +110,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                 <Button disabled={firstName === oldFirstName && lastName === oldLastName} size="md-1" className="mt-2 !text-[20px]"
                     onClick={handleSubmit}>
                     {t("settings:account.personalInfo.changeNameForm.acceptButton")}</Button>
-                <Text size="lg-2" className={`absolute top-5 right-8 hover:text-[var(--main-single-color)] cursor-pointer`}
+                <Text size="lg-2" className={`absolute top-5 right-8 hover:text-single-main cursor-pointer`}
                     onClick={handleClose}><i className="fa-solid fa-xmark"></i></Text>
             </div>
         </div>

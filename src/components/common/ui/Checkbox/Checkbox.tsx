@@ -37,7 +37,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
                 before:absolute before:content-[""] before:w-[13px] before:h-[13px] before:top-1/2 before:left-1/2 before:-translate-x-1/2 before:-translate-y-1/2
                 before:m-0 before:rounded-[3px] before:bg-[var(--second-bg-color)] before:z-[2]
                 peer-checked:after:visible peer-checked:after:opacity-100`}></span>
-            <span className={`text-[var(--second-single-color)] text-[1.0rem] ${className}`}>{label}</span>
+            <span className={`text-single-second text-[1.0rem] ${className}`}>{label}</span>
         </label>                                                                                                                                                                   
     );
 }

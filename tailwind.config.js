@@ -11,6 +11,11 @@ module.exports = {
         jua: ['Jua', 'sans-serif'],
         varela_round: ['Varela Round', 'sans-serif'],
         nunito: ['Nunito', 'sans-serif'],
+      },
+      colors: {
+        "single-main": "rgb(var(--main-single-color) / <alpha-value>)",
+        "single-second": "rgb(var(--second-single-color) / <alpha-value>)",
+        "single-third": "rgb(var(--third-single-color) / <alpha-value>)",
       }
     },
   },

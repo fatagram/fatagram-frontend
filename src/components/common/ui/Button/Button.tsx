@@ -57,9 +57,9 @@ const Button: React.FC<ButtonProps> = ({
         disabled={disabled} 
         ref={ref}
         className={` ${buttonSizes[size]} 
-            font-normal 
+            font-normal
             rounded-lg select-none
-            ${disabled ? 'bg-disabled text-[#949494]': buttonVariants[variant] + ' active:scale-95 active:opacity-80'}
+            ${disabled ? 'bg-disabled text-[#949494]': buttonVariants[variant] + ' active:scale-[0.98] active:opacity-80'}
             ${className}`
     } {...props}>
         {children}

@@ -9,6 +9,7 @@ import "./api/setupInterceptor";
 import whyDidYouRender from "@welldone-software/why-did-you-render";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { Provider } from "react-redux";
+import store from "./store/store";
 
 const root = ReactDOM.createRoot(
   document.getElementById("root") as HTMLElement
@@ -22,7 +23,9 @@ const queryClient = new QueryClient();
 
 root.render(
   <QueryClientProvider client={queryClient}>
+    <Provider store={store}>
       <App />
+    </Provider>
   </QueryClientProvider>
 );
 

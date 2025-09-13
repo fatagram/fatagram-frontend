@@ -20,25 +20,18 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({className, onSelect}) => {
     const { t } = useTranslation() as { t: (key: string) => string }; // i18n translation hook
 
     // Route auth settings
-    const authSettings : {icon: React.ReactNode, name: string, path: string}[] = [
+    const friendPageItems : {icon: React.ReactNode, name: string, path: string}[] = [
         {icon: <i className="fa-solid fa-user-plus"></i>, name: t("friends:navbar.suggestedFriends"), path: "/friends"},
         {icon: <i className="fa-solid fa-user-check"></i>, name: t("friends:navbar.invite"), path: "requests"},
     ]
 
     return (
-        <PageNavbar className={`flex flex-col gap-2
-            ${className}
-        `} title={t("friends:navbar.title")}>
-
-            <div className="h-[1px] bg-[var(--second-bg-color)] w-full"></div>
-                <ul className="w-full animate-dropdown-slide ">
-                    {authSettings.map((item, index) => (
-                        <li key={index} className="flex" onClick={onSelect}>
-                            <PageNavbarItem path={item.path}
-                                icon={item.icon} title={item.name}/>
-                        </li>
-                    ))}
-                </ul>
+        <PageNavbar title={t("friends:navbar.title")} className={className}>
+            <PageNavbar.Section>
+                {friendPageItems.map((item, index) => (
+                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} />
+                ))}
+            </PageNavbar.Section>
         </PageNavbar>
     )
 }

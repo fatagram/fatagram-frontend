@@ -6,7 +6,7 @@ const textSizes: Record<Size, string> = {
     "xs": "text-xs",
     "sm-1": "text-xs",
     "sm-2": "text-sm",
-    "sm-3": "text-sm",
+    "sm-3": "text-[15px]",
     "md-1": "text-md",
     "md-2": "text-lg",
     "md-3": "text-md",
@@ -30,7 +30,7 @@ type Weight = keyof typeof weightClasses;
 // Define a mapping of text colors
 const colorClasses: Record<string, string> = {
     "primary": "text-[var(--text-color)]",
-    "secondary": "text-[var(--main-single-color)]",
+    "secondary": "text-single-main",
     "danger": "text-red-400",
     "success": "text-green-600",
     "warning": "text-yellow-600",

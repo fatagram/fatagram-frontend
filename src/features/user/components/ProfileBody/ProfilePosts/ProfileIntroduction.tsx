@@ -8,16 +8,17 @@ import { AuthStatus } from "@/pages/profile/AuthStatus";
 import { title } from "process";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import { useOutletContext } from "react-router-dom";
 
-interface ProfileOverviewProps {
+interface ProfileIntroductionProps {
     className?: string;
-    authStatus?: AuthStatus;
 }
 
-const ProfileOverview: React.FC<ProfileOverviewProps> = ({
+const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({
     className,
-    authStatus
 }) => {
+    const authStatus = useOutletContext<AuthStatus>();
+
     const [bio, setBio] = React.useState<string | undefined>(undefined);
     const [isEditBio, setIsEditBio] = React.useState<boolean>(false);
     const [description, setDescription] = React.useState<string | undefined>(undefined);
@@ -64,7 +65,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({
 
     return (
         <Card title={t('user:profilePosts.overview')} 
-            className={`bg-[var(--second-bg-color)] rounded-md mt-2 flex-col gap-4 ${className}`}
+            className={`flex-col gap-4 ${className}`}
             titleClassName="text-[1.5rem] font-bold !mb-0">
                 
             { (bio || canEdit) && <EditableTextArea editableMode="inline" isEdit={isEditBio}
@@ -93,13 +94,13 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({
             {(bio || description) && <hr className="border-[var(--border-color)] w-full"/>}
 
             {email && <div>
-                <Text className="hover:text-[var(--main-single-color)]"><i className="fas fa-envelope"/> &nbsp; {email}</Text>
+                <Text className="hover:text-single-main"><i className="fas fa-envelope"/> &nbsp; {email}</Text>
             </div>}
             {phone && <div>
-                <Text className="hover:text-[var(--main-single-color)]"><i className="fas fa-phone"></i> &nbsp; {phone}</Text>
+                <Text className="hover:text-single-main"><i className="fas fa-phone"></i> &nbsp; {phone}</Text>
             </div>}
         </Card>
     )
 }
 
-export default ProfileOverview;
+export default ProfileIntroduction;

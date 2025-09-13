@@ -21,7 +21,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({switchToLogin}) 
         <Text size="sm-1" className="hidden text-[10px] px-[5px] text-red-400">Username does not exist!</Text>
     </div>
     <Button size="md-1" className={`sm:text-[17px] text-[20px] w-full sm:py-[5px] py-[7px] font-montserrat`}>Confirm</Button>
-    <Text className="sm:text-[14px] text-[15px] text-[var(--second-single-color)] hover:text-[var(--main-single-color)] hover:cursor-pointer
+    <Text className="sm:text-[14px] text-[15px] text-single-second hover:text-single-main hover:cursor-pointer
             transition-all duration-100 active:scale-95 select-none"
             onClick={switchToLogin}>&larr; Back to login</Text>
 </div>

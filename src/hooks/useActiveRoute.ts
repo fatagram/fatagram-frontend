@@ -1,7 +1,7 @@
-import { useMatch, useResolvedPath } from "react-router-dom"
+import { useMatch, useResolvedPath } from "react-router-dom";
 
-export const useActiveRoute = (to: string, end: string) => {
+export const useActiveRoute = (to: string, end: boolean = false) => {
     const resolved = useResolvedPath(to);
-    const match = useMatch({ path: resolved.pathname, end: to === end });
+    const match = useMatch({ path: resolved.pathname, end });
     return !!match;
-}
+};

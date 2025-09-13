@@ -9,6 +9,7 @@ import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";
 import { DialogProvider } from "./contexts/DialogContext";
+import NotificationListener from "./features/notifications/components/NotificationListener";
 
 
 const App: React.FC = () => {
@@ -21,6 +22,7 @@ const App: React.FC = () => {
               <ToastProvider>
                 <AppRoutes />
                 <GlobalDialog />
+                <NotificationListener />
               </ToastProvider>
             </AuthProvider>
           </LanguageProvider>

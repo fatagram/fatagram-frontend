@@ -100,7 +100,6 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({
                                 <NavbarItem
                                     path={item.href ?? ""}
                                     children={item.name}
-                                    end={`/${userParam}`}
                                     onClick={() => setShowDropdown(false)} />
                             </div>
                         );
@@ -113,7 +112,6 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({
                         <NavbarItem
                             path={item.href ?? ""} 
                             children={item.name}
-                            end={`/${userParam}`}
                             onClick={() => setShowDropdown(false)}/>
                     </div>
                 )
@@ -125,12 +123,12 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({
             >
                 <Text className={`
                    whitespace-nowrap
-                   ${isChooseHiddenItem ? "!text-[var(--main-single-color)]" : "text-[var(--text-color)]"}
+                   ${isChooseHiddenItem ? "!text-single-main" : "text-[var(--text-color)]"}
                 `}> 
                     More <i className="fa-solid fa-caret-down ml-1"></i>
                 </Text>
                 {isChooseHiddenItem && (
-                    <div className="absolute bg-[var(--main-single-color)] h-[2px] rounded-full
+                    <div className="absolute bg-single-main h-[2px] rounded-full
                             w-full bottom-0 left-0" />
                 )}
             </Button>}
@@ -144,7 +142,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({
                         items={hiddenItems.map(item => ({
                                 id: item.name,
                                 content: <div className={`flex justify-between items-center
-                                    ${location.pathname === item.href ? "text-[var(--main-single-color)]" : "text-[var(--text-color)]"}
+                                    ${location.pathname === item.href ? "text-single-main" : "text-[var(--text-color)]"}
                                 `}>
                                     {item.name}
                                     { location.pathname === item.href && <i className="fas fa-check"></i> }

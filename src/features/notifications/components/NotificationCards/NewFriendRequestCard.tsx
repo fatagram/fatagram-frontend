@@ -81,7 +81,7 @@ const NewFriendRequestCard: React.FC<NewFriendRequestCardProps> = ({
             </div>
             <div className='flex items-center'>
                 {!notificationDto.isRead && (
-                    <div className="w-2 h-2 bg-[var(--main-single-color)] rounded-full"></div>
+                    <div className="w-2 h-2 bg-single-main rounded-full"></div>
                 )}
             </div>
         </div>

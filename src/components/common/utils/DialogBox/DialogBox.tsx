@@ -47,7 +47,7 @@ const DialogBox: React.FC<DialogBoxProps> = ({
                     </Button>
                 )}
             </div> }
-            <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-[var(--main-single-color)] 
+            <Text className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main 
                                 cursor-pointer`}
                 onClick={onClose}>
                     <i className="fa-solid fa-xmark"></i>

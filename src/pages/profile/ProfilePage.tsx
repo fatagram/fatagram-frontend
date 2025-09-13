@@ -1,7 +1,7 @@
 import React from "react";
 import "./ProfilePage.style.css";
 import ProfileHeader from "@/features/user/components/ProfileHeader/ProfileHeader";
-import NotFoundPage from "../not_found/NotFoundPage";
+import NotFoundPage from "../not-found/NotFoundPage";
 import { useParams } from "react-router-dom";
 import useUserId from "@/features/user/hooks/useUserId";
 import LoadingPage from "../loading/LoadingPage";

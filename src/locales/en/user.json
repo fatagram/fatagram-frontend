@@ -68,6 +68,13 @@
     },
     "profileFriends": {
         "friends":"Friends",
-        "searchFriends":"Search friends"
+        "searchFriends":"Search friends",
+        "noFriends": "No friends to show"
+    },
+    "profileAbout": {
+        "title": "About",
+        "overview": "Overview",
+        "workAndEducation": "Work and Education",
+        "placesLived": "Places Lived"
     }
 }
