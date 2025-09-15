@@ -154,7 +154,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             {isLoading && <OverlayLoading />}
 
             {isShowLogo && <Logo />}
-            <Text size="xl-2" weight="extrabold" className="uppercase text-[var(--third-single-color)] 
+            <Text size="xl-2" weight="extrabold" className="uppercase text-single-third 
                             font-bold font-inter select-none">{t("auth:login.title")}</Text>
             <div className="w-full">
                 <Textbox className="text-[14px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
@@ -175,7 +175,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 <Checkbox className="text-[15px] text-[#00230e]" label={t("auth:login.rememberMe")} checked={isRememberMe}
                     onChange={(e) => { setIsRememberMe(e.target.checked) }} />
                 {switchForgotPassword &&
-                    <Text size="sm-2" className="text-[var(--third-single-color)] hover:text-single-main 
+                    <Text size="sm-2" className="text-single-third hover:text-single-main 
                                     hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
                         onClick={switchForgotPassword}>{t("auth:login.forgotPassword")}
                     </Text>
@@ -188,7 +188,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
                 {t("auth:login.loginButton")}
             </Button>
             <div className="flex gap-1 items-center">
-                <Text size="sm-2" className="text-[var(--third-single-color)]">{t("auth:login.registerAnswer")}</Text>
+                <Text size="sm-2" className="text-single-third">{t("auth:login.registerAnswer")}</Text>
                 <Link className={"sm:text-[15px] font-bold"} to="/register">{t("auth:login.registerButton")}</Link>
             </div>
 

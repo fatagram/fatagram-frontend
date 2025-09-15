@@ -8,11 +8,11 @@ const API_URL = `${apiUrl}/api/notification`;
 
 export class NotificationService {
 
-    public async getNotifications(page: number, pageSize: number) : Promise<Result<NotificationsDto>> {
+    public async getNotifications(cursorId: string, pageSize: number) : Promise<Result<NotificationsDto>> {
         try {
             const res = await apiClient.get(`${API_URL}/getNotifications`, {
                 params: {
-                    page,
+                    cursorId,
                     pageSize
                 }
             });

@@ -15,7 +15,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({switchToLogin}) 
                     p-[20px] bg-[var(--second-bg-color)] shadow-md rounded-lg 
                     sm:max-w-[380px] sm:p-[25px] animate-fade-in">             
     <Logo hasSlogan={false}/>
-    <Text size="lg-3" weight="bold" className="text-[var(--third-single-color)] font-bold select-none">Reset Password</Text>
+    <Text size="lg-3" weight="bold" className="text-single-third font-bold select-none">Reset Password</Text>
     <div className="w-full">
         <Textbox className="text-[14px] w-[100%] px-[20px] sm:py-[5px] py-[10px]" placeholder="Your username or email"/>
         <Text size="sm-1" className="hidden text-[10px] px-[5px] text-red-400">Username does not exist!</Text>

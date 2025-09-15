@@ -11,8 +11,7 @@ import Text from "@/components/common/ui/Text";
 import Button from "@/components/common/ui/Button";
 import NotificationSkeletonLoading from "../NotificationCards/NotificationSkeletonLoading";
 import { useDispatch, useSelector } from "react-redux";
-import { increasementPage, markAsRead } from "../../stores/notificationsSlice";
-import { Octagon } from "lucide-react";
+import { markAsRead, setCursorId, setShowFull } from "../../stores/notificationsSlice";
 
 type NotificationMenuProps = {
     className?: string;
@@ -27,18 +26,13 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
 }) => {
     const { t } = useTranslation() as { t: (key: string, options?: any) => string };
     const dispatch = useDispatch();
-    const { notifications, isInNotificationPage, page, pageSize, isFull } = useSelector((state: any) => state.notifications ); 
+    const { notifications, isInNotificationPage, cursorId, pageSize, isFull, isShowFull } = useSelector((state: any) => state.notifications ); 
     const navigate = useNavigate();
-    // const { pushToast } = useToast();
-
-    // const [page, setPage] = React.useState<number>(1);
-    // const [isFull, setIsFull] = React.useState<boolean>(false);    
-    const [isShowFull, setIsShowFull] = React.useState<boolean>(false);
 
     const loaderRef = React.useRef<HTMLLIElement>(null);
 
-    const { isLoading, refetch } = useNotifications({
-        page: page,
+    const { isLoading } = useNotifications({
+        cursorId: cursorId,
         pageSize: pageSize
     });
 
@@ -48,19 +42,14 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
 
         const observer = new IntersectionObserver(([entry]) => {
             if (entry.isIntersecting) {
-                dispatch(increasementPage());
-                console.log("Load more notifications, page:", page + 1);
+                dispatch(setCursorId(notifications[notifications.length - 1]?.id || ""));
+                // console.log("Load more notifications, page:", page + 1);
             }
         });
 
         observer.observe(loaderRef.current); 
         return () => observer.disconnect(); 
     }, [loaderRef, isShowFull, isFull]);
-
-    // const notificationsToShow = isShowFull 
-    //     ? notifications 
-    //     : notifications.slice(0, pageSize);
-
 
     return (
         <div className={`bg-[var(--main-bg-color)] shadow-xl rounded-xl 
@@ -71,7 +60,21 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                 notifications && notifications.length > 0 ?
                     <ul className="relative py-1 overflow-y-scroll scrollbar-none">
                         {
-                            notifications.map((notification: NotificationDto) => (
+                            isShowFull ? notifications.map((notification: NotificationDto) => (
+                                <li key={notification.id} className="px-2 py-2 hover:bg-[var(--second-bg-color)] rounded-lg 
+                                    cursor-pointer"
+                                >
+                                    <NotificationFactory notificationDto={notification}
+                                        onClick={async () => {
+                                            navigate(notification.link || "/");
+                                            // notification.isRead = true;
+                                            dispatch(markAsRead(notification.id));
+                                            await notificationService.markAsRead(notification.id);
+                                            onClick?.();
+                                        }} />
+                                </li>
+                            )) : 
+                            notifications.slice(0, 5).map((notification: NotificationDto) => (
                                 <li key={notification.id} className="px-2 py-2 hover:bg-[var(--second-bg-color)] rounded-lg 
                                     cursor-pointer"
                                 >
@@ -91,11 +94,11 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({
                                 <NotificationSkeletonLoading />
                             </li>
                         ))}
-                        {!isShowFull && !isFull ? 
+                        {!isShowFull ? 
                             <li className="mt-2">
                                 <Button size="sm-1" variant="secondary" className="w-full"
                                     onClick={() => {
-                                    setIsShowFull(true);
+                                        dispatch(setShowFull(true));
                                 }}>
                                     {t("notifications:notifications.showMore")}
                                 </Button>

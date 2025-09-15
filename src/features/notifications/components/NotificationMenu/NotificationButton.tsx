@@ -24,9 +24,10 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
 }) => {
     // const [showNotifications, setShowNotifications] = React.useState<boolean>(false);
     const dispatch = useDispatch();
+    const navigate = useNavigate();
 
     const { t } = useTranslation() as { t: (key: string, options?: any) => string };
-    const { unreadCount, isShowNotification, isInNotificationPage, page } = useSelector((state: any) => state.notifications);
+    const { unreadCount, isShowNotification, isInNotificationPage, cursorId } = useSelector((state: any) => state.notifications);
 
     // Refs for the menu and button
     const menuRef = React.useRef<HTMLDivElement>(null);
@@ -39,20 +40,17 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
 
     // Toggle notifications menu visibility
     const handleToggleNotifications = () => {
+        if (window.innerWidth < 640) {
+            navigate('/notifications');
+            return;
+        }
         dispatch(setShowNotification(!isShowNotification));
     };
 
-    const { isLoading, refetch } = useNotifications({
-        page: page,
+    useNotifications({
+        cursorId: cursorId,
         pageSize: 5
     });
-
-    React.useEffect(() => {
-        const fetchData = async () => {
-            await refetch();
-        };
-        fetchData();
-    }, []);
 
     return (
         <div className="relative flex items-center justify-center">
@@ -66,8 +64,8 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({
             {isShowNotification && !isInNotificationPage &&
                 <NotificationMenu className="!absolute max-h-[600px] sm:top-[120%] top-[108%] -right-[70px] sm:right-0
                         sm:w-auto w-screen sm:h-auto h-screen z-10 sm:p-2 p-6 min-w-[350px] 
-                        min-h-[100px]" onClick={() => dispatch(setShowNotification(false))}
-                        ref={menuRef}/>
+                        min-h-[100px]" onClick={() => dispatch(setShowNotification(!isShowNotification))}
+                ref={menuRef}/>
             }
         </div>
     );

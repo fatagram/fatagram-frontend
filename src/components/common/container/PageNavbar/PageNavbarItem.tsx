@@ -9,13 +9,15 @@ export type PageNavbarItemProps = {
     title?: string;
     description?: string;
     path: string;
+    onClick?: () => void;
 }
 
 const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
     icon,
     title,
     description,
-    path
+    path,
+    onClick
 }) => {
     const navigate = useNavigate();
     const isFocused = useActiveRoute(path, true);
@@ -23,7 +25,10 @@ const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
     return (
         <div className="flex items-center w-full">
             <Button variant={isFocused ? "secondary" : "third"}
-                onClick={() => navigate(path)}
+                onClick={() => {
+                    navigate(path);
+                    onClick?.();
+                }}
                 className="!w-full text-left !px-3">
                 <div className="grid grid-cols-10 items-start">
                     <Text size="lg-1" className="flex justify-center items-center h-full col-span-2">{icon}</Text>

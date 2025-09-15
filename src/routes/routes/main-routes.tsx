@@ -37,7 +37,9 @@ export const mainRoutes: RouteType[] = [
             {
                 path: "/notifications",
                 element: (
-                    <NotificationPage />
+                    <ProtectedRoute>
+                        <NotificationPage />
+                    </ProtectedRoute>
                 )
             },
             { 

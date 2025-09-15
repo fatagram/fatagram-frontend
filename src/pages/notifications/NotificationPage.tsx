@@ -22,8 +22,8 @@ const NotificationPage: React.FC<NotificationPageProps> = () => {
     }, [])
 
     return (
-        <div className="relative flex items-start justify-center w-full mt-20">
-            <NotificationMenu className="max-w-[600px] w-full px-2 py-4 pb-2 mx-4"/>
+        <div className="relative flex items-start justify-center w-full sm:mt-20 mt-16">
+            <NotificationMenu className="max-h-[800px] max-w-[600px] w-full px-2 py-4 pb-2 mx-4"/>
         </div>
     )
 } 

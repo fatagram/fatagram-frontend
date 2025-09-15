@@ -6,9 +6,10 @@ interface NotificationsState {
     unreadCount: number;
     isShowNotification?: boolean;
     isInNotificationPage?: boolean;
-    page: number;
+    cursorId?: string;
     pageSize: number;
     isFull: boolean;
+    isShowFull: boolean;
 }
 
 const initialState: NotificationsState = {
@@ -16,9 +17,9 @@ const initialState: NotificationsState = {
     unreadCount: 0,
     isShowNotification: false,
     isInNotificationPage: false,
-    page: 1,
     pageSize: 5,
     isFull: false,
+    isShowFull: false,
 }
 
 const notificationsSlice = createSlice({
@@ -62,8 +63,11 @@ const notificationsSlice = createSlice({
         setInNotificationPage: (state, action: PayloadAction<boolean>) => {
             state.isInNotificationPage = action.payload;
         },
-        increasementPage: (state) => {
-            state.page += 1;
+        setCursorId: (state, action: PayloadAction<string>) => {
+            state.cursorId = action.payload;
+        },
+        setShowFull: (state, action: PayloadAction<boolean>) => {
+            state.isShowFull = action.payload;
         }
     }
 })
@@ -76,5 +80,6 @@ export const {
     markAsRead, 
     setShowNotification, 
     setInNotificationPage, 
-    increasementPage } = notificationsSlice.actions;
+    setShowFull,
+    setCursorId } = notificationsSlice.actions;
 export default notificationsSlice.reducer;

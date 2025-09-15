@@ -12,6 +12,7 @@ import { useOutletContext } from "react-router-dom";
 
 interface ProfileIntroductionProps {
     className?: string;
+    authStatus?: AuthStatus;
 }
 
 const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({

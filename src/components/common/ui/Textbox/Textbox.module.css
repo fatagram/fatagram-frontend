@@ -23,9 +23,4 @@
   background-position: 0 100%;
   transition: background-position 0.3s ease-out;
 }
-
-.primary-textbox::selection {
-  background: var(--main-single-color);
-  color: white;
-}
   

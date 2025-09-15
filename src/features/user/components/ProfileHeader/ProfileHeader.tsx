@@ -1,4 +1,4 @@
-import React, { useMemo } from "react";
+import React, { useEffect, useLayoutEffect, useMemo } from "react";
 import Button from "@/components/common/ui/Button/Button";
 import { userProfileService } from "@/api/user/user-profile.api";
 import { friendshipService } from "@/api/user/friendship.api";
@@ -40,7 +40,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
     // const [isOwner, setIsOwner] = React.useState<boolean>(false);
     const [isLoading, setIsLoading] = React.useState<boolean>(true);
     const [numberOfFriends, setNumberOfFriends] = React.useState<number>(0);
-    // const [isShowOversizeError, setIsShowOversizeError] = React.useState<boolean>(false);
+    // const [offset, setOffset] = React.useState<number>(0);
+
+    const avtRef = React.useRef<HTMLDivElement>(null);
     
     // Auth info hook
     // const { userId, isAuthenticated } = useAuth(); 
@@ -59,6 +61,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
             const response = await userProfileService.GetProfile(authStatus?.userId ? authStatus.userId : "", "avatar,background,fullName,nickname");
             // console.log(response);
             // Delay to simulate loading
+            await new Promise(resolve => setTimeout(resolve, 3000));
             if (response.success) {
                 setAvatar(response.data.infos.avatar);
                 setBackground(response.data.infos.background);
@@ -126,34 +129,43 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
     }
 
     return (
-        <div className={`relative w-full h-auto pb-5 layout ${className}`}>
-            <div className="relative lg:mx-0 mx-2">
+        <div className={`relative w-full layout ${className} items-center flex flex-col`}>
+            <div className="relative w-full lg:mx-0 mx-2 ">
                 <ProfileBackground isLoading={isLoading} background={background} isOwner={authStatus?.isOwner || false}
                     handleSelectBackground={handleSelectBackground}/>
             </div>
             
-            <div className="absolute flex layout w-[85%] left-1/2 -translate-x-1/2 top-100 -translate-y-1/2 flex-col lg:flex-row items-center lg:items-end
-                            mt-[120px] lg:mt-0 lg:gap-0 gap-3">
+            <div className={`-mt-[80px] flex layout w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end
+                            mb-5 lg:gap-0 gap-3`}
+                            >
                 <ProfileAvatar isLoading={isLoading} avatar={avatar} isOwner={authStatus?.isOwner || false}
-                    handleSelectAvatar={handleSelectAvatar}/>
+                    handleSelectAvatar={handleSelectAvatar} ref={avtRef}/>
                 <div className="flex flex-col gap-2 flex-1 mb-3 ml-4">
-                    { isLoading ? <LabelSkeletonLoading size="md-1" className="lg:self-end mb-2 lg:mb-8 lg:ml-5 w-[200px] mt-2 lg:mt-0"/> : 
-                        <div >
-                            <Text size="xl-1" weight="bold" className=" lg:text-left text-center break-words">{fullName}</Text>
+                    { isLoading ? 
+                        <LabelSkeletonLoading size="md-1" className="lg:self-start self-center mb-2 lg:ml-5 w-[200px] mt-2 lg:mt-0"/> : 
+                        <Text size="xl-1" weight="bold" className="lg:text-left text-center break-words">
+                            {fullName}
                             {
                                 nickname &&
-                                <Text size="lg-3" weight="light" className="lg:text-left text-center lg:ml-2">({nickname})</Text>
+                                <Text size="lg-3" weight="light" className="lg:text-left text-center lg:ml-2">
+                                    ({nickname})
+                                </Text>
                             }
-                        </div>
+                        </Text>
                     }
                     
-                    { isLoading ? <LabelSkeletonLoading size="lg-1" className="w-[300px] lg:ml-auto mb-7 mt-2 lg:mt-0"/> :
-                        <div className="flex items-center lg:flex-row flex-col lg:items-start">
-                            <Text size="md-2" className="text-[var(--text-color)]">{
-                                        numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") :
-                                        t("user:profileHeader.noFriendsCount")
-                                    }</Text>
-                            <div className="relative flex flex-wrap lg:flex-none gap-2 lg:ml-auto lg:w-auto lg:mt-0 mt-2">       
+                    <div className="flex lg:flex-row flex-col items-center w-full">
+                        { !isLoading ?
+                            <Text size="md-2" weight="semibold" className="text-[var(--text-color)] opacity-70">
+                                {
+                                    numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") :
+                                    t("user:profileHeader.noFriendsCount")
+                                }
+                            </Text> : 
+                            <LabelSkeletonLoading size="md-1" className="w-[150px] lg:ml-5 mb-1"/> 
+                        }
+                        { !isLoading ? 
+                            <div className="relative flex flex-wrap lg:flex-none gap-2 lg:mt-0 mt-2 lg:ml-auto">       
                                 {authStatus?.isAuthenticated && <>
                                     { authStatus.isOwner ? (<Button size="sm-1"
                                             onClick={() => {
@@ -167,24 +179,15 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
                                 </>}
                                 
                                 { !authStatus?.isOwner && authStatus?.isAuthenticated && <Button size="sm-1" variant="secondary"><i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}</Button> }
-                                <Button size="sm-1" variant="secondary"><i className="fa-solid fa-circle-info"></i> 
-                                    {/* <Text className="hidden sm:inline-flex ml-1">{t("user:profileHeader.moreButton")}</Text> */}
+                                <Button size="sm-1" variant="secondary">
+                                    <i className="fa-solid fa-circle-info"></i> 
                                 </Button>
-                            </div>
-                        </div>
-                    }  
+                            </div> : 
+                            <LabelSkeletonLoading size="md-1" className="w-[250px] lg:ml-auto mb-1"/>
+                        }
+                    </div>  
                 </div>
             </div>
-
-            {/* {isShowOversizeError && <OverlayDialog
-                title={t("user:profileHeader.oversizeErrorTitle")}
-                content={<Text>{t("user:profileHeader.oversizeErrorMessage")}</Text>}
-                primaryButton={{
-                    text: t("user:profileHeader.oversizeErrorButton"),
-                    onClick: () => { setIsShowOversizeError(false); }
-                }}
-                onClose={() => {setIsShowOversizeError(false)}}/>} */}
-
         </div>
     )
 }

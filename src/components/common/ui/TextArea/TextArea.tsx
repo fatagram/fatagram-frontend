@@ -56,7 +56,7 @@ const TextArea: React.FC<TextAreaProps> = ({
       className={`border-[3px] bg-[var(--second-bg-color)] text-[var(--text-color)]
         resize-none
           ${disabled ? `bg-[var(--main-bg-color)]` : `focus:bg-gradient-main-move`}
-        font-normal rounded-[15px] outline-none text-lg caret-[var(--main-single-color)]
+        font-normal rounded-[15px] outline-none text-lg caret-single-main
         ${sizeClasses[size]}
         ${isWrong ? styles['my-textarea-wrong'] : styles['my-textarea']}
         ${className}`}

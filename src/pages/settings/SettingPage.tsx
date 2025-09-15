@@ -25,14 +25,17 @@ const SettingPage: React.FC<SettingPageProps> = () => {
             <div className="w-full inset-0 z-10 h-[50px] flex sm:hidden px-2">
                 <Text size="lg-3"><i className="fa-solid fa-list text-gradient-main" onClick={() => setIsShowNavbar(!isShowNavbar)}></i></Text>
             </div>
+            {isShowNavbar && <div className="sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"
+                onClick={() => setIsShowNavbar(false)}
+            />}
             <SettingsNavbar className={`sm:flex sm:w-[300px] sm:relative absolute
-                sm:animate-none animate-left-to-right w-full
+                sm:animate-none animate-left-to-right w-[60%]
                 ${isShowNavbar ? "absolute z-30" : "hidden"}  
-                shadow-lg rounded-2xl h-full
+                shadow-lg sm:rounded-2xl rounded-e-2xl h-[80vh]
                 bg-[var(--main-bg-color)] p-2`}
                 onSelect={() => setIsShowNavbar(false)}/>
             <div className="sm:col-span-8 flex justify-center flex-1">
-                <div className="w-full max-w-[700px]">
+                <div className="w-full max-w-[700px] sm:p-0 p-4">
                     <Outlet/>
                 </div>
             </div>

@@ -5,20 +5,20 @@ import { loadMoreNotifications, setNotifications } from "../stores/notifications
 import { useEffect } from "react";
 
 const useNotifications = ({
-    page = 1,
+    cursorId = "",
     pageSize = 10
 } : {
-    page?: number;
+    cursorId?: string;
     pageSize?: number;
 }) => {
     const dispatch = useDispatch();
 
     return useQuery({
-        queryKey: ["notifications", page],
+        queryKey: ["notifications", cursorId],
         queryFn: async () => {
-            const res = await notificationService.getNotifications(page, pageSize);
+            const res = await notificationService.getNotifications(cursorId, pageSize);
             await new Promise(resolve => setTimeout(resolve, 1500));
-            if (page === 1) dispatch(setNotifications(res.data ?? {notifications: [], unreadCount: 0}));
+            if (cursorId === "") dispatch(setNotifications(res.data ?? {notifications: [], unreadCount: 0}));
             else if (res.data) dispatch(loadMoreNotifications(res.data.notifications));
             return res.data;
         },

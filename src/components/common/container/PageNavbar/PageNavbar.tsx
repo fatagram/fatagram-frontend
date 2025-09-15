@@ -16,7 +16,7 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
 }) => {
 
     return (
-        <div className={`flex flex-col gap-2 ${className}`}>
+        <div className={`flex flex-col gap-2 ${className} overflow-y-auto`}>
             <Text size="xl-1" weight="bold" className="p-2 pl-5 text-gradient-main">{title}</Text>
             {children}
         </div>

@@ -26,10 +26,13 @@ const FriendPage: React.FC<FriendsPageProps> = () => {
                         onClick={() => setIsShowNavbar(!isShowNavbar)} />
                 </Text>
             </div>
-            <FriendsNavbar className={`sm:flex sm:w-[300px] relative
-                sm:animate-none animate-left-to-right w-full
+            {isShowNavbar && <div className="sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"
+                onClick={() => setIsShowNavbar(false)}
+            />}
+            <FriendsNavbar className={`sm:flex sm:w-[300px] sm:relative absolute z-9999
+                sm:animate-none animate-left-to-right w-[60%]
                 ${isShowNavbar ? "absolute z-30" : "hidden"}  
-                shadow-lg rounded-2xl h-full
+                shadow-lg sm:rounded-2xl rounded-e-2xl h-full
                 bg-[var(--main-bg-color)] p-2`}
                 onSelect={() => setIsShowNavbar(false)}/>
             <div className="sm:col-span-8 flex justify-center flex-1 overflow-y-auto h-full scrollbar-none">

@@ -11,7 +11,7 @@ const LoadingPage: React.FC = () => {
             <div className="flex flex-col items-center">
                 <Logo size="large" hasSlogan={false}/>
                 {/* <div className="relative top-1/2 w-12 h-12 mt-5 border-4 border-transparent 
-                                border-t-[var(--main-single-color)] border-r-[var(--main-single-color)] 
+                                border-t-single-main border-r-single-main 
                                 rounded-full animate-spin"></div> */}
             </div>
         </div>  

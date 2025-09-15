@@ -45,12 +45,12 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
         <PageNavbar title={t("settings:navbar.title")} className={className}>
             <PageNavbar.Section title={t("settings:navbar.privacy.title")}>
                 {authSettings.map((item, index) => (
-                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} />
+                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} onClick={onSelect}/>
                 ))}
             </PageNavbar.Section>
             <PageNavbar.Section title={t("settings:navbar.general.title")}>
                 {generalSettings.map((item, index) => (
-                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} />
+                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} onClick={onSelect}/>
                 ))}
             </PageNavbar.Section>
         </PageNavbar>

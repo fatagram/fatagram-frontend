@@ -233,7 +233,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
       <Text size="xl-2"
         weight="extrabold"
-        className="uppercase sm:text-[45px] text-[45px] text-[var(--third-single-color)] select-none text-center"
+        className="uppercase sm:text-[45px] text-[45px] text-single-third select-none text-center"
       >
         {t("user:register.title")}
       </Text>
@@ -376,7 +376,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             </Text>
           </div>
           <Checkbox
-            className="text-[15px] text-[var(--third-single-color)] gap-[8px]"
+            className="text-[15px] text-single-third gap-[8px]"
             label={
               <div className="flex items-center flex-wrap">
                 {t("user:register.agree")}&nbsp;

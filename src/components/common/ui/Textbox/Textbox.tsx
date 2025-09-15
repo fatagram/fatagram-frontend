@@ -61,7 +61,7 @@ const Textbox: React.FC<TextboxProps> = ({
             className={`border-[3px] bg-[var(--second-bg-color)] text-[var(--text-color)]
                 ${disabled ? `bg-[var(--main-bg-color)]` : `focus:bg-gradient-main-move 
                 ${isWrong ? styles['primary-textbox-wrong'] : styles['primary-textbox']}`}
-                font-normal rounded-[15px] outline-none text-lg caret-[var(--main-single-color)]
+                font-normal rounded-[15px] outline-none text-lg caret-single-main selection:!bg-single-third
                 ${className}
                 ${sizeClasses[size]}`}
             {...props}

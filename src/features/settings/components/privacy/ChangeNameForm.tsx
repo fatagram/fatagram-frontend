@@ -96,7 +96,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                         <Text size="md-1" color="danger" className="mt-2 mx-4">{errorMessage}</Text>
                     </div>
                 }
-                <Text className="mx-8 mt-8 mb-4 h-[0.5px] bg-[var(--third-single-color)]"></Text>
+                <Text className="mx-8 mt-8 mb-4 h-[0.5px] bg-single-third"></Text>
                 <Text size="sm-2" className="font-light px-2 mb-4 flex flex-col gap-1">
                     <Text weight="bold" className="text-single-second">* {t("settings:account.personalInfo.changeNameForm.note")}:</Text>
                     <Text className="opacity-80">- {t("settings:account.personalInfo.changeNameForm.noteText1")} &nbsp;

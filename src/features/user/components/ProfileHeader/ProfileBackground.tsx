@@ -23,10 +23,10 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = (
     const { t } = useTranslation() as { t: (key: string) => string };
 
     return (
-        <>
-            {isLoading ? <BackgroundImageSkeletonLoading alt="Loading" className="relative min-h-[300px]" /> :
-                <BackgroundImage src={background} alt="Background Image"
-                    className="relative min-h-[200px] w-full">
+        <div className="relative aspect-[16/6] w-full rounded-[15px]">
+            {isLoading ? <BackgroundImageSkeletonLoading alt="Loading" 
+                className="relative h-full w-full" /> :
+                <BackgroundImage src={background} alt="Background Image" className="relative h-full w-full">
                     {isOwner &&
                         <SelectFile
                             onChange={handleSelectBackground}
@@ -40,7 +40,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = (
                     }
                 </BackgroundImage>
             }
-        </>
+        </div>
     )
 }
 

@@ -29,7 +29,7 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({className, onSelect}) => {
         <PageNavbar title={t("friends:navbar.title")} className={className}>
             <PageNavbar.Section>
                 {friendPageItems.map((item, index) => (
-                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} />
+                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} onClick={onSelect}/>
                 ))}
             </PageNavbar.Section>
         </PageNavbar>

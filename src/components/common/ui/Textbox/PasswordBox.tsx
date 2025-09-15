@@ -40,7 +40,7 @@ const PasswordBox: React.FC<PasswordBoxProps> = ({
                 <button type="button" className="absolute right-0 top-1/2 -translate-y-1/2 mr-5"
                     onClick={() => setShowPassword(!showPassword)}>
                     {showPassword ? <i className="fa-solid fa-eye text-[#5e5e5e]"></i> : 
-                                <i className="fa-solid fa-eye-slash text-[var(--third-single-color)]"></i>}
+                                <i className="fa-solid fa-eye-slash text-single-third"></i>}
                 </button>
             )}
         </div>

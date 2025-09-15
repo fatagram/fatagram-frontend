@@ -22,10 +22,10 @@ function NotFoundPage() {
   return (
     <div className="flex flex-col items-center pt-20 sm:pt-10 sm:justify-center h-screen w-full gap-[20px] bg-[var(--main-bg-color)]">
         <Logo hasSlogan={false} className={"text-[30px]"}/>
-        <Text className="text-[80px] font-bold font-jua bg-single-main text-[var(--third-single-color)]
+        <Text className="text-[80px] font-bold font-jua bg-single-main text-single-third
                           w-[200px] h-[200px] flex justify-center items-center rounded-full">404</Text>
         <Text weight="extrabold" className="uppercase sm:text- text-[40px] 
-                        text-[var(--third-single-color)]">{t("notFound.title")}</Text>
+                        text-single-third">{t("notFound.title")}</Text>
         <Text size="lg-2" className="flex justify-center text-center">
             {t("notFound.description")}
         </Text>
