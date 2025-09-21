@@ -3,7 +3,6 @@ export default interface ChangeNameDto {
     lastName: string;
 }
 
-
 // Error messages for the RegisterValidator
 export const ErrorCodes: Record<string, {message: string, type: ErrorType}> = {
     FIRSTNAME_NOT_CORRECT_FORMAT : { message: "settings:account.personalInfo.errorMessages.changeName.firstNameNotCorrectFormat", type: "FirstName" },

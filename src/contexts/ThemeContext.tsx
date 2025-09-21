@@ -32,7 +32,6 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({children}) => {
         const theme = localStorage.getItem("theme");
         return (theme && theme in themes) ? (theme as Theme) : "default";
     }
-
     const [theme, setTheme] = useState<Theme>(getLocalStorageTheme);
     const [availableThemes, setAvailableThemes] = useState<ThemeOption[]>([]);
 

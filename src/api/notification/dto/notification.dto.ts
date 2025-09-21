@@ -1,4 +1,4 @@
-import { TimeUnit } from "@/utils/time_unit";
+import { TimeUnit } from "@/utils/TimeUnit";
 
 export interface NotificationDto {
     id: string;
@@ -20,4 +20,21 @@ export interface NotificationDto {
 export interface NotificationsDto {
     notifications: NotificationDto[];
     unreadCount: number;
+}
+
+export const NotificationDefault: NotificationDto = {
+    id: "",
+    userId: "",
+    type: "Unknown",
+    data: {},
+    actorId: "",
+    actorName: "Unknown",
+    actorImageUrl: "",
+    link: "/",
+    content: "You have a new notification",
+    isRead: true,
+    timeDistance: {
+        value: 0,
+        unit: TimeUnit.Miliseconds
+    }
 }

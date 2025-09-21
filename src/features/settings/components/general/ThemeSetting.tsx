@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { Theme, useTheme } from "../../../../contexts/ThemeContext";
-import SettingCard from "@/components/common/container/Card";
-import SelectBoxSetting from "@/components/common/container/Card/SettingItem/SelectBoxSetting";
-import { Option, OptionKey } from "@/components/common/ui/SelectBox/SelectBox";
+import SettingCard from "@/components/molecules/Card";
 import { useTranslation } from "react-i18next";
+import { OptionKey, Option } from "@/components/atoms/SelectBox/SelectBox";
+import SelectBoxSetting from "../common/SelectBoxSetting";
 
 interface ThemeSettingsProps {
     className?: string;

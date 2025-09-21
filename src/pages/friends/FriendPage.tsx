@@ -1,6 +1,6 @@
 import React, { useLayoutEffect } from "react";
+import Text from "@/components/atoms/Text";
 import { Outlet } from "react-router-dom";
-import Text from "@/components/common/ui/Text";
 import FriendsNavbar from "@/pages/friends/FriendsNavbar";
 import { useTranslation } from "react-i18next";
 

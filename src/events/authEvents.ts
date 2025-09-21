@@ -1,4 +1,3 @@
-import { useCallback } from 'react';
 const authEventTarget = new EventTarget();
 
 export const authEvents = {

@@ -1,16 +1,17 @@
-import { ApiResponse, Result } from '@/api/common';
-import { handleApiError } from "../common";
-import { NotificationDto, NotificationsDto } from "./dto/notification.dto";
-import { apiClient } from '../setupInterceptor';
+import { Result } from "@/api/common/result";
 import apiUrl from '@/config';
+import { NotificationsDto } from "./dto/notification.dto";
+import { apiClient } from "../common/axiosInterceptor";
+import { ApiResponse } from "../common/apiResponse";
+import { handleApiError } from "../common/handleApiError";
 
-const API_URL = `${apiUrl}/api/notification`;
+const PREFIX = `/api/notification`;
 
 export class NotificationService {
 
     public async getNotifications(cursorId: string, pageSize: number) : Promise<Result<NotificationsDto>> {
         try {
-            const res = await apiClient.get(`${API_URL}/getNotifications`, {
+            const res = await apiClient.get(`${PREFIX}/getNotifications`, {
                 params: {
                     cursorId,
                     pageSize
@@ -31,7 +32,7 @@ export class NotificationService {
 
     public async markAsRead(notificationId: string) : Promise<Result<any>> {
         try {
-            await apiClient.post(`${API_URL}/markNotificationAsRead/${notificationId}`);
+            await apiClient.post(`${PREFIX}/markNotificationAsRead/${notificationId}`);
             return {
                 success: true,
             }

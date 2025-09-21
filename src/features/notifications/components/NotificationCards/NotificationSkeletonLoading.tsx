@@ -1,5 +1,5 @@
-import { AvatarSkeletonLoading } from "@/components/common/display/Avatar"
-import TextSkeletionLoading from "@/components/common/ui/Text/TextSkeletionLoading";
+import { AvatarSkeletonLoading } from "@/components/atoms/Avatar"
+import TextSkeletionLoading from "@/components/atoms/Text/TextSkeletionLoading";
 
 const NotificationSkeletonLoading = () => {
 

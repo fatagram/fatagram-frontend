@@ -1,8 +1,8 @@
 import React, { useEffect } from "react";
 import RegisterForm from "../../features/user/components/RegisterForm/RegisterForm";
-import Footer from "../../components/layout/Footer/Footer";
+import Footer from "../../components/atoms/Footer/Footer";
 import SelectLanguage from "@/features/settings/components/general/SelectLanguage";
-import Text from "@/components/common/ui/Text";
+import Text from "@/components/atoms/Text";
 
 // RegisterPage function
 // This function is a React component that renders the register page.

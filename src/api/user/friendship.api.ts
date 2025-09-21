@@ -1,16 +1,16 @@
-import { handleApiError, Result } from './../common';
-import apiUrl from "@/config";
-import { apiClient } from "../setupInterceptor";
-import { ApiResponse } from "../common";
-import { TimeUnit } from '@/utils/time_unit';
+import { TimeUnit } from '@/utils/TimeUnit';
 import { FriendsDto } from './dto/friend.dto';
+import { Result } from "../common/result";
+import { apiClient } from "../common/axiosInterceptor";
+import { ApiResponse } from "../common/apiResponse";
+import { handleApiError } from "../common/handleApiError";
 
-const API_URL = `${apiUrl}/api/friendship`;
+const PREFIX = `/api/friendship`;
 
 export class FriendshipService {
     async GetFriendshipStatus(targetId: string): Promise<Result<{status: string}>> {
         try {
-            const res = await apiClient.get(`${API_URL}/status/${targetId}`);
+            const res = await apiClient.get(`${PREFIX}/status/${targetId}`);
             const response = res.data as ApiResponse<{status: string}>;
             return { success: true, data: response.data };
         }
@@ -22,7 +22,7 @@ export class FriendshipService {
 
     async SendAddFriendRequest(receiverId: string): Promise<Result<any>> {
         try {
-            const res = await apiClient.post(`${API_URL}/add/${receiverId}`);
+            const res = await apiClient.post(`${PREFIX}/add/${receiverId}`);
             const response = res.data as ApiResponse<any>;
             return { success: true, data: response.data };
         }
@@ -34,7 +34,7 @@ export class FriendshipService {
 
     async CancelAddFriendRequest(senderId: string): Promise<Result<any>> {
         try {
-            const res = await apiClient.delete(`${API_URL}/cancel/${senderId}`);
+            const res = await apiClient.delete(`${PREFIX}/cancel/${senderId}`);
             const response = res.data as ApiResponse<any>;
 
             // console.log(response);
@@ -48,7 +48,7 @@ export class FriendshipService {
 
     async AcceptAddFriendRequest(senderId: string): Promise<Result<any>> {
         try {
-            const res = await apiClient.post(`${API_URL}/accept/${senderId}`);
+            const res = await apiClient.post(`${PREFIX}/accept/${senderId}`);
             const response = res.data as ApiResponse<any>;
             return { success: true, data: response.data };
         }
@@ -60,7 +60,7 @@ export class FriendshipService {
 
     async DeclineAddFriendRequest(requesterId: string): Promise<Result<any>> {
         try {
-            const res = await apiClient.delete(`${API_URL}/decline/${requesterId}`);
+            const res = await apiClient.delete(`${PREFIX}/decline/${requesterId}`);
             const response = res.data as ApiResponse<any>;
             return { success: true, data: response.data };
         }
@@ -72,7 +72,7 @@ export class FriendshipService {
 
     async Unfriend(friendId: string): Promise<Result<any>> {
         try {
-            const res = await apiClient.delete(`${API_URL}/unfriend/${friendId}`);
+            const res = await apiClient.delete(`${PREFIX}/unfriend/${friendId}`);
             const response = res.data as ApiResponse<any>;
             return { success: true, data: response.data };
         }
@@ -84,7 +84,7 @@ export class FriendshipService {
 
     async GetNumberOfFriends(targetId: string): Promise<Result<{numberOfFriends: number}>> {
         try {
-            const res = await apiClient.get(`${API_URL}/count/${targetId}`);
+            const res = await apiClient.get(`${PREFIX}/count/${targetId}`);
             const response = res.data as ApiResponse<{numberOfFriends: number}>;
             return { success: true, data: response.data };
         }
@@ -106,7 +106,7 @@ export class FriendshipService {
             },
         }[], total: number}>> {
         try {
-            const res = await apiClient.get(`${API_URL}/requests`, {
+            const res = await apiClient.get(`${PREFIX}/requests`, {
                 params: {
                     page,
                     pageSize
@@ -139,7 +139,7 @@ export class FriendshipService {
             params.append("page", page.toString());
             params.append("pageSize", pageSize.toString());
 
-            const res = await apiClient.get(`${API_URL}/friends/${userId}`, {
+            const res = await apiClient.get(`${PREFIX}/friends/${userId}`, {
                 params
             });
 

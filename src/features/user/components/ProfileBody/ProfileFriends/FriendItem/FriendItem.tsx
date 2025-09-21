@@ -1,13 +1,13 @@
 import { FriendDto } from "@/api/user/dto/friend.dto";
 import { friendshipService } from "@/api/user/friendship.api";
-import Avatar from "@/components/common/display/Avatar";
-import Dropdown from "@/components/common/ui/Dropdown/Dropdown";
-import Text from "@/components/common/ui/Text";
+import Avatar from "@/components/atoms/Avatar";
 import useClickOutside from "@/hooks/useClickOutside";
 import React, { RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
-import AddFriendButton from "../../../ProfileHeader/AddFriendButton";
+import AddFriendButton from "../../../ProfileHeader/FriendButton";
+import Dropdown from "@/components/molecules/Dropdown";
+import Text from "@/components/atoms/Text";
 
 interface FriendItemProps {
     className?: string;

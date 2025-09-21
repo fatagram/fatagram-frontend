@@ -1,5 +1,5 @@
-import Card from "@/components/common/container/Card";
-import SubNavbar from "@/components/common/container/SubNavbar/SubNavbar";
+import Card from "@/components/molecules/Card";
+import SubNavbar from "@/components/organisms/Navigation/SubNavbar";
 import { useTranslation } from "react-i18next";
 
 type ProfileAboutNavbarProps = {

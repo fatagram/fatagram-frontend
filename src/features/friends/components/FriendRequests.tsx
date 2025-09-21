@@ -1,12 +1,12 @@
 import { friendshipService } from "@/api/user/friendship.api";
-import Card from "@/components/common/container/Card";
-import FriendRequestItem from "@/components/common/container/Card/FriendRequestItem/FriendRequestItem";
-import Text from "@/components/common/ui/Text";
-import { TimeUnit, TimeUnitTranslateMap } from "@/utils/time_unit";
-import React, { useCallback } from "react";
+import Card from "@/components/molecules/Card";
+import FriendRequestItem from "@/features/friends/components/FriendRequestItem";
+import Text from "@/components/atoms/Text";
+import { TimeUnit, TimeUnitTranslateMap } from "@/utils/TimeUnit";
+import React, { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 
-interface FriendRequestsProps {
+type FriendRequestsProps = {
     className?: string;
 }
 
@@ -47,25 +47,6 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         setIsLoading(false);
     }, [page, limit]);
 
-    // Fetch friend requests on mount
-    React.useEffect(() => {
-        setIsLoading(true);
-        fetchFriendRequests();
-    }, [fetchFriendRequests]);
-
-    React.useEffect(() => {
-        if (!loaderRef.current || isFull) return;
-
-        const observer = new IntersectionObserver(([entry]) => {
-            if (entry.isIntersecting) {
-                setPage((prev) => prev + 1); 
-            }
-        });
-
-        observer.observe(loaderRef.current); 
-        return () => observer.disconnect(); 
-    }, [loaderRef, isFull]);
-
     // Handle accept friend request
     const handleAcceptRequest = useCallback(async (requestId: string) => {
         const response = await friendshipService.AcceptAddFriendRequest(requestId);
@@ -84,6 +65,27 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         }
     }, []);
 
+    // === USE EFFECTS === 
+    // Fetch friend requests on mount
+    useEffect(() => {
+        setIsLoading(true);
+        fetchFriendRequests();
+    }, [fetchFriendRequests]);
+
+    useEffect(() => {
+        if (!loaderRef.current || isFull) return;
+
+        const observer = new IntersectionObserver(([entry]) => {
+            if (entry.isIntersecting) {
+                setPage((prev) => prev + 1); 
+            }
+        });
+
+        observer.observe(loaderRef.current); 
+        return () => observer.disconnect(); 
+    }, [loaderRef, isFull]);
+
+    // render
     return (
         <Card title={`Danh sách lời mời (${total})` } className={`${className}`}>
             <div className="flex flex-wrap gap-2 h-full w-full">

@@ -1,19 +1,17 @@
-import { apiClient, apiClientFormData } from "@/api/setupInterceptor";
-import ChangeNameDto from "./dto/change-name.dto";
-import { ApiResponse, handleApiError, Result } from "../common";
-import ChangeUrlNameDto from "./dto/change-url-name.dto";
-import apiUrl from "@/config";
-import ChangeNickname from "./dto/change-nickname.dto";
 import ChangeNicknameDto from "./dto/change-nickname.dto";
 import UserInfoOverviewDto from "./dto/user-info-overview.dto";
+import { Result } from "../common/result";
+import { apiClient } from "../common/axiosInterceptor";
+import { ApiResponse } from "../common/apiResponse";
+import { handleApiError } from "../common/handleApiError";
 
-const API_URL = `${apiUrl}/api/userinfo`;
+const PREFIX = `/api/userinfo`;
 
 export class UserInfoService {
     async UpdateNickname(changeNicknameDto: ChangeNicknameDto): Promise<Result<ChangeNicknameDto>> 
     {
         try {
-            const res = await apiClient.patch(`${API_URL}/nickname`, changeNicknameDto);
+            const res = await apiClient.patch(`${PREFIX}/nickname`, changeNicknameDto);
             const response = res.data as ApiResponse<ChangeNicknameDto>;
             return { success: true, data: response.data }
         }
@@ -24,7 +22,7 @@ export class UserInfoService {
 
     async GetUserInfoOverview(userId: string): Promise<Result<UserInfoOverviewDto>> {
         try {
-            const res = await apiClient.get(`${API_URL}/overview/${userId}`);
+            const res = await apiClient.get(`${PREFIX}/overview/${userId}`);
             const response = res.data as ApiResponse<UserInfoOverviewDto>;
             return { success: true, data: response.data }
         }

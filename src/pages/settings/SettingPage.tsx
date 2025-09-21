@@ -1,10 +1,10 @@
 import React, { useLayoutEffect } from "react";
 import SettingsNavbar from "../../features/settings/components/SettingsNavbar";
 import { Outlet } from "react-router-dom";
-import Text from "@/components/common/ui/Text";
+import Text from "@/components/atoms/Text";
 import { useTranslation } from "react-i18next";
 
-interface SettingPageProps {
+type SettingPageProps = {
   // Define any props if needed
 }
 

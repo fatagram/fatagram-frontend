@@ -1,25 +1,17 @@
 import { notificationService } from "@/api/notification/notification.api"
 import { useQuery } from "@tanstack/react-query"
-import { useDispatch } from "react-redux";
-import { loadMoreNotifications, setNotifications } from "../stores/notificationsSlice";
-import { useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { loadNotifications } from "../stores/notificationsSlice";
 
-const useNotifications = ({
-    cursorId = "",
-    pageSize = 10
-} : {
-    cursorId?: string;
-    pageSize?: number;
-}) => {
+const useNotifications = () => {
     const dispatch = useDispatch();
+    const { pageSize, cursorId } = useSelector((state: any) => state.notifications);
 
     return useQuery({
-        queryKey: ["notifications", cursorId],
+        queryKey: ["notifications"],
         queryFn: async () => {
             const res = await notificationService.getNotifications(cursorId, pageSize);
-            await new Promise(resolve => setTimeout(resolve, 1500));
-            if (cursorId === "") dispatch(setNotifications(res.data ?? {notifications: [], unreadCount: 0}));
-            else if (res.data) dispatch(loadMoreNotifications(res.data.notifications));
+            dispatch(loadNotifications(res.data as any));
             return res.data;
         },
         staleTime: 1000 * 60 * 5, 

@@ -1,5 +1,3 @@
-import { NotificationDto } from "@/api/notification/dto/notification.dto";
-import Text from "@/components/common/ui/Text";
 import NotificationMenu from "@/features/notifications/components/NotificationMenu/NotificationMenu";
 import { setInNotificationPage, setShowNotification } from "@/features/notifications/stores/notificationsSlice";
 import React, { useEffect } from "react";
@@ -12,14 +10,13 @@ type NotificationPageProps = {
 const NotificationPage: React.FC<NotificationPageProps> = () => {
 
     const dispatch = useDispatch();
-
     useEffect(() => {
         dispatch(setInNotificationPage(true));
         return () => {
             dispatch(setInNotificationPage(false));
             dispatch(setShowNotification(false));
         }
-    }, [])
+    }, []);
 
     return (
         <div className="relative flex items-start justify-center w-full sm:mt-20 mt-16">

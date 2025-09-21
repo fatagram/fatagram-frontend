@@ -1,10 +1,9 @@
-import { NotificationDto } from "@/api/notification/dto/notification.dto"
+import { NotificationDefault, NotificationDto } from "@/api/notification/dto/notification.dto"
 import NewFriendRequestCard from "./NotificationCards/NewFriendRequestCard";
-import AcceptedFriendRequestCard from "./NotificationCards/AcceptedFriendRequestCard";
-import { useNavigate } from "react-router-dom";
+import BaseNotification from "./NotificationCards/BaseNotification";
 
 // NotificationFactoryProps defines the props for the NotificationFactory component
-export interface NotificationFactoryProps {
+export type NotificationFactoryProps = {
     notificationDto: NotificationDto;
     onClick?: () => void;
 }
@@ -12,18 +11,18 @@ export interface NotificationFactoryProps {
 // NotificationFactory is a factory component that creates the appropriate notification card based on the notification type
 const NotificationFactory: React.FC<NotificationFactoryProps> = ({
     notificationDto,
-    onClick = () => {},
+    onClick = () => {}
 }) => {
 
     switch (notificationDto.type) {
-        case "NewFriendRequest": // New friend request notification
+        case "NewFriendRequest":
             return <NewFriendRequestCard notificationDto={notificationDto} onClick={(onClick)}/>
 
         case "FriendRequestAccepted": // Friend request accepted notification
-            return <AcceptedFriendRequestCard notificationDto={notificationDto} onClick={onClick}/>
+            return <BaseNotification notificationDto={notificationDto} onClick={onClick}/>
         
         default:
-            return <div>Unknown Notification</div>
+            return <BaseNotification notificationDto={NotificationDefault} onClick={onClick}/>;
     }
 }
 

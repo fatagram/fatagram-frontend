@@ -1,10 +1,8 @@
-import React, { useCallback } from "react";
-import Text from "@/components/common/ui/Text";
+import PageNavbar from "@/components/organisms/Navigation/PageNavbar";
+import React from "react";
 import { useTranslation } from "react-i18next";
-import PageNavbarItem from "@/components/common/container/PageNavbar/PageNavbarItem";
-import PageNavbar from "@/components/common/container/PageNavbar/PageNavbar";
 
-interface SettingsNavbarProps {
+type SettingsNavbarProps = {
     className?: string;
     onSelect?: () => void;
 }
@@ -16,10 +14,6 @@ interface SettingsNavbarProps {
  * @returns SettingsNavbar component
  */
 const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) => {
-
-    // State
-    // const [showAuthSettings, setShowAuthSettings] = React.useState<boolean>(true); 
-    // const [showGeneralSettings, setShowGeneralSettings] = React.useState<boolean>(true); 
 
     // Other hooks
     const { t } = useTranslation() as { t: (key: string) => string }; // i18n translation hook
@@ -37,9 +31,6 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({className, onSelect}) =>
         {icon: <i className="fa-solid fa-circle-info"></i>,name: t("settings:navbar.general.about"), path: "/settings/about"},
         {icon: <i className="fa-solid fa-palette"></i>,name: t("settings:navbar.general.theme"), path: "/settings/theme"},
     ]
-
-    // const createSettingItems = useCallback()
-
 
     return (
         <PageNavbar title={t("settings:navbar.title")} className={className}>

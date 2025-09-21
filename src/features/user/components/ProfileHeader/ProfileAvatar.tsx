@@ -1,4 +1,4 @@
-import Avatar, { AvatarSkeletonLoading } from "@/components/common/display/Avatar";
+import Avatar, { AvatarSkeletonLoading } from "@/components/atoms/Avatar";
 import React from "react";
 
 interface ProfileAvatarProps {

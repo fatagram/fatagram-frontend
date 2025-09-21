@@ -1,4 +1,4 @@
-import Card from "@/components/common/container/Card"
+import Card from "@/components/molecules/Card"
 import ProfileAboutNavbar from "./ProfileAboutNavbar";
 import { Outlet, useOutletContext } from "react-router-dom";
 import { AuthStatus } from "../../AuthStatus";

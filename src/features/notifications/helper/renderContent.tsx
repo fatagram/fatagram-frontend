@@ -1,7 +1,7 @@
-import Text from "@/components/common/ui/Text";
 import { JSX } from "react";
+import Text from "@/components/atoms/Text";
 
-export const renderContent = (template: string, values: Record<string, string | JSX.Element>) => {
+export function renderContent(template: string, values: Record<string, string | JSX.Element>) {
     const regex = /\{(\w+)\}/g;
     const parts: (string | JSX.Element)[] = [];
     let lastIndex = 0;
@@ -21,10 +21,8 @@ export const renderContent = (template: string, values: Record<string, string | 
     }
 
     return (
-        <Text>
-            {parts.map((part, index) => {
-                return part;
-            })}
-        </Text>
+        <>
+            {parts.map((part) => part)}
+        </>
     )
 }

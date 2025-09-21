@@ -1,6 +1,6 @@
-import SettingCard from "@/components/common/container/Card";
-import EditableField from "@/components/common/container/Card/SettingItem/EditableTextField";
-import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
+import SettingCard from "@/components/molecules/Card";
+import EditableField from "@/features/settings/components/common/EditableTextField";
+import Text, { TextSkeletonLoading } from "@/components/atoms/Text";
 import { userProfileService } from "@/api/user/user-profile.api";
 import React, { useEffect } from "react";
 import ChangeUrlNameDto, { ErrorCodes } from "@/api/user/dto/change-url-name.dto";
@@ -11,7 +11,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import ChangeNicknameDto from "@/api/user/dto/change-nickname.dto";
 import { userInfoService } from "@/api/user/user-info.api";
 
-interface AccountSettingProps {
+type AccountSettingProps = {
     className?: string;
 }
 

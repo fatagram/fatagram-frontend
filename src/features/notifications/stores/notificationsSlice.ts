@@ -26,13 +26,13 @@ const notificationsSlice = createSlice({
     name: "notifications",
     initialState,
     reducers: {
-        setNotifications: (state, action: PayloadAction<NotificationsDto>) => {
-            state.notifications = action.payload.notifications;
+        loadNotifications: (state, action: PayloadAction<NotificationsDto>) => {
+            state.notifications = [...state.notifications, ...action.payload.notifications];
             state.unreadCount = action.payload.unreadCount;
-        },
-        loadMoreNotifications: (state, action: PayloadAction<NotificationDto[]>) => {
-            state.notifications = [...state.notifications, ...action.payload];
-            if (action.payload.length < state.pageSize) {
+            if (action.payload.notifications.length > 0) {
+                state.cursorId = action.payload.notifications[action.payload.notifications.length - 1].id;
+            }
+            else {
                 state.isFull = true;
             }
         },
@@ -63,9 +63,6 @@ const notificationsSlice = createSlice({
         setInNotificationPage: (state, action: PayloadAction<boolean>) => {
             state.isInNotificationPage = action.payload;
         },
-        setCursorId: (state, action: PayloadAction<string>) => {
-            state.cursorId = action.payload;
-        },
         setShowFull: (state, action: PayloadAction<boolean>) => {
             state.isShowFull = action.payload;
         }
@@ -73,13 +70,12 @@ const notificationsSlice = createSlice({
 })
 
 export const { 
-    setNotifications, 
+    loadNotifications, 
     addNewNotification, 
-    loadMoreNotifications, 
     deleteNotification,
     markAsRead, 
     setShowNotification, 
     setInNotificationPage, 
     setShowFull,
-    setCursorId } = notificationsSlice.actions;
+} = notificationsSlice.actions;
 export default notificationsSlice.reducer;

@@ -1,11 +1,10 @@
-import Button from "@/components/common/ui/Button";
-import Dropdown from "@/components/common/ui/Dropdown/Dropdown";
-import Link from "@/components/common/ui/Link";
-import Text from "@/components/common/ui/Text";
-import NavbarItem from "@/components/layout/Navbar/NavbarItem";
+import NavbarItem from "@/components/organisms/Navigation/Navbar/NavbarItem";
+import Button from "@/components/atoms/Button";
+import Text from "@/components/atoms/Text";
+import Dropdown from "@/components/molecules/Dropdown";
 import { useSize } from "@/hooks/useSize";
 import { debounce } from "@/utils/debounce";
-import React, { useDebugValue, useEffect, useLayoutEffect, useState, useTransition } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 

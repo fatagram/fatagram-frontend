@@ -1,22 +1,17 @@
-import React, { useEffect, useLayoutEffect, useMemo } from "react";
-import Button from "@/components/common/ui/Button/Button";
+import React from "react";
 import { userProfileService } from "@/api/user/user-profile.api";
 import { friendshipService } from "@/api/user/friendship.api";
-import LabelSkeletonLoading from "@/components/common/ui/Text/TextSkeletionLoading";
-import Text from "@/components/common/ui/Text";
 import { useTranslation } from "react-i18next";
-import { useAuth } from "@/contexts/AuthContext";
 import ProfileBackground from "./ProfileBackground";
 import ProfileAvatar from "./ProfileAvatar";
-import AddFriendButton from "./AddFriendButton";
-// import { useDialog } from "@/contexts/DialogContext";
+import AddFriendButton from "./FriendButton";
 import { useNavigate } from "react-router-dom";
 import { AuthStatus } from "@/pages/profile/AuthStatus";
-import { useDispatch } from "react-redux";
-import { c } from "vite/dist/node/moduleRunnerTransport.d-DJ_mE5sf";
 import { useDialog } from "@/contexts/DialogContext";
+import Text, { TextSkeletonLoading } from "@/components/atoms/Text";
+import Button from "@/components/atoms/Button";
 
-export interface ProfileHeaderProps {
+export type ProfileHeaderProps = {
     className?: string;
     authStatus?: AuthStatus;
     onUserNotFound?: () => void;
@@ -37,18 +32,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
     const [nickname, setNickname] = React.useState<string | null>(null);
     const [avatar, setAvatar] = React.useState<string>("");
     const [background, setBackground] = React.useState<string>("");
-    // const [isOwner, setIsOwner] = React.useState<boolean>(false);
     const [isLoading, setIsLoading] = React.useState<boolean>(true);
     const [numberOfFriends, setNumberOfFriends] = React.useState<number>(0);
-    // const [offset, setOffset] = React.useState<number>(0);
 
     const avtRef = React.useRef<HTMLDivElement>(null);
     
     // Auth info hook
-    // const { userId, isAuthenticated } = useAuth(); 
     const { t } = useTranslation() as { t: (key: string) => string };
     const navigate = useNavigate();
-    // const dispatch = useDispatch();
     const { openDialog, closeDialog } = useDialog(); 
 
     React.useEffect(() => {
@@ -59,18 +50,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
     React.useEffect(() => {
         const fetchProfile = async () => {
             const response = await userProfileService.GetProfile(authStatus?.userId ? authStatus.userId : "", "avatar,background,fullName,nickname");
-            // console.log(response);
             // Delay to simulate loading
-            await new Promise(resolve => setTimeout(resolve, 3000));
             if (response.success) {
                 setAvatar(response.data.infos.avatar);
                 setBackground(response.data.infos.background);
                 setFullName(response.data.infos.fullName);
                 setNickname(response.data.infos.nickname);
-                // setIsOwner(response.data.isOwner);
             }
             else {
-                // console.log(response.errorCodes);
                 onUserNotFound?.();
             }
             setIsLoading(false);
@@ -93,7 +80,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
     // Handle background and avatar selection
     const handleSelectBackground = async (file: File) => {
         const result = await userProfileService.UploadBackground(file);
-        console.log(result);
+        // console.log(result);
         if (result.success) {
             setBackground(result.data);
         }
@@ -142,7 +129,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
                     handleSelectAvatar={handleSelectAvatar} ref={avtRef}/>
                 <div className="flex flex-col gap-2 flex-1 mb-3 ml-4">
                     { isLoading ? 
-                        <LabelSkeletonLoading size="md-1" className="lg:self-start self-center mb-2 lg:ml-5 w-[200px] mt-2 lg:mt-0"/> : 
+                        <TextSkeletonLoading size="md-1" className="lg:self-start self-center mb-2 lg:ml-5 w-[200px] mt-2 lg:mt-0"/> : 
                         <Text size="xl-1" weight="bold" className="lg:text-left text-center break-words">
                             {fullName}
                             {
@@ -162,7 +149,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
                                     t("user:profileHeader.noFriendsCount")
                                 }
                             </Text> : 
-                            <LabelSkeletonLoading size="md-1" className="w-[150px] lg:ml-5 mb-1"/> 
+                            <TextSkeletonLoading size="md-1" className="w-[150px] lg:ml-5 mb-1"/> 
                         }
                         { !isLoading ? 
                             <div className="relative flex flex-wrap lg:flex-none gap-2 lg:mt-0 mt-2 lg:ml-auto">       
@@ -183,7 +170,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({className, authStatus, onU
                                     <i className="fa-solid fa-circle-info"></i> 
                                 </Button>
                             </div> : 
-                            <LabelSkeletonLoading size="md-1" className="w-[250px] lg:ml-auto mb-1"/>
+                            <TextSkeletonLoading size="md-1" className="w-[250px] lg:ml-auto mb-1"/>
                         }
                     </div>  
                 </div>

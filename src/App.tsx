@@ -4,7 +4,7 @@ import "./styles/global.css";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes";
 import { LanguageProvider } from "./contexts/LanguageContext";
-import GlobalDialog from "./components/common/widgets/DialogBox/GlobalDialog";
+import GlobalDialog from "./components/organisms/Dialog/GlobalDialog";
 import { ThemeProvider } from "./contexts/ThemeContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { ToastProvider } from "./contexts/ToastContext";

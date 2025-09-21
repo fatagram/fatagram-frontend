@@ -1,14 +1,12 @@
 import { userInfoService } from "@/api/user/user-info.api";
 import { userProfileService } from "@/api/user/user-profile.api";
-import Card from "@/components/common/container/Card"
-import EditableTextArea from "@/components/common/container/Card/SettingItem/EditableTextArea";
-import Button from "@/components/common/ui/Button";
-import Text from "@/components/common/ui/Text";
+import Card from "@/components/molecules/Card"
+import EditableTextArea from "@/features/settings/components/common/EditableTextArea";
 import { AuthStatus } from "@/pages/profile/AuthStatus";
-import { title } from "process";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useOutletContext } from "react-router-dom";
+import Text from "@/components/atoms/Text";
 
 interface ProfileIntroductionProps {
     className?: string;
@@ -27,7 +25,6 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({
     const [email, setEmail] = React.useState<string | undefined>(undefined);
     const [phone, setPhone] = React.useState<string | undefined>(undefined);
     const [canEdit] = React.useState<boolean>((authStatus?.isAuthenticated && authStatus.isOwner) || false);
-    // const [isOwner, setIsOwner] = React.useState<boolean | null | undefined>(null);
 
     const { t } = useTranslation() as { t: (key: string) => string };
 
@@ -39,7 +36,6 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({
                 setDescription(response.data?.description);
                 setEmail(response.data?.email);
                 setPhone(response.data?.phone);
-                // setIsOwner(response.data?.isOwner);
             }
         }
         fetchData(authStatus?.userId ?? "");
@@ -77,7 +73,11 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({
                 valueClassName="text-[1.2rem] font-semibold"
                 canEdit={canEdit}
                 onCancelClick={() => setIsEditBio(false)}
-                btnChildren={<Text><i className="fas fa-pencil-alt"></i> &nbsp; {t('user:profilePosts.bioBtn')}</Text>}
+                btnChildren={
+                    <Text size="sm-2">
+                        <i className="fas fa-pencil-alt"></i> &nbsp; {t('user:profilePosts.bioBtn')}
+                    </Text>
+                }
             />}
 
             { description && <Text size="lg-1" weight="bold">{t('user:profilePosts.description')}</Text> }
@@ -89,7 +89,11 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({
                 onChangeClick={() => setIsEditDescription(true)}
                 onSaveClick={(value) => handleSaveDescription(value)}
                 onCancelClick={() => setIsEditDescription(false)}
-                btnChildren={<Text><i className="fas fa-pencil-alt"></i> &nbsp; {t('user:profilePosts.descriptionBtn')}</Text>}
+                btnChildren={
+                    <Text size="sm-2">
+                        <i className="fas fa-pencil-alt"></i> &nbsp; {t('user:profilePosts.descriptionBtn')}
+                    </Text>
+                }
             />}
 
             {(bio || description) && <hr className="border-[var(--border-color)] w-full"/>}

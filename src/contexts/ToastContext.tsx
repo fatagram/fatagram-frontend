@@ -1,5 +1,5 @@
-import Button from "@/components/common/ui/Button";
-import Text from "@/components/common/ui/Text";
+import Button from "@/components/atoms/Button";
+import Text from "@/components/atoms/Text";
 import NotificationFactory from "@/features/notifications/components/NotificationFactory";
 import React from "react";
 import { useNavigate } from "react-router-dom";

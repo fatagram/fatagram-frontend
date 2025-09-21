@@ -1,7 +1,6 @@
+import PageNavbar from "@/components/organisms/Navigation/PageNavbar";
 import React from "react";
 import { useTranslation } from "react-i18next";
-import PageNavbar from "@/components/common/container/PageNavbar/PageNavbar";
-import PageNavbarItem from "@/components/common/container/PageNavbar/PageNavbarItem";
 
 interface FriendsNavbarProps {
     className?: string;
@@ -29,7 +28,12 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({className, onSelect}) => {
         <PageNavbar title={t("friends:navbar.title")} className={className}>
             <PageNavbar.Section>
                 {friendPageItems.map((item, index) => (
-                    <PageNavbar.Item key={index} path={item.path} icon={item.icon} title={item.name} onClick={onSelect}/>
+                    <PageNavbar.Item key={index} 
+                        path={item.path} 
+                        icon={item.icon} 
+                        title={item.name} 
+                        onClick={onSelect}
+                    />
                 ))}
             </PageNavbar.Section>
         </PageNavbar>

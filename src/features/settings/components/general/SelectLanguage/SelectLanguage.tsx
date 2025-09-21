@@ -1,8 +1,7 @@
 import React, { useEffect, useState } from "react";
-import SelectBox from "@/components/common/ui/SelectBox";
-import { Option, OptionKey } from "../../../../../components/common/ui/SelectBox/SelectBox";
 import { Language, useLanguage } from "@/contexts/LanguageContext";
 import { userConfigService } from "@/api/user/user-config.api";
+import SelectBox, { OptionKey, Option } from "@/components/atoms/SelectBox/SelectBox";
 
 interface SelectLanguageProps {
     className?: string;

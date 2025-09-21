@@ -1,27 +1,25 @@
 import React, { useEffect, useRef, useState } from "react";
-import Button from "@/components/common/ui/Button/Button";
-import Textbox from "@/components/common/ui/Textbox/Textbox";
-import Logo from "@/components/common/ui/Logo/Logo";
-import Checkbox from "@/components/common/ui/Checkbox/Checkbox";
-import Link from "@/components/common/ui/Link/Link";
 import { useNavigate } from "react-router-dom";
-import { RegisterValidator } from "@/api/user/validate/register.dto.validate";
+import { RegisterValidator } from "@/api/user/validate/register.validator";
 import RegisterDto from "@/api/user/dto/register.dto";
 import { ErrorKey, ErrorCodes } from "@/api/user/dto/register.dto";
 import { RegisterService } from "@/api/user/register.api";
-import PasswordBox from "@/components/common/ui/Textbox/PasswordBox";
-import OverlayLoading from "@/components/common/widgets/OverlayLoading/OverlayLoading";
-import Text from "@/components/common/ui/Text";
+import OverlayLoading from "@/components/organisms/OverlayLoading/OverlayLoading";
 import { useTranslation } from "react-i18next";
-import { Result } from "@/api/common";
+import { Result } from "@/api/common/result";
+import Textbox, { PasswordBox } from "@/components/atoms/Textbox";
+import Logo from "@/components/atoms/Logo";
+import Text from "@/components/atoms/Text";
+import Checkbox from "@/components/atoms/Checkbox";
+import Link from "@/components/atoms/Link";
+import Button from "@/components/atoms/Button";
 
-interface RegisterFormProps {
+type RegisterFormProps = {
   showLogo?: boolean;
   showClose?: boolean;
   onClose?: () => void;
   className?: string;
 }
-
 
 const RegisterForm: React.FC<RegisterFormProps> = ({
   className,
@@ -329,6 +327,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         <div className="animate-right-to-left relative flex flex-col items-center sm:gap-[20px] gap-[15px] w-full">
           <div className="w-full">
             <Textbox value={formData.username}
+              autoComplete="username"
               ref={(el) => setRef(secondStepRefs, el, 0)}
               className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
               placeholder={t("user:register.username")}

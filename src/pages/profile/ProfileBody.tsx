@@ -3,7 +3,7 @@ import ProfileNavbar from "./ProfileNavbar";
 import React from "react";
 import { AuthStatus } from "./AuthStatus";
 
-interface ProfileBodyProps {
+type ProfileBodyProps = {
     userParam?: string;
     authStatus?: AuthStatus;
 }

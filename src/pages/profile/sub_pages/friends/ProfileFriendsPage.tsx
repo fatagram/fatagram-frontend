@@ -1,9 +1,5 @@
-import Card from "@/components/common/container/Card";
-import Textbox from "@/components/common/ui/Textbox";
-import SearchBox from "@/components/common/ui/Textbox/SearchBox";
+import Card from "@/components/molecules/Card";
 import ProfileFriends from "@/features/user/components/ProfileBody/ProfileFriends/ProfileFriends";
-import { useOutletContext } from "react-router-dom";
-import { AuthStatus } from "../../AuthStatus";
 import { useTranslation } from "react-i18next";
 
 const ProfileFriendsPage = () => {

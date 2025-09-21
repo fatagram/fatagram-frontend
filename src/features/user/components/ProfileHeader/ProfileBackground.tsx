@@ -1,11 +1,11 @@
 import React from "react";
-import BackgroundImage from "@/components/common/display/BackgroundImage";
-import { BackgroundImageSkeletonLoading } from "@/components/common/display/BackgroundImage";
+import BackgroundImage from "@/components/atoms/BackgroundImage";
+import { BackgroundImageSkeletonLoading } from "@/components/atoms/BackgroundImage";
 import { useTranslation } from "react-i18next";
-import Text from "@/components/common/ui/Text";
-import SelectFile from "@/components/common/widgets/SelectFile";
+import Text from "@/components/atoms/Text";
+import SelectFile from "@/components/molecules/SelectFile";
 
-interface ProfileBackgroundProps {
+type ProfileBackgroundProps = {
     isLoading: boolean;
     background: string;
     isOwner: boolean;

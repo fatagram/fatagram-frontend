@@ -1,4 +1,4 @@
-import { DialogBoxProps } from "@/components/common/utils/DialogBox/DialogBox";
+import { DialogBoxProps } from "@/components/organisms/Dialog/Dialog";
 import React, { createContext } from "react";
 
 type DialogContextType = {
@@ -22,15 +22,19 @@ export const DialogProvider = ({ children }: { children: React.ReactNode }) => {
     const openDialog = (props: DialogBoxProps) => {
         setDialogProps(props);
         setIsOpen(true);
-    }
-
+    };
     const closeDialog = () => {
         setIsOpen(false);
         setDialogProps(null);
-    }
+    };
 
     return (
-        <DialogContext.Provider value={{ isOpen, dialogProps, openDialog, closeDialog,  }}>
+        <DialogContext.Provider value={{ 
+            isOpen, 
+            dialogProps, 
+            openDialog, 
+            closeDialog,  
+        }}>
             {children}
         </DialogContext.Provider>
     );

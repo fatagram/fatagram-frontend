@@ -1,16 +1,18 @@
-import { apiClient, apiClientFormData } from "@/api/setupInterceptor";
+import { ApiResponse } from "../common/apiResponse";
+import { apiClient, apiClientFormData } from "../common/axiosInterceptor";
+import { handleApiError } from "../common/handleApiError";
+import { Result } from "../common/result";
 import ChangeNameDto from "./dto/change-name.dto";
-import { ApiResponse, handleApiError, Result } from "../common";
 import ChangeUrlNameDto from "./dto/change-url-name.dto";
-import apiUrl from "@/config";
+import GetMeDto from "./dto/get-me.dto";
 
-const API_URL = `${apiUrl}/api/UserProfile`;
+const PREFIX = `/api/UserProfile`;
 
 export class UserProfileService {
     // Check if user exists by id or urlName
     async CheckUserExistAsync(key: string): Promise<Result<any>> {
         try {
-            await apiClient.get(`${API_URL}/exist?key=${key}`);
+            await apiClient.get(`${PREFIX}/exist?key=${key}`);
             return { success: true };
         }
         catch (error: any)
@@ -22,7 +24,7 @@ export class UserProfileService {
     // Get user profile by id or urlName
     async GetProfile(id: string, fields: string): Promise<Result<any>> {
         try {
-            const res = await apiClient.get(`${API_URL}/${id}?fields=${fields}`);
+            const res = await apiClient.get(`${PREFIX}/${id}?fields=${fields}`);
             const response = res.data as ApiResponse<any>;
             return { success: true, data: response.data };
         }
@@ -33,11 +35,12 @@ export class UserProfileService {
     }
 
     // Get current user profile
-    async GetMe(): Promise<Result<{userId: string | undefined, urlName: string | undefined, languageCode: string}>> {
+    async GetMe(): Promise<Result<GetMeDto>> {
         try {
-            const res = await apiClient.get(`${API_URL}/me`);
-            const response = res.data.data.infos as {id: string | undefined, urlName: string | undefined, languageCode: string};
-            return { success: true, data: {userId: response?.id, urlName: response?.urlName, languageCode: response.languageCode} };
+            const res = await apiClient.get(`${PREFIX}/me`);
+            const response = res.data.data.infos as GetMeDto;
+            // console.log(response);
+            return { success: true, data: response };
         }
         catch (error: any)
         {
@@ -51,7 +54,7 @@ export class UserProfileService {
         {
             const formData = new FormData();
             formData.append('file', file);
-            const { data } = await apiClientFormData.patch(`${API_URL}/avatar`, formData)
+            const { data } = await apiClientFormData.patch(`${PREFIX}/avatar`, formData)
             return { success: true, data: data.data }
         }
         catch (error: any) {
@@ -64,7 +67,7 @@ export class UserProfileService {
         try {
             const formData = new FormData();
             formData.append('file', file);
-            const { data } = await apiClientFormData.patch(`${API_URL}/background`, formData)
+            const { data } = await apiClientFormData.patch(`${PREFIX}/background`, formData)
             return { success: true, data: data.data }
         }
         catch (error: any) {
@@ -75,7 +78,7 @@ export class UserProfileService {
     // Update simple profile fields such as bio, description, etc.
     async UpdateProfile(data: any): Promise<Result<any>> { 
         try {
-            const res = await apiClient.put(`${API_URL}`, data);
+            const res = await apiClient.put(`${PREFIX}`, data);
             const response = res.data as ApiResponse<any>;
             return { success: true, data: response.data }
         }
@@ -88,7 +91,7 @@ export class UserProfileService {
     async UpdateUrlName(changeUrlNameDto : ChangeUrlNameDto) : Promise<Result<ChangeUrlNameDto>>
     {
         try {
-            const res = await apiClient.patch(`${API_URL}/urlName`, changeUrlNameDto);
+            const res = await apiClient.patch(`${PREFIX}/urlName`, changeUrlNameDto);
             const response = res.data as ApiResponse<ChangeUrlNameDto>;
             return { success: true, data: response.data }
         }
@@ -101,7 +104,7 @@ export class UserProfileService {
     async UpdateName(changeNameDto : ChangeNameDto) : Promise<Result<ChangeNameDto>>
     {
         try {
-            const res = await apiClient.patch(`${API_URL}/name`, changeNameDto);
+            const res = await apiClient.patch(`${PREFIX}/name`, changeNameDto);
             const response = res.data as ApiResponse<ChangeNameDto>;
             return { success: true, data: response.data }
         }

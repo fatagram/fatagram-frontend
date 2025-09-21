@@ -1,9 +1,15 @@
 import React from "react";
 
+type Sz = {
+    width: number;
+    height: number;
+};
 export function useSize<T extends HTMLElement>() {
     const ref = React.useRef<T>(null);
-    const [size, setSize] = React.useState<{ width: number; height: number }>({ width: 0, height: 0 });
-
+    const [size, setSize] = React.useState<Sz>({ 
+        width: 0, 
+        height: 0 
+    });
     React.useEffect(() => {
         if (!ref.current) return;
         const el = ref.current;
@@ -14,14 +20,11 @@ export function useSize<T extends HTMLElement>() {
                 height: el.offsetHeight
             });
         });
-
         resizeObserver.observe(el);
 
         return () => {
             resizeObserver.disconnect();
         }
-        
-    }, [])
-
+    }, []);
     return [ref, size] as const;
 }

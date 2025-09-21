@@ -1,14 +1,14 @@
 import { ErrorCodes } from "@/api/user/dto/change-name.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
-import Button from "@/components/common/ui/Button";
-import Text, { TextSkeletonLoading } from "@/components/common/ui/Text";
-import Textbox from "@/components/common/ui/Textbox";
+import Button from "@/components/atoms/Button";
+import Text, { TextSkeletonLoading } from "@/components/atoms/Text";
+import Textbox from "@/components/atoms/Textbox";
 import { useAuth } from "@/contexts/AuthContext";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 
-interface ChangeNameFormProps {
+type ChangeNameFormProps = {
     className?: string
 }
 
@@ -26,10 +26,6 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
     const navigate = useNavigate();
     const { t } = useTranslation() as { t: (key: string) => string };
     const { userId } = useAuth();
-
-    // const userService = React.useMemo(() => {
-    //     return new UserService();
-    // }, []);
 
     // Close change name form
     const handleClose = () => {

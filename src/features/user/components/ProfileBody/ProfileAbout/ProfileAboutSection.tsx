@@ -1,4 +1,4 @@
-import Text from "@/components/common/ui/Text";
+import Text from "@/components/atoms/Text";
 
 type ProfileAboutSectionProps = {
     title?: string;

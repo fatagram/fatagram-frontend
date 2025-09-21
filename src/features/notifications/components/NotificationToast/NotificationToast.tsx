@@ -1,12 +1,11 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
-import { NotifyOnChangeProps } from "@tanstack/react-query";
 import NotificationFactory from "../NotificationFactory";
 import { useNavigate } from "react-router-dom";
 
-interface NotificationProps {
+type NotificationProps = {
     className?: string;
     notification: NotificationDto
-}
+};
 
 const NotificationToast: React.FC<NotificationProps> = ({
     className,
@@ -23,7 +22,6 @@ const NotificationToast: React.FC<NotificationProps> = ({
                 notificationDto={notification}
                 onClick={() => {
                     navigate(notification.link);
-                    // console.log("Notification clicked:", notification);
                 }}/>
         </div>
     )

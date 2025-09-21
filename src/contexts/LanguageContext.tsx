@@ -15,7 +15,7 @@ interface LanguageOption {
 interface LanguageContextType {
     language: Language,
     setLanguage: (lang: Language) => void,
-    availableLanguages: LanguageOption[]
+    availableLanguages: LanguageOption[],
 }
 
 // Language context
@@ -23,7 +23,7 @@ const LanguageContext = createContext<LanguageContextType | undefined>(undefined
 
 // Language provider props
 interface LanguageProviderProps {
-    children?: React.ReactNode
+    children?: React.ReactNode;
 }
 
 // Language Provider

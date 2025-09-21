@@ -1,9 +1,9 @@
 import axios from 'axios';
-import apiUrl from '@/config';
 import RegisterDto from './dto/register.dto';
-import { handleApiError, Result } from '../common';
+import { handleApiError } from '../common/handleApiError';
+import { Result } from '../common/result';
 
-const API_URL = `${apiUrl}/api/account`;
+const PREFIX = `/api/account`;
 
 export class RegisterService {
     // register method
@@ -12,7 +12,7 @@ export class RegisterService {
     // The method returns a promise of ServerResponse.
     async register(dto: RegisterDto): Promise<Result<void>> {
         try {
-            await axios.post(`${API_URL}/register`, {
+            await axios.post(`${PREFIX}/register`, {
                 username: dto.username,
                 password: dto.password,
                 email: dto.email,

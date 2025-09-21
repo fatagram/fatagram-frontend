@@ -1,12 +1,12 @@
 import { FriendDto, FriendsDto } from "@/api/user/dto/friend.dto";
 import FriendItem from "@/features/user/components/ProfileBody/ProfileFriends/FriendItem/FriendItem";
-import SearchBox from "@/components/common/ui/Textbox/SearchBox";
 import useFriends from "@/features/user/hooks/useFriends";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import Text from "@/components/common/ui/Text";
 import { useOutletContext } from "react-router-dom";
 import { AuthStatus } from "@/pages/profile/AuthStatus";
+import SearchBox from "@/components/atoms/Textbox/SearchBox";
+import Text from "@/components/atoms/Text";
 
 interface ProfileFriendsProps {
     className?: string;

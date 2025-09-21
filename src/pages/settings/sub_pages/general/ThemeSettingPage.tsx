@@ -1,5 +1,5 @@
+import ThemeSettings from "@/features/settings/components/general/ThemeSetting";
 import React from "react";
-import ThemeSettings from "../../../../features/settings/components/general/ThemeSetting";
 
 const ThemeSettingPage: React.FC = () => {
     return (

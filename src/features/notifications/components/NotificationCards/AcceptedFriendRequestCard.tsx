@@ -1,9 +1,8 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
-import Avatar from "@/components/common/display/Avatar";
-import Button from "@/components/common/ui/Button";
-import Text from "@/components/common/ui/Text";
-import { TimeUnit, TimeUnitTranslateMap } from "@/utils/time_unit";
-import { Trans, useTranslation } from "react-i18next";
+import Avatar from "@/components/atoms/Avatar";
+import Text from "@/components/atoms/Text";
+import { TimeUnit, TimeUnitTranslateMap } from "@/utils/TimeUnit";
+import { useTranslation } from "react-i18next";
 import { renderContent } from "../../helper/renderContent";
 
 interface AcceptedFriendRequestCardProps {

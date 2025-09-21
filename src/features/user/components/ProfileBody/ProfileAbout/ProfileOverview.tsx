@@ -1,11 +1,10 @@
 import { userInfoService } from "@/api/user/user-info.api";
-import { userProfileService } from "@/api/user/user-profile.api";
 import { AuthStatus } from "@/pages/profile/AuthStatus";
+import Text from "@/components/atoms/Text";
 import { useEffect, useState } from "react";
 import { useOutletContext } from "react-router-dom";
 import ProfileAboutSection from "./ProfileAboutSection";
-import Text from "@/components/common/ui/Text";
-import Button from "@/components/common/ui/Button";
+import Button from "@/components/atoms/Button";
 
 type ProfileOverviewProps = {
 }
@@ -15,11 +14,9 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({
     const authStatus = useOutletContext<AuthStatus>();
     const [emails, setEmails] = useState<string[]>([]);
     const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
-    const [isLoading, setIsLoading] = useState<boolean>(false);
 
     useEffect(() => {
         const fetchData = async () => {
-            setIsLoading(true);
             const response = await userInfoService.GetUserInfoOverview(authStatus?.userId ?? "");
             if (response) {
                 if (response.data?.email) {
@@ -31,7 +28,6 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({
             }
         }
         fetchData();
-        setIsLoading(false);
     }, [])
 
     return (

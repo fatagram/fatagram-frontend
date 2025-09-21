@@ -1,4 +1,4 @@
-import Card from "@/components/common/container/Card";
+import Card from "@/components/molecules/Card";
 import ProfileOverview from "../../../../features/user/components/ProfileBody/ProfilePosts/ProfileIntroduction";
 import { useOutletContext } from "react-router-dom";
 import { AuthStatus } from "../../AuthStatus";
