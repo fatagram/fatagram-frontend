@@ -1,0 +1,9 @@
+.user-bg-image {
+  aspect-ratio: 3/1;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-color: #e1e1e1;
+  border-radius: 0.75rem;
+  background-image: var(--bg-image);
+}
