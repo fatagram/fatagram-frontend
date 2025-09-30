@@ -1,30 +1,30 @@
 import React from "react";
 
 type Sz = {
-    width: number;
-    height: number;
+  width: number;
+  height: number;
 };
 export function useSize<T extends HTMLElement>() {
-    const ref = React.useRef<T>(null);
-    const [size, setSize] = React.useState<Sz>({ 
-        width: 0, 
-        height: 0 
+  const ref = React.useRef<T>(null);
+  const [size, setSize] = React.useState<Sz>({
+    width: 0,
+    height: 0,
+  });
+  React.useEffect(() => {
+    if (!ref.current) return;
+    const el = ref.current;
+
+    const resizeObserver = new ResizeObserver(() => {
+      setSize({
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      });
     });
-    React.useEffect(() => {
-        if (!ref.current) return;
-        const el = ref.current;
+    resizeObserver.observe(el);
 
-        const resizeObserver = new ResizeObserver(() => {
-            setSize({
-                width: el.offsetWidth,
-                height: el.offsetHeight
-            });
-        });
-        resizeObserver.observe(el);
-
-        return () => {
-            resizeObserver.disconnect();
-        }
-    }, []);
-    return [ref, size] as const;
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, []);
+  return [ref, size] as const;
 }

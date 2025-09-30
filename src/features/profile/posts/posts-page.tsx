@@ -1,12 +1,17 @@
 import Card from "@/components/molecules/card";
 import ProfileOverview from "./components/profile-introduction";
+import Grid from "@/components/atoms/grid";
 
 const PostsPage = () => {
   return (
-    <div className="flex gap-2 lg:flex-row flex-col ">
-      <ProfileOverview className="flex-[4] bg-[var(--second-bg-color)] rounded-md mt-2" />
-      <Card className="bg-[var(--second-bg-color)] rounded-md mt-2 flex-[8]"></Card>
-    </div>
+    <Grid cols={22} gap={8} className="w-full">
+      <Grid.Item colSpan={9}>
+        <ProfileOverview className="bg-[var(--second-bg-color)] rounded-md mt-2" />
+      </Grid.Item>
+      <Grid.Item colSpan={13}>
+        <Card className="bg-[var(--second-bg-color)] rounded-md mt-2"></Card>
+      </Grid.Item>
+    </Grid>
   );
 };
 

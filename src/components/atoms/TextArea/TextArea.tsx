@@ -1,42 +1,46 @@
 import React, { forwardRef } from "react";
 import styles from "./TextArea.module.css";
 import { Size } from "../../common/types/size";
+import { ComponentProps } from "@/components/common/types/component-type";
 
 const sizeClasses: Record<Size, string> = {
-  "xs": 'px-2 py-1 text-xs min-h-16',
-  "sm-1": 'px-3 py-1 text-[16px] min-h-24',   
-  "sm-2": 'px-4 py-2 text-[13px] min-h-24',
-  "sm-3": 'px-5 py-2 text-[13px] min-h-24',
-  "md-1": 'px-6 py-3 text-base min-h-28',
-  "md-2": 'px-7 py-3 text-base min-h-28',
-  "md-3": 'px-8 py-4 text-base min-h-32',
-  "lg-1": 'px-8 py-4 text-base min-h-32',
-  "lg-2": 'px-9 py-4 text-base min-h-32',
-  "lg-3": 'px-10 py-5 text-base min-h-32',
-  "xl-1": 'px-10 py-5 text-xl min-h-32',
-  "xl-2": 'px-12 py-6 text-2xl min-h-32',
-  "xl-3": 'px-14 py-7 text-3xl min-h-32',
+  xs: "px-2 py-1 text-xs min-h-16",
+  "sm-1": "px-3 py-1 text-[16px] min-h-24",
+  "sm-2": "px-4 py-2 text-[13px] min-h-24",
+  "sm-3": "px-5 py-2 text-[13px] min-h-24",
+  "md-1": "px-6 py-3 text-base min-h-28",
+  "md-2": "px-7 py-3 text-base min-h-28",
+  "md-3": "px-8 py-4 text-base min-h-32",
+  "lg-1": "px-8 py-4 text-base min-h-32",
+  "lg-2": "px-9 py-4 text-base min-h-32",
+  "lg-3": "px-10 py-5 text-base min-h-32",
+  "xl-1": "px-10 py-5 text-xl min-h-32",
+  "xl-2": "px-12 py-6 text-2xl min-h-32",
+  "xl-3": "px-14 py-7 text-3xl min-h-32",
 };
 
-interface TextAreaProps extends React.TextareaHTMLAttributes<HTMLTextAreaElement> {
+interface TextAreaProps extends ComponentProps<HTMLTextAreaElement> {
   onChange?: (e: React.ChangeEvent<HTMLTextAreaElement>) => void;
   isWrong?: boolean;
-  size?: Size;
+  sz?: Size;
 }
 
 const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
-  ({
-    placeholder,
-    onChange,
-    value,
-    disabled = false,
-    isWrong = false,
-    className,
-    size = "sm-1",
-    autoComplete = "off",
-    name = "",
-    ...props
-  }, ref) => {
+  (
+    {
+      placeholder,
+      onChange,
+      value,
+      disabled = false,
+      isWrong = false,
+      className,
+      sz = "sm-1",
+      autoComplete = "off",
+      name = "",
+      ...props
+    },
+    ref,
+  ) => {
     return (
       <textarea
         name={name}
@@ -50,13 +54,13 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           resize-none
             ${disabled ? `bg-[var(--main-bg-color)]` : `focus:bg-gradient-main-move`}
           font-normal rounded-[15px] outline-none text-lg caret-single-main
-          ${sizeClasses[size]}
-          ${isWrong ? styles['my-textarea-wrong'] : styles['my-textarea']}
+          ${sizeClasses[sz]}
+          ${isWrong ? styles["my-textarea-wrong"] : styles["my-textarea"]}
           ${className}`}
         {...props}
-    />
-    )
-  }
+      />
+    );
+  },
 );
 
 export default TextArea;

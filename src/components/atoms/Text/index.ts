@@ -1,2 +1,2 @@
-export { default } from "./Text";
-export { default as TextSkeletonLoading } from "./TextSkeletionLoading";
+export { default } from "./text";
+export { default as TextSkeletonLoading } from "./text.skeleton";

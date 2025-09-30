@@ -1,72 +1,72 @@
 {
+  "title": "Settings",
+  "navbar": {
     "title": "Settings",
-    "navbar": {
-        "title": "Settings",
-        "privacy": {
-            "title": "Privacy Settings",
-            "account": "Account",
-            "privacy": "Privacy"
-        },
-        "general": {
-            "title": "General Settings",
-            "notifications": "Notifications",
-            "about": "About",
-            "language": "Language",
-            "theme": "Themes"
-        }
+    "privacy": {
+      "title": "Privacy Settings",
+      "account": "Account",
+      "privacy": "Privacy"
     },
-    "editableField": {
-        "saveButton": "Save",
-        "cancelButton": "Cancel"
-    },
-    "account": {
-        "personalInfo": {
-            "title": "Personal Informations",
-            "yourName": "Your Name",
-            "urlName": "URL Name",
-            "nickname": "Nickname",
-            "changeButton": "Change",
-            "noUrlName": "No URL Name",
-            "noNickname": "No Nickname",
-            "urlNamePlaceholder": "Enter your URL name",
-            "nicknamePlaceholder": "Enter your nickname",
-            "changeNameForm": {
-                "title": "Name",
-                "firstName": "First name",
-                "lastName": "Last name",
-                "note": "Note",
-                "noteText1": "You can only change your name every",
-                "day": "days",
-                "noteText2": "Your name must have more than 3 characters and less than 36 characters.",
-                "noteText3": "Your name must not contains special characters such as",
-                "acceptButton": "Accept"
-            },
-            "errorMessages": {
-                "changeUrlName": {
-                    "userNotFound": "User not found",
-                    "urlNameAlreadyExist": "URL name already exists",
-                    "urlNameTooShort": "URL name must be at least 3 characters long",
-                    "urlNameTooLong": "URL name must be less than 36 characters",
-                    "urlNameEmpty": "URL name cannot be empty",
-                    "urlNameContainsSpace": "URL name cannot contain spaces",
-                    "unknownError": "Unknown error occurred",
-                    "internalServerError": "Internal server error"
-                },
-                "changeName": {
-                    "firstNameNotCorrectFormat": "First name is not in the correct format",
-                    "lastNameNotCorrectFormat": "Last name is not in the correct format",
-                    "unknownError": "Unknown error occurred",
-                    "internalServerError": "Internal server error"
-                }
-            }
-        }
-    },
-    "language": {
-        "title": "Language Settings",
-        "yourLanguage": "Your language"
-    },
-    "theme": {
-        "title": "Theme Settings",
-        "selectTheme": "Select theme"
+    "general": {
+      "title": "General Settings",
+      "notifications": "Notifications",
+      "about": "About",
+      "language": "Language",
+      "theme": "Themes"
     }
+  },
+  "editableField": {
+    "saveButton": "Save",
+    "cancelButton": "Cancel"
+  },
+  "account": {
+    "personalInfo": {
+      "title": "Personal Informations",
+      "yourName": "Your Name",
+      "urlName": "URL Name",
+      "nickname": "Nickname",
+      "changeButton": "Change",
+      "noUrlName": "No URL Name",
+      "noNickname": "No Nickname",
+      "urlNamePlaceholder": "Enter your URL name",
+      "nicknamePlaceholder": "Enter your nickname",
+      "changeNameForm": {
+        "title": "Name",
+        "firstName": "First name",
+        "lastName": "Last name",
+        "note": "Note",
+        "noteText1": "You can only change your name every",
+        "day": "days",
+        "noteText2": "Your name must have more than 3 characters and less than 36 characters.",
+        "noteText3": "Your name must not contains special characters such as",
+        "acceptButton": "Accept"
+      },
+      "errorMessages": {
+        "changeUrlName": {
+          "userNotFound": "User not found",
+          "urlNameAlreadyExist": "URL name already exists",
+          "urlNameTooShort": "URL name must be at least 3 characters long",
+          "urlNameTooLong": "URL name must be less than 36 characters",
+          "urlNameEmpty": "URL name cannot be empty",
+          "urlNameContainsSpace": "URL name cannot contain spaces",
+          "unknownError": "Unknown error occurred",
+          "internalServerError": "Internal server error"
+        },
+        "changeName": {
+          "firstNameNotCorrectFormat": "First name is not in the correct format",
+          "lastNameNotCorrectFormat": "Last name is not in the correct format",
+          "unknownError": "Unknown error occurred",
+          "internalServerError": "Internal server error"
+        }
+      }
+    }
+  },
+  "language": {
+    "title": "Language Settings",
+    "yourLanguage": "Your language"
+  },
+  "theme": {
+    "title": "Theme Settings",
+    "selectTheme": "Select theme"
+  }
 }

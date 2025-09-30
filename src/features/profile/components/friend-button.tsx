@@ -1,18 +1,17 @@
 import { friendshipService } from "@/api/user/friendship.api";
 import Button from "@/components/atoms/button";
-import { Size } from "@/components/common/types/size";
+import { ComponentProps } from "@/components/common/types/component-type";
 import Dropdown from "@/components/molecules/dropdown";
 import { useAuth } from "@/contexts/auth/auth-context";
 import useClickOutside from "@/hooks/use-click-outside";
 import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
-type FriendButtonProps = {
+interface FriendButtonProps extends ComponentProps {
   uid?: string;
-  size?: Size;
 };
 
-const FriendButton: React.FC<FriendButtonProps> = ({ uid, size = "md-1" }) => {
+const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   if (!useAuth().isAuthenticated) return null;
@@ -159,19 +158,19 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, size = "md-1" }) => {
   return (
     <div>
       {friendshipStatus === "None" ? (
-        <Button size={size} onClick={handleSentAddFriendRequest}>
+        <Button sz={sz} onClick={handleSentAddFriendRequest}>
           <i className="fa-solid fa-plus"></i>{" "}
           {t("user:profileHeader.addFriendButton")}
         </Button>
       ) : friendshipStatus === "SentByMe" ? (
-        <Button size={size} onClick={handleCancelAddFriendRequest}>
+        <Button sz={sz} onClick={handleCancelAddFriendRequest}>
           <i className="fa-solid fa-xmark"></i>{" "}
           {t("user:profileHeader.cancelRequestButton")}
         </Button>
       ) : friendshipStatus === "SentByThem" ? (
         <div className="sm:relative">
           <Button
-            size={size}
+            sz={sz}
             ref={btnRequestRef}
             onClick={() => {
               setIsShowRequestOptions(!isShowRequestOptions);
@@ -191,7 +190,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, size = "md-1" }) => {
       ) : (
         <div className="sm:relative z-50">
           <Button
-            size={size}
+            sz={sz}
             ref={btnFriendRef}
             onClick={() => {
               setIsShowFriendOptions(!isShowFriendOptions);

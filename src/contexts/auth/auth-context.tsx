@@ -1,197 +1,316 @@
 import { authService } from "@/api/auth/auth.api";
 import LoginDto, { LoginResponse } from "@/api/auth/dto/login.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
-import { removeRefreshToken, removeRefreshTokenFromSession, setRefreshToken, setRefreshTokenToSession } from "@/utils/token";
-import React, { createContext, useContext, useState, useCallback, useEffect, useMemo, useRef } from "react";
+import {
+  getRefreshToken,
+  getRefreshTokenFromSession,
+  removeRefreshToken,
+  removeRefreshTokenFromSession,
+  setRefreshToken,
+  setRefreshTokenToSession,
+} from "@/utils/token";
+import React, { createContext, useContext, useCallback, useEffect, useMemo } from "react";
 import { LANG_LIST, Language, useLanguage } from "../common/language-context";
 import { useLocation } from "react-router-dom";
 import LoginForm from "@/features/auth/components/login-form";
-import RegisterForm from "@/features/user/components/register-form/register-form";
+import RegisterForm from "@/features/auth/components/register-form";
 import { useDialog } from "../common/dialog-context";
 import { Result } from "@/api/common/result";
 import { useLoading } from "../common/loading-context";
-import LoadingPage from "@/pages/loading/loading-page";
+import { useDispatch } from "react-redux";
+import { resetState } from "@/features/notifications/stores/notification-slice";
+import { useQueryClient } from "@tanstack/react-query";
+import { AuthState, initialAuthStatus } from "@/types/auth-state";
+
+type AuthAction =
+  | { type: "INITIALIZE"; payload: Omit<AuthState, "isInitialized"> }
+  | { type: "LOGIN"; payload: Omit<AuthState, "isAuthenticated"> }
+  | { type: "LOGOUT" }
+  | { type: "UPDATE_URL_NAME"; payload: string | undefined };
+
+export const authReducer = (state: AuthState, action: AuthAction): AuthState => {
+  switch (action.type) {
+    case "INITIALIZE":
+      return {
+        ...state,
+        ...action.payload,
+        isInitialized: true
+      };
+    case "LOGIN":
+      return {
+        ...state,
+        isAuthenticated: true,
+        userId: action.payload.userId,
+        urlName: action.payload.urlName,
+        lang: action.payload.lang,
+      };
+    case "LOGOUT":
+      return {
+        ...state,
+        isAuthenticated: false,
+        userId: "",
+        urlName: undefined,
+      };
+    case "UPDATE_URL_NAME":
+      return {
+        ...state,
+        urlName: action.payload,
+      };
+    default:
+      return state;
+  }
+};
 
 // Authentication context
 interface AuthContextType {
-    isAuthenticated: boolean | null;
-    login: (loginDto: LoginDto) => Promise<Result<LoginResponse>>;
-    logout?: () => Promise<void>;
-    userId?: string;
-    urlName?: string;
-    openLoginOverlay: () => void;
-    openRegisterOverlay: () => void
+  isAuthenticated: boolean | null;
+  isInitialized?: boolean;
+  login: (loginDto: LoginDto) => Promise<Result<LoginResponse>>;
+  logout?: () => Promise<void>;
+  userId?: string;
+  urlName?: string;
+  openLoginOverlay: () => void;
+  openRegisterOverlay: () => void;
 }
 
 // Create AuthContext
-const AuthContext = createContext<AuthContextType>({ 
-    isAuthenticated: null, 
-    login: () => Promise.resolve({ success: false, data: undefined }),
-    logout: () => Promise.resolve(),
-    userId: undefined,
-    urlName: undefined,
-    openLoginOverlay: () => {},
-    openRegisterOverlay: () => {}
+const AuthContext = createContext<AuthContextType>({
+  isAuthenticated: null,
+  isInitialized: false,
+  login: () => Promise.resolve({ success: false, data: undefined }),
+  logout: () => Promise.resolve(),
+  userId: undefined,
+  urlName: undefined,
+  openLoginOverlay: () => {},
+  openRegisterOverlay: () => {},
 });
 
 type AuthProviderProps = {
-    children: React.ReactNode;
-}
+  children: React.ReactNode;
+};
 
 // Create AuthProvider
-export const AuthProvider: React.FC<AuthProviderProps> = ({
-    children
-}) => {
-    const [isAuthenticated, setIsAuthenticated] = useState<boolean | null>(null); // Authentication state
-    const [userId, setUserId] = useState<string | undefined>(undefined); // Current user ID
-    const [urlName, setUrlName] = useState<string | undefined>(undefined); // Current user URL name
-    const [isLoading, setIsLoading] = useState<boolean>(true);
+export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+  const [state, dispatch] = React.useReducer(authReducer, initialAuthStatus);
+  const { setLanguage } = useLanguage();
+  const { openDialog, closeDialog } = useDialog();
+  const { increment, decrement } = useLoading();
+  const location = useLocation();
+  const _dispatch = useDispatch();
+  const queryClient = useQueryClient();
 
-    const { setLanguage } = useLanguage(); 
-    const { openDialog, closeDialog } = useDialog();
-    // const { setIsLoading } = useLoading();
-    const location = useLocation();
+  const openLoginOverlay = useCallback(() => {
+    openDialog({
+      content: <LoginForm showLogo={false} />,
+    });
+  }, [openDialog]);
+  const openRegisterOverlay = useCallback(() => {
+    openDialog({
+      content: <RegisterForm showLogo={false} />,
+    });
+  }, [openDialog]);
 
-    const openLoginOverlay = useCallback(() => {
-        openDialog({
-            content: <LoginForm showLogo={false}/>,
-        })
-    }, [openDialog]);
-    const openRegisterOverlay = useCallback(() => {
-        openDialog({    
-            content: <RegisterForm showLogo={false}/>,
-        })
-    }, [openDialog]);
-
-    useEffect(() => {
-        const timer = setTimeout(() => {
-            if (isAuthenticated === false && location.pathname !== "/login" && location.pathname !== "/register") {
-                openLoginOverlay?.();
-            } 
-            else {
-                closeDialog?.();
-            }
-        }, 0); // đợi router settle
-        return () => clearTimeout(timer);
-    }, [isAuthenticated, location.pathname]); // ← Remove function dependencies
-
-    // Function to set language when reload or login
-    const setLang = (langCode: string) => {
-        if (LANG_LIST.includes(langCode as Language)) {
-            setLanguage(langCode as Language);
-        }
-    }
-
-    // Function to login
-    const login = async (loginDto: LoginDto): Promise<Result<LoginResponse>> => {
-        try {
-            const result = await authService.login(loginDto);
-            if (result.success) {
-                setUserId(result.data?.userId);
-                setUrlName(result.data?.urlName);
-                if (localStorage.getItem('isRememberMe') === 'true') {
-                    setRefreshToken(result.data?.refreshToken || '');
-                }
-                else {
-                    setRefreshTokenToSession(result.data?.refreshToken || '');
-                }
-                setIsAuthenticated(true);
-                closeDialog();
-            }
-            return result;
-        }
-        catch (err) {
-            return { success: false, data: undefined };
-        }
-    };
+  useEffect(() => {
+    if (!state.isInitialized) return;
     
-    // Function to logout
-    const logout = async () => {
-        try {    
-            await authService.logout();
-            setUserId(undefined);
-            setUrlName(undefined);
-            setIsAuthenticated(false);
-            removeRefreshToken();
-            removeRefreshTokenFromSession();
+    // Only show login overlay if definitely not authenticated after initialization
+    if (
+      state.isAuthenticated === false &&
+      location.pathname !== "/login" &&
+      location.pathname !== "/register"
+    ) {
+      // Add a small delay to ensure UserOnlyRoute has processed first
+      const timer = setTimeout(() => {
+        openLoginOverlay?.();
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      closeDialog?.();
+    }
+  }, [state.isInitialized, state.isAuthenticated, location.pathname, openLoginOverlay, closeDialog]);
+
+  // Function to set language when reload or login
+  const setLang = (langCode: string) => {
+    if (LANG_LIST.includes(langCode as Language)) {
+      setLanguage(langCode as Language);
+    }
+  };
+
+  // Function to login
+  const _logIn = async (loginDto: LoginDto): Promise<Result<LoginResponse>> => {
+    if (state.isAuthenticated) return { success: false, errorCode: "AlreadyLoggedIn" };
+    try {
+      const result = await authService.login(loginDto);
+      if (result.success) {
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            userId: result.data?.userId || "",
+            urlName: result.data?.urlName || "",
+            lang: result.data?.languageCode || "en",
+          },
+        });
+        if (localStorage.getItem("isRememberMe") === "true") {
+          setRefreshToken(result.data?.refreshToken || "");
+        } else {
+          // For better dev experience, still use localStorage but shorter expiry
+          // In production, you can change this back to sessionStorage
+          setRefreshToken(result.data?.refreshToken || "");
+          // setRefreshTokenToSession(result.data?.refreshToken || "");
         }
-        catch (err) {
-            console.error("Logout failed:", err);
-        }
+        closeDialog();
+      }
+      return result;
+    } catch (err) {
+      return { success: false, data: undefined };
+    }
+  };
+
+  const clearUserData = useCallback(() => {
+    removeRefreshToken();
+    removeRefreshTokenFromSession();
+    // restore react-query state
+    queryClient.clear();
+    _dispatch(resetState());
+  }, [_dispatch, queryClient]);
+
+  // Function to logout
+  const _logOut = async () => {
+    try {
+      increment();
+      if ((await authService.logout()).success) {
+        console.log("User is logged out");
+        dispatch({ type: "LOGOUT" });
+        clearUserData();
+      } else {
+        openDialog({
+          title: "Logout failed",
+          content: "Logout failed. Please try again later.",
+        });
+      }
+    } catch (err) {
+      console.error("Logout failed:", err);
+    } finally {
+      decrement();
+    }
+  };
+
+  const checkAuth = useCallback(async () => {
+    try {
+      const result = await authService.ping();
+      if (!result.success) {
+        _logOut();
+      }
+    } catch (err) {
+      console.error("Check auth failed:", err);
+      _logOut();
+    }
+  }, []);
+
+  const initialize = useCallback(async () => {
+    try {
+      // Check if refresh token exists first
+      const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
+      
+      if (!refreshToken) {
+        // No token found, user is not authenticated
+        dispatch({
+          type: "INITIALIZE",
+          payload: {
+            isAuthenticated: false,
+            userId: "",
+            urlName: undefined,
+            lang: "en",
+          },
+        });
+        return;
+      }
+
+      // Token exists, try to verify with server
+      const result = await userProfileService.GetMe();
+      console.log(result);
+      if (result.success) {
+        dispatch({
+          type: "INITIALIZE",
+          payload: {
+            isAuthenticated: true,
+            userId: result.data?.id || "",
+            urlName: result.data?.urlName,
+            lang: result.data?.languageCode || "en",
+          },
+        });
+        setLang(result.data?.languageCode || "en");
+        console.log("User is authenticated");
+      } else {
+        // API failed but token exists - keep authenticated for dev experience
+        console.warn("GetMe API failed but token exists, keeping authenticated");
+        dispatch({
+          type: "INITIALIZE",
+          payload: {
+            isAuthenticated: true, // Keep authenticated if we have token
+            userId: "",
+            urlName: undefined,
+            lang: "en",
+          },
+        });
+      }
+    } catch (err) {
+      console.error("Check auth failed:", err);
+      // Check if we have token - if yes, keep authenticated
+      const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
+      dispatch({
+        type: "INITIALIZE",
+        payload: {
+          isAuthenticated: !!refreshToken, // Keep auth if token exists
+          userId: "",
+          urlName: undefined,
+          lang: "en",
+        },
+      });
+    } finally {
+      decrement();
+    }
+  }, []);
+
+  useEffect(() => {
+    initialize();
+  }, []);
+
+  useEffect(() => {
+    const handleFocus = () => {
+      checkAuth();
     };
+    window.addEventListener("focus", handleFocus);
+    return () => window.removeEventListener("focus", handleFocus);
+  }, []);
 
-    const checkAuth = useCallback(async () => {
-        // setIsLoading(true);
-        try {
-            const result = await authService.ping();
-            if (!result.success) {
-                setUserId(undefined);
-                setUrlName(undefined);
-                setIsAuthenticated(false);
-            }
-            else {
-                setIsAuthenticated(true);
-            }
-        }
-        catch(err) {
-            console.error("Check auth failed:", err);
-            setIsAuthenticated(false);
-            setUserId(undefined);
-            setUrlName(undefined);
-        }
-        // Intentionally do not touch global loading state here to avoid
-        // rapid show/hide (flicker) when lightweight background checks run.
-    }, []);
-
-    useEffect(() => {
-        const fetchUserOnMount = async () => {
-            try {
-                const result = await userProfileService.GetMe();
-                if (result.success) {
-                    setUserId(result.data?.id);
-                    setUrlName(result.data?.urlName);
-                    setLang(result.data?.languageCode || "en");
-                    setIsAuthenticated(true);
-                    console.log("User is authenticated");
-                } else {
-                    setUserId(undefined);
-                    setUrlName(undefined);
-                    setIsAuthenticated(false);
-                }
-            } catch (err) {
-                console.error("Check auth failed:", err);
-                setIsAuthenticated(false);
-                setUserId(undefined);
-                setUrlName(undefined);
-            }
-            finally {
-                setIsLoading(false);
-            }
-        };
-        fetchUserOnMount();
-    }, []);
-
-    useEffect(() => {
-        const handleFocus = () => {
-            checkAuth();
-        };
-        window.addEventListener("focus", handleFocus);
-        return () => window.removeEventListener("focus", handleFocus);
-    }, []);
-
-    return ( 
-        <AuthContext.Provider value={useMemo(() => ({ 
-            isAuthenticated, 
-            login,
-            logout,
-            userId,
-            urlName,
-            openLoginOverlay,
-            openRegisterOverlay
-        }), [isAuthenticated, userId, urlName, login, logout, openLoginOverlay, openRegisterOverlay])}>
-            {isLoading ? <LoadingPage /> : children}
-        </AuthContext.Provider> 
-    )
-}
+  return (
+    <AuthContext.Provider
+      value={useMemo(
+        () => ({
+          isAuthenticated: state.isAuthenticated,
+          isInitialized: state.isInitialized,
+          userId: state.userId,
+          urlName: state.urlName,
+          login: _logIn,
+          logout: _logOut,
+          openLoginOverlay,
+          openRegisterOverlay,
+        }),
+        [
+          state.isAuthenticated,
+          state.userId,
+          state.urlName,
+          _logIn,
+          _logOut,
+          openLoginOverlay,
+          openRegisterOverlay,
+        ],
+      )}
+    >
+      {state.isInitialized && children}
+    </AuthContext.Provider>
+  );
+};
 
 export const useAuth = () => useContext(AuthContext);

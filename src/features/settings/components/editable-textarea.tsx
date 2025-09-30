@@ -50,7 +50,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   return (
     <div className="flex justify-between items-center w-full">
       {title && (
-        <Text size="lg-1" className="font-light m-2">
+        <Text sz="lg-1" className="font-light m-2">
           {title}
         </Text>
       )}
@@ -67,13 +67,13 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
               onChange={(e) => setInputValue(e.target.value)}
             />
             {isError && (
-              <Text size="sm-1" className="text-red-500 ml-2 h-[5px]">
+              <Text sz="sm-1" className="text-red-500 ml-2 h-[5px]">
                 {errorMessage}
               </Text>
             )}
           </div>
         ) : (
-          <Text size="lg-1" className={` ${valueClassName} select-auto`} wrap="whitespace-pre-wrap">
+          <Text sz="lg-1" className={` ${valueClassName} select-auto`} wrap="whitespace-pre-wrap">
             {value ?? noDataValue}
           </Text>
         )}
@@ -83,7 +83,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
               <div className="animate-fade-in gap-1 flex w-full">
                 <Button
                   disabled={value === inputValue}
-                  size="sm-1"
+                  sz="sm-1"
                   variant="primary"
                   onClick={() => {
                     onSaveClick?.(inputValue);
@@ -94,7 +94,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
                   {t("settings:editableField.saveButton")}
                 </Button>
                 <Button
-                  size="sm-1"
+                  sz="sm-1"
                   variant="secondary"
                   onClick={() => {
                     onCancelClick?.();
@@ -106,7 +106,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
               </div>
             ) : (
               <Button
-                size="sm-1"
+                sz="sm-1"
                 variant="secondary"
                 onClick={() => {
                   onChangeClick?.();

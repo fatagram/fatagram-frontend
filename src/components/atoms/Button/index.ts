@@ -1,2 +1,2 @@
-export { default } from "./Button";
-export {}
+export { default } from "./button";
+export {};

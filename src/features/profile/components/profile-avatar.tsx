@@ -23,16 +23,14 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
       {isLoading ? (
         <AvatarSkeletonLoading
           alt="Loading"
-          size="large"
+          sz="lg-2"
           className="border-[5px] border-[var(--second-bg-color)]"
         />
       ) : (
         <Avatar
           src={avatar}
-          onChange={handleSelectAvatar}
           alt="Avatar"
-          size="large_2"
-          isCanEdit={isOwner}
+          sz="lg-2"
           className="border-[5px] border-[var(--second-bg-color)] flex-shrink-0"
         />
       )}

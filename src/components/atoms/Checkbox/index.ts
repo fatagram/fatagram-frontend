@@ -1,2 +1,2 @@
-export { default } from "./Checkbox";
-export {}
+export { default } from "./checkbox";
+export {};

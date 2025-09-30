@@ -1,3 +1,3 @@
 interface ChangeLanguageDto {
-    LanguageCode: string;
+  LanguageCode: string;
 }

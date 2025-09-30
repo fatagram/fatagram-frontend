@@ -17,7 +17,7 @@ interface StackProps extends ComponentProps {
 const buildClasses = (props: Partial<StackProps>, prefix: "" | "sm:" | "md:" | "lg:" = "") => {
   const classes: string[] = [];
 
-  if (props.space !== undefined) classes.push(`${prefix}gap-${props.space}`);
+  if (props.space) classes.push(`${prefix}gap-${props.space}`);
   if (props.direction) {
     classes.push(
       props.direction === "up"
@@ -60,7 +60,7 @@ const Stack = forwardRef<HTMLElement, StackProps>(
       align = "center",
       justify = "start",
       wrap = "nowrap",
-      className,
+      className = "",
       smProps,
       mdProps,
       lgProps,
@@ -71,13 +71,14 @@ const Stack = forwardRef<HTMLElement, StackProps>(
   ) => {
     const baseClass = buildClasses({ space, direction, overflow, align, wrap, justify, className });
     const smClass = buildClasses(smProps || {}, "sm:");
-    console.log("smClass", smClass);
     const mdClass = buildClasses(mdProps || {}, "md:");
     const lgClass = buildClasses(lgProps || {}, "lg:");
 
+    const _className = `${baseClass} ${smClass} ${mdClass} ${lgClass}`;
+
     return (
       <Component
-        className={`flex ${baseClass} ${smClass} ${mdClass} ${lgClass}`}
+        className={`flex ${_className}`}
         {...props}
         ref={ref}
       >

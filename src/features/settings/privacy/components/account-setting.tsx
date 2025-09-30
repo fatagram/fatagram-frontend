@@ -102,7 +102,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
     <div className={`${className}`}>
       <SettingCard title={t("settings:account.personalInfo.title")} className="mb-0 gap-5">
         {isLoading ? (
-          <TextSkeletonLoading size="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
+          <TextSkeletonLoading sz="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
         ) : (
           <EditableField
             title={t("settings:account.personalInfo.yourName")}
@@ -117,7 +117,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
           />
         )}
         {isLoading ? (
-          <TextSkeletonLoading size="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
+          <TextSkeletonLoading sz="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
         ) : (
           <EditableField
             title={t("settings:account.personalInfo.urlName")}
@@ -146,7 +146,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
           />
         )}
         {isLoading ? (
-          <TextSkeletonLoading size="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
+          <TextSkeletonLoading sz="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
         ) : (
           <EditableField
             title={t("settings:account.personalInfo.nickname")}

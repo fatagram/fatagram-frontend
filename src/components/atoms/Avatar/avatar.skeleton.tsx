@@ -1,61 +1,63 @@
+import { ComponentProps } from "@/components/common/types/component-type";
 import React from "react";
 
 const sizeClasses = {
-    // Mini sizes
-    mini_1: "w-[16px] h-[16px]",
-    mini_2: "w-[24px] h-[24px]",
-    mini_3: "w-[32px] h-[32px]",
-    mini_4: "w-[40px] h-[40px]",
+  // Mini sizes
+  "xs": "w-[24px]",
 
-    // Small sizes
-    small_1: "w-[48px] h-[48px]",
-    small_2: "w-[56px] h-[56px]",
-    small_3: "w-[64px] h-[64px]",
-    small: "w-[80px] h-[80px]",
+  // Small sizes
+  "sm-1": "w-[48px]",
+  "sm-2": "w-[56px]",
+  "sm-3": "w-[64px]",
 
-    // Medium sizes
-    medium_1: "w-[96px] h-[96px]",
-    medium_2: "w-[112px] h-[112px]",
-    medium: "w-[128px] h-[128px]",
+  // Medium sizes
+  "md-1": "w-[96px]",
+  "md-2": "w-[112px] ",
+  "md-3": "w-[128px]",
 
-    // Large sizes
-    large_1: "w-[160px] h-[160px]",
-    large_2: "w-[192px] h-[192px]",
-    large: "w-[224px] h-[224px]",
+  // Large sizes
+  "lg-1": "w-[160px]",
+  "lg-2": "w-[192px]",
+  "lg-3": "w-[224px]",
 
-    // Extra Large
-    xlarge_1: "w-[256px] h-[256px]",
-    xlarge_2: "w-[288px] h-[288px]",
-    xlarge: "w-[320px] h-[320px]",
+  // Extra Large
+  "xl-1": "w-[256px]",
+  "xl-2": "w-[288px]",
+  "xl-3": "w-[320px]",
 } as const;
 
+export const shapeClasses = {
+  square: "rounded-none",
+  rounded: "rounded-2xl",
+  circle: "rounded-full",
+} as const;
 
-// typeof is a type operator that returns the type of a value or variable
-// keyof is a type operator that returns the type of the keys of an object
-// The Size type is a union of the keys of the sizeClasses object
-type Size = keyof typeof sizeClasses;
+type Shape = keyof typeof shapeClasses;
 
-interface AvatarSkeletonLoadingProps {
-    alt: string;
-    size?: Size;
-    className?: string;
+interface AvatarSkeletonLoadingProps extends ComponentProps {
+  alt: string;
+  shape?: Shape;
+  className?: string;
 }
-
 
 const AvatarSkeletonLoading: React.FC<AvatarSkeletonLoadingProps> = ({
-    size='medium',
-    className
+  sz = "md-1",
+  shape = "circle",
+  className,
 }) => {
-    const sizeClass = sizeClasses[size];
+  const sizeClass = sizeClasses[sz];
+  const shapeClass = shapeClasses[shape];
 
-    return (
-        <div className={`relative ${sizeClass} rounded-full object-cover select-none ${className} 
-            overflow-hidden`}>
-            <div className="absolute inset-0 bg-[var(--main-bg-color)] rounded-full overflow-hidden">
-                <div className="animate-pulse bg-[var(--fourth-bg-color)] w-full h-full rounded-full"></div>
-            </div>
-        </div>
-    )
-}
+  return (
+    <div
+      className={`relative aspect-square ${sizeClass} ${shapeClass} object-cover select-none ${className} 
+            overflow-hidden`}
+    >
+      <div className="absolute inset-0 bg-[var(--main-bg-color)] rounded-full overflow-hidden">
+        <div className="animate-pulse bg-[var(--fourth-bg-color)] w-full h-full rounded-full"></div>
+      </div>
+    </div>
+  );
+};
 
 export default AvatarSkeletonLoading;

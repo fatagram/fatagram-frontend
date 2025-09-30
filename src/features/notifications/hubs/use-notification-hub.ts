@@ -1,36 +1,48 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { HubConnection } from "@microsoft/signalr";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createSignalRConnection } from "./notification-hub-client";
+import { useAuth } from "@/contexts/auth/auth-context";
+import { on } from "events";
 
 export function useNotificationHub(onReceiveNotification: (data: NotificationDto) => void) {
-    const [connection, setConnection] = useState<HubConnection | null>(null);
-    useEffect(() => {
-        const conn = createSignalRConnection();
+  const connectionRef = useRef<HubConnection | null>(null);
+  const { isAuthenticated } = useAuth();
 
-        conn.start()
-            .then(() => {
-                setConnection(conn);
-            })
-            .catch((err) => console.error("Error while starting SignalR connection: ", err));
-        
-        return () => {
-            conn.stop();
-            setConnection(null);
-        }
-    }, []);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let isMounted = true;
 
-    useEffect(() => {
-        if (!connection) return;
+    const startConnection = async () => {
+      const conn = createSignalRConnection();
+      connectionRef.current = conn;
 
-        connection.on("ReceiveNotification", (data: NotificationDto) => {
-            onReceiveNotification(data);
-        });
-
-        return () => {
-            if (connection) {
-                connection.off("ReceiveNotification");
+      const tryConnect = async (retry: number = 0) => {
+        try {
+          await conn.start();
+          conn.on("ReceiveNotification", (data: NotificationDto) => {
+            if (isMounted) {
+              onReceiveNotification(data);
             }
+          });
+        } catch (err) {
+          console.error("SignalR connection error: ", err);
+          if (retry < 5) {
+            setTimeout(() => tryConnect(retry + 1), 500);
+          }
         }
-    }, [connection, onReceiveNotification]);
+      };
+      tryConnect();
+    };
+
+    startConnection();
+
+    return () => {
+      isMounted = false;
+      if (connectionRef.current) {
+        connectionRef.current.stop();
+        connectionRef.current = null;
+      }
+    };
+  }, [isAuthenticated]);
 }

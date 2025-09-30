@@ -1,2 +1,2 @@
-export { default } from "./Textbox";
-export { default as PasswordBox } from "./PasswordBox";
+export { default } from "./textbox";
+export { default as PasswordBox } from "./passwordbox";

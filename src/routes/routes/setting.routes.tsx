@@ -1,9 +1,9 @@
-import RouteType from "@/routes/interface/RouteType";
-import SettingPage from "@/pages/settings/SettingPage";
-import AccountSettingPage from "@/pages/settings/sub_pages/privacy/AccountSettingPage";
-import ThemeSettingPage from "@/pages/settings/sub_pages/general/ThemeSettingPage";
-import ChangeNameForm from "@/features/settings/components/privacy/ChangeNameForm";
-import LanguageSettingPage from "@/pages/settings/sub_pages/general/LanguageSettingPage";
+import RouteType from "@/routes/interface/route-type";
+import SettingPage from "@/pages/settings/setting-page";
+import AccountSettingPage from "@/features/settings/privacy/account-setting-page";
+import ThemeSettingPage from "@/features/settings/general/theme-setting-page";
+import ChangeNameForm from "@/features/settings/privacy/components/change-name-form";
+import LanguageSettingPage from "@/features/settings/general/language-setting-page";
 
 export const settingRoutes : RouteType = {
     path: "/settings",

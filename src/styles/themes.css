@@ -1,28 +1,40 @@
 :root {
-    --font-size: 16px;
-    --border-radius: 8px;
-    
-    --main-bg-color: rgb(255, 255, 255);
-    --second-bg-color: rgb(249, 249, 249);
-    --third-bg-color: rgb(236, 250, 245);
-    --fourth-bg-color: rgb(240, 240, 240);
+  --font-size: 16px;
+  --border-radius: 8px;
 
-        /* Single colors */
-    --main-single-color: 43, 212, 139;
-    --second-single-color: 44, 167, 114;
-    --third-single-color: 0, 56, 32;
+  --main-bg-color: rgb(255, 255, 255);
+  --second-bg-color: rgb(249, 249, 249);
+  --third-bg-color: rgb(236, 250, 245);
+  --fourth-bg-color: rgb(240, 240, 240);
 
-    --text-color: rgb(46, 46, 46);
+  /* Single colors */
+  --main-single-color: 43, 212, 139;
+  --second-single-color: 44, 167, 114;
+  --third-single-color: 0, 56, 32;
 
-    --btn-color: rgb(221, 221, 221);
-    --btn-hover-color: rgb(234, 234, 234);
+  --text-color: rgb(46, 46, 46);
 
-    --main-gradient-color: repeating-linear-gradient(45deg, 
-    #8dfeda 0%, #3dba84 20%, #2aacb0 40%, 
-    #36bcbf 60%, #47c4b0 80%, #8fffd0 100%);
+  --btn-color: rgb(221, 221, 221);
+  --btn-hover-color: rgb(234, 234, 234);
 
-    --second-gradient-color: repeating-linear-gradient(45deg, 
-    #8de8f0 0%, #3da8ba 20%, #2a9eac 40%, 
-    #36b0bc 60%, #47b5c4 80%, #8fe8ff 100%);
-    --main-wrong-gradient-color: rgb(255, 75, 75);
+  --main-gradient-color: repeating-linear-gradient(
+    45deg,
+    #8dfeda 0%,
+    #3dba84 20%,
+    #2aacb0 40%,
+    #36bcbf 60%,
+    #47c4b0 80%,
+    #8fffd0 100%
+  );
+
+  --second-gradient-color: repeating-linear-gradient(
+    45deg,
+    #8de8f0 0%,
+    #3da8ba 20%,
+    #2a9eac 40%,
+    #36b0bc 60%,
+    #47b5c4 80%,
+    #8fe8ff 100%
+  );
+  --main-wrong-gradient-color: rgb(255, 75, 75);
 }

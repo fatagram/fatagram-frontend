@@ -36,7 +36,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
       <ProfileAboutSection title="Liên hệ" className="mb-4 w-full ">
         {emails.length > 0 && (
           <div className="flex items-start w-full gap-4 mb-6 mt-4">
-            <Text size="lg-3" className="opacity-50">
+            <Text sz="lg-3" className="opacity-50">
               <i className="fa-solid fa-envelope"></i>
             </Text>
             <div>
@@ -45,7 +45,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
                   <Text key={index} weight="bold">
                     {email}
                   </Text>
-                  <Text size="sm-3" className="opacity-50">
+                  <Text sz="sm-3" className="opacity-50">
                     Email
                   </Text>
                 </div>
@@ -65,7 +65,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
         )}
         {phoneNumbers.length > 0 && (
           <div className="flex items-start gap-4">
-            <Text size="lg-3" className="opacity-50">
+            <Text sz="lg-3" className="opacity-50">
               <i className="fa-solid fa-phone"></i>
             </Text>
             <div>
@@ -74,7 +74,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
                   <Text key={index} weight="bold">
                     {phone}
                   </Text>
-                  <Text size="sm-3" className="opacity-50">
+                  <Text sz="sm-3" className="opacity-50">
                     Di động
                   </Text>
                 </div>

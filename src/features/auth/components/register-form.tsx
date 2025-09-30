@@ -227,7 +227,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       {isShowLogo && <Logo />}
 
       <Text
-        size="xl-2"
+        sz="xl-2"
         weight="extrabold"
         className="uppercase sm:text-[45px] text-[45px] text-single-third select-none text-center"
       >
@@ -247,7 +247,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                 isWrong={firstNameError ? true : false}
               />
               <Text
-                size="sm-1"
+                sz="sm-1"
                 color="danger"
                 className={`${firstNameError ? "" : "hidden"} px-[5px]`}
               >
@@ -264,7 +264,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
                 isWrong={lastNameError ? true : false}
               />
               <Text
-                size="sm-1"
+                sz="sm-1"
                 color="danger"
                 className={`${lastNameError ? "" : "hidden"} px-[5px]`}
               >
@@ -282,7 +282,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               onChange={(e) => updateFormData("email", e.target.value)}
               isWrong={emailError ? true : false}
             />
-            <Text size="sm-1" color="danger" className={`${emailError ? "" : "hidden"} px-[5px] `}>
+            <Text sz="sm-1" color="danger" className={`${emailError ? "" : "hidden"} px-[5px] `}>
               {emailError}
             </Text>
           </div>
@@ -295,18 +295,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               onChange={(e) => updateFormData("phone", e.target.value)}
               isWrong={phoneError ? true : false}
             />
-            <Text size="sm-1" color="danger" className={`${phoneError ? "" : "hidden"} px-[5px] `}>
+            <Text sz="sm-1" color="danger" className={`${phoneError ? "" : "hidden"} px-[5px] `}>
               {phoneError}
             </Text>
           </div>
 
-          <Text size="sm-1" color="danger" className={`${unknownError ? "" : "hidden"} px-[5px] `}>
+          <Text sz="sm-1" color="danger" className={`${unknownError ? "" : "hidden"} px-[5px] `}>
             {unknownError}
           </Text>
           <Button
             ref={btnNextStrepRef}
             type="button"
-            size="md-1"
+            sz="md-1"
             className={`w-full`}
             onClick={handleNextStep}
           >
@@ -326,7 +326,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               isWrong={usernameError ? true : false}
             />
             <Text
-              size="sm-1"
+              sz="sm-1"
               color="danger"
               className={`${usernameError ? "" : "hidden"} px-[5px] `}
             >
@@ -343,7 +343,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               isWrong={passwordError ? true : false}
             />
             <Text
-              size="sm-1"
+              sz="sm-1"
               color="danger"
               className={`${passwordError ? "" : "hidden"} px-[5px] `}
             >
@@ -360,7 +360,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               isWrong={confirmPasswordError ? true : false}
             />
             <Text
-              size="sm-1"
+              sz="sm-1"
               color="danger"
               className={`${confirmPasswordError ? "" : "hidden"} px-[5px]`}
             >
@@ -388,7 +388,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           <Button
             ref={btnRegisterRef}
             type="button"
-            size="md-1"
+            sz="md-1"
             className={`w-full`}
             onClick={handleRegister}
           >
@@ -412,7 +412,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
       {isShowClose && (
         <Text
-          size="lg-1"
+          sz="lg-1"
           className={`absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer`}
           onClick={onClose}
         >

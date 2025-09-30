@@ -1,4 +1,4 @@
-import NavbarItem from "@/components/organisms/navigation/navbar/NavbarItem";
+import NavbarItem from "@/components/organisms/navigation/navbar/navbar-item";
 import Button from "@/components/atoms/button";
 import Text from "@/components/atoms/text";
 import Dropdown from "@/components/molecules/dropdown";
@@ -9,6 +9,7 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { ProfilePageState } from "@/types/profile-page-state";
 import { useProfilePage } from "../context/profile-page-context";
+import { Stack } from "@/components/atoms";
 
 interface ProfileNavbarProps {
   className?: string;
@@ -82,7 +83,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
   }, [location.pathname, hiddenItems]);
 
   return (
-    <div className={`relative flex ${className}`} ref={containerRef}>
+    <Stack direction="right" className={`${className}`} ref={containerRef}>
       <div className="absolute invisible">
         {navbarItems.map((item, index) => {
           if (item.isOwnerOnly && !isOwner) return null;
@@ -102,15 +103,16 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
           );
         })}
       </div>
-      {visibleItems.map((item, index) => (
-        <div key={index}>
+      <Stack direction="right">
+        {visibleItems.map((item) => (
           <NavbarItem
+            key={item.name}
             path={item.href ?? ""}
             children={item.name}
             onClick={() => setShowDropdown(false)}
           />
-        </div>
-      ))}
+        ))}
+      </Stack>
       {hiddenItems.length > 0 && (
         <Button
           variant="secondary"
@@ -147,7 +149,11 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
             content: (
               <div
                 className={`flex justify-between items-center
-                                    ${location.pathname === item.href ? "text-single-main" : "text-[var(--text-color)]"}
+                                    ${
+                                      location.pathname === item.href
+                                        ? "text-single-main"
+                                        : "text-[var(--text-color)]"
+                                    }
                                 `}
               >
                 {item.name}
@@ -161,7 +167,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
           }))}
         />
       )}
-    </div>
+    </Stack>
   );
 };
 

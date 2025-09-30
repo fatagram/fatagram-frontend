@@ -128,7 +128,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
             ))}
           </>
         ) : (
-          <Text size="md-2">{t("friends:friendRequest.noRequests")}</Text>
+          <Text sz="md-2">{t("friends:friendRequest.noRequests")}</Text>
         )}
       </div>
 

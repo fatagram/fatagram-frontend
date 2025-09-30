@@ -69,7 +69,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   return (
     <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 lg:pt-0 pt-10">
       <div className="animate-fade-in  relative flex flex-col justify-center bg-[var(--second-bg-color)] rounded-2xl shadow-lg px-10 py-8">
-        <Text size="lg-3" className="pb-6 px-2 text-gradient-main !font-bold">
+        <Text sz="lg-3" className="pb-6 px-2 text-gradient-main !font-bold">
           {t("settings:account.personalInfo.changeNameForm.title")}
         </Text>
         {isLoading ? (
@@ -78,7 +78,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
           <div>
             <div className="animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-[var(--main-bg-color)] p-5">
               <div className="flex flex-col">
-                <Text size="md-2" className="ml-2 mb-1">
+                <Text sz="md-2" className="ml-2 mb-1">
                   {t("settings:account.personalInfo.changeNameForm.firstName")}
                 </Text>
                 <Textbox
@@ -90,7 +90,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                 />
               </div>
               <div className="flex flex-col">
-                <Text size="md-2" className="ml-2 mb-1">
+                <Text sz="md-2" className="ml-2 mb-1">
                   {t("settings:account.personalInfo.changeNameForm.lastName")}
                 </Text>
                 <Textbox
@@ -102,13 +102,13 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                 />
               </div>
             </div>
-            <Text size="md-1" color="danger" className="mt-2 mx-4">
+            <Text sz="md-1" color="danger" className="mt-2 mx-4">
               {errorMessage}
             </Text>
           </div>
         )}
         <Text className="mx-8 mt-8 mb-4 h-[0.5px] bg-single-third"></Text>
-        <Text size="sm-2" className="font-light px-2 mb-4 flex flex-col gap-1">
+        <Text sz="sm-2" className="font-light px-2 mb-4 flex flex-col gap-1">
           <Text weight="bold" className="text-single-second">
             * {t("settings:account.personalInfo.changeNameForm.note")}:
           </Text>
@@ -124,19 +124,19 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
           </Text>
           <Text className="opacity-80">
             - {t("settings:account.personalInfo.changeNameForm.noteText3")} &nbsp;
-            <Text size="md-1">!, #, $, @, ...</Text>.
+            <Text sz="md-1">!, #, $, @, ...</Text>.
           </Text>
         </Text>
         <Button
           disabled={firstName === oldFirstName && lastName === oldLastName}
-          size="md-1"
+          sz="md-1"
           className="mt-2 !text-[20px]"
           onClick={handleSubmit}
         >
           {t("settings:account.personalInfo.changeNameForm.acceptButton")}
         </Button>
         <Text
-          size="lg-2"
+          sz="lg-2"
           className={`absolute top-5 right-8 hover:text-single-main cursor-pointer`}
           onClick={handleClose}
         >

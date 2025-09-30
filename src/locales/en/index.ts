@@ -8,14 +8,14 @@ import times from "./times.json";
 import notifications from "./notifications.json";
 
 const en = {
-    auth,
-    common,
-    home,
-    settings,
-    user,
-    friends,
-    times,
-    notifications
+  auth,
+  common,
+  home,
+  settings,
+  user,
+  friends,
+  times,
+  notifications,
 };
 
 export default en;

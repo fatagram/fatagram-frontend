@@ -1,17 +1,15 @@
-import { namespaces } from './locales/index';
+import { namespaces } from "./locales/index";
 import i18next from "i18next";
 import { initReactI18next } from "react-i18next";
 import { defaultNS, resources } from "@/locales";
 
-i18next
-  .use(initReactI18next)
-  .init({
-    resources, 
-    lng: localStorage.getItem("i18nextLng") || "en",
-    fallbackLng: "en",
-    interpolation: {
-      escapeValue: false,
-    },
-    ns: namespaces,  
-    defaultNS: defaultNS,  
-  });
+i18next.use(initReactI18next).init({
+  resources,
+  lng: localStorage.getItem("i18nextLng") || "en",
+  fallbackLng: "en",
+  interpolation: {
+    escapeValue: false,
+  },
+  ns: namespaces,
+  defaultNS: defaultNS,
+});

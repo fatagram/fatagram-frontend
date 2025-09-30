@@ -11,6 +11,7 @@ import Text, { TextSkeletonLoading } from "@/components/atoms/text";
 import Button from "@/components/atoms/button";
 import { ProfilePageState } from "@/types/profile-page-state";
 import { useProfilePage } from "../context/profile-page-context";
+import { Stack } from "@/components/atoms";
 
 export type ProfileHeaderProps = {
   className?: string;
@@ -115,7 +116,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   };
 
   return (
-    <div className={`relative flex flex-col w-full items-center ${className} `}>
+    <Stack direction="down" align="center" className={`relative w-full ${className} `}>
       <div className="relative w-full lg:mx-0 mx-2 ">
         <ProfileBackground
           isLoading={isLoading}
@@ -124,8 +125,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         />
       </div>
 
-      <div
-        className={`-mt-[80px] flex layout w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end
+      <Stack
+        direction="down"
+        className={`-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end
                             mb-5 lg:gap-0 gap-3`}
       >
         <ProfileAvatar
@@ -134,40 +136,48 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
           handleSelectAvatar={handleSelectAvatar}
           ref={avtRef}
         />
-        <div className="flex flex-col gap-2 flex-1 mb-3 ml-4">
+        <Stack space={2} align="start" className="flex-1 mb-3 ml-4">
           {isLoading ? (
-            <TextSkeletonLoading
-              size="md-1"
-              className="lg:self-start self-center mb-2 lg:ml-5 w-[200px] mt-2 lg:mt-0"
-            />
+            <TextSkeletonLoading sz="md-1" className="lg:self-start self-center w-[200px]" />
           ) : (
-            <Text size="xl-1" weight="bold" className="lg:text-left text-center break-words">
+            <Text sz="xl-1" weight="bold" className="lg:text-left text-center break-words">
               {fullName}
               {nickname && (
-                <Text size="lg-3" weight="light" className="lg:text-left text-center lg:ml-2">
+                <Text sz="lg-3" weight="light" className="lg:text-left text-center lg:ml-2">
                   ({nickname})
                 </Text>
               )}
             </Text>
           )}
 
-          <div className="flex lg:flex-row flex-col items-center w-full">
+          <Stack
+            direction="down"
+            align="center"
+            className="w-full"
+            lgProps={{
+              direction: "right",
+            }}
+          >
             {!isLoadingNumOfFriends ? (
-              <Text size="md-2" weight="semibold" className="text-[var(--text-color)] opacity-70">
+              <Text sz="md-2" weight="semibold" className="text-[var(--text-color)] opacity-70">
                 {numberOfFriends > 0
                   ? numberOfFriends + " " + t("user:profileHeader.friendsCount")
                   : t("user:profileHeader.noFriendsCount")}
               </Text>
             ) : (
-              <TextSkeletonLoading size="md-1" className="w-[150px] lg:ml-5 mb-1" />
+              <TextSkeletonLoading sz="md-1" className="w-[150px] lg:ml-5 mb-1" />
             )}
             {!isLoading ? (
-              <div className="relative flex flex-wrap lg:flex-none gap-2 lg:mt-0 mt-2 lg:ml-auto">
+              <Stack wrap="wrap" direction="right" space={2} className="mt-2"
+                lgProps={{
+                  className: "ml-auto mt-0"
+                }}
+              >
                 {isAuthenticated && (
                   <>
-                    {isOwner ? (  
+                    {isOwner ? (
                       <Button
-                        size="sm-1"
+                        sz="sm-1"
                         onClick={() => {
                           navigate(`/settings`);
                         }}
@@ -176,27 +186,27 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                         {t("user:profileHeader.editButton")}
                       </Button>
                     ) : (
-                      <AddFriendButton size="sm-1" uid={targetId} />
+                      <AddFriendButton sz="sm-1" uid={targetId} />
                     )}
                   </>
                 )}
 
                 {!isOwner && isAuthenticated && (
-                  <Button size="sm-1" variant="secondary">
+                  <Button sz="sm-1" variant="secondary">
                     <i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}
                   </Button>
                 )}
-                <Button size="sm-1" variant="secondary">
+                <Button sz="sm-1" variant="secondary">
                   <i className="fa-solid fa-circle-info"></i>
                 </Button>
-              </div>
+              </Stack>
             ) : (
-              <TextSkeletonLoading size="md-1" className="w-[250px] lg:ml-auto mb-1" />
+              <TextSkeletonLoading sz="md-1" className="w-[250px] lg:ml-auto mb-1" />
             )}
-          </div>
-        </div>
-      </div>
-    </div>
+          </Stack>
+        </Stack>
+      </Stack>
+    </Stack>
   );
 };
 

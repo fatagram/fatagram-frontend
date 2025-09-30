@@ -21,7 +21,7 @@ const SelectBoxSetting: React.FC<SelectBoxSettingProps> = ({
 }) => {
   return (
     <div className={`flex justify-between items-center w-full ${className}`}>
-      <Text size="lg-1" className="m-2">
+      <Text sz="lg-1" className="m-2">
         {title}
       </Text>
       {selectBox ? (

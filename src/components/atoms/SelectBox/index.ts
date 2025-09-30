@@ -1,1 +1,1 @@
-export { default } from "./SelectBox";
+export { default } from "./selectbox";

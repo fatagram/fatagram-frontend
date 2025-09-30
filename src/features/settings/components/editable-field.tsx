@@ -48,7 +48,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
 
   return (
     <div className="flex justify-between items-center w-full">
-      <Text size="lg-1" className="font-light m-2">
+      <Text sz="lg-1" className="font-light m-2">
         {title}
       </Text>
       <div className="flex sm:items-center items-end gap-4 sm:flex-row flex-col">
@@ -62,13 +62,13 @@ const EditableField: React.FC<EditableFieldProps> = ({
               onChange={(e) => setInputValue(e.target.value)}
             />
             {isError && (
-              <Text size="sm-1" className="text-red-500 ml-2 h-[5px]">
+              <Text sz="sm-1" className="text-red-500 ml-2 h-[5px]">
                 {errorMessage}
               </Text>
             )}
           </div>
         ) : (
-          <Text size="lg-1" className={`${valueClassName}`}>
+          <Text sz="lg-1" className={`${valueClassName}`}>
             {value ?? noDataValue}
           </Text>
         )}
@@ -78,7 +78,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
               <div className="animate-fade-in gap-1 flex">
                 <Button
                   disabled={value === inputValue}
-                  size="sm-1"
+                  sz="sm-1"
                   variant="primary"
                   onClick={() => {
                     onSaveClick?.(inputValue);
@@ -88,7 +88,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
                   {t("settings:editableField.saveButton")}
                 </Button>
                 <Button
-                  size="sm-1"
+                  sz="sm-1"
                   variant="secondary"
                   onClick={() => {
                     onCancelClick?.();
@@ -99,7 +99,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
               </div>
             ) : (
               <Button
-                size="sm-1"
+                sz="sm-1"
                 variant="secondary"
                 onClick={() => {
                   onChangeClick?.();

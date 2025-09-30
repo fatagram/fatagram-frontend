@@ -3,32 +3,24 @@ import "./App.css";
 import "./styles/global.css";
 import { BrowserRouter } from "react-router-dom";
 import AppRoutes from "./routes";
-import { LanguageProvider } from "./contexts/LanguageContext";
-import GlobalDialog from "./components/organisms/Dialog/GlobalDialog";
-import { ThemeProvider } from "./contexts/ThemeContext";
-import { AuthProvider } from "./contexts/AuthContext";
-import { ToastProvider } from "./contexts/ToastContext";
-import { DialogProvider } from "./contexts/DialogContext";
-import NotificationListener from "./features/notifications/components/NotificationListener";
-
+import GlobalDialog from "./components/organisms/dialog/global-dialog";
+import NotificationListener from "./features/notifications/components/notification-listener";
+import ContextTree from "./context-tree";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const App: React.FC = () => {
+  const queryClient = new QueryClient();
+
   return (
-    <BrowserRouter>
-      <DialogProvider>
-        <ThemeProvider>
-          <LanguageProvider>
-            <AuthProvider>
-              <ToastProvider>
-                <AppRoutes />
-                <GlobalDialog />
-                <NotificationListener />
-              </ToastProvider>
-            </AuthProvider>
-          </LanguageProvider>
-        </ThemeProvider>
-      </DialogProvider>
-    </BrowserRouter>
+    <QueryClientProvider client={queryClient}>
+      <BrowserRouter>
+        <ContextTree>
+          <AppRoutes />
+          <GlobalDialog />
+          <NotificationListener />
+        </ContextTree>
+      </BrowserRouter>
+    </QueryClientProvider>
   );
 };
 

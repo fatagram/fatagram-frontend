@@ -1,12 +1,11 @@
 {
-    "notifications": {
-        "title": "Thông báo",
-        "no-notifications": "Không có thông báo nào.",
-        "has-a-friend-request": "đã gửi cho bạn lời mời kết bạn.",
-        "accepted-friend-request": "đã chấp nhận lời mời kết bạn.",
-        "accepted": "Đã chấp nhận lời mời kết bạn.",
-        "declined": "Đã từ chối lời mời kết bạn.",
-        "showMore": "Hiển thị thêm"
-
-    }
+  "notifications": {
+    "title": "Thông báo",
+    "no-notifications": "Không có thông báo nào.",
+    "has-a-friend-request": "đã gửi cho bạn lời mời kết bạn.",
+    "accepted-friend-request": "đã chấp nhận lời mời kết bạn.",
+    "accepted": "Đã chấp nhận lời mời kết bạn.",
+    "declined": "Đã từ chối lời mời kết bạn.",
+    "showMore": "Hiển thị thêm"
+  }
 }

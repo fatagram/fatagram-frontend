@@ -1,19 +1,16 @@
-import FriendPage from "@/pages/friends/FriendPage";
-import ProtectedRoute from "../components/UserOnlyRoute";
-import RouteType from "../interface/RouteType";
-import RequestsPage from "@/pages/friends/sub_pages/RequestsPage";
+import FriendPage from "@/pages/friends/friends-page";
+import RouteType from "../interface/route-type";
+import RequestsPage from "@/features/friends/requests/requests-page";
 
 export const friendsRoutes: RouteType = {
-    path: "/friends",
-    element: <FriendPage/>,
-    isUserOnly: true,
-    children: [
-        {
-            path: "requests",
-            element: (
-                <RequestsPage/>
-            ),
-            keepAlive: true
-        }
-    ]
-}
+  path: "/friends",
+  element: <FriendPage />,
+  isUserOnly: true,
+  children: [
+    {
+      path: "requests",
+      element: <RequestsPage />,
+      keepAlive: true,
+    },
+  ],
+};

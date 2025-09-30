@@ -2,92 +2,91 @@
 @tailwind components;
 @tailwind utilities;
 
+body {
+  font-family: "Nunito", sans-serif;
+  font-size: 1rem;
+  font-weight: 400;
+  color: var(--text-color);
+}
 
-  body {
-    font-family: "Nunito", sans-serif;
-    font-size: 1rem;
-    font-weight: 400;
-    color: var(--text-color);
-  }
+.bg-gradient-main {
+  background: var(--main-gradient-color);
+  background-size: 200% 100%;
+  transition: background-position 0.3s;
+}
 
-  
-  .bg-gradient-main {
-    background: var(--main-gradient-color);
-    background-size: 200% 100%;
-    transition: background-position 0.3s;
-  }
-  
-  .text-gradient-main {
-    background: var(--main-gradient-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  
-  .text-gradient-second {
-    background: var(--second-gradient-color);
-    -webkit-background-clip: text;
-    background-clip: text;
-    color: transparent;
-  }
-  
-  .hover\:bg-gradient-main-move:hover,
-  .focus\:bg-gradient-main-move:focus {
-    background-position: 50% 0;
-  }
-  
-  .bg-disabled {
-    background: #dcdcdc;
-  }
+.text-gradient-main {
+  background: var(--main-gradient-color);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
-  .background-image {
-    background: url('@/assets/images/login_background.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    min-height: 100vh;
-  }
+.text-gradient-second {
+  background: var(--second-gradient-color);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
 
-  .register-bg {
-    background: url('@/assets/images/register_background.jpg');
-    background-size: cover;
-    background-position: center;
-  }
+.hover\:bg-gradient-main-move:hover,
+.focus\:bg-gradient-main-move:focus {
+  background-position: 50% 0;
+}
 
+.bg-disabled {
+  background: #dcdcdc;
+}
 
-  [data-theme="dark"] .background-image {
-    background: url('@/assets/images/login_background.jpg');
-    background-size: cover;
-    background-repeat: no-repeat;
-    background-position: center;
-    min-height: 100vh;
-  }
+.background-image {
+  background: url("@/assets/images/login_background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh;
+}
 
-  [data-theme="dark"] .background-image::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    width: 100%;
-    background: rgba(0, 0, 0, 0.7);
-    z-index: 0;
-  }
+.register-bg {
+  background: url("@/assets/images/register_background.jpg");
+  background-size: cover;
+  background-position: center;
+}
+
+.layout-1000 {
+  max-width: 1000px !important;
+}
+
+[data-theme="dark"] .background-image {
+  background: url("@/assets/images/login_background.jpg");
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh;
+}
+
+[data-theme="dark"] .background-image::before {
+  content: "";
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  background: rgba(0, 0, 0, 0.7);
+  z-index: 0;
+}
 
 /* Chrome, Safari, Edge */
 *::-webkit-scrollbar {
-    width: 4px;
-  }
+  width: 4px;
+}
 
 *::-webkit-scrollbar-track {
-    background: transparent;
+  background: transparent;
 }
 
 *::-webkit-scrollbar-thumb {
-    background-image: var(--second-gradient-color);
-    border-radius: 6px;
+  background-image: var(--second-gradient-color);
+  border-radius: 6px;
 }
 
 *::-webkit-scrollbar-thumb:hover {
-    background-color: #888;
+  background-color: #888;
 }
-
-

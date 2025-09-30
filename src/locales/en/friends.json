@@ -1,12 +1,12 @@
 {
-    "title" : "Friends",
-    "description" : "Welcome to the home page! This is where you can find the latest updates and news.",
-    "navbar": {
-        "title" : "Friends",
-        "suggestedFriends" : "Suggested Friends",
-        "invite" : "Friend Requests"
-    },
-    "friendRequest": {
-        "noRequests": "No friend requests"
-    }
+  "title": "Friends",
+  "description": "Welcome to the home page! This is where you can find the latest updates and news.",
+  "navbar": {
+    "title": "Friends",
+    "suggestedFriends": "Suggested Friends",
+    "invite": "Friend Requests"
+  },
+  "friendRequest": {
+    "noRequests": "No friend requests"
+  }
 }

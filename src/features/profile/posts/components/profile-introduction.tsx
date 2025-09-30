@@ -75,7 +75,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           canEdit={canEdit}
           onCancelClick={() => setIsEditBio(false)}
           btnChildren={
-            <Text size="sm-2">
+            <Text sz="sm-2">
               <i className="fas fa-pencil-alt"></i> &nbsp; {t("user:profilePosts.bioBtn")}
             </Text>
           }
@@ -83,7 +83,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
       )}
 
       {description && (
-        <Text size="lg-1" weight="bold">
+        <Text sz="lg-1" weight="bold">
           {t("user:profilePosts.description")}
         </Text>
       )}
@@ -99,7 +99,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           onSaveClick={(value) => handleSaveDescription(value)}
           onCancelClick={() => setIsEditDescription(false)}
           btnChildren={
-            <Text size="sm-2">
+            <Text sz="sm-2">
               <i className="fas fa-pencil-alt"></i> &nbsp; {t("user:profilePosts.descriptionBtn")}
             </Text>
           }

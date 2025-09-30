@@ -1,80 +1,80 @@
 {
-    "register": {
-        "title": "Sign Up",
-        "slogan" : "Welcome to Fatagram",
-        "firstName": "First Name",
-        "lastName": "Last Name",
-        "username": "Username",
-        "password": "Password",
-        "confirmPassword": "Confirm Password",
-        "email": "Email",
-        "phone": "Phone",
-        "agree": "I agree to",
-        "termsOfService": "Terms of Service",
-        "and": "and",
-        "privacyPolicy": "Privacy Policy",
-        "registerButton": "Register",
-        "loginButton": "Login",
-        "nextButton" : "Next",
-        "gobackButton" : "Previous step",
-        "errorMessages": {
-            "usernameNotCorrectFormat": "Username format is invalid",
-            "passwordNotCorrectFormat": "Password must be at least 8 characters",
-            "emailNotCorrectFormat": "Invalid email address",
-            "firstnameNotCorrectFormat": "Firstname format is invalid",
-            "lastnameNotCorrectFormat": "Lastname format is invalid",
-            "phoneNotCorrectFormat": "Invalid phone number",
-            "unknownError": "An unknown error occurred",
-            "usernameExisted": "Username already exists",
-            "registerFailed": "Registration failed, please try again",
-            "emailExisted": "Email is already in use",
-            "internalServerError": "Internal server error"
-        }
-    },
-    "profileHeader": {
-        "editButton": "Edit",
-        "moreButton": "More",
-        "addButton": "Add",
-        "changeButton": "Change",
-        "messageButton": "Message",
-        "addFriendButton": "Add friend",
-        "acceptButton": "Accept",
-        "cancelRequestButton": "Cancel request",
-        "respondRequestButton": "Respond",
-        "friendButton": "Friend",
-        "declineButton": "Decline",
-        "unfriendButton": "Unfriend",
-        "friendsCount" : "friends",
-        "noFriendsCount" : "No friends",
-        "oversizeErrorTitle": "File too large",
-        "oversizeErrorMessage": "File size exceeds the limit of 2MB",
-        "oversizeErrorButton": "OK"
-    },
-    "profileMenu": {
-        "posts": "Posts",
-        "about": "About",
-        "friends": "Friends",
-        "photos": "Photos",
-        "videos": "Videos",
-        "settings": "Settings"
-    },
-    "profilePosts": {
-        "overview": "Overview",
-        "description": "Description",
-        "bioBtn": "Update your bio",
-        "descriptionBtn": "Update your description",
-        "bioPlaceholder": "Enter your bio",
-        "descriptionPlaceholder": "Enter your description"
-    },
-    "profileFriends": {
-        "friends":"Friends",
-        "searchFriends":"Search friends",
-        "noFriends": "No friends to show"
-    },
-    "profileAbout": {
-        "title": "About",
-        "overview": "Overview",
-        "workAndEducation": "Work and Education",
-        "placesLived": "Places Lived"
+  "register": {
+    "title": "Sign Up",
+    "slogan": "Welcome to Fatagram",
+    "firstName": "First Name",
+    "lastName": "Last Name",
+    "username": "Username",
+    "password": "Password",
+    "confirmPassword": "Confirm Password",
+    "email": "Email",
+    "phone": "Phone",
+    "agree": "I agree to",
+    "termsOfService": "Terms of Service",
+    "and": "and",
+    "privacyPolicy": "Privacy Policy",
+    "registerButton": "Register",
+    "loginButton": "Login",
+    "nextButton": "Next",
+    "gobackButton": "Previous step",
+    "errorMessages": {
+      "usernameNotCorrectFormat": "Username format is invalid",
+      "passwordNotCorrectFormat": "Password must be at least 8 characters",
+      "emailNotCorrectFormat": "Invalid email address",
+      "firstnameNotCorrectFormat": "Firstname format is invalid",
+      "lastnameNotCorrectFormat": "Lastname format is invalid",
+      "phoneNotCorrectFormat": "Invalid phone number",
+      "unknownError": "An unknown error occurred",
+      "usernameExisted": "Username already exists",
+      "registerFailed": "Registration failed, please try again",
+      "emailExisted": "Email is already in use",
+      "internalServerError": "Internal server error"
     }
+  },
+  "profileHeader": {
+    "editButton": "Edit",
+    "moreButton": "More",
+    "addButton": "Add",
+    "changeButton": "Change",
+    "messageButton": "Message",
+    "addFriendButton": "Add friend",
+    "acceptButton": "Accept",
+    "cancelRequestButton": "Cancel request",
+    "respondRequestButton": "Respond",
+    "friendButton": "Friend",
+    "declineButton": "Decline",
+    "unfriendButton": "Unfriend",
+    "friendsCount": "friends",
+    "noFriendsCount": "No friends",
+    "oversizeErrorTitle": "File too large",
+    "oversizeErrorMessage": "File size exceeds the limit of 2MB",
+    "oversizeErrorButton": "OK"
+  },
+  "profileMenu": {
+    "posts": "Posts",
+    "about": "About",
+    "friends": "Friends",
+    "photos": "Photos",
+    "videos": "Videos",
+    "settings": "Settings"
+  },
+  "profilePosts": {
+    "overview": "Overview",
+    "description": "Description",
+    "bioBtn": "Update your bio",
+    "descriptionBtn": "Update your description",
+    "bioPlaceholder": "Enter your bio",
+    "descriptionPlaceholder": "Enter your description"
+  },
+  "profileFriends": {
+    "friends": "Friends",
+    "searchFriends": "Search friends",
+    "noFriends": "No friends to show"
+  },
+  "profileAbout": {
+    "title": "About",
+    "overview": "Overview",
+    "workAndEducation": "Work and Education",
+    "placesLived": "Places Lived"
+  }
 }

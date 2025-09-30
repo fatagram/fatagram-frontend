@@ -1,10 +1,9 @@
-  
-  /* Primary checkbox */
-  
-  .checkbox .checkmark {
-    background-image: var(--main-gradient-color);
-  }
-  
-  .checkmark::after {
-    background-image: var(--main-gradient-color);
-  }
+/* Primary checkbox */
+
+.checkbox .checkmark {
+  background-image: var(--main-gradient-color);
+}
+
+.checkmark::after {
+  background-image: var(--main-gradient-color);
+}

@@ -4,12 +4,13 @@
   border-color: transparent;
 
   /* Gradient border */
-  background: linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box, 
-              var(--main-gradient-color) border-box;
+  background:
+    linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box,
+    var(--main-gradient-color) border-box;
   background-size: 200% 100%;
   background-position: 0 100%;
   transition: background-position 0.3s ease-out;
-  
+
   /* Height should not override Tailwind classes */
 }
 
@@ -19,11 +20,12 @@
   border-color: transparent;
 
   /* Gradient border */
-  background: linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box, 
-              var(--main-wrong-gradient-color) border-box;
+  background:
+    linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box,
+    var(--main-wrong-gradient-color) border-box;
   background-size: 200% 100%;
   background-position: 0 100%;
   transition: background-position 0.3s ease-out;
-  
+
   /* Height should not override Tailwind classes */
 }
