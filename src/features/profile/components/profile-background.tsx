@@ -6,6 +6,7 @@ import Text from "@/components/atoms/text";
 import SelectFile from "@/components/molecules/select-file";
 import { c } from "vite/dist/node/moduleRunnerTransport.d-DJ_mE5sf";
 import { useProfilePage } from "../context/profile-page-context";
+import clsx from "clsx";
 
 type ProfileBackgroundProps = {
   isLoading: boolean;
@@ -22,20 +23,30 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({
   const { isOwner } = useProfilePage();
 
   return (
-    <div className="relative aspect-[16/6] w-full rounded-[15px]">
+    <div className={clsx("relative aspect-[16/6] w-full rounded-[15px]")}>
       {isLoading ? (
-        <BackgroundImageSkeletonLoading alt="Loading" className="relative h-full w-full" />
+        <BackgroundImageSkeletonLoading 
+          alt="Loading" 
+          className={clsx("relative h-full w-full")} 
+        />
       ) : (
-        <BackgroundImage src={background} alt="Background Image" className="relative h-full w-full">
+        <BackgroundImage 
+          src={background} 
+          alt="Background Image" 
+          className={clsx("relative h-full w-full")}
+        >
           {isOwner && (
             <SelectFile
               onChange={handleSelectBackground}
               accept="image/*"
               multiple={false}
-              className="absolute flex items-center right-2 bottom-2 z-10 opacity-40 hover:opacity-70 gap-2"
+              className={clsx(
+                "absolute flex items-center right-2 bottom-2 z-10",
+                "opacity-40 hover:opacity-70 gap-2"
+              )}
             >
-              <i className="fa-solid fa-camera"></i>
-              <Text className="sm:flex hidden" sz="md-1">
+              <i className={clsx("fa-solid fa-camera")}></i>
+              <Text className={clsx("sm:flex hidden")} sz="md-1">
                 {background
                   ? t("user:profileHeader.changeButton")
                   : t("user:profileHeader.addButton")}

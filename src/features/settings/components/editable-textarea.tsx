@@ -3,6 +3,7 @@ import Text from "@/components/atoms/text";
 import TextArea from "@/components/atoms/textarea/textarea";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 
 type EditableTextAreaProps = {
   className?: string; // ClassName of main component
@@ -58,9 +59,10 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
         {editableMode === "inline" && isEdit ? (
           <div className="relative flex flex-col gap-1 w-full">
             <TextArea
-              className={`animate-fade-in px-2 py-1 ${isError && "mt-[5px]"}
-                                w-full h-[50px]
-                            `}
+              className={clsx(
+                "animate-fade-in px-2 py-1 w-full h-[50px]",
+                isError && "mt-[5px]"
+              )}
               placeholder={placeholder}
               value={inputValue}
               isWrong={isError}
@@ -73,7 +75,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
             )}
           </div>
         ) : (
-          <Text sz="lg-1" className={` ${valueClassName} select-auto`} wrap="whitespace-pre-wrap">
+          <Text sz="lg-1" className={clsx(valueClassName, "select-auto")} wrap="whitespace-pre-wrap">
             {value ?? noDataValue}
           </Text>
         )}
@@ -95,7 +97,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
                 </Button>
                 <Button
                   sz="sm-1"
-                  variant="secondary"
+                  variant="fourth"
                   onClick={() => {
                     onCancelClick?.();
                   }}
@@ -107,7 +109,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
             ) : (
               <Button
                 sz="sm-1"
-                variant="secondary"
+                variant="fourth"
                 onClick={() => {
                   onChangeClick?.();
                 }}

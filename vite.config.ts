@@ -7,9 +7,13 @@ export default defineConfig({
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
+      "~": path.resolve(__dirname, "./src/components"),
     },
   },
   server: {
     port: 3000,
-  },
+    hmr: {
+      overlay: false,
+    }
+  }
 });

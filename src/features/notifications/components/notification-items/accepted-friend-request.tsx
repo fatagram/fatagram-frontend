@@ -4,6 +4,7 @@ import Text from "@/components/atoms/text";
 import { TimeUnit, TimeUnitTranslateMap } from "@/types/time-unit";
 import { useTranslation } from "react-i18next";
 import { renderContent } from "../../helper/render-content";
+import clsx from "clsx";
 
 interface AcceptedFriendRequestProps {
   notificationDto: NotificationDto;
@@ -22,7 +23,7 @@ const AcceptedFriendRequest: React.FC<AcceptedFriendRequestProps> = ({
         <Avatar src={notificationDto.actorImageUrl} alt="Avatar" sz="sm-1" />
       </div>
       <div className="flex flex-col gap-1 flex-1">
-        <Text sz="sm-2" className={notificationDto.isRead ? "opacity-60" : ""}>
+        <Text sz="sm-2" className={clsx({ "opacity-60": notificationDto.isRead })}>
           {renderContent(notificationDto.content ?? "", {
             actorName: (
               <Text key={notificationDto.actorId} sz="sm-2" weight="bold">
@@ -34,7 +35,7 @@ const AcceptedFriendRequest: React.FC<AcceptedFriendRequestProps> = ({
         <Text
           sz="sm-1"
           color={notificationDto.isRead ? "primary" : "secondary"}
-          className={notificationDto.isRead ? "opacity-60" : ""}
+          className={clsx({ "opacity-60": notificationDto.isRead })}
         >
           {notificationDto.timeDistance.unit === TimeUnit.Seconds ||
           notificationDto.timeDistance.unit === TimeUnit.Miliseconds

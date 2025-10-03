@@ -1,4 +1,5 @@
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from "clsx";
 
 interface BadgeProps extends ComponentProps{
   count?: number;
@@ -16,17 +17,24 @@ const Badge: React.FC<BadgeProps> = ({
   return (
     <div
       ref={ref}
-      className={`relative flex items-center justify-center rounded-full bg-[var(--second-bg-color)] 
-            w-[48px] aspect-square text-[var(--text-color)] text-xl
-            cursor-pointer hover:bg-[var(--main-bg-color)] transition-all duration-200 ease-in-out
-            active:bg-[var(--second-bg-color)] active:scale-95 ${className}`}
+      className={clsx(
+        'relative flex items-center justify-center rounded-full bg-bg-second',
+        'w-[48px] aspect-square text-text-main text-xl',
+        'cursor-pointer hover:bg-bg-fourth transition-all duration-200 ease-in-out',
+        'active:scale-95',
+        className
+      )}
       onClick={onClick}
     >
       {children}
       {count > 0 && (
         <div
-          className={`absolute -top-0 ${count > 99 ? "-right-2" : "-right-1"} bg-red-500 text-white text-[10px] min-w-[16px] 
-                    h-[16px] px-[4px] rounded-full border-[2px] border-[var(--main-bg-color)] flex items-center justify-center`}
+          className={clsx(
+            'absolute -top-0 bg-red-500 text-text-main text-[10px] min-w-[16px]',
+            'h-[16px] px-[4px] rounded-full border-[2px] border-bg-main',
+            'flex items-center justify-center',
+            count > 99 ? '-right-2' : '-right-1'
+          )}
         >
           {count > 99 ? "99+" : count}
         </div>

@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { setShowNotification } from "../../stores/notification-slice";
 import Badge from "@/components/atoms/badge";
 import Text from "@/components/atoms/text";
+import clsx from "clsx";
 
 interface NotificationButtonProps {}
 
@@ -39,23 +40,31 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({}) => {
     dispatch(setShowNotification(!isShowNotification));
   };
 
+  const isActive = isShowNotification || isInNotificationPage;
+
   return (
     <div className="relative flex items-center justify-center">
       <Badge
         count={unreadCount}
         onClick={handleToggleNotifications}
         ref={btnRef}
-        className={isShowNotification || isInNotificationPage ? "!bg-single-main/30" : ""}
+        className={clsx({
+          "!bg-primary-500/30": isActive
+        })}
       >
-        <Text className={isShowNotification || isInNotificationPage ? "text-single-main" : ""}>
+        <Text className={clsx({
+          "!text-primary-500": isActive
+        })}>
           <i className="fa-solid fa-bell"></i>
         </Text>
       </Badge>
       {isShowNotification && !isInNotificationPage && (
         <NotificationMenu
-          className="!absolute max-h-[600px] sm:top-[120%] top-[108%] -right-[70px] sm:right-0
-                        sm:w-auto w-screen sm:h-auto h-screen z-10 sm:p-2 p-6 min-w-[350px] 
-                        min-h-[100px]"
+          className={clsx(
+            "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
+            "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
+            "top-[108%] -right-[70px] w-screen h-screen p-6"
+          )}
           onClick={() => dispatch(setShowNotification(!isShowNotification))}
           ref={menuRef}
         />

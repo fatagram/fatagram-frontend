@@ -4,6 +4,7 @@ import { ComponentProps } from "@/components/common/types/component-type";
 import Dropdown from "@/components/molecules/dropdown";
 import { useAuth } from "@/contexts/auth/auth-context";
 import useClickOutside from "@/hooks/use-click-outside";
+import clsx from "clsx";
 import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 
@@ -116,7 +117,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
         id: "unfriend",
         content: (
           <div>
-            <i className="fa-solid fa-user-xmark mr-2"></i>{" "}
+            <i className={clsx("fa-solid", "fa-user-xmark", "mr-2")}></i>{" "}
             {t("user:profileHeader.unfriendButton")}
           </div>
         ),
@@ -135,7 +136,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
         id: "acceptRequest",
         content: (
           <div>
-            <i className="fa-solid fa-check mr-2"></i>{" "}
+            <i className={clsx("fa-solid", "fa-check", "mr-2")}></i>{" "}
             {t("user:profileHeader.acceptButton")}
           </div>
         ),
@@ -145,7 +146,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
         id: "cancelRequest",
         content: (
           <div>
-            <i className="fa-solid fa-xmark mr-2"></i>{" "}
+            <i className={clsx("fa-solid", "fa-xmark", "mr-2")}></i>{" "}
             {t("user:profileHeader.declineButton")}
           </div>
         ),
@@ -159,16 +160,16 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
     <div>
       {friendshipStatus === "None" ? (
         <Button sz={sz} onClick={handleSentAddFriendRequest}>
-          <i className="fa-solid fa-plus"></i>{" "}
+          <i className={clsx("fa-solid", "fa-plus")}></i>{" "}
           {t("user:profileHeader.addFriendButton")}
         </Button>
       ) : friendshipStatus === "SentByMe" ? (
         <Button sz={sz} onClick={handleCancelAddFriendRequest}>
-          <i className="fa-solid fa-xmark"></i>{" "}
+          <i className={clsx("fa-solid", "fa-xmark")}></i>{" "}
           {t("user:profileHeader.cancelRequestButton")}
         </Button>
       ) : friendshipStatus === "SentByThem" ? (
-        <div className="sm:relative">
+        <div className={clsx("sm:relative", "z-50")}>
           <Button
             sz={sz}
             ref={btnRequestRef}
@@ -176,19 +177,29 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
               setIsShowRequestOptions(!isShowRequestOptions);
             }}
           >
-            <i className="fa-solid fa-reply"></i>{" "}
+            <i className={clsx("fa-solid", "fa-reply")}></i>{" "}
             {t("user:profileHeader.respondRequestButton")}
           </Button>
           <Dropdown
             ref={requestOptionsRef}
             isShow={isShowRequestOptions}
-            className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
-                                                rounded-lg shadow-md z-10 sm:min-w-[200px] w-[calc(100%-2%)]"
+            className={clsx(
+              "absolute",
+              "flex",
+              "sm:top-[130%]",
+              "top-[110%]",
+              "left-[1%]",
+              "bg-[var(--main-bg-color)]",
+              "shadow-md",
+              "z-[10]",
+              "sm:min-w-[200px]",
+              "w-[calc(100%-2%)]"
+            )}
             items={requestOptions}
           />
         </div>
       ) : (
-        <div className="sm:relative z-50">
+        <div className={clsx("sm:relative", "z-50")}>
           <Button
             sz={sz}
             ref={btnFriendRef}
@@ -196,14 +207,25 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
               setIsShowFriendOptions(!isShowFriendOptions);
             }}
           >
-            <i className="fa-solid fa-user-check"></i>{" "}
+            <i className={clsx("fa-solid", "fa-user-check")}></i>{" "}
             {t("user:profileHeader.friendButton")}
           </Button>
           <Dropdown
             ref={friendOptionsRef}
             isShow={isShowFriendOptions}
-            className="absolute sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
-                                    rounded-lg shadow-md z-[10] sm:min-w-[200px] w-[calc(100%-2%)] "
+            className={clsx(
+              "absolute",
+              "sm:top-[130%]",
+              "top-[110%]",
+              "left-[1%]",
+              "bg-[var(--main-bg-color)]",
+              "p-2",
+              "rounded-lg",
+              "shadow-md",
+              "z-[10]",
+              "sm:min-w-[200px]",
+              "w-[calc(100%-2%)]"
+            )}
             items={friendOptions}
           />
         </div>

@@ -1,4 +1,5 @@
 import Text from "@/components/atoms/text";
+import clsx from "clsx";
 
 type ProfileAboutSectionProps = {
   title?: string;
@@ -12,7 +13,7 @@ const ProfileAboutSection: React.FC<ProfileAboutSectionProps> = ({
   children,
 }) => {
   return (
-    <div className={`${className}`}>
+    <div className={clsx(className)}>
       {title && (
         <Text sz="lg-1" weight="bold">
           {title}

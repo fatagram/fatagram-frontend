@@ -6,24 +6,24 @@ body {
   font-family: "Nunito", sans-serif;
   font-size: 1rem;
   font-weight: 400;
-  color: var(--text-color);
+  color: rgb(var(--text-main));
 }
 
 .bg-gradient-main {
-  background: var(--main-gradient-color);
+  background: var(--gradient-main);
   background-size: 200% 100%;
   transition: background-position 0.3s;
 }
 
 .text-gradient-main {
-  background: var(--main-gradient-color);
+  background: var(--gradient-main);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
 }
 
 .text-gradient-second {
-  background: var(--second-gradient-color);
+  background: var(--gradient-second);
   -webkit-background-clip: text;
   background-clip: text;
   color: transparent;
@@ -83,7 +83,7 @@ body {
 }
 
 *::-webkit-scrollbar-thumb {
-  background-image: var(--second-gradient-color);
+  background-image: var(--gradient-second);
   border-radius: 6px;
 }
 

@@ -1,5 +1,6 @@
 import Avatar, { AvatarSkeletonLoading } from "@/components/atoms/avatar";
 import React from "react";
+import { clsx } from "clsx";
 import { useProfilePage } from "../context/profile-page-context";
 
 interface ProfileAvatarProps {
@@ -19,19 +20,19 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
 }) => {
   const { isOwner } = useProfilePage();
   return (
-    <div className={`relative ${className ? className : ""}`} ref={ref}>
+    <div className={clsx("relative", className)} ref={ref}>
       {isLoading ? (
         <AvatarSkeletonLoading
           alt="Loading"
           sz="lg-2"
-          className="border-[5px] border-[var(--second-bg-color)]"
+          className="border-4 border-bg-main flex-shrink-0"
         />
       ) : (
         <Avatar
           src={avatar}
           alt="Avatar"
           sz="lg-2"
-          className="border-[5px] border-[var(--second-bg-color)] flex-shrink-0"
+          className="border-4 border-bg-main flex-shrink-0"
         />
       )}
     </div>

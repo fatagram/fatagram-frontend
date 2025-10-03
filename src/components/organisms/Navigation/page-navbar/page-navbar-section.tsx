@@ -1,29 +1,31 @@
 import { useState } from "react";
-import { Stack, Text } from "@/components/atoms";
+import { Text } from "@/components/atoms";
+import clsx from "clsx";
 
 type PageNavbarSectionProps = {
   title?: string;
   className?: string;
+  titleClassName?: string;
   children?: React.ReactNode;
 };
 
-const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({ title, className, children }) => {
+const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({ title, className, titleClassName, children }) => {
   const [showChildren, setShowChildren] = useState<boolean>(true);
 
   return (
-    <Stack align="start" space={2} className={`w-full ${className}`}>
+    <div className={clsx("w-full", className)}>
       {title && (
         <Text
           sz="lg-1"
           weight="bold"
-          className="p-2 pl-5 text-gradient-main"
+          className={clsx("p-2 pl-5 text-text-third cursor-pointer select-none", titleClassName)}
           onClick={() => setShowChildren(!showChildren)}
         >
           {title}
         </Text>
       )}
-      {showChildren && <div className="w-full animate-dropdown-slide">{children}</div>}
-    </Stack>
+      {showChildren && <div className={clsx("w-full animate-dropdown-slide mt-1")}>{children}</div>}
+    </div>
   );
 };
 

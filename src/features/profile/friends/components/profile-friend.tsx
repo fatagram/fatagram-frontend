@@ -7,6 +7,7 @@ import SearchBox from "@/components/atoms/textbox/searchbox";
 import Text from "@/components/atoms/text";
 import FriendItem from "./friend-item";
 import { useProfilePage } from "../../context/profile-page-context";
+import clsx from "clsx";
 
 interface ProfileFriendsProps {
   className?: string;
@@ -52,7 +53,7 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
   }, [page, keyword, targetId]);
 
   return (
-    <div className={`flex flex-1 justify-end ${className} flex-col w-full`}>
+    <div className={clsx("flex flex-1 justify-end flex-col w-full", className)}>
       <SearchBox
         placeholder={t("user:profileFriends.searchFriends")}
         className="p-1"
@@ -66,11 +67,11 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
           {friends.length === 0 && (
             <div className="flex w-full justify-center mb-10 mt-10">
               <div className="flex flex-col items-center text-[var(--text-color)] opacity-30">
-                <Text size="xl-3" weight="bold">
+                <Text sz="xl-3" weight="bold">
                   <i className="fa-solid fa-user-xmark"></i>
                 </Text>
-                <Text size="md-2" className="mt-2">
-                  {t("user:profileFriends.noFriends")}ks
+                <Text sz="md-2" className="mt-2">
+                  {t("user:profileFriends.noFriends")}
                 </Text>
               </div>
             </div>

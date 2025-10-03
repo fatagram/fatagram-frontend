@@ -1,13 +1,14 @@
 import Card from "@/components/molecules/card";
 import ProfileAboutNavbar from "./components/profile-about-navbar";
 import { Outlet, useOutletContext } from "react-router-dom";
+import clsx from "clsx";
 
 const ProfileAboutPage = () => {
 
   return (
-    <div className="flex gap-2 lg:flex-row flex-col ">
-      <ProfileAboutNavbar className="bg-[var(--second-bg-color)] rounded-md mt-2 flex-[4]" />
-      <Card className="bg-[var(--second-bg-color)] rounded-md mt-2 flex-[8] pt-0">
+    <div className={clsx("grid grid-cols-golden gap-2 lg:flex-row flex-col")}>
+      <ProfileAboutNavbar className={clsx("rounded-r-lg mt-2")} />
+      <Card className={clsx("rounded-l-lg mt-2 pt-0")}>
         <Outlet />
       </Card>
     </div>

@@ -1,6 +1,7 @@
 import PageNavbar from "@/components/organisms/navigation/page-navbar";
 import React from "react";
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 
 type SettingsNavbarProps = {
   className?: string;
@@ -56,7 +57,7 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({ className, onSelect }) 
   ];
 
   return (
-    <PageNavbar title={t("settings:navbar.title")} className={className}>
+    <PageNavbar title={t("settings:navbar.title")} className={clsx("bg-bg-second", className)}>
       <PageNavbar.Section title={t("settings:navbar.privacy.title")}>
         {authSettings.map((item, index) => (
           <PageNavbar.Item

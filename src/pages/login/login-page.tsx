@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+import clsx from "clsx";
 import LoginForm from "@/features/auth/components/login-form";
 import Footer from "@/components/atoms/footer/footer";
 import ForgotPasswordForm from "@/features/auth/components/forgot-password-form";
@@ -14,21 +15,23 @@ function LoginPage(): React.ReactElement {
   }, [forgotPassword]);
 
   return (
-    <div className="relative">
+    <div className={clsx("relative")}>
       <div
-        className="relative flex flex-col items-center justify-center h-screen w-full
-                            background-image"
+        className={clsx(
+          "relative flex flex-col items-center justify-center h-screen w-full",
+          "background-image"
+        )}
       >
-        <div className="w-full flex justify-center items-center flex-1 z-10">
+        <div className={clsx("w-full flex justify-center items-center flex-1 z-10")}>
           {forgotPassword ? (
             <ForgotPasswordForm switchToLogin={() => setForgotPassword(false)} />
           ) : (
             <LoginForm switchForgotPassword={() => setForgotPassword(true)} />
           )}
         </div>
-        <Footer className="z-10 pb-0" />
+        <Footer className={clsx("z-10 pb-0")} />
       </div>
-      <SelectLanguage className="!absolute top-2 right-2 z-50" />
+      <SelectLanguage className={clsx("!absolute top-2 right-2 z-50")} />
     </div>
   );
 }

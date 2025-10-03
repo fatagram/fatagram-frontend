@@ -1,6 +1,7 @@
 import Card from "@/components/molecules/card";
 import SubNavbar from "@/components/organisms/navigation/sub-navbar";
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 
 type ProfileAboutNavbarProps = {
   className?: string;
@@ -25,7 +26,7 @@ const ProfileAboutNavbar: React.FC<ProfileAboutNavbarProps> = ({
   ];
 
   return (
-    <Card title={t("user:profileAbout.title")} className={`${className}`}>
+    <Card title={t("user:profileAbout.title")} className={clsx(className)}>
       <SubNavbar className="w-full">
         {aboutNavbarItems.map((item, index) => (
           <SubNavbar.Item key={index} title={item.title} path={item.path} />

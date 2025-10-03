@@ -2,6 +2,7 @@ import React, { forwardRef } from "react";
 import "./Button.module.css";
 import { Size } from "@/components/common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from "clsx";
 
 // Define a mapping of button sizes
 const buttonSizes: Record<Size, string> = {
@@ -23,15 +24,17 @@ const buttonSizes: Record<Size, string> = {
 const buttonVariants = {
   primary: "bg-gradient-main text-white hover:bg-gradient-main-move",
   secondary:
-    "bg-[var(--btn-color)] transition-all duration-200 ease text-[var(--text-color)] hover:bg-[var(--btn-hover-color)] ",
+    "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70",
   third:
-    "bg-[var(--main-bg-color)] transition-all duration-200 ease text-[var(--text-color)] hover:bg-[var(--btn-color)]",
+    "bg-bg-third transition-all duration-200 ease text-text-main hover:bg-bg-third/70",
+  fourth:
+    "bg-bg-fourth transition-all duration-200 ease text-text-main hover:bg-bg-fourth/70",
 };
 
 type Variant = keyof typeof buttonVariants;
 
 // ButtonProps interface
-interface ButtonProps extends ComponentProps<HTMLButtonElement>{
+interface ButtonProps extends ComponentProps<HTMLButtonElement> {
   variant?: Variant;
 }
 
@@ -40,15 +43,7 @@ interface ButtonProps extends ComponentProps<HTMLButtonElement>{
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   (
-    {
-      onClick,
-      variant = "primary",
-      sz = "lg-1",
-      className,
-      children,
-      disabled = false,
-      ...props
-    },
+    { onClick, variant = "primary", sz = "lg-1", className, children, disabled = false, ...props },
     ref,
   ) => {
     return (
@@ -56,11 +51,16 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         type="button"
         disabled={disabled}
         onClick={onClick}
-        className={` ${buttonSizes[sz]} 
-                font-normal
-                rounded-lg select-none
-                ${disabled ? "bg-disabled text-[#949494]" : buttonVariants[variant] + " active:scale-[0.98] active:opacity-80"}
-                ${className}`}
+        className={clsx(
+          buttonSizes[sz],
+          "font-normal rounded-xl select-none",
+          {
+            "bg-disabled text-[#949494]": disabled,
+            [buttonVariants[variant]]: !disabled,
+            "active:scale-[0.98] active:opacity-80": !disabled,
+          },
+          className,
+        )}
         ref={ref}
         {...props}
       >

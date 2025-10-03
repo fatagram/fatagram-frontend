@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import clsx from "clsx";
 import { RegisterValidator } from "@/api/user/validate/register.validator";
 import RegisterDto from "@/api/user/dto/register.dto";
 import { ErrorKey, ErrorCodes } from "@/api/user/dto/register.dto";
@@ -216,10 +217,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
 
   return (
     <form
-      className={`relative flex flex-col justify-center
-             animate-fade-in rounded-lg p-[20px] 
-             sm:p-[30px] bg-[var(--second-bg-color)] gap-5
-            ${className}`}
+      className={clsx(
+        "relative flex flex-col justify-center",
+        "animate-fade-in rounded-xl p-10",
+        "sm:p-12 bg-bg-main gap-5 max-w-[450px]",
+        className
+      )}
     >
       {/* Overlay Loading */}
       {isLoading && <OverlayLoading />}
@@ -227,21 +230,21 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       {isShowLogo && <Logo />}
 
       <Text
-        sz="xl-2"
+        sz="xl-1"
         weight="extrabold"
-        className="uppercase sm:text-[45px] text-[45px] text-single-third select-none text-center"
+        className="uppercase text-primary-500 select-none text-center"
       >
         {t("user:register.title")}
       </Text>
 
       {isFirstStep ? (
-        <div className="animate-left-to-right relative flex flex-col items-center sm:gap-[20px] gap-[15px] w-full">
-          <div className="flex gap-[10px] w-full">
+        <div className="animate-left-to-right relative flex flex-col items-center sm:gap-5 gap-3 w-full">
+          <div className="flex gap-2 w-full">
             <div className="w-full">
               <Textbox
                 value={formData.firstName}
                 ref={(el) => setRef(firstStepRefs, el, 0)}
-                className="text-[13px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+                className="w-[100%] px-3 shadow-sm"
                 placeholder={t("user:register.firstName")}
                 onChange={(e) => updateFormData("firstName", e.target.value)}
                 isWrong={firstNameError ? true : false}
@@ -249,7 +252,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               <Text
                 sz="sm-1"
                 color="danger"
-                className={`${firstNameError ? "" : "hidden"} px-[5px]`}
+                className={clsx(firstNameError ? "" : "hidden", "px-[5px]")}
               >
                 {firstNameError}
               </Text>
@@ -258,7 +261,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               <Textbox
                 value={formData.lastName}
                 ref={(el) => setRef(firstStepRefs, el, 1)}
-                className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+                className="w-[100%] px-3 shadow-sm"
                 placeholder={t("user:register.lastName")}
                 onChange={(e) => updateFormData("lastName", e.target.value)}
                 isWrong={lastNameError ? true : false}
@@ -266,7 +269,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               <Text
                 sz="sm-1"
                 color="danger"
-                className={`${lastNameError ? "" : "hidden"} px-[5px]`}
+                className={clsx(lastNameError ? "" : "hidden", "px-[5px]")}
               >
                 {lastNameError}
               </Text>
@@ -277,12 +280,12 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             <Textbox
               value={formData.email}
               ref={(el) => setRef(firstStepRefs, el, 2)}
-              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+              className="w-[100%] px-3 shadow-sm"
               placeholder={t("user:register.email")}
               onChange={(e) => updateFormData("email", e.target.value)}
               isWrong={emailError ? true : false}
             />
-            <Text sz="sm-1" color="danger" className={`${emailError ? "" : "hidden"} px-[5px] `}>
+            <Text sz="sm-1" color="danger" className={clsx(emailError ? "" : "hidden", "px-[5px]")}>
               {emailError}
             </Text>
           </div>
@@ -290,24 +293,24 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             <Textbox
               value={formData.phone}
               ref={(el) => setRef(firstStepRefs, el, 3)}
-              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+              className="w-[100%] px-3 shadow-sm"
               placeholder={t("user:register.phone")}
               onChange={(e) => updateFormData("phone", e.target.value)}
               isWrong={phoneError ? true : false}
             />
-            <Text sz="sm-1" color="danger" className={`${phoneError ? "" : "hidden"} px-[5px] `}>
+            <Text sz="sm-1" color="danger" className={clsx(phoneError ? "" : "hidden", "px-[5px]")}>
               {phoneError}
             </Text>
           </div>
 
-          <Text sz="sm-1" color="danger" className={`${unknownError ? "" : "hidden"} px-[5px] `}>
+          <Text sz="sm-1" color="danger" className={clsx(unknownError ? "" : "hidden", "px-[5px]")}>
             {unknownError}
           </Text>
           <Button
             ref={btnNextStrepRef}
             type="button"
-            sz="md-1"
-            className={`w-full`}
+            sz="sm-3"
+            className="w-full"
             onClick={handleNextStep}
           >
             <Text>{t("user:register.nextButton")}</Text>
@@ -328,7 +331,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             <Text
               sz="sm-1"
               color="danger"
-              className={`${usernameError ? "" : "hidden"} px-[5px] `}
+              className={clsx(usernameError ? "" : "hidden", "px-[5px]")}
             >
               {usernameError}
             </Text>
@@ -345,7 +348,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             <Text
               sz="sm-1"
               color="danger"
-              className={`${passwordError ? "" : "hidden"} px-[5px] `}
+              className={clsx(passwordError ? "" : "hidden", "px-[5px]")}
             >
               {passwordError}
             </Text>
@@ -362,7 +365,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
             <Text
               sz="sm-1"
               color="danger"
-              className={`${confirmPasswordError ? "" : "hidden"} px-[5px]`}
+              className={clsx(confirmPasswordError ? "" : "hidden", "px-[5px]")}
             >
               {confirmPasswordError}
             </Text>
@@ -384,19 +387,18 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
               </div>
             }
           />
-
           <Button
             ref={btnRegisterRef}
             type="button"
-            sz="md-1"
-            className={`w-full`}
+            sz="sm-3"
+            className="w-full"
             onClick={handleRegister}
           >
             <Text>{t("user:register.registerButton")}</Text>
           </Button>
           <Text
             ref={btnBackStepRef}
-            className="flex gap-1 items-center text-single-second hover:text-single-main"
+            className="flex gap-1 items-center cursor-pointer text-primary-600 hover:text-secondary-500"
             onClick={handleNextStep}
           >
             <i className="fa-solid fa-arrow-left"></i>
@@ -405,7 +407,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         </div>
       )}
       <div className="relative flex justify-center">
-        <Link className={"sm:text-[15px] font-bold"} to="/login">
+        <Link className="sm:text-[15px] font-bold" to="/login">
           {t("user:register.loginButton")}
         </Link>
       </div>
@@ -413,7 +415,9 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       {isShowClose && (
         <Text
           sz="lg-1"
-          className={`absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer`}
+          className={clsx(
+            "absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer"
+          )}
           onClick={onClose}
         >
           <i className="fa-solid fa-xmark"></i>

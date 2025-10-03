@@ -1,15 +1,15 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveRoute } from "@/hooks/use-active-route";
-import { Button, Stack, Text } from "@/components/atoms";
-import Grid from "@/components/atoms/grid";
-import GridItem from "@/components/atoms/grid/grid-item";
+import { Button, Text } from "@/components/atoms";
+import clsx from "clsx";
 
 export type PageNavbarItemProps = {
   icon?: React.ReactNode;
   title?: string;
   description?: string;
   path: string;
+  className?: string;
   onClick?: () => void;
 };
 
@@ -18,38 +18,38 @@ const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
   title,
   description,
   path,
+  className = "",
   onClick,
 }) => {
   const navigate = useNavigate();
   const isFocused = useActiveRoute(path, true);
 
   return (
-    <Stack className="w-full">
-      <Button
-        variant={isFocused ? "secondary" : "third"}
-        onClick={() => {
-          navigate(path);
-          onClick?.();
-        }}
-        className="!w-full text-left !px-3"
-      >
-        <Grid cols={10} flow="col">
-          <Grid.Item colSpan={2}>
-            <Text sz="lg-1" className="flex justify-center items-center h-full">
-              {icon}
-            </Text>
-          </Grid.Item>
-          <Grid.Item colSpan={8}>
-            <Text sz="md-2">{title}</Text>
-            {description && (
-              <Text sz="sm-1" weight="light">
-                {description}
-              </Text>
-            )}
-          </Grid.Item>
-        </Grid>
-      </Button>
-    </Stack>
+    <button
+      onClick={() => {
+        navigate(path);
+        onClick?.();
+      }}
+      className={clsx("w-full text-left px-1 py-3 rounded-md",
+        { "bg-bg-fourth border-x-primary-500 border-x-2" : isFocused },
+        { "hover:bg-bg-third transition-all duration-100" : !isFocused },
+        className,
+      )}
+    >
+      <div className={clsx("grid grid-cols-10")}>
+        <Text sz="md-3" className={clsx("flex justify-center items-center h-full", "col-span-2")}>
+          {icon}
+        </Text>
+        <Text sz="md-1" className={clsx("col-span-8")}>
+          {title}
+        </Text>
+        {description && (
+          <Text sz="sm-2" weight="light">
+            {description}
+          </Text>
+        )}
+      </div>
+    </button>
   );
 };
 

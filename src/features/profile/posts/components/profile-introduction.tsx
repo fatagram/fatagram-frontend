@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import Text from "@/components/atoms/text";
 import EditableTextArea from "@/features/settings/components/editable-textarea";
 import { useProfilePage } from "../../context/profile-page-context";
+import clsx from "clsx";
 
 interface ProfileIntroductionProps {
   className?: string;
@@ -60,8 +61,8 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
   return (
     <Card
       title={t("user:profilePosts.overview")}
-      className={`flex-col gap-4 ${className}`}
-      titleClassName="text-[1.5rem] font-bold !mb-0"
+      className={clsx("flex-col gap-4 rounded-l-2xl", className)}
+      titleClassName="text-2xl font-bold !mb-0"
     >
       {(bio || canEdit) && (
         <EditableTextArea
@@ -110,14 +111,14 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
 
       {email && (
         <div>
-          <Text className="hover:text-single-main">
+          <Text className="hover:text-primary-500">
             <i className="fas fa-envelope" /> &nbsp; {email}
           </Text>
         </div>
       )}
       {phone && (
         <div>
-          <Text className="hover:text-single-main">
+          <Text className="hover:text-primary-500">
             <i className="fas fa-phone"></i> &nbsp; {phone}
           </Text>
         </div>

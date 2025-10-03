@@ -11,9 +11,6 @@ import {
 } from "@/utils/token";
 import React, { createContext, useContext, useCallback, useEffect, useMemo } from "react";
 import { LANG_LIST, Language, useLanguage } from "../common/language-context";
-import { useLocation } from "react-router-dom";
-import LoginForm from "@/features/auth/components/login-form";
-import RegisterForm from "@/features/auth/components/register-form";
 import { useDialog } from "../common/dialog-context";
 import { Result } from "@/api/common/result";
 import { useLoading } from "../common/loading-context";
@@ -69,8 +66,6 @@ interface AuthContextType {
   logout?: () => Promise<void>;
   userId?: string;
   urlName?: string;
-  openLoginOverlay: () => void;
-  openRegisterOverlay: () => void;
 }
 
 // Create AuthContext
@@ -81,8 +76,6 @@ const AuthContext = createContext<AuthContextType>({
   logout: () => Promise.resolve(),
   userId: undefined,
   urlName: undefined,
-  openLoginOverlay: () => {},
-  openRegisterOverlay: () => {},
 });
 
 type AuthProviderProps = {
@@ -95,39 +88,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const { setLanguage } = useLanguage();
   const { openDialog, closeDialog } = useDialog();
   const { increment, decrement } = useLoading();
-  const location = useLocation();
   const _dispatch = useDispatch();
   const queryClient = useQueryClient();
-
-  const openLoginOverlay = useCallback(() => {
-    openDialog({
-      content: <LoginForm showLogo={false} />,
-    });
-  }, [openDialog]);
-  const openRegisterOverlay = useCallback(() => {
-    openDialog({
-      content: <RegisterForm showLogo={false} />,
-    });
-  }, [openDialog]);
-
-  useEffect(() => {
-    if (!state.isInitialized) return;
-    
-    // Only show login overlay if definitely not authenticated after initialization
-    if (
-      state.isAuthenticated === false &&
-      location.pathname !== "/login" &&
-      location.pathname !== "/register"
-    ) {
-      // Add a small delay to ensure UserOnlyRoute has processed first
-      const timer = setTimeout(() => {
-        openLoginOverlay?.();
-      }, 100);
-      return () => clearTimeout(timer);
-    } else {
-      closeDialog?.();
-    }
-  }, [state.isInitialized, state.isAuthenticated, location.pathname, openLoginOverlay, closeDialog]);
 
   // Function to set language when reload or login
   const setLang = (langCode: string) => {
@@ -153,10 +115,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         if (localStorage.getItem("isRememberMe") === "true") {
           setRefreshToken(result.data?.refreshToken || "");
         } else {
-          // For better dev experience, still use localStorage but shorter expiry
-          // In production, you can change this back to sessionStorage
-          setRefreshToken(result.data?.refreshToken || "");
-          // setRefreshTokenToSession(result.data?.refreshToken || "");
+          setRefreshTokenToSession(result.data?.refreshToken || "");
         }
         closeDialog();
       }
@@ -169,7 +128,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const clearUserData = useCallback(() => {
     removeRefreshToken();
     removeRefreshTokenFromSession();
-    // restore react-query state
     queryClient.clear();
     _dispatch(resetState());
   }, [_dispatch, queryClient]);
@@ -228,7 +186,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
       // Token exists, try to verify with server
       const result = await userProfileService.GetMe();
-      console.log(result);
+      // console.log(result);
       if (result.success) {
         dispatch({
           type: "INITIALIZE",
@@ -240,7 +198,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           },
         });
         setLang(result.data?.languageCode || "en");
-        console.log("User is authenticated");
+        // console.log("User is authenticated");
       } else {
         // API failed but token exists - keep authenticated for dev experience
         console.warn("GetMe API failed but token exists, keeping authenticated");
@@ -294,8 +252,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           urlName: state.urlName,
           login: _logIn,
           logout: _logOut,
-          openLoginOverlay,
-          openRegisterOverlay,
         }),
         [
           state.isAuthenticated,
@@ -303,8 +259,6 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           state.urlName,
           _logIn,
           _logOut,
-          openLoginOverlay,
-          openRegisterOverlay,
         ],
       )}
     >

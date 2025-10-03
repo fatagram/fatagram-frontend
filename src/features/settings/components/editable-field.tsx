@@ -3,6 +3,7 @@ import Text from "@/components/atoms/text";
 import Textbox from "@/components/atoms/textbox";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 
 interface EditableFieldProps {
   className?: string;
@@ -38,7 +39,6 @@ const EditableField: React.FC<EditableFieldProps> = ({
   onSaveClick,
   onCancelClick,
 }) => {
-  //const [inputValue, setInputValue] = React.useState<string>(isEmpty ? "" : value ?? "");
   const [inputValue, setInputValue] = React.useState<string | undefined>(value);
   const { t } = useTranslation() as { t: (key: string) => string };
 
@@ -55,7 +55,9 @@ const EditableField: React.FC<EditableFieldProps> = ({
         {editableMode === "inline" && isEdit ? (
           <div className="relative flex flex-col gap-1">
             <Textbox
-              className={`animate-fade-in px-2 py-1 ${isError && "mt-[5px]"}`}
+              className={clsx("animate-fade-in px-2 py-1", {
+                "mt-[5px]": isError
+              })}
               placeholder={placeholder}
               value={inputValue}
               isWrong={isError}
@@ -68,7 +70,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
             )}
           </div>
         ) : (
-          <Text sz="lg-1" className={`${valueClassName}`}>
+          <Text sz="lg-1" className={clsx(valueClassName)}>
             {value ?? noDataValue}
           </Text>
         )}
@@ -89,7 +91,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
                 </Button>
                 <Button
                   sz="sm-1"
-                  variant="secondary"
+                  variant="fourth"
                   onClick={() => {
                     onCancelClick?.();
                   }}
@@ -100,7 +102,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
             ) : (
               <Button
                 sz="sm-1"
-                variant="secondary"
+                variant="fourth"
                 onClick={() => {
                   onChangeClick?.();
                 }}

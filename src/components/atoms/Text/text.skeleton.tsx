@@ -1,6 +1,7 @@
 import React from "react";
 import { Size } from "../../common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from "clsx";
 
 const skeletonSizeClasses: Record<Size, string> = {
   xs: "h-[16px]",
@@ -26,8 +27,11 @@ const TextSkeletonLoading: React.FC<TextSkeletonLoadingProps> = ({
 }) => {
   return (
     <div
-      className={`animate-pulse select-none rounded-lg bg-[var(--fourth-bg-color)] shadow-lg
-            ${skeletonSizeClasses[sz]} ${className}`}
+      className={clsx(
+        'animate-pulse select-none rounded-lg bg-bg-fourth shadow-lg',
+        skeletonSizeClasses[sz],
+        className
+      )}
     />
   );
 };

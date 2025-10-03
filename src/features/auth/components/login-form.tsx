@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth/auth-context";
 import { useTranslation } from "react-i18next";
 import { Result } from "@/api/common/result";
 import { Button, Logo, Textbox, Text, PasswordBox, Checkbox, Link } from "@/components/atoms";
+import clsx from "clsx";
 
 interface LoginFormProps {
   switchForgotPassword?: () => void;
@@ -39,7 +40,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
   const { t } = useTranslation() as { t: (key: string) => string };
   const { login } = useAuth();
-  // console.log("Login Function: ", login);
 
   // hooks
   const navigate = useNavigate();
@@ -76,14 +76,10 @@ const LoginForm: React.FC<LoginFormProps> = ({
     return errorCodes.length === 0;
   };
 
-  // handleLogin function
-  // This function handles the login process.
-  // It calls the login API and handles the response.
   const handleLogin = async () => {
     resetErrors();
     if (!validateInput()) return;
 
-    // Call the login API
     const loginDto: LoginDto = {
       username: username,
       password: password,
@@ -135,58 +131,64 @@ const LoginForm: React.FC<LoginFormProps> = ({
 
   return (
     <form
-      className="relative flex flex-col items-center gap-[20px] min-w-[380px]
-                        p-[20px] bg-[var(--second-bg-color)] rounded-lg
-                        sm:p-[25px] animate-fade-in overflow-hidden"
+      className={clsx(
+        "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
+        "bg-bg-main rounded-2xl",
+        "p-16 animate-fade-in overflow-hidden"
+      )}
     >
       {isLoading && <OverlayLoading />}
 
       {isShowLogo && <Logo />}
       <Text
-        sz="xl-2"
+        sz="xl-1"
         weight="extrabold"
-        className="uppercase text-single-third 
-                            font-bold font-inter select-none"
+        className={clsx(
+          "uppercase text-primary-500",
+          "font-bold font-inter select-none"
+        )}
       >
         {t("auth:login.title")}
       </Text>
-      <div className="w-full">
-        <Textbox
-          className="text-[14px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
-          ref={inputUsernameRef}
-          autoComplete="username"
-          placeholder={t("auth:login.username")}
-          onChange={(e) => setUsername(e.target.value)}
-          isWrong={usernameError !== ""}
-        />
-        <Text
-          sz="sm-1"
-          className={`${usernameError === "" ? "hidden" : ""} px-[5px] text-red-400`}
-        >
-          {usernameError}
-        </Text>
-      </div>
-      <div className="w-full">
-        <PasswordBox
-          ref={inputPasswordRef}
-          className="text-[14px] w-[100%] px-[20px] sm:py-[7px] py-[10px] shadow-sm"
-          placeholder={t("auth:login.password")}
-          onChange={(e) => {
-            setPassword(e.target.value);
-          }}
-          isWrong={passwordError !== ""}
-          autoComplete="current-password"
-        />
-        <Text
-          sz="sm-1"
-          className={`${passwordError === "" ? "hidden" : ""} px-[5px] text-red-400`}
-        >
-          {passwordError}
-        </Text>
+      <div className="flex flex-col gap-3 w-full">
+        <div className="w-full">
+          <Textbox
+            className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
+            ref={inputUsernameRef}
+            autoComplete="username"
+            placeholder={t("auth:login.username")}
+            onChange={(e) => setUsername(e.target.value)}
+            isWrong={usernameError !== ""}
+          />
+          <Text
+            sz="sm-1"
+            className={clsx(usernameError === "" && "hidden", "px-[5px] text-red-400")}
+          >
+            {usernameError}
+          </Text>
+        </div>
+        <div className="w-full">
+          <PasswordBox
+            ref={inputPasswordRef}
+            className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
+            placeholder={t("auth:login.password")}
+            onChange={(e) => {
+              setPassword(e.target.value);
+            }}
+            isWrong={passwordError !== ""}
+            autoComplete="current-password"
+          />
+          <Text
+            sz="sm-1"
+            className={clsx(passwordError === "" && "hidden", "px-[5px] text-red-400")}
+          >
+            {passwordError}
+          </Text>
+        </div>
       </div>
       <div className="flex justify-between w-[95%] items-center gap-[50px]">
         <Checkbox
-          className="text-[15px] text-[#00230e]"
+          className=""
           label={t("auth:login.rememberMe")}
           checked={isRememberMe}
           onChange={(e) => {
@@ -196,20 +198,22 @@ const LoginForm: React.FC<LoginFormProps> = ({
         {switchForgotPassword && (
           <Text
             sz="sm-2"
-            className="text-single-third hover:text-single-main 
-                                    hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
+            className={clsx(
+              "text-primary-700 hover:text-primary-600",
+              "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
+            )}
             onClick={switchForgotPassword}
           >
             {t("auth:login.forgotPassword")}
           </Text>
         )}
       </div>
-      <Text className={`${unknownError === "" ? "hidden" : ""} px-[5px] text-red-400`}>
+      <Text className={clsx(unknownError === "" && "hidden", "px-[5px] text-red-400")}>
         {unknownError}
       </Text>
       <Button
         type="button"
-        className={`w-full font-montserrat`}
+        className="w-full font-montserrat"
         onClick={handleLogin}
         ref={btnRef}
         sz="md-1"
@@ -217,17 +221,19 @@ const LoginForm: React.FC<LoginFormProps> = ({
         {t("auth:login.loginButton")}
       </Button>
       <div className="flex gap-1 items-center">
-        <Text sz="sm-2" className="text-single-third">
+        <Text sz="sm-2" className="text-text-main">
           {t("auth:login.registerAnswer")}
         </Text>
-        <Link className={"sm:text-[15px] font-bold"} to="/register">
+        <Link className="font-bold" to="/register">
           {t("auth:login.registerButton")}
         </Link>
       </div>
 
       {isShowClose && (
         <Text
-          className={`absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer`}
+          className={clsx(
+            "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
+          )}
           onClick={onClose}
         >
           <i className="fa-solid fa-xmark"></i>

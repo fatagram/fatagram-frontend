@@ -11,6 +11,7 @@ import { markAsRead, setShowFull } from "../../stores/notification-slice";
 import Text from "@/components/atoms/text";
 import Button from "@/components/atoms/button";
 import { useAuth } from "@/contexts/auth/auth-context";
+import clsx from "clsx";
 
 type NotificationMenuProps = {
   className?: string;
@@ -45,8 +46,10 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
 
   return (
     <div
-      className={`bg-[var(--main-bg-color)] shadow-xl rounded-xl 
-                            flex flex-col gap-2 ${className}`}
+      className={clsx(
+        "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
+        className
+      )}
       ref={ref}
     >
       <Text sz="lg-1" weight="bold" className="px-2">
@@ -58,14 +61,12 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
             ? notifications.map((notification: NotificationDto) => (
                 <li
                   key={notification.id}
-                  className="px-2 py-2 hover:bg-[var(--second-bg-color)] rounded-lg 
-                                    cursor-pointer"
+                  className="px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer"
                 >
                   <NotificationFactory
                     notificationDto={notification}
                     onClick={async () => {
                       navigate(notification.link || "/");
-                      // notification.isRead = true;
                       dispatch(markAsRead(notification.id));
                       await notificationService.markAsRead(notification.id);
                       onClick?.();
@@ -76,14 +77,12 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
             : notifications.slice(0, 5).map((notification: NotificationDto) => (
                 <li
                   key={notification.id}
-                  className="px-2 py-2 hover:bg-[var(--second-bg-color)] rounded-lg 
-                                    cursor-pointer"
+                  className="px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer"
                 >
                   <NotificationFactory
                     notificationDto={notification}
                     onClick={async () => {
                       navigate(notification.link || "/");
-                      // notification.isRead = true;
                       dispatch(markAsRead(notification.id));
                       await notificationService.markAsRead(notification.id);
                       onClick?.();
@@ -101,7 +100,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
             <li className="mt-2">
               <Button
                 sz="sm-1"
-                variant="secondary"
+                variant="fourth"
                 className="w-full"
                 onClick={() => {
                   dispatch(setShowFull(true));
@@ -134,7 +133,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
 
       {!isInNotificationPage && (
         <div className="absolute right-4" onClick={() => navigate("/notifications")}>
-          <Text sz="sm-1" className="text-single-main cursor-pointer underline">
+          <Text sz="sm-1" color="secondary" className={clsx("cursor-pointer underline")}>
             Mở thông báo
           </Text>
         </div>

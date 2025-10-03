@@ -1,5 +1,6 @@
 import { useState } from "react";
-import { Stack, Text } from "@/components/atoms";
+import { Text } from "@/components/atoms";
+import clsx from "clsx";
 
 type SubNavbarSectionProps = {
   title?: string;
@@ -11,19 +12,19 @@ const SubNavbarSection: React.FC<SubNavbarSectionProps> = ({ title, className, c
   const [showChildren, setShowChildren] = useState<boolean>(true);
 
   return (
-    <Stack space={2} className={`${className}`}>
+    <div className={clsx("flex flex-col gap-2", className)}>
       {title && (
         <Text
           sz="lg-1"
           weight="bold"
-          className="p-2 pl-5 text-gradient-main"
+          className={clsx("p-2 pl-5 text-gradient-main")}
           onClick={() => setShowChildren(!showChildren)}
         >
           {title}
         </Text>
       )}
       {showChildren && <div className="animate-dropdown-slide">{children}</div>}
-    </Stack>
+    </div>
   );
 };
 

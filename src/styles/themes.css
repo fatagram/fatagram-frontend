@@ -1,40 +1,85 @@
 :root {
+  /* Base */
   --font-size: 16px;
   --border-radius: 8px;
 
-  --main-bg-color: rgb(255, 255, 255);
-  --second-bg-color: rgb(249, 249, 249);
-  --third-bg-color: rgb(236, 250, 245);
-  --fourth-bg-color: rgb(240, 240, 240);
+  /* Background layers */
+  --bg-main: rgb(255, 255, 255);
+  --bg-second: rgb(249, 249, 249);
+  --bg-third: rgb(236, 250, 245);
+  --bg-fourth: rgb(240, 240, 240);
+  --bg-fifth: rgb(248, 250, 252);
+  --bg-sixth: rgb(241, 245, 249);
+  --bg-seventh: rgb(230, 235, 240);
+  --bg-eighth: rgb(220, 225, 230);
+  --bg-ninth: rgb(210, 215, 220);
+  --bg-tenth: rgb(200, 205, 210);
+  
+  /* Special background variants */
+  --bg-overlay: rgba(0, 0, 0, 0.5);
+  --bg-modal: rgba(255, 255, 255, 0.95);
+  --bg-glass: rgba(255, 255, 255, 0.1);
+  --bg-card: rgb(255, 255, 255);
+  --bg-sidebar: rgb(248, 250, 252);
+  --bg-header: rgb(255, 255, 255);
+  --bg-footer: rgb(249, 249, 249);
+  --bg-hover: rgb(243, 244, 246);
+  --bg-active: rgb(229, 231, 235);
+  --bg-disabled: rgb(229, 231, 235);
 
-  /* Single colors */
-  --main-single-color: 43, 212, 139;
-  --second-single-color: 44, 167, 114;
-  --third-single-color: 0, 56, 32;
+  /* Brand colors (primary & secondary as palette) */
+  --primary-50:  #ecfdf5;
+  --primary-100: #d1fae5;
+  --primary-200: #a7f3d0;
+  --primary-300: #6ee7b7;
+  --primary-400: #34d399;
+  --primary-500: rgb(43, 212, 139);  /* giữ màu chính của mày */
+  --primary-600: #059669;
+  --primary-700: #047857;
+  --primary-800: #065f46;
+  --primary-900: rgb(0, 30, 17);
 
-  --text-color: rgb(46, 46, 46);
+  --secondary-100: rgb(44, 167, 114);
+  --secondary-200: #3da8ba;
+  --secondary-300: #2aacb0;
+  --secondary-400: #36bcbf;
+  --secondary-500: #47c4b0;
+  --secondary-600: #2a9eac;
 
-  --btn-color: rgb(221, 221, 221);
-  --btn-hover-color: rgb(234, 234, 234);
+  /* Text */
+  --text-main: rgb(46, 46, 46);
+  --text-second: rgb(117, 117, 117);
+  --text-third: rgb(189, 189, 189);
+  --text-fourth: rgb(224, 224, 224);
 
-  --main-gradient-color: repeating-linear-gradient(
+  /* Buttons / Surface */
+  --btn-main: rgb(221, 221, 221);
+  --btn-second: rgb(234, 234, 234);
+  --btn-third: rgb(250, 250, 250);
+  --btn-fourth: rgb(255, 255, 255);
+
+  /* Gradients */
+  --gradient-main: repeating-linear-gradient(
     45deg,
     #8dfeda 0%,
-    #3dba84 20%,
-    #2aacb0 40%,
-    #36bcbf 60%,
-    #47c4b0 80%,
+    #3dba84 25%,
+    #2aacb0 50%,
+    #36bcbf 75%,
     #8fffd0 100%
   );
 
-  --second-gradient-color: repeating-linear-gradient(
+  --gradient-secondary: repeating-linear-gradient(
     45deg,
     #8de8f0 0%,
-    #3da8ba 20%,
-    #2a9eac 40%,
-    #36b0bc 60%,
-    #47b5c4 80%,
+    #3da8ba 25%,
+    #36b0bc 50%,
+    #47b5c4 75%,
     #8fe8ff 100%
   );
-  --main-wrong-gradient-color: rgb(255, 75, 75);
+
+  /* Semantic (status colors) */
+  --success: #22c55e;
+  --warning: #eab308;
+  --error: rgb(255, 75, 75);
+  --info: #3b82f6;
 }

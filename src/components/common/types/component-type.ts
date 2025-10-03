@@ -1,17 +1,19 @@
 import { Size } from "./size";
 import React from "react";
 
-interface ResponsiveOverride {
+interface BaseProps {
   sz?: Size;
   className?: string;
   children?: React.ReactNode;
 }
 
-interface BaseProps extends ResponsiveOverride {
-  smProps?: ResponsiveOverride;
-  mdProps?: ResponsiveOverride;
-  lgProps?: ResponsiveOverride;
-}
+// type ResponsiveType = Omit<ResponsiveOverride, "className">;
+
+// interface BaseProps extends ResponsiveOverride {
+//   smProps?: ResponsiveType;
+//   mdProps?: ResponsiveType;
+//   lgProps?: ResponsiveType;
+// }
 
 // ComponentProps sẽ tự động chọn đúng HTML attributes dựa theo T
 export type ComponentProps<T extends HTMLElement = HTMLElement> =

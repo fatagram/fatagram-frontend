@@ -1,6 +1,7 @@
 import SelectBox, { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
 import Text from "@/components/atoms/text";
 import React from "react";
+import clsx from "clsx";
 
 interface SelectBoxSettingProps {
   options?: Option[];
@@ -20,7 +21,7 @@ const SelectBoxSetting: React.FC<SelectBoxSettingProps> = ({
   selectBox,
 }) => {
   return (
-    <div className={`flex justify-between items-center w-full ${className}`}>
+    <div className={clsx("flex justify-between items-center w-full", className)}>
       <Text sz="lg-1" className="m-2">
         {title}
       </Text>

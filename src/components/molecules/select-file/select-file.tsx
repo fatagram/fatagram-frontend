@@ -1,4 +1,5 @@
 import React from "react";
+import clsx from "clsx";
 
 interface SelectFileProps {
   onChange: (file: File) => void;
@@ -29,9 +30,11 @@ const SelectFile: React.FC<SelectFileProps> = ({
 
   return (
     <div
-      className={`bg-[var(--btn-color)] transition-all duration-200 ease text-[var(--text-color)] hover:bg-[var(--btn-hover-color)] 
-        rounded-lg px-4 py-2 cursor-pointer text-[13px]
-        ${className} `}
+      className={clsx(
+        "bg-[var(--btn-color)] transition-all duration-200 ease text-[var(--text-color)] hover:bg-[var(--btn-hover-color)]",
+        "rounded-lg px-4 py-2 cursor-pointer text-[13px]",
+        className
+      )}
       onClick={handleClick}
     >
       <input

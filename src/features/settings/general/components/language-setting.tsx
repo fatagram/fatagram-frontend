@@ -3,6 +3,7 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import SelectBoxSetting from "../../components/selectbox-setting";
 import SelectLanguage from "./select-language";
+import clsx from "clsx";
 
 interface LanguageSettingsProps {
   className?: string;
@@ -12,7 +13,7 @@ const LanguageSettings: React.FC<LanguageSettingsProps> = ({ className }) => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   return (
-    <div className={`${className}`}>
+    <div className={clsx(className)}>
       <SettingCard title={t("settings:language.title")}>
         <SelectBoxSetting
           title={t("settings:language.yourLanguage")}

@@ -5,6 +5,7 @@ import Text from "@/components/atoms/text";
 import { TimeUnit, TimeUnitTranslateMap } from "@/types/time-unit";
 import React, { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
+import clsx from "clsx";
 
 type FriendRequestsProps = {
   className?: string;
@@ -100,7 +101,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
 
   // render
   return (
-    <Card title={`Danh sách lời mời (${total})`} className={`${className}`}>
+    <Card title={`Danh sách lời mời (${total})`} className={className}>
       <div className="flex flex-wrap gap-2 h-full w-full">
         {requests.length > 0 ? (
           <>
@@ -134,10 +135,10 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
 
       <div ref={loaderRef} className="w-full h-0" />
       {isLoading && (
-        <div className="flex justify-center items-center w-full h-10 gap-1 mt-5">
-          <span className="w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0s]"></span>
-          <span className="w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.2s]"></span>
-          <span className="w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.4s]"></span>
+        <div className={clsx("flex justify-center items-center w-full h-10 gap-1 mt-5")}>
+          <span className={clsx("w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0s]")}></span>
+          <span className={clsx("w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.2s]")}></span>
+          <span className={clsx("w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.4s]")}></span>
         </div>
       )}
     </Card>

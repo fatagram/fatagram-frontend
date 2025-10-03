@@ -10,7 +10,7 @@ export const createSignalRConnection = () => {
         withCredentials: true,
       })
       .withAutomaticReconnect()
-      .configureLogging(signalR.LogLevel.Information)
+      .configureLogging(signalR.LogLevel.Error)
       .build();
     return connection;
   } catch (error) {

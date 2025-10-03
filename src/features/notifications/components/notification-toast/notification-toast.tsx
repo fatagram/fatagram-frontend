@@ -1,6 +1,7 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import NotificationFactory from "../notification-factory";
 import { useNavigate } from "react-router-dom";
+import clsx from "clsx";
 
 type NotificationProps = {
   className?: string;
@@ -12,9 +13,10 @@ const NotificationToast: React.FC<NotificationProps> = ({ className, notificatio
 
   return (
     <div
-      className={`py-4 px-8 bg-[var(--main-bg-color)] rounded-lg
-            ${className}
-        `}
+      className={clsx(
+        "py-4 px-8 bg-bg-second rounded-lg",
+        className
+      )}
     >
       <NotificationFactory
         notificationDto={notification}

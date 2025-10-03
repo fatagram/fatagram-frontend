@@ -2,6 +2,7 @@ import React, { useEffect } from "react";
 import "@/styles/global.css";
 import style from "./background-image.module.css";
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from "clsx";
 
 interface BackgroundImageProps extends ComponentProps {
   src: string;
@@ -15,9 +16,12 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ src, alt, className, 
 
   return (
     <div
-      className={`${style["user-bg-image"]}
-                        ${src ?? "h-[200px] !bg-[var(--third-bg-color)]"}
-                        ${className} `}
+      className={clsx(
+      "rounded-2xl",
+      style["user-bg-image"],
+      src ? "" : "h-[200px] !bg-[var(--third-bg-color)]",
+      className
+      )}
       aria-label={alt}
     >
       {children}

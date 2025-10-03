@@ -1,8 +1,8 @@
 import React from "react";
+import clsx from "clsx";
 import PageNavbarSection from "./page-navbar-section";
 import PageNavbarItem from "./page-navbar-item";
 import Text from "@/components/atoms/text";
-import { Stack } from "@/components/atoms";
 
 type PageNavbarProps = {
   title?: string;
@@ -14,12 +14,15 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
   Item: typeof PageNavbarItem;
 } = ({ title, className, children }) => {
   return (
-    <Stack space={2} overflow="scroll" align="start" className={`${className}`}>
-      <Text sz="xl-1" weight="bold" className="p-2 pl-5 text-gradient-main">
+    <div className={clsx(
+      "flex flex-col gap-2",
+      className
+    )}>
+      <Text sz="xl-1" weight="bold" className="pt-2 pb-4 px-5 text-gradient-main bg-bg-second">
         {title}
       </Text>
       {children}
-    </Stack>
+    </div>
   );
 };
 

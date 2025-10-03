@@ -5,8 +5,8 @@
 
   /* Gradient border */
   background:
-    linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box,
-    var(--main-gradient-color) border-box;
+    linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
+    var(--gradient-main) border-box;
   background-size: 200% 100%;
   background-position: 0 100%;
   transition: background-position 0.3s ease-out;
@@ -19,8 +19,8 @@
 
   /* Gradient border */
   background:
-    linear-gradient(var(--second-bg-color), var(--second-bg-color)) padding-box,
-    var(--main-wrong-gradient-color) border-box;
+    linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
+    rgb(var(--error)) border-box;
   background-size: 200% 100%;
   background-position: 0 100%;
   transition: background-position 0.3s ease-out;

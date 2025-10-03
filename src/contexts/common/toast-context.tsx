@@ -52,8 +52,8 @@ const ToastManager: React.FC<ToastManagerProps> = ({ className, children }) => {
       {children}
       {toast && (
         <div
-          className={`animate-left-to-right fixed bottom-8 left-8 rounded-lg shadow-2xl
-                    bg-[var(--main-bg-color)] text-[var(--text-color)] max-w-full z-50
+          className={`animate-left-to-right fixed bottom-8 left-8 rounded-2xl shadow-2xl
+                    bg-bg-second max-w-full z-50
                      ${className}`}
         >
           {toast.type === "notification" ? (
@@ -68,7 +68,7 @@ const ToastManager: React.FC<ToastManagerProps> = ({ className, children }) => {
             <div>More</div>
           )}
           <Button
-            size="sm-1"
+            sz="sm-1"
             variant="third"
             className="absolute top-2 right-2"
             onClick={() => setToast(null)}

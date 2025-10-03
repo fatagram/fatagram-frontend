@@ -1,4 +1,5 @@
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from "clsx";
 import React from "react";
 
 const sizeClasses = {
@@ -50,11 +51,15 @@ const AvatarSkeletonLoading: React.FC<AvatarSkeletonLoadingProps> = ({
 
   return (
     <div
-      className={`relative aspect-square ${sizeClass} ${shapeClass} object-cover select-none ${className} 
-            overflow-hidden`}
+      className={clsx(
+        "relative aspect-square overflow-hidden object-cover select-none",
+        sizeClass,
+        shapeClass,
+        className
+      )}
     >
-      <div className="absolute inset-0 bg-[var(--main-bg-color)] rounded-full overflow-hidden">
-        <div className="animate-pulse bg-[var(--fourth-bg-color)] w-full h-full rounded-full"></div>
+      <div className="absolute inset-0 bg-bg-main rounded-full overflow-hidden">
+        <div className="animate-pulse bg-bg-fourth w-full h-full rounded-full" />
       </div>
     </div>
   );

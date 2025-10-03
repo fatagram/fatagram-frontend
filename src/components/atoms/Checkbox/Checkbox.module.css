@@ -1,9 +1,9 @@
 /* Primary checkbox */
 
 .checkbox .checkmark {
-  background-image: var(--main-gradient-color);
+  background-image: var(--gradient-main);
 }
 
 .checkmark::after {
-  background-image: var(--main-gradient-color);
+  background-image: var(--gradient-main);
 }

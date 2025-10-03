@@ -1,6 +1,7 @@
 import React, { forwardRef } from "react";
 import Textbox, { TextboxProps } from "./textbox";
 import { Size } from "../../common/types/size";
+import clsx from "clsx";
 
 interface PasswordBoxProps extends TextboxProps {
   showPasswordToggle?: boolean;
@@ -34,13 +35,15 @@ const PasswordBox = forwardRef<HTMLInputElement, PasswordBoxProps>(
         {showPasswordToggle && (
           <button
             type="button"
-            className="absolute right-0 top-1/2 -translate-y-1/2 mr-5"
+            className={clsx(
+              "absolute right-0 top-1/2 -translate-y-1/2 mr-5"
+            )}
             onClick={() => setShowPassword(!showPassword)}
           >
             {showPassword ? (
-              <i className="fa-solid fa-eye text-[#5e5e5e]"></i>
+              <i className={clsx("fa-solid fa-eye text-secondary-500")}></i>
             ) : (
-              <i className="fa-solid fa-eye-slash text-single-third"></i>
+              <i className={clsx("fa-solid fa-eye-slash text-text-main")}></i>
             )}
           </button>
         )}

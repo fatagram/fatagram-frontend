@@ -1,6 +1,7 @@
-import { Stack } from "@/components/atoms";
+import { Text } from "@/components/atoms";
 import SubNavbarItem from "./sub-navbar-item";
 import SubNavbarSection from "./sub-navbar-section";
+import clsx from "clsx";
 
 type SubNavbarProps = {
   className?: string;
@@ -11,9 +12,9 @@ const SubNavbar: React.FC<SubNavbarProps> & { Item: typeof SubNavbarItem } & {
   Section: typeof SubNavbarSection;
 } = ({ className, children }) => {
   return (
-    <Stack as="nav" space={2} className={className}>
+    <div className={clsx("flex flex-col gap-1", className)}>
       {children}
-    </Stack>
+    </div>
   );
 };
 

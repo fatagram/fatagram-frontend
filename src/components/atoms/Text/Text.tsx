@@ -1,6 +1,7 @@
 import React, { ElementType, forwardRef, JSX } from "react";
 import { Size } from "../../common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from "clsx";
 
 // Define a mapping of text sizes
 const textSizes: Record<Size, string> = {
@@ -30,8 +31,8 @@ type Weight = keyof typeof weightClasses;
 
 // Define a mapping of text colors
 const colorClasses: Record<string, string> = {
-  primary: "text-[var(--text-color)]",
-  secondary: "text-single-main",
+  primary: "text-text-main",
+  secondary: "text-primary-600",
   danger: "text-red-400",
   success: "text-green-600",
   warning: "text-yellow-600",
@@ -61,15 +62,17 @@ const Text = forwardRef<HTMLElement, TextProps>(
   ) => {
     return (
       <Component
-        className={`${className}
-            ${textSizes[sz]}
-            ${weightClasses[weight]}
-            ${colorClasses[color]}
-            ${wrap}`}
-        ref={ref}
-        {...props}
+      className={clsx(
+        textSizes[sz],
+        weightClasses[weight],
+        colorClasses[color],
+        wrap,
+        className
+      )}
+      ref={ref}
+      {...props}
       >
-        {children}
+      {children}
       </Component>
     );
   },

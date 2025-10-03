@@ -1,8 +1,7 @@
 import { Outlet } from "react-router-dom";
 import ProfileNavbar from "./profile-navbar";
 import React from "react";
-import { ProfilePageState } from "@/types/profile-page-state";
-import { Stack } from "@/components/atoms";
+import clsx from "clsx";
 
 type ProfileBodyProps = {
   className?: string;
@@ -10,14 +9,12 @@ type ProfileBodyProps = {
 
 const ProfileBody: React.FC<ProfileBodyProps> = ({ className }) => {
   return (
-    <Stack direction="down" className={`w-full ${className}`}>
-      <ProfileNavbar
-        className="bg-[var(--second-bg-color)] justify-start rounded-md shadow-md mt-2 p-2 w-full"
-      />
+    <div className={clsx("w-full flex flex-col", className)}>
+      <ProfileNavbar className="bg-bg-main justify-start rounded-2xl shadow-md mt-2 p-2 w-full" />
       <div className="w-full">
         <Outlet />
       </div>
-    </Stack>
+    </div>
   );
 };
 

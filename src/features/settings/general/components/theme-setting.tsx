@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import clsx from "clsx";
 import SettingCard from "@/components/molecules/card";
 import { useTranslation } from "react-i18next";
 import { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
@@ -27,7 +28,7 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = ({ className }) => {
   }, [availableThemes]);
 
   return (
-    <div className={`${className}`}>
+    <div className={clsx(className)}>
       <SettingCard title={t("settings:theme.title")}>
         <SelectBoxSetting
           title={t("settings:theme.selectTheme")}

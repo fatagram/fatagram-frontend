@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
-import SelectFile from "@/components/molecules/select-file";
 import emptyAvatar from "@/assets/images/empty_avatar.png";
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from "clsx";
 
 export const sizeClasses = {
   // Mini sizes
@@ -48,15 +48,12 @@ const Avatar: React.FC<AvatarProps> = ({
   onChange = () => {},
   src,
   alt,
-  border = 5,
   sz = "md-1",
   shape = "circle",
-  isCanEdit = false,
   className,
 }) => {
   const sizeClass = sizeClasses[sz];
   const shapeClass = shapeClasses[shape];
-  const boderClass = `border-[${border}px] border-[var(--main-bg-color)]`;
 
   const [imgSrc, setImgSrc] = React.useState<string>(src || emptyAvatar);
 
@@ -66,8 +63,13 @@ const Avatar: React.FC<AvatarProps> = ({
 
   return (
     <div
-      className={`relative ${sizeClass} aspect-square ${shapeClass} object-contain select-none ${className} 
-            overflow-hidden ${boderClass} flex-shrink-0` }
+      className={clsx(
+        "relative aspect-square object-contain select-none flex-shrink-0",
+        "overflow-hidden",
+        sizeClass,
+        shapeClass,
+        className,
+      )}
     >
       {/* {isCanEdit ? (
         <SelectFile
@@ -81,11 +83,13 @@ const Avatar: React.FC<AvatarProps> = ({
         </SelectFile>
       ) : null} */}
 
-      <div className={`absolute inset-0 bg-[var(--main-bg-color)] overflow-hidden`}>
+      <div className={clsx(
+        "absolute inset-0 bg-bg-main overflow-hidden"
+      )}>
         <img
           src={imgSrc || emptyAvatar}
           alt={alt}
-          className="relative z-0 w-full h-full object-cover"
+          className={clsx("relative z-0 w-full h-full object-cover")}
           onError={() => setImgSrc(emptyAvatar)}
         />
       </div>

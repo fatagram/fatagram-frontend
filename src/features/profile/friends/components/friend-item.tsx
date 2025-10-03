@@ -8,6 +8,7 @@ import { useNavigate } from "react-router-dom";
 import AddFriendButton from "../../components/friend-button";
 import Dropdown from "@/components/molecules/dropdown";
 import Text from "@/components/atoms/text";
+import clsx from "clsx";
 
 interface FriendItemProps {
   className?: string;
@@ -60,18 +61,21 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
 
   return (
     <div
-      className={`relative flex items-center justify-between bg-[var(--second-bg-color)] rounded-xl 
-                hover:bg-[var(--fourth-bg-color)] cursor-pointer transition-colors ${className}`}
+      className={clsx(
+        "relative flex items-center justify-between rounded-xl",
+        "hover:bg-bg-fourth cursor-pointer transition-colors",
+        className
+      )}
     >
       <div
-        className={`relative flex p-3 gap-4 items-center`}
+        className="relative flex p-3 gap-4 items-center"
         onClick={() => navigate(`/${friendDto.id}`)}
       >
         <div>
-          <Avatar alt="Avatar" src={friendDto.avatar ?? undefined} size="small_1" />
+          <Avatar alt="Avatar" src={friendDto.avatar ?? undefined} sz="sm-1" />
         </div>
         <div className="flex flex-col h-full justify-center flex-1">
-          <Text size="md-2" weight="bold">
+          <Text sz="md-2" weight="bold">
             {friendDto.name}
           </Text>
         </div>
@@ -82,7 +86,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
             <button
               aria-label="More options"
               ref={btnRef}
-              className="w-10 h-10 rounded-full hover:bg-[var(--main-bg-color)]"
+              className="w-10 h-10 rounded-full hover:bg-bg-third"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsShowDropdown(!isShowDrowdown);
@@ -92,14 +96,16 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
             </button>
             <Dropdown
               isShow={isShowDrowdown}
-              className="absolute flex sm:top-[130%] top-[110%] left-[1%] bg-[var(--main-bg-color)] p-2
-                                        rounded-lg shadow-md z-10 min-w-[200px] w-[calc(100%-2%)]"
+              className={clsx(
+                "absolute flex sm:top-[130%] top-[110%] left-[1%] p-2",
+                "rounded-lg shadow-md z-10 min-w-[200px] w-[calc(100%-2%)]"
+              )}
               ref={dropdownRef}
               items={requestOptions}
             />
           </>
         ) : (
-          <AddFriendButton size="sm-1" uid={friendDto.id} />
+          <AddFriendButton sz="sm-1" uid={friendDto.id} />
         )}
       </div>
     </div>

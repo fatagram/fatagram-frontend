@@ -1,7 +1,6 @@
 import React from "react";
+import clsx from "clsx";
 import NavbarItem from "./navbar-item";
-import { Stack } from "@/components/atoms";
-import { Scale } from "lucide-react";
 
 interface NavbarFooterProps {
   className?: string;
@@ -10,35 +9,27 @@ interface NavbarFooterProps {
 }
 
 const NavbarFooter: React.FC<NavbarFooterProps> = ({ className, isAuthenticated }) => {
-  const navItems: { icon: React.ReactNode; path: string }[] = [
-    { icon: <i className="fa-solid fa-house"></i>, path: "/" },
-    { icon: <i className="fa-solid fa-user-group"></i>, path: "/friends" },
+  const navItems: { icon: React.ReactNode; path: string; isIndex: boolean }[] = [
+    { icon: <i className="fa-solid fa-house"></i>, path: "/", isIndex: true },
+    { icon: <i className="fa-solid fa-user-group"></i>, path: "/friends", isIndex: false },
   ];
   return (
-    <Stack
-      space={3}
-      className={`bg-[var(--third-bg-color)] w-full py-1
-                ${className}`}
+    <div
+      className={clsx(
+        "bg-[var(--third-bg-color)] w-full py-1",
+        className
+      )}
     >
       {isAuthenticated && (
-        <Stack space={3} align="center" className="flex-1">
-          <Stack
-            justify="center"
-            direction="right"
-            className="w-full"
-            mdProps={{
-              className: "w-auto",
-            }}
-          >
-            {navItems.map((item, index) => (
-              <NavbarItem path={item.path} key={index}>
+        <div className="flex flex-1 items-center justify-center py-1">
+          {navItems.map((item, index) => (
+              <NavbarItem path={item.path} key={index} activeRoute={item.isIndex}>
                 {item.icon}
               </NavbarItem>
             ))}
-          </Stack>
-        </Stack>
+        </div>
       )}
-    </Stack>
+    </div>
   );
 };
 

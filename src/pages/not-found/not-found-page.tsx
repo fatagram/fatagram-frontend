@@ -6,6 +6,7 @@ import { useTranslation } from "react-i18next";
 import Logo from "@/components/atoms/logo";
 import Text from "@/components/atoms/text";
 import Button from "@/components/atoms/button";
+import clsx from "clsx";
 
 // NotFoundPage function
 // This function is a React component that renders the 404 page.
@@ -23,40 +24,41 @@ function NotFoundPage() {
 
   return (
     <div
-      className="flex flex-col items-center sm:justify-center h-full
-                    w-full gap-[20px] pt-10"
+      className={clsx(
+        "flex flex-col items-center sm:justify-center h-full w-full gap-[20px] pt-10"
+      )}
     >
-      <Logo hasSlogan={false} className={"text-[30px]"} />
+      <Logo hasSlogan={false} className={clsx("text-[30px]")} />
       <Text
         sz="xl-3"
-        className="font-jua bg-single-main text-single-third
-                          w-[200px] h-[200px] flex justify-center items-center rounded-full"
+        className={clsx(
+          "font-jua bg-single-main text-single-third w-[200px] h-[200px] flex justify-center items-center rounded-full"
+        )}
       >
         404
       </Text>
       <Text
         weight="extrabold"
         sz="lg-3"
-        className="uppercase
-                        text-single-third"
+        className={clsx("uppercase text-single-third")}
       >
         {t("notFound.title")}
       </Text>
-      <Text sz="lg-1" className="flex justify-center text-center">
+      <Text sz="lg-1" className={clsx("flex justify-center text-center")}>
         {t("notFound.description")}
       </Text>
-      <div className="flex gap-[10px]">
+      <div className={clsx("flex gap-[10px]")}>
         <Button
-          className={"flex items-center"}
+          className={clsx("flex items-center")}
           onClick={() => {
             navigate("/");
           }}
         >
-          <ArrowLeft className="w-5 h-5 mr-2" />
+          <ArrowLeft className={clsx("w-5 h-5 mr-2")} />
           {t("notFound.backButton")}
         </Button>
       </div>
-      <Footer className="text-[#959595]" />
+      <Footer className={clsx("text-[#959595]")} />
     </div>
   );
 }

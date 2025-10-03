@@ -1,9 +1,10 @@
 import React, { useCallback } from "react";
-import ProfileMenu from "@/features/user/components/profile-menu";
+import ProfileMenu from "@/features/user/components/user-menu";
 import { useNavigate } from "react-router-dom";
 import NavbarItem from "./navbar-item";
 import NotificationMenu from "@/features/notifications/components/notification-menu/notification-badge";
-import { Button, Logo, Stack } from "@/components/atoms";
+import { Button, Logo } from "@/components/atoms";
+import clsx from "clsx";
 
 interface NavbarProps {
   className?: string;
@@ -13,9 +14,9 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ className, isAuthenticated, onLogin, onSignup }) => {
-  const navItems: { icon: React.ReactNode; path: string }[] = [
-    { icon: <i className="fa-solid fa-house"></i>, path: "/" },
-    { icon: <i className="fa-solid fa-user-group"></i>, path: "/friends" },
+  const navItems: { icon: React.ReactNode; path: string; isIndex: boolean }[] = [
+    { icon: <i className="fa-solid fa-house"></i>, path: "/", isIndex: true },
+    { icon: <i className="fa-solid fa-user-group"></i>, path: "/friends", isIndex: false },
   ];
 
   const navigate = useNavigate();
@@ -29,61 +30,47 @@ const Navbar: React.FC<NavbarProps> = ({ className, isAuthenticated, onLogin, on
   }, [isAuthenticated, navigate]);
 
   return (
-    <Stack
-      as="nav"
-      direction="right"
-      space={3}
-      align="center"
-      justify="between"
-      className={`bg-[var(--third-bg-color)] py-1 px-1
-            shadow-md ${className}`}
-      smProps={{
-        className: "px-8", 
-      }}
+    <nav
+      className={clsx(
+        "flex flex-row gap-3 items-center justify-between",
+        "bg-bg-main p-1 shadow-md",
+        "sm:px-8",
+        className
+      )}
     >
-      <div onClick={handleGoToHome} className=" cursor-pointer items-center gap-2">
+      <div onClick={handleGoToHome} className="cursor-pointer items-center gap-2">
         <Logo hasSlogan={false} sz="md-1" />
       </div>
       {isAuthenticated ? (
-        <Stack direction="right" space={3} className="flex-1">
-          <Stack
-            justify="center"
-            direction="right"
-            className="hidden w-full"
-            smProps={{
-              className: "flex flex-1",
-            }}
+        <div className="flex flex-row gap-3 flex-1">
+          <div
+            className={clsx(
+              "hidden w-full justify-center flex-row",
+              "sm:flex sm:flex-1"
+            )}
           >
             {navItems.map((item, index) => (
-              <NavbarItem path={item.path} key={index} className="!px-10">
+              <NavbarItem path={item.path} key={index} className="!px-10" activeRoute={item.isIndex}>
                 {item.icon}
               </NavbarItem>
             ))}
-          </Stack>
-          <Stack
-            space={2}
-            className="flex-1"
-            direction="right"
-            justify="end"
-            smProps={{
-              className: "flex-none",
-            }}
-          >
+          </div>
+          <div className={clsx("flex flex-row gap-2 flex-1 justify-end sm:flex-none")}>
             <NotificationMenu />
             <ProfileMenu />
-          </Stack>
-        </Stack>
+          </div>
+        </div>
       ) : (
-        <Stack space={2} direction="right">
+        <div className="flex flex-row gap-2">
           <Button sz="sm-1" variant="secondary" onClick={() => onLogin?.()}>
             Sign in
           </Button>
           <Button sz="sm-1" variant="primary" onClick={() => onSignup?.()}>
             Sign up
           </Button>
-        </Stack>
+        </div>
       )}
-    </Stack>
+    </nav>
   );
 };
 

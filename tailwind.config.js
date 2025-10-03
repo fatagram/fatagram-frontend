@@ -1,3 +1,5 @@
+import { colorsConfig } from "./colors.config"
+
 /** @type {import('tailwindcss').Config} */
 module.exports = {
   darkMode: "class",
@@ -10,11 +12,10 @@ module.exports = {
         varela_round: ["Varela Round", "sans-serif"],
         nunito: ["Nunito", "sans-serif"],
       },
-      colors: {
-        "single-main": "rgb(var(--main-single-color) / <alpha-value>)",
-        "single-second": "rgb(var(--second-single-color) / <alpha-value>)",
-        "single-third": "rgb(var(--third-single-color) / <alpha-value>)",
-      },
+      colors: colorsConfig,
+      gridTemplateColumns: {
+        "golden": "1fr 1.618fr",
+      }
     },
   },
   plugins: [require("tailwind-scrollbar")],

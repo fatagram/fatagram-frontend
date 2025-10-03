@@ -1,5 +1,6 @@
 import React from "react";
 import { Text } from "@/components/atoms";
+import clsx from "clsx";
 
 interface CardProps {
   className?: string;
@@ -11,9 +12,12 @@ interface CardProps {
 const Card: React.FC<CardProps> = ({ className, children, title, titleClassName }) => {
   return (
     <div
-      className={`flex flex-col items-start bg-[var(--main-bg-color)] p-7 rounded-2xl shadow-lg ${className}`}
+      className={clsx(
+        "flex flex-col items-start bg-bg-second p-7 rounded-2xl shadow-lg",
+        className
+      )}
     >
-      <Text size="lg-2" weight="bold" className={`mb-5 ${titleClassName}`}>
+      <Text sz="lg-2" weight="bold" className={clsx("mb-5", titleClassName)}>
         {title}
       </Text>
       {children}

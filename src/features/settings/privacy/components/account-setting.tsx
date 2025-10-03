@@ -1,3 +1,4 @@
+import clsx from "clsx";
 import SettingCard from "@/components/molecules/card";
 import EditableField from "@/features/settings/components/editable-field";
 import Text, { TextSkeletonLoading } from "@/components/atoms/text";
@@ -37,10 +38,6 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
   const [isEditNicknameFailed, setIsEditNicknameFailed] = React.useState<boolean>(false);
   const [editNicknameFailedMessage, setEditNicknameFailedMessage] = React.useState<string>("");
 
-  // const userService = React.useMemo(() => {
-  //     return new UserService();
-  // }, []);
-
   // Handle change URL name
   const handleChangeUrlName = async (urlName: string | undefined) => {
     const changeUrlNameDto: ChangeUrlNameDto = {
@@ -50,9 +47,6 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
     if (response.success) {
       setUrlName(urlName);
       setIsEditUrlName(false);
-
-      // AuthContext refresh user info after update
-      // refresh?.();
     } else {
       setIsEditUrlNameFailed(true);
       const errorCode = response?.errorCode;
@@ -66,13 +60,9 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
       nickname: nickname ?? "",
     };
     const response = await userInfoService.UpdateNickname(changeNickname);
-    // console.log(response);
     if (response.success) {
       setNickname(nickname);
       setIsEditNickname(false);
-
-      // AuthContext refresh user info after update
-      //refresh?.();
     } else {
       setIsEditNicknameFailed(true);
       const errorCode = response?.errorCode;
@@ -87,7 +77,6 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
     const fetchProfile = async () => {
       const _userId: string = userId ?? "";
       const response = await userProfileService.GetProfile(_userId, "fullName,urlName,nickname");
-      // console.log(response);
       if (response.success) {
         setFullName(response.data.infos.fullName);
         setUrlName(response.data.infos.urlName);
@@ -99,7 +88,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
   }, [userProfileService, location.key, userId]);
 
   return (
-    <div className={`${className}`}>
+    <div className={clsx(className)}>
       <SettingCard title={t("settings:account.personalInfo.title")} className="mb-0 gap-5">
         {isLoading ? (
           <TextSkeletonLoading sz="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
@@ -124,7 +113,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
             value={urlName}
             noDataValue={t("settings:account.personalInfo.noUrlName")}
             placeholder={t("settings:account.personalInfo.urlNamePlaceholder")}
-            valueClassName={`${urlName === undefined || urlName === null ? "!opacity-50" : ""}`}
+            valueClassName={clsx(urlName === undefined || urlName === null && "!opacity-50")}
             btnChildren={
               <Text>
                 <i className="fa-solid fa-pen mr-2"></i>
@@ -153,7 +142,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
             value={nickname}
             noDataValue={t("settings:account.personalInfo.noNickname")}
             placeholder={t("settings:account.personalInfo.nicknamePlaceholder")}
-            valueClassName={`${nickname === undefined || nickname === null ? "!opacity-50" : ""}`}
+            valueClassName={clsx(nickname === undefined || nickname === null && "!opacity-50")}
             btnChildren={
               <Text>
                 <i className="fa-solid fa-pen mr-2"></i>

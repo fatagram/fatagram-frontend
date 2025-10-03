@@ -2,6 +2,7 @@ import React, { forwardRef } from "react";
 import styles from "./TextArea.module.css";
 import { Size } from "../../common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from 'clsx';
 
 const sizeClasses: Record<Size, string> = {
   xs: "px-2 py-1 text-xs min-h-16",
@@ -50,13 +51,14 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         autoComplete={autoComplete}
         onChange={onChange}
         disabled={disabled}
-        className={`border-[3px] bg-[var(--second-bg-color)] text-[var(--text-color)]
-          resize-none
-            ${disabled ? `bg-[var(--main-bg-color)]` : `focus:bg-gradient-main-move`}
-          font-normal rounded-[15px] outline-none text-lg caret-single-main
-          ${sizeClasses[sz]}
-          ${isWrong ? styles["my-textarea-wrong"] : styles["my-textarea"]}
-          ${className}`}
+        className={clsx(
+          'border-2 text-text-main resize-none',
+          'font-normal rounded-[15px] outline-none text-lg caret-secondary-100 selection:!bg-primary-600',
+          disabled ? 'bg-bg-second' : 'focus:bg-gradient-main-move',
+          sizeClasses[sz],
+          isWrong ? styles["my-textarea-wrong"] : styles["my-textarea"],
+          className
+        )}
         {...props}
       />
     );

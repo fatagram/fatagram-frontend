@@ -9,9 +9,8 @@ import { useNavigate } from "react-router-dom";
 import { useDialog } from "@/contexts/common/dialog-context";
 import Text, { TextSkeletonLoading } from "@/components/atoms/text";
 import Button from "@/components/atoms/button";
-import { ProfilePageState } from "@/types/profile-page-state";
 import { useProfilePage } from "../context/profile-page-context";
-import { Stack } from "@/components/atoms";
+import clsx from "clsx";
 
 export type ProfileHeaderProps = {
   className?: string;
@@ -116,8 +115,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   };
 
   return (
-    <Stack direction="down" align="center" className={`relative w-full ${className} `}>
-      <div className="relative w-full lg:mx-0 mx-2 ">
+    <div className={clsx("relative w-full flex flex-col items-center", className)}>
+      <div className="relative w-full lg:mx-0 mx-2">
         <ProfileBackground
           isLoading={isLoading}
           background={background}
@@ -125,18 +124,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         />
       </div>
 
-      <Stack
-        direction="down"
-        className={`-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end
-                            mb-5 lg:gap-0 gap-3`}
-      >
+      <div className="-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3">
         <ProfileAvatar
           isLoading={isLoading}
           avatar={avatar}
           handleSelectAvatar={handleSelectAvatar}
           ref={avtRef}
         />
-        <Stack space={2} align="start" className="flex-1 mb-3 ml-4">
+        <div className="flex flex-col gap-2 items-start flex-1 mb-3 ml-4">
           {isLoading ? (
             <TextSkeletonLoading sz="md-1" className="lg:self-start self-center w-[200px]" />
           ) : (
@@ -150,14 +145,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
             </Text>
           )}
 
-          <Stack
-            direction="down"
-            align="center"
-            className="w-full"
-            lgProps={{
-              direction: "right",
-            }}
-          >
+          <div className="flex flex-col items-center w-full lg:flex-row">
             {!isLoadingNumOfFriends ? (
               <Text sz="md-2" weight="semibold" className="text-[var(--text-color)] opacity-70">
                 {numberOfFriends > 0
@@ -168,11 +156,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
               <TextSkeletonLoading sz="md-1" className="w-[150px] lg:ml-5 mb-1" />
             )}
             {!isLoading ? (
-              <Stack wrap="wrap" direction="right" space={2} className="mt-2"
-                lgProps={{
-                  className: "ml-auto mt-0"
-                }}
-              >
+              <div className="flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0">
                 {isAuthenticated && (
                   <>
                     {isOwner ? (
@@ -199,14 +183,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                 <Button sz="sm-1" variant="secondary">
                   <i className="fa-solid fa-circle-info"></i>
                 </Button>
-              </Stack>
+              </div>
             ) : (
               <TextSkeletonLoading sz="md-1" className="w-[250px] lg:ml-auto mb-1" />
             )}
-          </Stack>
-        </Stack>
-      </Stack>
-    </Stack>
+          </div>
+        </div>
+      </div>
+    </div>
   );
 };
 

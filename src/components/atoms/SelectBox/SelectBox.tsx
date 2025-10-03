@@ -2,6 +2,7 @@ import React, { RefObject } from "react";
 import Label from "../text";
 import useClickOutside from "@/hooks/use-click-outside";
 import { ComponentProps } from "@/components/common/types/component-type";
+import clsx from "clsx";
 
 export type OptionKey = string | number | boolean;
 
@@ -31,11 +32,14 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
   );
 
   return (
-    <div className={`relative ${className}`}>
+    <div className={clsx("relative", className)}>
       <button ref={btnRef} className="w-full">
         <div
-          className={`flex items-center justify-between cursor-pointer bg-[var(--fourth-bg-color)] 
-                        px-4 py-2 rounded-xl shadow-md gap-5 hover:bg-[var(--second-bg-color)]`}
+          className={clsx(
+            "flex items-center justify-between cursor-pointer",
+            "bg-[var(--fourth-bg-color)] px-4 py-2 rounded-xl shadow-md gap-5",
+            "hover:bg-[var(--second-bg-color)]",
+          )}
           onClick={() => setIsOpen(!isOpen)}
         >
           <Label sz="md-2">{options.find((opt) => opt.key === selected)?.value}</Label>
@@ -45,14 +49,20 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
 
       {isOpen && (
         <div
-          className="absolute w-full animate-dropdown-slide bg-[var(--fourth-bg-color)] rounded-lg shadow-md mt-1 z-50"
+          className={clsx(
+            "absolute w-full animate-dropdown-slide",
+            "bg-[var(--fourth-bg-color)] rounded-lg shadow-md mt-1 z-50",
+          )}
           ref={selectBoxRef}
         >
           <ul className="p-1">
             {options.map((item, index) => (
               <li
                 key={index}
-                className="px-4 py-2 hover:bg-[var(--second-bg-color)] cursor-pointer rounded-lg"
+                className={clsx(
+                  "px-4 py-2 hover:bg-[var(--second-bg-color)]",
+                  "cursor-pointer rounded-lg",
+                )}
                 onClick={() => {
                   setSelected(item.key);
                   onSelect(item.key);

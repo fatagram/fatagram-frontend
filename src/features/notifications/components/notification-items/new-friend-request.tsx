@@ -2,6 +2,7 @@ import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { friendshipService } from "@/api/user/friendship.api";
 import Button from "@/components/atoms/button";
 import Text from "@/components/atoms/text";
+import clsx from "clsx";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import BaseNotification from "./base-notification";
@@ -55,7 +56,7 @@ const NewFriendRequest: React.FC<NewFriendRequestProps> = ({
   return (
     <BaseNotification notificationDto={notificationDto} onClick={onClick}>
       {!message ? (
-        <div className="flex gap-1 mt-1 justify-start">
+        <div className={clsx("flex", "gap-1", "mt-1", "justify-start")}>
           <Button sz="sm-1" variant="primary" onClick={handleAccept}>
             {t("user:profileHeader.acceptButton")}
           </Button>
@@ -64,7 +65,7 @@ const NewFriendRequest: React.FC<NewFriendRequestProps> = ({
           </Button>
         </div>
       ) : (
-        <Text sz="sm-2" className="opacity-70">
+        <Text sz="sm-2" className={clsx("opacity-70")}>
           {message}
         </Text>
       )}

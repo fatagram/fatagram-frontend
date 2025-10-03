@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import clsx from "clsx";
 import { Language, useLanguage } from "@/contexts/common/language-context";
 import { userConfigService } from "@/api/user/user-config.api";
 import SelectBox, { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
@@ -14,8 +15,6 @@ const SelectLanguage: React.FC<SelectLanguageProps> = ({ className }) => {
   const selectLanguage = async (opt: OptionKey) => {
     setLanguage(opt as Language);
     await userConfigService.changeLanguage({ LanguageCode: opt as string });
-    // ("Change language to ", opt);
-
     window.location.reload();
   };
 
@@ -29,7 +28,7 @@ const SelectLanguage: React.FC<SelectLanguageProps> = ({ className }) => {
 
   return (
     <SelectBox
-      className={`${className}`}
+      className={clsx(className)}
       options={langs}
       selectedOption={language}
       onSelect={selectLanguage}

@@ -7,6 +7,7 @@ import { useAuth } from "@/contexts/auth/auth-context";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import clsx from "clsx";
 
 type ChangeNameFormProps = {
   className?: string;
@@ -67,62 +68,77 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   }, [userProfileService, userId]);
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 lg:pt-0 pt-10">
-      <div className="animate-fade-in  relative flex flex-col justify-center bg-[var(--second-bg-color)] rounded-2xl shadow-lg px-10 py-8">
-        <Text sz="lg-3" className="pb-6 px-2 text-gradient-main !font-bold">
+    <div
+      className={clsx(
+        "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 lg:pt-0 pt-10",
+        className,
+      )}
+    >
+      <div
+        className={clsx(
+          "animate-fade-in relative flex flex-col justify-center bg-bg-second rounded-2xl shadow-lg px-10 py-8",
+        )}
+      >
+        <Text sz="lg-3" className={clsx("pb-6 px-2 text-gradient-main !font-bold")}>
           {t("settings:account.personalInfo.changeNameForm.title")}
         </Text>
         {isLoading ? (
-          <TextSkeletonLoading className="h-[50px]" />
+          <TextSkeletonLoading className={clsx("h-[50px]")} />
         ) : (
           <div>
-            <div className="animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-[var(--main-bg-color)] p-5">
-              <div className="flex flex-col">
-                <Text sz="md-2" className="ml-2 mb-1">
+            <div
+              className={clsx(
+                "animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-bg-main p-5",
+              )}
+            >
+              <div className={clsx("flex flex-col")}>
+                <Text sz="md-2" className={clsx("ml-2 mb-1")}>
                   {t("settings:account.personalInfo.changeNameForm.firstName")}
                 </Text>
                 <Textbox
                   isWrong={firstNameFailed}
                   value={firstName}
                   placeholder="First name"
-                  className="py-1 px-2 lg:max-w-[200px]"
+                  className={clsx("py-1 px-2 lg:max-w-[200px]")}
                   onChange={(e) => setFirstName(e.target.value)}
                 />
               </div>
-              <div className="flex flex-col">
-                <Text sz="md-2" className="ml-2 mb-1">
+              <div className={clsx("flex flex-col")}>
+                <Text sz="md-2" className={clsx("ml-2 mb-1")}>
                   {t("settings:account.personalInfo.changeNameForm.lastName")}
                 </Text>
                 <Textbox
                   isWrong={lastNameFailed}
                   value={lastName}
                   placeholder="Last name"
-                  className="py-1 px-2 lg:max-w-[200px]"
+                  className={clsx("py-1 px-2 lg:max-w-[200px]")}
                   onChange={(e) => setLastName(e.target.value)}
                 />
               </div>
             </div>
-            <Text sz="md-1" color="danger" className="mt-2 mx-4">
-              {errorMessage}
-            </Text>
+            {errorMessage && (
+              <Text sz="md-1" color="danger" className={clsx("mt-2 mx-4")}>
+                {errorMessage}
+              </Text>
+            )}
           </div>
         )}
-        <Text className="mx-8 mt-8 mb-4 h-[0.5px] bg-single-third"></Text>
-        <Text sz="sm-2" className="font-light px-2 mb-4 flex flex-col gap-1">
-          <Text weight="bold" className="text-single-second">
+        <Text className={clsx("mx-8 mt-8 mb-4 h-[0.5px] bg-primary-500")}></Text>
+        <Text sz="sm-2" className={clsx("font-light px-2 mb-4 flex flex-col gap-1")}>
+          <Text weight="bold" className={clsx("text-single-second")}>
             * {t("settings:account.personalInfo.changeNameForm.note")}:
           </Text>
-          <Text className="opacity-80">
+          <Text className={clsx("opacity-80")}>
             - {t("settings:account.personalInfo.changeNameForm.noteText1")} &nbsp;
-            <Text weight="bold" className="text-single-main">
+            <Text weight="bold" className={clsx("text-single-main")}>
               7 {t("settings:account.personalInfo.changeNameForm.day")}
             </Text>
             .
           </Text>
-          <Text className="opacity-80">
+          <Text className={clsx("opacity-80")}>
             - {t("settings:account.personalInfo.changeNameForm.noteText2")}
           </Text>
-          <Text className="opacity-80">
+          <Text className={clsx("opacity-80")}>
             - {t("settings:account.personalInfo.changeNameForm.noteText3")} &nbsp;
             <Text sz="md-1">!, #, $, @, ...</Text>.
           </Text>
@@ -130,14 +146,14 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
         <Button
           disabled={firstName === oldFirstName && lastName === oldLastName}
           sz="md-1"
-          className="mt-2 !text-[20px]"
+          className={clsx("mt-2")}
           onClick={handleSubmit}
         >
           {t("settings:account.personalInfo.changeNameForm.acceptButton")}
         </Button>
         <Text
           sz="lg-2"
-          className={`absolute top-5 right-8 hover:text-single-main cursor-pointer`}
+          className={clsx("absolute top-5 right-8 hover:text-primary-500 cursor-pointer")}
           onClick={handleClose}
         >
           <i className="fa-solid fa-xmark"></i>

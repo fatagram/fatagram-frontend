@@ -1,13 +1,14 @@
-import React, { HTMLInputTypeAttribute } from "react";
+import React from "react";
+import clsx from "clsx";
 import styles from "./Textbox.module.css";
 import { Size } from "../../common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
 
 const sizeClasses: Record<Size, string> = {
   xs: "px-2 py-1 text-xs",
-  "sm-1": "px-3 py-1 text-[15px] ",
-  "sm-2": "px-4 py-2 text-[15px] ",
-  "sm-3": "px-5 py-2 text-[15px] ",
+  "sm-1": "px-3 py-1 text-[13px] ",
+  "sm-2": "px-4 py-2 text-[13px] ",
+  "sm-3": "px-5 py-2 text-[13px] ",
   "md-1": "px-6 py-3 text-base ",
   "md-2": "px-7 py-3 text-base ",
   "md-3": "px-8 py-4 text-base ",
@@ -32,16 +33,18 @@ const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
       <input
         type="text"
         ref={ref}
-        className={`border-[3px] bg-[var(--second-bg-color)] text-[var(--text-color)]
-                    ${
-                      disabled
-                        ? `bg-[var(--main-bg-color)]`
-                        : `focus:bg-gradient-main-move 
-                    ${isWrong ? styles["primary-textbox-wrong"] : styles["primary-textbox"]}`
-                    }
-                    font-normal rounded-[15px] outline-none text-lg caret-single-main selection:!bg-single-third
-                    ${className}
-                    ${sizeClasses[sz]}`}
+        className={clsx(
+          'border-[2px] text-text-main',
+          'font-normal rounded-xl outline-none text-lg caret-secondary-100 selection:!bg-primary-600',
+          {
+            'bg-bg-main': disabled,
+            'focus:bg-gradient-main-move': !disabled,
+            [styles["primary-textbox-wrong"]]: isWrong && !disabled,
+            [styles["primary-textbox"]]: !isWrong && !disabled,
+          },
+          sizeClasses[sz],
+          className
+        )}
         {...props}
       />
     );
