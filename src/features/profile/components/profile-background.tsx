@@ -4,9 +4,8 @@ import { BackgroundImageSkeletonLoading } from "@/components/atoms/background-im
 import { useTranslation } from "react-i18next";
 import Text from "@/components/atoms/text";
 import SelectFile from "@/components/molecules/select-file";
-import { c } from "vite/dist/node/moduleRunnerTransport.d-DJ_mE5sf";
-import { useProfilePage } from "../context/profile-page-context";
 import clsx from "clsx";
+import { useProfilePage } from "../hooks/use-profile-page";
 
 type ProfileBackgroundProps = {
   isLoading: boolean;
@@ -27,7 +26,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({
       {isLoading ? (
         <BackgroundImageSkeletonLoading 
           alt="Loading" 
-          className={clsx("relative h-full w-full")} 
+          className={clsx("relative h-full w-full bg-bg-fourth")} 
         />
       ) : (
         <BackgroundImage 

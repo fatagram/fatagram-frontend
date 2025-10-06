@@ -1,6 +1,5 @@
 import useClickOutside from "@/hooks/use-click-outside";
 import React, { RefObject } from "react";
-import useNotifications from "../../hooks/use-notification";
 import { useNavigate } from "react-router-dom";
 import NotificationMenu from "./notification-menu";
 import { useDispatch, useSelector } from "react-redux";
@@ -8,10 +7,11 @@ import { setShowNotification } from "../../stores/notification-slice";
 import Badge from "@/components/atoms/badge";
 import Text from "@/components/atoms/text";
 import clsx from "clsx";
+import { useNotifications } from "../../hooks/use-notification";
 
 interface NotificationButtonProps {}
 
-const NotificationButton: React.FC<NotificationButtonProps> = ({}) => {
+const NotificationBadge: React.FC<NotificationButtonProps> = ({}) => {
   // const [showNotifications, setShowNotifications] = React.useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -73,4 +73,4 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({}) => {
   );
 };
 
-export default NotificationButton;
+export default NotificationBadge;

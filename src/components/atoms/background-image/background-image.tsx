@@ -19,7 +19,7 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ src, alt, className, 
       className={clsx(
       "rounded-2xl",
       style["user-bg-image"],
-      src ? "" : "h-[200px] !bg-[var(--third-bg-color)]",
+      src ? "" : "h-[200px] bg-bg-fourth",
       className
       )}
       aria-label={alt}

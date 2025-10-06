@@ -1,9 +1,9 @@
 export interface AuthState {
   isAuthenticated: boolean;
-  userId: string;
+  userId?: string;
   urlName?: string;
   lang: string;
-  isInitialized?: boolean;
+  isInitialized: boolean;
 }
 
 export const initialAuthStatus: AuthState = {

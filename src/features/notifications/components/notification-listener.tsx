@@ -1,14 +1,15 @@
-import { useToast } from "@/contexts/common/toast-context";
 import { useDispatch } from "react-redux";
 import { useNotificationHub } from "../hubs/use-notification-hub";
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { addNewNotification, deleteNotification } from "../stores/notification-slice";
+import { useCallback } from "react";
+import { useToast } from "@/hooks/utilities/use-toast";
 
 const NotificationListener = () => {
   const dispatch = useDispatch();
   const { pushToast } = useToast();
 
-  const handleNewNotification = (data: NotificationDto) => {
+  const handleNewNotification = useCallback((data: NotificationDto) => {
     // console.log("New notification received:", data);
     if (data.type === "CancelNotification") {
       // If notification type is CancelNotification, remove it from the list
@@ -26,7 +27,7 @@ const NotificationListener = () => {
       },
       duration: 5000,
     });
-  };
+  }, [dispatch, pushToast]);
 
   useNotificationHub(handleNewNotification);
 

@@ -1,3 +1,4 @@
+/* @refresh reload */
 import { authService } from "@/api/auth/auth.api";
 import LoginDto, { LoginResponse } from "@/api/auth/dto/login.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
@@ -9,19 +10,20 @@ import {
   setRefreshToken,
   setRefreshTokenToSession,
 } from "@/utils/token";
-import React, { createContext, useContext, useCallback, useEffect, useMemo } from "react";
-import { LANG_LIST, Language, useLanguage } from "../common/language-context";
-import { useDialog } from "../common/dialog-context";
+import React, { createContext, useCallback, useEffect, useMemo } from "react";
 import { Result } from "@/api/common/result";
-import { useLoading } from "../common/loading-context";
 import { useDispatch } from "react-redux";
 import { resetState } from "@/features/notifications/stores/notification-slice";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthState, initialAuthStatus } from "@/types/auth-state";
+import { useLanguage } from "@/hooks/utilities/use-language";
+import { useDialog } from "@/hooks/utilities/use-dialog";
+import { useLoading } from "@/hooks/utilities/use-loading";
+import { LANG_LIST, Language } from "../common/language-context";
 
 type AuthAction =
   | { type: "INITIALIZE"; payload: Omit<AuthState, "isInitialized"> }
-  | { type: "LOGIN"; payload: Omit<AuthState, "isAuthenticated"> }
+  | { type: "LOGIN"; payload: Omit<Omit<AuthState, "isInitialized">, "isAuthenticated"> }
   | { type: "LOGOUT" }
   | { type: "UPDATE_URL_NAME"; payload: string | undefined };
 
@@ -31,7 +33,7 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
       return {
         ...state,
         ...action.payload,
-        isInitialized: true
+        isInitialized: true,
       };
     case "LOGIN":
       return {
@@ -59,21 +61,21 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
 };
 
 // Authentication context
-interface AuthContextType {
+export interface AuthContextType {
   isAuthenticated: boolean | null;
   isInitialized?: boolean;
-  login: (loginDto: LoginDto) => Promise<Result<LoginResponse>>;
-  logout?: () => Promise<void>;
+  logIn: (loginDto: LoginDto) => Promise<Result<LoginResponse>>;
+  logOut?: () => Promise<void>;
   userId?: string;
   urlName?: string;
 }
 
 // Create AuthContext
-const AuthContext = createContext<AuthContextType>({
+export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: null,
   isInitialized: false,
-  login: () => Promise.resolve({ success: false, data: undefined }),
-  logout: () => Promise.resolve(),
+  logIn: () => Promise.resolve({ success: false, data: undefined }),
+  logOut: () => Promise.resolve(),
   userId: undefined,
   urlName: undefined,
 });
@@ -83,7 +85,7 @@ type AuthProviderProps = {
 };
 
 // Create AuthProvider
-export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
+export function AuthProvider({ children }: AuthProviderProps) {
   const [state, dispatch] = React.useReducer(authReducer, initialAuthStatus);
   const { setLanguage } = useLanguage();
   const { openDialog, closeDialog } = useDialog();
@@ -91,39 +93,42 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const _dispatch = useDispatch();
   const queryClient = useQueryClient();
 
-  // Function to set language when reload or login
-  const setLang = (langCode: string) => {
+  // Function to set language when reload or login - MEMOIZED
+  const setLang = useCallback((langCode: string) => {
     if (LANG_LIST.includes(langCode as Language)) {
       setLanguage(langCode as Language);
     }
-  };
+  }, [setLanguage]);
 
   // Function to login
-  const _logIn = async (loginDto: LoginDto): Promise<Result<LoginResponse>> => {
-    if (state.isAuthenticated) return { success: false, errorCode: "AlreadyLoggedIn" };
-    try {
-      const result = await authService.login(loginDto);
-      if (result.success) {
-        dispatch({
-          type: "LOGIN",
-          payload: {
-            userId: result.data?.userId || "",
-            urlName: result.data?.urlName || "",
-            lang: result.data?.languageCode || "en",
-          },
-        });
-        if (localStorage.getItem("isRememberMe") === "true") {
-          setRefreshToken(result.data?.refreshToken || "");
-        } else {
-          setRefreshTokenToSession(result.data?.refreshToken || "");
+  const _logIn = useCallback(
+    async (loginDto: LoginDto): Promise<Result<LoginResponse>> => {
+      if (state.isAuthenticated) return { success: false, errorCode: "AlreadyLoggedIn" };
+      try {
+        const result = await authService.login(loginDto);
+        if (result.success) {
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              userId: result.data?.userId,
+              urlName: result.data?.urlName,
+              lang: result.data?.languageCode || "en",
+            },
+          });
+          if (localStorage.getItem("isRememberMe") === "true") {
+            setRefreshToken(result.data?.refreshToken || "");
+          } else {
+            setRefreshTokenToSession(result.data?.refreshToken || "");
+          }
+          closeDialog();
         }
-        closeDialog();
+        return result;
+      } catch (err) {
+        return { success: false, data: undefined };
       }
-      return result;
-    } catch (err) {
-      return { success: false, data: undefined };
-    }
-  };
+    },
+    [state.isAuthenticated, closeDialog, dispatch],
+  );
 
   const clearUserData = useCallback(() => {
     removeRefreshToken();
@@ -133,7 +138,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   }, [_dispatch, queryClient]);
 
   // Function to logout
-  const _logOut = async () => {
+  const _logOut = useCallback(async () => {
     try {
       increment();
       if ((await authService.logout()).success) {
@@ -151,25 +156,27 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       decrement();
     }
-  };
+  }, [increment, decrement, clearUserData, openDialog]);
 
   const checkAuth = useCallback(async () => {
     try {
       const result = await authService.ping();
       if (!result.success) {
-        _logOut();
+        await _logOut();
       }
     } catch (err) {
       console.error("Check auth failed:", err);
-      _logOut();
+      await _logOut();
     }
-  }, []);
+  }, [_logOut]);
 
+  // Memoize initialize function
   const initialize = useCallback(async () => {
     try {
+      increment();
       // Check if refresh token exists first
       const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
-      
+
       if (!refreshToken) {
         // No token found, user is not authenticated
         dispatch({
@@ -228,11 +235,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     } finally {
       decrement();
     }
-  }, []);
+  }, [increment, decrement, setLang]);
 
   useEffect(() => {
     initialize();
-  }, []);
+  }, [initialize]);
 
   useEffect(() => {
     const handleFocus = () => {
@@ -240,7 +247,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     };
     window.addEventListener("focus", handleFocus);
     return () => window.removeEventListener("focus", handleFocus);
-  }, []);
+  }, [checkAuth]);
 
   return (
     <AuthContext.Provider
@@ -250,21 +257,13 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
           isInitialized: state.isInitialized,
           userId: state.userId,
           urlName: state.urlName,
-          login: _logIn,
-          logout: _logOut,
+          logIn: _logIn,
+          logOut: _logOut,
         }),
-        [
-          state.isAuthenticated,
-          state.userId,
-          state.urlName,
-          _logIn,
-          _logOut,
-        ],
+        [state.isAuthenticated, state.isInitialized, state.userId, state.urlName, _logIn, _logOut],
       )}
     >
       {state.isInitialized && children}
     </AuthContext.Provider>
   );
-};
-
-export const useAuth = () => useContext(AuthContext);
+}

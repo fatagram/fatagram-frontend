@@ -1,7 +1,7 @@
 import Avatar, { AvatarSkeletonLoading } from "@/components/atoms/avatar";
 import React from "react";
 import { clsx } from "clsx";
-import { useProfilePage } from "../context/profile-page-context";
+import { useProfilePage } from "../hooks/use-profile-page";
 
 interface ProfileAvatarProps {
   isLoading: boolean;

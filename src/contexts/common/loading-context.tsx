@@ -1,12 +1,13 @@
+/* @refresh reload */
 import LoadingPage from "@/pages/loading/loading-page";
 import React, { use, useCallback, useContext, useMemo, useState } from "react";
 
-type LoadingContextType = {
+export interface LoadingContextType {
   increment: () => void;
   decrement: () => void;
 };
 
-const LoadingContext = React.createContext<LoadingContextType>({
+export const LoadingContext = React.createContext<LoadingContextType>({
   increment: () => {},
   decrement: () => {},
 });
@@ -15,9 +16,8 @@ type LoadingProviderProps = {
   children: React.ReactNode;
 };
 
-export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) => {
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [count, setCount] = useState(1);
+export function LoadingProvider({ children }: LoadingProviderProps) {
+  const [count, setCount] = useState(0);
 
   const stableIncrement = useCallback(() => {
     setCount((prev) => prev + 1);
@@ -40,10 +40,4 @@ export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) =>
       {children}
     </LoadingContext.Provider>
   );
-};
-
-export const useLoading = () => {
-  return useContext(LoadingContext);
-};
-
-export default LoadingContext;
+}

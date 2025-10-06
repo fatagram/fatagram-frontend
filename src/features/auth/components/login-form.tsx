@@ -1,13 +1,12 @@
 import React, { useEffect } from "react";
-import { useNavigate, useSearchParams } from "react-router-dom";
 import { LoginValidator } from "@/api/auth/validate/login.validator";
 import LoginDto, { ErrorCodes, ErrorKey, LoginResponse } from "@/api/auth/dto/login.dto";
 import OverlayLoading from "@/components/organisms/overlay-loading/overlay-loading";
-import { useAuth } from "@/contexts/auth/auth-context";
 import { useTranslation } from "react-i18next";
 import { Result } from "@/api/common/result";
 import { Button, Logo, Textbox, Text, PasswordBox, Checkbox, Link } from "@/components/atoms";
 import clsx from "clsx";
+import { useAuth } from "@/hooks/utilities/use-auth";
 
 interface LoginFormProps {
   switchForgotPassword?: () => void;
@@ -39,11 +38,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
   const inputPasswordRef = React.useRef<HTMLInputElement>(null);
 
   const { t } = useTranslation() as { t: (key: string) => string };
-  const { login } = useAuth();
-
-  // hooks
-  const navigate = useNavigate();
-  const [params] = useSearchParams();
+  const { logIn } = useAuth();
 
   const resetErrors = (): void => {
     setUsernameError("");
@@ -86,7 +81,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
     };
     localStorage.setItem("isRememberMe", isRememberMe.toString());
     setIsLoading(true);
-    const result: Result<LoginResponse> = await login(loginDto);
+    const result: Result<LoginResponse> = await logIn?.(loginDto);
 
     if (!result.success) {
       if (result.errorCodes) {

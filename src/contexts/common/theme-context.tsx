@@ -1,3 +1,4 @@
+/* @refresh reload */
 import React, { createContext, useContext, useEffect, useState } from "react";
 import themesJson from "@/themes/themes.json";
 
@@ -13,19 +14,19 @@ export interface ThemeOption {
   display: string;
 }
 
-interface ThemeContextType {
+export interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
   availableThemes: ThemeOption[];
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
+export function ThemeProvider({ children }: ThemeProviderProps) {
   const getLocalStorageTheme = (): Theme => {
     const theme = localStorage.getItem("theme");
     return theme && theme in themes ? (theme as Theme) : "default";
@@ -33,7 +34,9 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
   const [theme, setTheme] = useState<Theme>(getLocalStorageTheme);
   const [availableThemes, setAvailableThemes] = useState<ThemeOption[]>([]);
 
-  const handleTheme = (theme: Theme) => setTheme(theme);
+  const handleTheme = React.useCallback((theme: Theme) => {
+    setTheme(theme);
+  }, []);
 
   // Init availabla themes
   useEffect(() => {
@@ -55,17 +58,19 @@ export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
     localStorage.setItem("theme", theme);
   }, [theme]);
 
+  const value = React.useMemo(
+    () => ({ 
+      theme, 
+      availableThemes, 
+      setTheme: handleTheme 
+    }),
+    [theme, availableThemes, handleTheme]
+  );
+
   return (
-    <ThemeContext.Provider
-      value={{ theme: theme, availableThemes: availableThemes, setTheme: handleTheme }}
+    <ThemeContext.Provider value={value}
     >
       {children}
     </ThemeContext.Provider>
   );
-};
-
-export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
-  if (!context) throw new Error("useTheme must be used within a ThemeProvider.");
-  return context;
-};
+}

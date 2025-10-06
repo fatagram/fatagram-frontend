@@ -3,11 +3,11 @@ import { userProfileService } from "@/api/user/user-profile.api";
 import Button from "@/components/atoms/button";
 import Text, { TextSkeletonLoading } from "@/components/atoms/text";
 import Textbox from "@/components/atoms/textbox";
-import { useAuth } from "@/contexts/auth/auth-context";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
+import { useAuth } from "@/hooks/utilities/use-auth";
 
 type ChangeNameFormProps = {
   className?: string;

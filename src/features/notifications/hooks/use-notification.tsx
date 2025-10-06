@@ -2,9 +2,9 @@ import { notificationService } from "@/api/notification/notification.api";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { loadNotifications } from "../stores/notification-slice";
-import { useAuth } from "@/contexts/auth/auth-context";
+import { useAuth } from "@/hooks/utilities/use-auth";
 
-const useNotifications = () => {
+export const useNotifications = () => {
   const dispatch = useDispatch();
   const { userId } = useAuth();
   const { pageSize, cursorId } = useSelector((state: any) => state.notifications);
@@ -20,5 +20,3 @@ const useNotifications = () => {
     enabled: !!userId,
   });
 };
-
-export default useNotifications;

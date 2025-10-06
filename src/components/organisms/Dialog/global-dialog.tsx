@@ -1,4 +1,4 @@
-import { useDialog } from "@/contexts/common/dialog-context";
+import { useDialog } from "@/hooks/utilities/use-dialog";
 import Dialog from "./dialog";
 import clsx from 'clsx';
 

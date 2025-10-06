@@ -1,3 +1,4 @@
+/* @refresh reload */
 import Button from "@/components/atoms/button";
 import Text from "@/components/atoms/text";
 import NotificationFactory from "@/features/notifications/components/notification-factory";
@@ -13,7 +14,7 @@ interface ToastItem {
 }
 
 // Toast context type
-interface ToastContextType {
+export interface ToastContextType {
   pushToast: (item: ToastItem) => void;
 }
 
@@ -24,7 +25,7 @@ interface ToastManagerProps {
 }
 
 // Toast context
-const ToastContext = React.createContext<ToastContextType>({
+export const ToastContext = React.createContext<ToastContextType>({
   pushToast: () => {},
 });
 
@@ -36,19 +37,30 @@ const ToastManager: React.FC<ToastManagerProps> = ({ className, children }) => {
   const navigate = useNavigate();
 
   // Push a new toast
-  const pushToast = (item: ToastItem) => {
-    if (timer) {
-      clearTimeout(timer);
-    }
+  const pushToast = React.useCallback((item: ToastItem) => {
+    setTimer((prevTimer) => {
+      if (prevTimer) {
+        clearTimeout(prevTimer);
+      }
+      return null;
+    });
+    
     setToast(item);
+    
     const newTimer = setTimeout(() => {
       setToast(null);
     }, item.duration || 3000);
+    
     setTimer(newTimer);
-  };
+  }, []);
+
+  const value = React.useMemo(
+    () => ({ pushToast }),
+    [pushToast]
+  );
 
   return (
-    <ToastContext.Provider value={{ pushToast }}>
+    <ToastContext.Provider value={value}>
       {children}
       {toast && (
         <div
@@ -81,14 +93,6 @@ const ToastManager: React.FC<ToastManagerProps> = ({ className, children }) => {
   );
 };
 
-export const ToastProvider = ({ children }: { children: React.ReactNode }) => {
+export function ToastProvider({ children }: { children: React.ReactNode }) {
   return <ToastManager>{children}</ToastManager>;
-};
-
-export const useToast = () => {
-  const context = React.useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider");
-  }
-  return context;
 };

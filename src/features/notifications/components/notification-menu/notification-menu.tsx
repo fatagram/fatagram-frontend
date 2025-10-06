@@ -1,7 +1,6 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import React, { use, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import useNotifications from "../../hooks/use-notification";
 import NotificationFactory from "../notification-factory";
 import { useNavigate } from "react-router";
 import { notificationService } from "@/api/notification/notification.api";
@@ -10,8 +9,8 @@ import { useDispatch, useSelector } from "react-redux";
 import { markAsRead, setShowFull } from "../../stores/notification-slice";
 import Text from "@/components/atoms/text";
 import Button from "@/components/atoms/button";
-import { useAuth } from "@/contexts/auth/auth-context";
 import clsx from "clsx";
+import { useNotifications } from "../../hooks/use-notification";
 
 type NotificationMenuProps = {
   className?: string;
@@ -24,7 +23,6 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { isLoading, refetch } = useNotifications();
-  const { userId } = useAuth();
 
   const { notifications, isInNotificationPage, isFull, isShowFull } = useSelector(
     (state: any) => state.notifications,

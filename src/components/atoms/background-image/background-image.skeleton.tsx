@@ -12,7 +12,7 @@ const BackgroundImageSkeleton: React.FC<BackgroundImageSkeletonProps> = ({ class
   return (
     <div
       className={clsx(
-        'animate-pulse bg-[var(--fourth-bg-color)] h-[200px] rounded-2xl shadow-lg',
+        'animate-pulse h-[200px] rounded-2xl shadow-lg',
         className
       )}
     />

@@ -1,3 +1,4 @@
+/* @refresh reload */
 import i18next from "i18next";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -12,14 +13,14 @@ interface LanguageOption {
 }
 
 // Language context type
-interface LanguageContextType {
+export interface LanguageContextType {
   language: Language;
   setLanguage: (lang: Language) => void;
   availableLanguages: LanguageOption[];
 }
 
 // Language context
-const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
+export const LanguageContext = createContext<LanguageContextType | undefined>(undefined);
 
 // Language provider props
 interface LanguageProviderProps {
@@ -27,14 +28,16 @@ interface LanguageProviderProps {
 }
 
 // Language Provider
-export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) => {
+export function LanguageProvider({ children }: LanguageProviderProps) {
   const { t } = useTranslation() as { t: (key: string) => string };
   const [lang, setLang] = useState<Language>(
     () => (localStorage.getItem("language") as Language) || "en",
   );
   const [availableLanguages, setAvailableLanguages] = useState<LanguageOption[]>([]);
 
-  const setLanguage = (lang: Language) => setLang(lang);
+  const setLanguage = React.useCallback((lang: Language) => {
+    setLang(lang);
+  }, []);
 
   useEffect(() => {
     const langOptions: LanguageOption[] = LANG_LIST.map((lang) => ({
@@ -49,18 +52,18 @@ export const LanguageProvider: React.FC<LanguageProviderProps> = ({ children }) 
     localStorage.setItem("language", lang);
   }, [lang]);
 
+  const value = React.useMemo(
+    () => ({ 
+      language: lang, 
+      setLanguage, 
+      availableLanguages 
+    }),
+    [lang, setLanguage, availableLanguages]
+  );
+
   return (
-    <LanguageContext.Provider
-      value={{ language: lang, setLanguage: setLanguage, availableLanguages: availableLanguages }}
-    >
+    <LanguageContext.Provider value={value}>
       {children}
     </LanguageContext.Provider>
   );
-};
-
-// Hook
-export const useLanguage = (): LanguageContextType => {
-  const context = useContext(LanguageContext);
-  if (!context) throw new Error("useLanguage muse be used within LanguageProvider.");
-  return context;
-};
+}

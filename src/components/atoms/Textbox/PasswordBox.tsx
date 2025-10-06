@@ -51,5 +51,6 @@ const PasswordBox = forwardRef<HTMLInputElement, PasswordBoxProps>(
     );
   },
 );
+PasswordBox.displayName = "PasswordBox";
 
 export default PasswordBox;

@@ -14,6 +14,7 @@ const LayoutHeader = forwardRef<HTMLHeadElement, LayoutHeaderProps>(({ children,
     </header>
   );
 });
+LayoutHeader.displayName = "Layout.Header";
 
 // === Layout Main === //
 interface LayoutMainProps {

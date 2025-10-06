@@ -1,11 +1,10 @@
 import { userInfoService } from "@/api/user/user-info.api";
 import Text from "@/components/atoms/text";
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
 import ProfileAboutSection from "./profile-about-section";
 import Button from "@/components/atoms/button";
-import { useProfilePage } from "../../context/profile-page-context";
 import clsx from "clsx";
+import { useProfilePage } from "../../hooks/use-profile-page";
 
 type ProfileOverviewProps = {};
 

@@ -2,7 +2,7 @@ import React from "react";
 import clsx from "clsx";
 import ProfileHeader from "@/features/profile/components/profile-header";
 import ProfileBody from "@/features/profile/components/profile-body";
-import { ProfilePageProvider } from "@/features/profile/context/profile-page-context";
+import ProfilePageProvider from "@/features/profile/context/profile-page-context";
 
 const ProfilePage: React.FC = () => {  
   return (

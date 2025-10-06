@@ -1,5 +1,4 @@
 import clsx from "clsx";
-import SettingCard from "@/components/molecules/card";
 import EditableField from "@/features/settings/components/editable-field";
 import Text, { TextSkeletonLoading } from "@/components/atoms/text";
 import { userProfileService } from "@/api/user/user-profile.api";
@@ -8,9 +7,10 @@ import ChangeUrlNameDto, { ErrorCodes } from "@/api/user/dto/change-url-name.dto
 import { useLocation, useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { ErrorKey } from "@/api/auth/dto/login.dto";
-import { useAuth } from "@/contexts/auth/auth-context";
 import ChangeNicknameDto from "@/api/user/dto/change-nickname.dto";
 import { userInfoService } from "@/api/user/user-info.api";
+import Card from "@/components/molecules/card";
+import { useAuth } from "@/hooks/utilities/use-auth";
 
 type AccountSettingProps = {
   className?: string;
@@ -89,7 +89,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
 
   return (
     <div className={clsx(className)}>
-      <SettingCard title={t("settings:account.personalInfo.title")} className="mb-0 gap-5">
+      <Card title={t("settings:account.personalInfo.title")} className="mb-0 gap-5">
         {isLoading ? (
           <TextSkeletonLoading sz="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
         ) : (
@@ -163,7 +163,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
             onSaveClick={(e) => handleChangeNickname(e)}
           />
         )}
-      </SettingCard>
+      </Card>
     </div>
   );
 };

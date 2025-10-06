@@ -5,8 +5,9 @@ import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import Text from "@/components/atoms/text";
 import EditableTextArea from "@/features/settings/components/editable-textarea";
-import { useProfilePage } from "../../context/profile-page-context";
 import clsx from "clsx";
+import { useAuth } from "@/hooks/utilities/use-auth";
+import { useProfilePage } from "../../hooks/use-profile-page";
 
 interface ProfileIntroductionProps {
   className?: string;
@@ -21,15 +22,16 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
   const [email, setEmail] = React.useState<string | undefined>(undefined);
   const [phone, setPhone] = React.useState<string | undefined>(undefined);
 
-  const { isAuthenticated, isOwner, targetId } = useProfilePage();
+  const { isAuthenticated } = useAuth();
+  const { isOwner, targetId } = useProfilePage();
   
   const canEdit = useMemo(() => isAuthenticated && isOwner, [isAuthenticated, isOwner]);
 
   const { t } = useTranslation() as { t: (key: string) => string };
 
   useEffect(() => {
-    const fetchData = async (uid: string) => {
-      const response = await userInfoService.GetUserInfoOverview(uid ?? "");
+    const fetchData = async () => {
+      const response = await userInfoService.GetUserInfoOverview(targetId ?? "");
       if (response) {
         setBio(response.data?.bio);
         setDescription(response.data?.description);
@@ -37,7 +39,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
         setPhone(response.data?.phone);
       }
     };
-    fetchData(targetId ?? "");
+    fetchData();
   }, [targetId]);
 
   // Handle save bio
@@ -61,7 +63,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
   return (
     <Card
       title={t("user:profilePosts.overview")}
-      className={clsx("flex-col gap-4 rounded-l-2xl", className)}
+      className={clsx("flex-col gap-4", className)}
       titleClassName="text-2xl font-bold !mb-0"
     >
       {(bio || canEdit) && (
@@ -73,7 +75,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           onChangeClick={() => setIsEditBio(true)}
           onSaveClick={(value) => handleSaveBio(value)}
           valueClassName="text-[1.2rem] font-semibold"
-          canEdit={canEdit}
+          canEdit={canEdit || false}
           onCancelClick={() => setIsEditBio(false)}
           btnChildren={
             <Text sz="sm-2">
@@ -94,7 +96,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           isEdit={isEditDescription}
           placeholder={t("user:profilePosts.descriptionPlaceholder")}
           value={description}
-          canEdit={canEdit}
+          canEdit={canEdit || false}
           valueClassName="text-[1.1rem]"
           onChangeClick={() => setIsEditDescription(true)}
           onSaveClick={(value) => handleSaveDescription(value)}

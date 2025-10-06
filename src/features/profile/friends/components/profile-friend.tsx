@@ -2,12 +2,11 @@ import { FriendDto } from "@/api/user/dto/friend.dto";
 import useFriends from "@/features/profile/hooks/use-friend";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { useOutletContext } from "react-router-dom";
 import SearchBox from "@/components/atoms/textbox/searchbox";
 import Text from "@/components/atoms/text";
 import FriendItem from "./friend-item";
-import { useProfilePage } from "../../context/profile-page-context";
 import clsx from "clsx";
+import { useProfilePage } from "../../hooks/use-profile-page";
 
 interface ProfileFriendsProps {
   className?: string;
@@ -18,7 +17,7 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
 
   const [friends, setFriends] = React.useState<FriendDto[]>([]);
   const [page, setPage] = React.useState<number>(1);
-  const [pageSize, setPageSize] = React.useState<number>(12);
+  const [pageSize] = React.useState<number>(12);
   const [isFull, setIsFull] = React.useState<boolean>(false);
   const [keyword, setKeyword] = React.useState<string>("");
   const { targetId } = useProfilePage();

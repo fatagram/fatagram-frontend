@@ -1,10 +1,10 @@
 import React, { useCallback } from "react";
 import ProfileMenu from "@/features/user/components/user-menu";
 import { useNavigate } from "react-router-dom";
-import NavbarItem from "./navbar-item";
 import NotificationMenu from "@/features/notifications/components/notification-menu/notification-badge";
 import { Button, Logo } from "@/components/atoms";
 import clsx from "clsx";
+import NavbarItem from "./navbar-item";
 
 interface NavbarProps {
   className?: string;
@@ -32,14 +32,13 @@ const Navbar: React.FC<NavbarProps> = ({ className, isAuthenticated, onLogin, on
   return (
     <nav
       className={clsx(
-        "flex flex-row gap-3 items-center justify-between",
-        "bg-bg-main p-1 shadow-md",
-        "sm:px-8",
+        "flex items-center justify-between",
+        "bg-bg-main p-[2px] shadow-md sm:px-8",
         className
       )}
     >
       <div onClick={handleGoToHome} className="cursor-pointer items-center gap-2">
-        <Logo hasSlogan={false} sz="md-1" />
+        <Logo hasSlogan={false} sz="sm-3" />
       </div>
       {isAuthenticated ? (
         <div className="flex flex-row gap-3 flex-1">

@@ -37,8 +37,8 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
         <div
           className={clsx(
             "flex items-center justify-between cursor-pointer",
-            "bg-[var(--fourth-bg-color)] px-4 py-2 rounded-xl shadow-md gap-5",
-            "hover:bg-[var(--second-bg-color)]",
+            "bg-bg-fourth px-4 py-2 rounded-xl shadow-md gap-5",
+            "hover:bg-bg-fourth/80 transition-all duration-200 ease",
           )}
           onClick={() => setIsOpen(!isOpen)}
         >
@@ -51,7 +51,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
         <div
           className={clsx(
             "absolute w-full animate-dropdown-slide",
-            "bg-[var(--fourth-bg-color)] rounded-lg shadow-md mt-1 z-50",
+            "bg-bg-fourth rounded-lg shadow-md mt-1 z-50",
           )}
           ref={selectBoxRef}
         >
@@ -60,7 +60,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
               <li
                 key={index}
                 className={clsx(
-                  "px-4 py-2 hover:bg-[var(--second-bg-color)]",
+                  "px-4 py-2 hover:bg-bg-eighth transition-all duration-100 ease",
                   "cursor-pointer rounded-lg",
                 )}
                 onClick={() => {

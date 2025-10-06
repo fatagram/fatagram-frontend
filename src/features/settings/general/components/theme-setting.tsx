@@ -3,8 +3,9 @@ import clsx from "clsx";
 import SettingCard from "@/components/molecules/card";
 import { useTranslation } from "react-i18next";
 import { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
-import { Theme, useTheme } from "@/contexts/common/theme-context";
 import SelectBoxSetting from "../../components/selectbox-setting";
+import { useTheme } from "@/hooks/utilities/use-theme";
+import { Theme } from "@/contexts/common/theme-context";
 
 interface ThemeSettingsProps {
   className?: string;

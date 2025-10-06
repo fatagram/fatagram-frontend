@@ -1,16 +1,13 @@
 // src/routes/MainRoutes.tsx
+import { useAuth } from "@/hooks/utilities/use-auth";
 import React, { JSX } from "react";
-import { useAuth } from "@/contexts/auth/auth-context";
 import { Navigate, useSearchParams } from "react-router-dom";
 
 const GuestOnlyRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated, isInitialized } = useAuth();
+  const { isAuthenticated } = useAuth();
   const [searchParams] = useSearchParams();
 
-  // Wait for auth initialization to complete
-  if (!isInitialized) return null;
-
-  if (isAuthenticated) {
+  if (isAuthenticated !== null && isAuthenticated) {
     const returnTo = searchParams.get("returnTo") || "/";
     return <Navigate to={returnTo} replace />;
   }

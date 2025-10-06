@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import { userProfileService } from "@/api/user/user-profile.api";
 import { friendshipService } from "@/api/user/friendship.api";
 import { useTranslation } from "react-i18next";
@@ -6,11 +6,13 @@ import ProfileBackground from "./profile-background";
 import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
 import { useNavigate } from "react-router-dom";
-import { useDialog } from "@/contexts/common/dialog-context";
 import Text, { TextSkeletonLoading } from "@/components/atoms/text";
 import Button from "@/components/atoms/button";
-import { useProfilePage } from "../context/profile-page-context";
 import clsx from "clsx";
+import { getImageUrl } from "@/utils/get-image-url";
+import { useAuth } from "@/hooks/utilities/use-auth";
+import { useDialog } from "@/hooks/utilities/use-dialog";
+import { useProfilePage } from "../hooks/use-profile-page";
 
 export type ProfileHeaderProps = {
   className?: string;
@@ -41,7 +43,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   const { t } = useTranslation() as { t: (key: string) => string };
   const navigate = useNavigate();
   const { openDialog, closeDialog } = useDialog();
-  const { isAuthenticated, targetId, isOwner } = useProfilePage();
+  const { targetId, isOwner } = useProfilePage();
+  const { isAuthenticated } = useAuth();
 
   // Fetch user profile
   React.useEffect(() => {
@@ -53,8 +56,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
       );
       // Delay to simulate loading
       if (response.success) {
-        setAvatar(response.data.infos.avatar);
-        setBackground(response.data.infos.background);
+        setAvatar(getImageUrl(response.data.infos.avatar) || "");
+        setBackground(getImageUrl(response.data.infos.background) || "");
         setFullName(response.data.infos.fullName);
         setNickname(response.data.infos.nickname);
       } else {
@@ -81,11 +84,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   }, [targetId, onUserNotFound, friendshipService]);
 
   // Handle background and avatar selection
-  const handleSelectBackground = async (file: File) => {
+  const handleSelectBackground = useCallback(async (file: File) => {
     const result = await userProfileService.UploadBackground(file);
     // console.log(result);
     if (result.success) {
-      setBackground(result.data);
+      setBackground(getImageUrl(result.data) || "");
     } else if (result.errorCode === "LARGE_FILE_ERROR") {
       openDialog({
         title: t("user:profileHeader.oversizeErrorTitle"),
@@ -96,9 +99,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         },
       });
     }
-  };
+  }, [openDialog, closeDialog, t]);
 
-  const handleSelectAvatar = async (file: File) => {
+  const handleSelectAvatar = useCallback(async (file: File) => {
     const result = await userProfileService.UploadAvatar(file);
     if (result.success) {
       setAvatar(result.data);
@@ -112,11 +115,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         },
       });
     }
-  };
+  }, [openDialog, closeDialog, t]);
 
   return (
     <div className={clsx("relative w-full flex flex-col items-center", className)}>
-      <div className="relative w-full lg:mx-0 mx-2">
+      <div className="relative w-full mt-2">
         <ProfileBackground
           isLoading={isLoading}
           background={background}

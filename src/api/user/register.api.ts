@@ -2,6 +2,7 @@ import axios from "axios";
 import RegisterDto from "./dto/register.dto";
 import { handleApiError } from "../common/handleApiError";
 import { Result } from "../common/result";
+import { apiClient } from "../common/axiosInterceptor";
 
 const PREFIX = `/api/account`;
 
@@ -12,7 +13,7 @@ export class RegisterService {
   // The method returns a promise of ServerResponse.
   async register(dto: RegisterDto): Promise<Result<void>> {
     try {
-      await axios.post(`${PREFIX}/register`, {
+      await apiClient.post(`${PREFIX}/register`, {
         username: dto.username,
         password: dto.password,
         email: dto.email,

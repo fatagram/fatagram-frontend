@@ -1,14 +1,14 @@
 import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import Avatar from "@/components/atoms/avatar/avatar";
 import { userProfileService } from "@/api/user/user-profile.api";
 import useClickOutside from "@/hooks/use-click-outside";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/auth/auth-context";
 import { useTranslation } from "react-i18next";
 import Text from "@/components/atoms/text";
 import Button from "@/components/atoms/button";
 import { List } from "@/components/atoms/list";
+import { Avatar } from "@/components/atoms";
+import { useAuth } from "@/hooks/utilities/use-auth";
 
 /**
  * ProfileMenu component displays a profile menu with options for the user.
@@ -17,58 +17,53 @@ import { List } from "@/components/atoms/list";
  * @returns {JSX.Element} The rendered ProfileMenu component.
  */
 const UserMenu: React.FC = () => {
-  // States
   const [avatar, setAvatar] = useState<string>("");
   const [fullName, setFullName] = useState<string>("");
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
+  const { userId, urlName, logOut } = useAuth();
+  const { t } = useTranslation() as { t: (key: string) => string };
+  
+  const navigate = useNavigate();
 
-  // Refs
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLDivElement>(null);
-
-  // Other hooks
-  const navigate = useNavigate();
-  const { userId, urlName, logout } = useAuth();
-  const { t } = useTranslation() as { t: (key: string) => string };
-  // Click outside hook to close the menu
-  useClickOutside(menuRef as RefObject<HTMLDivElement>, btnRef as RefObject<HTMLDivElement>, () => {
+  
+  const handleClickOutside = () => {
     if (isOpenMenu) setIsOpenMenu(false);
-  });
+  };
+  
+  useClickOutside(menuRef as RefObject<HTMLDivElement>, btnRef as RefObject<HTMLDivElement>, handleClickOutside);
 
-  // Fetch user avatar and full name
-  const fetchProfiles = useCallback(async () => {
-    // const profileService = new UserService();
-    const response = await userProfileService.GetProfile(userId || "", "avatar,fullName");
-    // console.log(userId);
-    if (response.success) {
-      setAvatar(response.data.infos.avatar);
-      setFullName(response.data.infos.fullName);
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const response = await userProfileService.GetProfile(userId || "", "avatar,fullName");
+      if (response.success) {
+        setAvatar(response.data.infos.avatar);
+        setFullName(response.data.infos.fullName);
+      }
     }
+    fetchProfile();
   }, [userId]);
 
   // Navigation to personal page
-  const handlePersonalPage = () => {
+  const handlePersonalPage = useCallback(() => {
     const user = urlName || userId;
     // console.log("Navigate to personal page: ", user);
     navigate(`/${user}`);
     setIsOpenMenu(false);
-  };
+  }, [navigate, urlName, userId]);
 
   // Navigation to settings page
-  const handleSettings = () => {
+  const handleSettings = useCallback(() => {
     navigate("/settings");
     setIsOpenMenu(false);
-  };
+  }, [navigate]);
 
   // Logout function
-  const handleLogout = async () => {
-    await logout?.();
+  const handleLogout = useCallback(async () => {
+    await logOut?.();
     navigate("/login", { replace: true });
-  };
-
-  useEffect(() => {
-    fetchProfiles();
-  }, [fetchProfiles]);
+  }, [logOut, navigate]);
 
   return (
     <div className={clsx("flex items-center justify-center relative")} ref={btnRef}>
@@ -79,7 +74,7 @@ const UserMenu: React.FC = () => {
           setIsOpenMenu(!isOpenMenu);
         }}
       >
-        <Avatar border={2} src={avatar} alt="Profile" sz="sm-1" />
+        <Avatar src={avatar} alt="Profile" sz="sm-1" className="border-4 border-bg-third" />
       </Button>
       {isOpenMenu && (
         <div

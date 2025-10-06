@@ -50,5 +50,6 @@ const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
     );
   },
 );
+Textbox.displayName = "Textbox";
 
 export default Textbox;
