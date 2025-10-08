@@ -2,10 +2,10 @@ import { useDispatch } from "react-redux";
 import { useNotificationHub } from "../hubs/use-notification-hub";
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { addNewNotification, deleteNotification } from "../stores/notification-slice";
-import { useCallback } from "react";
+import { use, useCallback } from "react";
 import { useToast } from "@/hooks/utilities/use-toast";
 
-const NotificationListener = () => {
+export function NotificationListener() {
   const dispatch = useDispatch();
   const { pushToast } = useToast();
 

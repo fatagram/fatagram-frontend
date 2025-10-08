@@ -1,4 +1,3 @@
-/* @refresh reload */
 import { authService } from "@/api/auth/auth.api";
 import LoginDto, { LoginResponse } from "@/api/auth/dto/login.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
@@ -85,7 +84,7 @@ type AuthProviderProps = {
 };
 
 // Create AuthProvider
-export function AuthProvider({ children }: AuthProviderProps) {
+export const AuthProvider = React.memo(function AuthProvider({ children }: AuthProviderProps) {
   const [state, dispatch] = React.useReducer(authReducer, initialAuthStatus);
   const { setLanguage } = useLanguage();
   const { openDialog, closeDialog } = useDialog();
@@ -266,4 +265,4 @@ export function AuthProvider({ children }: AuthProviderProps) {
       {state.isInitialized && children}
     </AuthContext.Provider>
   );
-}
+});

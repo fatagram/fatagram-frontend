@@ -12,11 +12,25 @@ import store from "./store/store";
 
 const root = ReactDOM.createRoot(document.getElementById("root") as HTMLElement);
 
-whyDidYouRender(React, {
-  trackAllPureComponents: false,
-});
+// // Only enable Why Did You Render when explicitly needed for debugging
+// if (process.env.NODE_ENV === 'development' && process.env.REACT_APP_WDYR === 'true') {
+//   whyDidYouRender(React, {
+//     trackAllPureComponents: false,
+//     collapseGroups: true,
+//     logOnDifferentValues: false,
+//   });
+// }
 
-const queryClient = new QueryClient();
+// Create QueryClient with proper config
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: 1,
+      staleTime: 5 * 60 * 1000, // 5 minutes
+    },
+  },
+});
 
 root.render(
   <QueryClientProvider client={queryClient}>

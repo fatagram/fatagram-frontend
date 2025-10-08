@@ -1,5 +1,4 @@
-/* @refresh reload */
-import React, { createContext, useContext, useEffect, useState } from "react";
+import React, { createContext, useEffect, useState } from "react";
 import themesJson from "@/themes/themes.json";
 
 // Json
@@ -26,11 +25,12 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export function ThemeProvider({ children }: ThemeProviderProps) {
-  const getLocalStorageTheme = (): Theme => {
-    const theme = localStorage.getItem("theme");
-    return theme && theme in themes ? (theme as Theme) : "default";
-  };
+const getLocalStorageTheme = (): Theme => {
+  const theme = localStorage.getItem("theme");
+  return theme && theme in themes ? (theme as Theme) : "default";
+};
+
+export const ThemeProvider = React.memo(function ThemeProvider({ children }: ThemeProviderProps) {
   const [theme, setTheme] = useState<Theme>(getLocalStorageTheme);
   const [availableThemes, setAvailableThemes] = useState<ThemeOption[]>([]);
 
@@ -68,9 +68,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   );
 
   return (
-    <ThemeContext.Provider value={value}
-    >
+    <ThemeContext.Provider value={value}>
       {children}
     </ThemeContext.Provider>
   );
-}
+});

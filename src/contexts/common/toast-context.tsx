@@ -1,4 +1,3 @@
-/* @refresh reload */
 import Button from "@/components/atoms/button";
 import Text from "@/components/atoms/text";
 import NotificationFactory from "@/features/notifications/components/notification-factory";
@@ -30,7 +29,7 @@ export const ToastContext = React.createContext<ToastContextType>({
 });
 
 // Toast manager
-const ToastManager: React.FC<ToastManagerProps> = ({ className, children }) => {
+const ToastManager: React.FC<ToastManagerProps> = React.memo(function ToastManager({ className, children }) {
   const [toast, setToast] = React.useState<ToastItem | null>(null); // Current toast item
   const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null); // Toast timer
 
@@ -91,8 +90,8 @@ const ToastManager: React.FC<ToastManagerProps> = ({ className, children }) => {
       )}
     </ToastContext.Provider>
   );
-};
+});
 
-export function ToastProvider({ children }: { children: React.ReactNode }) {
+export const ToastProvider = React.memo(function ToastProvider({ children }: { children: React.ReactNode }) {
   return <ToastManager>{children}</ToastManager>;
-};
+});

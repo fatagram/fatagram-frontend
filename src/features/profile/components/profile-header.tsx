@@ -156,7 +156,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                   : t("user:profileHeader.noFriendsCount")}
               </Text>
             ) : (
-              <TextSkeletonLoading sz="md-1" className="w-[150px] lg:ml-5 mb-1" />
+              <TextSkeletonLoading sz="md-1" className="w-[150px] mb-1" />
             )}
             {!isLoading ? (
               <div className="flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0">

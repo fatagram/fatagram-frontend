@@ -1,4 +1,3 @@
-/* @refresh reload */
 import { DialogBoxProps } from "@/components/organisms/dialog/dialog";
 import React, { createContext } from "react";
 
@@ -20,7 +19,7 @@ type DialogProviderProps = {
   children: React.ReactNode;
 };
 
-export function DialogProvider({ children }: DialogProviderProps) {
+export const DialogProvider = React.memo(function DialogProvider({ children }: DialogProviderProps) {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [dialogProps, setDialogProps] = React.useState<DialogBoxProps | null>(null);
 
@@ -49,4 +48,4 @@ export function DialogProvider({ children }: DialogProviderProps) {
       {children}
     </DialogContext.Provider>
   );
-}
+});

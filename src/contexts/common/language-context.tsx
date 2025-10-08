@@ -1,4 +1,3 @@
-/* @refresh reload */
 import i18next from "i18next";
 import React, { createContext, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
@@ -28,7 +27,7 @@ interface LanguageProviderProps {
 }
 
 // Language Provider
-export function LanguageProvider({ children }: LanguageProviderProps) {
+export const LanguageProvider = React.memo(function LanguageProvider({ children }: LanguageProviderProps) {
   const { t } = useTranslation() as { t: (key: string) => string };
   const [lang, setLang] = useState<Language>(
     () => (localStorage.getItem("language") as Language) || "en",
@@ -66,4 +65,4 @@ export function LanguageProvider({ children }: LanguageProviderProps) {
       {children}
     </LanguageContext.Provider>
   );
-}
+});

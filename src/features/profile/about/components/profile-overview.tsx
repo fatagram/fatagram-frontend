@@ -41,8 +41,8 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
             </Text>
             <div>
               {emails.map((email, index) => (
-                <div className={clsx("flex", "flex-col")}>
-                  <Text key={index} weight="bold">
+                <div key={index} className={clsx("flex", "flex-col")}>
+                  <Text weight="bold">
                     {email}
                   </Text>
                   <Text sz="sm-3" className={clsx("opacity-50")}>
@@ -70,8 +70,8 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
             </Text>
             <div>
               {phoneNumbers.map((phone, index) => (
-                <div className={clsx("flex", "flex-col")}>
-                  <Text key={index} weight="bold">
+                <div key={index} className={clsx("flex", "flex-col")}>
+                  <Text weight="bold">
                     {phone}
                   </Text>
                   <Text sz="sm-3" className={clsx("opacity-50")}>

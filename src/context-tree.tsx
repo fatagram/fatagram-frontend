@@ -8,7 +8,7 @@ import { LoadingProvider } from "./contexts/common/loading-context";
 interface ContextTreeProps {
   children: React.ReactNode;
 }
-const ContextTree: React.FC<ContextTreeProps> = ({ children }) => {
+export default function ContextTree({ children }: ContextTreeProps) {
   return (
     <ThemeProvider>
       <LoadingProvider>
@@ -23,4 +23,3 @@ const ContextTree: React.FC<ContextTreeProps> = ({ children }) => {
     </ThemeProvider>
   );
 };
-export default ContextTree;

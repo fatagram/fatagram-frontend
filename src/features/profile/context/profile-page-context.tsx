@@ -1,4 +1,3 @@
-/* @refresh reload */
 import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 import NotFoundPage from "@/pages/not-found/not-found-page";

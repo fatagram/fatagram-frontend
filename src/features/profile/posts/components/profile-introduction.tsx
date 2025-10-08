@@ -21,13 +21,13 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
   const [isEditDescription, setIsEditDescription] = React.useState<boolean>(false);
   const [email, setEmail] = React.useState<string | undefined>(undefined);
   const [phone, setPhone] = React.useState<string | undefined>(undefined);
+  
+  const { t } = useTranslation() as { t: (key: string) => string };
 
   const { isAuthenticated } = useAuth();
   const { isOwner, targetId } = useProfilePage();
   
   const canEdit = useMemo(() => isAuthenticated && isOwner, [isAuthenticated, isOwner]);
-
-  const { t } = useTranslation() as { t: (key: string) => string };
 
   useEffect(() => {
     const fetchData = async () => {

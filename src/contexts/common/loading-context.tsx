@@ -1,4 +1,3 @@
-/* @refresh reload */
 import LoadingPage from "@/pages/loading/loading-page";
 import React, { use, useCallback, useContext, useMemo, useState } from "react";
 
@@ -16,7 +15,7 @@ type LoadingProviderProps = {
   children: React.ReactNode;
 };
 
-export function LoadingProvider({ children }: LoadingProviderProps) {
+export const LoadingProvider = React.memo(function LoadingProvider({ children }: LoadingProviderProps) {
   const [count, setCount] = useState(0);
 
   const stableIncrement = useCallback(() => {
@@ -40,4 +39,4 @@ export function LoadingProvider({ children }: LoadingProviderProps) {
       {children}
     </LoadingContext.Provider>
   );
-}
+});
