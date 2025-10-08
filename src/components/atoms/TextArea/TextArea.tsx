@@ -53,8 +53,9 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         disabled={disabled}
         className={clsx(
           'border-2 text-text-main resize-none',
-          'font-normal rounded-[15px] outline-none text-lg caret-secondary-100 selection:!bg-primary-600',
-          disabled ? 'bg-bg-second' : 'focus:bg-gradient-main-move',
+          'font-normal rounded-[15px] outline-none text-lg caret-primary-500 selection:!bg-primary-600',
+          'transition-all duration-300 ease-out',
+          disabled ? 'bg-bg-second opacity-60 cursor-not-allowed' : 'focus:bg-gradient-main-move',
           sizeClasses[sz],
           isWrong ? styles["my-textarea-wrong"] : styles["my-textarea"],
           className

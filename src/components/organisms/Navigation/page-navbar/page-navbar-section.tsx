@@ -15,16 +15,42 @@ const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({ title, className,
   return (
     <div className={clsx("w-full", className)}>
       {title && (
-        <Text
-          sz="lg-1"
-          weight="bold"
-          className={clsx("p-2 pl-5 text-text-third cursor-pointer select-none", titleClassName)}
+        <div 
+          className={clsx(
+            "group flex items-center justify-between",
+            "p-2 pl-5 pr-3 cursor-pointer select-none",
+            "hover:bg-bg-third/50 rounded-lg",
+            "transition-all duration-200"
+          )}
           onClick={() => setShowChildren(!showChildren)}
         >
-          {title}
-        </Text>
+          <Text
+            sz="lg-1"
+            weight="bold"
+            className={clsx(
+              "text-text-third group-hover:text-text-main transition-colors duration-200",
+              titleClassName
+            )}
+          >
+            {title}
+          </Text>
+          <i 
+            className={clsx(
+              "fas fa-chevron-down text-text-third text-sm",
+              "transition-transform duration-300",
+              "group-hover:text-primary-500",
+              showChildren ? "rotate-180" : "rotate-0"
+            )}
+          />
+        </div>
       )}
-      {showChildren && <div className={clsx("w-full animate-dropdown-slide mt-1")}>{children}</div>}
+      {showChildren && (
+        <div className={clsx(
+          "w-full animate-dropdown-slide mt-1 space-y-1"
+        )}>
+          {children}
+        </div>
+      )}
     </div>
   );
 };

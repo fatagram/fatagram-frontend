@@ -46,11 +46,12 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
     <div
       className={clsx(
         "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
+        "animate-dropdown-slide origin-top",
         className
       )}
       ref={ref}
     >
-      <Text sz="lg-1" weight="bold" className="px-2">
+      <Text sz="lg-1" weight="bold" className="px-2 pt-2">
         {t("notifications:notifications.title")}
       </Text>
       {notifications && notifications.length > 0 ? (
@@ -59,7 +60,11 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
             ? notifications.map((notification: NotificationDto) => (
                 <li
                   key={notification.id}
-                  className="px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer"
+                  className={clsx(
+                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
+                    "transition-all duration-200 hover:scale-[1.01]",
+                    "active:scale-[0.99]"
+                  )}
                 >
                   <NotificationFactory
                     notificationDto={notification}
@@ -75,7 +80,11 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
             : notifications.slice(0, 5).map((notification: NotificationDto) => (
                 <li
                   key={notification.id}
-                  className="px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer"
+                  className={clsx(
+                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
+                    "transition-all duration-200 hover:scale-[1.01]",
+                    "active:scale-[0.99]"
+                  )}
                 >
                   <NotificationFactory
                     notificationDto={notification}

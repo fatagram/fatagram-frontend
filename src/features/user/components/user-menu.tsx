@@ -80,7 +80,8 @@ const UserMenu: React.FC = () => {
         <div
           className={clsx(
             "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
-            "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]"
+            "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
+            "animate-dropdown-slide origin-top-right"
           )}
           ref={menuRef}
         >
@@ -89,7 +90,11 @@ const UserMenu: React.FC = () => {
               <Button
                 sz="md-1"
                 variant="secondary"
-                className={clsx("flex items-center justify-start gap-3 w-full !pl-3 py-3 hover:!bg-bg-fourth")}
+                className={clsx(
+                  "flex items-center justify-start gap-3 w-full !pl-3 py-3",
+                  "hover:!bg-bg-fourth transition-all duration-200",
+                  "hover:scale-[1.02] active:scale-[0.98]"
+                )}
                 onClick={handlePersonalPage}
               >
                 <Avatar src={avatar} alt="avatar" sz="sm-1"></Avatar>
@@ -100,14 +105,18 @@ const UserMenu: React.FC = () => {
             </List.Item>
             <List.Item
               className={clsx(
-                "items-center mx-auto w-[95%] h-1 bg-text-main/20 rounded-full"
+                "items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full"
               )}
             ></List.Item>
             <List.Item>
               <Button
                 sz="md-1"
                 variant="secondary"
-                className={clsx("flex items-center justify-start w-full gap-3 hover:!bg-bg-fourth")}
+                className={clsx(
+                  "flex items-center justify-start w-full gap-3",
+                  "hover:!bg-bg-fourth transition-all duration-200",
+                  "hover:scale-[1.02] active:scale-[0.98]"
+                )}
                 onClick={handleSettings}
               >
                 <Text className={clsx("flex items-center gap-3")} sz="md-1">
@@ -120,7 +129,11 @@ const UserMenu: React.FC = () => {
               <Button
                 sz="md-1"
                 variant="secondary"
-                className={clsx("flex items-center justify-start w-full gap-3 text-red-400 hover:!bg-bg-fourth")}
+                className={clsx(
+                  "flex items-center justify-start w-full gap-3 text-red-400",
+                  "hover:!bg-red-50 transition-all duration-200",
+                  "hover:scale-[1.02] active:scale-[0.98]"
+                )}
                 onClick={handleLogout}
               >
                 <Text sz="md-1" className={clsx("flex items-center gap-3")} color="danger">

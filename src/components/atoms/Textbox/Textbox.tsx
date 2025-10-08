@@ -35,9 +35,10 @@ const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
         ref={ref}
         className={clsx(
           'border-[2px] text-text-main',
-          'font-normal rounded-xl outline-none text-lg caret-secondary-100 selection:!bg-primary-600',
+          'font-normal rounded-xl outline-none text-lg caret-primary-500 selection:!bg-primary-600',
+          'transition-all duration-300 ease-out',
           {
-            'bg-bg-main': disabled,
+            'bg-bg-main opacity-60 cursor-not-allowed': disabled,
             'focus:bg-gradient-main-move': !disabled,
             [styles["primary-textbox-wrong"]]: isWrong && !disabled,
             [styles["primary-textbox"]]: !isWrong && !disabled,
@@ -45,6 +46,7 @@ const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
           sizeClasses[sz],
           className
         )}
+        disabled={disabled}
         {...props}
       />
     );
