@@ -13,6 +13,7 @@ export const useNotifications = () => {
     queryKey: ["notifications", userId],
     queryFn: async () => {
       const res = await notificationService.getNotifications(cursorId, pageSize);
+      await new Promise((resolve) => setTimeout(resolve, 100000));
       dispatch(loadNotifications(res.data as any));
       return res.data;
     },

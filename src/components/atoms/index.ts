@@ -12,3 +12,5 @@ export { default as SelectBox } from "./selectbox";
 export { default as Badge } from "./badge";
 export { default as Avatar } from "./avatar";
 export { default as BackgroundImage } from "./background-image";
+export { default as List } from "./list/list";
+export { default as Skeleton } from "./skeleton";

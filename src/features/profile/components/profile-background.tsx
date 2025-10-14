@@ -1,11 +1,11 @@
 import React from "react";
 import BackgroundImage from "@/components/atoms/background-image";
-import { BackgroundImageSkeletonLoading } from "@/components/atoms/background-image";
 import { useTranslation } from "react-i18next";
 import Text from "@/components/atoms/text";
 import SelectFile from "@/components/molecules/select-file";
 import clsx from "clsx";
 import { useProfilePage } from "../hooks/use-profile-page";
+import { Skeleton } from "@/components/atoms";
 
 type ProfileBackgroundProps = {
   isLoading: boolean;
@@ -24,10 +24,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({
   return (
     <div className={clsx("relative aspect-[16/6] w-full rounded-[15px]")}>
       {isLoading ? (
-        <BackgroundImageSkeletonLoading 
-          alt="Loading" 
-          className={clsx("relative h-full w-full bg-bg-fourth")} 
-        />
+        <Skeleton className="h-full"/>
       ) : (
         <BackgroundImage 
           src={background} 

@@ -1,18 +1,17 @@
-import React, { useCallback } from "react";
+import React, { useCallback, useEffect, useRef } from "react";
 import { userProfileService } from "@/api/user/user-profile.api";
 import { friendshipService } from "@/api/user/friendship.api";
-import { useTranslation } from "react-i18next";
 import ProfileBackground from "./profile-background";
 import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
 import { useNavigate } from "react-router-dom";
-import Text, { TextSkeletonLoading } from "@/components/atoms/text";
-import Button from "@/components/atoms/button";
 import clsx from "clsx";
 import { getImageUrl } from "@/utils/get-image-url";
 import { useAuth } from "@/hooks/utilities/use-auth";
 import { useDialog } from "@/hooks/utilities/use-dialog";
 import { useProfilePage } from "../hooks/use-profile-page";
+import useLanguage from "@/utils/i18n";
+import { Button, Text, Skeleton } from "@/components/atoms";
 
 export type ProfileHeaderProps = {
   className?: string;
@@ -37,23 +36,24 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   const [isLoadingNumOfFriends, setIsLoadingNumOfFriends] = React.useState<boolean>(true);
   const [numberOfFriends, setNumberOfFriends] = React.useState<number>(0);
 
-  const avtRef = React.useRef<HTMLDivElement>(null);
+  const avtRef = useRef<HTMLDivElement>(null);
 
   // Auth info hook
-  const { t } = useTranslation() as { t: (key: string) => string };
+  const t = useLanguage();
   const navigate = useNavigate();
   const { openDialog, closeDialog } = useDialog();
   const { targetId, isOwner } = useProfilePage();
   const { isAuthenticated } = useAuth();
 
   // Fetch user profile
-  React.useEffect(() => {
+  useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
       const response = await userProfileService.GetProfile(
         targetId,
         "avatar,background,fullName,nickname",
       );
+
       // Delay to simulate loading
       if (response.success) {
         setAvatar(getImageUrl(response.data.infos.avatar) || "");
@@ -136,7 +136,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         />
         <div className="flex flex-col gap-2 items-start flex-1 mb-3 ml-4">
           {isLoading ? (
-            <TextSkeletonLoading sz="md-1" className="lg:self-start self-center w-[200px]" />
+            <Skeleton sz="sm-3" className="w-56"/>
           ) : (
             <Text sz="xl-1" weight="bold" className="lg:text-left text-center break-words">
               {fullName}
@@ -156,7 +156,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                   : t("user:profileHeader.noFriendsCount")}
               </Text>
             ) : (
-              <TextSkeletonLoading sz="md-1" className="w-[150px] mb-1" />
+              <Skeleton sz="sm-3" className="w-36"/>
             )}
             {!isLoading ? (
               <div className="flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0">
@@ -188,7 +188,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                 </Button>
               </div>
             ) : (
-              <TextSkeletonLoading sz="md-1" className="w-[250px] lg:ml-auto mb-1" />
+              <Skeleton sz="md-1" className="w-[250px] lg:ml-auto mb-1" />
             )}
           </div>
         </div>

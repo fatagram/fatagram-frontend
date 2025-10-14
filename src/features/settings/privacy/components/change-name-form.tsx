@@ -1,8 +1,6 @@
 import { ErrorCodes } from "@/api/user/dto/change-name.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
-import Button from "@/components/atoms/button";
-import Text, { TextSkeletonLoading } from "@/components/atoms/text";
-import Textbox from "@/components/atoms/textbox";
+import { Text, Textbox, Button, Skeleton } from "@/components/atoms";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -83,7 +81,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
           {t("settings:account.personalInfo.changeNameForm.title")}
         </Text>
         {isLoading ? (
-          <TextSkeletonLoading className={clsx("h-[50px]")} />
+          <Skeleton />
         ) : (
           <div>
             <div

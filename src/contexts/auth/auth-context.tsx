@@ -65,6 +65,7 @@ export interface AuthContextType {
   isInitialized?: boolean;
   logIn: (loginDto: LoginDto) => Promise<Result<LoginResponse>>;
   logOut?: () => Promise<void>;
+  setUrlName?: (urlName: string | undefined) => void;
   userId?: string;
   urlName?: string;
 }
@@ -75,6 +76,7 @@ export const AuthContext = createContext<AuthContextType>({
   isInitialized: false,
   logIn: () => Promise.resolve({ success: false, data: undefined }),
   logOut: () => Promise.resolve(),
+  setUrlName: () => {},
   userId: undefined,
   urlName: undefined,
 });
@@ -169,6 +171,13 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
     }
   }, [_logOut]);
 
+  const setUrlName = useCallback((urlName: string | undefined) => {
+    dispatch({
+      type: "UPDATE_URL_NAME",
+      payload: urlName,
+    });
+  }, []);
+
   // Memoize initialize function
   const initialize = useCallback(async () => {
     try {
@@ -258,6 +267,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
           urlName: state.urlName,
           logIn: _logIn,
           logOut: _logOut,
+          setUrlName,
         }),
         [state.isAuthenticated, state.isInitialized, state.userId, state.urlName, _logIn, _logOut],
       )}
