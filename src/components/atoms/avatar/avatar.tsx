@@ -8,7 +8,7 @@ export const sizeClasses = {
   "xs": "w-[24px]",
 
   // Small sizes
-  "sm-1": "w-[45px]",
+  "sm-1": "w-[48px]",
   "sm-2": "w-[56px]",
   "sm-3": "w-[64px]",
 
