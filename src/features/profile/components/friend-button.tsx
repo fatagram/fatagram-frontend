@@ -1,5 +1,5 @@
 import { friendshipService } from "@/api/user/friendship.api";
-import Button from "@/components/atoms/button";
+import { Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/types/component-type";
 import Dropdown from "@/components/molecules/dropdown";
 import useClickOutside from "@/hooks/use-click-outside";
@@ -10,19 +10,16 @@ import { useTranslation } from "react-i18next";
 
 interface FriendButtonProps extends ComponentProps {
   uid?: string;
-};
+}
 
 const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   if (!useAuth().isAuthenticated) return null;
 
-  const [friendshipStatus, setFriendshipStatus] =
-    useState<string>("None");
-  const [isShowFriendOptions, setIsShowFriendOptions] =
-    useState<boolean>(false);
-  const [isShowRequestOptions, setIsShowRequestOptions] =
-    useState<boolean>(false);
+  const [friendshipStatus, setFriendshipStatus] = useState<string>("None");
+  const [isShowFriendOptions, setIsShowFriendOptions] = useState<boolean>(false);
+  const [isShowRequestOptions, setIsShowRequestOptions] = useState<boolean>(false);
 
   const btnFriendRef = useRef<HTMLButtonElement>(null);
   const btnRequestRef = useRef<HTMLButtonElement>(null);
@@ -34,7 +31,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
     btnFriendRef as RefObject<HTMLButtonElement>,
     () => {
       if (isShowFriendOptions) setIsShowFriendOptions(false);
-    }
+    },
   );
 
   useClickOutside(
@@ -42,14 +39,12 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
     btnRequestRef as RefObject<HTMLButtonElement>,
     () => {
       if (isShowRequestOptions) setIsShowRequestOptions(false);
-    }
+    },
   );
 
   useEffect(() => {
     const fetchFriendshipStatus = async () => {
-      const response = await friendshipService.GetFriendshipStatus(
-        uid ? uid : ""
-      );
+      const response = await friendshipService.GetFriendshipStatus(uid ? uid : "");
       if (response.success) {
         setFriendshipStatus(response.data?.status ?? "None");
       }
@@ -58,18 +53,14 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
   }, [uid, friendshipService, setFriendshipStatus]);
 
   const handleSentAddFriendRequest = useCallback(async () => {
-    const response = await friendshipService.SendAddFriendRequest(
-      uid ? uid : ""
-    );
+    const response = await friendshipService.SendAddFriendRequest(uid ? uid : "");
     if (response.success) {
       setFriendshipStatus("SentByMe");
     }
   }, [uid, friendshipService]);
 
   const handleCancelAddFriendRequest = useCallback(async () => {
-    const response = await friendshipService.CancelAddFriendRequest(
-      uid ? uid : ""
-    );
+    const response = await friendshipService.CancelAddFriendRequest(uid ? uid : "");
     if (response.success) {
       setFriendshipStatus("None");
     }
@@ -77,26 +68,22 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
 
   const handleAcceptAddFriendRequest = useCallback(
     async (id: string | undefined) => {
-      const response = await friendshipService.AcceptAddFriendRequest(
-        id ? id : ""
-      );
+      const response = await friendshipService.AcceptAddFriendRequest(id ? id : "");
       if (response.success) {
         setFriendshipStatus("Friend");
       }
     },
-    [friendshipService]
+    [friendshipService],
   );
 
   const handleDeclineAddFriendRequest = useCallback(
     async (id: string | undefined) => {
-      const response = await friendshipService.DeclineAddFriendRequest(
-        id ? id : ""
-      );
+      const response = await friendshipService.DeclineAddFriendRequest(id ? id : "");
       if (response.success) {
         setFriendshipStatus("None");
       }
     },
-    [friendshipService]
+    [friendshipService],
   );
 
   // Handle unfriend action
@@ -107,7 +94,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
         setFriendshipStatus("None");
       }
     },
-    [friendshipService]
+    [friendshipService],
   );
 
   // Dropdown options for friend actions
@@ -126,7 +113,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
         },
       },
     ],
-    [uid, handleUnfriend, t]
+    [uid, handleUnfriend, t],
   );
 
   // Dropdown options for request actions
@@ -153,15 +140,14 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
         onClick: async () => await handleDeclineAddFriendRequest?.(uid),
       },
     ],
-    [uid, handleAcceptAddFriendRequest, handleDeclineAddFriendRequest, t]
+    [uid, handleAcceptAddFriendRequest, handleDeclineAddFriendRequest, t],
   );
 
   return (
     <div>
       {friendshipStatus === "None" ? (
         <Button sz={sz} onClick={handleSentAddFriendRequest}>
-          <i className={clsx("fa-solid", "fa-plus")}></i>{" "}
-          {t("user:profileHeader.addFriendButton")}
+          <i className={clsx("fa-solid", "fa-plus")}></i> {t("user:profileHeader.addFriendButton")}
         </Button>
       ) : friendshipStatus === "SentByMe" ? (
         <Button sz={sz} onClick={handleCancelAddFriendRequest}>
@@ -193,7 +179,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
               "shadow-md",
               "z-[10]",
               "sm:min-w-[200px]",
-              "w-[calc(100%-2%)]"
+              "w-[calc(100%-2%)]",
             )}
             items={requestOptions}
           />
@@ -224,7 +210,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
               "shadow-md",
               "z-[10]",
               "sm:min-w-[200px]",
-              "w-[calc(100%-2%)]"
+              "w-[calc(100%-2%)]",
             )}
             items={friendOptions}
           />

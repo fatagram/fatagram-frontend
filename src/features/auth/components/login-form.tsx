@@ -1,12 +1,12 @@
 import React, { useEffect } from "react";
 import { LoginValidator } from "@/api/auth/validate/login.validator";
 import LoginDto, { ErrorCodes, ErrorKey, LoginResponse } from "@/api/auth/dto/login.dto";
-import OverlayLoading from "@/components/organisms/overlay-loading/overlay-loading";
 import { useTranslation } from "react-i18next";
 import { Result } from "@/api/common/result";
 import { Button, Logo, Textbox, Text, PasswordBox, Checkbox, Link } from "@/components/atoms";
 import clsx from "clsx";
 import { useAuth } from "@/hooks/utilities/use-auth";
+import { OverlayLoading } from "@/components/organisms/overlay-loading";
 
 interface LoginFormProps {
   switchForgotPassword?: () => void;
@@ -129,7 +129,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       className={clsx(
         "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
         "bg-bg-main rounded-2xl",
-        "p-16 animate-fade-in overflow-hidden"
+        "p-16 animate-fade-in overflow-hidden",
       )}
     >
       {isLoading && <OverlayLoading />}
@@ -138,10 +138,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       <Text
         sz="xl-1"
         weight="extrabold"
-        className={clsx(
-          "uppercase text-primary-500",
-          "font-bold font-inter select-none"
-        )}
+        className={clsx("uppercase text-primary-500", "font-bold font-inter select-none")}
       >
         {t("auth:login.title")}
       </Text>
@@ -195,7 +192,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
             sz="sm-2"
             className={clsx(
               "text-primary-700 hover:text-primary-600",
-              "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
+              "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none",
             )}
             onClick={switchForgotPassword}
           >
@@ -227,7 +224,7 @@ const LoginForm: React.FC<LoginFormProps> = ({
       {isShowClose && (
         <Text
           className={clsx(
-            "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
+            "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer",
           )}
           onClick={onClose}
         >

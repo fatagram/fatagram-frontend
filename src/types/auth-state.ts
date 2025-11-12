@@ -8,8 +8,6 @@ export interface AuthState {
 
 export const initialAuthStatus: AuthState = {
   isAuthenticated: false,
-  userId: "",
-  urlName: undefined,
   lang: "en",
   isInitialized: false,
 };

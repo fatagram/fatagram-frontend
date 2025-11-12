@@ -1,7 +1,7 @@
 import React, { RefObject } from "react";
-import Label from "../text";
 import useClickOutside from "@/hooks/use-click-outside";
 import { ComponentProps } from "@/components/common/types/component-type";
+import { Text } from "@/components/atoms";
 import clsx from "clsx";
 
 export type OptionKey = string | number | boolean;
@@ -17,7 +17,12 @@ interface SelectBoxProps extends Omit<ComponentProps, "onSelect"> {
   onSelect: (option: OptionKey) => void;
 }
 
-const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect, className }) => {
+export const SelectBox: React.FC<SelectBoxProps> = ({
+  options,
+  selectedOption,
+  onSelect,
+  className,
+}) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [selected, setSelected] = React.useState<OptionKey>(selectedOption);
   const selectBoxRef = React.useRef<HTMLDivElement>(null);
@@ -42,7 +47,7 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
           )}
           onClick={() => setIsOpen(!isOpen)}
         >
-          <Label sz="md-2">{options.find((opt) => opt.key === selected)?.value}</Label>
+          <Text sz="md-2">{options.find((opt) => opt.key === selected)?.value}</Text>
           <i className="fa-solid fa-caret-down"></i>
         </div>
       </button>
@@ -78,5 +83,3 @@ const SelectBox: React.FC<SelectBoxProps> = ({ options, selectedOption, onSelect
     </div>
   );
 };
-
-export default SelectBox;

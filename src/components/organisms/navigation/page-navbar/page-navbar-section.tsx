@@ -9,18 +9,23 @@ type PageNavbarSectionProps = {
   children?: React.ReactNode;
 };
 
-const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({ title, className, titleClassName, children }) => {
+export const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({
+  title,
+  className,
+  titleClassName,
+  children,
+}) => {
   const [showChildren, setShowChildren] = useState<boolean>(true);
 
   return (
     <div className={clsx("w-full", className)}>
       {title && (
-        <div 
+        <div
           className={clsx(
             "group flex items-center justify-between",
             "p-2 pl-5 pr-3 cursor-pointer select-none",
             "hover:bg-bg-third/50 rounded-lg",
-            "transition-all duration-200"
+            "transition-all duration-200",
           )}
           onClick={() => setShowChildren(!showChildren)}
         >
@@ -29,30 +34,24 @@ const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({ title, className,
             weight="bold"
             className={clsx(
               "text-text-third group-hover:text-text-main transition-colors duration-200",
-              titleClassName
+              titleClassName,
             )}
           >
             {title}
           </Text>
-          <i 
+          <i
             className={clsx(
               "fas fa-chevron-down text-text-third text-sm",
               "transition-transform duration-300",
               "group-hover:text-primary-500",
-              showChildren ? "rotate-180" : "rotate-0"
+              showChildren ? "rotate-180" : "rotate-0",
             )}
           />
         </div>
       )}
       {showChildren && (
-        <div className={clsx(
-          "w-full animate-dropdown-slide mt-1 space-y-1"
-        )}>
-          {children}
-        </div>
+        <div className={clsx("w-full animate-dropdown-slide mt-1 space-y-1")}>{children}</div>
       )}
     </div>
   );
 };
-
-export default PageNavbarSection;

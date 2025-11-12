@@ -9,7 +9,7 @@ import {
   setRefreshToken,
   setRefreshTokenToSession,
 } from "@/utils/token";
-import React, { createContext, useCallback, useEffect, useMemo } from "react";
+import React, { createContext, FC, useCallback, useEffect, useMemo, useReducer } from "react";
 import { Result } from "@/api/common/result";
 import { useDispatch } from "react-redux";
 import { resetState } from "@/features/notifications/stores/notification-slice";
@@ -86,8 +86,8 @@ type AuthProviderProps = {
 };
 
 // Create AuthProvider
-export const AuthProvider = React.memo(function AuthProvider({ children }: AuthProviderProps) {
-  const [state, dispatch] = React.useReducer(authReducer, initialAuthStatus);
+export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
+  const [state, dispatch] = useReducer(authReducer, initialAuthStatus);
   const { setLanguage } = useLanguage();
   const { openDialog, closeDialog } = useDialog();
   const { increment, decrement } = useLoading();
@@ -95,11 +95,14 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
   const queryClient = useQueryClient();
 
   // Function to set language when reload or login - MEMOIZED
-  const setLang = useCallback((langCode: string) => {
-    if (LANG_LIST.includes(langCode as Language)) {
-      setLanguage(langCode as Language);
-    }
-  }, [setLanguage]);
+  const setLang = useCallback(
+    (langCode: string) => {
+      if (LANG_LIST.includes(langCode as Language)) {
+        setLanguage(langCode as Language);
+      }
+    },
+    [setLanguage],
+  );
 
   // Function to login
   const _logIn = useCallback(
@@ -159,17 +162,17 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
     }
   }, [increment, decrement, clearUserData, openDialog]);
 
-  const checkAuth = useCallback(async () => {
-    try {
-      const result = await authService.ping();
-      if (!result.success) {
-        await _logOut();
-      }
-    } catch (err) {
-      console.error("Check auth failed:", err);
-      await _logOut();
-    }
-  }, [_logOut]);
+  // const checkAuth = useCallback(async () => {
+  //   try {
+  //     const result = await authService.ping();
+  //     if (!result.success) {
+  //       await _logOut();
+  //     }
+  //   } catch (err) {
+  //     console.error("Check auth failed:", err);
+  //     await _logOut();
+  //   }
+  // }, [_logOut]);
 
   const setUrlName = useCallback((urlName: string | undefined) => {
     dispatch({
@@ -191,8 +194,6 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
           type: "INITIALIZE",
           payload: {
             isAuthenticated: false,
-            userId: "",
-            urlName: undefined,
             lang: "en",
           },
         });
@@ -207,7 +208,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
           type: "INITIALIZE",
           payload: {
             isAuthenticated: true,
-            userId: result.data?.id || "",
+            userId: result.data?.id,
             urlName: result.data?.urlName,
             lang: result.data?.languageCode || "en",
           },
@@ -221,8 +222,6 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
           type: "INITIALIZE",
           payload: {
             isAuthenticated: true, // Keep authenticated if we have token
-            userId: "",
-            urlName: undefined,
             lang: "en",
           },
         });
@@ -235,8 +234,6 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
         type: "INITIALIZE",
         payload: {
           isAuthenticated: !!refreshToken, // Keep auth if token exists
-          userId: "",
-          urlName: undefined,
           lang: "en",
         },
       });
@@ -247,15 +244,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
 
   useEffect(() => {
     initialize();
-  }, [initialize]);
-
-  useEffect(() => {
-    const handleFocus = () => {
-      checkAuth();
-    };
-    window.addEventListener("focus", handleFocus);
-    return () => window.removeEventListener("focus", handleFocus);
-  }, [checkAuth]);
+  }, []);
 
   return (
     <AuthContext.Provider
@@ -272,7 +261,7 @@ export const AuthProvider = React.memo(function AuthProvider({ children }: AuthP
         [state.isAuthenticated, state.isInitialized, state.userId, state.urlName, _logIn, _logOut],
       )}
     >
-      {state.isInitialized && children}
+      {children}
     </AuthContext.Provider>
   );
-});
+};

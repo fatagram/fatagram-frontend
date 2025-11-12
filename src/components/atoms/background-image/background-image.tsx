@@ -9,7 +9,7 @@ interface BackgroundImageProps extends ComponentProps {
   alt: string;
 }
 
-const BackgroundImage: React.FC<BackgroundImageProps> = ({ src, alt, className, children }) => {
+export default function BackgroundImage({ src, alt, className, children }: BackgroundImageProps) {
   useEffect(() => {
     document.documentElement.style.setProperty("--bg-image", `url(${src})`);
   }, [src]);
@@ -17,16 +17,14 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ src, alt, className, 
   return (
     <div
       className={clsx(
-      "rounded-2xl",
-      style["user-bg-image"],
-      src ? "" : "h-[200px] bg-bg-fourth",
-      className
+        "rounded-2xl",
+        style["user-bg-image"],
+        src ? "" : "h-[200px] bg-bg-fourth",
+        className,
       )}
       aria-label={alt}
     >
       {children}
     </div>
   );
-};
-
-export default BackgroundImage;
+}

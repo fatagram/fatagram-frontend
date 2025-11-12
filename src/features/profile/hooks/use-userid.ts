@@ -12,7 +12,7 @@ export function useUserId(userParam: string) {
           controller.abort?.();
         }
       }, 10000);
-      
+
       try {
         const response = await userProfileService.GetProfile(userParam, "id");
         clearTimeout(timeoutId);
@@ -37,7 +37,7 @@ export function useUserId(userParam: string) {
         };
       }
     },
-    staleTime: 1000 * 60 * 5, 
+    staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     enabled: !!userParam,
     retry: 1,
@@ -47,5 +47,5 @@ export function useUserId(userParam: string) {
     userId: data?.userId,
     userExist: isError ? false : data?.userExist,
     isLoading,
-  }
-};
+  };
+}

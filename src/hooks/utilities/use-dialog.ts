@@ -7,4 +7,4 @@ export function useDialog(): DialogContextType {
     throw new Error("useDialog must be used within a DialogProvider");
   }
   return context;
-};
+}

@@ -6,7 +6,7 @@
       "--border-radius": "8px",
 
       "--bg-main": "255 255 255",
-      "--bg-second": "249 249 249", 
+      "--bg-second": "249 249 249",
       "--bg-third": "236 250 245",
       "--bg-fourth": "240 240 240",
       "--bg-fifth": "248 250 252",

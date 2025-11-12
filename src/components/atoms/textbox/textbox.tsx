@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import styles from "./Textbox.module.css";
+import styles from "./textbox.module.css";
 import { Size } from "../../common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
 
@@ -27,24 +27,24 @@ export interface TextboxProps extends ComponentProps<HTMLInputElement> {
 
 // Textbox component
 // This component is a textbox component that can be used in the application.
-const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
+export const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
   ({ disabled = false, isWrong = false, className, sz = "sm-1", ...props }, ref) => {
     return (
       <input
         type="text"
         ref={ref}
         className={clsx(
-          'border-[2px] text-text-main',
-          'font-normal rounded-xl outline-none text-lg caret-primary-500 selection:!bg-primary-600',
-          'transition-all duration-300 ease-out',
+          "border-[2px] text-text-main",
+          "font-normal rounded-xl outline-none text-lg caret-primary-500 selection:!bg-primary-600",
+          "transition-all duration-300 ease-out",
           {
-            'bg-bg-main opacity-60 cursor-not-allowed': disabled,
-            'focus:bg-gradient-main-move': !disabled,
+            "bg-bg-main opacity-60 cursor-not-allowed": disabled,
+            "focus:bg-gradient-main-move": !disabled,
             [styles["primary-textbox-wrong"]]: isWrong && !disabled,
             [styles["primary-textbox"]]: !isWrong && !disabled,
           },
           sizeClasses[sz],
-          className
+          className,
         )}
         disabled={disabled}
         {...props}
@@ -53,5 +53,3 @@ const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
   },
 );
 Textbox.displayName = "Textbox";
-
-export default Textbox;

@@ -1,11 +1,10 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { friendshipService } from "@/api/user/friendship.api";
-import Button from "@/components/atoms/button";
-import Text from "@/components/atoms/text";
 import clsx from "clsx";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import BaseNotification from "./base-notification";
+import { Button, Text } from "@/components/atoms";
 
 interface NewFriendRequestProps {
   notificationDto: NotificationDto;

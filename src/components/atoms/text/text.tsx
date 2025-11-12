@@ -46,7 +46,7 @@ interface TextProps extends ComponentProps {
   wrap?: "whitespace-pre-wrap" | "whitespace-normal";
 }
 
-const Text = forwardRef<HTMLElement, TextProps>(
+export const Text = forwardRef<HTMLElement, TextProps>(
   (
     {
       as: Component = "span",
@@ -62,20 +62,12 @@ const Text = forwardRef<HTMLElement, TextProps>(
   ) => {
     return (
       <Component
-      className={clsx(
-        textSizes[sz],
-        weightClasses[weight],
-        colorClasses[color],
-        wrap,
-        className
-      )}
-      ref={ref}
-      {...props}
+        className={clsx(textSizes[sz], weightClasses[weight], colorClasses[color], wrap, className)}
+        ref={ref}
+        {...props}
       >
-      {children}
+        {children}
       </Component>
     );
   },
 );
-
-export default Text;

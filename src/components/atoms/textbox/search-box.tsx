@@ -1,10 +1,10 @@
 import { forwardRef } from "react";
-import Textbox, { TextboxProps } from "./textbox";
 import clsx from "clsx";
+import { Textbox, TextboxProps } from "./textbox";
 
 interface SearchBoxProps extends TextboxProps {}
 
-const SearchBox = forwardRef<HTMLInputElement, SearchBoxProps>(
+export const SearchBox = forwardRef<HTMLInputElement, SearchBoxProps>(
   ({ sz = "sm-1", className, ...props }, ref) => {
     return (
       <div className={clsx("relative h-fit w-fit", className)}>
@@ -15,5 +15,3 @@ const SearchBox = forwardRef<HTMLInputElement, SearchBoxProps>(
   },
 );
 SearchBox.displayName = "SearchBox";
-
-export default SearchBox;

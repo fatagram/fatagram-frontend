@@ -1,4 +1,4 @@
-import RegisterDto, { ErrorCodes } from "@/api/user/dto/register.dto";
+import RegisterDto, { ErrorCodes } from "@/api/auth/dto/register.dto";
 
 export class RegisterValidator {
   static validate(dto: RegisterDto): string[] {

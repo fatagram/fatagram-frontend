@@ -2,11 +2,10 @@ import { FriendDto } from "@/api/user/dto/friend.dto";
 import useFriends from "@/features/profile/hooks/use-friend";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import SearchBox from "@/components/atoms/textbox/searchbox";
-import Text from "@/components/atoms/text";
 import FriendItem from "./friend-item";
 import clsx from "clsx";
 import { useProfilePage } from "../../hooks/use-profile-page";
+import { SearchBox, Text } from "@/components/atoms";
 
 interface ProfileFriendsProps {
   className?: string;

@@ -1,9 +1,8 @@
 import React, { useEffect } from "react";
 import clsx from "clsx";
 import RegisterForm from "../../features/auth/components/register-form";
-import Footer from "../../components/atoms/footer/footer";
-import Text from "@/components/atoms/text";
 import SelectLanguage from "@/features/settings/general/components/select-language";
+import { Footer, Text } from "@/components/atoms";
 
 // RegisterPage function
 function RegisterPage() {
@@ -15,26 +14,26 @@ function RegisterPage() {
     <div
       className={clsx(
         "relative flex flex-col items-center justify-center h-full",
-        "background-image"
+        "background-image",
       )}
     >
       <div
         className={clsx(
           "relative w-full flex justify-center lg:justify-between m-2 z-10 backdrop-blur-sm bg-bg-main",
-          "lg:max-w-[75%] max-w-[95%] rounded-lg overflow-hidden sm:h-[95vh] h-auto"
+          "lg:max-w-[75%] max-w-[95%] rounded-lg overflow-hidden sm:h-[95vh] h-auto",
         )}
       >
         <div
           className={clsx(
             "hidden relative sm:flex flex-col register-bg w-full rounded-lg h-full items-center justify-center gap-1",
-            "border-8 border-bg-main border-r-0 overflow-hidden"
+            "border-8 border-bg-main border-r-0 overflow-hidden",
           )}
         >
           <Text
             weight="extrabold"
             className={clsx(
               "relative flex items-center z-50 text-white text-center shadow-lg rounded-lg backdrop-blur-sm h-[70px]",
-              "xl:text-[50px] lg:text-[40px] text-[30px]"
+              "xl:text-[50px] lg:text-[40px] text-[30px]",
             )}
           >
             Welcome to Fatagram
@@ -43,7 +42,7 @@ function RegisterPage() {
             weight="light"
             className={clsx(
               "text-white z-50 shadow-lg rounded-lg backdrop-blur-sm",
-              "xl:text-[30px] lg:text-[25px] text-[20px]"
+              "xl:text-[30px] lg:text-[25px] text-[20px]",
             )}
           >
             Connect with your friends

@@ -22,4 +22,4 @@ export default function ContextTree({ children }: ContextTreeProps) {
       </LoadingProvider>
     </ThemeProvider>
   );
-};
+}

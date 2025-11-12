@@ -21,7 +21,7 @@ export const ChangeUrlName: React.FC<ChangeUrlNameProps> = ({ isLoading, urlName
 
   useEffect(() => {
     setUrlName(u);
-  }, [u])
+  }, [u]);
 
   // Handle change URL name
   const handleChangeUrlName = async (urlName: string | undefined) => {

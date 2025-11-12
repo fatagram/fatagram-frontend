@@ -1,5 +1,4 @@
 import LanguageSettings from "@/features/settings/general/components/language-setting";
-import React from "react";
 import clsx from "clsx";
 
 const LanguageSettingPage = () => {

@@ -13,26 +13,26 @@ export interface ProfilePageContextType {
 
 export const ProfilePageContext = createContext<ProfilePageContextType>({
   isOwner: false,
-  targetId: '',
-  userParam: undefined
+  targetId: "",
+  userParam: undefined,
 });
 
 type ProfilePageProviderProps = {
   children: React.ReactNode;
-}
+};
 
 // Using function declaration instead of arrow function for better Fast Refresh compatibility
 export default function ProfilePageProvider({ children }: ProfilePageProviderProps) {
   const { userId } = useAuth();
   const { increment, decrement } = useLoading();
   const userParam = useParams<{ userParam: string }>();
-  const { userId: targetId, userExist, isLoading } = useUserId(userParam.userParam || '');
-  
+  const { userId: targetId, userExist, isLoading } = useUserId(userParam.userParam || "");
+
   // Track previous loading state to avoid unnecessary increment/decrement calls
   const prevLoadingRef = useRef<boolean | null>(null);
   // Cache the last valid targetId to prevent it from becoming undefined during reload
   const cachedTargetIdRef = useRef<string | undefined>(undefined);
-  
+
   // Update cached targetId only when we have a valid one
   if (targetId) {
     cachedTargetIdRef.current = targetId;
@@ -53,12 +53,15 @@ export default function ProfilePageProvider({ children }: ProfilePageProviderPro
 
   // Memoize context value to prevent unnecessary re-renders of consumers
   // Use cached targetId if current one is undefined (during reload)
-  const validTargetId = targetId || cachedTargetIdRef.current || '';
-  const contextValue = useMemo(() => ({
-    isOwner: userId === validTargetId,
-    targetId: validTargetId,
-    userParam: userParam.userParam
-  }), [userId, validTargetId, userParam.userParam]);
+  const validTargetId = targetId || cachedTargetIdRef.current || "";
+  const contextValue = useMemo(
+    () => ({
+      isOwner: userId === validTargetId,
+      targetId: validTargetId,
+      userParam: userParam.userParam,
+    }),
+    [userId, validTargetId, userParam.userParam],
+  );
 
   // Show NotFoundPage if user doesn't exist (but not while loading)
   if (userExist === false) {
@@ -66,9 +69,5 @@ export default function ProfilePageProvider({ children }: ProfilePageProviderPro
   }
 
   // Render children even while loading to prevent targetId from becoming undefined
-  return (
-    <ProfilePageContext.Provider value={contextValue}>
-      {children}
-    </ProfilePageContext.Provider>
-  );
+  return <ProfilePageContext.Provider value={contextValue}>{children}</ProfilePageContext.Provider>;
 }

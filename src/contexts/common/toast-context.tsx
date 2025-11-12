@@ -1,5 +1,4 @@
-import Button from "@/components/atoms/button";
-import Text from "@/components/atoms/text";
+import { Button, Text } from "@/components/atoms";
 import NotificationFactory from "@/features/notifications/components/notification-factory";
 import React from "react";
 import { useNavigate } from "react-router-dom";
@@ -29,7 +28,10 @@ export const ToastContext = React.createContext<ToastContextType>({
 });
 
 // Toast manager
-const ToastManager: React.FC<ToastManagerProps> = React.memo(function ToastManager({ className, children }) {
+const ToastManager: React.FC<ToastManagerProps> = React.memo(function ToastManager({
+  className,
+  children,
+}) {
   const [toast, setToast] = React.useState<ToastItem | null>(null); // Current toast item
   const [timer, setTimer] = React.useState<NodeJS.Timeout | null>(null); // Toast timer
 
@@ -43,20 +45,17 @@ const ToastManager: React.FC<ToastManagerProps> = React.memo(function ToastManag
       }
       return null;
     });
-    
+
     setToast(item);
-    
+
     const newTimer = setTimeout(() => {
       setToast(null);
     }, item.duration || 3000);
-    
+
     setTimer(newTimer);
   }, []);
 
-  const value = React.useMemo(
-    () => ({ pushToast }),
-    [pushToast]
-  );
+  const value = React.useMemo(() => ({ pushToast }), [pushToast]);
 
   return (
     <ToastContext.Provider value={value}>
@@ -92,6 +91,10 @@ const ToastManager: React.FC<ToastManagerProps> = React.memo(function ToastManag
   );
 });
 
-export const ToastProvider = React.memo(function ToastProvider({ children }: { children: React.ReactNode }) {
+export const ToastProvider = React.memo(function ToastProvider({
+  children,
+}: {
+  children: React.ReactNode;
+}) {
   return <ToastManager>{children}</ToastManager>;
 });

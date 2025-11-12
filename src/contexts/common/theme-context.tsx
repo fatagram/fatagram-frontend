@@ -59,17 +59,13 @@ export const ThemeProvider = React.memo(function ThemeProvider({ children }: The
   }, [theme]);
 
   const value = React.useMemo(
-    () => ({ 
-      theme, 
-      availableThemes, 
-      setTheme: handleTheme 
+    () => ({
+      theme,
+      availableThemes,
+      setTheme: handleTheme,
     }),
-    [theme, availableThemes, handleTheme]
+    [theme, availableThemes, handleTheme],
   );
 
-  return (
-    <ThemeContext.Provider value={value}>
-      {children}
-    </ThemeContext.Provider>
-  );
+  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
 });

@@ -9,7 +9,7 @@ interface ListProps extends ComponentProps {
   itemClassName?: string;
 }
 
-const ListItem: React.FC<ListItemProps> = ({ key, className, children, ...props }) => {
+export const ListItem: React.FC<ListItemProps> = ({ key, className, children, ...props }) => {
   return (
     <li key={key} className={className} {...props}>
       {children}
@@ -17,7 +17,7 @@ const ListItem: React.FC<ListItemProps> = ({ key, className, children, ...props 
   );
 };
 
-const List: React.FC<ListProps> & { Item: typeof ListItem } = ({
+export const List: React.FC<ListProps> & { Item: typeof ListItem } = ({
   listItems,
   children,
   className,
@@ -36,5 +36,3 @@ const List: React.FC<ListProps> & { Item: typeof ListItem } = ({
 };
 
 List.Item = ListItem;
-export { ListItem };
-export default List;

@@ -19,7 +19,7 @@ export const colorsConfig = {
     400: "rgb(var(--secondary-400) / <alpha-value>)",
     500: "rgb(var(--secondary-500) / <alpha-value>)",
     600: "rgb(var(--secondary-600) / <alpha-value>)",
-  },  
+  },
   text: {
     main: "rgb(var(--text-main) / <alpha-value>)",
     second: "rgb(var(--text-second) / <alpha-value>)",

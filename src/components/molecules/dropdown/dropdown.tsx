@@ -42,14 +42,18 @@ const Dropdown: React.FC<DropdownProps> = ({
       )}
       <ul className="flex flex-col gap-1 w-full">
         {items.map((item, index) => (
-          <li key={index} onClick={() => {
-                item.onClick?.();
-                onSelect?.(item);
-              }}
-              className={clsx("w-full text-left px-3 py-2 !rounded-md text-sm",
-                "hover:bg-bg-fourth cursor-pointer select-none",
-              )}>
-              {item.content}
+          <li
+            key={index}
+            onClick={() => {
+              item.onClick?.();
+              onSelect?.(item);
+            }}
+            className={clsx(
+              "w-full text-left px-3 py-2 !rounded-md text-sm",
+              "hover:bg-bg-fourth cursor-pointer select-none",
+            )}
+          >
+            {item.content}
           </li>
         ))}
       </ul>

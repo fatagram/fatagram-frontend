@@ -1,8 +1,8 @@
 import React, { useLayoutEffect } from "react";
 import SettingsNavbar from "../../features/settings/components/settings-navbar";
 import { Outlet } from "react-router-dom";
-import Text from "@/components/atoms/text";
 import { useTranslation } from "react-i18next";
+import { Text } from "@/components/atoms";
 import clsx from "clsx";
 
 type SettingPageProps = {
@@ -21,7 +21,7 @@ const SettingPage: React.FC<SettingPageProps> = () => {
   return (
     <div
       className={clsx(
-        "relative flex flex-col sm:flex-row w-full h-full bg-[var(--second-bg-color)] sm:gap-4"
+        "relative flex flex-col sm:flex-row w-full h-full bg-[var(--second-bg-color)] sm:gap-4",
       )}
     >
       <div className={clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2")}>
@@ -34,9 +34,7 @@ const SettingPage: React.FC<SettingPageProps> = () => {
       </div>
       {isShowNavbar && (
         <div
-          className={clsx(
-            "sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"
-          )}
+          className={clsx("sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen")}
           onClick={() => setIsShowNavbar(false)}
         />
       )}
@@ -46,15 +44,11 @@ const SettingPage: React.FC<SettingPageProps> = () => {
           {
             "absolute z-30": isShowNavbar,
             hidden: !isShowNavbar,
-          }
+          },
         )}
         onSelect={() => setIsShowNavbar(false)}
       />
-      <div
-        className={clsx(
-          "sm:col-span-8 flex justify-center flex-1 ml-[300px]"
-        )}
-      >
+      <div className={clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]")}>
         <div className={clsx("w-full max-w-[700px] p-2")}>
           <Outlet />
         </div>

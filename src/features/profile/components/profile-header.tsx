@@ -6,7 +6,6 @@ import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import { getImageUrl } from "@/utils/get-image-url";
 import { useAuth } from "@/hooks/utilities/use-auth";
 import { useDialog } from "@/hooks/utilities/use-dialog";
 import { useProfilePage } from "../hooks/use-profile-page";
@@ -56,8 +55,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
 
       // Delay to simulate loading
       if (response.success) {
-        setAvatar(getImageUrl(response.data.infos.avatar) || "");
-        setBackground(getImageUrl(response.data.infos.background) || "");
+        // setAvatar(getImageUrl(response.data.infos.avatar) || "");
+        // setBackground(getImageUrl(response.data.infos.background) || "");
         setFullName(response.data.infos.fullName);
         setNickname(response.data.infos.nickname);
       } else {
@@ -67,9 +66,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
     };
     const fetchNumberOfFriends = async () => {
       setIsLoadingNumOfFriends(true);
-      const response = await friendshipService.GetNumberOfFriends(
-        targetId
-      );
+      const response = await friendshipService.GetNumberOfFriends(targetId);
       if (response.success) {
         setNumberOfFriends(response.data?.numberOfFriends ?? 0);
       } else {
@@ -84,38 +81,44 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   }, [targetId, onUserNotFound, friendshipService]);
 
   // Handle background and avatar selection
-  const handleSelectBackground = useCallback(async (file: File) => {
-    const result = await userProfileService.UploadBackground(file);
-    // console.log(result);
-    if (result.success) {
-      setBackground(getImageUrl(result.data) || "");
-    } else if (result.errorCode === "LARGE_FILE_ERROR") {
-      openDialog({
-        title: t("user:profileHeader.oversizeErrorTitle"),
-        content: t("user:profileHeader.oversizeErrorMessage"),
-        primaryButton: {
-          text: t("user:profileHeader.oversizeErrorButton"),
-          onClick: closeDialog,
-        },
-      });
-    }
-  }, [openDialog, closeDialog, t]);
+  const handleSelectBackground = useCallback(
+    async (file: File) => {
+      const result = await userProfileService.UploadBackground(file);
+      // console.log(result);
+      if (result.success) {
+        // setBackground(getImageUrl(result.data) || "");
+      } else if (result.errorCode === "LARGE_FILE_ERROR") {
+        openDialog({
+          title: t("user:profileHeader.oversizeErrorTitle"),
+          content: t("user:profileHeader.oversizeErrorMessage"),
+          primaryButton: {
+            text: t("user:profileHeader.oversizeErrorButton"),
+            onClick: closeDialog,
+          },
+        });
+      }
+    },
+    [openDialog, closeDialog, t],
+  );
 
-  const handleSelectAvatar = useCallback(async (file: File) => {
-    const result = await userProfileService.UploadAvatar(file);
-    if (result.success) {
-      setAvatar(result.data);
-    } else if (result.errorCode === "LARGE_FILE_ERROR") {
-      openDialog({
-        title: t("user:profileHeader.oversizeErrorTitle"),
-        content: t("user:profileHeader.oversizeErrorMessage"),
-        primaryButton: {
-          text: t("user:profileHeader.oversizeErrorButton"),
-          onClick: closeDialog,
-        },
-      });
-    }
-  }, [openDialog, closeDialog, t]);
+  const handleSelectAvatar = useCallback(
+    async (file: File) => {
+      const result = await userProfileService.UploadAvatar(file);
+      if (result.success) {
+        setAvatar(result.data);
+      } else if (result.errorCode === "LARGE_FILE_ERROR") {
+        openDialog({
+          title: t("user:profileHeader.oversizeErrorTitle"),
+          content: t("user:profileHeader.oversizeErrorMessage"),
+          primaryButton: {
+            text: t("user:profileHeader.oversizeErrorButton"),
+            onClick: closeDialog,
+          },
+        });
+      }
+    },
+    [openDialog, closeDialog, t],
+  );
 
   return (
     <div className={clsx("relative w-full flex flex-col items-center", className)}>
@@ -136,7 +139,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         />
         <div className="flex flex-col gap-2 items-start flex-1 mb-3 ml-4">
           {isLoading ? (
-            <Skeleton sz="sm-3" className="w-56"/>
+            <Skeleton sz="sm-3" className="w-56" />
           ) : (
             <Text sz="xl-1" weight="bold" className="lg:text-left text-center break-words">
               {fullName}
@@ -156,7 +159,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                   : t("user:profileHeader.noFriendsCount")}
               </Text>
             ) : (
-              <Skeleton sz="sm-3" className="w-36"/>
+              <Skeleton sz="sm-3" className="w-36" />
             )}
             {!isLoading ? (
               <div className="flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0">

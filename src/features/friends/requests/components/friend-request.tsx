@@ -1,11 +1,11 @@
 import { friendshipService } from "@/api/user/friendship.api";
 import Card from "@/components/molecules/card";
 import FriendRequestItem from "@/features/friends/components/friend-request-item";
-import Text from "@/components/atoms/text";
 import { TimeUnit, TimeUnitTranslateMap } from "@/types/time-unit";
 import React, { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
+import { Text } from "@/components/atoms";
 
 type FriendRequestsProps = {
   className?: string;
@@ -42,15 +42,9 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     setIsLoading(true);
     const response = await friendshipService.GetFriendRequests(page, limit);
     if (response.success) {
-      setRequests((prev) => [
-        ...prev,
-        ...(response.data?.friendRequests ?? []),
-      ]);
+      setRequests((prev) => [...prev, ...(response.data?.friendRequests ?? [])]);
       setTotal(response.data?.total ?? 0);
-      if (
-        response.data?.friendRequests.length &&
-        response.data?.friendRequests.length < limit
-      ) {
+      if (response.data?.friendRequests.length && response.data?.friendRequests.length < limit) {
         setIsFull(true);
       }
     }
@@ -62,7 +56,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     const response = await friendshipService.AcceptAddFriendRequest(requestId);
     if (response.success) {
       setRequests((prevRequests) =>
-        prevRequests.filter((request) => request.senderId !== requestId)
+        prevRequests.filter((request) => request.senderId !== requestId),
       );
       setTotal((prevTotal) => prevTotal - 1);
     }
@@ -73,7 +67,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     const response = await friendshipService.DeclineAddFriendRequest(senderId);
     if (response.success) {
       setRequests((prevRequests) =>
-        prevRequests.filter((request) => request.senderId !== senderId)
+        prevRequests.filter((request) => request.senderId !== senderId),
       );
       setTotal((prevTotal) => prevTotal - 1);
     }
@@ -119,7 +113,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
                         `${TimeUnitTranslateMap[request.createdAt.unit]}.${
                           request.createdAt.value === 1 ? "one" : "other"
                         }`,
-                        { count: request.createdAt.value }
+                        { count: request.createdAt.value },
                       )} 
                                         ${t("times:ago")}`
                 }
@@ -136,9 +130,21 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
       <div ref={loaderRef} className="w-full h-0" />
       {isLoading && (
         <div className={clsx("flex justify-center items-center w-full h-10 gap-1 mt-5")}>
-          <span className={clsx("w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0s]")}></span>
-          <span className={clsx("w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.2s]")}></span>
-          <span className={clsx("w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.4s]")}></span>
+          <span
+            className={clsx(
+              "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0s]",
+            )}
+          ></span>
+          <span
+            className={clsx(
+              "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.2s]",
+            )}
+          ></span>
+          <span
+            className={clsx(
+              "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.4s]",
+            )}
+          ></span>
         </div>
       )}
     </Card>

@@ -81,7 +81,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
     // Don't early return - let effect run but handle logic inside
     const handleResize = () => {
       if (containerSize.width === 0) return; // Check inside function instead
-      
+
       let total = showMoreRef.current?.offsetWidth ?? 0;
       const newVisibleItems: NavbarItem[] = [];
       const newHiddenItems: NavbarItem[] = [];
@@ -204,4 +204,3 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
 };
 
 export default ProfileNavbar;
-

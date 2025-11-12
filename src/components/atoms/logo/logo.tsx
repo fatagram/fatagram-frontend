@@ -26,7 +26,12 @@ interface LogoProps extends ComponentProps {
 
 // Logo component
 // This component is a logo component that can be used in the application.
-const Logo: React.FC<LogoProps> = ({ hasSlogan = true, sz = "md-1", className = "", ...props }) => {
+export const Logo: React.FC<LogoProps> = ({
+  hasSlogan = true,
+  sz = "md-1",
+  className = "",
+  ...props
+}) => {
   return (
     <div className="flex flex-col items-center">
       <h1
@@ -53,5 +58,3 @@ const Logo: React.FC<LogoProps> = ({ hasSlogan = true, sz = "md-1", className = 
     </div>
   );
 };
-
-export default Logo;

@@ -1,8 +1,8 @@
 import React, { forwardRef } from "react";
-import styles from "./TextArea.module.css";
+import styles from "./textarea.module.css";
 import { Size } from "../../common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
-import clsx from 'clsx';
+import clsx from "clsx";
 
 const sizeClasses: Record<Size, string> = {
   xs: "px-2 py-1 text-xs min-h-16",
@@ -26,7 +26,7 @@ interface TextAreaProps extends ComponentProps<HTMLTextAreaElement> {
   sz?: Size;
 }
 
-const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
+export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
   (
     {
       placeholder,
@@ -52,19 +52,18 @@ const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
         onChange={onChange}
         disabled={disabled}
         className={clsx(
-          'border-2 text-text-main resize-none',
-          'font-normal rounded-[15px] outline-none text-lg caret-primary-500 selection:!bg-primary-600',
-          'transition-all duration-300 ease-out',
-          disabled ? 'bg-bg-second opacity-60 cursor-not-allowed' : 'focus:bg-gradient-main-move',
+          "border-2 text-text-main resize-none",
+          "font-normal rounded-[15px] outline-none text-lg caret-primary-500 selection:!bg-primary-600",
+          "transition-all duration-300 ease-out",
+          disabled ? "bg-bg-second opacity-60 cursor-not-allowed" : "focus:bg-gradient-main-move",
           sizeClasses[sz],
           isWrong ? styles["my-textarea-wrong"] : styles["my-textarea"],
-          className
+          className,
         )}
         {...props}
       />
     );
   },
 );
-TextArea.displayName = "TextArea";
 
-export default TextArea;
+TextArea.displayName = "TextArea";

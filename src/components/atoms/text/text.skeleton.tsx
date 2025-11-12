@@ -21,19 +21,17 @@ const skeletonSizeClasses: Record<Size, string> = {
 
 interface TextSkeletonLoadingProps extends ComponentProps {}
 
-const TextSkeletonLoading: React.FC<TextSkeletonLoadingProps> = ({
+export const TextSkeletonLoading: React.FC<TextSkeletonLoadingProps> = ({
   className = "",
   sz = "md-1",
 }) => {
   return (
     <div
       className={clsx(
-        'animate-pulse select-none rounded-lg bg-bg-fourth shadow-lg',
+        "animate-pulse select-none rounded-lg bg-bg-fourth shadow-lg",
         skeletonSizeClasses[sz],
-        className
+        className,
       )}
     />
   );
 };
-
-export default TextSkeletonLoading;

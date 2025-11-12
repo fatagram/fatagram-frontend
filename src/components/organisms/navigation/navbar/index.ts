@@ -1,3 +1,3 @@
-export { default } from "./navbar";
-export { default as NavbarFooter } from "./navbar-footer";
-export { default as NavbarItem } from "./navbar-item";
+export * from "./navbar";
+export * from "./navbar-footer";
+export * from "./navbar-item";

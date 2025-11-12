@@ -3,30 +3,29 @@ import { userProfileService } from "@/api/user/user-profile.api";
 import Card from "@/components/molecules/card";
 import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import Text from "@/components/atoms/text";
 import EditableTextArea from "@/features/settings/components/editable-textarea";
 import clsx from "clsx";
 import { useAuth } from "@/hooks/utilities/use-auth";
 import { useProfilePage } from "../../hooks/use-profile-page";
+import { Text } from "@/components/atoms";
 
 interface ProfileIntroductionProps {
   className?: string;
 }
 
 const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) => {
-
   const [bio, setBio] = React.useState<string | undefined>(undefined);
   const [isEditBio, setIsEditBio] = React.useState<boolean>(false);
   const [description, setDescription] = React.useState<string | undefined>(undefined);
   const [isEditDescription, setIsEditDescription] = React.useState<boolean>(false);
   const [email, setEmail] = React.useState<string | undefined>(undefined);
   const [phone, setPhone] = React.useState<string | undefined>(undefined);
-  
+
   const { t } = useTranslation() as { t: (key: string) => string };
 
   const { isAuthenticated } = useAuth();
   const { isOwner, targetId } = useProfilePage();
-  
+
   const canEdit = useMemo(() => isAuthenticated && isOwner, [isAuthenticated, isOwner]);
 
   useEffect(() => {

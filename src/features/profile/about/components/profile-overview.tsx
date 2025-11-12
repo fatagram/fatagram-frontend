@@ -1,8 +1,7 @@
 import { userInfoService } from "@/api/user/user-info.api";
-import Text from "@/components/atoms/text";
+import { Button, Text } from "@/components/atoms";
 import { useEffect, useState } from "react";
 import ProfileAboutSection from "./profile-about-section";
-import Button from "@/components/atoms/button";
 import clsx from "clsx";
 import { useProfilePage } from "../../hooks/use-profile-page";
 
@@ -16,9 +15,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await userInfoService.GetUserInfoOverview(
-        targetId ?? ""
-      );
+      const response = await userInfoService.GetUserInfoOverview(targetId ?? "");
       if (response) {
         if (response.data?.email) {
           setEmails([...emails, response.data.email]);
@@ -42,9 +39,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
             <div>
               {emails.map((email, index) => (
                 <div key={index} className={clsx("flex", "flex-col")}>
-                  <Text weight="bold">
-                    {email}
-                  </Text>
+                  <Text weight="bold">{email}</Text>
                   <Text sz="sm-3" className={clsx("opacity-50")}>
                     Email
                   </Text>
@@ -71,9 +66,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
             <div>
               {phoneNumbers.map((phone, index) => (
                 <div key={index} className={clsx("flex", "flex-col")}>
-                  <Text weight="bold">
-                    {phone}
-                  </Text>
+                  <Text weight="bold">{phone}</Text>
                   <Text sz="sm-3" className={clsx("opacity-50")}>
                     Di động
                   </Text>

@@ -1,4 +1,4 @@
-import { colorsConfig } from "./colors.config"
+import { colorsConfig } from "./colors.config";
 
 /** @type {import('tailwindcss').Config} */
 module.exports = {
@@ -14,8 +14,8 @@ module.exports = {
       },
       colors: colorsConfig,
       gridTemplateColumns: {
-        "golden": "1fr 1.618fr",
-      }
+        golden: "1fr 1.618fr",
+      },
     },
   },
   plugins: [require("tailwind-scrollbar")],

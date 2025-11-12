@@ -7,8 +7,7 @@ import { notificationService } from "@/api/notification/notification.api";
 import NotificationSkeletonLoading from "../notification-items/notification.skeleton";
 import { useDispatch, useSelector } from "react-redux";
 import { markAsRead, setShowFull } from "../../stores/notification-slice";
-import Text from "@/components/atoms/text";
-import Button from "@/components/atoms/button";
+import { Text, Button } from "@/components/atoms";
 import clsx from "clsx";
 import { useNotifications } from "../../hooks/use-notification";
 
@@ -47,7 +46,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
       className={clsx(
         "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
         "animate-dropdown-slide origin-top",
-        className
+        className,
       )}
       ref={ref}
     >
@@ -63,7 +62,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
                   className={clsx(
                     "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
                     "transition-all duration-200 hover:scale-[1.01]",
-                    "active:scale-[0.99]"
+                    "active:scale-[0.99]",
                   )}
                 >
                   <NotificationFactory
@@ -83,7 +82,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
                   className={clsx(
                     "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
                     "transition-all duration-200 hover:scale-[1.01]",
-                    "active:scale-[0.99]"
+                    "active:scale-[0.99]",
                   )}
                 >
                   <NotificationFactory

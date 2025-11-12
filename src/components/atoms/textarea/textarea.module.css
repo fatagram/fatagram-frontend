@@ -21,7 +21,7 @@
 
 .my-textarea:focus {
   background-position: 100% 100%;
-  box-shadow: 
+  box-shadow:
     0 0 0 3px rgba(43, 212, 139, 0.15),
     0 4px 20px rgba(43, 212, 139, 0.25);
   transform: scale(1.01);
@@ -50,7 +50,7 @@
 
 .my-textarea-wrong:focus {
   background-position: 100% 100%;
-  box-shadow: 
+  box-shadow:
     0 0 0 3px rgba(255, 75, 75, 0.2),
     0 4px 20px rgba(255, 75, 75, 0.3);
   transform: scale(1.01);

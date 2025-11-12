@@ -1,5 +1,4 @@
-import React, { forwardRef } from "react";
-import "./Button.module.css";
+import { forwardRef } from "react";
 import { Size } from "@/components/common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
 import clsx from "clsx";
@@ -23,12 +22,9 @@ const buttonSizes: Record<Size, string> = {
 
 const buttonVariants = {
   primary: "bg-gradient-main text-white hover:bg-gradient-main-move",
-  secondary:
-    "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70",
-  third:
-    "bg-bg-third transition-all duration-200 ease text-text-main hover:bg-bg-third/70",
-  fourth:
-    "bg-bg-fourth transition-all duration-200 ease text-text-main hover:bg-bg-fourth/70",
+  secondary: "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70",
+  third: "bg-bg-third transition-all duration-200 ease text-text-main hover:bg-bg-third/70",
+  fourth: "bg-bg-fourth transition-all duration-200 ease text-text-main hover:bg-bg-fourth/70",
 };
 
 type Variant = keyof typeof buttonVariants;
@@ -71,4 +67,4 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
 );
 
 Button.displayName = "Button";
-export default Button;
+export { Button };

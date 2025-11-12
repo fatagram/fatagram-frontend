@@ -1,9 +1,9 @@
-import React, { useEffect, useLayoutEffect } from "react";
-import Text from "@/components/atoms/text";
+import React, { useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import FriendsNavbar from "@/features/friends/components/friends-navbar";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
+import FriendsNavbar from "@/features/friends/components/friends-navbar";
+import { Text } from "@/components/atoms";
 
 interface FriendsPageProps {}
 
@@ -18,7 +18,8 @@ const FriendPage: React.FC<FriendsPageProps> = () => {
   return (
     <div
       className={clsx(
-        "relative flex flex-col sm:flex-row w-full h-full bg-[var(--second-bg-color)] sm:gap-4",
+        "relative flex flex-col sm:flex-row w-full h-full",
+        "bg-[var(--second-bg-color)] sm:gap-4",
       )}
     >
       <div className={clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2")}>
@@ -37,11 +38,12 @@ const FriendPage: React.FC<FriendsPageProps> = () => {
       )}
       <FriendsNavbar
         className={clsx(
-          "sm:flex sm:w-[300px] sm:fixed absolute sm:animate-none animate-left-to-right w-[60%]",
+          "sm:flex sm:w-[300px] sm:fixed absolute sm:animate-none",
+          "animate-left-to-right w-[60%]",
           "shadow-lg h-full bg-[var(--main-bg-color)] p-2",
           {
             "absolute z-30": isShowNavbar,
-            "hidden": !isShowNavbar,
+            hidden: !isShowNavbar,
           },
         )}
         onSelect={() => setIsShowNavbar(false)}

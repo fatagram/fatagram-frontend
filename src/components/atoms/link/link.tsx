@@ -11,7 +11,7 @@ interface LinkProps extends ComponentProps {
 
 // Link component
 // This component is a link component that can be used in the application.
-const Link: React.FC<LinkProps> = ({ to, children, onClick, className = "", ...props }) => {
+export const Link: React.FC<LinkProps> = ({ to, children, onClick, className = "", ...props }) => {
   return (
     <RouterLink
       to={to}
@@ -19,7 +19,7 @@ const Link: React.FC<LinkProps> = ({ to, children, onClick, className = "", ...p
         "sm:text-sm text-base text-primary-600",
         "hover:text-primary-500 hover:cursor-pointer",
         "transition-all duration-100 active:scale-95 select-none",
-        className
+        className,
       )}
       onClick={onClick}
       {...props}
@@ -28,5 +28,3 @@ const Link: React.FC<LinkProps> = ({ to, children, onClick, className = "", ...p
     </RouterLink>
   );
 };
-
-export default Link;

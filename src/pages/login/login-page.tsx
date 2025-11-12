@@ -1,9 +1,9 @@
 import React, { useEffect } from "react";
 import clsx from "clsx";
 import LoginForm from "@/features/auth/components/login-form";
-import Footer from "@/components/atoms/footer/footer";
 import ForgotPasswordForm from "@/features/auth/components/forgot-password-form";
 import SelectLanguage from "@/features/settings/general/components/select-language";
+import { Footer } from "@/components/atoms";
 
 // LoginPage function
 // This function is a React component that renders the login page.
@@ -19,7 +19,7 @@ function LoginPage(): React.ReactElement {
       <div
         className={clsx(
           "relative flex flex-col items-center justify-center h-screen w-full",
-          "background-image"
+          "background-image",
         )}
       >
         <div className={clsx("w-full flex justify-center items-center flex-1 z-10")}>

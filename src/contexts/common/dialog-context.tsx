@@ -6,7 +6,7 @@ export interface DialogContextType {
   dialogProps?: DialogBoxProps | null;
   openDialog: (props: DialogBoxProps) => void;
   closeDialog: () => void;
-};
+}
 
 export const DialogContext = createContext<DialogContextType>({
   isOpen: false,
@@ -19,7 +19,9 @@ type DialogProviderProps = {
   children: React.ReactNode;
 };
 
-export const DialogProvider = React.memo(function DialogProvider({ children }: DialogProviderProps) {
+export const DialogProvider = React.memo(function DialogProvider({
+  children,
+}: DialogProviderProps) {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
   const [dialogProps, setDialogProps] = React.useState<DialogBoxProps | null>(null);
 
@@ -40,12 +42,8 @@ export const DialogProvider = React.memo(function DialogProvider({ children }: D
       openDialog,
       closeDialog,
     }),
-    [isOpen, dialogProps, openDialog, closeDialog]
+    [isOpen, dialogProps, openDialog, closeDialog],
   );
 
-  return (
-    <DialogContext.Provider value={value}>
-      {children}
-    </DialogContext.Provider>
-  );
+  return <DialogContext.Provider value={value}>{children}</DialogContext.Provider>;
 });

@@ -11,7 +11,13 @@ interface NavbarItemProps {
   onClick?: () => void;
 }
 
-const NavbarItem: React.FC<NavbarItemProps> = ({ children, path, activeRoute = true, className = "", onClick }) => {
+export const NavbarItem: React.FC<NavbarItemProps> = ({
+  children,
+  path,
+  activeRoute = true,
+  className = "",
+  onClick,
+}) => {
   const isFocused = useActiveRoute(path, activeRoute);
 
   return (
@@ -24,20 +30,16 @@ const NavbarItem: React.FC<NavbarItemProps> = ({ children, path, activeRoute = t
         "p-4 px-6 rounded-lg overflow-hidden",
         {
           "hover:bg-bg-third": !isFocused,
-          "active:bg-bg-third active:scale-95 transition-all duration-200 ease-in-out": !isFocused
-        }
+          "active:bg-bg-third active:scale-95 transition-all duration-200 ease-in-out": !isFocused,
+        },
       )}
       to={path}
       onClick={onClick}
     >
       {children}
       {isFocused && (
-        <div
-          className="absolute bg-primary-500 h-[2px] rounded-full w-full bottom-0 left-0"
-        />
+        <div className="absolute bg-primary-500 h-[2px] rounded-full w-full bottom-0 left-0" />
       )}
     </Link>
   );
 };
-
-export default NavbarItem;

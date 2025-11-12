@@ -25,11 +25,7 @@ const sizeClasses: Record<Size, string> = {
   "xl-3": "h-72",
 };
 
-export default function Skeleton({
-  className = "",
-  sz = "md-1",
-  variant = "text",
-}: SkeletonProps): JSX.Element {
+export const Skeleton: FC<SkeletonProps> = ({ className = "", sz = "md-1", variant = "text" }) => {
   return (
     <div
       className={clsx(
@@ -40,4 +36,4 @@ export default function Skeleton({
       )}
     />
   );
-}
+};

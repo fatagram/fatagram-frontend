@@ -27,7 +27,9 @@ interface LanguageProviderProps {
 }
 
 // Language Provider
-export const LanguageProvider = React.memo(function LanguageProvider({ children }: LanguageProviderProps) {
+export const LanguageProvider = React.memo(function LanguageProvider({
+  children,
+}: LanguageProviderProps) {
   const { t } = useTranslation() as { t: (key: string) => string };
   const [lang, setLang] = useState<Language>(
     () => (localStorage.getItem("language") as Language) || "en",
@@ -52,17 +54,13 @@ export const LanguageProvider = React.memo(function LanguageProvider({ children 
   }, [lang]);
 
   const value = React.useMemo(
-    () => ({ 
-      language: lang, 
-      setLanguage, 
-      availableLanguages 
+    () => ({
+      language: lang,
+      setLanguage,
+      availableLanguages,
     }),
-    [lang, setLanguage, availableLanguages]
+    [lang, setLanguage, availableLanguages],
   );
 
-  return (
-    <LanguageContext.Provider value={value}>
-      {children}
-    </LanguageContext.Provider>
-  );
+  return <LanguageContext.Provider value={value}>{children}</LanguageContext.Provider>;
 });

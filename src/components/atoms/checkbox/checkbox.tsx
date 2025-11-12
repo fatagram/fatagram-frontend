@@ -1,5 +1,5 @@
 import React from "react";
-import styles from "./Checkbox.module.css";
+import styles from "./checkbox.module.css";
 import { ComponentProps } from "@/components/common/types/component-type";
 import clsx from "clsx";
 
@@ -13,7 +13,7 @@ interface CheckboxProps extends ComponentProps {
 
 // Checkbox component
 // This component is a checkbox component that can be used in the application.
-const Checkbox: React.FC<CheckboxProps> = ({
+export const Checkbox: React.FC<CheckboxProps> = ({
   label,
   checked,
   onChange,
@@ -24,12 +24,7 @@ const Checkbox: React.FC<CheckboxProps> = ({
   const checkmarkClass = styles["checkmark"];
 
   return (
-    <label
-      className={clsx(
-        "relative inline-flex items-center gap-1 select-none",
-        className,
-      )}
-    >
+    <label className={clsx("relative inline-flex items-center gap-1 select-none", className)}>
       <input
         {...props}
         disabled={disabled}
@@ -54,5 +49,3 @@ const Checkbox: React.FC<CheckboxProps> = ({
     </label>
   );
 };
-
-export default Checkbox;

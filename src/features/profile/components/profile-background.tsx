@@ -1,11 +1,11 @@
 import React from "react";
-import BackgroundImage from "@/components/atoms/background-image";
 import { useTranslation } from "react-i18next";
-import Text from "@/components/atoms/text";
 import SelectFile from "@/components/molecules/select-file";
 import clsx from "clsx";
 import { useProfilePage } from "../hooks/use-profile-page";
 import { Skeleton } from "@/components/atoms";
+import BackgroundImage from "@/components/atoms/background-image/background-image";
+import { Text } from "@/components/atoms";
 
 type ProfileBackgroundProps = {
   isLoading: boolean;
@@ -24,11 +24,11 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({
   return (
     <div className={clsx("relative aspect-[16/6] w-full rounded-[15px]")}>
       {isLoading ? (
-        <Skeleton className="h-full"/>
+        <Skeleton className="h-full" />
       ) : (
-        <BackgroundImage 
-          src={background} 
-          alt="Background Image" 
+        <BackgroundImage
+          src={background}
+          alt="Background Image"
           className={clsx("relative h-full w-full")}
         >
           {isOwner && (
@@ -38,7 +38,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({
               multiple={false}
               className={clsx(
                 "absolute flex items-center right-2 bottom-2 z-10",
-                "opacity-40 hover:opacity-70 gap-2"
+                "opacity-40 hover:opacity-70 gap-2",
               )}
             >
               <i className={clsx("fa-solid fa-camera")}></i>

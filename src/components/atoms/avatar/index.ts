@@ -1,2 +1,2 @@
-export { default } from "./avatar";
-export { default as AvatarSkeletonLoading } from "./avatar.skeleton";
+export * from "./avatar";
+export * from "./avatar-skeleton";

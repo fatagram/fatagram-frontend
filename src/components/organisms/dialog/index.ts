@@ -1,4 +1,2 @@
-import Dialog from "./dialog";
-
-export default Dialog;
-export { default as GlobalDialog } from "./global-dialog";
+export * from "./dialog";
+export * from "./global-dialog";

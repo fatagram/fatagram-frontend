@@ -4,10 +4,8 @@ import { userProfileService } from "@/api/user/user-profile.api";
 import useClickOutside from "@/hooks/use-click-outside";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import Text from "@/components/atoms/text";
-import Button from "@/components/atoms/button";
 import { List } from "@/components/atoms/list";
-import { Avatar } from "@/components/atoms";
+import { Avatar, Button, Text } from "@/components/atoms";
 import { useAuth } from "@/hooks/utilities/use-auth";
 
 /**
@@ -22,17 +20,21 @@ const UserMenu: React.FC = () => {
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
   const { userId, urlName, logOut } = useAuth();
   const { t } = useTranslation() as { t: (key: string) => string };
-  
+
   const navigate = useNavigate();
 
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLDivElement>(null);
-  
+
   const handleClickOutside = () => {
     if (isOpenMenu) setIsOpenMenu(false);
   };
-  
-  useClickOutside(menuRef as RefObject<HTMLDivElement>, btnRef as RefObject<HTMLDivElement>, handleClickOutside);
+
+  useClickOutside(
+    menuRef as RefObject<HTMLDivElement>,
+    btnRef as RefObject<HTMLDivElement>,
+    handleClickOutside,
+  );
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -41,7 +43,7 @@ const UserMenu: React.FC = () => {
         setAvatar(response.data.infos.avatar);
         setFullName(response.data.infos.fullName);
       }
-    }
+    };
     fetchProfile();
   }, [userId]);
 
@@ -81,7 +83,7 @@ const UserMenu: React.FC = () => {
           className={clsx(
             "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
             "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
-            "animate-dropdown-slide origin-top-right"
+            "animate-dropdown-slide origin-top-right",
           )}
           ref={menuRef}
         >
@@ -93,7 +95,7 @@ const UserMenu: React.FC = () => {
                 className={clsx(
                   "flex items-center justify-start gap-3 w-full !pl-3 py-3",
                   "hover:!bg-bg-fourth transition-all duration-200",
-                  "hover:scale-[1.02] active:scale-[0.98]"
+                  "hover:scale-[1.02] active:scale-[0.98]",
                 )}
                 onClick={handlePersonalPage}
               >
@@ -104,9 +106,7 @@ const UserMenu: React.FC = () => {
               </Button>
             </List.Item>
             <List.Item
-              className={clsx(
-                "items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full"
-              )}
+              className={clsx("items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full")}
             ></List.Item>
             <List.Item>
               <Button
@@ -115,7 +115,7 @@ const UserMenu: React.FC = () => {
                 className={clsx(
                   "flex items-center justify-start w-full gap-3",
                   "hover:!bg-bg-fourth transition-all duration-200",
-                  "hover:scale-[1.02] active:scale-[0.98]"
+                  "hover:scale-[1.02] active:scale-[0.98]",
                 )}
                 onClick={handleSettings}
               >
@@ -132,7 +132,7 @@ const UserMenu: React.FC = () => {
                 className={clsx(
                   "flex items-center justify-start w-full gap-3 text-red-400",
                   "hover:!bg-red-50 transition-all duration-200",
-                  "hover:scale-[1.02] active:scale-[0.98]"
+                  "hover:scale-[1.02] active:scale-[0.98]",
                 )}
                 onClick={handleLogout}
               >

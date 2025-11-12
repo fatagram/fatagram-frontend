@@ -1,4 +1,4 @@
-import Text from "@/components/atoms/text";
+import { Text } from "@/components/atoms";
 import clsx from "clsx";
 
 type ProfileAboutSectionProps = {

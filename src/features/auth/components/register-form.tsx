@@ -1,19 +1,14 @@
 import React, { useEffect, useRef, useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import { RegisterValidator } from "@/api/user/validate/register.validator";
-import RegisterDto from "@/api/user/dto/register.dto";
-import { ErrorKey, ErrorCodes } from "@/api/user/dto/register.dto";
-import { RegisterService } from "@/api/user/register.api";
-import OverlayLoading from "@/components/organisms/overlay-loading/overlay-loading";
+import { RegisterValidator } from "@/api/auth/validate/register.validator";
+import RegisterDto from "@/api/auth/dto/register.dto";
+import { ErrorKey, ErrorCodes } from "@/api/auth/dto/register.dto";
+import { RegisterService } from "@/api/auth/register.api";
 import { useTranslation } from "react-i18next";
 import { Result } from "@/api/common/result";
-import Textbox, { PasswordBox } from "@/components/atoms/textbox";
-import Logo from "@/components/atoms/logo";
-import Text from "@/components/atoms/text";
-import Checkbox from "@/components/atoms/checkbox";
-import Link from "@/components/atoms/link";
-import Button from "@/components/atoms/button";
+import { OverlayLoading } from "@/components/organisms";
+import { Button, Checkbox, Logo, PasswordBox, Textbox, Text } from "@/components/atoms";
 
 type RegisterFormProps = {
   showLogo?: boolean;
@@ -221,7 +216,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         "relative flex flex-col justify-center",
         "animate-fade-in rounded-xl p-10",
         "sm:p-12 bg-bg-main gap-5 max-w-[450px]",
-        className
+        className,
       )}
     >
       {/* Overlay Loading */}
@@ -416,7 +411,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
         <Text
           sz="lg-1"
           className={clsx(
-            "absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer"
+            "absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer",
           )}
           onClick={onClose}
         >

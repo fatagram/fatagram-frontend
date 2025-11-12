@@ -1,1 +1,1 @@
-export { default as List, ListItem } from "./list";
+export * from "./list";

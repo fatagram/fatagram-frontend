@@ -30,7 +30,7 @@ apiClientFormData.interceptors.request.use((config: InternalAxiosRequestConfig) 
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error.response?.status === 401) {
       try {
         // Refresh token
         const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
@@ -55,7 +55,7 @@ apiClient.interceptors.response.use(
 apiClientFormData.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error.response?.status === 401) {
       try {
         // Refresh token
         const refreshToken = getRefreshToken() || getRefreshTokenFromSession();

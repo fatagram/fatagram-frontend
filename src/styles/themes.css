@@ -14,7 +14,7 @@
   --bg-eighth: rgb(220, 225, 230);
   --bg-ninth: rgb(210, 215, 220);
   --bg-tenth: rgb(200, 205, 210);
-  
+
   /* Special background variants */
   --bg-overlay: rgba(0, 0, 0, 0.5);
   --bg-modal: rgba(255, 255, 255, 0.95);
@@ -28,12 +28,12 @@
   --bg-disabled: rgb(229, 231, 235);
 
   /* Brand colors (primary & secondary as palette) */
-  --primary-50:  #ecfdf5;
+  --primary-50: #ecfdf5;
   --primary-100: #d1fae5;
   --primary-200: #a7f3d0;
   --primary-300: #6ee7b7;
   --primary-400: #34d399;
-  --primary-500: rgb(43, 212, 139);  /* giữ màu chính của mày */
+  --primary-500: rgb(43, 212, 139); /* giữ màu chính của mày */
   --primary-600: #059669;
   --primary-700: #047857;
   --primary-800: #065f46;

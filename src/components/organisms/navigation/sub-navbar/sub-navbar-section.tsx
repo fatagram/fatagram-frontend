@@ -8,7 +8,11 @@ type SubNavbarSectionProps = {
   children?: React.ReactNode;
 };
 
-const SubNavbarSection: React.FC<SubNavbarSectionProps> = ({ title, className, children }) => {
+export const SubNavbarSection: React.FC<SubNavbarSectionProps> = ({
+  title,
+  className,
+  children,
+}) => {
   const [showChildren, setShowChildren] = useState<boolean>(true);
 
   return (
@@ -27,5 +31,3 @@ const SubNavbarSection: React.FC<SubNavbarSectionProps> = ({ title, className, c
     </div>
   );
 };
-
-export default SubNavbarSection;

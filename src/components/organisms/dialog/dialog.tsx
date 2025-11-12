@@ -1,13 +1,14 @@
-import { Button, Text } from "@/components/atoms";
 import React from "react";
 import clsx from "clsx";
+import { Button, Text } from "@/components/atoms";
+("@/components/atoms");
 
 interface ButtonProps {
   text: string;
   onClick: () => void;
 }
 
-export interface DialogBoxProps {
+interface DialogBoxProps {
   title?: string;
   content?: React.ReactNode;
   primaryButton?: ButtonProps;
@@ -17,7 +18,7 @@ export interface DialogBoxProps {
   className?: string;
 }
 
-const Dialog: React.FC<DialogBoxProps> = ({
+export const Dialog: React.FC<DialogBoxProps> = ({
   title,
   content,
   primaryButton,
@@ -31,7 +32,7 @@ const Dialog: React.FC<DialogBoxProps> = ({
       className={clsx(
         "relative flex flex-col gap-4 bg-[var(--second-bg-color)]",
         "rounded-lg shadow-lg",
-        className
+        className,
       )}
     >
       {title && (
@@ -61,7 +62,7 @@ const Dialog: React.FC<DialogBoxProps> = ({
         className={clsx(
           "absolute top-3 right-5 text-[20px]",
           "text-gradient-main hover:text-single-main",
-          "cursor-pointer"
+          "cursor-pointer",
         )}
         onClick={onClose}
       >
@@ -70,5 +71,3 @@ const Dialog: React.FC<DialogBoxProps> = ({
     </div>
   );
 };
-
-export default Dialog;

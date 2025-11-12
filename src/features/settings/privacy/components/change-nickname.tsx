@@ -1,4 +1,4 @@
-import { FC, useDebugValue, useEffect, useState } from "react";
+import { FC, useEffect, useState } from "react";
 import { Skeleton, Text } from "@/components/atoms";
 import EditableField from "../../components/editable-field";
 import clsx from "clsx";

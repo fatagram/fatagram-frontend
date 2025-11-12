@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
 import { userConfigService } from "@/api/user/user-config.api";
-import SelectBox, { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
 import { useLanguage } from "@/hooks/utilities/use-language";
 import { Language } from "@/contexts/common/language-context";
+import { Option, OptionKey, SelectBox } from "@/components/atoms";
 
 interface SelectLanguageProps {
   className?: string;

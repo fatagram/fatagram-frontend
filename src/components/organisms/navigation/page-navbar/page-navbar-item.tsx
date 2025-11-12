@@ -1,7 +1,7 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import { useActiveRoute } from "@/hooks/use-active-route";
-import { Button, Text } from "@/components/atoms";
+import { Text } from "@/components/atoms";
 import clsx from "clsx";
 
 export type PageNavbarItemProps = {
@@ -13,7 +13,7 @@ export type PageNavbarItemProps = {
   onClick?: () => void;
 };
 
-const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
+export const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
   icon,
   title,
   description,
@@ -45,34 +45,34 @@ const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
       {isFocused && (
         <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 to-transparent pointer-events-none" />
       )}
-      
+
       <div className={clsx("grid grid-cols-10 relative z-10")}>
-        <Text 
-          sz="md-3" 
+        <Text
+          sz="md-3"
           className={clsx(
             "flex justify-center items-center h-full col-span-2",
             "transition-all duration-300",
-            isFocused ? "text-primary-500 scale-110" : "text-text-second group-hover:text-primary-500 group-hover:scale-105"
+            isFocused
+              ? "text-primary-500 scale-110"
+              : "text-text-second group-hover:text-primary-500 group-hover:scale-105",
           )}
         >
           {icon}
         </Text>
         <div className="col-span-8 flex flex-col justify-center">
-          <Text 
-            sz="md-1" 
+          <Text
+            sz="md-1"
             className={clsx(
               "transition-colors duration-300",
-              isFocused ? "text-primary-600 font-semibold" : "text-text-main group-hover:text-primary-600"
+              isFocused
+                ? "text-primary-600 font-semibold"
+                : "text-text-main group-hover:text-primary-600",
             )}
           >
             {title}
           </Text>
           {description && (
-            <Text 
-              sz="sm-2" 
-              weight="light"
-              className="text-text-second mt-0.5"
-            >
+            <Text sz="sm-2" weight="light" className="text-text-second mt-0.5">
               {description}
             </Text>
           )}
@@ -81,5 +81,3 @@ const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
     </button>
   );
 };
-
-export default PageNavbarItem;

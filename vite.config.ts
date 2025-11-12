@@ -27,11 +27,6 @@ export default defineConfig({
   },
   optimizeDeps: {
     // Pre-bundle these dependencies for faster dev server startup
-    include: [
-      "react",
-      "react-dom",
-      "react-router-dom",
-      "@tanstack/react-query",
-    ],
+    include: ["react", "react-dom", "react-router-dom", "@tanstack/react-query"],
   },
 });

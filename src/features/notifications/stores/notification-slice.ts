@@ -1,6 +1,5 @@
 import { NotificationDto, NotificationsDto } from "@/api/notification/dto/notification.dto";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { init } from "i18next";
 
 interface NotificationsState {
   notifications: NotificationDto[];

@@ -1,7 +1,6 @@
-import SelectBox, { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
-import Text from "@/components/atoms/text";
 import React from "react";
 import clsx from "clsx";
+import { Option, Text, OptionKey, SelectBox } from "@/components/atoms";
 
 interface SelectBoxSettingProps {
   options?: Option[];

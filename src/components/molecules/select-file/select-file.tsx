@@ -33,7 +33,7 @@ const SelectFile: React.FC<SelectFileProps> = ({
       className={clsx(
         "bg-bg-fourth transition-all duration-200 ease hover:bg-bg-fourth/40",
         "rounded-lg px-4 py-2 cursor-pointer text-[13px]",
-        className
+        className,
       )}
       onClick={handleClick}
     >

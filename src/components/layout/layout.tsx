@@ -7,13 +7,15 @@ interface LayoutHeaderProps {
   className?: string;
 }
 
-const LayoutHeader = forwardRef<HTMLHeadElement, LayoutHeaderProps>(({ children, className }, ref) => {
-  return (
-    <header ref={ref} className={clsx("fixed z-40 w-full", className)}>
-      {children}
-    </header>
-  );
-});
+const LayoutHeader = forwardRef<HTMLHeadElement, LayoutHeaderProps>(
+  ({ children, className }, ref) => {
+    return (
+      <header ref={ref} className={clsx("fixed z-40 w-full", className)}>
+        {children}
+      </header>
+    );
+  },
+);
 LayoutHeader.displayName = "Layout.Header";
 
 // === Layout Main === //
@@ -23,7 +25,11 @@ interface LayoutMainProps {
   className?: string;
 }
 const LayoutMain: React.FC<LayoutMainProps> = ({ children, className, style }) => {
-  return <main className={clsx("relative h-full", className)} style={style}>{children}</main>;
+  return (
+    <main className={clsx("relative h-full", className)} style={style}>
+      {children}
+    </main>
+  );
 };
 
 // === Layout Footer === //
@@ -33,7 +39,9 @@ interface LayoutFooterProps {
 }
 const LayoutFooter: React.FC<LayoutFooterProps> = ({ children, className }) => {
   return (
-    <footer className={clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className)}>{children}</footer>
+    <footer className={clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className)}>
+      {children}
+    </footer>
   );
 };
 

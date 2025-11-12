@@ -2,9 +2,9 @@ import React, { useCallback } from "react";
 import ProfileMenu from "@/features/user/components/user-menu";
 import { useNavigate } from "react-router-dom";
 import NotificationMenu from "@/features/notifications/components/notification-menu/notification-badge";
-import { Button, Logo } from "@/components/atoms";
 import clsx from "clsx";
-import NavbarItem from "./navbar-item";
+import { Button, Logo } from "@/components/atoms";
+import { NavbarItem } from "./navbar-item";
 
 interface NavbarProps {
   className?: string;
@@ -13,7 +13,12 @@ interface NavbarProps {
   onSignup?: () => void;
 }
 
-const Navbar: React.FC<NavbarProps> = ({ className, isAuthenticated, onLogin, onSignup }) => {
+export const Navbar: React.FC<NavbarProps> = ({
+  className,
+  isAuthenticated,
+  onLogin,
+  onSignup,
+}) => {
   const navItems: { icon: React.ReactNode; path: string; isIndex: boolean }[] = [
     { icon: <i className="fa-solid fa-house"></i>, path: "/", isIndex: true },
     { icon: <i className="fa-solid fa-user-group"></i>, path: "/friends", isIndex: false },
@@ -34,7 +39,7 @@ const Navbar: React.FC<NavbarProps> = ({ className, isAuthenticated, onLogin, on
       className={clsx(
         "flex items-center justify-between",
         "bg-bg-main p-[2px] shadow-md sm:px-8",
-        className
+        className,
       )}
     >
       <div onClick={handleGoToHome} className="cursor-pointer items-center gap-2">
@@ -42,14 +47,14 @@ const Navbar: React.FC<NavbarProps> = ({ className, isAuthenticated, onLogin, on
       </div>
       {isAuthenticated ? (
         <div className="flex flex-row gap-3 flex-1">
-          <div
-            className={clsx(
-              "hidden w-full justify-center flex-row",
-              "sm:flex sm:flex-1"
-            )}
-          >
+          <div className={clsx("hidden w-full justify-center flex-row", "sm:flex sm:flex-1")}>
             {navItems.map((item, index) => (
-              <NavbarItem path={item.path} key={index} className="!px-10" activeRoute={item.isIndex}>
+              <NavbarItem
+                path={item.path}
+                key={index}
+                className="!px-10"
+                activeRoute={item.isIndex}
+              >
                 {item.icon}
               </NavbarItem>
             ))}
@@ -72,5 +77,3 @@ const Navbar: React.FC<NavbarProps> = ({ className, isAuthenticated, onLogin, on
     </nav>
   );
 };
-
-export default Navbar;

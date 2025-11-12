@@ -1,17 +1,13 @@
 import React from "react";
 import clsx from "clsx";
 import "./loading-page.module.css";
-import Logo from "@/components/atoms/logo";
+import { Logo } from "@/components/atoms";
 
 // LoadingPage
 // This component is the loading page component.
 const LoadingPage: React.FC = () => {
   return (
-    <div
-      className={clsx(
-        "fixed inset-0 z-[9999] flex justify-center items-center bg-bg-main"
-      )}
-    >
+    <div className={clsx("fixed inset-0 z-[9999] flex justify-center items-center bg-bg-main")}>
       <div className={clsx("flex flex-col items-center")}>
         <Logo sz="lg-1" hasSlogan={false} />
         {/* <div className={clsx(
