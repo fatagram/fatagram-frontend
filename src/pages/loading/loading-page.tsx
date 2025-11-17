@@ -1,7 +1,7 @@
 import React from "react";
 import clsx from "clsx";
 import "./loading-page.module.css";
-import Logo from "@/components/atoms/logo";
+import { Logo } from "@/components/atoms";
 
 // LoadingPage
 // This component is the loading page component.

@@ -35,7 +35,7 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
         "sm:w-[calc(25%-6px)]",
         "w-[calc(50%-4px)]",
         "sm:min-w-[220px] h-auto",
-        "rounded-2xl shadow-lg p-4 gap-1"
+        "rounded-2xl shadow-lg p-4 gap-1",
       )}
     >
       <div className="w-full cursor-pointer" onClick={handleNavigate}>
@@ -52,20 +52,10 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
       <Text sz="sm-1" weight="light">
         {time}
       </Text>
-      <Button 
-        variant="primary" 
-        sz="sm-1" 
-        className={clsx("w-full mt-2 mb-1")} 
-        onClick={onAccept}
-      >
+      <Button variant="primary" sz="sm-1" className={clsx("w-full mt-2 mb-1")} onClick={onAccept}>
         {t("user:profileHeader:acceptButton")}
       </Button>
-      <Button 
-        variant="fourth" 
-        sz="sm-1" 
-        className={clsx("w-full mt-2r")} 
-        onClick={onCancel}
-      >
+      <Button variant="fourth" sz="sm-1" className={clsx("w-full mt-2r")} onClick={onCancel}>
         {t("user:profileHeader:declineButton")}
       </Button>
     </div>

@@ -1,12 +1,14 @@
 import LoadingPage from "@/pages/loading/loading-page";
-import React, { use, useCallback, useContext, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
-type LoadingContextType = {
+export interface LoadingContextType {
+  count: number;
   increment: () => void;
   decrement: () => void;
-};
+}
 
-const LoadingContext = React.createContext<LoadingContextType>({
+export const LoadingContext = React.createContext<LoadingContextType>({
+  count: 0,
   increment: () => {},
   decrement: () => {},
 });
@@ -15,35 +17,23 @@ type LoadingProviderProps = {
   children: React.ReactNode;
 };
 
-export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) => {
-  // const [isLoading, setIsLoading] = useState<boolean>(true);
-  const [count, setCount] = useState(1);
+export const LoadingProvider: React.FC<LoadingProviderProps> = ({
+  children,
+}) => {
+  const [count, setCount] = useState(0);
 
-  const stableIncrement = useCallback(() => {
-    setCount((prev) => prev + 1);
-  }, []);
-  const stableDecrement = useCallback(() => {
-    setCount((prev) => Math.max(0, prev - 1));
-  }, []);
+  const increment = useCallback(() => setCount((prev) => prev + 1), []);
+  const decrement = useCallback(
+    () => setCount((prev) => Math.max(0, prev - 1)),
+    []
+  );
 
   const value = useMemo(
-    () => ({
-      increment: stableIncrement,
-      decrement: stableDecrement,
-    }),
-    [stableIncrement, stableDecrement],
+    () => ({ count, increment, decrement }),
+    [count, increment, decrement]
   );
 
   return (
-    <LoadingContext.Provider value={value}>
-      {count > 0 && <LoadingPage />}
-      {children}
-    </LoadingContext.Provider>
+    <LoadingContext.Provider value={value}>{children}</LoadingContext.Provider>
   );
 };
-
-export const useLoading = () => {
-  return useContext(LoadingContext);
-};
-
-export default LoadingContext;

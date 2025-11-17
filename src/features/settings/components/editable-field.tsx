@@ -1,9 +1,7 @@
-import Button from "@/components/atoms/button";
-import Text from "@/components/atoms/text";
-import Textbox from "@/components/atoms/textbox";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
+import { Button, Textbox, Text } from "@/components/atoms";
 
 interface EditableFieldProps {
   className?: string;
@@ -56,7 +54,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
           <div className="relative flex flex-col gap-1">
             <Textbox
               className={clsx("animate-fade-in px-2 py-1", {
-                "mt-[5px]": isError
+                "mt-[5px]": isError,
               })}
               placeholder={placeholder}
               value={inputValue}

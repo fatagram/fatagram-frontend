@@ -1,13 +1,11 @@
 import { ErrorCodes } from "@/api/user/dto/change-name.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
-import Button from "@/components/atoms/button";
-import Text, { TextSkeletonLoading } from "@/components/atoms/text";
-import Textbox from "@/components/atoms/textbox";
-import { useAuth } from "@/contexts/auth/auth-context";
+import { Text, Textbox, Button, Skeleton } from "@/components/atoms";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
+import { useAuth } from "@/hooks/contexts/use-auth";
 
 type ChangeNameFormProps = {
   className?: string;
@@ -70,7 +68,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   return (
     <div
       className={clsx(
-        "fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 lg:pt-0 pt-10",
+        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50 lg:pt-0 pt-10",
         className,
       )}
     >
@@ -83,7 +81,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
           {t("settings:account.personalInfo.changeNameForm.title")}
         </Text>
         {isLoading ? (
-          <TextSkeletonLoading className={clsx("h-[50px]")} />
+          <Skeleton />
         ) : (
           <div>
             <div

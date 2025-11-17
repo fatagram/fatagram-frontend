@@ -1,26 +1,20 @@
 // src/routes/MainRoutes.tsx
-import React, { JSX } from "react";
-import { useAuth } from "@/contexts/auth/auth-context";
-import { Navigate, useLocation } from "react-router-dom";
+import { useAuth } from "@/hooks/contexts/use-auth";
+import { useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
-const UserOnlyRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated, isInitialized } = useAuth();
-  const location = useLocation();
+const UserOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+  const auth = useAuth();
+  const navigate = useNavigate();
 
-  console.log('UserOnlyRoute:', { isAuthenticated, isInitialized, pathname: location.pathname });
+  useEffect(() => {
+    if (auth && auth.isAuthenticated === false) {
+      navigate("/login", { replace: true });
+    }
+  }, [auth, navigate]);
 
-  // Wait for auth initialization to complete
-  if (!isInitialized) {
-    console.log('UserOnlyRoute: Waiting for auth initialization...');
-    return null;
-  }
+  if (!auth) return null;
 
-  if (!isAuthenticated) {
-    console.log('UserOnlyRoute: Not authenticated, redirecting to login');
-    return <Navigate to={`/login?returnTo=${encodeURIComponent(location.pathname)}`} replace />;
-  }
-
-  console.log('UserOnlyRoute: Authenticated, rendering children');
   return children;
 };
 

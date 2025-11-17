@@ -15,11 +15,12 @@ import SecondLayout from "../components/layouts/second-layout";
 export const mainRoutes: RouteType[] = [
   {
     element: <DefaultLayout />,
+    type: "public",
     children: [
       {
         path: "/",
         element: <HomePage />,
-        isUserOnly: true,
+        type: "private",
         index: true,
         keepAlive: true,
       },
@@ -29,24 +30,25 @@ export const mainRoutes: RouteType[] = [
       {
         path: "/notifications",
         element: <NotificationPage />,
-        isUserOnly: true,
+        type: "private",
       },
-      { path: "/loading", element: <LoadingPage /> },
-      { path: "*", element: <NotFoundPage /> },
+      { path: "/loading", type: "public", element: <LoadingPage /> },
+      { path: "*", type: "public", element: <NotFoundPage /> },
     ],
   },
   {
     element: <SecondLayout />,
+    type: "public",
     children: [
       {
         path: "/login",
         element: <LoginPage />,
-        isGuestOnly: true,
+        type: "auth",
       },
       {
         path: "/register",
         element: <RegisterPage />,
-        isGuestOnly: true,
+        type: "auth",
       },
     ],
   },

@@ -1,5 +1,5 @@
 import Card from "@/components/molecules/card";
-import SubNavbar from "@/components/organisms/navigation/sub-navbar";
+import { SubNavbar } from "@/components/organisms";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 
@@ -7,9 +7,7 @@ type ProfileAboutNavbarProps = {
   className?: string;
 };
 
-const ProfileAboutNavbar: React.FC<ProfileAboutNavbarProps> = ({
-  className,
-}) => {
+const ProfileAboutNavbar: React.FC<ProfileAboutNavbarProps> = ({ className }) => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   const aboutNavbarItems: {

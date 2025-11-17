@@ -1,15 +1,15 @@
+import { LocaleKeys } from "@/hooks/use-trans";
+
 export interface AuthState {
   isAuthenticated: boolean;
-  userId: string;
+  userId?: string;
   urlName?: string;
-  lang: string;
-  isInitialized?: boolean;
+  lang: LocaleKeys;
+  isInitialized: boolean;
 }
 
 export const initialAuthStatus: AuthState = {
   isAuthenticated: false,
-  userId: "",
-  urlName: undefined,
   lang: "en",
   isInitialized: false,
 };

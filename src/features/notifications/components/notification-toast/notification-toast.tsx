@@ -12,12 +12,7 @@ const NotificationToast: React.FC<NotificationProps> = ({ className, notificatio
   const navigate = useNavigate();
 
   return (
-    <div
-      className={clsx(
-        "py-4 px-8 bg-bg-second rounded-lg",
-        className
-      )}
-    >
+    <div className={clsx("py-4 px-8 bg-bg-second rounded-lg", className)}>
       <NotificationFactory
         notificationDto={notification}
         onClick={() => {

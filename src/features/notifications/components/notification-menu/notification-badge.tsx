@@ -1,17 +1,16 @@
 import useClickOutside from "@/hooks/use-click-outside";
 import React, { RefObject } from "react";
-import useNotifications from "../../hooks/use-notification";
 import { useNavigate } from "react-router-dom";
 import NotificationMenu from "./notification-menu";
 import { useDispatch, useSelector } from "react-redux";
 import { setShowNotification } from "../../stores/notification-slice";
-import Badge from "@/components/atoms/badge";
-import Text from "@/components/atoms/text";
 import clsx from "clsx";
+import { useNotifications } from "../../hooks/use-notification";
+import { Text, Badge } from "@/components/atoms";
 
 interface NotificationButtonProps {}
 
-const NotificationButton: React.FC<NotificationButtonProps> = ({}) => {
+const NotificationBadge: React.FC<NotificationButtonProps> = ({}) => {
   // const [showNotifications, setShowNotifications] = React.useState<boolean>(false);
   const dispatch = useDispatch();
   const navigate = useNavigate();
@@ -49,12 +48,14 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({}) => {
         onClick={handleToggleNotifications}
         ref={btnRef}
         className={clsx({
-          "!bg-primary-500/30": isActive
+          "!bg-primary-500/30": isActive,
         })}
       >
-        <Text className={clsx({
-          "!text-primary-500": isActive
-        })}>
+        <Text
+          className={clsx({
+            "!text-primary-500": isActive,
+          })}
+        >
           <i className="fa-solid fa-bell"></i>
         </Text>
       </Badge>
@@ -63,7 +64,7 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({}) => {
           className={clsx(
             "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
             "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
-            "top-[108%] -right-[70px] w-screen h-screen p-6"
+            "top-[108%] -right-[70px] w-screen h-screen p-6",
           )}
           onClick={() => dispatch(setShowNotification(!isShowNotification))}
           ref={menuRef}
@@ -73,4 +74,4 @@ const NotificationButton: React.FC<NotificationButtonProps> = ({}) => {
   );
 };
 
-export default NotificationButton;
+export default NotificationBadge;

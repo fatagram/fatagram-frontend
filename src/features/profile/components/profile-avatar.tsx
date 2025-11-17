@@ -1,7 +1,7 @@
-import Avatar, { AvatarSkeletonLoading } from "@/components/atoms/avatar";
 import React from "react";
 import { clsx } from "clsx";
-import { useProfilePage } from "../context/profile-page-context";
+import { useProfilePage } from "../hooks/use-profile-page";
+import { Avatar, Skeleton } from "@/components/atoms";
 
 interface ProfileAvatarProps {
   isLoading: boolean;
@@ -22,11 +22,9 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
   return (
     <div className={clsx("relative", className)} ref={ref}>
       {isLoading ? (
-        <AvatarSkeletonLoading
-          alt="Loading"
-          sz="lg-2"
-          className="border-4 border-bg-main flex-shrink-0"
-        />
+        <div className="bg-bg-main rounded-full">
+          <Skeleton className="border-4 border-bg-main h-[192px]" variant="circle" />
+        </div>
       ) : (
         <Avatar
           src={avatar}

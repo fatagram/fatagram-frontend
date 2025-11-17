@@ -1,4 +1,8 @@
-import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
+import axios, {
+  AxiosInstance,
+  AxiosResponse,
+  InternalAxiosRequestConfig,
+} from "axios";
 import { getRefreshToken, getRefreshTokenFromSession } from "@/utils/token";
 import appConfig from "@/config";
 
@@ -22,22 +26,24 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 // Add Interceptors: apiClientFormData
-apiClientFormData.interceptors.request.use((config: InternalAxiosRequestConfig) => {
-  return config;
-});
+apiClientFormData.interceptors.request.use(
+  (config: InternalAxiosRequestConfig) => {
+    return config;
+  }
+);
 
 // Error Authorization
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error.response?.status === 401) {
       try {
         // Refresh token
         const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
         const refreshResult = await axios.post(
           `${appConfig.apiUrl}/api/auth/refreshToken`,
           { refreshToken: refreshToken },
-          { withCredentials: true },
+          { withCredentials: true }
         );
 
         if (refreshResult.status === 200) {
@@ -48,21 +54,21 @@ apiClient.interceptors.response.use(
       }
     }
     return Promise.reject(error);
-  },
+  }
 );
 
 // Error Authorization
 apiClientFormData.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
-    if (error.response?.status === 401 || error.response?.status === 403) {
+    if (error.response?.status === 401) {
       try {
         // Refresh token
         const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
         const refreshResult = await axios.post(
           `${appConfig.apiUrl}/api/auth/refresh-token`,
           { refreshToken: refreshToken },
-          { withCredentials: true },
+          { withCredentials: true }
         );
 
         if (refreshResult.status === 200) {
@@ -73,13 +79,15 @@ apiClientFormData.interceptors.response.use(
       }
     } else if (error.response?.status === 413) {
       // Custom error
-      const err = new Error("File size is too large. Please upload a smaller file.");
+      const err = new Error(
+        "File size is too large. Please upload a smaller file."
+      );
       err.name = "LARGE_FILE_ERROR";
       return Promise.reject(err);
     }
     // console.log(error);
     return Promise.reject(error);
-  },
+  }
 );
 
 // Export the apiClient

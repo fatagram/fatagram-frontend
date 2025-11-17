@@ -1,20 +1,25 @@
 // src/routes/MainRoutes.tsx
-import React, { JSX } from "react";
-import { useAuth } from "@/contexts/auth/auth-context";
-import { Navigate, useSearchParams } from "react-router-dom";
+import { useAuth } from "@/hooks/contexts/use-auth";
+import { useEffect } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
-const GuestOnlyRoute = ({ children }: { children: JSX.Element }) => {
-  const { isAuthenticated, isInitialized } = useAuth();
+const GuestOnlyRoute = ({ children }: { children: React.ReactNode }) => {
+  const auth = useAuth();
+  const navigate = useNavigate();
   const [searchParams] = useSearchParams();
 
-  // Wait for auth initialization to complete
-  if (!isInitialized) return null;
+  useEffect(() => {
+    // If user is authenticated, redirect them away from auth pages
+    if (auth && auth.isAuthenticated) {
+      const returnTo = searchParams.get("returnTo") || "/";
+      navigate(returnTo, { replace: true });
+    }
+  }, [auth, navigate, searchParams]);
 
-  if (isAuthenticated) {
-    const returnTo = searchParams.get("returnTo") || "/";
-    return <Navigate to={returnTo} replace />;
-  }
+  // While auth state is loading/undefined, don't render anything
+  if (!auth) return null;
 
+  // If not authenticated (guest), render children (login/register pages)
   return children;
 };
 

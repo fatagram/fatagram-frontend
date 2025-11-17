@@ -2,9 +2,9 @@ import { notificationService } from "@/api/notification/notification.api";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { loadNotifications } from "../stores/notification-slice";
-import { useAuth } from "@/contexts/auth/auth-context";
+import { useAuth } from "@/hooks/contexts/use-auth";
 
-const useNotifications = () => {
+export const useNotifications = () => {
   const dispatch = useDispatch();
   const { userId } = useAuth();
   const { pageSize, cursorId } = useSelector((state: any) => state.notifications);
@@ -13,6 +13,7 @@ const useNotifications = () => {
     queryKey: ["notifications", userId],
     queryFn: async () => {
       const res = await notificationService.getNotifications(cursorId, pageSize);
+      await new Promise((resolve) => setTimeout(resolve, 100000));
       dispatch(loadNotifications(res.data as any));
       return res.data;
     },
@@ -20,5 +21,3 @@ const useNotifications = () => {
     enabled: !!userId,
   });
 };
-
-export default useNotifications;

@@ -1,7 +1,7 @@
-import PageNavbar from "@/components/organisms/navigation/page-navbar";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
+import PageNavbar from "@/components/organisms/navigation/page-navbar/page-navbar";
 
 interface FriendsNavbarProps {
   className?: string;
@@ -33,9 +33,7 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({ className, onSelect }) =>
   ];
 
   return (
-    <PageNavbar title={t("friends:navbar.title")} className={clsx("bg-bg-second",
-      className
-    )}>
+    <PageNavbar title={t("friends:navbar.title")} className={clsx("bg-bg-second", className)}>
       <PageNavbar.Section>
         {friendPageItems.map((item, index) => (
           <PageNavbar.Item

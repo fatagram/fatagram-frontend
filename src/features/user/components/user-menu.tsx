@@ -1,14 +1,12 @@
 import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
 import clsx from "clsx";
-import Avatar from "@/components/atoms/avatar/avatar";
 import { userProfileService } from "@/api/user/user-profile.api";
 import useClickOutside from "@/hooks/use-click-outside";
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "@/contexts/auth/auth-context";
 import { useTranslation } from "react-i18next";
-import Text from "@/components/atoms/text";
-import Button from "@/components/atoms/button";
 import { List } from "@/components/atoms/list";
+import { Avatar, Button, Text } from "@/components/atoms";
+import { useAuth } from "@/hooks/contexts/use-auth";
 
 /**
  * ProfileMenu component displays a profile menu with options for the user.
@@ -17,58 +15,57 @@ import { List } from "@/components/atoms/list";
  * @returns {JSX.Element} The rendered ProfileMenu component.
  */
 const UserMenu: React.FC = () => {
-  // States
   const [avatar, setAvatar] = useState<string>("");
   const [fullName, setFullName] = useState<string>("");
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
+  const { userId, urlName, logOut } = useAuth();
+  const { t } = useTranslation() as { t: (key: string) => string };
 
-  // Refs
+  const navigate = useNavigate();
+
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLDivElement>(null);
 
-  // Other hooks
-  const navigate = useNavigate();
-  const { userId, urlName, logout } = useAuth();
-  const { t } = useTranslation() as { t: (key: string) => string };
-  // Click outside hook to close the menu
-  useClickOutside(menuRef as RefObject<HTMLDivElement>, btnRef as RefObject<HTMLDivElement>, () => {
+  const handleClickOutside = () => {
     if (isOpenMenu) setIsOpenMenu(false);
-  });
+  };
 
-  // Fetch user avatar and full name
-  const fetchProfiles = useCallback(async () => {
-    // const profileService = new UserService();
-    const response = await userProfileService.GetProfile(userId || "", "avatar,fullName");
-    // console.log(userId);
-    if (response.success) {
-      setAvatar(response.data.infos.avatar);
-      setFullName(response.data.infos.fullName);
-    }
+  useClickOutside(
+    menuRef as RefObject<HTMLDivElement>,
+    btnRef as RefObject<HTMLDivElement>,
+    handleClickOutside,
+  );
+
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const response = await userProfileService.GetProfile(userId || "", "avatar,fullName");
+      if (response.success) {
+        setAvatar(response.data.infos.avatar);
+        setFullName(response.data.infos.fullName);
+      }
+    };
+    fetchProfile();
   }, [userId]);
 
   // Navigation to personal page
-  const handlePersonalPage = () => {
+  const handlePersonalPage = useCallback(() => {
     const user = urlName || userId;
     // console.log("Navigate to personal page: ", user);
     navigate(`/${user}`);
     setIsOpenMenu(false);
-  };
+  }, [navigate, urlName, userId]);
 
   // Navigation to settings page
-  const handleSettings = () => {
+  const handleSettings = useCallback(() => {
     navigate("/settings");
     setIsOpenMenu(false);
-  };
+  }, [navigate]);
 
   // Logout function
-  const handleLogout = async () => {
-    await logout?.();
+  const handleLogout = useCallback(async () => {
+    await logOut?.();
     navigate("/login", { replace: true });
-  };
-
-  useEffect(() => {
-    fetchProfiles();
-  }, [fetchProfiles]);
+  }, [logOut, navigate]);
 
   return (
     <div className={clsx("flex items-center justify-center relative")} ref={btnRef}>
@@ -79,13 +76,14 @@ const UserMenu: React.FC = () => {
           setIsOpenMenu(!isOpenMenu);
         }}
       >
-        <Avatar border={2} src={avatar} alt="Profile" sz="sm-1" />
+        <Avatar src={avatar} alt="Profile" sz="sm-1" className="border-4 border-bg-third" />
       </Button>
       {isOpenMenu && (
         <div
           className={clsx(
             "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
-            "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]"
+            "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
+            "animate-dropdown-slide origin-top-right",
           )}
           ref={menuRef}
         >
@@ -94,7 +92,11 @@ const UserMenu: React.FC = () => {
               <Button
                 sz="md-1"
                 variant="secondary"
-                className={clsx("flex items-center justify-start gap-3 w-full !pl-3 py-3 hover:!bg-bg-fourth")}
+                className={clsx(
+                  "flex items-center justify-start gap-3 w-full !pl-3 py-3",
+                  "hover:!bg-bg-fourth transition-all duration-200",
+                  "hover:scale-[1.02] active:scale-[0.98]",
+                )}
                 onClick={handlePersonalPage}
               >
                 <Avatar src={avatar} alt="avatar" sz="sm-1"></Avatar>
@@ -104,15 +106,17 @@ const UserMenu: React.FC = () => {
               </Button>
             </List.Item>
             <List.Item
-              className={clsx(
-                "items-center mx-auto w-[95%] h-1 bg-text-main/20 rounded-full"
-              )}
+              className={clsx("items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full")}
             ></List.Item>
             <List.Item>
               <Button
                 sz="md-1"
                 variant="secondary"
-                className={clsx("flex items-center justify-start w-full gap-3 hover:!bg-bg-fourth")}
+                className={clsx(
+                  "flex items-center justify-start w-full gap-3",
+                  "hover:!bg-bg-fourth transition-all duration-200",
+                  "hover:scale-[1.02] active:scale-[0.98]",
+                )}
                 onClick={handleSettings}
               >
                 <Text className={clsx("flex items-center gap-3")} sz="md-1">
@@ -125,7 +129,11 @@ const UserMenu: React.FC = () => {
               <Button
                 sz="md-1"
                 variant="secondary"
-                className={clsx("flex items-center justify-start w-full gap-3 text-red-400 hover:!bg-bg-fourth")}
+                className={clsx(
+                  "flex items-center justify-start w-full gap-3 text-red-400",
+                  "hover:!bg-red-50 transition-all duration-200",
+                  "hover:scale-[1.02] active:scale-[0.98]",
+                )}
                 onClick={handleLogout}
               >
                 <Text sz="md-1" className={clsx("flex items-center gap-3")} color="danger">

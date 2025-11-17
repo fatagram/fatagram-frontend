@@ -1,5 +1,4 @@
 import { JSX } from "react";
-import Text from "@/components/atoms/text";
 
 export function renderContent(template: string, values: Record<string, string | JSX.Element>) {
   const regex = /\{(\w+)\}/g;

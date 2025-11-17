@@ -1,11 +1,9 @@
 import { userInfoService } from "@/api/user/user-info.api";
-import Text from "@/components/atoms/text";
+import { Button, Text } from "@/components/atoms";
 import { useEffect, useState } from "react";
-import { useOutletContext } from "react-router-dom";
 import ProfileAboutSection from "./profile-about-section";
-import Button from "@/components/atoms/button";
-import { useProfilePage } from "../../context/profile-page-context";
 import clsx from "clsx";
+import { useProfilePage } from "../../hooks/use-profile-page";
 
 type ProfileOverviewProps = {};
 
@@ -17,9 +15,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
 
   useEffect(() => {
     const fetchData = async () => {
-      const response = await userInfoService.GetUserInfoOverview(
-        targetId ?? ""
-      );
+      const response = await userInfoService.GetUserInfoOverview(targetId ?? "");
       if (response) {
         if (response.data?.email) {
           setEmails([...emails, response.data.email]);
@@ -42,10 +38,8 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
             </Text>
             <div>
               {emails.map((email, index) => (
-                <div className={clsx("flex", "flex-col")}>
-                  <Text key={index} weight="bold">
-                    {email}
-                  </Text>
+                <div key={index} className={clsx("flex", "flex-col")}>
+                  <Text weight="bold">{email}</Text>
                   <Text sz="sm-3" className={clsx("opacity-50")}>
                     Email
                   </Text>
@@ -71,10 +65,8 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
             </Text>
             <div>
               {phoneNumbers.map((phone, index) => (
-                <div className={clsx("flex", "flex-col")}>
-                  <Text key={index} weight="bold">
-                    {phone}
-                  </Text>
+                <div key={index} className={clsx("flex", "flex-col")}>
+                  <Text weight="bold">{phone}</Text>
                   <Text sz="sm-3" className={clsx("opacity-50")}>
                     Di động
                   </Text>

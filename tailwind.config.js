@@ -1,9 +1,8 @@
-import { colorsConfig } from "./colors.config"
+import { colorsConfig } from "./colors.config";
 
 /** @type {import('tailwindcss').Config} */
-module.exports = {
-  darkMode: "class",
-  content: ["./src/**/*.{js,jsx,ts,tsx}"],
+export default {
+  content: ["./index.html", "./src/**/*.{js,jsx,ts,tsx}"],
   theme: {
     extend: {
       fontFamily: {
@@ -14,9 +13,9 @@ module.exports = {
       },
       colors: colorsConfig,
       gridTemplateColumns: {
-        "golden": "1fr 1.618fr",
-      }
+        golden: "1fr 1.618fr",
+      },
     },
   },
-  plugins: [require("tailwind-scrollbar")],
+  plugins: [],
 };

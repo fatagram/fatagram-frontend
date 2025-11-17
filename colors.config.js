@@ -19,7 +19,7 @@ export const colorsConfig = {
     400: "rgb(var(--secondary-400) / <alpha-value>)",
     500: "rgb(var(--secondary-500) / <alpha-value>)",
     600: "rgb(var(--secondary-600) / <alpha-value>)",
-  },  
+  },
   text: {
     main: "rgb(var(--text-main) / <alpha-value>)",
     second: "rgb(var(--text-second) / <alpha-value>)",
@@ -53,6 +53,11 @@ export const colorsConfig = {
     second: "rgb(var(--btn-second) / <alpha-value>)",
     third: "rgb(var(--btn-third) / <alpha-value>)",
     fourth: "rgb(var(--btn-fourth) / <alpha-value>)",
+  },
+  border: {
+    main: "rgb(var(--border-main) / <alpha-value>)",
+    second: "rgb(var(--border-second) / <alpha-value>)",
+    focus: "rgb(var(--border-focus) / <alpha-value>)",
   },
   gradient: {
     main: "var(--gradient-main)",

@@ -1,6 +1,8 @@
-import { NotificationDto, NotificationsDto } from "@/api/notification/dto/notification.dto";
+import {
+  NotificationDto,
+  NotificationsDto,
+} from "@/api/notification/dto/notification.dto";
 import { createSlice, PayloadAction } from "@reduxjs/toolkit";
-import { init } from "i18next";
 
 interface NotificationsState {
   notifications: NotificationDto[];
@@ -30,11 +32,17 @@ const notificationsSlice = createSlice({
   initialState,
   reducers: {
     loadNotifications: (state, action: PayloadAction<NotificationsDto>) => {
-      state.notifications = [...state.notifications, ...action.payload.notifications];
+      state.notifications = [
+        ...state.notifications,
+        ...action.payload.notifications,
+      ];
       state.unreadCount = action.payload.unreadCount;
       state.isInitialized = true;
       if (action.payload.notifications.length > 0) {
-        state.cursorId = action.payload.notifications[action.payload.notifications.length - 1].id;
+        state.cursorId =
+          action.payload.notifications[
+            action.payload.notifications.length - 1
+          ].id;
       } else {
         state.isFull = true;
       }

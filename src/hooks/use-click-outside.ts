@@ -3,14 +3,21 @@ import { useEffect, RefObject } from "react";
 const useClickOutside = (
   refTarget: RefObject<HTMLElement>,
   refException: RefObject<HTMLElement>,
-  callback: () => void,
+  callback: () => void
 ) => {
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
       // Kiểm tra xem ref.current có mounted không và kiểu tra xem event.target có phải là con của ref.current hay không
       // Nếu không phải thì gọi callback
-      if (refTarget.current && !refTarget.current.contains(event.target as Node)) {
-        if (refException.current && refException.current.contains(event.target as Node)) return;
+      if (
+        refTarget.current &&
+        !refTarget.current.contains(event.target as Node)
+      ) {
+        if (
+          refException.current &&
+          refException.current.contains(event.target as Node)
+        )
+          return;
         callback();
       }
     };

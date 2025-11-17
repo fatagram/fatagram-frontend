@@ -1,11 +1,10 @@
-import Layout from "@/components/layout/layout";
-import Navbar from "@/components/organisms/navigation/navbar";
-import NavbarFooter from "@/components/organisms/navigation/navbar/navbar-footer";
-import { useAuth } from "@/contexts/auth/auth-context";
-import { useDialog } from "@/contexts/common/dialog-context";
+import Layout from "@/components/layout";
+import { Navbar, NavbarFooter } from "@/components/organisms";
 import { LoginForm, RegisterForm } from "@/features/auth/components";
 import { useSize } from "@/hooks/use-size";
-import { useCallback, useEffect, useRef } from "react";
+import { useAuth } from "@/hooks/contexts/use-auth";
+import { useDialog } from "@/hooks/contexts/use-dialog";
+import { useCallback, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
 const DefaultLayout = () => {
@@ -19,6 +18,7 @@ const DefaultLayout = () => {
       content: <LoginForm showLogo={false} />,
     });
   }, [openDialog]);
+
   const openRegisterOverlay = useCallback(() => {
     openDialog({
       content: <RegisterForm showLogo={false} />,
@@ -35,7 +35,7 @@ const DefaultLayout = () => {
     }
 
     return () => closeDialog();
-  }, [isAuthenticated, isInitialized]);
+  }, [isAuthenticated, isInitialized, closeDialog, openLoginOverlay]);
 
   return (
     <Layout>

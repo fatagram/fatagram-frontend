@@ -7,6 +7,5 @@ export default interface RouteType {
   keepAlive?: boolean;
   index?: boolean;
   hasParams?: boolean;
-  isGuestOnly?: boolean;
-  isUserOnly?: boolean;
+  type?: "public" | "private" | "auth";
 }

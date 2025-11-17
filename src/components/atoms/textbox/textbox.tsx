@@ -1,0 +1,102 @@
+import React from "react";
+import clsx from "clsx";
+import styles from "./textbox.module.css";
+import { Size } from "../../common/types/size";
+import { ComponentProps } from "@/components/common/types/component-type";
+
+const sizeClasses: Record<Size, string> = {
+  xs: "px-2 py-1 text-xs",
+  "sm-1": "px-3 py-1 text-[13px] ",
+  "sm-2": "px-4 py-2 text-[13px] ",
+  "sm-3": "px-5 py-2 text-[13px] ",
+  "md-1": "px-6 py-3 text-base ",
+  "md-2": "px-7 py-3 text-base ",
+  "md-3": "px-8 py-4 text-base ",
+  "lg-1": "px-8 py-4 text-base ",
+  "lg-2": "px-9 py-4 text-base ",
+  "lg-3": "px-10 py-5 text-base ",
+  "xl-1": "px-10 py-5 text-xl ",
+  "xl-2": "px-12 py-6 text-2xl ",
+  "xl-3": "px-14 py-7 text-3xl ",
+};
+
+// TextboxProps interface
+export interface TextboxProps extends ComponentProps<HTMLInputElement> {
+  isWrong?: boolean;
+  wrongMessage?: string;
+  wrapperClassName?: string;
+}
+
+// Textbox component
+// This component is a textbox component that can be used in the application.
+export const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
+  (
+    {
+      disabled = false,
+      isWrong = false,
+      wrongMessage,
+      className,
+      sz = "sm-1",
+      type = "text",
+      wrapperClassName,
+      ...props
+    },
+    ref,
+  ) => {
+    const [showPassword, setShowPassword] = React.useState<boolean>(false);
+    const typeOfText =
+      type === "text"
+        ? "text"
+        : type === "password"
+          ? showPassword
+            ? "text"
+            : "password"
+          : type === "search"
+            ? "search"
+            : type;
+    return (
+      <div className={clsx(wrapperClassName)}>
+        <div className={clsx("relative")}>
+          <input
+            type={typeOfText}
+            ref={ref}
+            className={clsx(
+              "border-[2px] text-text-main",
+              "font-normal rounded-xl outline-none text-lg caret-primary-500 selection:!bg-primary-600",
+              "transition-all duration-300 ease-out",
+              {
+                "pl-10": type === "search",
+                "bg-bg-main opacity-60 cursor-not-allowed": disabled,
+                "focus:bg-gradient-main-move": !disabled,
+                [styles["primary-textbox-wrong"]]: isWrong && !disabled,
+                [styles["primary-textbox"]]: !isWrong && !disabled,
+              },
+              sizeClasses[sz],
+              className,
+            )}
+            disabled={disabled}
+            {...props}
+          />
+          {type === "password" && (
+            <button
+              type="button"
+              className={clsx("absolute right-0 top-1/2 -translate-y-1/2 mr-5")}
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <i className={clsx("fa-solid fa-eye text-secondary-500")}></i>
+              ) : (
+                <i className={clsx("fa-solid fa-eye-slash text-text-main")}></i>
+              )}
+            </button>
+          )}
+          {type === "search" && (
+            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-text-main" />
+          )}
+        </div>
+        {isWrong && <span className="text-red-400">{wrongMessage}</span>}
+      </div>
+    );
+  },
+);
+Textbox.displayName = "Textbox";

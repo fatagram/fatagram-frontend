@@ -1,12 +1,9 @@
-import React, { useEffect } from "react";
-import Footer from "@/components/atoms/footer/footer";
+import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { ArrowLeft } from "lucide-react";
 import { useTranslation } from "react-i18next";
-import Logo from "@/components/atoms/logo";
-import Text from "@/components/atoms/text";
-import Button from "@/components/atoms/button";
 import clsx from "clsx";
+import { Button, Footer, Logo, Text } from "@/components/atoms";
 
 // NotFoundPage function
 // This function is a React component that renders the 404 page.
@@ -19,29 +16,25 @@ function NotFoundPage() {
     document.title = "Page Not Found";
     return () => {
       document.title = "Fatagram";
-    }
-  })
+    };
+  });
 
   return (
     <div
       className={clsx(
-        "flex flex-col items-center sm:justify-center h-full w-full gap-[20px] pt-10"
+        "flex flex-col items-center sm:justify-center h-full w-full gap-[20px] pt-10",
       )}
     >
-      <Logo hasSlogan={false} className={clsx("text-[30px]")} />
+      <Logo hasSlogan={false} sz="md-2" />
       <Text
         sz="xl-3"
         className={clsx(
-          "font-jua bg-single-main text-single-third w-[200px] h-[200px] flex justify-center items-center rounded-full"
+          "font-jua bg-primary-500/70 text-primary-600 w-[200px] h-[200px] flex justify-center items-center rounded-full",
         )}
       >
         404
       </Text>
-      <Text
-        weight="extrabold"
-        sz="lg-3"
-        className={clsx("uppercase text-single-third")}
-      >
+      <Text weight="extrabold" sz="lg-3" className={clsx("uppercase text-primary-600")}>
         {t("notFound.title")}
       </Text>
       <Text sz="lg-1" className={clsx("flex justify-center text-center")}>
@@ -58,7 +51,7 @@ function NotFoundPage() {
           {t("notFound.backButton")}
         </Button>
       </div>
-      <Footer className={clsx("text-[#959595]")} />
+      <Footer className={clsx("text-text-third")} />
     </div>
   );
 }

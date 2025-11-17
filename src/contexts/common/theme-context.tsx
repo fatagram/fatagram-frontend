@@ -1,71 +1,48 @@
-import React, { createContext, useContext, useEffect, useState } from "react";
-import themesJson from "@/themes/themes.json";
+import { createContext, useContext, useEffect, useState } from "react";
 
-// Json
-const themes = themesJson as Record<string, any>;
+export type Theme = "light" | "dark";
 
-// type of Theme
-export type Theme = keyof typeof themes;
-
-// ThemeOption
-export interface ThemeOption {
-  theme: Theme;
-  display: string;
-}
+export const availableThemes: { key: Theme; label: string }[] = [
+  { key: "light", label: "common:themes:light" },
+  { key: "dark", label: "common:themes:dark" },
+];
 
 interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  availableThemes: ThemeOption[];
 }
 
-const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType>({
+  theme: "light",
+  setTheme: () => {},
+});
 
 interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-export const ThemeProvider: React.FC<ThemeProviderProps> = ({ children }) => {
-  const getLocalStorageTheme = (): Theme => {
-    const theme = localStorage.getItem("theme");
-    return theme && theme in themes ? (theme as Theme) : "default";
-  };
-  const [theme, setTheme] = useState<Theme>(getLocalStorageTheme);
-  const [availableThemes, setAvailableThemes] = useState<ThemeOption[]>([]);
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>("light");
 
-  const handleTheme = (theme: Theme) => setTheme(theme);
-
-  // Init availabla themes
   useEffect(() => {
-    const themeOption: ThemeOption[] = Object.entries(themes).map(([key, value]) => ({
-      theme: key,
-      display: value.display || key,
-    }));
-    setAvailableThemes(themeOption);
+    const storedTheme = localStorage.getItem("theme") as Theme | null;
+    if (storedTheme && availableThemes.some((t) => t.key === storedTheme)) {
+      setTheme(storedTheme);
+    } else {
+      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+      setTheme(prefersDark ? "dark" : "light");
+    }
   }, []);
 
-  // Reload theme
   useEffect(() => {
-    const themeData = themes[theme];
-    const themeColors = themeData?.colors || {};
-    Object.entries(themeColors).forEach(([key, value]) => {
-      document.documentElement.style.setProperty(key, value as string);
-      document.documentElement.setAttribute("data-theme", theme);
-    });
+    const root = window.document.documentElement;
+    root.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  return (
-    <ThemeContext.Provider
-      value={{ theme: theme, availableThemes: availableThemes, setTheme: handleTheme }}
-    >
-      {children}
-    </ThemeContext.Provider>
-  );
-};
+  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
+}
 
-export const useTheme = (): ThemeContextType => {
-  const context = useContext(ThemeContext);
-  if (!context) throw new Error("useTheme must be used within a ThemeProvider.");
-  return context;
-};
+export function useTheme() {
+  return useContext(ThemeContext);
+}

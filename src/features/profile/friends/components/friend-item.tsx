@@ -1,14 +1,13 @@
 import { FriendDto } from "@/api/user/dto/friend.dto";
 import { friendshipService } from "@/api/user/friendship.api";
-import Avatar from "@/components/atoms/avatar";
 import useClickOutside from "@/hooks/use-click-outside";
 import React, { RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import AddFriendButton from "../../components/friend-button";
 import Dropdown from "@/components/molecules/dropdown";
-import Text from "@/components/atoms/text";
 import clsx from "clsx";
+import { Avatar, Text } from "@/components/atoms";
 
 interface FriendItemProps {
   className?: string;
@@ -64,7 +63,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
       className={clsx(
         "relative flex items-center justify-between rounded-xl",
         "hover:bg-bg-fourth cursor-pointer transition-colors",
-        className
+        className,
       )}
     >
       <div
@@ -98,7 +97,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
               isShow={isShowDrowdown}
               className={clsx(
                 "absolute flex sm:top-[130%] top-[110%] left-[1%] p-2",
-                "rounded-lg shadow-md z-10 min-w-[200px] w-[calc(100%-2%)]"
+                "rounded-lg shadow-md z-10 min-w-[200px] w-[calc(100%-2%)]",
               )}
               ref={dropdownRef}
               items={requestOptions}

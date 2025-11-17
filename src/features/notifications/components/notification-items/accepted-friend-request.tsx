@@ -1,9 +1,8 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
-import Avatar from "@/components/atoms/avatar";
-import Text from "@/components/atoms/text";
 import { TimeUnit, TimeUnitTranslateMap } from "@/types/time-unit";
 import { useTranslation } from "react-i18next";
 import { renderContent } from "../../helper/render-content";
+import { Avatar, Text } from "@/components/atoms";
 import clsx from "clsx";
 
 interface AcceptedFriendRequestProps {

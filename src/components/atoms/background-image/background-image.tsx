@@ -1,5 +1,4 @@
-import React, { useEffect } from "react";
-import "@/styles/global.css";
+import { useEffect } from "react";
 import style from "./background-image.module.css";
 import { ComponentProps } from "@/components/common/types/component-type";
 import clsx from "clsx";
@@ -9,7 +8,12 @@ interface BackgroundImageProps extends ComponentProps {
   alt: string;
 }
 
-const BackgroundImage: React.FC<BackgroundImageProps> = ({ src, alt, className, children }) => {
+export default function BackgroundImage({
+  src,
+  alt,
+  className,
+  children,
+}: BackgroundImageProps) {
   useEffect(() => {
     document.documentElement.style.setProperty("--bg-image", `url(${src})`);
   }, [src]);
@@ -17,16 +21,14 @@ const BackgroundImage: React.FC<BackgroundImageProps> = ({ src, alt, className, 
   return (
     <div
       className={clsx(
-      "rounded-2xl",
-      style["user-bg-image"],
-      src ? "" : "h-[200px] !bg-[var(--third-bg-color)]",
-      className
+        "rounded-2xl",
+        style["user-bg-image"],
+        src ? "" : "h-[200px] bg-bg-fourth",
+        className
       )}
       aria-label={alt}
     >
       {children}
     </div>
   );
-};
-
-export default BackgroundImage;
+}

@@ -1,9 +1,7 @@
-import Button from "@/components/atoms/button";
-import Text from "@/components/atoms/text";
-import TextArea from "@/components/atoms/textarea/textarea";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
+import { Button, TextArea, Text } from "@/components/atoms";
 
 type EditableTextAreaProps = {
   className?: string; // ClassName of main component
@@ -59,10 +57,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
         {editableMode === "inline" && isEdit ? (
           <div className="relative flex flex-col gap-1 w-full">
             <TextArea
-              className={clsx(
-                "animate-fade-in px-2 py-1 w-full h-[50px]",
-                isError && "mt-[5px]"
-              )}
+              className={clsx("animate-fade-in px-2 py-1 w-full h-[50px]", isError && "mt-[5px]")}
               placeholder={placeholder}
               value={inputValue}
               isWrong={isError}
@@ -75,7 +70,11 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
             )}
           </div>
         ) : (
-          <Text sz="lg-1" className={clsx(valueClassName, "select-auto")} wrap="whitespace-pre-wrap">
+          <Text
+            sz="lg-1"
+            className={clsx(valueClassName, "select-auto")}
+            wrap="whitespace-pre-wrap"
+          >
             {value ?? noDataValue}
           </Text>
         )}

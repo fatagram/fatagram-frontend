@@ -1,8 +1,86 @@
-@import url("./styles/global.css");
-@import url("./styles/themes.css");
-@import url("./styles/animation.css");
-@import url("./styles/fonts.css");
+@import "./styles/fonts.css";
+@import "./styles/themes.css";
+@import "./styles/animation.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 html {
   background-color: rgb(var(--bg-main));
 }
+
+body {
+  font-family: var(--font-nunito);
+  font-size: 1rem;
+  font-weight: 400;
+  color: rgb(var(--text-main));
+}
+
+.bg-gradient-main {
+  background: var(--gradient-main);
+  background-size: 200% 100%;
+  transition: background-position 0.3s;
+}
+
+.text-gradient-main {
+  background: var(--gradient-main);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.text-gradient-second {
+  background: var(--gradient-second);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.hover\:bg-gradient-main-move:hover,
+.focus\:bg-gradient-main-move:focus {
+  background-position: 50% 0;
+}
+
+.background-image {
+  background: var(--login-image);
+  background-size: cover;
+  background-repeat: no-repeat;
+  background-position: center;
+  min-height: 100vh;
+}
+
+.register-bg {
+  background: var(--login-image);
+  background-size: cover;
+  background-position: center;
+}
+
+.login-bg {
+  background: var(--login-image);
+  background-size: cover;
+  background-position: center;
+}
+
+.layout-1000 {
+  max-width: 900px !important;
+}
+
+/* Chrome, Safari, Edge */
+*::-webkit-scrollbar {
+  width: 4px;
+}
+
+*::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-image: var(--gradient-second);
+  border-radius: 6px;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #888;
+}
+

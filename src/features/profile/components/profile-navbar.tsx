@@ -1,14 +1,13 @@
-import NavbarItem from "@/components/organisms/navigation/navbar/navbar-item";
-import Button from "@/components/atoms/button";
-import Text from "@/components/atoms/text";
+import { Button, Text } from "@/components/atoms";
 import Dropdown from "@/components/molecules/dropdown";
+import { NavbarItem } from "@/components/organisms/navigation/navbar";
 import { useSize } from "@/hooks/use-size";
 import { debounce } from "@/utils/debounce";
-import React, { useEffect, useLayoutEffect, useMemo, useState } from "react";
+import clsx from "clsx";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useProfilePage } from "../context/profile-page-context";
-import clsx from "clsx";
+import { useProfilePage } from "../hooks/use-profile-page";
 
 interface ProfileNavbarProps {
   className?: string;
@@ -28,8 +27,13 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
   const { userParam, isOwner } = useProfilePage();
 
   const [containerRef, containerSize] = useSize<HTMLDivElement>();
-  const showMoreRef = React.useRef<HTMLButtonElement>(null);
-  const itemRefs = React.useRef<HTMLDivElement[]>([]);
+  const showMoreRef = useRef<HTMLButtonElement>(null);
+  const itemRefs = useRef<HTMLDivElement[]>([]);
+
+  const [showDropdown, setShowDropdown] = useState<boolean>(false);
+  const [visibleItems, setVisibleItems] = useState<NavbarItem[]>([]);
+  const [hiddenItems, setHiddenItems] = useState<NavbarItem[]>([]);
+  const [isChooseHiddenItem, setIsChooseHiddenItem] = useState<boolean>(false);
 
   const navbarItems = useMemo(
     () => [
@@ -73,21 +77,11 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
     [userParam, t],
   );
 
-  const [showDropdown, setShowDropdown] = useState<boolean>(false);
-  const [visibleItems, setVisibleItems] = useState<NavbarItem[]>([]);
-  const [hiddenItems, setHiddenItems] = useState<NavbarItem[]>([]);
-  const [isChooseHiddenItem, setIsChooseHiddenItem] = useState<boolean>(false);
-
-  const updateChooseHiddenItem = () => {
-    const currentPath = location.pathname;
-    const foundInHidden = hiddenItems.some((itemRefs) => itemRefs.href === currentPath);
-    setIsChooseHiddenItem(foundInHidden);
-  };
-
   useLayoutEffect(() => {
-    if (containerSize.width === 0) return;
-
+    // Don't early return - let effect run but handle logic inside
     const handleResize = () => {
+      if (containerSize.width === 0) return; // Check inside function instead
+
       let total = showMoreRef.current?.offsetWidth ?? 0;
       const newVisibleItems: NavbarItem[] = [];
       const newHiddenItems: NavbarItem[] = [];
@@ -111,14 +105,16 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
 
     const debouncedHandle = debounce(handleResize, 20); // 50ms delay
     debouncedHandle(); // chạy ngay lần đầu
-  }, [containerSize.width, isOwner, navbarItems, hiddenItems.length]); // Thêm navbarItems vào dependency
+  }, [containerSize.width, isOwner, navbarItems]); // Remove hiddenItems.length to prevent infinite loop
 
   useEffect(() => {
-    updateChooseHiddenItem();
+    const currentPath = location.pathname;
+    const foundInHidden = hiddenItems.some((item) => item.href === currentPath);
+    setIsChooseHiddenItem(foundInHidden);
   }, [location.pathname, hiddenItems]);
 
   return (
-    <div className={clsx("relative flex", className)} ref={containerRef}>
+    <div className={clsx("relative flex py-2", className)} ref={containerRef}>
       <div className="absolute invisible">
         {navbarItems.map((item, index) => {
           if (item.isOwnerOnly && !isOwner) return null;
