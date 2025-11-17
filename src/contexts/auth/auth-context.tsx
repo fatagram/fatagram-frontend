@@ -1,24 +1,15 @@
 import { authService } from "@/api/auth/auth.api";
-import LoginDto, { LoginResponse } from "@/api/auth/dto/login.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
-import {
-  getRefreshToken,
-  getRefreshTokenFromSession,
-  removeRefreshToken,
-  removeRefreshTokenFromSession,
-  setRefreshToken,
-  setRefreshTokenToSession,
-} from "@/utils/token";
 import React, { createContext, FC, useCallback, useEffect, useMemo, useReducer } from "react";
-import { Result } from "@/api/common/result";
 import { useDispatch } from "react-redux";
 import { resetState } from "@/features/notifications/stores/notification-slice";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthState, initialAuthStatus } from "@/types/auth-state";
-import { useLanguage } from "@/hooks/utilities/use-language";
-import { useDialog } from "@/hooks/utilities/use-dialog";
-import { useLoading } from "@/hooks/utilities/use-loading";
-import { LANG_LIST, Language } from "../common/language-context";
+import { useDialog } from "@/hooks/contexts/use-dialog";
+import { useLoading } from "@/hooks/contexts/use-loading";
+import { useNavigate } from "react-router-dom";
+import { LoginDto } from "@/types/entities";
+import { LocaleKeys, useLanguage } from "@/hooks/use-trans";
 
 type AuthAction =
   | { type: "INITIALIZE"; payload: Omit<AuthState, "isInitialized"> }
@@ -63,7 +54,7 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
 export interface AuthContextType {
   isAuthenticated: boolean | null;
   isInitialized?: boolean;
-  logIn: (loginDto: LoginDto) => Promise<Result<LoginResponse>>;
+  logIn: (loginDto: LoginDto) => void;
   logOut?: () => Promise<void>;
   setUrlName?: (urlName: string | undefined) => void;
   userId?: string;
@@ -88,91 +79,46 @@ type AuthProviderProps = {
 // Create AuthProvider
 export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
   const [state, dispatch] = useReducer(authReducer, initialAuthStatus);
-  const { setLanguage } = useLanguage();
   const { openDialog, closeDialog } = useDialog();
+  const { changeLanguage } = useLanguage();
   const { increment, decrement } = useLoading();
   const _dispatch = useDispatch();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
-  // Function to set language when reload or login - MEMOIZED
-  const setLang = useCallback(
-    (langCode: string) => {
-      if (LANG_LIST.includes(langCode as Language)) {
-        setLanguage(langCode as Language);
-      }
-    },
-    [setLanguage],
-  );
-
-  // Function to login
-  const _logIn = useCallback(
-    async (loginDto: LoginDto): Promise<Result<LoginResponse>> => {
-      if (state.isAuthenticated) return { success: false, errorCode: "AlreadyLoggedIn" };
-      try {
-        const result = await authService.login(loginDto);
-        if (result.success) {
-          dispatch({
-            type: "LOGIN",
-            payload: {
-              userId: result.data?.userId,
-              urlName: result.data?.urlName,
-              lang: result.data?.languageCode || "en",
-            },
-          });
-          if (localStorage.getItem("isRememberMe") === "true") {
-            setRefreshToken(result.data?.refreshToken || "");
-          } else {
-            setRefreshTokenToSession(result.data?.refreshToken || "");
-          }
-          closeDialog();
-        }
-        return result;
-      } catch (err) {
-        return { success: false, data: undefined };
-      }
-    },
-    [state.isAuthenticated, closeDialog, dispatch],
-  );
-
-  const clearUserData = useCallback(() => {
-    removeRefreshToken();
-    removeRefreshTokenFromSession();
-    queryClient.clear();
-    _dispatch(resetState());
-  }, [_dispatch, queryClient]);
-
-  // Function to logout
-  const _logOut = useCallback(async () => {
+  const _logIn = async (loginDto: LoginDto) => {
     try {
-      increment();
-      if ((await authService.logout()).success) {
-        console.log("User is logged out");
-        dispatch({ type: "LOGOUT" });
-        clearUserData();
-      } else {
-        openDialog({
-          title: "Logout failed",
-          content: "Logout failed. Please try again later.",
+      await authService.login(loginDto);
+      // Fetch me
+      const me = (await userProfileService.GetMe()).data;
+      if (me) {
+        dispatch({
+          type: "LOGIN",
+          payload: {
+            userId: me.id,
+            urlName: me.urlName,
+            lang: (me.languageCode as LocaleKeys) || "en",
+          },
         });
       }
     } catch (err) {
-      console.error("Logout failed:", err);
-    } finally {
-      decrement();
+      console.error("Login failed:", err);
     }
-  }, [increment, decrement, clearUserData, openDialog]);
+  };
 
-  // const checkAuth = useCallback(async () => {
-  //   try {
-  //     const result = await authService.ping();
-  //     if (!result.success) {
-  //       await _logOut();
-  //     }
-  //   } catch (err) {
-  //     console.error("Check auth failed:", err);
-  //     await _logOut();
-  //   }
-  // }, [_logOut]);
+  const clearUserData = useCallback(() => {
+    queryClient.clear();
+    _dispatch(resetState());
+  }, [queryClient, _dispatch]);
+
+  // Function to logout
+  const _logOut = useCallback(async () => {
+    increment();
+    await authService.logout();
+    dispatch({ type: "LOGOUT" });
+    clearUserData();
+    decrement();
+  }, [increment, decrement, clearUserData]);
 
   const setUrlName = useCallback((urlName: string | undefined) => {
     dispatch({
@@ -181,87 +127,66 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     });
   }, []);
 
-  // Memoize initialize function
-  const initialize = useCallback(async () => {
-    try {
+  // Memoize initialize function - Run ONLY ONCE on mount
+  const initializeRef = React.useRef(false);
+
+  useEffect(() => {
+    // Prevent double initialization in StrictMode or on refresh
+    if (initializeRef.current) return;
+    initializeRef.current = true;
+
+    const initialize = async () => {
       increment();
-      // Check if refresh token exists first
-      const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
-
-      if (!refreshToken) {
-        // No token found, user is not authenticated
-        dispatch({
-          type: "INITIALIZE",
-          payload: {
-            isAuthenticated: false,
-            lang: "en",
-          },
-        });
-        return;
-      }
-
-      // Token exists, try to verify with server
-      const result = await userProfileService.GetMe();
-      // console.log(result);
-      if (result.success) {
+      try {
+        const result = await userProfileService.GetMe();
+        if (!result.success) {
+          dispatch({
+            type: "INITIALIZE",
+            payload: {
+              isAuthenticated: false,
+              lang: "en",
+            },
+          });
+          return;
+        }
         dispatch({
           type: "INITIALIZE",
           payload: {
             isAuthenticated: true,
             userId: result.data?.id,
             urlName: result.data?.urlName,
-            lang: result.data?.languageCode || "en",
+            lang: (result.data?.languageCode as LocaleKeys) || "en",
           },
         });
-        setLang(result.data?.languageCode || "en");
-        // console.log("User is authenticated");
-      } else {
-        // API failed but token exists - keep authenticated for dev experience
-        console.warn("GetMe API failed but token exists, keeping authenticated");
-        dispatch({
-          type: "INITIALIZE",
-          payload: {
-            isAuthenticated: true, // Keep authenticated if we have token
-            lang: "en",
-          },
-        });
+        changeLanguage((result.data?.languageCode as LocaleKeys) || "en");
+      } finally {
+        decrement();
       }
-    } catch (err) {
-      console.error("Check auth failed:", err);
-      // Check if we have token - if yes, keep authenticated
-      const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
-      dispatch({
-        type: "INITIALIZE",
-        payload: {
-          isAuthenticated: !!refreshToken, // Keep auth if token exists
-          lang: "en",
-        },
-      });
-    } finally {
-      decrement();
-    }
-  }, [increment, decrement, setLang]);
+    };
 
-  useEffect(() => {
     initialize();
-  }, []);
+  }, []); // Empty deps - run ONLY once
 
-  return (
-    <AuthContext.Provider
-      value={useMemo(
-        () => ({
-          isAuthenticated: state.isAuthenticated,
-          isInitialized: state.isInitialized,
-          userId: state.userId,
-          urlName: state.urlName,
-          logIn: _logIn,
-          logOut: _logOut,
-          setUrlName,
-        }),
-        [state.isAuthenticated, state.isInitialized, state.userId, state.urlName, _logIn, _logOut],
-      )}
-    >
-      {children}
-    </AuthContext.Provider>
+  const contextValue = useMemo(
+    () => ({
+      isAuthenticated: state.isAuthenticated,
+      isInitialized: state.isInitialized,
+      userId: state.userId,
+      urlName: state.urlName,
+      logIn: _logIn,
+      logOut: _logOut,
+      setUrlName,
+    }),
+    [
+      state.isAuthenticated,
+      state.isInitialized,
+      state.userId,
+      state.urlName,
+      _logIn,
+      _logOut,
+      setUrlName,
+    ],
   );
+
+  return <AuthContext.Provider value={contextValue}>{children}</AuthContext.Provider>;
 };

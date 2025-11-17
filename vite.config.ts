@@ -24,6 +24,9 @@ export default defineConfig({
     hmr: {
       overlay: true, // Show errors as overlay for better debugging
     },
+    watch: {
+      ignored: ["**/node_modules/**", "**/.git/**", "**/dist/**"],
+    },
   },
   optimizeDeps: {
     // Pre-bundle these dependencies for faster dev server startup

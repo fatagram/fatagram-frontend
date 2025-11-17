@@ -1,5 +1,5 @@
 import LoadingPage from "@/pages/loading/loading-page";
-import React, { use, useCallback, useContext, useMemo, useState } from "react";
+import React, { useCallback, useMemo, useState } from "react";
 
 export interface LoadingContextType {
   increment: () => void;
@@ -15,30 +15,13 @@ type LoadingProviderProps = {
   children: React.ReactNode;
 };
 
-export const LoadingProvider = React.memo(function LoadingProvider({
-  children,
-}: LoadingProviderProps) {
+export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) => {
   const [count, setCount] = useState(0);
 
-  const stableIncrement = useCallback(() => {
-    setCount((prev) => prev + 1);
-  }, []);
-  const stableDecrement = useCallback(() => {
-    setCount((prev) => Math.max(0, prev - 1));
-  }, []);
+  const increment = useCallback(() => setCount((prev) => prev + 1), []);
+  const decrement = useCallback(() => setCount((prev) => Math.max(0, prev - 1)), []);
 
-  const value = useMemo(
-    () => ({
-      increment: stableIncrement,
-      decrement: stableDecrement,
-    }),
-    [stableIncrement, stableDecrement],
-  );
+  const value = useMemo(() => ({ increment, decrement }), [increment, decrement]);
 
-  return (
-    <LoadingContext.Provider value={value}>
-      {count > 0 && <LoadingPage />}
-      {children}
-    </LoadingContext.Provider>
-  );
-});
+  return <LoadingContext.Provider value={value}>{children}</LoadingContext.Provider>;
+};

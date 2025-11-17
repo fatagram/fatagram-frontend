@@ -2,7 +2,7 @@ import { notificationService } from "@/api/notification/notification.api";
 import { useQuery } from "@tanstack/react-query";
 import { useDispatch, useSelector } from "react-redux";
 import { loadNotifications } from "../stores/notification-slice";
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 
 export const useNotifications = () => {
   const dispatch = useDispatch();

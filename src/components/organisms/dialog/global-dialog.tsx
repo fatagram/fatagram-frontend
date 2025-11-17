@@ -1,4 +1,4 @@
-import { useDialog } from "@/hooks/utilities/use-dialog";
+import { useDialog } from "@/hooks/contexts/use-dialog";
 import clsx from "clsx";
 import { Dialog } from "./dialog";
 
@@ -9,10 +9,7 @@ export const GlobalDialog: React.FC = () => {
 
   return (
     <div
-      className={clsx(
-        "fixed z-[9998] inset-0 flex items-center justify-center",
-        "bg-black bg-opacity-50",
-      )}
+      className={clsx("fixed z-[9998] inset-0 flex items-center justify-center", "bg-bg-overlay")}
     >
       <Dialog {...dialogProps} onClose={closeDialog} />
     </div>

@@ -5,7 +5,7 @@ import clsx from "clsx";
 import { useEffect, useState } from "react";
 import ChangeUrlNameDto, { ErrorCodes, ErrorKey } from "@/api/user/dto/change-url-name.dto";
 import { userProfileService } from "@/api/user/user-profile.api";
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 interface ChangeUrlNameProps {
   isLoading: boolean;
   urlName: string | undefined;

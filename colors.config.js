@@ -54,6 +54,11 @@ export const colorsConfig = {
     third: "rgb(var(--btn-third) / <alpha-value>)",
     fourth: "rgb(var(--btn-fourth) / <alpha-value>)",
   },
+  border: {
+    main: "rgb(var(--border-main) / <alpha-value>)",
+    second: "rgb(var(--border-second) / <alpha-value>)",
+    focus: "rgb(var(--border-focus) / <alpha-value>)",
+  },
   gradient: {
     main: "var(--gradient-main)",
     second: "var(--gradient-second)",

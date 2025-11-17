@@ -16,7 +16,7 @@ export const Link: React.FC<LinkProps> = ({ to, children, onClick, className = "
     <RouterLink
       to={to}
       className={clsx(
-        "sm:text-sm text-base text-primary-600",
+        "text-primary-600",
         "hover:text-primary-500 hover:cursor-pointer",
         "transition-all duration-100 active:scale-95 select-none",
         className,

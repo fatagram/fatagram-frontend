@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { List } from "@/components/atoms/list";
 import { Avatar, Button, Text } from "@/components/atoms";
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 
 /**
  * ProfileMenu component displays a profile menu with options for the user.

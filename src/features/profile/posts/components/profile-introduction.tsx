@@ -5,7 +5,7 @@ import React, { useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import EditableTextArea from "@/features/settings/components/editable-textarea";
 import clsx from "clsx";
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 import { useProfilePage } from "../../hooks/use-profile-page";
 import { Text } from "@/components/atoms";
 

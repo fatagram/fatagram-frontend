@@ -8,7 +8,7 @@ interface ButtonProps {
   onClick: () => void;
 }
 
-interface DialogBoxProps {
+export interface DialogBoxProps {
   title?: string;
   content?: React.ReactNode;
   primaryButton?: ButtonProps;

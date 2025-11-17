@@ -51,7 +51,7 @@ function NotFoundPage() {
           {t("notFound.backButton")}
         </Button>
       </div>
-      <Footer className={clsx("text-[#959595]")} />
+      <Footer className={clsx("text-text-third")} />
     </div>
   );
 }

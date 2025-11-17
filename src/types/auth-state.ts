@@ -1,8 +1,10 @@
+import { LocaleKeys } from "@/hooks/use-trans";
+
 export interface AuthState {
   isAuthenticated: boolean;
   userId?: string;
   urlName?: string;
-  lang: string;
+  lang: LocaleKeys;
   isInitialized: boolean;
 }
 

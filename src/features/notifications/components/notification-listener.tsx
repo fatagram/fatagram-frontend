@@ -3,7 +3,7 @@ import { useNotificationHub } from "../hubs/use-notification-hub";
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { addNewNotification, deleteNotification } from "../stores/notification-slice";
 import { useCallback } from "react";
-import { useToast } from "@/hooks/utilities/use-toast";
+import { useToast } from "@/hooks/contexts/use-toast";
 
 export function NotificationListener() {
   const dispatch = useDispatch();

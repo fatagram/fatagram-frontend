@@ -1,14 +1,16 @@
-import React, { useEffect } from "react";
-import { LoginValidator } from "@/api/auth/validate/login.validator";
-import LoginDto, { ErrorCodes, ErrorKey, LoginResponse } from "@/api/auth/dto/login.dto";
-import { useTranslation } from "react-i18next";
-import { Result } from "@/api/common/result";
-import { Button, Logo, Textbox, Text, PasswordBox, Checkbox, Link } from "@/components/atoms";
+import React from "react";
+import { Button, Logo, Textbox, Text, Checkbox, Link } from "@/components/atoms";
 import clsx from "clsx";
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 import { OverlayLoading } from "@/components/organisms/overlay-loading";
+import { loginInitialValues, loginValidationSchema } from "@/types/entities";
+import { useFormik } from "formik";
+import { useTranslation } from "react-i18next";
+import { SocialButton } from "./social-button";
+import { ComponentProps } from "@/components/common/types/component-type";
+import { SocialButtons } from "./social-buttons";
 
-interface LoginFormProps {
+interface LoginFormProps extends ComponentProps {
   switchForgotPassword?: () => void;
   showLogo?: boolean;
   showClose?: boolean;
@@ -16,182 +18,79 @@ interface LoginFormProps {
 }
 
 // LoginForm component
-const LoginForm: React.FC<LoginFormProps> = ({
+export const LoginForm: React.FC<LoginFormProps> = ({
   switchForgotPassword,
   showLogo = true,
   showClose = false,
   onClose,
+  className,
 }) => {
+  const { t } = useTranslation();
   // states
-  const [username, setUsername] = React.useState<string>("");
-  const [password, setPassword] = React.useState<string>("");
-  const [usernameError, setUsernameError] = React.useState<string>("");
-  const [passwordError, setPasswordError] = React.useState<string>("");
-  const [unknownError, setUnknownError] = React.useState<string>("");
-  const [isRememberMe, setIsRememberMe] = React.useState<boolean>(true);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
   const [isShowClose] = React.useState<boolean>(showClose);
   const [isShowLogo] = React.useState<boolean>(showLogo);
-
-  const btnRef = React.useRef<HTMLButtonElement>(null);
-  const inputUsernameRef = React.useRef<HTMLInputElement>(null);
-  const inputPasswordRef = React.useRef<HTMLInputElement>(null);
-
-  const { t } = useTranslation() as { t: (key: string) => string };
   const { logIn } = useAuth();
-
-  const resetErrors = (): void => {
-    setUsernameError("");
-    setPasswordError("");
-    setUnknownError("");
-  };
-
-  const errorMap: Record<ErrorKey, React.Dispatch<React.SetStateAction<string>>> = {
-    USERNAME_NOT_CORRECT_FORMAT: setUsernameError,
-    PASSWORD_NOT_CORRECT_FORMAT: setPasswordError,
-    UNKNOWN_ERROR: setUnknownError,
-    ACCOUNT_NOT_FOUND: setUsernameError,
-    WRONG_PASSWORD: setPasswordError,
-    INTERNAL_SERVER_ERROR: setUnknownError,
-  };
-
-  const validateInput = (): boolean => {
-    const loginDto: LoginDto = {
-      username: username,
-      password: password,
-    };
-    const errorCodes = LoginValidator.validate(loginDto).filter(
-      (code): code is ErrorKey => code in ErrorCodes,
-    );
-
-    errorCodes.forEach((code) => {
-      errorMap[code]?.(t(ErrorCodes[code]));
-    });
-
-    return errorCodes.length === 0;
-  };
-
-  const handleLogin = async () => {
-    resetErrors();
-    if (!validateInput()) return;
-
-    const loginDto: LoginDto = {
-      username: username,
-      password: password,
-    };
-    localStorage.setItem("isRememberMe", isRememberMe.toString());
-    setIsLoading(true);
-    const result: Result<LoginResponse> = await logIn?.(loginDto);
-
-    if (!result.success) {
-      if (result.errorCodes) {
-        const errCodes = result.errorCodes?.filter((code): code is ErrorKey => code in ErrorCodes);
-        errCodes?.forEach((code) => {
-          errorMap[code]?.(t(ErrorCodes[code]));
-        });
-      } else {
-        var code = result.errorCode as ErrorKey;
-        errorMap[code]?.(t(ErrorCodes[code]));
-      }
-    }
-    setIsLoading(false);
-  };
-
-  useEffect(() => {
-    inputUsernameRef.current?.focus();
-    const handleArrowDown = (event: KeyboardEvent) => {
-      if (event.key === "ArrowDown") {
-        inputPasswordRef.current?.focus();
-      } else if (event.key === "ArrowUp") {
-        inputUsernameRef.current?.focus();
-      }
-    };
-    document.addEventListener("keydown", handleArrowDown);
-    return () => {
-      document.removeEventListener("keydown", handleArrowDown);
-    };
-  }, []);
-
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Enter") {
-        btnRef.current?.click();
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, []);
+  const formik = useFormik({
+    initialValues: loginInitialValues,
+    validationSchema: loginValidationSchema,
+    onSubmit: async (values) => {
+      await logIn({
+        usernameOrEmail: values.usernameOrEmail,
+        password: values.password,
+      });
+    },
+  });
 
   return (
-    <form
+    <div
       className={clsx(
         "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
-        "bg-bg-main rounded-2xl",
-        "p-16 animate-fade-in overflow-hidden",
+        "bg-bg-second rounded-2xl",
+        "p-12 animate-fade-in overflow-hidden",
+        className,
       )}
     >
-      {isLoading && <OverlayLoading />}
+      {formik.isSubmitting && <OverlayLoading />}
 
-      {isShowLogo && <Logo />}
+      {isShowLogo && <Logo sz="md-1" />}
       <Text
         sz="xl-1"
         weight="extrabold"
-        className={clsx("uppercase text-primary-500", "font-bold font-inter select-none")}
+        className={clsx("uppercase !text-primary-500", "font-bold font-inter select-none")}
       >
         {t("auth:login.title")}
       </Text>
       <div className="flex flex-col gap-3 w-full">
-        <div className="w-full">
-          <Textbox
-            className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
-            ref={inputUsernameRef}
-            autoComplete="username"
-            placeholder={t("auth:login.username")}
-            onChange={(e) => setUsername(e.target.value)}
-            isWrong={usernameError !== ""}
-          />
-          <Text
-            sz="sm-1"
-            className={clsx(usernameError === "" && "hidden", "px-[5px] text-red-400")}
-          >
-            {usernameError}
-          </Text>
-        </div>
-        <div className="w-full">
-          <PasswordBox
-            ref={inputPasswordRef}
-            className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
-            placeholder={t("auth:login.password")}
-            onChange={(e) => {
-              setPassword(e.target.value);
-            }}
-            isWrong={passwordError !== ""}
-            autoComplete="current-password"
-          />
-          <Text
-            sz="sm-1"
-            className={clsx(passwordError === "" && "hidden", "px-[5px] text-red-400")}
-          >
-            {passwordError}
-          </Text>
-        </div>
+        <Textbox
+          className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
+          autoComplete="username"
+          placeholder={t("auth:login.username")}
+          onChange={(e) => formik.setFieldValue("usernameOrEmail", e.target.value)}
+          isWrong={formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail)}
+          wrongMessage={t(formik.errors.usernameOrEmail || "")}
+        />
+        <Textbox
+          type="password"
+          className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
+          placeholder={t("auth:login.password")}
+          onChange={(e) => formik.setFieldValue("password", e.target.value)}
+          isWrong={formik.touched.password && Boolean(formik.errors.password)}
+          wrongMessage={t(formik.errors.password || "")}
+          autoComplete="current-password"
+        />
       </div>
-      <div className="flex justify-between w-[95%] items-center gap-[50px]">
+      <div className="flex justify-between w-[98%] items-center gap-[50px]">
         <Checkbox
-          className=""
           label={t("auth:login.rememberMe")}
-          checked={isRememberMe}
           onChange={(e) => {
-            setIsRememberMe(e.target.checked);
+            formik.setFieldValue("rememberMe", e.target.checked);
           }}
         />
         {switchForgotPassword && (
           <Text
-            sz="sm-2"
+            sz="sm-3"
             className={clsx(
-              "text-primary-700 hover:text-primary-600",
+              "!text-primary-500 hover:!text-primary-600",
               "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none",
             )}
             onClick={switchForgotPassword}
@@ -200,26 +99,31 @@ const LoginForm: React.FC<LoginFormProps> = ({
           </Text>
         )}
       </div>
-      <Text className={clsx(unknownError === "" && "hidden", "px-[5px] text-red-400")}>
-        {unknownError}
-      </Text>
       <Button
         type="button"
         className="w-full font-montserrat"
-        onClick={handleLogin}
-        ref={btnRef}
+        onClick={formik.submitForm}
         sz="md-1"
       >
         {t("auth:login.loginButton")}
       </Button>
-      <div className="flex gap-1 items-center">
-        <Text sz="sm-2" className="text-text-main">
-          {t("auth:login.registerAnswer")}
-        </Text>
+      <div className="w-full flex flex-col items-center gap-3">
+        <div className="flex items-center w-full gap-3">
+          <div className="h-[1px] bg-border-main flex-1" />
+          <Text sz="sm-2" className="text-text-third">
+            OR
+          </Text>
+          <div className="h-[1px] bg-border-main flex-1" />
+        </div>
+        <SocialButtons />
+      </div>
+      <Text>
+        {t("auth:login.dontHaveAccount")}
+        &nbsp;
         <Link className="font-bold" to="/register">
           {t("auth:login.registerButton")}
         </Link>
-      </div>
+      </Text>
 
       {isShowClose && (
         <Text
@@ -231,8 +135,6 @@ const LoginForm: React.FC<LoginFormProps> = ({
           <i className="fa-solid fa-xmark"></i>
         </Text>
       )}
-    </form>
+    </div>
   );
 };
-
-export default LoginForm;

@@ -34,12 +34,8 @@ body {
   background-position: 50% 0;
 }
 
-.bg-disabled {
-  background: #dcdcdc;
-}
-
 .background-image {
-  background: url("@/assets/images/login_background.jpg");
+  background: var(--login-image);
   background-size: cover;
   background-repeat: no-repeat;
   background-position: center;
@@ -47,30 +43,19 @@ body {
 }
 
 .register-bg {
-  background: url("@/assets/images/register_background.jpg");
+  background: var(--login-image);
+  background-size: cover;
+  background-position: center;
+}
+
+.login-bg {
+  background: var(--login-image);
   background-size: cover;
   background-position: center;
 }
 
 .layout-1000 {
   max-width: 900px !important;
-}
-
-[data-theme="dark"] .background-image {
-  background: url("@/assets/images/login_background.jpg");
-  background-size: cover;
-  background-repeat: no-repeat;
-  background-position: center;
-  min-height: 100vh;
-}
-
-[data-theme="dark"] .background-image::before {
-  content: "";
-  position: absolute;
-  inset: 0;
-  width: 100%;
-  background: rgba(0, 0, 0, 0.7);
-  z-index: 0;
 }
 
 /* Chrome, Safari, Edge */

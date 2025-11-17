@@ -2,8 +2,8 @@ import Layout from "@/components/layout";
 import { Navbar, NavbarFooter } from "@/components/organisms";
 import { LoginForm, RegisterForm } from "@/features/auth/components";
 import { useSize } from "@/hooks/use-size";
-import { useAuth } from "@/hooks/utilities/use-auth";
-import { useDialog } from "@/hooks/utilities/use-dialog";
+import { useAuth } from "@/hooks/contexts/use-auth";
+import { useDialog } from "@/hooks/contexts/use-dialog";
 import { useCallback, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 

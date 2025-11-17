@@ -11,13 +11,13 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ switchToLogin }
     <div
       className={clsx(
         "flex flex-col items-center gap-[20px] w-[95%]",
-        "max-w-[380px] p-[20px] bg-[var(--second-bg-color)]",
+        "!max-w-[450px] !p-16 bg-bg-second",
         "shadow-md rounded-lg animate-fade-in",
         "sm:max-w-[380px] sm:p-[25px]",
       )}
     >
       <Logo hasSlogan={false} />
-      <Text sz="lg-3" weight="bold" className="text-single-third font-bold select-none">
+      <Text sz="lg-3" weight="bold" className="!text-primary-500 uppercase font-bold select-none">
         Reset Password
       </Text>
       <div className="w-full">
@@ -40,8 +40,8 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ switchToLogin }
       </Button>
       <Text
         className={clsx(
-          "sm:text-[14px] text-[15px] text-single-second",
-          "hover:text-single-main hover:cursor-pointer",
+          "sm:text-[14px] text-[15px] !text-primary-500",
+          "hover:!text-primary-600 hover:cursor-pointer",
           "transition-all duration-100 active:scale-95 select-none",
         )}
         onClick={switchToLogin}

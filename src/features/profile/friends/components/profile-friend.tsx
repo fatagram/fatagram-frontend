@@ -5,7 +5,7 @@ import { useTranslation } from "react-i18next";
 import FriendItem from "./friend-item";
 import clsx from "clsx";
 import { useProfilePage } from "../../hooks/use-profile-page";
-import { SearchBox, Text } from "@/components/atoms";
+import { Text, Textbox } from "@/components/atoms";
 
 interface ProfileFriendsProps {
   className?: string;
@@ -52,7 +52,8 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
 
   return (
     <div className={clsx("flex flex-1 justify-end flex-col w-full", className)}>
-      <SearchBox
+      <Textbox
+        type="search"
         placeholder={t("user:profileFriends.searchFriends")}
         className="p-1"
         onChange={handleOnChange}

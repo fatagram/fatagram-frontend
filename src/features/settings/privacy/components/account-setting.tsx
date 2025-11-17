@@ -5,7 +5,7 @@ import { userProfileService } from "@/api/user/user-profile.api";
 import React, { useEffect } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Card from "@/components/molecules/card";
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 import useLanguage from "@/utils/i18n";
 import { ChangeUrlName } from "./change-url-name";
 import { ChangeNickname } from "./change-nickname";

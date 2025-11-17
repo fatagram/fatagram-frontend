@@ -23,32 +23,79 @@ const sizeClasses: Record<Size, string> = {
 // TextboxProps interface
 export interface TextboxProps extends ComponentProps<HTMLInputElement> {
   isWrong?: boolean;
+  wrongMessage?: string;
+  wrapperClassName?: string;
 }
 
 // Textbox component
 // This component is a textbox component that can be used in the application.
 export const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
-  ({ disabled = false, isWrong = false, className, sz = "sm-1", ...props }, ref) => {
+  (
+    {
+      disabled = false,
+      isWrong = false,
+      wrongMessage,
+      className,
+      sz = "sm-1",
+      type = "text",
+      wrapperClassName,
+      ...props
+    },
+    ref,
+  ) => {
+    const [showPassword, setShowPassword] = React.useState<boolean>(false);
+    const typeOfText =
+      type === "text"
+        ? "text"
+        : type === "password"
+          ? showPassword
+            ? "text"
+            : "password"
+          : type === "search"
+            ? "search"
+            : type;
     return (
-      <input
-        type="text"
-        ref={ref}
-        className={clsx(
-          "border-[2px] text-text-main",
-          "font-normal rounded-xl outline-none text-lg caret-primary-500 selection:!bg-primary-600",
-          "transition-all duration-300 ease-out",
-          {
-            "bg-bg-main opacity-60 cursor-not-allowed": disabled,
-            "focus:bg-gradient-main-move": !disabled,
-            [styles["primary-textbox-wrong"]]: isWrong && !disabled,
-            [styles["primary-textbox"]]: !isWrong && !disabled,
-          },
-          sizeClasses[sz],
-          className,
-        )}
-        disabled={disabled}
-        {...props}
-      />
+      <div className={clsx(wrapperClassName)}>
+        <div className={clsx("relative")}>
+          <input
+            type={typeOfText}
+            ref={ref}
+            className={clsx(
+              "border-[2px] text-text-main",
+              "font-normal rounded-xl outline-none text-lg caret-primary-500 selection:!bg-primary-600",
+              "transition-all duration-300 ease-out",
+              {
+                "pl-10": type === "search",
+                "bg-bg-main opacity-60 cursor-not-allowed": disabled,
+                "focus:bg-gradient-main-move": !disabled,
+                [styles["primary-textbox-wrong"]]: isWrong && !disabled,
+                [styles["primary-textbox"]]: !isWrong && !disabled,
+              },
+              sizeClasses[sz],
+              className,
+            )}
+            disabled={disabled}
+            {...props}
+          />
+          {type === "password" && (
+            <button
+              type="button"
+              className={clsx("absolute right-0 top-1/2 -translate-y-1/2 mr-5")}
+              onClick={() => setShowPassword(!showPassword)}
+            >
+              {showPassword ? (
+                <i className={clsx("fa-solid fa-eye text-secondary-500")}></i>
+              ) : (
+                <i className={clsx("fa-solid fa-eye-slash text-text-main")}></i>
+              )}
+            </button>
+          )}
+          {type === "search" && (
+            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-text-main" />
+          )}
+        </div>
+        {isWrong && <span className="text-red-400">{wrongMessage}</span>}
+      </div>
     );
   },
 );

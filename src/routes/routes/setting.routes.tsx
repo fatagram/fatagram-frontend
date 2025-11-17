@@ -8,7 +8,7 @@ import LanguageSettingPage from "@/features/settings/general/language-setting-pa
 export const settingRoutes: RouteType = {
   path: "/settings",
   element: <SettingPage />,
-  isUserOnly: true,
+  type: "private",
   children: [
     {
       path: "",

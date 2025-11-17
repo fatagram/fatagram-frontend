@@ -1,5 +1,5 @@
 // src/routes/MainRoutes.tsx
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 import { JSX } from "react";
 import { Navigate, useLocation } from "react-router-dom";
 

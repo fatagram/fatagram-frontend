@@ -1,14 +1,13 @@
-import React, { useEffect, useRef, useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import { RegisterValidator } from "@/api/auth/validate/register.validator";
-import RegisterDto from "@/api/auth/dto/register.dto";
-import { ErrorKey, ErrorCodes } from "@/api/auth/dto/register.dto";
-import { RegisterService } from "@/api/auth/register.api";
 import { useTranslation } from "react-i18next";
-import { Result } from "@/api/common/result";
 import { OverlayLoading } from "@/components/organisms";
-import { Button, Checkbox, Logo, PasswordBox, Textbox, Text } from "@/components/atoms";
+import { Button, Checkbox, Logo, Textbox, Text, Link } from "@/components/atoms";
+import { useFormik } from "formik";
+import { registerInitialValues, registerValidationSchema } from "@/types/entities";
+import { authService } from "@/api/auth/auth.api";
+import { SocialButtons } from "./social-buttons";
 
 type RegisterFormProps = {
   showLogo?: boolean;
@@ -23,390 +22,131 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
   showClose = false,
   onClose,
 }) => {
-  // useState hooks
-  const [formData, setFormData] = React.useState({
-    firstName: "",
-    lastName: "",
-    email: "",
-    phone: "",
-    username: "",
-    password: "",
-    confirmPassword: "",
-  });
-
   // States
-  const [firstNameError, setFirstNameError] = React.useState<string>("");
-  const [lastNameError, setLastNameError] = React.useState<string>("");
-  const [usernameError, setUsernameError] = React.useState<string>("");
-  const [passwordError, setPasswordError] = React.useState<string>("");
-  const [confirmPasswordError, setConfirmPasswordError] = React.useState<string>("");
-  const [emailError, setEmailError] = React.useState<string>("");
-  const [phoneError, setPhoneError] = React.useState<string>("");
-  const [unknownError, setUnknownError] = React.useState<string>("");
+  const { t } = useTranslation();
   const [isShowClose] = React.useState<boolean>(showClose);
   const [isShowLogo] = React.useState<boolean>(showLogo);
-  const [isFirstStep, setIsFirstStep] = React.useState<boolean>(true);
-  const [isLoading, setIsLoading] = React.useState<boolean>(false);
-
-  // Refs
-  const btnNextStrepRef = React.useRef<HTMLButtonElement>(null);
-  const btnRegisterRef = React.useRef<HTMLButtonElement>(null);
-  const btnBackStepRef = React.useRef<HTMLLabelElement>(null);
-  const firstStepRefs = useRef<(HTMLInputElement | null)[]>([]); // Refs for the first step inputs
-  const secondStepRefs = useRef<(HTMLInputElement | null)[]>([]); // Refs for the second step inputs
-  const [currentIndex, setCurrentIndex] = useState<number>(0);
-  const setRef = (
-    stepRefs: React.RefObject<(HTMLInputElement | null)[]>,
-    el: HTMLInputElement | null,
-    index: number,
-  ) => {
-    stepRefs.current[index] = el;
-  };
-
   // Other hooks
-  const { t } = useTranslation() as { t: (key: string) => string };
 
   // useNavigate hook
   const navigate = useNavigate();
 
-  // Update formData function
-  const updateFormData = (field: string, value: string) =>
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
-
-  // resetErrors function
-  // This function resets all the error messages.
-  const resetErrors = (): void => {
-    setFirstNameError("");
-    setLastNameError("");
-    setUsernameError("");
-    setPasswordError("");
-    setConfirmPasswordError("");
-    setEmailError("");
-    setPhoneError("");
-  };
-
-  // errorMap object
-  // This object maps the error codes to the corresponding error state.
-  const errorMap: Record<ErrorKey, React.Dispatch<React.SetStateAction<string>>> = {
-    USERNAME_NOT_CORRECT_FORMAT: setUsernameError,
-    PASSWORD_NOT_CORRECT_FORMAT: setPasswordError,
-    EMAIL_NOT_CORRECT_FORMAT: setEmailError,
-    FIRSTNAME_NOT_CORRECT_FORMAT: setFirstNameError,
-    LASTNAME_NOT_CORRECT_FORMAT: setLastNameError,
-    PHONE_NUMBER_NOT_CORRECT_FORMAT: setPhoneError,
-    UNKNOWN_ERROR: setUnknownError,
-    INTERNAL_SERVER_ERROR: setUnknownError,
-    REGISTER_USERNAME_EXISTED: setUsernameError,
-    EMAIL_EXISTED: setEmailError,
-  };
-
-  // validateInput function
-  // This function validates the input fields.
-  const validateInput = (): boolean => {
-    const registerDto: RegisterDto = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      username: formData.username,
-      password: formData.password,
-      email: formData.email,
-      phone: formData.phone,
-    };
-    const errorCodes = RegisterValidator.validate(registerDto).filter(
-      (code): code is ErrorKey => code in ErrorCodes,
-    );
-
-    errorCodes.forEach((code) => {
-      errorMap[code]?.(t(ErrorCodes[code]));
-    });
-    return errorCodes.length === 0;
-  };
-
-  // handleRegister function
-  // This function handles the registration process.
-  const handleRegister = async () => {
-    resetErrors();
-    if (!validateInput()) return;
-    if (formData.password !== formData.confirmPassword) {
-      setConfirmPasswordError("Passwords do not match");
-      return;
-    }
-    const registerDto: RegisterDto = {
-      firstName: formData.firstName,
-      lastName: formData.lastName,
-      username: formData.username,
-      password: formData.password,
-      email: formData.email,
-      phone: formData.phone,
-    };
-    const authService = new RegisterService();
-    setIsLoading(true);
-    const result: Result<void> = await authService.register(registerDto);
-
-    if (result.success) {
-      navigate("/login", { replace: true });
-    } else {
-      if (result.errorCodes) {
-        const errCodes = result.errorCodes?.filter((code): code is ErrorKey => code in ErrorCodes);
-        errCodes?.forEach((code) => {
-          errorMap[code]?.(t(ErrorCodes[code]));
-        });
-      } else if (result.errorCode) {
-        var code = result.errorCode as ErrorKey;
-        errorMap[code]?.(t(ErrorCodes[code]));
-      }
-      if (lastNameError || firstNameError || emailError || phoneError) {
-        setIsFirstStep(true);
-      }
-    }
-    setIsLoading(false);
-  };
-
-  // Next step function: this function handles the next step button click event.
-  const handleNextStep = () => {
-    setIsFirstStep(!isFirstStep);
-  };
-
-  // Back step function: this function handles the back step button click event.
-  useEffect(() => {
-    if (isFirstStep) {
-      firstStepRefs.current[0]?.focus();
-    } else {
-      secondStepRefs.current[0]?.focus();
-    }
-    setCurrentIndex(0);
-  }, [isFirstStep]);
-
-  // Keyboard event listener
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.key === "Enter") {
-        if (isFirstStep) btnNextStrepRef.current?.click();
-        else btnRegisterRef.current?.click();
-      } else if (event.key === "ArrowUp") {
-        const index = currentIndex - 1 >= 0 ? currentIndex - 1 : currentIndex;
-        if (isFirstStep) firstStepRefs.current[index]?.focus();
-        else secondStepRefs.current[index]?.focus();
-        setCurrentIndex(index);
-      } else if (event.key === "ArrowDown") {
-        if (isFirstStep) {
-          const index =
-            currentIndex + 1 < firstStepRefs.current.length ? currentIndex + 1 : currentIndex;
-          firstStepRefs.current[index]?.focus();
-          setCurrentIndex(index);
-        } else {
-          const index =
-            currentIndex + 1 < secondStepRefs.current.length ? currentIndex + 1 : currentIndex;
-          secondStepRefs.current[index]?.focus();
-          setCurrentIndex(index);
-        }
-      }
-    };
-    document.addEventListener("keydown", handleKeyDown);
-    return () => {
-      document.removeEventListener("keydown", handleKeyDown);
-    };
-  }, [isFirstStep, currentIndex]);
+  const formik = useFormik({
+    initialValues: registerInitialValues,
+    validationSchema: registerValidationSchema,
+    onSubmit: async (values) => {
+      await authService.register({
+        username: values.username,
+        password: values.password,
+        confirmPassword: values.confirmPassword,
+        email: values.email,
+        phoneNumber: values.phoneNumber,
+      });
+    },
+  });
 
   return (
-    <form
+    <div
       className={clsx(
-        "relative flex flex-col justify-center",
-        "animate-fade-in rounded-xl p-10",
-        "sm:p-12 bg-bg-main gap-5 max-w-[450px]",
+        "relative flex flex-col items-center justify-center gap-3 w-[450px]",
+        "bg-bg-second rounded-2xl",
+        "p-12 animate-fade-in overflow-hidden",
         className,
       )}
+      onSubmit={formik.submitForm}
     >
       {/* Overlay Loading */}
-      {isLoading && <OverlayLoading />}
+      {formik.isSubmitting && <OverlayLoading />}
       {/* Logo Fatagram */}
       {isShowLogo && <Logo />}
 
       <Text
         sz="xl-1"
         weight="extrabold"
-        className="uppercase text-primary-500 select-none text-center"
+        className="uppercase !text-primary-500 select-none text-center"
       >
-        {t("user:register.title")}
+        {t("auth:register.title")}
       </Text>
-
-      {isFirstStep ? (
-        <div className="animate-left-to-right relative flex flex-col items-center sm:gap-5 gap-3 w-full">
-          <div className="flex gap-2 w-full">
-            <div className="w-full">
-              <Textbox
-                value={formData.firstName}
-                ref={(el) => setRef(firstStepRefs, el, 0)}
-                className="w-[100%] px-3 shadow-sm"
-                placeholder={t("user:register.firstName")}
-                onChange={(e) => updateFormData("firstName", e.target.value)}
-                isWrong={firstNameError ? true : false}
-              />
-              <Text
-                sz="sm-1"
-                color="danger"
-                className={clsx(firstNameError ? "" : "hidden", "px-[5px]")}
-              >
-                {firstNameError}
-              </Text>
-            </div>
-            <div className="w-full">
-              <Textbox
-                value={formData.lastName}
-                ref={(el) => setRef(firstStepRefs, el, 1)}
-                className="w-[100%] px-3 shadow-sm"
-                placeholder={t("user:register.lastName")}
-                onChange={(e) => updateFormData("lastName", e.target.value)}
-                isWrong={lastNameError ? true : false}
-              />
-              <Text
-                sz="sm-1"
-                color="danger"
-                className={clsx(lastNameError ? "" : "hidden", "px-[5px]")}
-              >
-                {lastNameError}
-              </Text>
-            </div>
-          </div>
-
-          <div className="w-full">
-            <Textbox
-              value={formData.email}
-              ref={(el) => setRef(firstStepRefs, el, 2)}
-              className="w-[100%] px-3 shadow-sm"
-              placeholder={t("user:register.email")}
-              onChange={(e) => updateFormData("email", e.target.value)}
-              isWrong={emailError ? true : false}
-            />
-            <Text sz="sm-1" color="danger" className={clsx(emailError ? "" : "hidden", "px-[5px]")}>
-              {emailError}
-            </Text>
-          </div>
-          <div className="w-full">
-            <Textbox
-              value={formData.phone}
-              ref={(el) => setRef(firstStepRefs, el, 3)}
-              className="w-[100%] px-3 shadow-sm"
-              placeholder={t("user:register.phone")}
-              onChange={(e) => updateFormData("phone", e.target.value)}
-              isWrong={phoneError ? true : false}
-            />
-            <Text sz="sm-1" color="danger" className={clsx(phoneError ? "" : "hidden", "px-[5px]")}>
-              {phoneError}
-            </Text>
-          </div>
-
-          <Text sz="sm-1" color="danger" className={clsx(unknownError ? "" : "hidden", "px-[5px]")}>
-            {unknownError}
-          </Text>
-          <Button
-            ref={btnNextStrepRef}
-            type="button"
-            sz="sm-3"
-            className="w-full"
-            onClick={handleNextStep}
-          >
-            <Text>{t("user:register.nextButton")}</Text>
-          </Button>
-        </div>
-      ) : (
-        <div className="animate-right-to-left relative flex flex-col items-center sm:gap-[20px] gap-[15px] w-full">
-          <div className="w-full">
-            <Textbox
-              value={formData.username}
-              autoComplete="username"
-              ref={(el) => setRef(secondStepRefs, el, 0)}
-              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-              placeholder={t("user:register.username")}
-              onChange={(e) => updateFormData("username", e.target.value)}
-              isWrong={usernameError ? true : false}
-            />
-            <Text
-              sz="sm-1"
-              color="danger"
-              className={clsx(usernameError ? "" : "hidden", "px-[5px]")}
-            >
-              {usernameError}
-            </Text>
-          </div>
-          <div className="w-full">
-            <PasswordBox
-              value={formData.password}
-              ref={(el) => setRef(secondStepRefs, el, 1)}
-              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-              placeholder={t("user:register.password")}
-              onChange={(e) => updateFormData("password", e.target.value)}
-              isWrong={passwordError ? true : false}
-            />
-            <Text
-              sz="sm-1"
-              color="danger"
-              className={clsx(passwordError ? "" : "hidden", "px-[5px]")}
-            >
-              {passwordError}
-            </Text>
-          </div>
-          <div className="w-full">
-            <PasswordBox
-              value={formData.confirmPassword}
-              ref={(el) => setRef(secondStepRefs, el, 2)}
-              className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
-              placeholder={t("user:register.confirmPassword")}
-              onChange={(e) => updateFormData("confirmPassword", e.target.value)}
-              isWrong={confirmPasswordError ? true : false}
-            />
-            <Text
-              sz="sm-1"
-              color="danger"
-              className={clsx(confirmPasswordError ? "" : "hidden", "px-[5px]")}
-            >
-              {confirmPasswordError}
-            </Text>
-          </div>
-          <Checkbox
-            className="text-[15px] text-single-third gap-[8px]"
-            label={
-              <div className="flex items-center flex-wrap">
-                {t("user:register.agree")}&nbsp;
-                <Link className="sm:text-[15px]" to="/terms">
-                  {t("user:register.termsOfService")}
-                </Link>
-                &nbsp;
-                {t("user:register.and")}&nbsp;
-                <Link className="sm:text-[15px]" to="/policy">
-                  {t("user:register.privacyPolicy")}
-                </Link>
-                .
-              </div>
-            }
-          />
-          <Button
-            ref={btnRegisterRef}
-            type="button"
-            sz="sm-3"
-            className="w-full"
-            onClick={handleRegister}
-          >
-            <Text>{t("user:register.registerButton")}</Text>
-          </Button>
-          <Text
-            ref={btnBackStepRef}
-            className="flex gap-1 items-center cursor-pointer text-primary-600 hover:text-secondary-500"
-            onClick={handleNextStep}
-          >
-            <i className="fa-solid fa-arrow-left"></i>
-            {t("user:register.gobackButton")}
-          </Text>
-        </div>
-      )}
-      <div className="relative flex justify-center">
-        <Link className="sm:text-[15px] font-bold" to="/login">
-          {t("user:register.loginButton")}
-        </Link>
+      <div className="flex flex-col gap-3 w-full">
+        <Textbox
+          value={formik.values.username}
+          autoComplete="username"
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          placeholder={t("auth:register.username")}
+          onChange={(e) => formik.setFieldValue("username", e.target.value)}
+          isWrong={formik.touched.username && Boolean(formik.errors.username)}
+          wrongMessage={t(formik.errors.username || "")}
+        />
+        <Textbox
+          value={formik.values.email}
+          autoComplete="email"
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          placeholder={t("auth:register.email")}
+          onChange={(e) => formik.setFieldValue("email", e.target.value)}
+          isWrong={formik.touched.email && Boolean(formik.errors.email)}
+          wrongMessage={t(formik.errors.email || "")}
+        />
+        <Textbox
+          value={formik.values.phoneNumber}
+          autoComplete="tel"
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          placeholder={t("auth:register.phoneNumber")}
+          onChange={(e) => formik.setFieldValue("phoneNumber", e.target.value)}
+          isWrong={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
+          wrongMessage={t(formik.errors.phoneNumber || "")}
+        />
+        <Textbox
+          type="password"
+          value={formik.values.password}
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          placeholder={t("auth:register.password")}
+          onChange={(e) => formik.setFieldValue("password", e.target.value)}
+          isWrong={formik.touched.password && Boolean(formik.errors.password)}
+          wrongMessage={t(formik.errors.password || "")}
+        />
+        <Textbox
+          type="password"
+          value={formik.values.confirmPassword}
+          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          placeholder={t("auth:register.confirmPassword")}
+          onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
+          isWrong={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
+          wrongMessage={t(formik.errors.confirmPassword || "")}
+        />
       </div>
-
+      <Checkbox
+        className="text-[15px] text-single-third gap-[8px]"
+        label={
+          <Text className="flex items-center flex-wrap">
+            {t("auth:register.agree")}&nbsp;
+            <Link className="sm:text-[15px]" to="/terms">
+              {t("auth:register.termsOfService")}
+            </Link>
+            &nbsp;
+            {t("auth:register.and")}&nbsp;
+            <Link className="sm:text-[15px]" to="/policy">
+              {t("auth:register.privacyPolicy")}
+            </Link>
+            .
+          </Text>
+        }
+      />
+      <Button type="button" sz="md-1" className="w-full" onClick={formik.submitForm}>
+        <Text>{t("auth:register.registerButton")}</Text>
+      </Button>
+      <div className="w-full flex flex-col items-center gap-3">
+        <div className="flex items-center w-full gap-3">
+          <div className="h-[1px] bg-border-main flex-1" />
+          <Text sz="sm-2" className="text-text-third">
+            OR
+          </Text>
+          <div className="h-[1px] bg-border-main flex-1" />
+        </div>
+        <SocialButtons />
+      </div>
+      <Link className="font-bold" to="/login">
+        {t("auth:register.loginButton")}
+      </Link>
       {isShowClose && (
         <Text
           sz="lg-1"
@@ -418,7 +158,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           <i className="fa-solid fa-xmark"></i>
         </Text>
       )}
-    </form>
+    </div>
   );
 };
 

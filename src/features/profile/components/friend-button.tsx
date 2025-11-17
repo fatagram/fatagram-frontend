@@ -3,7 +3,7 @@ import { Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/types/component-type";
 import Dropdown from "@/components/molecules/dropdown";
 import useClickOutside from "@/hooks/use-click-outside";
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 import clsx from "clsx";
 import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";

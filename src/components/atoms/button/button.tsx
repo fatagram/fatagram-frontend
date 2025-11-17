@@ -51,7 +51,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           buttonSizes[sz],
           "font-normal rounded-xl select-none",
           {
-            "bg-disabled text-[#949494]": disabled,
+            "bg-bg-disabled text-text-fourth": disabled,
             [buttonVariants[variant]]: !disabled,
             "active:scale-[0.98] active:opacity-80": !disabled,
           },

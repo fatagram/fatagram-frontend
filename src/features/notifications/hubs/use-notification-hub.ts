@@ -2,7 +2,7 @@ import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useRef } from "react";
 import { createSignalRConnection } from "./notification-hub-client";
-import { useAuth } from "@/hooks/utilities/use-auth";
+import { useAuth } from "@/hooks/contexts/use-auth";
 
 export function useNotificationHub(onReceiveNotification: (data: NotificationDto) => void) {
   const connectionRef = useRef<HubConnection | null>(null);

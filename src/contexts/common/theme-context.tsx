@@ -1,71 +1,40 @@
-import React, { createContext, useEffect, useState } from "react";
-import themesJson from "@/themes/themes.json";
+import { createContext, useContext, useEffect, useState } from "react";
 
-// Json
-const themes = themesJson as Record<string, any>;
+export type Theme = "light" | "dark";
 
-// type of Theme
-export type Theme = keyof typeof themes;
+export const availableThemes: { key: Theme; label: string }[] = [
+  { key: "light", label: "common:themes:light" },
+  { key: "dark", label: "common:themes:dark" },
+];
 
-// ThemeOption
-export interface ThemeOption {
-  theme: Theme;
-  display: string;
-}
-
-export interface ThemeContextType {
+interface ThemeContextType {
   theme: Theme;
   setTheme: (theme: Theme) => void;
-  availableThemes: ThemeOption[];
 }
 
-export const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
+const ThemeContext = createContext<ThemeContextType>({
+  theme: "light",
+  setTheme: () => {},
+});
 
 interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-const getLocalStorageTheme = (): Theme => {
-  const theme = localStorage.getItem("theme");
-  return theme && theme in themes ? (theme as Theme) : "default";
-};
+export function ThemeProvider({ children }: ThemeProviderProps) {
+  const [theme, setTheme] = useState<Theme>(
+    () => (localStorage.getItem("theme") as Theme) || "light",
+  );
 
-export const ThemeProvider = React.memo(function ThemeProvider({ children }: ThemeProviderProps) {
-  const [theme, setTheme] = useState<Theme>(getLocalStorageTheme);
-  const [availableThemes, setAvailableThemes] = useState<ThemeOption[]>([]);
-
-  const handleTheme = React.useCallback((theme: Theme) => {
-    setTheme(theme);
-  }, []);
-
-  // Init availabla themes
   useEffect(() => {
-    const themeOption: ThemeOption[] = Object.entries(themes).map(([key, value]) => ({
-      theme: key,
-      display: value.display || key,
-    }));
-    setAvailableThemes(themeOption);
-  }, []);
-
-  // Reload theme
-  useEffect(() => {
-    const themeData = themes[theme];
-    const themeColors = themeData?.colors || {};
-    Object.entries(themeColors).forEach(([key, value]) => {
-      document.documentElement.style.setProperty(key, value as string);
-      document.documentElement.setAttribute("data-theme", theme);
-    });
+    const root = window.document.documentElement;
+    root.setAttribute("data-theme", theme);
     localStorage.setItem("theme", theme);
   }, [theme]);
 
-  const value = React.useMemo(
-    () => ({
-      theme,
-      availableThemes,
-      setTheme: handleTheme,
-    }),
-    [theme, availableThemes, handleTheme],
-  );
+  return <ThemeContext.Provider value={{ theme, setTheme }}>{children}</ThemeContext.Provider>;
+}
 
-  return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;
-});
+export function useTheme() {
+  return useContext(ThemeContext);
+}

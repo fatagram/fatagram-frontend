@@ -17,9 +17,9 @@ const AppRoutes: React.FC = () => {
       );
 
       const element =
-        route.isUserOnly === true ? (
+        route.type === "private" ? (
           <UserOnlyRoute>{elementKeepAlive}</UserOnlyRoute>
-        ) : route.isGuestOnly === true ? (
+        ) : route.type === "auth" ? (
           <GuestOnlyRoute>{elementKeepAlive}</GuestOnlyRoute>
         ) : (
           elementKeepAlive

@@ -1,38 +1,31 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
 import clsx from "clsx";
-import { userConfigService } from "@/api/user/user-config.api";
-import { useLanguage } from "@/hooks/utilities/use-language";
-import { Language } from "@/contexts/common/language-context";
 import { Option, OptionKey, SelectBox } from "@/components/atoms";
+import { useLanguage } from "@/hooks/use-trans";
+import { useTranslation } from "react-i18next";
 
 interface SelectLanguageProps {
   className?: string;
 }
 
 const SelectLanguage: React.FC<SelectLanguageProps> = ({ className }) => {
-  const [langs, setLangs] = useState<Option[]>([]);
-  const { language, setLanguage, availableLanguages } = useLanguage();
+  const { t } = useTranslation();
+  const { changeLanguage, availableLanguages, currentLanguage } = useLanguage();
+  const options: Option[] = availableLanguages.map((lang) => ({
+    key: lang,
+    value: t(`common:language.${lang}`),
+  }));
 
-  const selectLanguage = async (opt: OptionKey) => {
-    setLanguage(opt as Language);
-    await userConfigService.changeLanguage({ LanguageCode: opt as string });
-    window.location.reload();
+  const _changeLanguage = (key: OptionKey) => {
+    changeLanguage(key as any);
   };
-
-  useEffect(() => {
-    const options: Option[] = availableLanguages.map((lang) => ({
-      key: lang.language,
-      value: lang.display,
-    }));
-    setLangs(options);
-  }, [availableLanguages]);
 
   return (
     <SelectBox
       className={clsx(className)}
-      options={langs}
-      selectedOption={language}
-      onSelect={selectLanguage}
+      options={options}
+      selectedOption={currentLanguage}
+      onSelect={_changeLanguage}
     />
   );
 };

@@ -4,15 +4,14 @@ import SettingCard from "@/components/molecules/card";
 import { useTranslation } from "react-i18next";
 import { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
 import SelectBoxSetting from "../../components/selectbox-setting";
-import { useTheme } from "@/hooks/utilities/use-theme";
-import { Theme } from "@/contexts/common/theme-context";
+import { availableThemes, Theme, useTheme } from "@/contexts/common/theme-context";
 
 interface ThemeSettingsProps {
   className?: string;
 }
 
 const ThemeSettings: React.FC<ThemeSettingsProps> = ({ className }) => {
-  const { theme, setTheme, availableThemes } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [themeOptions, setThemeOptions] = useState<Option[]>([]);
   const { t } = useTranslation() as { t: (key: string) => string };
 
@@ -22,8 +21,8 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = ({ className }) => {
 
   useEffect(() => {
     const options: Option[] = availableThemes.map((theme) => ({
-      key: theme.theme,
-      value: theme.display,
+      key: theme.key,
+      value: t(theme.label),
     }));
     setThemeOptions(options);
   }, [availableThemes]);

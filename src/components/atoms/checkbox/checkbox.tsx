@@ -9,6 +9,7 @@ interface CheckboxProps extends ComponentProps {
   checked?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
+  isWrong?: boolean;
 }
 
 // Checkbox component
@@ -18,6 +19,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   checked,
   onChange,
   disabled,
+  isWrong,
   className,
   ...props
 }) => {
@@ -31,12 +33,16 @@ export const Checkbox: React.FC<CheckboxProps> = ({
         type="checkbox"
         checked={checked}
         onChange={onChange}
-        className="relative invisible mr-[5px] w-[18px] h-[18px] peer"
+        className={clsx("relative invisible mr-[5px] w-[18px] h-[18px] peer", {
+          "cursor-not-allowed": disabled,
+          "text-red-500": isWrong,
+        })}
       />
       <span
         className={clsx(
           "absolute z-[2] rounded-md m-[3px] w-[18px] h-[18px] bg-gradient-main",
           checkmarkClass,
+          isWrong && "border border-danger",
           'after:absolute after:invisible after:content-["✓"] after:text-[0.8rem] after:w-[18px] after:h-[18px] after:top-1/2 after:left-1/2',
           "after:-translate-x-1/2 after:-translate-y-1/2 after:m-0 after:text-text-main after:rounded-md",
           "after:text-center after:leading-[18px] after:z-[3] after:opacity-[0.3] after:transition-opacity after:duration-[0.1s]",

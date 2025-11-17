@@ -1,8 +1,6 @@
 {
   "workbench.tree.indent": 12,
   "editor.formatOnSave": true,
-  "editor.defaultFormatter": "csharpier.csharpier-vscode",
-  "[typescriptreact]": {
-    "editor.defaultFormatter": "esbenp.prettier-vscode"
-  }
+  "editor.tabSize": 2,
+  "editor.defaultFormatter": "esbenp.prettier-vscode"
 }

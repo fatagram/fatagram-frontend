@@ -1,6 +1,6 @@
 // src/routes/MainRoutes.tsx
-import { useAuth } from "@/hooks/utilities/use-auth";
-import React, { JSX } from "react";
+import { useAuth } from "@/hooks/contexts/use-auth";
+import { JSX } from "react";
 import { Navigate, useSearchParams } from "react-router-dom";
 
 const GuestOnlyRoute = ({ children }: { children: JSX.Element }) => {

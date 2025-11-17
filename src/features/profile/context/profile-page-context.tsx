@@ -2,8 +2,8 @@ import { createContext, useContext, useEffect, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 import NotFoundPage from "@/pages/not-found/not-found-page";
 import { useUserId } from "../hooks/use-userid";
-import { useAuth } from "@/hooks/utilities/use-auth";
-import { useLoading } from "@/hooks/utilities/use-loading";
+import { useAuth } from "@/hooks/contexts/use-auth";
+import { useLoading } from "@/hooks/contexts/use-loading";
 
 export interface ProfilePageContextType {
   isOwner: boolean;

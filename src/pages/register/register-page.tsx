@@ -1,58 +1,30 @@
 import React, { useEffect } from "react";
 import clsx from "clsx";
-import RegisterForm from "../../features/auth/components/register-form";
-import SelectLanguage from "@/features/settings/general/components/select-language";
 import { Footer, Text } from "@/components/atoms";
+import SelectLanguage from "@/features/settings/general/components/select-language";
+import { RegisterForm } from "@/features/auth/components";
 
-// RegisterPage function
-function RegisterPage() {
+// RegisterPage - match layout with LoginPage (hero + form card)
+function RegisterPage(): React.ReactElement {
   useEffect(() => {
     document.title = "Register - Fatagram";
   }, []);
 
   return (
     <div
-      className={clsx(
-        "relative flex flex-col items-center justify-center h-full",
-        "background-image",
-      )}
+      className={clsx("relative flex h-screen w-screen bg-bg-main", "justify-center items-center")}
     >
+      <div className="absolute inset-0 filter blur-lg opacity-80 background-image" />
       <div
-        className={clsx(
-          "relative w-full flex justify-center lg:justify-between m-2 z-10 backdrop-blur-sm bg-bg-main",
-          "lg:max-w-[75%] max-w-[95%] rounded-lg overflow-hidden sm:h-[95vh] h-auto",
-        )}
+        className={clsx("relative flex items-center bg-bg-second", "rounded-3xl overflow-hidden")}
       >
-        <div
-          className={clsx(
-            "hidden relative sm:flex flex-col register-bg w-full rounded-lg h-full items-center justify-center gap-1",
-            "border-8 border-bg-main border-r-0 overflow-hidden",
-          )}
-        >
-          <Text
-            weight="extrabold"
-            className={clsx(
-              "relative flex items-center z-50 text-white text-center shadow-lg rounded-lg backdrop-blur-sm h-[70px]",
-              "xl:text-[50px] lg:text-[40px] text-[30px]",
-            )}
-          >
-            Welcome to Fatagram
+        <div className="relative hidden sm:block flex-1 login-bg w-[1000px] h-[800px]">
+          <Text sz="xl-3" className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2">
+            Feeling
           </Text>
-          <Text
-            weight="light"
-            className={clsx(
-              "text-white z-50 shadow-lg rounded-lg backdrop-blur-sm",
-              "xl:text-[30px] lg:text-[25px] text-[20px]",
-            )}
-          >
-            Connect with your friends
-          </Text>
-          <div className="absolute inset-0 bg-gradient-to-br from-green-200/20 to-blue-600/20"></div>
         </div>
-        <RegisterForm className={clsx("shadow-none w-full bg-bg-main")} />
+        <RegisterForm className="min-h-[700px] max-h-[800px]" />
       </div>
-      <Footer className={clsx("z-10 pt-0 pb-0")} />
-      <SelectLanguage className={clsx("!absolute top-2 right-2 z-50")} />
     </div>
   );
 }
