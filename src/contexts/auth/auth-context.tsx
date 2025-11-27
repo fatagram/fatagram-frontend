@@ -54,6 +54,7 @@ export interface AuthContextType {
   setUrlName?: (urlName: string | undefined) => void;
   userId?: string;
   urlName?: string;
+  isOnBoarding?: boolean;
 }
 
 // Create AuthContext
@@ -66,6 +67,7 @@ export const AuthContext = createContext<AuthContextType>({
   setUrlName: () => {},
   userId: undefined,
   urlName: undefined,
+  isOnBoarding: false,
 });
 
 type AuthProviderProps = {
@@ -86,6 +88,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
     userId: userData?.id,
     urlName: userData?.urlName,
     lang: userData?.languageCode as LocaleKeys,
+    isOnBoarding: userData?.isOnBoarding,
   });
   console.log("AuthContext", userData);
   // const { changeLanguage } = useLanguage();
@@ -174,6 +177,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
       redirectToGoogle,
       logOut: logout,
       setUrlName,
+      isOnBoarding: state.isOnBoarding,
     }),
     [
       state.isAuthenticated,
@@ -184,6 +188,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
       redirectToGoogle,
       logout,
       setUrlName,
+      state.isOnBoarding,
     ],
   );
 

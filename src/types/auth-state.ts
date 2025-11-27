@@ -5,9 +5,11 @@ export interface AuthState {
   userId?: string;
   urlName?: string;
   lang: LocaleKeys;
+  isOnBoarding?: boolean;
 }
 
 export const initialAuthStatus: AuthState = {
   isAuthenticated: false,
   lang: "en",
+  isOnBoarding: false,
 };

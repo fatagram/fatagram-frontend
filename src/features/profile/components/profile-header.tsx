@@ -30,7 +30,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   const [fullName, setFullName] = React.useState<string>("");
   const [nickname, setNickname] = React.useState<string | null>(null);
   const [avatar, setAvatar] = React.useState<string>("");
-  const [background] = React.useState<string>("");
+  const [background, setBackground] = React.useState<string>("");
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isLoadingNumOfFriends, setIsLoadingNumOfFriends] = React.useState<boolean>(true);
   const [numberOfFriends, setNumberOfFriends] = React.useState<number>(0);
@@ -53,10 +53,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         "avatar,background,fullName,nickname",
       );
 
+      console.log(response);
+
       // Delay to simulate loading
       if (response.success) {
-        // setAvatar(getImageUrl(response.data.infos.avatar) || "");
-        // setBackground(getImageUrl(response.data.infos.background) || "");
+        setAvatar(response.data.infos.avatar);
+        setBackground(response.data.infos.background || "");
         setFullName(response.data.infos.fullName);
         setNickname(response.data.infos.nickname);
       } else {
