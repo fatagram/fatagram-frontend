@@ -1,10 +1,6 @@
-import axios, {
-  AxiosInstance,
-  AxiosResponse,
-  InternalAxiosRequestConfig,
-} from "axios";
-import { getRefreshToken, getRefreshTokenFromSession } from "@/utils/token";
+import axios, { AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from "axios";
 import appConfig from "@/config";
+import { authEvents } from "@/events/auth-event";
 
 // Instance of axios for fetching data with JSON content type
 const apiClient: AxiosInstance = axios.create({
@@ -26,11 +22,9 @@ apiClient.interceptors.request.use((config: InternalAxiosRequestConfig) => {
 });
 
 // Add Interceptors: apiClientFormData
-apiClientFormData.interceptors.request.use(
-  (config: InternalAxiosRequestConfig) => {
-    return config;
-  }
-);
+apiClientFormData.interceptors.request.use((config: InternalAxiosRequestConfig) => {
+  return config;
+});
 
 // Error Authorization
 apiClient.interceptors.response.use(
@@ -39,11 +33,12 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       try {
         // Refresh token
-        const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
         const refreshResult = await axios.post(
           `${appConfig.apiUrl}/api/auth/refreshToken`,
-          { refreshToken: refreshToken },
-          { withCredentials: true }
+          {},
+          {
+            withCredentials: true,
+          },
         );
 
         if (refreshResult.status === 200) {
@@ -52,9 +47,15 @@ apiClient.interceptors.response.use(
       } catch (error) {
         // authEvents.emit("openLoginOverlay");
       }
+    } else if (
+      error.response?.status === 403 &&
+      error.response?.data?.error?.code === "ONBOARDING_NOT_COMPLETED"
+    ) {
+      authEvents.emit("redirectToOnboarding");
+      return Promise.reject(error);
     }
     return Promise.reject(error);
-  }
+  },
 );
 
 // Error Authorization
@@ -64,11 +65,12 @@ apiClientFormData.interceptors.response.use(
     if (error.response?.status === 401) {
       try {
         // Refresh token
-        const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
         const refreshResult = await axios.post(
           `${appConfig.apiUrl}/api/auth/refresh-token`,
-          { refreshToken: refreshToken },
-          { withCredentials: true }
+          {},
+          {
+            withCredentials: true,
+          },
         );
 
         if (refreshResult.status === 200) {
@@ -79,15 +81,13 @@ apiClientFormData.interceptors.response.use(
       }
     } else if (error.response?.status === 413) {
       // Custom error
-      const err = new Error(
-        "File size is too large. Please upload a smaller file."
-      );
+      const err = new Error("File size is too large. Please upload a smaller file.");
       err.name = "LARGE_FILE_ERROR";
       return Promise.reject(err);
     }
     // console.log(error);
     return Promise.reject(error);
-  }
+  },
 );
 
 // Export the apiClient

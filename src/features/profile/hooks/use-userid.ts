@@ -14,7 +14,7 @@ export function useUserId(userParam: string) {
       }, 10000);
 
       try {
-        const response = await userProfileService.GetProfile(userParam, "id");
+        const response = await userProfileService.getProfile(userParam, "id");
         clearTimeout(timeoutId);
         console.log("Fetch userId for", userParam, response);
         if (response.success) {

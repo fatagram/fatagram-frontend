@@ -17,23 +17,18 @@ type LoadingProviderProps = {
   children: React.ReactNode;
 };
 
-export const LoadingProvider: React.FC<LoadingProviderProps> = ({
-  children,
-}) => {
+export const LoadingProvider: React.FC<LoadingProviderProps> = ({ children }) => {
   const [count, setCount] = useState(0);
 
   const increment = useCallback(() => setCount((prev) => prev + 1), []);
-  const decrement = useCallback(
-    () => setCount((prev) => Math.max(0, prev - 1)),
-    []
-  );
+  const decrement = useCallback(() => setCount((prev) => Math.max(0, prev - 1)), []);
 
-  const value = useMemo(
-    () => ({ count, increment, decrement }),
-    [count, increment, decrement]
-  );
+  const value = useMemo(() => ({ count, increment, decrement }), [count, increment, decrement]);
 
   return (
-    <LoadingContext.Provider value={value}>{children}</LoadingContext.Provider>
+    <LoadingContext.Provider value={value}>
+      {count > 0 && <LoadingPage />}
+      {children}
+    </LoadingContext.Provider>
   );
 };

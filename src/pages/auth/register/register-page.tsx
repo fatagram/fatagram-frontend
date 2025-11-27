@@ -1,7 +1,6 @@
 import React, { useEffect } from "react";
 import clsx from "clsx";
-import { Footer, Text } from "@/components/atoms";
-import SelectLanguage from "@/features/settings/general/components/select-language";
+import { Text } from "@/components/atoms";
 import { RegisterForm } from "@/features/auth/components";
 
 // RegisterPage - match layout with LoginPage (hero + form card)

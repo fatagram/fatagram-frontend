@@ -38,7 +38,7 @@ const UserMenu: React.FC = () => {
 
   useEffect(() => {
     const fetchProfile = async () => {
-      const response = await userProfileService.GetProfile(userId || "", "avatar,fullName");
+      const response = await userProfileService.getProfile(userId || "", "avatar,fullName");
       if (response.success) {
         setAvatar(response.data.infos.avatar);
         setFullName(response.data.infos.fullName);

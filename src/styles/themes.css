@@ -164,4 +164,71 @@
 
     --login-image: url("/src/assets/images/auth_image_dark.jpg");
   }
+
+  /* Universe Theme - Cosmic Purple & Deep Blue 🌌 */
+  [data-theme="universe"] {
+    /* Primary colors - cosmic purple */
+    --primary-50: 250 245 255;
+    --primary-100: 243 232 255;
+    --primary-200: 233 213 255;
+    --primary-300: 216 180 254;
+    --primary-400: 192 132 252;
+    --primary-500: 168 85 247; /* main cosmic purple */
+    --primary-600: 147 51 234;
+    --primary-700: 126 34 206;
+    --primary-800: 107 33 168;
+    --primary-900: 88 28 135;
+
+    /* Secondary colors - deep space blue */
+    --secondary-50: 240 249 255;
+    --secondary-100: 224 242 254;
+    --secondary-200: 186 230 253;
+    --secondary-300: 125 211 252;
+    --secondary-400: 56 189 248;
+    --secondary-500: 14 165 233;
+    --secondary-600: 2 132 199;
+
+    /* Text colors - light text on deep space */
+    --text-main: 248 250 252; /* almost white */
+    --text-second: 226 232 240; /* light slate */
+    --text-third: 148 163 184; /* slate */
+    --text-fourth: 100 116 139; /* dark slate */
+
+    /* Background colors - deep space theme */
+    --bg-main: 15 23 42; /* deep space blue */
+    --bg-second: 30 41 59; /* space blue */
+    --bg-third: 51 65 85; /* lighter space */
+    --bg-fourth: 71 85 105; /* slate blue */
+    --bg-fifth: 100 116 139; /* light slate */
+    --bg-sixth: 20 28 47; /* darker space */
+    --bg-seventh: 25 33 52; /* dark space */
+    --bg-eighth: 35 45 64; /* medium space */
+    --bg-ninth: 45 55 74; /* lighter space */
+    --bg-tenth: 55 65 84; /* light space */
+
+    --bg-overlay: rgba(15, 23, 42, 0.9);
+    --bg-modal: rgba(30, 41, 59, 0.98);
+    --bg-glass: rgba(30, 41, 59, 0.85);
+
+    --bg-card: 30 41 59; /* space blue for cards */
+    --bg-sidebar: 15 23 42; /* deep space for sidebar */
+    --bg-header: 30 41 59; /* space blue for header */
+    --bg-footer: 15 23 42; /* deep space for footer */
+    --bg-hover: 51 65 85; /* lighter space for hover */
+    --bg-active: 71 85 105; /* slate blue for active */
+    --bg-disabled: 51 65 85; /* lighter space for disabled */
+
+    /* Button colors */
+    --btn-main: 168 85 247; /* cosmic purple */
+    --btn-second: 51 65 85;
+    --btn-third: 71 85 105;
+    --btn-fourth: 100 116 139;
+
+    /* Border colors - cosmic borders */
+    --border-main: 71 85 105; /* slate blue border */
+    --border-second: 100 116 139; /* lighter border */
+    --border-focus: 168 85 247; /* cosmic purple for focus */
+
+    --login-image: url("/src/assets/images/auth_image_dark.jpg");
+  }
 }

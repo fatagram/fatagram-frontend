@@ -1,13 +1,18 @@
-import React from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { OverlayLoading } from "@/components/organisms";
 import { Button, Checkbox, Logo, Textbox, Text, Link } from "@/components/atoms";
 import { useFormik } from "formik";
-import { registerInitialValues, registerValidationSchema } from "@/types/entities";
 import { authService } from "@/api/auth/auth.api";
 import { SocialButtons } from "./social-buttons";
+import { useResultFetcher } from "@/hooks/use-fetcher";
+import {
+  registerErrorCodeMap,
+  registerInitialValues,
+  registerValidationSchema,
+} from "../validation/register.validation";
 
 type RegisterFormProps = {
   showLogo?: boolean;
@@ -16,26 +21,62 @@ type RegisterFormProps = {
   className?: string;
 };
 
-const RegisterForm: React.FC<RegisterFormProps> = ({
+export const RegisterForm: React.FC<RegisterFormProps> = ({
   className,
   showLogo = true,
   showClose = false,
   onClose,
 }) => {
-  // States
   const { t } = useTranslation();
   const [isShowClose] = React.useState<boolean>(showClose);
   const [isShowLogo] = React.useState<boolean>(showLogo);
-  // Other hooks
-
-  // useNavigate hook
   const navigate = useNavigate();
+
+  const [usernameError, setUsernameError] = useState<string>("");
+  const [emailError, setEmailError] = useState<string>("");
+  const [phoneNumberError, setPhoneNumberError] = useState<string>("");
+  const [passwordError, setPasswordError] = useState<string>("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState<string>("");
+
+  const { fetch: register, isFetching } = useResultFetcher(authService.register, {
+    onSuccess: () => {
+      navigate("/login");
+    },
+    onError: (err?: any, _errs?: any[]) => {
+      const errMap = registerErrorCodeMap[err?.code] ?? registerErrorCodeMap["UNKNOWN_ERROR"];
+      if (errMap) {
+        switch (errMap.type) {
+          case "username":
+            setUsernameError(errMap.message);
+            break;
+          case "email":
+            setEmailError(errMap.message);
+            break;
+          case "phoneNumber":
+            setPhoneNumberError(errMap.message);
+            break;
+          case "password":
+            setPasswordError(errMap.message);
+            break;
+          case "confirmPassword":
+            setConfirmPasswordError(errMap.message);
+            break;
+        }
+      }
+    },
+  });
 
   const formik = useFormik({
     initialValues: registerInitialValues,
     validationSchema: registerValidationSchema,
     onSubmit: async (values) => {
-      await authService.register({
+      setUsernameError("");
+      setEmailError("");
+      setPhoneNumberError("");
+      setPasswordError("");
+      setConfirmPasswordError("");
+
+      await register({
         username: values.username,
         password: values.password,
         confirmPassword: values.confirmPassword,
@@ -56,7 +97,7 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
       onSubmit={formik.submitForm}
     >
       {/* Overlay Loading */}
-      {formik.isSubmitting && <OverlayLoading />}
+      {(formik.isSubmitting || isFetching) && <OverlayLoading />}
       {/* Logo Fatagram */}
       {isShowLogo && <Logo />}
 
@@ -74,8 +115,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder={t("auth:register.username")}
           onChange={(e) => formik.setFieldValue("username", e.target.value)}
-          isWrong={formik.touched.username && Boolean(formik.errors.username)}
-          wrongMessage={t(formik.errors.username || "")}
+          isWrong={
+            (formik.touched.username && Boolean(formik.errors.username)) || Boolean(usernameError)
+          }
+          wrongMessage={t(usernameError || formik.errors.username || "")}
         />
         <Textbox
           value={formik.values.email}
@@ -83,8 +126,8 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder={t("auth:register.email")}
           onChange={(e) => formik.setFieldValue("email", e.target.value)}
-          isWrong={formik.touched.email && Boolean(formik.errors.email)}
-          wrongMessage={t(formik.errors.email || "")}
+          isWrong={(formik.touched.email && Boolean(formik.errors.email)) || Boolean(emailError)}
+          wrongMessage={t(emailError || formik.errors.email || "")}
         />
         <Textbox
           value={formik.values.phoneNumber}
@@ -92,8 +135,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder={t("auth:register.phoneNumber")}
           onChange={(e) => formik.setFieldValue("phoneNumber", e.target.value)}
-          isWrong={formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)}
-          wrongMessage={t(formik.errors.phoneNumber || "")}
+          isWrong={
+            (formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber)) ||
+            Boolean(phoneNumberError)
+          }
+          wrongMessage={t(phoneNumberError || formik.errors.phoneNumber || "")}
         />
         <Textbox
           type="password"
@@ -101,8 +147,10 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder={t("auth:register.password")}
           onChange={(e) => formik.setFieldValue("password", e.target.value)}
-          isWrong={formik.touched.password && Boolean(formik.errors.password)}
-          wrongMessage={t(formik.errors.password || "")}
+          isWrong={
+            (formik.touched.password && Boolean(formik.errors.password)) || Boolean(passwordError)
+          }
+          wrongMessage={t(passwordError || formik.errors.password || "")}
         />
         <Textbox
           type="password"
@@ -110,8 +158,11 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
           className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
           placeholder={t("auth:register.confirmPassword")}
           onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
-          isWrong={formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)}
-          wrongMessage={t(formik.errors.confirmPassword || "")}
+          isWrong={
+            (formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword)) ||
+            Boolean(confirmPasswordError)
+          }
+          wrongMessage={t(confirmPasswordError || formik.errors.confirmPassword || "")}
         />
       </div>
       <Checkbox
@@ -161,5 +212,3 @@ const RegisterForm: React.FC<RegisterFormProps> = ({
     </div>
   );
 };
-
-export default RegisterForm;

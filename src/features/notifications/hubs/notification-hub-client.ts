@@ -13,7 +13,7 @@ export const createSignalRConnection = () => {
       .configureLogging(signalR.LogLevel.Error)
       .build();
     return connection;
-  } catch (error) {
+  } catch (error: any) {
     console.error("Error creating SignalR connection: ", error);
     throw error;
   }

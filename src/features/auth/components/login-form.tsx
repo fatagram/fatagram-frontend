@@ -1,20 +1,17 @@
-import React from "react";
-import {
-  Button,
-  Logo,
-  Textbox,
-  Text,
-  Checkbox,
-  Link,
-} from "@/components/atoms";
+import React, { useState } from "react";
+import { Button, Logo, Textbox, Text, Checkbox, Link } from "@/components/atoms";
 import clsx from "clsx";
 import { useAuth } from "@/hooks/contexts/use-auth";
 import { OverlayLoading } from "@/components/organisms/overlay-loading";
-import { loginInitialValues, loginValidationSchema } from "@/types/entities";
 import { useFormik } from "formik";
 import { useTranslation } from "react-i18next";
 import { ComponentProps } from "@/components/common/types/component-type";
 import { SocialButtons } from "./social-buttons";
+import {
+  errorCodeMap,
+  loginInitialValues,
+  loginValidationSchema,
+} from "../validation/login.validation";
 
 interface LoginFormProps extends ComponentProps {
   switchForgotPassword?: () => void;
@@ -32,6 +29,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   className,
 }) => {
   const { t } = useTranslation();
+  const [passwordError, setPasswordError] = useState<string>("");
+  const [usernameOrEmailError, setUsernameOrEmailError] = useState<string>("");
   // states
   const [isShowClose] = React.useState<boolean>(showClose);
   const [isShowLogo] = React.useState<boolean>(showLogo);
@@ -40,10 +39,27 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     initialValues: loginInitialValues,
     validationSchema: loginValidationSchema,
     onSubmit: async (values) => {
-      await logIn({
-        usernameOrEmail: values.usernameOrEmail,
-        password: values.password,
-      });
+      setUsernameOrEmailError("");
+      setPasswordError("");
+      // console.log(values);
+      await logIn(
+        {
+          usernameOrEmail: values.usernameOrEmail,
+          password: values.password,
+        },
+        {
+          onError: (err: any, _errs: any[]) => {
+            const errMap = errorCodeMap[err.code] ?? errorCodeMap["UNKNOWN_ERROR"];
+            if (errMap) {
+              errMap.type === "username"
+                ? setUsernameOrEmailError(errMap.message)
+                : errMap.type == "password"
+                ? setPasswordError(errMap.message)
+                : null;
+            }
+          },
+        },
+      );
     },
   });
 
@@ -53,7 +69,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
         "bg-bg-second rounded-2xl",
         "p-12 animate-fade-in overflow-hidden",
-        className
+        className,
       )}
     >
       {formik.isSubmitting && <OverlayLoading />}
@@ -62,40 +78,31 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <Text
         sz="xl-1"
         weight="extrabold"
-        className={clsx(
-          "uppercase !text-primary-500",
-          "font-bold font-inter select-none"
-        )}
+        className={clsx("uppercase !text-primary-500", "font-bold font-inter select-none")}
       >
         {t("auth:login.title")}
       </Text>
       <div className="flex flex-col gap-3 w-full">
         <Textbox
-          className={clsx(
-            "text-[14px] w-[100%] px-[20px]",
-            "sm:py-[7px] py-[10px] shadow-sm"
-          )}
+          className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
           autoComplete="username"
           placeholder={t("auth:login.username")}
-          onChange={(e) =>
-            formik.setFieldValue("usernameOrEmail", e.target.value)
-          }
+          onChange={(e) => formik.setFieldValue("usernameOrEmail", e.target.value)}
           isWrong={
-            formik.touched.usernameOrEmail &&
-            Boolean(formik.errors.usernameOrEmail)
+            (formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail)) ||
+            Boolean(usernameOrEmailError)
           }
-          wrongMessage={t(formik.errors.usernameOrEmail || "")}
+          wrongMessage={t(usernameOrEmailError || formik.errors.usernameOrEmail || "")}
         />
         <Textbox
           type="password"
-          className={clsx(
-            "text-[14px] w-[100%] px-[20px]",
-            "sm:py-[7px] py-[10px] shadow-sm"
-          )}
+          className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
           placeholder={t("auth:login.password")}
           onChange={(e) => formik.setFieldValue("password", e.target.value)}
-          isWrong={formik.touched.password && Boolean(formik.errors.password)}
-          wrongMessage={t(formik.errors.password || "")}
+          isWrong={
+            (formik.touched.password && Boolean(formik.errors.password)) || Boolean(passwordError)
+          }
+          wrongMessage={t(passwordError || formik.errors.password || "")}
           autoComplete="current-password"
         />
       </div>
@@ -111,7 +118,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             sz="sm-3"
             className={clsx(
               "!text-primary-500 hover:!text-primary-600",
-              "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
+              "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none",
             )}
             onClick={switchForgotPassword}
           >
@@ -148,7 +155,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       {isShowClose && (
         <Text
           className={clsx(
-            "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
+            "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer",
           )}
           onClick={onClose}
         >

@@ -3,6 +3,7 @@ import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useRef } from "react";
 import { createSignalRConnection } from "./notification-hub-client";
 import { useAuth } from "@/hooks/contexts/use-auth";
+import { authEvents } from "@/events/auth-event";
 
 export function useNotificationHub(onReceiveNotification: (data: NotificationDto) => void) {
   const connectionRef = useRef<HubConnection | null>(null);
@@ -24,7 +25,11 @@ export function useNotificationHub(onReceiveNotification: (data: NotificationDto
               onReceiveNotification(data);
             }
           });
-        } catch (err) {
+        } catch (err: any) {
+          if (err?.message?.includes("ONBOARDING_NOT_COMPLETED")) {
+            authEvents.emit("redirectToOnboarding");
+            return;
+          }
           console.error("SignalR connection error: ", err);
           if (retry < 5) {
             setTimeout(() => tryConnect(retry + 1), 500);

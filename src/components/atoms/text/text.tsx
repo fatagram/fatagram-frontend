@@ -1,4 +1,4 @@
-import React, { ElementType, forwardRef, JSX } from "react";
+import { ElementType, forwardRef } from "react";
 import { Size } from "../../common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
 import clsx from "clsx";

@@ -12,3 +12,4 @@ export * from "./textbox";
 export * from "./textarea";
 export * from "./text";
 export * from "./footer";
+export * from "./selectday";

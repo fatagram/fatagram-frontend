@@ -5,24 +5,20 @@ import { useDispatch } from "react-redux";
 import { resetState } from "@/features/notifications/stores/notification-slice";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthState, initialAuthStatus } from "@/types/auth-state";
-import { useLoading } from "@/hooks/contexts/use-loading";
-import { LoginDto } from "@/types/entities";
-import { LocaleKeys, useLanguage } from "@/hooks/use-trans";
+import { LocaleKeys } from "@/hooks/use-trans";
+import { useResultFetcher } from "@/hooks/use-fetcher";
+import { useGoogleLogin } from "@/hooks/use-google-login";
+import { useNavigate } from "react-router-dom";
+import { authEvents } from "@/events/auth-event";
 
 type AuthAction =
-  | { type: "INITIALIZE"; payload: Omit<AuthState, "isInitialized"> }
-  | { type: "LOGIN"; payload: Omit<Omit<AuthState, "isInitialized">, "isAuthenticated"> }
+  | { type: "INITIALIZE"; payload: Omit<AuthState, "isAuthenticated"> }
+  | { type: "LOGIN"; payload: Omit<AuthState, "isAuthenticated"> }
   | { type: "LOGOUT" }
   | { type: "UPDATE_URL_NAME"; payload: string | undefined };
 
 export const authReducer = (state: AuthState, action: AuthAction): AuthState => {
   switch (action.type) {
-    case "INITIALIZE":
-      return {
-        ...state,
-        ...action.payload,
-        isInitialized: true,
-      };
     case "LOGIN":
       return {
         ...state,
@@ -51,8 +47,9 @@ export const authReducer = (state: AuthState, action: AuthAction): AuthState => 
 // Authentication context
 export interface AuthContextType {
   isAuthenticated: boolean | null;
-  isInitialized?: boolean;
-  logIn: (loginDto: LoginDto) => void;
+  logIn: (...args: any[]) => Promise<any>;
+  loginWithGoogle: (...args: any[]) => Promise<any>;
+  redirectToGoogle: () => void;
   logOut?: () => Promise<void>;
   setUrlName?: (urlName: string | undefined) => void;
   userId?: string;
@@ -62,8 +59,9 @@ export interface AuthContextType {
 // Create AuthContext
 export const AuthContext = createContext<AuthContextType>({
   isAuthenticated: null,
-  isInitialized: false,
-  logIn: () => Promise.resolve({ success: false, data: undefined }),
+  logIn: () => Promise.resolve(),
+  loginWithGoogle: () => Promise.resolve(),
+  redirectToGoogle: () => {},
   logOut: () => Promise.resolve(),
   setUrlName: () => {},
   userId: undefined,
@@ -72,49 +70,79 @@ export const AuthContext = createContext<AuthContextType>({
 
 type AuthProviderProps = {
   children: React.ReactNode;
+  initialIsAuthenticated?: boolean;
+  userData?: any;
 };
 
 // Create AuthProvider
-export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialAuthStatus);
-  const { changeLanguage } = useLanguage();
-  const { increment, decrement } = useLoading();
+export const AuthProvider: FC<AuthProviderProps> = ({
+  children,
+  initialIsAuthenticated,
+  userData,
+}) => {
+  const [state, dispatch] = useReducer(authReducer, {
+    ...initialAuthStatus,
+    isAuthenticated: (initialIsAuthenticated ?? null) as boolean | null,
+    userId: userData?.id,
+    urlName: userData?.urlName,
+    lang: userData?.languageCode as LocaleKeys,
+  });
+  console.log("AuthContext", userData);
+  // const { changeLanguage } = useLanguage();
   const _dispatch = useDispatch();
   const queryClient = useQueryClient();
+  const navigate = useNavigate();
 
-  const _logIn = async (loginDto: LoginDto) => {
-    try {
-      await authService.login(loginDto);
-      // Fetch me
-      const me = (await userProfileService.GetMe()).data;
-      if (me) {
-        dispatch({
-          type: "LOGIN",
-          payload: {
-            userId: me.id,
-            urlName: me.urlName,
-            lang: (me.languageCode as LocaleKeys) || "en",
+  const { fetch: me } = useResultFetcher(userProfileService.getMe, {});
+
+  const { fetch: login } = useResultFetcher(authService.login, {
+    onSuccess: async () => {
+      await me(undefined, {
+        onSuccess: (data) => {
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              userId: data?.id,
+              urlName: data?.urlName,
+              lang: (data?.languageCode as LocaleKeys) || "en",
+            },
+          });
+        },
+      });
+    },
+  });
+  const { fetch: logout } = useResultFetcher(authService.logout, {
+    onSuccess: () => {
+      dispatch({ type: "LOGOUT" });
+      clearUserData();
+    },
+  });
+
+  const { redirectToGoogle, fetcher: loginWithGoogle } = useGoogleLogin();
+
+  const handleLoginWithGoogle = async (code: string) => {
+    await loginWithGoogle.fetch(code, {
+      onSuccess: async () => {
+        await me(undefined, {
+          onSuccess: async (data) => {
+            dispatch({
+              type: "LOGIN",
+              payload: {
+                userId: data?.id,
+                urlName: data?.urlName,
+                lang: (data?.languageCode as LocaleKeys) || "en",
+              },
+            });
           },
         });
-      }
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
+      },
+    });
   };
 
   const clearUserData = useCallback(() => {
     queryClient.clear();
     _dispatch(resetState());
   }, [queryClient, _dispatch]);
-
-  // Function to logout
-  const _logOut = useCallback(async () => {
-    increment();
-    await authService.logout();
-    dispatch({ type: "LOGOUT" });
-    clearUserData();
-    decrement();
-  }, [increment, decrement, clearUserData]);
 
   const setUrlName = useCallback((urlName: string | undefined) => {
     dispatch({
@@ -123,63 +151,38 @@ export const AuthProvider: FC<AuthProviderProps> = ({ children }) => {
     });
   }, []);
 
-  // Memoize initialize function - Run ONLY ONCE on mount
-  const initializeRef = React.useRef(false);
-
   useEffect(() => {
-    // Prevent double initialization in StrictMode or on refresh
-    if (initializeRef.current) return;
-    initializeRef.current = true;
-
-    const initialize = async () => {
-      increment();
-      try {
-        const result = await userProfileService.GetMe();
-        if (!result.success) {
-          dispatch({
-            type: "INITIALIZE",
-            payload: {
-              isAuthenticated: false,
-              lang: "en",
-            },
-          });
-          return;
-        }
-        dispatch({
-          type: "INITIALIZE",
-          payload: {
-            isAuthenticated: true,
-            userId: result.data?.id,
-            urlName: result.data?.urlName,
-            lang: (result.data?.languageCode as LocaleKeys) || "en",
-          },
-        });
-        changeLanguage((result.data?.languageCode as LocaleKeys) || "en");
-      } finally {
-        decrement();
-      }
+    const handleRedirectToOnboarding = () => {
+      console.log("Redirect to onboarding");
+      navigate("/onboarding");
     };
 
-    initialize();
-  }, []); // Empty deps - run ONLY once
+    authEvents.on("redirectToOnboarding", handleRedirectToOnboarding);
+
+    return () => {
+      authEvents.off("redirectToOnboarding", handleRedirectToOnboarding);
+    };
+  }, [navigate]);
 
   const contextValue = useMemo(
     () => ({
       isAuthenticated: state.isAuthenticated,
-      isInitialized: state.isInitialized,
       userId: state.userId,
       urlName: state.urlName,
-      logIn: _logIn,
-      logOut: _logOut,
+      logIn: login,
+      loginWithGoogle: handleLoginWithGoogle,
+      redirectToGoogle,
+      logOut: logout,
       setUrlName,
     }),
     [
       state.isAuthenticated,
-      state.isInitialized,
       state.userId,
       state.urlName,
-      _logIn,
-      _logOut,
+      login,
+      handleLoginWithGoogle,
+      redirectToGoogle,
+      logout,
       setUrlName,
     ],
   );

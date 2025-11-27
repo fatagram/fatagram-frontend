@@ -8,7 +8,7 @@ import { useCallback, useEffect } from "react";
 import { Outlet } from "react-router-dom";
 
 const DefaultLayout = () => {
-  const { isAuthenticated, isInitialized } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { openDialog, closeDialog } = useDialog();
 
   const [headerRef, headerSize] = useSize<HTMLHeadElement>();
@@ -26,8 +26,6 @@ const DefaultLayout = () => {
   }, [openDialog]);
 
   useEffect(() => {
-    if (!isInitialized) return;
-
     if (isAuthenticated) {
       closeDialog();
     } else {
@@ -35,7 +33,7 @@ const DefaultLayout = () => {
     }
 
     return () => closeDialog();
-  }, [isAuthenticated, isInitialized, closeDialog, openLoginOverlay]);
+  }, [isAuthenticated, closeDialog, openLoginOverlay]);
 
   return (
     <Layout>

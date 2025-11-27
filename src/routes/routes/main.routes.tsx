@@ -4,13 +4,15 @@ import RouteType from "../interface/route-type";
 import NotFoundPage from "@/pages/not-found/not-found-page";
 import HomePage from "@/pages/home/home-page";
 import { settingRoutes } from "./setting.routes";
-import RegisterPage from "@/pages/register/register-page";
-import LoginPage from "@/pages/login/login-page";
+import RegisterPage from "@/pages/auth/register/register-page";
+import LoginPage from "@/pages/auth/login/login-page";
 import { friendsRoutes } from "./friends.routes";
 import NotificationPage from "@/pages/notifications/notifications-page";
 import { userRoute } from "./profile.routes";
 import DefaultLayout from "../components/layouts/default-layout";
 import SecondLayout from "../components/layouts/second-layout";
+import GoogleCallbackPage from "@/pages/auth/google-callback/google-callback-page";
+import OnboardingPage from "@/pages/onboarding/onboarding-page";
 
 export const mainRoutes: RouteType[] = [
   {
@@ -49,6 +51,16 @@ export const mainRoutes: RouteType[] = [
         path: "/register",
         element: <RegisterPage />,
         type: "auth",
+      },
+      {
+        path: "/auth/google/callback",
+        element: <GoogleCallbackPage />,
+        type: "auth",
+      },
+      {
+        path: "/onboarding",
+        element: <OnboardingPage />,
+        type: "private",
       },
     ],
   },

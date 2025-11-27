@@ -4,24 +4,26 @@ import styles from "./textbox.module.css";
 import { Size } from "../../common/types/size";
 import { ComponentProps } from "@/components/common/types/component-type";
 
-const sizeClasses: Record<Size, string> = {
-  xs: "px-2 py-1 text-xs",
-  "sm-1": "px-3 py-1 text-[13px] ",
-  "sm-2": "px-4 py-2 text-[13px] ",
-  "sm-3": "px-5 py-2 text-[13px] ",
-  "md-1": "px-6 py-3 text-base ",
-  "md-2": "px-7 py-3 text-base ",
-  "md-3": "px-8 py-4 text-base ",
-  "lg-1": "px-8 py-4 text-base ",
-  "lg-2": "px-9 py-4 text-base ",
-  "lg-3": "px-10 py-5 text-base ",
-  "xl-1": "px-10 py-5 text-xl ",
-  "xl-2": "px-12 py-6 text-2xl ",
-  "xl-3": "px-14 py-7 text-3xl ",
+const sizeClasses: Record<Size, { mainText: string; titleText: string }> = {
+  xs: { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
+  "sm-1": { mainText: "px-3 py-1 text-[13px] ", titleText: "text-sm" },
+  "sm-2": { mainText: "px-4 py-2 text-[13px] ", titleText: "text-sm" },
+  "sm-3": { mainText: "px-5 py-2 text-[13px] ", titleText: "text-sm" },
+  "md-1": { mainText: "px-6 py-3 text-base ", titleText: "text-base" },
+  "md-2": { mainText: "px-7 py-3 text-base ", titleText: "text-base" },
+  "md-3": { mainText: "px-8 py-4 text-base ", titleText: "text-base" },
+  "lg-1": { mainText: "px-8 py-4 text-base ", titleText: "text-base" },
+  "lg-2": { mainText: "px-9 py-4 text-base ", titleText: "text-base" },
+  "lg-3": { mainText: "px-10 py-5 text-base ", titleText: "text-base" },
+  "xl-1": { mainText: "px-10 py-5 text-xl ", titleText: "text-xl" },
+  "xl-2": { mainText: "px-12 py-6 text-2xl ", titleText: "text-2xl" },
+  "xl-3": { mainText: "px-14 py-7 text-3xl ", titleText: "text-3xl" },
 };
 
 // TextboxProps interface
 export interface TextboxProps extends ComponentProps<HTMLInputElement> {
+  title?: string;
+  isRequired?: boolean;
   isWrong?: boolean;
   wrongMessage?: string;
   wrapperClassName?: string;
@@ -35,6 +37,8 @@ export const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
       disabled = false,
       isWrong = false,
       wrongMessage,
+      title,
+      isRequired = false,
       className,
       sz = "sm-1",
       type = "text",
@@ -48,15 +52,26 @@ export const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
       type === "text"
         ? "text"
         : type === "password"
-          ? showPassword
-            ? "text"
-            : "password"
-          : type === "search"
-            ? "search"
-            : type;
+        ? showPassword
+          ? "text"
+          : "password"
+        : type === "search"
+        ? "search"
+        : type;
     return (
       <div className={clsx(wrapperClassName)}>
         <div className={clsx("relative")}>
+          {title && (
+            <div
+              className={clsx(
+                "flex items-center gap-1 ml-1 mb-1 font-medium",
+                sizeClasses[sz].titleText,
+              )}
+            >
+              <label htmlFor={title}>{title}</label>
+              {isRequired && <span className="text-red-400">*</span>}
+            </div>
+          )}
           <input
             type={typeOfText}
             ref={ref}
@@ -71,7 +86,7 @@ export const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
                 [styles["primary-textbox-wrong"]]: isWrong && !disabled,
                 [styles["primary-textbox"]]: !isWrong && !disabled,
               },
-              sizeClasses[sz],
+              sizeClasses[sz].mainText,
               className,
             )}
             disabled={disabled}

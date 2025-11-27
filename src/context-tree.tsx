@@ -6,17 +6,21 @@ import { ThemeProvider } from "./contexts/common/theme-context";
 
 interface ContextTreeProps {
   children: React.ReactNode;
+  authContext?: { isAuthenticated?: boolean; userData?: any };
 }
-export default function ContextTree({ children }: ContextTreeProps) {
+export default function ContextTree({ children, authContext }: ContextTreeProps) {
   return (
     <ThemeProvider>
-      <LoadingProvider>
-        <DialogProvider>
-          <AuthProvider>
+      <AuthProvider
+        initialIsAuthenticated={authContext?.isAuthenticated}
+        userData={authContext?.userData}
+      >
+        <LoadingProvider>
+          <DialogProvider>
             <ToastProvider>{children}</ToastProvider>
-          </AuthProvider>
-        </DialogProvider>
-      </LoadingProvider>
+          </DialogProvider>
+        </LoadingProvider>
+      </AuthProvider>
     </ThemeProvider>
   );
 }

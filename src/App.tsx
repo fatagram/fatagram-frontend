@@ -1,11 +1,9 @@
 import "./i18n";
 import ContextTree from "./context-tree";
-import AppRoutes from "./routes";
-import { GlobalDialog } from "./components/organisms";
-import { NotificationListener } from "./features/notifications/components";
 import { Provider } from "react-redux";
 import store from "./store/store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import Main from "./main";
 
 // Create QueryClient ONCE with proper config
 const queryClient = new QueryClient({
@@ -19,16 +17,12 @@ const queryClient = new QueryClient({
   },
 });
 
-function App() {
+function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userData?: any } }) {
   return (
     <Provider store={store}>
       <QueryClientProvider client={queryClient}>
-        <ContextTree>
-          <main>
-            <AppRoutes />
-            <GlobalDialog />
-            <NotificationListener />
-          </main>
+        <ContextTree authContext={authContext}>
+          <Main />
         </ContextTree>
       </QueryClientProvider>
     </Provider>

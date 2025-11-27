@@ -30,7 +30,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   const [fullName, setFullName] = React.useState<string>("");
   const [nickname, setNickname] = React.useState<string | null>(null);
   const [avatar, setAvatar] = React.useState<string>("");
-  const [background, setBackground] = React.useState<string>("");
+  const [background] = React.useState<string>("");
   const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const [isLoadingNumOfFriends, setIsLoadingNumOfFriends] = React.useState<boolean>(true);
   const [numberOfFriends, setNumberOfFriends] = React.useState<number>(0);
@@ -48,7 +48,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
-      const response = await userProfileService.GetProfile(
+      const response = await userProfileService.getProfile(
         targetId,
         "avatar,background,fullName,nickname",
       );
@@ -87,7 +87,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
       // console.log(result);
       if (result.success) {
         // setBackground(getImageUrl(result.data) || "");
-      } else if (result.errorCode === "LARGE_FILE_ERROR") {
+      } else if (result.error?.code === "LARGE_FILE_ERROR") {
         openDialog({
           title: t("user:profileHeader.oversizeErrorTitle"),
           content: t("user:profileHeader.oversizeErrorMessage"),
@@ -106,7 +106,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
       const result = await userProfileService.UploadAvatar(file);
       if (result.success) {
         setAvatar(result.data);
-      } else if (result.errorCode === "LARGE_FILE_ERROR") {
+      } else if (result.error?.code === "LARGE_FILE_ERROR") {
         openDialog({
           title: t("user:profileHeader.oversizeErrorTitle"),
           content: t("user:profileHeader.oversizeErrorMessage"),

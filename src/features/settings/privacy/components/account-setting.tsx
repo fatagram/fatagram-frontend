@@ -31,7 +31,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       const _userId: string = userId ?? "";
-      const response = await userProfileService.GetProfile(_userId, "fullName,urlName,nickname");
+      const response = await userProfileService.getProfile(_userId, "fullName,urlName,nickname");
       if (response.success) {
         setFullName(response.data.infos.fullName);
         setUrlName(response.data.infos.urlName);

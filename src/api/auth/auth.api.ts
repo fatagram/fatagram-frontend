@@ -13,13 +13,22 @@ export class AuthService {
   async login(dto: LoginDto): Promise<Result<void>> {
     try {
       const res = await apiClient.post(`${PREFIX}/login`, {
-        username: dto.usernameOrEmail,
+        usernameOrEmail: dto.usernameOrEmail,
         password: dto.password,
         isRememberMe: dto.isRememberMe,
       });
       const response = res.data as ApiResponse<any>;
 
       return { success: true, data: response.data };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  }
+
+  async loginWithGoogle(code: string): Promise<Result<void>> {
+    try {
+      await apiClient.post(`${PREFIX}/google/callback`, { code });
+      return { success: true };
     } catch (error: any) {
       return handleApiError(error);
     }

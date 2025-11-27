@@ -1,3 +1,3 @@
 export * from "./login-form";
-export { default as RegisterForm } from "./register-form";
-export { default as ForgotPasswordForm } from "./forgot-password-form";
+export * from "./register-form";
+export * from "./forgot-password-form";

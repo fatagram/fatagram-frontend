@@ -30,11 +30,11 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   };
 
   const handleSubmit = async () => {
-    const response = await userProfileService.UpdateName({ firstName, lastName });
+    const response = await userProfileService.updateName({ firstName, lastName });
     if (response.success) {
       navigate("/settings", { state: { reload: true } });
     } else {
-      const errorCode = response?.errorCodes?.[0] || response.errorCode;
+      const errorCode = response?.error?.code;
       if (errorCode) {
         setErrorMessage(t(ErrorCodes[errorCode].message));
         setFirstNameFailed(ErrorCodes[errorCode].type === "FirstName");
@@ -50,7 +50,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   // Fetch user profile
   useEffect(() => {
     const fetchProfile = async () => {
-      const response = await userProfileService.GetProfile(userId ?? "", "firstName,lastName");
+      const response = await userProfileService.getProfile(userId ?? "", "firstName,lastName");
       if (response.success) {
         setFirstName(response.data.infos.firstName);
         setLastName(response.data.infos.lastName);

@@ -5,12 +5,14 @@ import { Result } from "../common/result";
 import ChangeNameDto from "./dto/change-name.dto";
 import ChangeUrlNameDto from "./dto/change-url-name.dto";
 import GetMeDto from "./dto/get-me.dto";
+import OnboardingDto from "./dto/onboarding.dto";
+import { OnboardingDefaultDataDto } from "./dto/onboarding-default-data.dto";
 
 const PREFIX = `/api/UserProfile`;
 
 export class UserProfileService {
   // Check if user exists by id or urlName
-  async CheckUserExistAsync(key: string): Promise<Result<any>> {
+  async checkUserExist(key: string): Promise<Result<any>> {
     try {
       await apiClient.get(`${PREFIX}/exist?key=${key}`);
       return { success: true };
@@ -20,7 +22,7 @@ export class UserProfileService {
   }
 
   // Get user profile by id or urlName
-  async GetProfile(id: string, fields: string): Promise<Result<any>> {
+  async getProfile(id: string, fields: string): Promise<Result<any>> {
     try {
       const res = await apiClient.get(`${PREFIX}/${id}?fields=${fields}`);
       const response = res.data as ApiResponse<any>;
@@ -31,7 +33,7 @@ export class UserProfileService {
   }
 
   // Get current user profile
-  async GetMe(): Promise<Result<GetMeDto>> {
+  async getMe(): Promise<Result<GetMeDto>> {
     try {
       const res = await apiClient.get(`${PREFIX}/me`);
       const response = res.data.data.infos as GetMeDto;
@@ -88,11 +90,33 @@ export class UserProfileService {
     }
   }
 
+  // Complete onboarding
+  async completeOnboarding(onboardingDto: OnboardingDto): Promise<Result<any>> {
+    try {
+      const res = await apiClient.post(`${PREFIX}/onboarding`, onboardingDto);
+      const response = res.data as ApiResponse<any>;
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  }
+
   // Update user's name
-  async UpdateName(changeNameDto: ChangeNameDto): Promise<Result<ChangeNameDto>> {
+  async updateName(changeNameDto: ChangeNameDto): Promise<Result<ChangeNameDto>> {
     try {
       const res = await apiClient.patch(`${PREFIX}/name`, changeNameDto);
       const response = res.data as ApiResponse<ChangeNameDto>;
+      return { success: true, data: response.data };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  }
+
+  // Get onboarding default data
+  async getOnboardingDefaults(): Promise<Result<OnboardingDefaultDataDto>> {
+    try {
+      const res = await apiClient.get(`${PREFIX}/onboarding/defaults`);
+      const response = res.data as ApiResponse<OnboardingDefaultDataDto>;
       return { success: true, data: response.data };
     } catch (error: any) {
       return handleApiError(error);

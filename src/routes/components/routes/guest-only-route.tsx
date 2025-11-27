@@ -9,17 +9,16 @@ const GuestOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const [searchParams] = useSearchParams();
 
   useEffect(() => {
-    // If user is authenticated, redirect them away from auth pages
-    if (auth && auth.isAuthenticated) {
+    if (auth?.isAuthenticated) {
       const returnTo = searchParams.get("returnTo") || "/";
       navigate(returnTo, { replace: true });
     }
-  }, [auth, navigate, searchParams]);
+  }, [auth?.isAuthenticated, navigate, searchParams]);
 
-  // While auth state is loading/undefined, don't render anything
-  if (!auth) return null;
+  if (auth?.isAuthenticated) {
+    return null;
+  }
 
-  // If not authenticated (guest), render children (login/register pages)
   return children;
 };
 

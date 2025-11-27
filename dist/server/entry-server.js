@@ -1,7 +1,7 @@
-import { jsxDEV, Fragment } from "react/jsx-dev-runtime";
-import React, { useState, useCallback, useMemo, useContext, createContext, useReducer, useEffect, forwardRef, useLayoutEffect, useRef, StrictMode } from "react";
-import { renderToPipeableStream } from "react-dom/server";
-import { Link as Link$1, useNavigate, useResolvedPath, useMatch, Outlet, useLocation, useParams, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
+import { jsx, jsxs, Fragment } from "react/jsx-runtime";
+import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, forwardRef, useContext, useRef, useLayoutEffect, StrictMode } from "react";
+import { renderToString } from "react-dom/server";
+import { useNavigate, Link as Link$1, useResolvedPath, useMatch, Outlet, useLocation, useParams, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
 import i18next from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
@@ -9,13 +9,13 @@ import { useDispatch, useSelector, Provider } from "react-redux";
 import { createSlice, configureStore } from "@reduxjs/toolkit";
 import { useQueryClient, useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import clsx, { clsx as clsx$1 } from "clsx";
+import * as signalR from "@microsoft/signalr";
 import { ArrowLeft } from "lucide-react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
 import { useNavigate as useNavigate$1 } from "react-router";
 import { AliveScope } from "react-activation";
-import * as signalR from "@microsoft/signalr";
-const login$1 = { "title": "Login", "username": "Username", "password": "Password", "rememberMe": "Remember me", "forgotPassword": "Forgot password?", "loginButton": "Login", "dontHaveAccount": "Don't have an account?", "registerButton": "Register", "errors": { "usernameOrEmail": { "required": "Username or email is required", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)", "notFound": "Username or email not found" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)", "incorrectPassword": "Incorrect password" }, "account": { "locked": "Account is locked", "disabled": "Account is disabled" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
+const login$1 = { "title": "Login", "username": "Username", "password": "Password", "rememberMe": "Remember me", "forgotPassword": "Forgot password?", "loginButton": "Login", "dontHaveAccount": "Don't have an account?", "registerButton": "Register", "errors": { "usernameOrEmail": { "required": "Username or email is required", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)", "notFound": "Username or email not found" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)", "incorrect": "Incorrect password" }, "account": { "locked": "Account is locked", "disabled": "Account is disabled" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const register$2 = { "title": "Register", "username": "Username", "password": "Password", "confirmPassword": "Confirm password", "email": "Email", "phoneNumber": "Phone number", "registerButton": "Register", "backToLogin": "Back to login", "agree": "I agree to the", "termsOfService": "Terms of Service", "and": " and ", "privacyPolicy": "Privacy Policy", "loginButton": "Login", "errors": { "username": { "required": "Username is required", "alreadyExists": "Username already exists", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)" }, "email": { "required": "Email is required", "alreadyExists": "Email already exists", "invalidFormat": "Invalid email format" }, "phoneNumber": { "alreadyExists": "Phone number already exists", "invalidFormat": "Invalid phone number format" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)" }, "confirmPassword": { "required": "Please confirm your password", "doNotMatch": "Passwords do not match" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const auth$1 = {
   login: login$1,
@@ -198,11 +198,30 @@ i18next.use(initReactI18next).init({
   ns: namespaces,
   defaultNS
 });
-const getRefreshToken = () => localStorage.getItem("refreshToken");
-const getRefreshTokenFromSession = () => sessionStorage.getItem("refreshToken");
 const appConfig = {
-  apiUrl: "http://localhost:5002"
+  apiUrl: "http://localhost:5002",
+  googleClientId: "981986901169-54kebahp4jeu71vra4s377i0uda22guc.apps.googleusercontent.com"
 };
+class AuthEventEmitter {
+  listeners = /* @__PURE__ */ new Map();
+  on(event, callback) {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, /* @__PURE__ */ new Set());
+    }
+    this.listeners.get(event).add(callback);
+  }
+  off(event, callback) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event).delete(callback);
+    }
+  }
+  emit(event, ...args) {
+    if (this.listeners.has(event)) {
+      this.listeners.get(event).forEach((callback) => callback(...args));
+    }
+  }
+}
+const authEvents = new AuthEventEmitter();
 const apiClient = axios.create({
   baseURL: appConfig.apiUrl,
   headers: { "Content-Type": "application/json" },
@@ -216,27 +235,29 @@ const apiClientFormData = axios.create({
 apiClient.interceptors.request.use((config) => {
   return config;
 });
-apiClientFormData.interceptors.request.use(
-  (config) => {
-    return config;
-  }
-);
+apiClientFormData.interceptors.request.use((config) => {
+  return config;
+});
 apiClient.interceptors.response.use(
   (response) => response,
   async (error) => {
     if (error.response?.status === 401) {
       try {
-        const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
         const refreshResult = await axios.post(
           `${appConfig.apiUrl}/api/auth/refreshToken`,
-          { refreshToken },
-          { withCredentials: true }
+          {},
+          {
+            withCredentials: true
+          }
         );
         if (refreshResult.status === 200) {
           return await apiClient.request(error.config);
         }
       } catch (error2) {
       }
+    } else if (error.response?.status === 403 && error.response?.data?.error?.code === "ONBOARDING_NOT_COMPLETED") {
+      authEvents.emit("redirectToOnboarding");
+      return Promise.reject(error);
     }
     return Promise.reject(error);
   }
@@ -246,11 +267,12 @@ apiClientFormData.interceptors.response.use(
   async (error) => {
     if (error.response?.status === 401) {
       try {
-        const refreshToken = getRefreshToken() || getRefreshTokenFromSession();
         const refreshResult = await axios.post(
           `${appConfig.apiUrl}/api/auth/refresh-token`,
-          { refreshToken },
-          { withCredentials: true }
+          {},
+          {
+            withCredentials: true
+          }
         );
         if (refreshResult.status === 200) {
           return await apiClient.request(error.config);
@@ -258,9 +280,7 @@ apiClientFormData.interceptors.response.use(
       } catch (error2) {
       }
     } else if (error.response?.status === 413) {
-      const err = new Error(
-        "File size is too large. Please upload a smaller file."
-      );
+      const err = new Error("File size is too large. Please upload a smaller file.");
       err.name = "LARGE_FILE_ERROR";
       return Promise.reject(err);
     }
@@ -271,20 +291,28 @@ const handleApiError = (error) => {
   if (error.name === "LARGE_FILE_ERROR") {
     return {
       success: false,
-      errorCode: "LARGE_FILE_ERROR"
+      error: {
+        code: "LARGE_FILE_ERROR",
+        detail: "File size is too large. Please upload a smaller file."
+      }
     };
   }
   if (error.response) {
     const err = error.response.data;
     return {
       success: false,
-      errorCode: err.error?.code || "UNKNOWN_ERROR",
-      errorCodes: err.error?.codes
+      error: {
+        code: err.error?.code || "UNKNOWN_ERROR",
+        detail: err.error?.message
+      }
     };
   } else {
     return {
       success: false,
-      errorCode: "INTERNAL_SERVER_ERROR"
+      error: {
+        code: "INTERNAL_SERVER_ERROR",
+        detail: "Internal server error."
+      }
     };
   }
 };
@@ -294,12 +322,20 @@ class AuthService {
   async login(dto) {
     try {
       const res = await apiClient.post(`${PREFIX$4}/login`, {
-        username: dto.usernameOrEmail,
+        usernameOrEmail: dto.usernameOrEmail,
         password: dto.password,
         isRememberMe: dto.isRememberMe
       });
       const response = res.data;
       return { success: true, data: response.data };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+  async loginWithGoogle(code) {
+    try {
+      await apiClient.post(`${PREFIX$4}/google/callback`, { code });
+      return { success: true };
     } catch (error) {
       return handleApiError(error);
     }
@@ -342,7 +378,7 @@ const authService = new AuthService();
 const PREFIX$3 = `/api/UserProfile`;
 class UserProfileService {
   // Check if user exists by id or urlName
-  async CheckUserExistAsync(key) {
+  async checkUserExist(key) {
     try {
       await apiClient.get(`${PREFIX$3}/exist?key=${key}`);
       return { success: true };
@@ -351,7 +387,7 @@ class UserProfileService {
     }
   }
   // Get user profile by id or urlName
-  async GetProfile(id, fields) {
+  async getProfile(id, fields) {
     try {
       const res = await apiClient.get(`${PREFIX$3}/${id}?fields=${fields}`);
       const response = res.data;
@@ -361,7 +397,7 @@ class UserProfileService {
     }
   }
   // Get current user profile
-  async GetMe() {
+  async getMe() {
     try {
       const res = await apiClient.get(`${PREFIX$3}/me`);
       const response = res.data.data.infos;
@@ -412,10 +448,30 @@ class UserProfileService {
       return handleApiError(error);
     }
   }
+  // Complete onboarding
+  async completeOnboarding(onboardingDto) {
+    try {
+      const res = await apiClient.post(`${PREFIX$3}/onboarding`, onboardingDto);
+      const response = res.data;
+      return { success: true, data: response.data };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
   // Update user's name
-  async UpdateName(changeNameDto) {
+  async updateName(changeNameDto) {
     try {
       const res = await apiClient.patch(`${PREFIX$3}/name`, changeNameDto);
+      const response = res.data;
+      return { success: true, data: response.data };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+  // Get onboarding default data
+  async getOnboardingDefaults() {
+    try {
+      const res = await apiClient.get(`${PREFIX$3}/onboarding/defaults`);
       const response = res.data;
       return { success: true, data: response.data };
     } catch (error) {
@@ -496,47 +552,59 @@ const {
 const notificationsReducer = notificationsSlice.reducer;
 const initialAuthStatus = {
   isAuthenticated: false,
-  lang: "en",
-  isInitialized: false
+  lang: "en"
 };
-const LoadingContext = React.createContext({
-  increment: () => {
-  },
-  decrement: () => {
-  }
-});
-const LoadingProvider = ({ children }) => {
-  const [count, setCount] = useState(0);
-  const increment = useCallback(() => setCount((prev) => prev + 1), []);
-  const decrement = useCallback(() => setCount((prev) => Math.max(0, prev - 1)), []);
-  const value = useMemo(() => ({ increment, decrement }), [increment, decrement]);
-  return /* @__PURE__ */ jsxDEV(LoadingContext.Provider, { value, children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/loading-context.tsx",
-    lineNumber: 26,
-    columnNumber: 10
-  }, void 0);
-};
-const useLoading = () => {
-  return useContext(LoadingContext);
-};
-const useLanguage$1 = () => {
-  const changeLanguage = (lng) => {
-    console.log("Changing language to:", lng);
-    i18next.changeLanguage(lng);
+function useResultFetcher(fn, options) {
+  const [data, setData] = useState();
+  const [error, setError] = useState();
+  const [errors, setErrors] = useState();
+  const [isFetching, setIsFetching] = useState(false);
+  const fetch = useCallback(
+    async (params, opts) => {
+      setIsFetching(true);
+      setError(void 0);
+      setErrors(void 0);
+      try {
+        const result = await fn(params);
+        if (result.success) {
+          setData(result.data);
+          opts?.onSuccess?.(result.data);
+          options?.onSuccess?.(result.data);
+        } else {
+          setError(result.error);
+          setErrors(result.errors);
+          opts?.onError?.(result.error, result.errors);
+          options?.onError?.(result.error, result.errors);
+        }
+      } catch (error2) {
+        throw error2;
+      } finally {
+        setIsFetching(false);
+      }
+    },
+    [fn]
+  );
+  return {
+    data,
+    error,
+    errors,
+    isFetching,
+    fetch
   };
-  const lang = i18next.language;
-  const currentLanguage = lang ? lang.split("-")[0] : void 0;
-  const availableLanguages = Object.keys(resources);
-  return { changeLanguage, availableLanguages, currentLanguage };
-};
+}
+function useGoogleLogin() {
+  const redirectToGoogle = useCallback(async () => {
+    const url = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + appConfig.googleClientId + "&redirect_uri=http://localhost:3000/auth/google/callback&response_type=code&scope=openid%20profile%20email";
+    window.location.href = url;
+  }, []);
+  const fetcher = useResultFetcher(authService.loginWithGoogle);
+  return {
+    redirectToGoogle,
+    fetcher
+  };
+}
 const authReducer = (state, action) => {
   switch (action.type) {
-    case "INITIALIZE":
-      return {
-        ...state,
-        ...action.payload,
-        isInitialized: true
-      };
     case "LOGIN":
       return {
         ...state,
@@ -563,114 +631,117 @@ const authReducer = (state, action) => {
 };
 const AuthContext = createContext({
   isAuthenticated: null,
-  isInitialized: false,
-  logIn: () => Promise.resolve({ success: false, data: void 0 }),
+  logIn: () => Promise.resolve(),
+  loginWithGoogle: () => Promise.resolve(),
+  redirectToGoogle: () => {
+  },
   logOut: () => Promise.resolve(),
   setUrlName: () => {
   },
   userId: void 0,
   urlName: void 0
 });
-const AuthProvider = ({ children }) => {
-  const [state, dispatch] = useReducer(authReducer, initialAuthStatus);
-  const { changeLanguage } = useLanguage$1();
-  const { increment, decrement } = useLoading();
+const AuthProvider = ({
+  children,
+  initialIsAuthenticated,
+  userData
+}) => {
+  const [state, dispatch] = useReducer(authReducer, {
+    ...initialAuthStatus,
+    isAuthenticated: initialIsAuthenticated ?? null,
+    userId: userData?.id,
+    urlName: userData?.urlName,
+    lang: userData?.languageCode
+  });
+  console.log("AuthContext", userData);
   const _dispatch = useDispatch();
   const queryClient2 = useQueryClient();
-  const _logIn = async (loginDto) => {
-    try {
-      await authService.login(loginDto);
-      const me = (await userProfileService.GetMe()).data;
-      if (me) {
-        dispatch({
-          type: "LOGIN",
-          payload: {
-            userId: me.id,
-            urlName: me.urlName,
-            lang: me.languageCode || "en"
+  const navigate = useNavigate();
+  const { fetch: me } = useResultFetcher(userProfileService.getMe, {});
+  const { fetch: login2 } = useResultFetcher(authService.login, {
+    onSuccess: async () => {
+      await me(void 0, {
+        onSuccess: (data) => {
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              userId: data?.id,
+              urlName: data?.urlName,
+              lang: data?.languageCode || "en"
+            }
+          });
+        }
+      });
+    }
+  });
+  const { fetch: logout } = useResultFetcher(authService.logout, {
+    onSuccess: () => {
+      dispatch({ type: "LOGOUT" });
+      clearUserData();
+    }
+  });
+  const { redirectToGoogle, fetcher: loginWithGoogle } = useGoogleLogin();
+  const handleLoginWithGoogle = async (code) => {
+    await loginWithGoogle.fetch(code, {
+      onSuccess: async () => {
+        await me(void 0, {
+          onSuccess: async (data) => {
+            dispatch({
+              type: "LOGIN",
+              payload: {
+                userId: data?.id,
+                urlName: data?.urlName,
+                lang: data?.languageCode || "en"
+              }
+            });
           }
         });
       }
-    } catch (err) {
-      console.error("Login failed:", err);
-    }
+    });
   };
   const clearUserData = useCallback(() => {
     queryClient2.clear();
     _dispatch(resetState());
   }, [queryClient2, _dispatch]);
-  const _logOut = useCallback(async () => {
-    increment();
-    await authService.logout();
-    dispatch({ type: "LOGOUT" });
-    clearUserData();
-    decrement();
-  }, [increment, decrement, clearUserData]);
   const setUrlName = useCallback((urlName) => {
     dispatch({
       type: "UPDATE_URL_NAME",
       payload: urlName
     });
   }, []);
-  const initializeRef = React.useRef(false);
   useEffect(() => {
-    if (initializeRef.current) return;
-    initializeRef.current = true;
-    const initialize = async () => {
-      increment();
-      try {
-        const result = await userProfileService.GetMe();
-        if (!result.success) {
-          dispatch({
-            type: "INITIALIZE",
-            payload: {
-              isAuthenticated: false,
-              lang: "en"
-            }
-          });
-          return;
-        }
-        dispatch({
-          type: "INITIALIZE",
-          payload: {
-            isAuthenticated: true,
-            userId: result.data?.id,
-            urlName: result.data?.urlName,
-            lang: result.data?.languageCode || "en"
-          }
-        });
-        changeLanguage(result.data?.languageCode || "en");
-      } finally {
-        decrement();
-      }
+    const handleRedirectToOnboarding = () => {
+      console.log("Redirect to onboarding");
+      navigate("/onboarding");
     };
-    initialize();
-  }, []);
+    authEvents.on("redirectToOnboarding", handleRedirectToOnboarding);
+    return () => {
+      authEvents.off("redirectToOnboarding", handleRedirectToOnboarding);
+    };
+  }, [navigate]);
   const contextValue = useMemo(
     () => ({
       isAuthenticated: state.isAuthenticated,
-      isInitialized: state.isInitialized,
       userId: state.userId,
       urlName: state.urlName,
-      logIn: _logIn,
-      logOut: _logOut,
+      logIn: login2,
+      loginWithGoogle: handleLoginWithGoogle,
+      redirectToGoogle,
+      logOut: logout,
       setUrlName
     }),
     [
       state.isAuthenticated,
-      state.isInitialized,
       state.userId,
       state.urlName,
-      _logIn,
-      _logOut,
+      login2,
+      handleLoginWithGoogle,
+      redirectToGoogle,
+      logout,
       setUrlName
     ]
   );
-  return /* @__PURE__ */ jsxDEV(AuthContext.Provider, { value: contextValue, children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/auth/auth-context.tsx",
-    lineNumber: 187,
-    columnNumber: 10
-  }, void 0);
+  return /* @__PURE__ */ jsx(AuthContext.Provider, { value: contextValue, children });
 };
 const buttonSizes = {
   xs: "px-2 py-1 text-xs",
@@ -695,7 +766,7 @@ const buttonVariants = {
 };
 const Button = forwardRef(
   ({ onClick, variant = "primary", sz = "lg-1", className, children, disabled = false, ...props }, ref) => {
-    return /* @__PURE__ */ jsxDEV(
+    return /* @__PURE__ */ jsx(
       "button",
       {
         type: "button",
@@ -714,15 +785,7 @@ const Button = forwardRef(
         ref,
         ...props,
         children
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/button/button.tsx",
-        lineNumber: 46,
-        columnNumber: 7
-      },
-      void 0
+      }
     );
   }
 );
@@ -766,7 +829,7 @@ const Avatar = ({
   useEffect(() => {
     setImgSrc(src || emptyAvatar);
   }, [src]);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(
     "div",
     {
       className: clsx(
@@ -776,36 +839,16 @@ const Avatar = ({
         shapeClass,
         className
       ),
-      children: /* @__PURE__ */ jsxDEV("div", { className: clsx("absolute inset-0 bg-bg-main overflow-hidden"), children: /* @__PURE__ */ jsxDEV(
+      children: /* @__PURE__ */ jsx("div", { className: clsx("absolute inset-0 bg-bg-main overflow-hidden"), children: /* @__PURE__ */ jsx(
         "img",
         {
           src: imgSrc || emptyAvatar,
           alt,
           className: clsx("relative z-0 w-full h-full object-cover"),
           onError: () => setImgSrc(emptyAvatar)
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/avatar/avatar.tsx",
-          lineNumber: 56,
-          columnNumber: 9
-        },
-        void 0
-      ) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/avatar/avatar.tsx",
-        lineNumber: 55,
-        columnNumber: 7
-      }, void 0)
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/avatar/avatar.tsx",
-      lineNumber: 34,
-      columnNumber: 5
-    },
-    void 0
+        }
+      ) })
+    }
   );
 };
 function Badge({
@@ -816,7 +859,7 @@ function Badge({
   },
   children
 }) {
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       ref,
@@ -830,7 +873,7 @@ function Badge({
       onClick,
       children: [
         children,
-        count > 0 && /* @__PURE__ */ jsxDEV(
+        count > 0 && /* @__PURE__ */ jsx(
           "div",
           {
             className: clsx(
@@ -840,26 +883,10 @@ function Badge({
               count > 99 ? "-right-2" : "-right-1"
             ),
             children: count > 99 ? "99+" : count
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/badge/badge.tsx",
-            lineNumber: 31,
-            columnNumber: 9
-          },
-          this
+          }
         )
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/badge/badge.tsx",
-      lineNumber: 18,
-      columnNumber: 5
-    },
-    this
+    }
   );
 }
 const checkmark = "_checkmark_1oahj_3";
@@ -876,8 +903,8 @@ const Checkbox = ({
   ...props
 }) => {
   const checkmarkClass = styles$3["checkmark"];
-  return /* @__PURE__ */ jsxDEV("label", { className: clsx("relative inline-flex items-center gap-1 select-none", className), children: [
-    /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("label", { className: clsx("relative inline-flex items-center gap-1 select-none", className), children: [
+    /* @__PURE__ */ jsx(
       "input",
       {
         ...props,
@@ -889,17 +916,9 @@ const Checkbox = ({
           "cursor-not-allowed": disabled,
           "text-red-500": isWrong
         })
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/checkbox/checkbox.tsx",
-        lineNumber: 30,
-        columnNumber: 7
-      },
-      void 0
+      }
     ),
-    /* @__PURE__ */ jsxDEV(
+    /* @__PURE__ */ jsx(
       "span",
       {
         className: clsx(
@@ -913,26 +932,10 @@ const Checkbox = ({
           "before:m-0 before:rounded-sm before:bg-bg-second before:z-[2]",
           "peer-checked:after:visible peer-checked:after:opacity-100"
         )
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/checkbox/checkbox.tsx",
-        lineNumber: 41,
-        columnNumber: 7
-      },
-      void 0
+      }
     ),
-    /* @__PURE__ */ jsxDEV("span", { className: clsx("text-text-main text-sm", className), children: label }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/checkbox/checkbox.tsx",
-      lineNumber: 54,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/checkbox/checkbox.tsx",
-    lineNumber: 29,
-    columnNumber: 5
-  }, void 0);
+    /* @__PURE__ */ jsx("span", { className: clsx("text-text-main text-sm", className), children: label })
+  ] });
 };
 const style = {
   "user-bg-image": "_user-bg-image_1igzi_1"
@@ -946,7 +949,7 @@ function BackgroundImage({
   useEffect(() => {
     document.documentElement.style.setProperty("--bg-image", `url(${src})`);
   }, [src]);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(
     "div",
     {
       className: clsx(
@@ -957,19 +960,11 @@ function BackgroundImage({
       ),
       "aria-label": alt,
       children
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/background-image/background-image.tsx",
-      lineNumber: 22,
-      columnNumber: 5
-    },
-    this
+    }
   );
 }
 const Link = ({ to, children, onClick, className = "", ...props }) => {
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(
     Link$1,
     {
       to,
@@ -982,23 +977,11 @@ const Link = ({ to, children, onClick, className = "", ...props }) => {
       onClick,
       ...props,
       children
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/link/link.tsx",
-      lineNumber: 16,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const ListItem = ({ key, className, children, ...props }) => {
-  return /* @__PURE__ */ jsxDEV("li", { className, ...props, children }, key, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/list/list.tsx",
-    lineNumber: 14,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx("li", { className, ...props, children }, key);
 };
 const List = ({
   listItems,
@@ -1006,18 +989,10 @@ const List = ({
   className,
   itemClassName
 }) => {
-  return /* @__PURE__ */ jsxDEV("ul", { className, children: [
-    listItems?.map((item, index) => /* @__PURE__ */ jsxDEV(ListItem, { className: `${itemClassName} ${item.className}`, children: item.children }, item.key ?? index, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/list/list.tsx",
-      lineNumber: 29,
-      columnNumber: 9
-    }, void 0)),
+  return /* @__PURE__ */ jsxs("ul", { className, children: [
+    listItems?.map((item, index) => /* @__PURE__ */ jsx(ListItem, { className: `${itemClassName} ${item.className}`, children: item.children }, item.key ?? index)),
     children
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/list/list.tsx",
-    lineNumber: 27,
-    columnNumber: 5
-  }, void 0);
+  ] });
 };
 List.Item = ListItem;
 const sizeClasses$3 = {
@@ -1080,8 +1055,8 @@ const Logo = ({
   className = "",
   ...props
 }) => {
-  return /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col items-center", children: [
-    /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center", children: [
+    /* @__PURE__ */ jsx(
       "h1",
       {
         ...props,
@@ -1092,17 +1067,9 @@ const Logo = ({
           className
         ),
         children: "Fatagram"
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/logo/logo.tsx",
-        lineNumber: 76,
-        columnNumber: 7
-      },
-      void 0
+      }
     ),
-    hasSlogan && /* @__PURE__ */ jsxDEV(
+    hasSlogan && /* @__PURE__ */ jsx(
       "h2",
       {
         className: clsx(
@@ -1110,21 +1077,9 @@ const Logo = ({
           "text-gradient-second font-light font-bagel_fat_one select-none whitespace-nowrap"
         ),
         children: "Share your fun moments with the world!"
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/logo/logo.tsx",
-        lineNumber: 88,
-        columnNumber: 9
-      },
-      void 0
+      }
     )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/logo/logo.tsx",
-    lineNumber: 75,
-    columnNumber: 5
-  }, void 0);
+  ] });
 };
 const useClickOutside = (refTarget, refException, callback) => {
   useEffect(() => {
@@ -1142,9 +1097,14 @@ const useClickOutside = (refTarget, refException, callback) => {
   }, [refTarget, refException, callback]);
 };
 const SelectBox = ({
+  title: title2,
+  isRequired = false,
   options,
   selectedOption,
   onSelect,
+  optionClassName,
+  optionActiveClassName,
+  dropdownClassName,
   className
 }) => {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -1158,56 +1118,43 @@ const SelectBox = ({
       if (isOpen) setIsOpen(false);
     }
   );
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("relative", className), children: [
-    /* @__PURE__ */ jsxDEV("button", { ref: btnRef, className: "w-full", children: /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: clsx("relative"), children: [
+    title2 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 mb-1 ml-1", children: [
+      /* @__PURE__ */ jsx("label", { className: "text-sm text-text-secondary font-medium", children: title2 }),
+      isRequired && /* @__PURE__ */ jsx("span", { className: "text-red-400", children: "*" })
+    ] }),
+    /* @__PURE__ */ jsx("button", { ref: btnRef, className: clsx("w-full", className), children: /* @__PURE__ */ jsxs(
       "div",
       {
         className: clsx(
           "flex items-center justify-between cursor-pointer",
-          "bg-bg-fourth px-4 py-2 rounded-xl shadow-md gap-5",
+          "bg-bg-fourth px-4 py-2 text-[13px] rounded-xl shadow-md gap-5",
           "hover:bg-bg-hover transition-colors"
         ),
         onClick: () => setIsOpen(!isOpen),
         children: [
-          /* @__PURE__ */ jsxDEV(Text, { sz: "md-2", children: options.find((opt) => opt.key === selected)?.value }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/selectbox/selectbox.tsx",
-            lineNumber: 50,
-            columnNumber: 11
-          }, void 0),
-          /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-caret-down" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/selectbox/selectbox.tsx",
-            lineNumber: 51,
-            columnNumber: 11
-          }, void 0)
+          /* @__PURE__ */ jsx(Text, { sz: "md-2", children: options.find((opt) => opt.key === selected)?.value }),
+          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-caret-down" })
         ]
-      },
-      void 0,
-      true,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/selectbox/selectbox.tsx",
-        lineNumber: 42,
-        columnNumber: 9
-      },
-      void 0
-    ) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/selectbox/selectbox.tsx",
-      lineNumber: 41,
-      columnNumber: 7
-    }, void 0),
-    isOpen && /* @__PURE__ */ jsxDEV(
+      }
+    ) }),
+    isOpen && /* @__PURE__ */ jsx(
       "div",
       {
         className: clsx(
           "absolute w-full animate-dropdown-slide",
-          "bg-bg-card rounded-lg shadow-md mt-1 z-50 border border-border-main"
+          "bg-bg-card rounded-lg shadow-md mt-1 z-50 border border-border-main",
+          dropdownClassName
         ),
         ref: selectBoxRef,
-        children: /* @__PURE__ */ jsxDEV("ul", { className: "p-1", children: options.map((item, index) => /* @__PURE__ */ jsxDEV(
+        children: /* @__PURE__ */ jsx("ul", { className: "p-1", children: options.map((item, index) => /* @__PURE__ */ jsx(
           "li",
           {
             className: clsx(
               "px-4 py-2 hover:bg-bg-hover",
-              "cursor-pointer rounded-lg transition-colors"
+              "cursor-pointer rounded-lg transition-colors",
+              optionClassName,
+              selected === item.key && optionActiveClassName
             ),
             onClick: () => {
               setSelected(item.key);
@@ -1216,34 +1163,11 @@ const SelectBox = ({
             },
             children: item.value
           },
-          index,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/selectbox/selectbox.tsx",
-            lineNumber: 65,
-            columnNumber: 15
-          },
-          void 0
-        )) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/selectbox/selectbox.tsx",
-          lineNumber: 63,
-          columnNumber: 11
-        }, void 0)
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/selectbox/selectbox.tsx",
-        lineNumber: 56,
-        columnNumber: 9
-      },
-      void 0
+          index
+        )) })
+      }
     )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/selectbox/selectbox.tsx",
-    lineNumber: 40,
-    columnNumber: 5
-  }, void 0);
+  ] });
 };
 const sizeClasses$2 = {
   xs: "h-2",
@@ -1261,7 +1185,7 @@ const sizeClasses$2 = {
   "xl-3": "h-72"
 };
 const Skeleton = ({ className = "", sz = "md-1", variant = "text" }) => {
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(
     "div",
     {
       className: clsx(
@@ -1270,41 +1194,35 @@ const Skeleton = ({ className = "", sz = "md-1", variant = "text" }) => {
         sizeClasses$2[sz],
         className
       )
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/skeleton/skeleton.tsx",
-      lineNumber: 30,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const styles$2 = {
-  "primary-textbox": "_primary-textbox_3nvi8_1",
-  "primary-textbox-wrong": "_primary-textbox-wrong_3nvi8_28"
+  "primary-textbox": "_primary-textbox_13edf_1",
+  "primary-textbox-wrong": "_primary-textbox-wrong_13edf_25"
 };
 const sizeClasses$1 = {
-  xs: "px-2 py-1 text-xs",
-  "sm-1": "px-3 py-1 text-[13px] ",
-  "sm-2": "px-4 py-2 text-[13px] ",
-  "sm-3": "px-5 py-2 text-[13px] ",
-  "md-1": "px-6 py-3 text-base ",
-  "md-2": "px-7 py-3 text-base ",
-  "md-3": "px-8 py-4 text-base ",
-  "lg-1": "px-8 py-4 text-base ",
-  "lg-2": "px-9 py-4 text-base ",
-  "lg-3": "px-10 py-5 text-base ",
-  "xl-1": "px-10 py-5 text-xl ",
-  "xl-2": "px-12 py-6 text-2xl ",
-  "xl-3": "px-14 py-7 text-3xl "
+  xs: { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
+  "sm-1": { mainText: "px-3 py-1 text-[13px] ", titleText: "text-sm" },
+  "sm-2": { mainText: "px-4 py-2 text-[13px] ", titleText: "text-sm" },
+  "sm-3": { mainText: "px-5 py-2 text-[13px] ", titleText: "text-sm" },
+  "md-1": { mainText: "px-6 py-3 text-base ", titleText: "text-base" },
+  "md-2": { mainText: "px-7 py-3 text-base ", titleText: "text-base" },
+  "md-3": { mainText: "px-8 py-4 text-base ", titleText: "text-base" },
+  "lg-1": { mainText: "px-8 py-4 text-base ", titleText: "text-base" },
+  "lg-2": { mainText: "px-9 py-4 text-base ", titleText: "text-base" },
+  "lg-3": { mainText: "px-10 py-5 text-base ", titleText: "text-base" },
+  "xl-1": { mainText: "px-10 py-5 text-xl ", titleText: "text-xl" },
+  "xl-2": { mainText: "px-12 py-6 text-2xl ", titleText: "text-2xl" },
+  "xl-3": { mainText: "px-14 py-7 text-3xl ", titleText: "text-3xl" }
 };
 const Textbox = React.forwardRef(
   ({
     disabled = false,
     isWrong = false,
     wrongMessage,
+    title: title2,
+    isRequired = false,
     className,
     sz = "sm-1",
     type = "text",
@@ -1313,9 +1231,22 @@ const Textbox = React.forwardRef(
   }, ref) => {
     const [showPassword, setShowPassword] = React.useState(false);
     const typeOfText = type === "text" ? "text" : type === "password" ? showPassword ? "text" : "password" : type === "search" ? "search" : type;
-    return /* @__PURE__ */ jsxDEV("div", { className: clsx(wrapperClassName), children: [
-      /* @__PURE__ */ jsxDEV("div", { className: clsx("relative"), children: [
-        /* @__PURE__ */ jsxDEV(
+    return /* @__PURE__ */ jsxs("div", { className: clsx(wrapperClassName), children: [
+      /* @__PURE__ */ jsxs("div", { className: clsx("relative"), children: [
+        title2 && /* @__PURE__ */ jsxs(
+          "div",
+          {
+            className: clsx(
+              "flex items-center gap-1 ml-1 mb-1 font-medium",
+              sizeClasses$1[sz].titleText
+            ),
+            children: [
+              /* @__PURE__ */ jsx("label", { htmlFor: title2, children: title2 }),
+              isRequired && /* @__PURE__ */ jsx("span", { className: "text-red-400", children: "*" })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsx(
           "input",
           {
             type: typeOfText,
@@ -1331,66 +1262,26 @@ const Textbox = React.forwardRef(
                 [styles$2["primary-textbox-wrong"]]: isWrong && !disabled,
                 [styles$2["primary-textbox"]]: !isWrong && !disabled
               },
-              sizeClasses$1[sz],
+              sizeClasses$1[sz].mainText,
               className
             ),
             disabled,
             ...props
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textbox/textbox.tsx",
-            lineNumber: 60,
-            columnNumber: 11
-          },
-          void 0
+          }
         ),
-        type === "password" && /* @__PURE__ */ jsxDEV(
+        type === "password" && /* @__PURE__ */ jsx(
           "button",
           {
             type: "button",
             className: clsx("absolute right-0 top-1/2 -translate-y-1/2 mr-5"),
             onClick: () => setShowPassword(!showPassword),
-            children: showPassword ? /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid fa-eye text-secondary-500") }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textbox/textbox.tsx",
-              lineNumber: 87,
-              columnNumber: 17
-            }, void 0) : /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid fa-eye-slash text-text-main") }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textbox/textbox.tsx",
-              lineNumber: 89,
-              columnNumber: 17
-            }, void 0)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textbox/textbox.tsx",
-            lineNumber: 81,
-            columnNumber: 13
-          },
-          void 0
+            children: showPassword ? /* @__PURE__ */ jsx("i", { className: clsx("fa-solid fa-eye text-secondary-500") }) : /* @__PURE__ */ jsx("i", { className: clsx("fa-solid fa-eye-slash text-text-main") })
+          }
         ),
-        type === "search" && /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-text-main" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textbox/textbox.tsx",
-          lineNumber: 94,
-          columnNumber: 13
-        }, void 0)
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textbox/textbox.tsx",
-        lineNumber: 59,
-        columnNumber: 9
-      }, void 0),
-      isWrong && /* @__PURE__ */ jsxDEV("span", { className: "text-red-400", children: wrongMessage }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textbox/textbox.tsx",
-        lineNumber: 97,
-        columnNumber: 21
-      }, void 0)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textbox/textbox.tsx",
-      lineNumber: 58,
-      columnNumber: 7
-    }, void 0);
+        type === "search" && /* @__PURE__ */ jsx("i", { className: "fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-text-main" })
+      ] }),
+      isWrong && /* @__PURE__ */ jsx("span", { className: "text-red-400", children: wrongMessage })
+    ] });
   }
 );
 Textbox.displayName = "Textbox";
@@ -1426,7 +1317,7 @@ const TextArea = forwardRef(
     name = "",
     ...props
   }, ref) => {
-    return /* @__PURE__ */ jsxDEV(
+    return /* @__PURE__ */ jsx(
       "textarea",
       {
         name,
@@ -1446,15 +1337,7 @@ const TextArea = forwardRef(
           className
         ),
         ...props
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/textarea/textarea.tsx",
-        lineNumber: 46,
-        columnNumber: 7
-      },
-      void 0
+      }
     );
   }
 );
@@ -1498,35 +1381,61 @@ const Text = forwardRef(
     children,
     ...props
   }, ref) => {
-    return /* @__PURE__ */ jsxDEV(
+    return /* @__PURE__ */ jsx(
       Component,
       {
         className: clsx(textSizes[sz], weightClasses[weight], colorClasses[color], wrap, className),
         ref,
         ...props,
         children
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/text/text.tsx",
-        lineNumber: 64,
-        columnNumber: 7
-      },
-      void 0
+      }
     );
   }
 );
 const Footer = ({ className }) => {
-  return /* @__PURE__ */ jsxDEV("footer", { className: clsx("text-center text-text-third text-sm py-4", className), children: [
+  return /* @__PURE__ */ jsxs("footer", { className: clsx("text-center text-text-third text-sm py-4", className), children: [
     "© ",
     (/* @__PURE__ */ new Date()).getFullYear(),
     " Fatagram. All rights reserved."
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/atoms/footer/footer.tsx",
-    lineNumber: 9,
-    columnNumber: 5
-  }, void 0);
+  ] });
+};
+const SelectDay = ({
+  title: title2,
+  isRequired = false,
+  isWrong = false,
+  wrongMessage,
+  className,
+  value,
+  onChange,
+  ...props
+}) => {
+  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-1", children: [
+    title2 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 ml-1", children: [
+      /* @__PURE__ */ jsx("label", { className: "text-sm text-text-secondary font-medium", children: title2 }),
+      isRequired && /* @__PURE__ */ jsx("span", { className: "text-red-400", children: "*" })
+    ] }),
+    /* @__PURE__ */ jsx(
+      "input",
+      {
+        type: "date",
+        value,
+        onChange,
+        className: clsx(
+          "border-[2px] text-text-main font-normal rounded-xl outline-none",
+          "text-lg caret-primary-500 selection:!bg-primary-600",
+          "transition-all duration-300 ease-out",
+          "px-3 py-1 text-[13px] shadow-sm",
+          "bg-bg-fourth border-border-main",
+          "focus:ring-2 focus:ring-primary-500",
+          isWrong && "border-error",
+          className
+        ),
+        max: (/* @__PURE__ */ new Date()).toISOString().split("T")[0],
+        ...props
+      }
+    ),
+    isWrong && wrongMessage && /* @__PURE__ */ jsx("span", { className: "text-xs text-error ml-1", children: wrongMessage })
+  ] });
 };
 var TimeUnit = /* @__PURE__ */ ((TimeUnit2) => {
   TimeUnit2["Miliseconds"] = "Miliseconds";
@@ -1700,11 +1609,7 @@ function renderContent(template, values) {
   if (lastIndex < template.length) {
     parts.push(template.slice(lastIndex));
   }
-  return /* @__PURE__ */ jsxDEV(Fragment, { children: parts.map((part) => part) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/helper/render-content.tsx",
-    lineNumber: 22,
-    columnNumber: 10
-  }, this);
+  return /* @__PURE__ */ jsx(Fragment, { children: parts.map((part) => part) });
 }
 const BaseNotification = ({
   notificationDto,
@@ -1712,29 +1617,13 @@ const BaseNotification = ({
   onClick
 }) => {
   const { t } = useTranslation();
-  return /* @__PURE__ */ jsxDEV("div", { className: "flex gap-2 select-none", onClick, children: [
-    /* @__PURE__ */ jsxDEV("div", { className: "flex items-start", children: /* @__PURE__ */ jsxDEV(Avatar, { border: 0, src: notificationDto.actorImageUrl, alt: "Avatar", sz: "sm-1" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-      lineNumber: 24,
-      columnNumber: 9
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-      lineNumber: 23,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col gap-1 flex-1", children: [
-      /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", className: clsx({ "opacity-60": notificationDto.isRead }), children: renderContent(notificationDto.content ?? "", {
-        actorName: /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", weight: "bold", children: notificationDto.actorName }, notificationDto.actorId, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-          lineNumber: 30,
-          columnNumber: 15
-        }, void 0)
-      }) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-        lineNumber: 27,
-        columnNumber: 9
-      }, void 0),
-      /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: "flex gap-2 select-none", onClick, children: [
+    /* @__PURE__ */ jsx("div", { className: "flex items-start", children: /* @__PURE__ */ jsx(Avatar, { border: 0, src: notificationDto.actorImageUrl, alt: "Avatar", sz: "sm-1" }) }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-1 flex-1", children: [
+      /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: clsx({ "opacity-60": notificationDto.isRead }), children: renderContent(notificationDto.content ?? "", {
+        actorName: /* @__PURE__ */ jsx(Text, { sz: "sm-2", weight: "bold", children: notificationDto.actorName }, notificationDto.actorId)
+      }) }),
+      /* @__PURE__ */ jsx(
         Text,
         {
           sz: "sm-1",
@@ -1745,36 +1634,12 @@ const BaseNotification = ({
             { count: notificationDto.timeDistance.value }
           )} 
                                                 ${t("times:ago")}`
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-          lineNumber: 36,
-          columnNumber: 9
-        },
-        void 0
+        }
       ),
       children
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-      lineNumber: 26,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: "flex items-center", children: !notificationDto.isRead && /* @__PURE__ */ jsxDEV("div", { className: "w-2 h-2 bg-primary-500 rounded-full" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-      lineNumber: 55,
-      columnNumber: 37
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-      lineNumber: 54,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/base-notification.tsx",
-    lineNumber: 22,
-    columnNumber: 5
-  }, void 0);
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "flex items-center", children: !notificationDto.isRead && /* @__PURE__ */ jsx("div", { className: "w-2 h-2 bg-primary-500 rounded-full" }) })
+  ] });
 };
 const messageMap = {};
 const NewFriendRequest = ({
@@ -1810,30 +1675,10 @@ const NewFriendRequest = ({
     };
     deleteFriendRequest();
   };
-  return /* @__PURE__ */ jsxDEV(BaseNotification, { notificationDto, onClick, children: !message ? /* @__PURE__ */ jsxDEV("div", { className: clsx("flex", "gap-1", "mt-1", "justify-start"), children: [
-    /* @__PURE__ */ jsxDEV(Button, { sz: "sm-1", variant: "primary", onClick: handleAccept, children: t("user:profileHeader.acceptButton") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/new-friend-request.tsx",
-      lineNumber: 59,
-      columnNumber: 11
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(Button, { sz: "sm-1", variant: "secondary", onClick: handleDelete, children: t("user:profileHeader.declineButton") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/new-friend-request.tsx",
-      lineNumber: 62,
-      columnNumber: 11
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/new-friend-request.tsx",
-    lineNumber: 58,
-    columnNumber: 9
-  }, void 0) : /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", className: clsx("opacity-70"), children: message }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/new-friend-request.tsx",
-    lineNumber: 67,
-    columnNumber: 9
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/new-friend-request.tsx",
-    lineNumber: 56,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick, children: !message ? /* @__PURE__ */ jsxs("div", { className: clsx("flex", "gap-1", "mt-1", "justify-start"), children: [
+    /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "primary", onClick: handleAccept, children: t("user:profileHeader.acceptButton") }),
+    /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "secondary", onClick: handleDelete, children: t("user:profileHeader.declineButton") })
+  ] }) : /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: clsx("opacity-70"), children: message }) });
 };
 const NotificationFactory = ({
   notificationDto,
@@ -1842,23 +1687,11 @@ const NotificationFactory = ({
 }) => {
   switch (notificationDto.type) {
     case "NewFriendRequest":
-      return /* @__PURE__ */ jsxDEV(NewFriendRequest, { notificationDto, onClick }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-factory.tsx",
-        lineNumber: 18,
-        columnNumber: 14
-      }, void 0);
+      return /* @__PURE__ */ jsx(NewFriendRequest, { notificationDto, onClick });
     case "FriendRequestAccepted":
-      return /* @__PURE__ */ jsxDEV(BaseNotification, { notificationDto, onClick }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-factory.tsx",
-        lineNumber: 21,
-        columnNumber: 14
-      }, void 0);
+      return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick });
     default:
-      return /* @__PURE__ */ jsxDEV(BaseNotification, { notificationDto: NotificationDefault, onClick }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-factory.tsx",
-        lineNumber: 24,
-        columnNumber: 14
-      }, void 0);
+      return /* @__PURE__ */ jsx(BaseNotification, { notificationDto: NotificationDefault, onClick });
   }
 };
 const ToastContext = React.createContext({
@@ -1886,92 +1719,44 @@ const ToastManager = React.memo(function ToastManager2({
     setTimer(newTimer);
   }, []);
   const value = React.useMemo(() => ({ pushToast }), [pushToast]);
-  return /* @__PURE__ */ jsxDEV(ToastContext.Provider, { value, children: [
+  return /* @__PURE__ */ jsxs(ToastContext.Provider, { value, children: [
     children,
-    toast && /* @__PURE__ */ jsxDEV(
+    toast && /* @__PURE__ */ jsxs(
       "div",
       {
         className: `animate-left-to-right fixed bottom-8 left-8 rounded-2xl shadow-2xl
                     bg-bg-second max-w-full z-50
                      ${className}`,
         children: [
-          toast.type === "notification" ? /* @__PURE__ */ jsxDEV("div", { className: "px-4 py-4 flex flex-col gap-4", children: [
-            /* @__PURE__ */ jsxDEV(Text, { weight: "bold", children: "New notification" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-              lineNumber: 71,
-              columnNumber: 15
-            }, this),
-            /* @__PURE__ */ jsxDEV(
+          toast.type === "notification" ? /* @__PURE__ */ jsxs("div", { className: "px-4 py-4 flex flex-col gap-4", children: [
+            /* @__PURE__ */ jsx(Text, { weight: "bold", children: "New notification" }),
+            /* @__PURE__ */ jsx(
               NotificationFactory,
               {
                 notificationDto: toast.payload.notificationDto,
                 onClick: () => navigate(toast.payload.notificationDto.link)
-              },
-              void 0,
-              false,
-              {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-                lineNumber: 72,
-                columnNumber: 15
-              },
-              this
+              }
             )
-          ] }, void 0, true, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-            lineNumber: 70,
-            columnNumber: 13
-          }, this) : /* @__PURE__ */ jsxDEV("div", { children: "More" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-            lineNumber: 78,
-            columnNumber: 13
-          }, this),
-          /* @__PURE__ */ jsxDEV(
+          ] }) : /* @__PURE__ */ jsx("div", { children: "More" }),
+          /* @__PURE__ */ jsx(
             Button,
             {
               sz: "sm-1",
               variant: "third",
               className: "absolute top-2 right-2",
               onClick: () => setToast(null),
-              children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-xmark" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-                lineNumber: 86,
-                columnNumber: 13
-              }, this)
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-              lineNumber: 80,
-              columnNumber: 11
-            },
-            this
+              children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+            }
           )
         ]
-      },
-      void 0,
-      true,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-        lineNumber: 64,
-        columnNumber: 9
-      },
-      this
+      }
     )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-    lineNumber: 61,
-    columnNumber: 5
-  }, this);
+  ] });
 });
 const ToastProvider = React.memo(function ToastProvider2({
   children
 }) {
-  return /* @__PURE__ */ jsxDEV(ToastManager, { children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/toast-context.tsx",
-    lineNumber: 99,
-    columnNumber: 10
-  }, this);
+  return /* @__PURE__ */ jsx(ToastManager, { children });
 });
 const DialogContext = createContext({
   isOpen: false,
@@ -2003,30 +1788,61 @@ const DialogProvider = React.memo(function DialogProvider2({
     }),
     [isOpen, dialogProps, openDialog, closeDialog]
   );
-  return /* @__PURE__ */ jsxDEV(DialogContext.Provider, { value, children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/dialog-context.tsx",
-    lineNumber: 48,
-    columnNumber: 10
-  }, this);
+  return /* @__PURE__ */ jsx(DialogContext.Provider, { value, children });
 });
+const LoadingPage = () => {
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx(
+        "fixed inset-0 z-[9999] flex justify-center items-center bg-bg-main"
+      ),
+      children: /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col items-center"), children: /* @__PURE__ */ jsx(Logo, { sz: "lg-1", hasSlogan: false }) })
+    }
+  );
+};
+const LoadingContext = React.createContext({
+  count: 0,
+  increment: () => {
+  },
+  decrement: () => {
+  }
+});
+const LoadingProvider = ({ children }) => {
+  const [count, setCount] = useState(0);
+  const increment = useCallback(() => setCount((prev) => prev + 1), []);
+  const decrement = useCallback(() => setCount((prev) => Math.max(0, prev - 1)), []);
+  const value = useMemo(() => ({ count, increment, decrement }), [count, increment, decrement]);
+  return /* @__PURE__ */ jsxs(LoadingContext.Provider, { value, children: [
+    count > 0 && /* @__PURE__ */ jsx(LoadingPage, {}),
+    children
+  ] });
+};
 const availableThemes = [
   { key: "light", label: "common:themes:light" },
-  { key: "dark", label: "common:themes:dark" }
+  { key: "dark", label: "common:themes:dark" },
+  { key: "universe", label: "common:themes:universe" }
 ];
 const ThemeContext = createContext({
   theme: "light",
   setTheme: () => {
   }
 });
+function getInitialTheme() {
+  if (typeof window === "undefined") return "light";
+  const currentTheme = document.documentElement.getAttribute("data-theme");
+  if (availableThemes.some((t) => t.key === currentTheme)) {
+    return currentTheme;
+  }
+  return "light";
+}
 function ThemeProvider({ children }) {
-  const [theme2, setTheme] = useState("light");
+  const [theme2, setTheme] = useState(getInitialTheme);
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
-    if (storedTheme && availableThemes.some((t) => t.key === storedTheme)) {
+    const currentTheme = document.documentElement.getAttribute("data-theme");
+    if (storedTheme && storedTheme !== currentTheme && availableThemes.some((t) => t.key === storedTheme)) {
       setTheme(storedTheme);
-    } else {
-      const prefersDark = window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
-      setTheme(prefersDark ? "dark" : "light");
     }
   }, []);
   useEffect(() => {
@@ -2034,1921 +1850,29 @@ function ThemeProvider({ children }) {
     root.setAttribute("data-theme", theme2);
     localStorage.setItem("theme", theme2);
   }, [theme2]);
-  return /* @__PURE__ */ jsxDEV(ThemeContext.Provider, { value: { theme: theme2, setTheme }, children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/contexts/common/theme-context.tsx",
-    lineNumber: 43,
-    columnNumber: 10
-  }, this);
+  return /* @__PURE__ */ jsx(ThemeContext.Provider, { value: { theme: theme2, setTheme }, children });
 }
 function useTheme() {
   return useContext(ThemeContext);
 }
-function ContextTree({ children }) {
-  return /* @__PURE__ */ jsxDEV(ThemeProvider, { children: /* @__PURE__ */ jsxDEV(LoadingProvider, { children: /* @__PURE__ */ jsxDEV(DialogProvider, { children: /* @__PURE__ */ jsxDEV(AuthProvider, { children: /* @__PURE__ */ jsxDEV(ToastProvider, { children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/context-tree.tsx",
-    lineNumber: 16,
-    columnNumber: 13
-  }, this) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/context-tree.tsx",
-    lineNumber: 15,
-    columnNumber: 11
-  }, this) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/context-tree.tsx",
-    lineNumber: 14,
-    columnNumber: 9
-  }, this) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/context-tree.tsx",
-    lineNumber: 13,
-    columnNumber: 7
-  }, this) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/context-tree.tsx",
-    lineNumber: 12,
-    columnNumber: 5
-  }, this);
-}
-const LoadingPage = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("fixed inset-0 z-[9999] flex justify-center items-center bg-bg-main"), children: /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-col items-center"), children: /* @__PURE__ */ jsxDEV(Logo, { sz: "lg-1", hasSlogan: false }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/loading/loading-page.tsx",
-    lineNumber: 12,
-    columnNumber: 9
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/loading/loading-page.tsx",
-    lineNumber: 11,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/loading/loading-page.tsx",
-    lineNumber: 10,
-    columnNumber: 5
-  }, void 0);
-};
-function NotFoundPage() {
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  useEffect(() => {
-    document.title = "Page Not Found";
-    return () => {
-      document.title = "Fatagram";
-    };
-  });
-  return /* @__PURE__ */ jsxDEV(
-    "div",
+function ContextTree({ children, authContext }) {
+  return /* @__PURE__ */ jsx(ThemeProvider, { children: /* @__PURE__ */ jsx(
+    AuthProvider,
     {
-      className: clsx(
-        "flex flex-col items-center sm:justify-center h-full w-full gap-[20px] pt-10"
-      ),
-      children: [
-        /* @__PURE__ */ jsxDEV(Logo, { hasSlogan: false, sz: "md-2" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-          lineNumber: 28,
-          columnNumber: 7
-        }, this),
-        /* @__PURE__ */ jsxDEV(
-          Text,
-          {
-            sz: "xl-3",
-            className: clsx(
-              "font-jua bg-primary-500/70 text-primary-600 w-[200px] h-[200px] flex justify-center items-center rounded-full"
-            ),
-            children: "404"
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-            lineNumber: 29,
-            columnNumber: 7
-          },
-          this
-        ),
-        /* @__PURE__ */ jsxDEV(Text, { weight: "extrabold", sz: "lg-3", className: clsx("uppercase text-primary-600"), children: t("notFound.title") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-          lineNumber: 37,
-          columnNumber: 7
-        }, this),
-        /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", className: clsx("flex justify-center text-center"), children: t("notFound.description") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-          lineNumber: 40,
-          columnNumber: 7
-        }, this),
-        /* @__PURE__ */ jsxDEV("div", { className: clsx("flex gap-[10px]"), children: /* @__PURE__ */ jsxDEV(
-          Button,
-          {
-            className: clsx("flex items-center"),
-            onClick: () => {
-              navigate("/");
-            },
-            children: [
-              /* @__PURE__ */ jsxDEV(ArrowLeft, { className: clsx("w-5 h-5 mr-2") }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-                lineNumber: 50,
-                columnNumber: 11
-              }, this),
-              t("notFound.backButton")
-            ]
-          },
-          void 0,
-          true,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-            lineNumber: 44,
-            columnNumber: 9
-          },
-          this
-        ) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-          lineNumber: 43,
-          columnNumber: 7
-        }, this),
-        /* @__PURE__ */ jsxDEV(Footer, { className: clsx("text-text-third") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-          lineNumber: 54,
-          columnNumber: 7
-        }, this)
-      ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/not-found/not-found-page.tsx",
-      lineNumber: 23,
-      columnNumber: 5
-    },
-    this
-  );
-}
-const HomePage = () => {
-  return /* @__PURE__ */ jsxDEV("div", { children: /* @__PURE__ */ jsxDEV("h1", { children: "Home Page" }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/home/home-page.tsx",
-    lineNumber: 7,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/home/home-page.tsx",
-    lineNumber: 6,
-    columnNumber: 5
-  }, void 0);
-};
-const useActiveRoute = (to, end = false) => {
-  const resolved = useResolvedPath(to);
-  const match = useMatch({ path: resolved.pathname, end });
-  return !!match;
-};
-const PageNavbarItem = ({
-  icon,
-  title: title2,
-  description: description2,
-  path,
-  className = "",
-  onClick
-}) => {
-  const navigate = useNavigate();
-  const isFocused = useActiveRoute(path, true);
-  return /* @__PURE__ */ jsxDEV(
-    "button",
-    {
-      onClick: () => {
-        navigate(path);
-        onClick?.();
-      },
-      className: clsx(
-        "w-full text-left px-3 py-3 rounded-xl",
-        "transition-all duration-300 ease-out",
-        "relative overflow-hidden group",
-        {
-          "bg-bg-fourth border-l-4 border-l-primary-500 shadow-sm": isFocused,
-          "hover:bg-bg-third hover:shadow-sm hover:translate-x-1": !isFocused
-        },
-        className
-      ),
-      children: [
-        isFocused && /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 to-transparent pointer-events-none" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-item.tsx",
-          lineNumber: 46,
-          columnNumber: 9
-        }, void 0),
-        /* @__PURE__ */ jsxDEV("div", { className: clsx("grid grid-cols-10 relative z-10"), children: [
-          /* @__PURE__ */ jsxDEV(
-            Text,
-            {
-              sz: "md-3",
-              className: clsx(
-                "flex justify-center items-center h-full col-span-2",
-                "transition-all duration-300",
-                isFocused ? "text-primary-500 scale-110" : "text-text-second group-hover:text-primary-500 group-hover:scale-105"
-              ),
-              children: icon
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-item.tsx",
-              lineNumber: 50,
-              columnNumber: 9
-            },
-            void 0
-          ),
-          /* @__PURE__ */ jsxDEV("div", { className: "col-span-8 flex flex-col justify-center", children: [
-            /* @__PURE__ */ jsxDEV(
-              Text,
-              {
-                sz: "md-1",
-                className: clsx(
-                  "transition-colors duration-300",
-                  isFocused ? "text-primary-600 font-semibold" : "text-text-main group-hover:text-primary-600"
-                ),
-                children: title2
-              },
-              void 0,
-              false,
-              {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-item.tsx",
-                lineNumber: 63,
-                columnNumber: 11
-              },
-              void 0
-            ),
-            description2 && /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", weight: "light", className: "text-text-second mt-0.5", children: description2 }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-item.tsx",
-              lineNumber: 75,
-              columnNumber: 13
-            }, void 0)
-          ] }, void 0, true, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-item.tsx",
-            lineNumber: 62,
-            columnNumber: 9
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-item.tsx",
-          lineNumber: 49,
-          columnNumber: 7
-        }, void 0)
-      ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-item.tsx",
-      lineNumber: 28,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-const PageNavbarSection = ({
-  title: title2,
-  className,
-  titleClassName,
-  children
-}) => {
-  const [showChildren, setShowChildren] = useState(true);
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("w-full", className), children: [
-    title2 && /* @__PURE__ */ jsxDEV(
-      "div",
-      {
-        className: clsx(
-          "group flex items-center justify-between",
-          "p-2 pl-5 pr-3 cursor-pointer select-none",
-          "hover:bg-bg-third/50 rounded-lg",
-          "transition-all duration-200"
-        ),
-        onClick: () => setShowChildren(!showChildren),
-        children: [
-          /* @__PURE__ */ jsxDEV(
-            Text,
-            {
-              sz: "lg-1",
-              weight: "bold",
-              className: clsx(
-                "text-text-third group-hover:text-text-main transition-colors duration-200",
-                titleClassName
-              ),
-              children: title2
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-section.tsx",
-              lineNumber: 32,
-              columnNumber: 11
-            },
-            void 0
-          ),
-          /* @__PURE__ */ jsxDEV(
-            "i",
-            {
-              className: clsx(
-                "fas fa-chevron-down text-text-third text-sm",
-                "transition-transform duration-300",
-                "group-hover:text-primary-500",
-                showChildren ? "rotate-180" : "rotate-0"
-              )
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-section.tsx",
-              lineNumber: 42,
-              columnNumber: 11
-            },
-            void 0
-          )
-        ]
-      },
-      void 0,
-      true,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-section.tsx",
-        lineNumber: 23,
-        columnNumber: 9
-      },
-      void 0
-    ),
-    showChildren && /* @__PURE__ */ jsxDEV("div", { className: clsx("w-full animate-dropdown-slide mt-1 space-y-1"), children }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-section.tsx",
-      lineNumber: 53,
-      columnNumber: 9
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar-section.tsx",
-    lineNumber: 21,
-    columnNumber: 5
-  }, void 0);
-};
-const PageNavbar = ({ title: title2, className, children }) => {
-  return /* @__PURE__ */ jsxDEV(
-    "div",
-    {
-      className: clsx(
-        "flex flex-col gap-3",
-        "bg-bg-main shadow-md rounded-b-2xl",
-        "overflow-hidden",
-        className
-      ),
-      children: [
-        title2 && /* @__PURE__ */ jsxDEV("div", { className: "relative bg-bg-second mt-2", children: [
-          /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-secondary-500/5 pointer-events-none" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar.tsx",
-            lineNumber: 28,
-            columnNumber: 11
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(Text, { sz: "xl-1", weight: "bold", className: "relative pt-4 pb-4 px-6 text-gradient-main", children: title2 }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar.tsx",
-            lineNumber: 29,
-            columnNumber: 11
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar.tsx",
-          lineNumber: 26,
-          columnNumber: 9
-        }, void 0),
-        /* @__PURE__ */ jsxDEV("div", { className: "px-2 pb-3 space-y-1", children }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar.tsx",
-          lineNumber: 34,
-          columnNumber: 7
-        }, void 0)
-      ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/page-navbar/page-navbar.tsx",
-      lineNumber: 17,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-PageNavbar.Section = PageNavbarSection;
-PageNavbar.Item = PageNavbarItem;
-const SettingsNavbar = ({ className, onSelect }) => {
-  const { t } = useTranslation();
-  const authSettings = [
-    {
-      icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-user" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-        lineNumber: 24,
-        columnNumber: 13
-      }, void 0),
-      name: t("settings:navbar.privacy.account"),
-      path: "/settings"
-    },
-    {
-      icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-shield-halved" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-        lineNumber: 29,
-        columnNumber: 13
-      }, void 0),
-      name: t("settings:navbar.privacy.privacy"),
-      path: "/settings/privacy"
+      initialIsAuthenticated: authContext?.isAuthenticated,
+      userData: authContext?.userData,
+      children: /* @__PURE__ */ jsx(LoadingProvider, { children: /* @__PURE__ */ jsx(DialogProvider, { children: /* @__PURE__ */ jsx(ToastProvider, { children }) }) })
     }
-  ];
-  const generalSettings = [
-    {
-      icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-language" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-        lineNumber: 38,
-        columnNumber: 13
-      }, void 0),
-      name: t("settings:navbar.general.language"),
-      path: "/settings/language"
-    },
-    {
-      icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-bell" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-        lineNumber: 43,
-        columnNumber: 13
-      }, void 0),
-      name: t("settings:navbar.general.notifications"),
-      path: "/settings/notifications"
-    },
-    {
-      icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-circle-info" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-        lineNumber: 48,
-        columnNumber: 13
-      }, void 0),
-      name: t("settings:navbar.general.about"),
-      path: "/settings/about"
-    },
-    {
-      icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-palette" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-        lineNumber: 53,
-        columnNumber: 13
-      }, void 0),
-      name: t("settings:navbar.general.theme"),
-      path: "/settings/theme"
-    }
-  ];
-  return /* @__PURE__ */ jsxDEV(PageNavbar, { title: t("settings:navbar.title"), className: clsx("bg-bg-second", className), children: [
-    /* @__PURE__ */ jsxDEV(PageNavbar.Section, { title: t("settings:navbar.privacy.title"), children: authSettings.map((item, index) => /* @__PURE__ */ jsxDEV(
-      PageNavbar.Item,
-      {
-        path: item.path,
-        icon: item.icon,
-        title: item.name,
-        onClick: onSelect
-      },
-      index,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-        lineNumber: 63,
-        columnNumber: 11
-      },
-      void 0
-    )) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-      lineNumber: 61,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(PageNavbar.Section, { title: t("settings:navbar.general.title"), children: generalSettings.map((item, index) => /* @__PURE__ */ jsxDEV(
-      PageNavbar.Item,
-      {
-        path: item.path,
-        icon: item.icon,
-        title: item.name,
-        onClick: onSelect
-      },
-      index,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-        lineNumber: 74,
-        columnNumber: 11
-      },
-      void 0
-    )) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-      lineNumber: 72,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/settings-navbar.tsx",
-    lineNumber: 60,
-    columnNumber: 5
-  }, void 0);
-};
-const SettingPage = () => {
-  const { t } = useTranslation();
-  useLayoutEffect(() => {
-    document.title = t("settings:title");
-  }, [t]);
-  const [isShowNavbar, setIsShowNavbar] = React.useState(true);
-  return /* @__PURE__ */ jsxDEV(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col sm:flex-row w-full h-full bg-[var(--second-bg-color)] sm:gap-4"
-      ),
-      children: [
-        /* @__PURE__ */ jsxDEV("div", { className: clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2"), children: /* @__PURE__ */ jsxDEV(Text, { sz: "lg-3", children: /* @__PURE__ */ jsxDEV(
-          "i",
-          {
-            className: "fa-solid fa-list text-gradient-main",
-            onClick: () => setIsShowNavbar(!isShowNavbar)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-            lineNumber: 29,
-            columnNumber: 11
-          },
-          void 0
-        ) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-          lineNumber: 28,
-          columnNumber: 9
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-          lineNumber: 27,
-          columnNumber: 7
-        }, void 0),
-        isShowNavbar && /* @__PURE__ */ jsxDEV(
-          "div",
-          {
-            className: clsx("sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"),
-            onClick: () => setIsShowNavbar(false)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-            lineNumber: 36,
-            columnNumber: 9
-          },
-          void 0
-        ),
-        /* @__PURE__ */ jsxDEV(
-          SettingsNavbar,
-          {
-            className: clsx(
-              "sm:flex sm:w-[300px] sm:fixed absolute h-full sm:animate-none animate-left-to-right w-[60%] shadow-lg bg-[var(--main-bg-color)] p-2",
-              {
-                "absolute z-30": isShowNavbar,
-                hidden: !isShowNavbar
-              }
-            ),
-            onSelect: () => setIsShowNavbar(false)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-            lineNumber: 41,
-            columnNumber: 7
-          },
-          void 0
-        ),
-        /* @__PURE__ */ jsxDEV("div", { className: clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]"), children: /* @__PURE__ */ jsxDEV("div", { className: clsx("w-full max-w-[700px] p-2"), children: /* @__PURE__ */ jsxDEV(Outlet, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-          lineNumber: 53,
-          columnNumber: 11
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-          lineNumber: 52,
-          columnNumber: 9
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-          lineNumber: 51,
-          columnNumber: 7
-        }, void 0)
-      ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/settings/setting-page.tsx",
-      lineNumber: 22,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-const EditableField = ({
-  editableMode = "none",
-  title: title2,
-  value,
-  placeholder,
-  valueClassName,
-  btnChildren,
-  isEdit,
-  isError = false,
-  errorMessage,
-  noDataValue,
-  canEdit = true,
-  onChangeClick,
-  onSaveClick,
-  onCancelClick
-}) => {
-  const [inputValue, setInputValue] = React.useState(value);
-  const { t } = useTranslation();
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
-  return /* @__PURE__ */ jsxDEV("div", { className: "flex justify-between items-center w-full", children: [
-    /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", className: "font-light m-2", children: title2 }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-      lineNumber: 49,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: "flex sm:items-center items-end gap-4 sm:flex-row flex-col", children: [
-      editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxDEV("div", { className: "relative flex flex-col gap-1", children: [
-        /* @__PURE__ */ jsxDEV(
-          Textbox,
-          {
-            className: clsx("animate-fade-in px-2 py-1", {
-              "mt-[5px]": isError
-            }),
-            placeholder,
-            value: inputValue,
-            isWrong: isError,
-            onChange: (e) => setInputValue(e.target.value)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-            lineNumber: 55,
-            columnNumber: 13
-          },
-          void 0
-        ),
-        isError && /* @__PURE__ */ jsxDEV(Text, { sz: "sm-1", className: "text-red-500 ml-2 h-[5px]", children: errorMessage }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-          lineNumber: 65,
-          columnNumber: 15
-        }, void 0)
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-        lineNumber: 54,
-        columnNumber: 11
-      }, void 0) : /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", className: clsx(valueClassName), children: value ?? noDataValue }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-        lineNumber: 71,
-        columnNumber: 11
-      }, void 0),
-      canEdit && /* @__PURE__ */ jsxDEV(Fragment, { children: editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxDEV("div", { className: "animate-fade-in gap-1 flex", children: [
-        /* @__PURE__ */ jsxDEV(
-          Button,
-          {
-            disabled: value === inputValue,
-            sz: "sm-1",
-            variant: "primary",
-            onClick: () => {
-              onSaveClick?.(inputValue);
-            },
-            children: [
-              /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-floppy-disk mr-2" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-                lineNumber: 87,
-                columnNumber: 19
-              }, void 0),
-              t("settings:editableField.saveButton")
-            ]
-          },
-          void 0,
-          true,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-            lineNumber: 79,
-            columnNumber: 17
-          },
-          void 0
-        ),
-        /* @__PURE__ */ jsxDEV(
-          Button,
-          {
-            sz: "sm-1",
-            variant: "fourth",
-            onClick: () => {
-              onCancelClick?.();
-            },
-            children: t("settings:editableField.cancelButton")
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-            lineNumber: 90,
-            columnNumber: 17
-          },
-          void 0
-        )
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-        lineNumber: 78,
-        columnNumber: 15
-      }, void 0) : /* @__PURE__ */ jsxDEV(
-        Button,
-        {
-          sz: "sm-1",
-          variant: "fourth",
-          onClick: () => {
-            onChangeClick?.();
-          },
-          children: btnChildren
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-          lineNumber: 101,
-          columnNumber: 15
-        },
-        void 0
-      ) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-        lineNumber: 76,
-        columnNumber: 11
-      }, void 0)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-      lineNumber: 52,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-field.tsx",
-    lineNumber: 48,
-    columnNumber: 5
-  }, void 0);
-};
-const Card = ({ className, children, title: title2, titleClassName }) => {
-  return /* @__PURE__ */ jsxDEV(
-    "div",
-    {
-      className: clsx(
-        "flex flex-col items-start bg-bg-second p-7 rounded-2xl shadow-lg",
-        className
-      ),
-      children: [
-        /* @__PURE__ */ jsxDEV(Text, { sz: "lg-2", weight: "bold", className: clsx("mb-5", titleClassName), children: title2 }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/molecules/card/card.tsx",
-          lineNumber: 20,
-          columnNumber: 7
-        }, void 0),
-        children
-      ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/molecules/card/card.tsx",
-      lineNumber: 14,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
+  ) });
+}
+const store = configureStore({
+  reducer: {
+    notifications: notificationsReducer
+  }
+});
 function useAuth() {
   return useContext(AuthContext);
 }
-function useLanguage() {
-  const { t } = useTranslation();
-  return t;
-}
-const ErrorCodes$2 = {
-  USER_NOT_FOUND: "settings:account.personalInfo.errorMessages.changeUrlName.userNotFound",
-  URLNAME_EXIST: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameAlreadyExist",
-  URL_NAME_TOO_SHORT: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooShort",
-  URL_NAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooLong",
-  URL_NAME_EMPTY: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameEmpty",
-  URL_NAME_CONTAINS_SPACE: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameContainsSpace",
-  UNKNOWN_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.unknownError",
-  INTERNAL_SERVER_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.internalServerError"
-};
-const ChangeUrlName = ({ isLoading, urlName: u }) => {
-  const t = useLanguage();
-  const { setUrlName: _setUrlName } = useAuth();
-  const [urlName, setUrlName] = useState();
-  const [isEditUrlName, setIsEditUrlName] = useState(false);
-  const [isEditUrlNameFailed, setIsEditUrlNameFailed] = useState(false);
-  const [editUrlFailedMessage, setEditUrlFailedMessage] = useState("");
-  useEffect(() => {
-    setUrlName(u);
-  }, [u]);
-  const handleChangeUrlName = async (urlName2) => {
-    const changeUrlNameDto = {
-      urlName: urlName2 ?? ""
-    };
-    const response = await userProfileService.UpdateUrlName(changeUrlNameDto);
-    if (response.success) {
-      setUrlName(urlName2);
-      _setUrlName?.(urlName2);
-      setIsEditUrlName(false);
-    } else {
-      setIsEditUrlNameFailed(true);
-      const errorCode = response?.errorCode;
-      setEditUrlFailedMessage(t(ErrorCodes$2[errorCode]));
-    }
-  };
-  if (isLoading) {
-    return /* @__PURE__ */ jsxDEV(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-url-name.tsx",
-      lineNumber: 44,
-      columnNumber: 12
-    }, void 0);
-  }
-  return /* @__PURE__ */ jsxDEV(
-    EditableField,
-    {
-      title: t("settings:account.personalInfo.urlName"),
-      value: urlName,
-      noDataValue: t("settings:account.personalInfo.noUrlName"),
-      placeholder: t("settings:account.personalInfo.urlNamePlaceholder"),
-      valueClassName: clsx(!urlName && "!opacity-50"),
-      btnChildren: /* @__PURE__ */ jsxDEV(Text, { children: [
-        /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-pen mr-2" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-url-name.tsx",
-          lineNumber: 56,
-          columnNumber: 11
-        }, void 0),
-        t("settings:account.personalInfo.changeButton")
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-url-name.tsx",
-        lineNumber: 55,
-        columnNumber: 9
-      }, void 0),
-      editableMode: "inline",
-      isEdit: isEditUrlName,
-      isError: isEditUrlNameFailed,
-      errorMessage: editUrlFailedMessage,
-      onChangeClick: () => {
-        setIsEditUrlName(true);
-      },
-      onCancelClick: () => {
-        setIsEditUrlName(false);
-        setIsEditUrlNameFailed(false);
-      },
-      onSaveClick: (e) => handleChangeUrlName(e)
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-url-name.tsx",
-      lineNumber: 48,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-const ErrorCodes$1 = {
-  NICKNAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeNickname.nicknameTooLong"
-};
-const PREFIX$1 = `/api/userinfo`;
-class UserInfoService {
-  async UpdateNickname(changeNicknameDto) {
-    try {
-      const res = await apiClient.patch(`${PREFIX$1}/nickname`, changeNicknameDto);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
-  }
-  async GetUserInfoOverview(userId) {
-    try {
-      const res = await apiClient.get(`${PREFIX$1}/overview/${userId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
-  }
-}
-const userInfoService = new UserInfoService();
-const ChangeNickname = ({ isLoading, nickname: n }) => {
-  const t = useLanguage();
-  const [nickname, setNickname] = useState();
-  const [isEditNickname, setIsEditNickname] = useState(false);
-  const [isEditNicknameFailed, setIsEditNicknameFailed] = useState(false);
-  const [editNicknameFailedMessage, setEditNicknameFailedMessage] = useState("");
-  useEffect(() => {
-    setNickname(n);
-  }, [n]);
-  const handleChangeNickname = async (nickname2) => {
-    const changeNickname = {
-      nickname: nickname2 ?? ""
-    };
-    const response = await userInfoService.UpdateNickname(changeNickname);
-    if (response.success) {
-      setNickname(nickname2);
-      setIsEditNickname(false);
-    } else {
-      setIsEditNicknameFailed(true);
-      const errorCode = response?.errorCode;
-      setEditNicknameFailedMessage(t(ErrorCodes$1[errorCode]));
-    }
-  };
-  if (isLoading) {
-    return /* @__PURE__ */ jsxDEV(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-nickname.tsx",
-      lineNumber: 43,
-      columnNumber: 12
-    }, void 0);
-  }
-  return /* @__PURE__ */ jsxDEV(
-    EditableField,
-    {
-      title: t("settings:account.personalInfo.nickname"),
-      value: nickname,
-      noDataValue: t("settings:account.personalInfo.noNickname"),
-      placeholder: t("settings:account.personalInfo.nicknamePlaceholder"),
-      valueClassName: clsx(!nickname && "!opacity-50"),
-      btnChildren: /* @__PURE__ */ jsxDEV(Text, { children: [
-        /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-pen mr-2" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-nickname.tsx",
-          lineNumber: 55,
-          columnNumber: 11
-        }, void 0),
-        t("settings:account.personalInfo.changeButton")
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-nickname.tsx",
-        lineNumber: 54,
-        columnNumber: 9
-      }, void 0),
-      editableMode: "inline",
-      isEdit: isEditNickname,
-      isError: isEditNicknameFailed,
-      errorMessage: editNicknameFailedMessage,
-      onChangeClick: () => {
-        setIsEditNickname(true);
-      },
-      onCancelClick: () => {
-        setIsEditNickname(false);
-        setIsEditNicknameFailed(false);
-      },
-      onSaveClick: (e) => handleChangeNickname(e)
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-nickname.tsx",
-      lineNumber: 47,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-const AccountSetting = ({ className }) => {
-  const t = useLanguage();
-  const [fullName, setFullName] = React.useState("");
-  const [urlName, setUrlName] = React.useState();
-  const [nickname, setNickname] = React.useState();
-  const [isLoading, setIsLoading] = React.useState(true);
-  const { userId } = useAuth();
-  const navigate = useNavigate();
-  const location = useLocation();
-  const handleChangeName = () => navigate("name");
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const _userId = userId ?? "";
-      const response = await userProfileService.GetProfile(_userId, "fullName,urlName,nickname");
-      if (response.success) {
-        setFullName(response.data.infos.fullName);
-        setUrlName(response.data.infos.urlName);
-        setNickname(response.data.infos.nickname);
-      }
-      setIsLoading(false);
-    };
-    fetchProfile();
-  }, [userProfileService, location.key, userId]);
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx(className), children: /* @__PURE__ */ jsxDEV(Card, { title: t("settings:account.personalInfo.title"), className: "mb-0 gap-5", children: [
-    isLoading ? /* @__PURE__ */ jsxDEV(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/account-setting.tsx",
-      lineNumber: 49,
-      columnNumber: 11
-    }, void 0) : /* @__PURE__ */ jsxDEV(
-      EditableField,
-      {
-        title: t("settings:account.personalInfo.yourName"),
-        value: fullName,
-        btnChildren: /* @__PURE__ */ jsxDEV(Text, { children: [
-          /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-pen mr-2" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/account-setting.tsx",
-            lineNumber: 56,
-            columnNumber: 17
-          }, void 0),
-          " ",
-          t("settings:account.personalInfo.changeButton")
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/account-setting.tsx",
-          lineNumber: 55,
-          columnNumber: 15
-        }, void 0),
-        onChangeClick: handleChangeName
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/account-setting.tsx",
-        lineNumber: 51,
-        columnNumber: 11
-      },
-      void 0
-    ),
-    /* @__PURE__ */ jsxDEV(ChangeUrlName, { isLoading, urlName }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/account-setting.tsx",
-      lineNumber: 63,
-      columnNumber: 9
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(ChangeNickname, { isLoading, nickname }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/account-setting.tsx",
-      lineNumber: 64,
-      columnNumber: 9
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/account-setting.tsx",
-    lineNumber: 47,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/account-setting.tsx",
-    lineNumber: 46,
-    columnNumber: 5
-  }, void 0);
-};
-const AccountSettingPage = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex justify-center w-full"), children: [
-    /* @__PURE__ */ jsxDEV(AccountSetting, { className: clsx("w-full") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/account-setting-page.tsx",
-      lineNumber: 9,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(Outlet, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/account-setting-page.tsx",
-      lineNumber: 10,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/account-setting-page.tsx",
-    lineNumber: 8,
-    columnNumber: 5
-  }, void 0);
-};
-const SelectBoxSetting = ({
-  options = [],
-  selectedOption = "",
-  onOptionChange = (e) => {
-  },
-  title: title2,
-  className,
-  selectBox
-}) => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex justify-between items-center w-full", className), children: [
-    /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", className: "m-2", children: title2 }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/selectbox-setting.tsx",
-      lineNumber: 24,
-      columnNumber: 7
-    }, void 0),
-    selectBox ? selectBox : /* @__PURE__ */ jsxDEV(
-      SelectBox,
-      {
-        className: "!min-w-[170px]",
-        selectedOption,
-        options,
-        onSelect: onOptionChange
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/selectbox-setting.tsx",
-        lineNumber: 30,
-        columnNumber: 9
-      },
-      void 0
-    )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/selectbox-setting.tsx",
-    lineNumber: 23,
-    columnNumber: 5
-  }, void 0);
-};
-const ThemeSettings = ({ className }) => {
-  const { theme: theme2, setTheme } = useTheme();
-  const [themeOptions, setThemeOptions] = useState([]);
-  const { t } = useTranslation();
-  const selectTheme = (opt) => {
-    setTheme(opt);
-  };
-  useEffect(() => {
-    const options = availableThemes.map((theme22) => ({
-      key: theme22.key,
-      value: t(theme22.label)
-    }));
-    setThemeOptions(options);
-  }, [availableThemes]);
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx(className), children: /* @__PURE__ */ jsxDEV(Card, { title: t("settings:theme.title"), children: /* @__PURE__ */ jsxDEV(
-    SelectBoxSetting,
-    {
-      title: t("settings:theme.selectTheme"),
-      selectedOption: theme2,
-      options: themeOptions,
-      onOptionChange: selectTheme
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/components/theme-setting.tsx",
-      lineNumber: 33,
-      columnNumber: 9
-    },
-    void 0
-  ) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/components/theme-setting.tsx",
-    lineNumber: 32,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/components/theme-setting.tsx",
-    lineNumber: 31,
-    columnNumber: 5
-  }, void 0);
-};
-const ThemeSettingPage = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex justify-center w-full"), children: /* @__PURE__ */ jsxDEV(ThemeSettings, { className: clsx("w-full") }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/theme-setting-page.tsx",
-    lineNumber: 8,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/theme-setting-page.tsx",
-    lineNumber: 7,
-    columnNumber: 5
-  }, void 0);
-};
-const ErrorCodes = {
-  FIRSTNAME_NOT_CORRECT_FORMAT: {
-    message: "settings:account.personalInfo.errorMessages.changeName.firstNameNotCorrectFormat",
-    type: "FirstName"
-  },
-  LASTNAME_NOT_CORRECT_FORMAT: {
-    message: "settings:account.personalInfo.errorMessages.changeName.lastNameNotCorrectFormat",
-    type: "LastName"
-  },
-  UNKNOWN_ERROR: {
-    message: "settings:account.personalInfo.errorMessages.changeName.unknownError",
-    type: "UnknownError"
-  },
-  INTERNAL_SERVER_ERROR: {
-    message: "settings:account.personalInfo.errorMessages.changeName.internalServerError",
-    type: "InternalServerError"
-  }
-};
-const ChangeNameForm = ({ className }) => {
-  const [oldFirstName, setOldFirstName] = React.useState("");
-  const [oldLastName, setOldLastName] = React.useState("");
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
-  const [firstNameFailed, setFirstNameFailed] = React.useState(false);
-  const [lastNameFailed, setLastNameFailed] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(true);
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { userId } = useAuth();
-  const handleClose = () => {
-    navigate("/settings");
-  };
-  const handleSubmit = async () => {
-    const response = await userProfileService.UpdateName({ firstName, lastName });
-    if (response.success) {
-      navigate("/settings", { state: { reload: true } });
-    } else {
-      const errorCode = response?.errorCodes?.[0] || response.errorCode;
-      if (errorCode) {
-        setErrorMessage(t(ErrorCodes[errorCode].message));
-        setFirstNameFailed(ErrorCodes[errorCode].type === "FirstName");
-        setLastNameFailed(ErrorCodes[errorCode].type === "LastName");
-      } else {
-        setErrorMessage(t(ErrorCodes["UNKNOWN_ERROR"].message));
-        setFirstNameFailed(false);
-        setLastNameFailed(false);
-      }
-    }
-  };
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const response = await userProfileService.GetProfile(userId ?? "", "firstName,lastName");
-      if (response.success) {
-        setFirstName(response.data.infos.firstName);
-        setLastName(response.data.infos.lastName);
-        setOldFirstName(response.data.infos.firstName);
-        setOldLastName(response.data.infos.lastName);
-      }
-      setIsLoading(false);
-    };
-    setErrorMessage("");
-    setFirstNameFailed(false);
-    setLastNameFailed(false);
-    fetchProfile();
-  }, [userProfileService, userId]);
-  return /* @__PURE__ */ jsxDEV(
-    "div",
-    {
-      className: clsx(
-        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50 lg:pt-0 pt-10",
-        className
-      ),
-      children: /* @__PURE__ */ jsxDEV(
-        "div",
-        {
-          className: clsx(
-            "animate-fade-in relative flex flex-col justify-center bg-bg-second rounded-2xl shadow-lg px-10 py-8"
-          ),
-          children: [
-            /* @__PURE__ */ jsxDEV(Text, { sz: "lg-3", className: clsx("pb-6 px-2 text-gradient-main !font-bold"), children: t("settings:account.personalInfo.changeNameForm.title") }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-              lineNumber: 80,
-              columnNumber: 9
-            }, void 0),
-            isLoading ? /* @__PURE__ */ jsxDEV(Skeleton, {}, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-              lineNumber: 84,
-              columnNumber: 11
-            }, void 0) : /* @__PURE__ */ jsxDEV("div", { children: [
-              /* @__PURE__ */ jsxDEV(
-                "div",
-                {
-                  className: clsx(
-                    "animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-bg-main p-5"
-                  ),
-                  children: [
-                    /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-col"), children: [
-                      /* @__PURE__ */ jsxDEV(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.firstName") }, void 0, false, {
-                        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                        lineNumber: 93,
-                        columnNumber: 17
-                      }, void 0),
-                      /* @__PURE__ */ jsxDEV(
-                        Textbox,
-                        {
-                          isWrong: firstNameFailed,
-                          value: firstName,
-                          placeholder: "First name",
-                          className: clsx("py-1 px-2 lg:max-w-[200px]"),
-                          onChange: (e) => setFirstName(e.target.value)
-                        },
-                        void 0,
-                        false,
-                        {
-                          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                          lineNumber: 96,
-                          columnNumber: 17
-                        },
-                        void 0
-                      )
-                    ] }, void 0, true, {
-                      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                      lineNumber: 92,
-                      columnNumber: 15
-                    }, void 0),
-                    /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-col"), children: [
-                      /* @__PURE__ */ jsxDEV(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.lastName") }, void 0, false, {
-                        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                        lineNumber: 105,
-                        columnNumber: 17
-                      }, void 0),
-                      /* @__PURE__ */ jsxDEV(
-                        Textbox,
-                        {
-                          isWrong: lastNameFailed,
-                          value: lastName,
-                          placeholder: "Last name",
-                          className: clsx("py-1 px-2 lg:max-w-[200px]"),
-                          onChange: (e) => setLastName(e.target.value)
-                        },
-                        void 0,
-                        false,
-                        {
-                          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                          lineNumber: 108,
-                          columnNumber: 17
-                        },
-                        void 0
-                      )
-                    ] }, void 0, true, {
-                      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                      lineNumber: 104,
-                      columnNumber: 15
-                    }, void 0)
-                  ]
-                },
-                void 0,
-                true,
-                {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                  lineNumber: 87,
-                  columnNumber: 13
-                },
-                void 0
-              ),
-              errorMessage && /* @__PURE__ */ jsxDEV(Text, { sz: "md-1", color: "danger", className: clsx("mt-2 mx-4"), children: errorMessage }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                lineNumber: 118,
-                columnNumber: 15
-              }, void 0)
-            ] }, void 0, true, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-              lineNumber: 86,
-              columnNumber: 11
-            }, void 0),
-            /* @__PURE__ */ jsxDEV(Text, { className: clsx("mx-8 mt-8 mb-4 h-[0.5px] bg-primary-500") }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-              lineNumber: 124,
-              columnNumber: 9
-            }, void 0),
-            /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", className: clsx("font-light px-2 mb-4 flex flex-col gap-1"), children: [
-              /* @__PURE__ */ jsxDEV(Text, { weight: "bold", className: clsx("text-single-second"), children: [
-                "* ",
-                t("settings:account.personalInfo.changeNameForm.note"),
-                ":"
-              ] }, void 0, true, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                lineNumber: 126,
-                columnNumber: 11
-              }, void 0),
-              /* @__PURE__ */ jsxDEV(Text, { className: clsx("opacity-80"), children: [
-                "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText1"),
-                "  ",
-                /* @__PURE__ */ jsxDEV(Text, { weight: "bold", className: clsx("text-single-main"), children: [
-                  "7 ",
-                  t("settings:account.personalInfo.changeNameForm.day")
-                ] }, void 0, true, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                  lineNumber: 131,
-                  columnNumber: 13
-                }, void 0),
-                "."
-              ] }, void 0, true, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                lineNumber: 129,
-                columnNumber: 11
-              }, void 0),
-              /* @__PURE__ */ jsxDEV(Text, { className: clsx("opacity-80"), children: [
-                "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText2")
-              ] }, void 0, true, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                lineNumber: 136,
-                columnNumber: 11
-              }, void 0),
-              /* @__PURE__ */ jsxDEV(Text, { className: clsx("opacity-80"), children: [
-                "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText3"),
-                "  ",
-                /* @__PURE__ */ jsxDEV(Text, { sz: "md-1", children: "!, #, $, @, ..." }, void 0, false, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                  lineNumber: 141,
-                  columnNumber: 13
-                }, void 0),
-                "."
-              ] }, void 0, true, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                lineNumber: 139,
-                columnNumber: 11
-              }, void 0)
-            ] }, void 0, true, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-              lineNumber: 125,
-              columnNumber: 9
-            }, void 0),
-            /* @__PURE__ */ jsxDEV(
-              Button,
-              {
-                disabled: firstName === oldFirstName && lastName === oldLastName,
-                sz: "md-1",
-                className: clsx("mt-2"),
-                onClick: handleSubmit,
-                children: t("settings:account.personalInfo.changeNameForm.acceptButton")
-              },
-              void 0,
-              false,
-              {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                lineNumber: 144,
-                columnNumber: 9
-              },
-              void 0
-            ),
-            /* @__PURE__ */ jsxDEV(
-              Text,
-              {
-                sz: "lg-2",
-                className: clsx("absolute top-5 right-8 hover:text-primary-500 cursor-pointer"),
-                onClick: handleClose,
-                children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-xmark" }, void 0, false, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                  lineNumber: 157,
-                  columnNumber: 11
-                }, void 0)
-              },
-              void 0,
-              false,
-              {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-                lineNumber: 152,
-                columnNumber: 9
-              },
-              void 0
-            )
-          ]
-        },
-        void 0,
-        true,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-          lineNumber: 75,
-          columnNumber: 7
-        },
-        void 0
-      )
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/privacy/components/change-name-form.tsx",
-      lineNumber: 69,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-const SelectLanguage = ({ className }) => {
-  const { t } = useTranslation();
-  const { changeLanguage, availableLanguages, currentLanguage } = useLanguage$1();
-  const options = availableLanguages.map((lang) => ({
-    key: lang,
-    value: t(`common:language.${lang}`)
-  }));
-  const _changeLanguage = (key) => {
-    changeLanguage(key);
-  };
-  return /* @__PURE__ */ jsxDEV(
-    SelectBox,
-    {
-      className: clsx(className),
-      options,
-      selectedOption: currentLanguage,
-      onSelect: _changeLanguage
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/components/select-language.tsx",
-      lineNumber: 24,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-const LanguageSettings = ({ className }) => {
-  const { t } = useTranslation();
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx(className), children: /* @__PURE__ */ jsxDEV(Card, { title: t("settings:language.title"), children: /* @__PURE__ */ jsxDEV(
-    SelectBoxSetting,
-    {
-      title: t("settings:language.yourLanguage"),
-      selectBox: /* @__PURE__ */ jsxDEV(SelectLanguage, { className: "!min-w-[180px]" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/components/language-setting.tsx",
-        lineNumber: 20,
-        columnNumber: 22
-      }, void 0)
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/components/language-setting.tsx",
-      lineNumber: 18,
-      columnNumber: 9
-    },
-    void 0
-  ) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/components/language-setting.tsx",
-    lineNumber: 17,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/components/language-setting.tsx",
-    lineNumber: 16,
-    columnNumber: 5
-  }, void 0);
-};
-const LanguageSettingPage = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex justify-center w-full"), children: /* @__PURE__ */ jsxDEV(LanguageSettings, { className: clsx("w-full !min-w-[200px]") }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/language-setting-page.tsx",
-    lineNumber: 7,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/general/language-setting-page.tsx",
-    lineNumber: 6,
-    columnNumber: 5
-  }, void 0);
-};
-const settingRoutes = {
-  path: "/settings",
-  element: /* @__PURE__ */ jsxDEV(SettingPage, {}, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/setting.routes.tsx",
-    lineNumber: 10,
-    columnNumber: 12
-  }, void 0),
-  type: "private",
-  children: [
-    {
-      path: "",
-      element: /* @__PURE__ */ jsxDEV(AccountSettingPage, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/setting.routes.tsx",
-        lineNumber: 15,
-        columnNumber: 16
-      }, void 0),
-      children: [{ path: "name", element: /* @__PURE__ */ jsxDEV(ChangeNameForm, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/setting.routes.tsx",
-        lineNumber: 16,
-        columnNumber: 43
-      }, void 0) }]
-    },
-    { path: "theme", element: /* @__PURE__ */ jsxDEV(ThemeSettingPage, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/setting.routes.tsx",
-      lineNumber: 18,
-      columnNumber: 31
-    }, void 0) },
-    { path: "language", element: /* @__PURE__ */ jsxDEV(LanguageSettingPage, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/setting.routes.tsx",
-      lineNumber: 19,
-      columnNumber: 34
-    }, void 0) }
-  ]
-};
-const styles = {
-  "overlay-loading-bg-color": "_overlay-loading-bg-color_snybu_4"
-};
-const OverlayLoading = () => {
-  return /* @__PURE__ */ jsxDEV(
-    "div",
-    {
-      className: clsx(
-        "absolute inset-0 flex items-center justify-center z-50",
-        styles["overlay-loading-bg-color"]
-      ),
-      children: /* @__PURE__ */ jsxDEV(
-        "div",
-        {
-          className: clsx(
-            "absolute top-1/2 w-12 h-12 border-4 border-transparent",
-            "border-t-primary-700 border-r-primary-700",
-            "rounded-full animate-spin"
-          )
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/overlay-loading/overlay-loading.tsx",
-          lineNumber: 13,
-          columnNumber: 7
-        },
-        void 0
-      )
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/overlay-loading/overlay-loading.tsx",
-      lineNumber: 7,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-const loginInitialValues = {
-  usernameOrEmail: "",
-  password: "",
-  isRememberMe: true
-};
-const loginValidationSchema = Yup.object().shape({
-  usernameOrEmail: Yup.string().required("auth:login.errors.usernameOrEmail.required").test(
-    "IS_VALID_USERNAME_OR_EMAIL",
-    "auth:login.errors.usernameOrEmail.invalidFormat",
-    function(value) {
-      if (!value) return false;
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-      return emailRegex.test(value) || usernameRegex.test(value);
-    }
-  ),
-  password: Yup.string().required("auth:login.errors.password.required").min(6, "auth:login.errors.password.tooShort")
-});
-const registerInitialValues = {
-  username: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  isRememberMe: true
-};
-const registerValidationSchema = Yup.object().shape({
-  username: Yup.string().required("auth:register.errors.username.required").min(3, "auth:register.errors.username.tooShort").max(30, "auth:register.errors.username.tooLong").matches(
-    /^[a-zA-Z0-9_]+$/,
-    "auth:register.errors.username.notCorrectFormat"
-  ),
-  email: Yup.string().required("auth:register.errors.email.required").email("auth:register.errors.email.notCorrectFormat"),
-  password: Yup.string().required("auth:register.errors.password.required").min(8, "auth:register.errors.password.tooShort").max(100, "auth:register.errors.password.tooLong"),
-  confirmPassword: Yup.string().required("auth:register.errors.confirmPassword.required").oneOf([Yup.ref("password")], "auth:register.errors.passwords.doNotMatch")
-});
-const SocialButton = ({ icon, name, onClick }) => {
-  return /* @__PURE__ */ jsxDEV(
-    Button,
-    {
-      variant: "fourth",
-      className: "flex gap-2 flex-1 items-center justify-center !py-3",
-      onClick,
-      children: [
-        /* @__PURE__ */ jsxDEV("img", { src: icon, alt: name, className: "w-5 h-5" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/social-button.tsx",
-          lineNumber: 16,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV("span", { className: "hidden sm:inline", children: name }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/social-button.tsx",
-          lineNumber: 17,
-          columnNumber: 7
-        }, void 0)
-      ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/social-button.tsx",
-      lineNumber: 11,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
-const SocialButtons = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: "flex gap-3 w-full", children: [
-    /* @__PURE__ */ jsxDEV(SocialButton, { name: "Google", icon: "src/assets/svgs/google-icon.svg" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/social-buttons.tsx",
-      lineNumber: 6,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(SocialButton, { name: "Facebook", icon: "src/assets/svgs/facebook-icon.svg" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/social-buttons.tsx",
-      lineNumber: 7,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/social-buttons.tsx",
-    lineNumber: 5,
-    columnNumber: 5
-  }, void 0);
-};
-const LoginForm = ({
-  switchForgotPassword,
-  showLogo = true,
-  showClose = false,
-  onClose,
-  className
-}) => {
-  const { t } = useTranslation();
-  const [isShowClose] = React.useState(showClose);
-  const [isShowLogo] = React.useState(showLogo);
-  const { logIn } = useAuth();
-  const formik = useFormik({
-    initialValues: loginInitialValues,
-    validationSchema: loginValidationSchema,
-    onSubmit: async (values) => {
-      await logIn({
-        usernameOrEmail: values.usernameOrEmail,
-        password: values.password
-      });
-    }
-  });
-  return /* @__PURE__ */ jsxDEV(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
-        "bg-bg-second rounded-2xl",
-        "p-12 animate-fade-in overflow-hidden",
-        className
-      ),
-      children: [
-        formik.isSubmitting && /* @__PURE__ */ jsxDEV(OverlayLoading, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-          lineNumber: 59,
-          columnNumber: 31
-        }, void 0),
-        isShowLogo && /* @__PURE__ */ jsxDEV(Logo, { sz: "md-1" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-          lineNumber: 61,
-          columnNumber: 22
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(
-          Text,
-          {
-            sz: "xl-1",
-            weight: "extrabold",
-            className: clsx(
-              "uppercase !text-primary-500",
-              "font-bold font-inter select-none"
-            ),
-            children: t("auth:login.title")
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-            lineNumber: 62,
-            columnNumber: 7
-          },
-          void 0
-        ),
-        /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col gap-3 w-full", children: [
-          /* @__PURE__ */ jsxDEV(
-            Textbox,
-            {
-              className: clsx(
-                "text-[14px] w-[100%] px-[20px]",
-                "sm:py-[7px] py-[10px] shadow-sm"
-              ),
-              autoComplete: "username",
-              placeholder: t("auth:login.username"),
-              onChange: (e) => formik.setFieldValue("usernameOrEmail", e.target.value),
-              isWrong: formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail),
-              wrongMessage: t(formik.errors.usernameOrEmail || "")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-              lineNumber: 73,
-              columnNumber: 9
-            },
-            void 0
-          ),
-          /* @__PURE__ */ jsxDEV(
-            Textbox,
-            {
-              type: "password",
-              className: clsx(
-                "text-[14px] w-[100%] px-[20px]",
-                "sm:py-[7px] py-[10px] shadow-sm"
-              ),
-              placeholder: t("auth:login.password"),
-              onChange: (e) => formik.setFieldValue("password", e.target.value),
-              isWrong: formik.touched.password && Boolean(formik.errors.password),
-              wrongMessage: t(formik.errors.password || ""),
-              autoComplete: "current-password"
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-              lineNumber: 89,
-              columnNumber: 9
-            },
-            void 0
-          )
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-          lineNumber: 72,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV("div", { className: "flex justify-between w-[98%] items-center gap-[50px]", children: [
-          /* @__PURE__ */ jsxDEV(
-            Checkbox,
-            {
-              label: t("auth:login.rememberMe"),
-              onChange: (e) => {
-                formik.setFieldValue("rememberMe", e.target.checked);
-              }
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-              lineNumber: 103,
-              columnNumber: 9
-            },
-            void 0
-          ),
-          switchForgotPassword && /* @__PURE__ */ jsxDEV(
-            Text,
-            {
-              sz: "sm-3",
-              className: clsx(
-                "!text-primary-500 hover:!text-primary-600",
-                "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
-              ),
-              onClick: switchForgotPassword,
-              children: t("auth:login.forgotPassword")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-              lineNumber: 110,
-              columnNumber: 11
-            },
-            void 0
-          )
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-          lineNumber: 102,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(
-          Button,
-          {
-            type: "button",
-            className: "w-full font-montserrat",
-            onClick: formik.submitForm,
-            sz: "md-1",
-            children: t("auth:login.loginButton")
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-            lineNumber: 122,
-            columnNumber: 7
-          },
-          void 0
-        ),
-        /* @__PURE__ */ jsxDEV("div", { className: "w-full flex flex-col items-center gap-3", children: [
-          /* @__PURE__ */ jsxDEV("div", { className: "flex items-center w-full gap-3", children: [
-            /* @__PURE__ */ jsxDEV("div", { className: "h-[1px] bg-border-main flex-1" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-              lineNumber: 132,
-              columnNumber: 11
-            }, void 0),
-            /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", className: "text-text-third", children: "OR" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-              lineNumber: 133,
-              columnNumber: 11
-            }, void 0),
-            /* @__PURE__ */ jsxDEV("div", { className: "h-[1px] bg-border-main flex-1" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-              lineNumber: 136,
-              columnNumber: 11
-            }, void 0)
-          ] }, void 0, true, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-            lineNumber: 131,
-            columnNumber: 9
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(SocialButtons, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-            lineNumber: 138,
-            columnNumber: 9
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-          lineNumber: 130,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(Text, { children: [
-          t("auth:login.dontHaveAccount"),
-          " ",
-          /* @__PURE__ */ jsxDEV(Link, { className: "font-bold", to: "/register", children: t("auth:login.registerButton") }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-            lineNumber: 143,
-            columnNumber: 9
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-          lineNumber: 140,
-          columnNumber: 7
-        }, void 0),
-        isShowClose && /* @__PURE__ */ jsxDEV(
-          Text,
-          {
-            className: clsx(
-              "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
-            ),
-            onClick: onClose,
-            children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-xmark" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-              lineNumber: 155,
-              columnNumber: 11
-            }, void 0)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-            lineNumber: 149,
-            columnNumber: 9
-          },
-          void 0
-        )
-      ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/login-form.tsx",
-      lineNumber: 51,
-      columnNumber: 5
-    },
-    void 0
-  );
-};
 const UserMenu = () => {
   const [avatar, setAvatar] = useState("");
   const [fullName, setFullName] = useState("");
@@ -3968,7 +1892,7 @@ const UserMenu = () => {
   );
   useEffect(() => {
     const fetchProfile = async () => {
-      const response = await userProfileService.GetProfile(userId || "", "avatar,fullName");
+      const response = await userProfileService.getProfile(userId || "", "avatar,fullName");
       if (response.success) {
         setAvatar(response.data.infos.avatar);
         setFullName(response.data.infos.fullName);
@@ -3989,8 +1913,8 @@ const UserMenu = () => {
     await logOut?.();
     navigate("/login", { replace: true });
   }, [logOut, navigate]);
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex items-center justify-center relative"), ref: btnRef, children: [
-    /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center justify-center relative"), ref: btnRef, children: [
+    /* @__PURE__ */ jsx(
       Button,
       {
         variant: "secondary",
@@ -3998,22 +1922,10 @@ const UserMenu = () => {
         onClick: () => {
           setIsOpenMenu(!isOpenMenu);
         },
-        children: /* @__PURE__ */ jsxDEV(Avatar, { src: avatar, alt: "Profile", sz: "sm-1", className: "border-4 border-bg-third" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-          lineNumber: 79,
-          columnNumber: 9
-        }, void 0)
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-        lineNumber: 72,
-        columnNumber: 7
-      },
-      void 0
+        children: /* @__PURE__ */ jsx(Avatar, { src: avatar, alt: "Profile", sz: "sm-1", className: "border-4 border-bg-third" })
+      }
     ),
-    isOpenMenu && /* @__PURE__ */ jsxDEV(
+    isOpenMenu && /* @__PURE__ */ jsx(
       "div",
       {
         className: clsx(
@@ -4022,8 +1934,8 @@ const UserMenu = () => {
           "animate-dropdown-slide origin-top-right"
         ),
         ref: menuRef,
-        children: /* @__PURE__ */ jsxDEV(List, { className: clsx("flex flex-col gap-2 w-full"), children: [
-          /* @__PURE__ */ jsxDEV(List.Item, { children: /* @__PURE__ */ jsxDEV(
+        children: /* @__PURE__ */ jsxs(List, { className: clsx("flex flex-col gap-2 w-full"), children: [
+          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsxs(
             Button,
             {
               sz: "md-1",
@@ -4035,46 +1947,18 @@ const UserMenu = () => {
               ),
               onClick: handlePersonalPage,
               children: [
-                /* @__PURE__ */ jsxDEV(Avatar, { src: avatar, alt: "avatar", sz: "sm-1" }, void 0, false, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-                  lineNumber: 102,
-                  columnNumber: 17
-                }, void 0),
-                /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", weight: "bold", children: fullName }, void 0, false, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-                  lineNumber: 103,
-                  columnNumber: 17
-                }, void 0)
+                /* @__PURE__ */ jsx(Avatar, { src: avatar, alt: "avatar", sz: "sm-1" }),
+                /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: fullName })
               ]
-            },
-            void 0,
-            true,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-              lineNumber: 92,
-              columnNumber: 15
-            },
-            void 0
-          ) }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-            lineNumber: 91,
-            columnNumber: 13
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(
+            }
+          ) }),
+          /* @__PURE__ */ jsx(
             List.Item,
             {
               className: clsx("items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-              lineNumber: 108,
-              columnNumber: 13
-            },
-            void 0
+            }
           ),
-          /* @__PURE__ */ jsxDEV(List.Item, { children: /* @__PURE__ */ jsxDEV(
+          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsx(
             Button,
             {
               sz: "md-1",
@@ -4085,33 +1969,13 @@ const UserMenu = () => {
                 "hover:scale-[1.02] active:scale-[0.98]"
               ),
               onClick: handleSettings,
-              children: /* @__PURE__ */ jsxDEV(Text, { className: clsx("flex items-center gap-3"), sz: "md-1", children: [
-                /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-gear" }, void 0, false, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-                  lineNumber: 123,
-                  columnNumber: 19
-                }, void 0),
+              children: /* @__PURE__ */ jsxs(Text, { className: clsx("flex items-center gap-3"), sz: "md-1", children: [
+                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-gear" }),
                 t("navbar.profileMenu.settings")
-              ] }, void 0, true, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-                lineNumber: 122,
-                columnNumber: 17
-              }, void 0)
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-              lineNumber: 112,
-              columnNumber: 15
-            },
-            void 0
-          ) }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-            lineNumber: 111,
-            columnNumber: 13
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(List.Item, { children: /* @__PURE__ */ jsxDEV(
+              ] })
+            }
+          ) }),
+          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsx(
             Button,
             {
               sz: "md-1",
@@ -4122,58 +1986,22 @@ const UserMenu = () => {
                 "hover:scale-[1.02] active:scale-[0.98]"
               ),
               onClick: handleLogout,
-              children: /* @__PURE__ */ jsxDEV(Text, { sz: "md-1", className: clsx("flex items-center gap-3"), color: "danger", children: [
-                /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-right-from-bracket" }, void 0, false, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-                  lineNumber: 140,
-                  columnNumber: 19
-                }, void 0),
+              children: /* @__PURE__ */ jsxs(Text, { sz: "md-1", className: clsx("flex items-center gap-3"), color: "danger", children: [
+                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-right-from-bracket" }),
                 t("navbar.profileMenu.logout")
-              ] }, void 0, true, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-                lineNumber: 139,
-                columnNumber: 17
-              }, void 0)
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-              lineNumber: 129,
-              columnNumber: 15
-            },
-            void 0
-          ) }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-            lineNumber: 128,
-            columnNumber: 13
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-          lineNumber: 90,
-          columnNumber: 11
-        }, void 0)
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-        lineNumber: 82,
-        columnNumber: 9
-      },
-      void 0
+              ] })
+            }
+          ) })
+        ] })
+      }
     )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/user/components/user-menu.tsx",
-    lineNumber: 71,
-    columnNumber: 5
-  }, void 0);
+  ] });
 };
-const PREFIX = `/api/notification`;
+const PREFIX$1 = `/api/notification`;
 class NotificationService {
   async getNotifications(cursorId, pageSize) {
     try {
-      const res = await apiClient.get(`${PREFIX}/getNotifications`, {
+      const res = await apiClient.get(`${PREFIX$1}/getNotifications`, {
         params: {
           cursorId,
           pageSize
@@ -4190,7 +2018,7 @@ class NotificationService {
   }
   async markAsRead(notificationId) {
     try {
-      await apiClient.post(`${PREFIX}/markNotificationAsRead/${notificationId}`);
+      await apiClient.post(`${PREFIX$1}/markNotificationAsRead/${notificationId}`);
       return {
         success: true
       };
@@ -4201,33 +2029,13 @@ class NotificationService {
 }
 const notificationService = new NotificationService();
 const NotificationSkeleton = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex items-center"), children: [
-    /* @__PURE__ */ jsxDEV(Skeleton, { sz: "md-2", variant: "circle" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/notification.skeleton.tsx",
-      lineNumber: 7,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-col w-full flex-1 gap-2 ml-2"), children: [
-      /* @__PURE__ */ jsxDEV(Skeleton, { className: clsx("w-full"), sz: "sm-2" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/notification.skeleton.tsx",
-        lineNumber: 9,
-        columnNumber: 9
-      }, void 0),
-      /* @__PURE__ */ jsxDEV(Skeleton, { className: clsx("w-[50%]"), sz: "sm-2" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/notification.skeleton.tsx",
-        lineNumber: 10,
-        columnNumber: 9
-      }, void 0)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/notification.skeleton.tsx",
-      lineNumber: 8,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-items/notification.skeleton.tsx",
-    lineNumber: 6,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center"), children: [
+    /* @__PURE__ */ jsx(Skeleton, { sz: "md-2", variant: "circle" }),
+    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col w-full flex-1 gap-2 ml-2"), children: [
+      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-full"), sz: "sm-2" }),
+      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-[50%]"), sz: "sm-2" })
+    ] })
+  ] });
 };
 const useNotifications = () => {
   const dispatch = useDispatch();
@@ -4264,7 +2072,7 @@ const NotificationMenu = ({ className, onClick, ref }) => {
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
   }, [loaderRef, isShowFull, isFull, refetch]);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -4274,13 +2082,9 @@ const NotificationMenu = ({ className, onClick, ref }) => {
       ),
       ref,
       children: [
-        /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", weight: "bold", className: "px-2 pt-2", children: t("notifications:notifications.title") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-          lineNumber: 53,
-          columnNumber: 7
-        }, void 0),
-        notifications2 && notifications2.length > 0 ? /* @__PURE__ */ jsxDEV("ul", { className: "relative py-1 overflow-y-scroll scrollbar-none", children: [
-          isShowFull ? notifications2.map((notification) => /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", className: "px-2 pt-2", children: t("notifications:notifications.title") }),
+        notifications2 && notifications2.length > 0 ? /* @__PURE__ */ jsxs("ul", { className: "relative py-1 overflow-y-scroll scrollbar-none", children: [
+          isShowFull ? notifications2.map((notification) => /* @__PURE__ */ jsx(
             "li",
             {
               className: clsx(
@@ -4288,7 +2092,7 @@ const NotificationMenu = ({ className, onClick, ref }) => {
                 "transition-all duration-200 hover:scale-[1.01]",
                 "active:scale-[0.99]"
               ),
-              children: /* @__PURE__ */ jsxDEV(
+              children: /* @__PURE__ */ jsx(
                 NotificationFactory,
                 {
                   notificationDto: notification,
@@ -4298,26 +2102,11 @@ const NotificationMenu = ({ className, onClick, ref }) => {
                     await notificationService.markAsRead(notification.id);
                     onClick?.();
                   }
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-                  lineNumber: 68,
-                  columnNumber: 19
-                },
-                void 0
+                }
               )
             },
-            notification.id,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-              lineNumber: 60,
-              columnNumber: 17
-            },
-            void 0
-          )) : notifications2.slice(0, 5).map((notification) => /* @__PURE__ */ jsxDEV(
+            notification.id
+          )) : notifications2.slice(0, 5).map((notification) => /* @__PURE__ */ jsx(
             "li",
             {
               className: clsx(
@@ -4325,7 +2114,7 @@ const NotificationMenu = ({ className, onClick, ref }) => {
                 "transition-all duration-200 hover:scale-[1.01]",
                 "active:scale-[0.99]"
               ),
-              children: /* @__PURE__ */ jsxDEV(
+              children: /* @__PURE__ */ jsx(
                 NotificationFactory,
                 {
                   notificationDto: notification,
@@ -4335,36 +2124,13 @@ const NotificationMenu = ({ className, onClick, ref }) => {
                     await notificationService.markAsRead(notification.id);
                     onClick?.();
                   }
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-                  lineNumber: 88,
-                  columnNumber: 19
-                },
-                void 0
+                }
               )
             },
-            notification.id,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-              lineNumber: 80,
-              columnNumber: 17
-            },
-            void 0
+            notification.id
           )),
-          isLoading && [...Array(2)].map((_, i) => /* @__PURE__ */ jsxDEV("li", { className: "mt-1", children: /* @__PURE__ */ jsxDEV(NotificationSkeleton, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 102,
-            columnNumber: 17
-          }, void 0) }, `skeleton-${i}`, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 101,
-            columnNumber: 15
-          }, void 0)),
-          !isShowFull ? /* @__PURE__ */ jsxDEV("li", { className: "mt-2", children: /* @__PURE__ */ jsxDEV(
+          isLoading && [...Array(2)].map((_, i) => /* @__PURE__ */ jsx("li", { className: "mt-1", children: /* @__PURE__ */ jsx(NotificationSkeleton, {}) }, `skeleton-${i}`)),
+          !isShowFull ? /* @__PURE__ */ jsx("li", { className: "mt-2", children: /* @__PURE__ */ jsx(
             Button,
             {
               sz: "sm-1",
@@ -4374,86 +2140,18 @@ const NotificationMenu = ({ className, onClick, ref }) => {
                 dispatch(setShowFull(true));
               },
               children: t("notifications:notifications.showMore")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-              lineNumber: 107,
-              columnNumber: 15
-            },
-            void 0
-          ) }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 106,
-            columnNumber: 13
-          }, void 0) : /* @__PURE__ */ jsxDEV("li", { ref: loaderRef }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 119,
-            columnNumber: 13
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-          lineNumber: 57,
-          columnNumber: 9
-        }, void 0) : /* @__PURE__ */ jsxDEV(Fragment, { children: !isLoading ? /* @__PURE__ */ jsxDEV("div", { className: "flex items-center justify-center h-40", children: t("notifications:notifications.no-notifications") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-          lineNumber: 125,
-          columnNumber: 13
-        }, void 0) : /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col px-2 py-2 gap-3", children: [
-          /* @__PURE__ */ jsxDEV(NotificationSkeleton, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 130,
-            columnNumber: 15
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(NotificationSkeleton, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 131,
-            columnNumber: 15
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(NotificationSkeleton, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 132,
-            columnNumber: 15
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(NotificationSkeleton, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 133,
-            columnNumber: 15
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(NotificationSkeleton, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-            lineNumber: 134,
-            columnNumber: 15
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-          lineNumber: 129,
-          columnNumber: 13
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-          lineNumber: 123,
-          columnNumber: 9
-        }, void 0),
-        !isInNotificationPage && /* @__PURE__ */ jsxDEV("div", { className: "absolute right-4", onClick: () => navigate("/notifications"), children: /* @__PURE__ */ jsxDEV(Text, { sz: "sm-1", color: "secondary", className: clsx("cursor-pointer underline"), children: "Mở thông báo" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-          lineNumber: 142,
-          columnNumber: 11
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-          lineNumber: 141,
-          columnNumber: 9
-        }, void 0)
+            }
+          ) }) : /* @__PURE__ */ jsx("li", { ref: loaderRef })
+        ] }) : /* @__PURE__ */ jsx(Fragment, { children: !isLoading ? /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center h-40", children: t("notifications:notifications.no-notifications") }) : /* @__PURE__ */ jsxs("div", { className: "flex flex-col px-2 py-2 gap-3", children: [
+          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+          /* @__PURE__ */ jsx(NotificationSkeleton, {})
+        ] }) }),
+        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "absolute right-4", onClick: () => navigate("/notifications"), children: /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", className: clsx("cursor-pointer underline"), children: "Mở thông báo" }) })
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-menu.tsx",
-      lineNumber: 45,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const NotificationBadge = ({}) => {
@@ -4476,8 +2174,8 @@ const NotificationBadge = ({}) => {
     dispatch(setShowNotification(!isShowNotification));
   };
   const isActive = isShowNotification || isInNotificationPage;
-  return /* @__PURE__ */ jsxDEV("div", { className: "relative flex items-center justify-center", children: [
-    /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: "relative flex items-center justify-center", children: [
+    /* @__PURE__ */ jsx(
       Badge,
       {
         count: unreadCount,
@@ -4486,38 +2184,18 @@ const NotificationBadge = ({}) => {
         className: clsx({
           "!bg-primary-500/30": isActive
         }),
-        children: /* @__PURE__ */ jsxDEV(
+        children: /* @__PURE__ */ jsx(
           Text,
           {
             className: clsx({
               "!text-primary-500": isActive
             }),
-            children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-bell" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-badge.tsx",
-              lineNumber: 59,
-              columnNumber: 11
-            }, void 0)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-badge.tsx",
-            lineNumber: 54,
-            columnNumber: 9
-          },
-          void 0
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" })
+          }
         )
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-badge.tsx",
-        lineNumber: 46,
-        columnNumber: 7
-      },
-      void 0
+      }
     ),
-    isShowNotification && !isInNotificationPage && /* @__PURE__ */ jsxDEV(
+    isShowNotification && !isInNotificationPage && /* @__PURE__ */ jsx(
       NotificationMenu,
       {
         className: clsx(
@@ -4527,21 +2205,14 @@ const NotificationBadge = ({}) => {
         ),
         onClick: () => dispatch(setShowNotification(!isShowNotification)),
         ref: menuRef
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-badge.tsx",
-        lineNumber: 63,
-        columnNumber: 9
-      },
-      void 0
+      }
     )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/notifications/components/notification-menu/notification-badge.tsx",
-    lineNumber: 45,
-    columnNumber: 5
-  }, void 0);
+  ] });
+};
+const useActiveRoute = (to, end = false) => {
+  const resolved = useResolvedPath(to);
+  const match = useMatch({ path: resolved.pathname, end });
+  return !!match;
 };
 const NavbarItem = ({
   children,
@@ -4551,7 +2222,7 @@ const NavbarItem = ({
   onClick
 }) => {
   const isFocused = useActiveRoute(path, activeRoute);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     Link,
     {
       className: clsx(
@@ -4569,21 +2240,9 @@ const NavbarItem = ({
       onClick,
       children: [
         children,
-        isFocused && /* @__PURE__ */ jsxDEV("div", { className: "absolute bg-primary-500 h-[2px] rounded-full w-full bottom-0 left-0" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar-item.tsx",
-          lineNumber: 41,
-          columnNumber: 9
-        }, void 0)
+        isFocused && /* @__PURE__ */ jsx("div", { className: "absolute bg-primary-500 h-[2px] rounded-full w-full bottom-0 left-0" })
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar-item.tsx",
-      lineNumber: 24,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const Navbar = ({
@@ -4593,16 +2252,8 @@ const Navbar = ({
   onSignup
 }) => {
   const navItems = [
-    { icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-house" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-      lineNumber: 23,
-      columnNumber: 13
-    }, void 0), path: "/", isIndex: true },
-    { icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-user-group" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-      lineNumber: 24,
-      columnNumber: 13
-    }, void 0), path: "/friends", isIndex: false }
+    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-house" }), path: "/", isIndex: true },
+    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-group" }), path: "/friends", isIndex: false }
   ];
   const navigate = useNavigate();
   const handleGoToHome = useCallback(() => {
@@ -4612,7 +2263,7 @@ const Navbar = ({
       onLogin?.();
     }
   }, [isAuthenticated, navigate]);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "nav",
     {
       className: clsx(
@@ -4621,17 +2272,9 @@ const Navbar = ({
         className
       ),
       children: [
-        /* @__PURE__ */ jsxDEV("div", { onClick: handleGoToHome, className: "cursor-pointer items-center gap-2", children: /* @__PURE__ */ jsxDEV(Logo, { hasSlogan: false, sz: "sm-3" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-          lineNumber: 46,
-          columnNumber: 9
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-          lineNumber: 45,
-          columnNumber: 7
-        }, void 0),
-        isAuthenticated ? /* @__PURE__ */ jsxDEV("div", { className: "flex flex-row gap-3 flex-1", children: [
-          /* @__PURE__ */ jsxDEV("div", { className: clsx("hidden w-full justify-center flex-row", "sm:flex sm:flex-1"), children: navItems.map((item, index) => /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx("div", { onClick: handleGoToHome, className: "cursor-pointer items-center gap-2", children: /* @__PURE__ */ jsx(Logo, { hasSlogan: false, sz: "sm-3" }) }),
+        isAuthenticated ? /* @__PURE__ */ jsxs("div", { className: "flex flex-row gap-3 flex-1", children: [
+          /* @__PURE__ */ jsx("div", { className: clsx("hidden w-full justify-center flex-row", "sm:flex sm:flex-1"), children: navItems.map((item, index) => /* @__PURE__ */ jsx(
             NavbarItem,
             {
               path: item.path,
@@ -4639,102 +2282,166 @@ const Navbar = ({
               activeRoute: item.isIndex,
               children: item.icon
             },
-            index,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-              lineNumber: 52,
-              columnNumber: 15
-            },
-            void 0
-          )) }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-            lineNumber: 50,
-            columnNumber: 11
-          }, void 0),
-          /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-row gap-2 flex-1 justify-end sm:flex-none"), children: [
-            /* @__PURE__ */ jsxDEV(NotificationBadge, {}, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-              lineNumber: 63,
-              columnNumber: 13
-            }, void 0),
-            /* @__PURE__ */ jsxDEV(UserMenu, {}, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-              lineNumber: 64,
-              columnNumber: 13
-            }, void 0)
-          ] }, void 0, true, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-            lineNumber: 62,
-            columnNumber: 11
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-          lineNumber: 49,
-          columnNumber: 9
-        }, void 0) : /* @__PURE__ */ jsxDEV("div", { className: "flex flex-row gap-2", children: [
-          /* @__PURE__ */ jsxDEV(Button, { sz: "sm-1", variant: "secondary", onClick: () => onLogin?.(), children: "Sign in" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-            lineNumber: 69,
-            columnNumber: 11
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(Button, { sz: "sm-1", variant: "primary", onClick: () => onSignup?.(), children: "Sign up" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-            lineNumber: 72,
-            columnNumber: 11
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-          lineNumber: 68,
-          columnNumber: 9
-        }, void 0)
+            index
+          )) }),
+          /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-row gap-2 flex-1 justify-end sm:flex-none"), children: [
+            /* @__PURE__ */ jsx(NotificationBadge, {}),
+            /* @__PURE__ */ jsx(UserMenu, {})
+          ] })
+        ] }) : /* @__PURE__ */ jsxs("div", { className: "flex flex-row gap-2", children: [
+          /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "secondary", onClick: () => onLogin?.(), children: "Sign in" }),
+          /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "primary", onClick: () => onSignup?.(), children: "Sign up" })
+        ] })
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar.tsx",
-      lineNumber: 38,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const NavbarFooter = ({ className, isAuthenticated }) => {
   const navItems = [
-    { icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-house" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar-footer.tsx",
-      lineNumber: 13,
-      columnNumber: 13
-    }, void 0), path: "/", isIndex: true },
-    { icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-user-group" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar-footer.tsx",
-      lineNumber: 14,
-      columnNumber: 13
-    }, void 0), path: "/friends", isIndex: false }
+    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-house" }), path: "/", isIndex: true },
+    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-group" }), path: "/friends", isIndex: false }
   ];
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("bg-[var(--third-bg-color)] w-full py-1", className), children: isAuthenticated && /* @__PURE__ */ jsxDEV("div", { className: "flex flex-1 items-center justify-center py-1", children: navItems.map((item, index) => /* @__PURE__ */ jsxDEV(NavbarItem, { path: item.path, activeRoute: item.isIndex, children: item.icon }, index, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar-footer.tsx",
-    lineNumber: 21,
-    columnNumber: 13
-  }, void 0)) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar-footer.tsx",
-    lineNumber: 19,
-    columnNumber: 9
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/navbar/navbar-footer.tsx",
-    lineNumber: 17,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx("div", { className: clsx("bg-[var(--third-bg-color)] w-full py-1", className), children: isAuthenticated && /* @__PURE__ */ jsx("div", { className: "flex flex-1 items-center justify-center py-1", children: navItems.map((item, index) => /* @__PURE__ */ jsx(NavbarItem, { path: item.path, activeRoute: item.isIndex, children: item.icon }, index)) }) });
 };
+const PageNavbarItem = ({
+  icon,
+  title: title2,
+  description: description2,
+  path,
+  className = "",
+  onClick
+}) => {
+  const navigate = useNavigate();
+  const isFocused = useActiveRoute(path, true);
+  return /* @__PURE__ */ jsxs(
+    "button",
+    {
+      onClick: () => {
+        navigate(path);
+        onClick?.();
+      },
+      className: clsx(
+        "w-full text-left px-3 py-3 rounded-xl",
+        "transition-all duration-300 ease-out",
+        "relative overflow-hidden group",
+        {
+          "bg-bg-fourth border-l-4 border-l-primary-500 shadow-sm": isFocused,
+          "hover:bg-bg-third hover:shadow-sm hover:translate-x-1": !isFocused
+        },
+        className
+      ),
+      children: [
+        isFocused && /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 to-transparent pointer-events-none" }),
+        /* @__PURE__ */ jsxs("div", { className: clsx("grid grid-cols-10 relative z-10"), children: [
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "md-3",
+              className: clsx(
+                "flex justify-center items-center h-full col-span-2",
+                "transition-all duration-300",
+                isFocused ? "text-primary-500 scale-110" : "text-text-second group-hover:text-primary-500 group-hover:scale-105"
+              ),
+              children: icon
+            }
+          ),
+          /* @__PURE__ */ jsxs("div", { className: "col-span-8 flex flex-col justify-center", children: [
+            /* @__PURE__ */ jsx(
+              Text,
+              {
+                sz: "md-1",
+                className: clsx(
+                  "transition-colors duration-300",
+                  isFocused ? "text-primary-600 font-semibold" : "text-text-main group-hover:text-primary-600"
+                ),
+                children: title2
+              }
+            ),
+            description2 && /* @__PURE__ */ jsx(Text, { sz: "sm-2", weight: "light", className: "text-text-second mt-0.5", children: description2 })
+          ] })
+        ] })
+      ]
+    }
+  );
+};
+const PageNavbarSection = ({
+  title: title2,
+  className,
+  titleClassName,
+  children
+}) => {
+  const [showChildren, setShowChildren] = useState(true);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("w-full", className), children: [
+    title2 && /* @__PURE__ */ jsxs(
+      "div",
+      {
+        className: clsx(
+          "group flex items-center justify-between",
+          "p-2 pl-5 pr-3 cursor-pointer select-none",
+          "hover:bg-bg-third/50 rounded-lg",
+          "transition-all duration-200"
+        ),
+        onClick: () => setShowChildren(!showChildren),
+        children: [
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "lg-1",
+              weight: "bold",
+              className: clsx(
+                "text-text-third group-hover:text-text-main transition-colors duration-200",
+                titleClassName
+              ),
+              children: title2
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            "i",
+            {
+              className: clsx(
+                "fas fa-chevron-down text-text-third text-sm",
+                "transition-transform duration-300",
+                "group-hover:text-primary-500",
+                showChildren ? "rotate-180" : "rotate-0"
+              )
+            }
+          )
+        ]
+      }
+    ),
+    showChildren && /* @__PURE__ */ jsx("div", { className: clsx("w-full animate-dropdown-slide mt-1 space-y-1"), children })
+  ] });
+};
+const PageNavbar = ({ title: title2, className, children }) => {
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "flex flex-col gap-3",
+        "bg-bg-main shadow-md rounded-b-2xl",
+        "overflow-hidden",
+        className
+      ),
+      children: [
+        title2 && /* @__PURE__ */ jsxs("div", { className: "relative bg-bg-second mt-2", children: [
+          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-secondary-500/5 pointer-events-none" }),
+          /* @__PURE__ */ jsx(Text, { sz: "xl-1", weight: "bold", className: "relative pt-4 pb-4 px-6 text-gradient-main", children: title2 })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "px-2 pb-3 space-y-1", children })
+      ]
+    }
+  );
+};
+PageNavbar.Section = PageNavbarSection;
+PageNavbar.Item = PageNavbarItem;
 const SubNavbarSection = ({
   title: title2,
   className,
   children
 }) => {
   const [showChildren, setShowChildren] = useState(true);
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-col gap-2", className), children: [
-    title2 && /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col gap-2", className), children: [
+    title2 && /* @__PURE__ */ jsx(
       Text,
       {
         sz: "lg-1",
@@ -4742,31 +2449,15 @@ const SubNavbarSection = ({
         className: clsx("p-2 pl-5 text-gradient-main"),
         onClick: () => setShowChildren(!showChildren),
         children: title2
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/sub-navbar/sub-navbar-section.tsx",
-        lineNumber: 21,
-        columnNumber: 9
-      },
-      void 0
+      }
     ),
-    showChildren && /* @__PURE__ */ jsxDEV("div", { className: "animate-dropdown-slide", children }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/sub-navbar/sub-navbar-section.tsx",
-      lineNumber: 30,
-      columnNumber: 24
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/sub-navbar/sub-navbar-section.tsx",
-    lineNumber: 19,
-    columnNumber: 5
-  }, void 0);
+    showChildren && /* @__PURE__ */ jsx("div", { className: "animate-dropdown-slide", children })
+  ] });
 };
 const SubNavbarItem = ({ title: title2, path, onClick }) => {
   const navigate = useNavigate();
   const isFocused = useActiveRoute(path, true);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(
     "button",
     {
       onClick: () => {
@@ -4778,7 +2469,7 @@ const SubNavbarItem = ({ title: title2, path, onClick }) => {
         { "bg-primary-500/15": isFocused },
         "hover:bg-primary-500/15 cursor-pointer"
       ),
-      children: /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-col gap-1"), children: /* @__PURE__ */ jsxDEV(
+      children: /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-1"), children: /* @__PURE__ */ jsx(
         Text,
         {
           sz: "sm-3",
@@ -4786,37 +2477,13 @@ const SubNavbarItem = ({ title: title2, path, onClick }) => {
             "!text-primary-500 !font-bold": isFocused
           }),
           children: title2
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/sub-navbar/sub-navbar-item.tsx",
-          lineNumber: 30,
-          columnNumber: 9
-        },
-        void 0
-      ) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/sub-navbar/sub-navbar-item.tsx",
-        lineNumber: 29,
-        columnNumber: 7
-      }, void 0)
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/sub-navbar/sub-navbar-item.tsx",
-      lineNumber: 18,
-      columnNumber: 5
-    },
-    void 0
+        }
+      ) })
+    }
   );
 };
 const SubNavbar = ({ className, children }) => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-col gap-1", className), children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/navigation/sub-navbar/sub-navbar.tsx",
-    lineNumber: 14,
-    columnNumber: 10
-  }, void 0);
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-1", className), children });
 };
 SubNavbar.Item = SubNavbarItem;
 SubNavbar.Section = SubNavbarSection;
@@ -4829,7 +2496,7 @@ const Dialog = ({
   onClose,
   className
 }) => {
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -4838,38 +2505,14 @@ const Dialog = ({
         className
       ),
       children: [
-        title2 && /* @__PURE__ */ jsxDEV(Text, { weight: "bold", sz: "lg-2", children: title2 }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-          lineNumber: 39,
-          columnNumber: 9
-        }, void 0),
-        content && /* @__PURE__ */ jsxDEV("div", { children: content }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-          lineNumber: 43,
-          columnNumber: 19
-        }, void 0),
-        /* @__PURE__ */ jsxDEV("div", { className: "flex justify-end space-x-2", children: [
-          tertiaryButton && /* @__PURE__ */ jsxDEV(Button, { onClick: tertiaryButton.onClick, variant: "secondary", sz: "sm-1", children: tertiaryButton.text }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-            lineNumber: 46,
-            columnNumber: 11
-          }, void 0),
-          secondaryButton && /* @__PURE__ */ jsxDEV(Button, { onClick: secondaryButton.onClick, variant: "secondary", sz: "sm-1", children: secondaryButton.text }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-            lineNumber: 51,
-            columnNumber: 11
-          }, void 0),
-          primaryButton && /* @__PURE__ */ jsxDEV(Button, { onClick: primaryButton.onClick, variant: "primary", sz: "sm-1", children: primaryButton.text }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-            lineNumber: 56,
-            columnNumber: 11
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-          lineNumber: 44,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(
+        title2 && /* @__PURE__ */ jsx(Text, { weight: "bold", sz: "lg-2", children: title2 }),
+        content && /* @__PURE__ */ jsx("div", { children: content }),
+        /* @__PURE__ */ jsxs("div", { className: "flex justify-end space-x-2", children: [
+          tertiaryButton && /* @__PURE__ */ jsx(Button, { onClick: tertiaryButton.onClick, variant: "secondary", sz: "sm-1", children: tertiaryButton.text }),
+          secondaryButton && /* @__PURE__ */ jsx(Button, { onClick: secondaryButton.onClick, variant: "secondary", sz: "sm-1", children: secondaryButton.text }),
+          primaryButton && /* @__PURE__ */ jsx(Button, { onClick: primaryButton.onClick, variant: "primary", sz: "sm-1", children: primaryButton.text })
+        ] }),
+        /* @__PURE__ */ jsx(
           Text,
           {
             className: clsx(
@@ -4878,31 +2521,11 @@ const Dialog = ({
               "cursor-pointer"
             ),
             onClick: onClose,
-            children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-xmark" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-              lineNumber: 69,
-              columnNumber: 9
-            }, void 0)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-            lineNumber: 61,
-            columnNumber: 7
-          },
-          void 0
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+          }
         )
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/dialog.tsx",
-      lineNumber: 31,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 function useDialog() {
@@ -4915,25 +2538,1064 @@ function useDialog() {
 const GlobalDialog = () => {
   const { isOpen, dialogProps, closeDialog } = useDialog();
   if (!isOpen) return null;
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(
     "div",
     {
       className: clsx("fixed z-[9998] inset-0 flex items-center justify-center", "bg-bg-overlay"),
-      children: /* @__PURE__ */ jsxDEV(Dialog, { ...dialogProps, onClose: closeDialog }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/global-dialog.tsx",
-        lineNumber: 14,
-        columnNumber: 7
-      }, void 0)
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/organisms/dialog/global-dialog.tsx",
-      lineNumber: 11,
-      columnNumber: 5
-    },
-    void 0
+      children: /* @__PURE__ */ jsx(Dialog, { ...dialogProps, onClose: closeDialog })
+    }
   );
+};
+const styles = {
+  "overlay-loading-bg-color": "_overlay-loading-bg-color_snybu_4"
+};
+const OverlayLoading = () => {
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx(
+        "absolute inset-0 flex items-center justify-center z-50",
+        styles["overlay-loading-bg-color"]
+      ),
+      children: /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: clsx(
+            "absolute top-1/2 w-12 h-12 border-4 border-transparent",
+            "border-t-primary-700 border-r-primary-700",
+            "rounded-full animate-spin"
+          )
+        }
+      )
+    }
+  );
+};
+let connection = null;
+const createSignalRConnection = () => {
+  try {
+    connection = new signalR.HubConnectionBuilder().withUrl(`${appConfig.apiUrl}/hubs/notification`, {
+      withCredentials: true
+    }).withAutomaticReconnect().configureLogging(signalR.LogLevel.Error).build();
+    return connection;
+  } catch (error) {
+    console.error("Error creating SignalR connection: ", error);
+    throw error;
+  }
+};
+function useNotificationHub(onReceiveNotification) {
+  const connectionRef = useRef(null);
+  const { isAuthenticated } = useAuth();
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let isMounted = true;
+    const startConnection = async () => {
+      const conn = createSignalRConnection();
+      connectionRef.current = conn;
+      const tryConnect = async (retry = 0) => {
+        try {
+          await conn.start();
+          conn.on("ReceiveNotification", (data) => {
+            if (isMounted) {
+              onReceiveNotification(data);
+            }
+          });
+        } catch (err) {
+          if (err?.message?.includes("ONBOARDING_NOT_COMPLETED")) {
+            authEvents.emit("redirectToOnboarding");
+            return;
+          }
+          console.error("SignalR connection error: ", err);
+          if (retry < 5) {
+            setTimeout(() => tryConnect(retry + 1), 500);
+          }
+        }
+      };
+      tryConnect();
+    };
+    startConnection();
+    return () => {
+      isMounted = false;
+      if (connectionRef.current) {
+        connectionRef.current.stop();
+        connectionRef.current = null;
+      }
+    };
+  }, [isAuthenticated]);
+}
+const useToast = () => {
+  const context = useContext(ToastContext);
+  if (!context) {
+    throw new Error("useToast must be used within a ToastProvider");
+  }
+  return context;
+};
+function NotificationListener() {
+  const dispatch = useDispatch();
+  const { pushToast } = useToast();
+  const handleNewNotification = useCallback(
+    (data) => {
+      if (data.type === "CancelNotification") {
+        dispatch(deleteNotification(data.data.noticationId));
+        return;
+      } else {
+        dispatch(addNewNotification(data));
+      }
+      pushToast({
+        id: data.id,
+        type: "notification",
+        payload: {
+          notificationDto: data
+        },
+        duration: 5e3
+      });
+    },
+    [dispatch, pushToast]
+  );
+  useNotificationHub(handleNewNotification);
+  return null;
+}
+function NotFoundPage() {
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  useEffect(() => {
+    document.title = "Page Not Found";
+    return () => {
+      document.title = "Fatagram";
+    };
+  });
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "flex flex-col items-center sm:justify-center h-full w-full gap-[20px] pt-10"
+      ),
+      children: [
+        /* @__PURE__ */ jsx(Logo, { hasSlogan: false, sz: "md-2" }),
+        /* @__PURE__ */ jsx(
+          Text,
+          {
+            sz: "xl-3",
+            className: clsx(
+              "font-jua bg-primary-500/70 text-primary-600 w-[200px] h-[200px] flex justify-center items-center rounded-full"
+            ),
+            children: "404"
+          }
+        ),
+        /* @__PURE__ */ jsx(Text, { weight: "extrabold", sz: "lg-3", className: clsx("uppercase text-primary-600"), children: t("notFound.title") }),
+        /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: clsx("flex justify-center text-center"), children: t("notFound.description") }),
+        /* @__PURE__ */ jsx("div", { className: clsx("flex gap-[10px]"), children: /* @__PURE__ */ jsxs(
+          Button,
+          {
+            className: clsx("flex items-center"),
+            onClick: () => {
+              navigate("/");
+            },
+            children: [
+              /* @__PURE__ */ jsx(ArrowLeft, { className: clsx("w-5 h-5 mr-2") }),
+              t("notFound.backButton")
+            ]
+          }
+        ) }),
+        /* @__PURE__ */ jsx(Footer, { className: clsx("text-text-third") })
+      ]
+    }
+  );
+}
+const HomePage = () => {
+  return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("h1", { children: "Home Page" }) });
+};
+const SettingsNavbar = ({ className, onSelect }) => {
+  const { t } = useTranslation();
+  const authSettings = [
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user" }),
+      name: t("settings:navbar.privacy.account"),
+      path: "/settings"
+    },
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-shield-halved" }),
+      name: t("settings:navbar.privacy.privacy"),
+      path: "/settings/privacy"
+    }
+  ];
+  const generalSettings = [
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-language" }),
+      name: t("settings:navbar.general.language"),
+      path: "/settings/language"
+    },
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" }),
+      name: t("settings:navbar.general.notifications"),
+      path: "/settings/notifications"
+    },
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-info" }),
+      name: t("settings:navbar.general.about"),
+      path: "/settings/about"
+    },
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-palette" }),
+      name: t("settings:navbar.general.theme"),
+      path: "/settings/theme"
+    }
+  ];
+  return /* @__PURE__ */ jsxs(PageNavbar, { title: t("settings:navbar.title"), className: clsx("bg-bg-second", className), children: [
+    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t("settings:navbar.privacy.title"), children: authSettings.map((item, index) => /* @__PURE__ */ jsx(
+      PageNavbar.Item,
+      {
+        path: item.path,
+        icon: item.icon,
+        title: item.name,
+        onClick: onSelect
+      },
+      index
+    )) }),
+    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t("settings:navbar.general.title"), children: generalSettings.map((item, index) => /* @__PURE__ */ jsx(
+      PageNavbar.Item,
+      {
+        path: item.path,
+        icon: item.icon,
+        title: item.name,
+        onClick: onSelect
+      },
+      index
+    )) })
+  ] });
+};
+const SettingPage = () => {
+  const { t } = useTranslation();
+  useLayoutEffect(() => {
+    document.title = t("settings:title");
+  }, [t]);
+  const [isShowNavbar, setIsShowNavbar] = React.useState(true);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex flex-col sm:flex-row w-full h-full bg-[var(--second-bg-color)] sm:gap-4"
+      ),
+      children: [
+        /* @__PURE__ */ jsx("div", { className: clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2"), children: /* @__PURE__ */ jsx(Text, { sz: "lg-3", children: /* @__PURE__ */ jsx(
+          "i",
+          {
+            className: "fa-solid fa-list text-gradient-main",
+            onClick: () => setIsShowNavbar(!isShowNavbar)
+          }
+        ) }) }),
+        isShowNavbar && /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: clsx("sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"),
+            onClick: () => setIsShowNavbar(false)
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          SettingsNavbar,
+          {
+            className: clsx(
+              "sm:flex sm:w-[300px] sm:fixed absolute h-full sm:animate-none animate-left-to-right w-[60%] shadow-lg bg-[var(--main-bg-color)] p-2",
+              {
+                "absolute z-30": isShowNavbar,
+                hidden: !isShowNavbar
+              }
+            ),
+            onSelect: () => setIsShowNavbar(false)
+          }
+        ),
+        /* @__PURE__ */ jsx("div", { className: clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]"), children: /* @__PURE__ */ jsx("div", { className: clsx("w-full max-w-[700px] p-2"), children: /* @__PURE__ */ jsx(Outlet, {}) }) })
+      ]
+    }
+  );
+};
+const EditableField = ({
+  editableMode = "none",
+  title: title2,
+  value,
+  placeholder,
+  valueClassName,
+  btnChildren,
+  isEdit,
+  isError = false,
+  errorMessage,
+  noDataValue,
+  canEdit = true,
+  onChangeClick,
+  onSaveClick,
+  onCancelClick
+}) => {
+  const [inputValue, setInputValue] = React.useState(value);
+  const { t } = useTranslation();
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+  return /* @__PURE__ */ jsxs("div", { className: "flex justify-between items-center w-full", children: [
+    /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: "font-light m-2", children: title2 }),
+    /* @__PURE__ */ jsxs("div", { className: "flex sm:items-center items-end gap-4 sm:flex-row flex-col", children: [
+      editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxs("div", { className: "relative flex flex-col gap-1", children: [
+        /* @__PURE__ */ jsx(
+          Textbox,
+          {
+            className: clsx("animate-fade-in px-2 py-1", {
+              "mt-[5px]": isError
+            }),
+            placeholder,
+            value: inputValue,
+            isWrong: isError,
+            onChange: (e) => setInputValue(e.target.value)
+          }
+        ),
+        isError && /* @__PURE__ */ jsx(Text, { sz: "sm-1", className: "text-red-500 ml-2 h-[5px]", children: errorMessage })
+      ] }) : /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: clsx(valueClassName), children: value ?? noDataValue }),
+      canEdit && /* @__PURE__ */ jsx(Fragment, { children: editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxs("div", { className: "animate-fade-in gap-1 flex", children: [
+        /* @__PURE__ */ jsxs(
+          Button,
+          {
+            disabled: value === inputValue,
+            sz: "sm-1",
+            variant: "primary",
+            onClick: () => {
+              onSaveClick?.(inputValue);
+            },
+            children: [
+              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-floppy-disk mr-2" }),
+              t("settings:editableField.saveButton")
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          Button,
+          {
+            sz: "sm-1",
+            variant: "fourth",
+            onClick: () => {
+              onCancelClick?.();
+            },
+            children: t("settings:editableField.cancelButton")
+          }
+        )
+      ] }) : /* @__PURE__ */ jsx(
+        Button,
+        {
+          sz: "sm-1",
+          variant: "fourth",
+          onClick: () => {
+            onChangeClick?.();
+          },
+          children: btnChildren
+        }
+      ) })
+    ] })
+  ] });
+};
+const Card = ({ className, children, title: title2, titleClassName }) => {
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "flex flex-col items-start bg-bg-second p-7 rounded-2xl shadow-lg",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsx(Text, { sz: "lg-2", weight: "bold", className: clsx("mb-5", titleClassName), children: title2 }),
+        children
+      ]
+    }
+  );
+};
+function useLanguage$1() {
+  const { t } = useTranslation();
+  return t;
+}
+const ErrorCodes$3 = {
+  USER_NOT_FOUND: "settings:account.personalInfo.errorMessages.changeUrlName.userNotFound",
+  URLNAME_EXIST: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameAlreadyExist",
+  URL_NAME_TOO_SHORT: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooShort",
+  URL_NAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooLong",
+  URL_NAME_EMPTY: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameEmpty",
+  URL_NAME_CONTAINS_SPACE: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameContainsSpace",
+  UNKNOWN_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.unknownError",
+  INTERNAL_SERVER_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.internalServerError"
+};
+const ChangeUrlName = ({ isLoading, urlName: u }) => {
+  const t = useLanguage$1();
+  const { setUrlName: _setUrlName } = useAuth();
+  const [urlName, setUrlName] = useState();
+  const [isEditUrlName, setIsEditUrlName] = useState(false);
+  const [isEditUrlNameFailed, setIsEditUrlNameFailed] = useState(false);
+  const [editUrlFailedMessage, setEditUrlFailedMessage] = useState("");
+  useEffect(() => {
+    setUrlName(u);
+  }, [u]);
+  const handleChangeUrlName = async (urlName2) => {
+    const changeUrlNameDto = {
+      urlName: urlName2 ?? ""
+    };
+    const response = await userProfileService.UpdateUrlName(changeUrlNameDto);
+    if (response.success) {
+      setUrlName(urlName2);
+      _setUrlName?.(urlName2);
+      setIsEditUrlName(false);
+    } else {
+      setIsEditUrlNameFailed(true);
+      const errorCode = response?.errorCode;
+      setEditUrlFailedMessage(t(ErrorCodes$3[errorCode]));
+    }
+  };
+  if (isLoading) {
+    return /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" });
+  }
+  return /* @__PURE__ */ jsx(
+    EditableField,
+    {
+      title: t("settings:account.personalInfo.urlName"),
+      value: urlName,
+      noDataValue: t("settings:account.personalInfo.noUrlName"),
+      placeholder: t("settings:account.personalInfo.urlNamePlaceholder"),
+      valueClassName: clsx(!urlName && "!opacity-50"),
+      btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
+        /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
+        t("settings:account.personalInfo.changeButton")
+      ] }),
+      editableMode: "inline",
+      isEdit: isEditUrlName,
+      isError: isEditUrlNameFailed,
+      errorMessage: editUrlFailedMessage,
+      onChangeClick: () => {
+        setIsEditUrlName(true);
+      },
+      onCancelClick: () => {
+        setIsEditUrlName(false);
+        setIsEditUrlNameFailed(false);
+      },
+      onSaveClick: (e) => handleChangeUrlName(e)
+    }
+  );
+};
+const ErrorCodes$2 = {
+  NICKNAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeNickname.nicknameTooLong"
+};
+const PREFIX = `/api/userinfo`;
+class UserInfoService {
+  async UpdateNickname(changeNicknameDto) {
+    try {
+      const res = await apiClient.patch(`${PREFIX}/nickname`, changeNicknameDto);
+      const response = res.data;
+      return { success: true, data: response.data };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+  async GetUserInfoOverview(userId) {
+    try {
+      const res = await apiClient.get(`${PREFIX}/overview/${userId}`);
+      const response = res.data;
+      return { success: true, data: response.data };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+}
+const userInfoService = new UserInfoService();
+const ChangeNickname = ({ isLoading, nickname: n }) => {
+  const t = useLanguage$1();
+  const [nickname, setNickname] = useState();
+  const [isEditNickname, setIsEditNickname] = useState(false);
+  const [isEditNicknameFailed, setIsEditNicknameFailed] = useState(false);
+  const [editNicknameFailedMessage, setEditNicknameFailedMessage] = useState("");
+  useEffect(() => {
+    setNickname(n);
+  }, [n]);
+  const handleChangeNickname = async (nickname2) => {
+    const changeNickname = {
+      nickname: nickname2 ?? ""
+    };
+    const response = await userInfoService.UpdateNickname(changeNickname);
+    if (response.success) {
+      setNickname(nickname2);
+      setIsEditNickname(false);
+    } else {
+      setIsEditNicknameFailed(true);
+      const errorCode = response?.errorCode;
+      setEditNicknameFailedMessage(t(ErrorCodes$2[errorCode]));
+    }
+  };
+  if (isLoading) {
+    return /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" });
+  }
+  return /* @__PURE__ */ jsx(
+    EditableField,
+    {
+      title: t("settings:account.personalInfo.nickname"),
+      value: nickname,
+      noDataValue: t("settings:account.personalInfo.noNickname"),
+      placeholder: t("settings:account.personalInfo.nicknamePlaceholder"),
+      valueClassName: clsx(!nickname && "!opacity-50"),
+      btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
+        /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
+        t("settings:account.personalInfo.changeButton")
+      ] }),
+      editableMode: "inline",
+      isEdit: isEditNickname,
+      isError: isEditNicknameFailed,
+      errorMessage: editNicknameFailedMessage,
+      onChangeClick: () => {
+        setIsEditNickname(true);
+      },
+      onCancelClick: () => {
+        setIsEditNickname(false);
+        setIsEditNicknameFailed(false);
+      },
+      onSaveClick: (e) => handleChangeNickname(e)
+    }
+  );
+};
+const AccountSetting = ({ className }) => {
+  const t = useLanguage$1();
+  const [fullName, setFullName] = React.useState("");
+  const [urlName, setUrlName] = React.useState();
+  const [nickname, setNickname] = React.useState();
+  const [isLoading, setIsLoading] = React.useState(true);
+  const { userId } = useAuth();
+  const navigate = useNavigate();
+  const location = useLocation();
+  const handleChangeName = () => navigate("name");
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const _userId = userId ?? "";
+      const response = await userProfileService.getProfile(_userId, "fullName,urlName,nickname");
+      if (response.success) {
+        setFullName(response.data.infos.fullName);
+        setUrlName(response.data.infos.urlName);
+        setNickname(response.data.infos.nickname);
+      }
+      setIsLoading(false);
+    };
+    fetchProfile();
+  }, [userProfileService, location.key, userId]);
+  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsxs(Card, { title: t("settings:account.personalInfo.title"), className: "mb-0 gap-5", children: [
+    isLoading ? /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" }) : /* @__PURE__ */ jsx(
+      EditableField,
+      {
+        title: t("settings:account.personalInfo.yourName"),
+        value: fullName,
+        btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
+          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
+          " ",
+          t("settings:account.personalInfo.changeButton")
+        ] }),
+        onChangeClick: handleChangeName
+      }
+    ),
+    /* @__PURE__ */ jsx(ChangeUrlName, { isLoading, urlName }),
+    /* @__PURE__ */ jsx(ChangeNickname, { isLoading, nickname })
+  ] }) });
+};
+const AccountSettingPage = () => {
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-center w-full"), children: [
+    /* @__PURE__ */ jsx(AccountSetting, { className: clsx("w-full") }),
+    /* @__PURE__ */ jsx(Outlet, {})
+  ] });
+};
+const SelectBoxSetting = ({
+  options = [],
+  selectedOption = "",
+  onOptionChange = (e) => {
+  },
+  title: title2,
+  className,
+  selectBox
+}) => {
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-between items-center w-full", className), children: [
+    /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: "m-2", children: title2 }),
+    selectBox ? selectBox : /* @__PURE__ */ jsx(
+      SelectBox,
+      {
+        className: "!min-w-[170px]",
+        selectedOption,
+        options,
+        onSelect: onOptionChange
+      }
+    )
+  ] });
+};
+const ThemeSettings = ({ className }) => {
+  const { theme: theme2, setTheme } = useTheme();
+  const [themeOptions, setThemeOptions] = useState([]);
+  const { t } = useTranslation();
+  const selectTheme = (opt) => {
+    setTheme(opt);
+  };
+  useEffect(() => {
+    const options = availableThemes.map((theme22) => ({
+      key: theme22.key,
+      value: t(theme22.label)
+    }));
+    setThemeOptions(options);
+  }, [availableThemes]);
+  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsx(Card, { title: t("settings:theme.title"), children: /* @__PURE__ */ jsx(
+    SelectBoxSetting,
+    {
+      title: t("settings:theme.selectTheme"),
+      selectedOption: theme2,
+      options: themeOptions,
+      onOptionChange: selectTheme
+    }
+  ) }) });
+};
+const ThemeSettingPage = () => {
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex justify-center w-full"), children: /* @__PURE__ */ jsx(ThemeSettings, { className: clsx("w-full") }) });
+};
+const ErrorCodes$1 = {
+  FIRSTNAME_NOT_CORRECT_FORMAT: {
+    message: "settings:account.personalInfo.errorMessages.changeName.firstNameNotCorrectFormat",
+    type: "FirstName"
+  },
+  LASTNAME_NOT_CORRECT_FORMAT: {
+    message: "settings:account.personalInfo.errorMessages.changeName.lastNameNotCorrectFormat",
+    type: "LastName"
+  },
+  UNKNOWN_ERROR: {
+    message: "settings:account.personalInfo.errorMessages.changeName.unknownError",
+    type: "UnknownError"
+  },
+  INTERNAL_SERVER_ERROR: {
+    message: "settings:account.personalInfo.errorMessages.changeName.internalServerError",
+    type: "InternalServerError"
+  }
+};
+const ChangeNameForm = ({ className }) => {
+  const [oldFirstName, setOldFirstName] = React.useState("");
+  const [oldLastName, setOldLastName] = React.useState("");
+  const [firstName, setFirstName] = React.useState("");
+  const [lastName, setLastName] = React.useState("");
+  const [firstNameFailed, setFirstNameFailed] = React.useState(false);
+  const [lastNameFailed, setLastNameFailed] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("");
+  const [isLoading, setIsLoading] = React.useState(true);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { userId } = useAuth();
+  const handleClose = () => {
+    navigate("/settings");
+  };
+  const handleSubmit = async () => {
+    const response = await userProfileService.updateName({ firstName, lastName });
+    if (response.success) {
+      navigate("/settings", { state: { reload: true } });
+    } else {
+      const errorCode = response?.error?.code;
+      if (errorCode) {
+        setErrorMessage(t(ErrorCodes$1[errorCode].message));
+        setFirstNameFailed(ErrorCodes$1[errorCode].type === "FirstName");
+        setLastNameFailed(ErrorCodes$1[errorCode].type === "LastName");
+      } else {
+        setErrorMessage(t(ErrorCodes$1["UNKNOWN_ERROR"].message));
+        setFirstNameFailed(false);
+        setLastNameFailed(false);
+      }
+    }
+  };
+  useEffect(() => {
+    const fetchProfile = async () => {
+      const response = await userProfileService.getProfile(userId ?? "", "firstName,lastName");
+      if (response.success) {
+        setFirstName(response.data.infos.firstName);
+        setLastName(response.data.infos.lastName);
+        setOldFirstName(response.data.infos.firstName);
+        setOldLastName(response.data.infos.lastName);
+      }
+      setIsLoading(false);
+    };
+    setErrorMessage("");
+    setFirstNameFailed(false);
+    setLastNameFailed(false);
+    fetchProfile();
+  }, [userProfileService, userId]);
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx(
+        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50 lg:pt-0 pt-10",
+        className
+      ),
+      children: /* @__PURE__ */ jsxs(
+        "div",
+        {
+          className: clsx(
+            "animate-fade-in relative flex flex-col justify-center bg-bg-second rounded-2xl shadow-lg px-10 py-8"
+          ),
+          children: [
+            /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("pb-6 px-2 text-gradient-main !font-bold"), children: t("settings:account.personalInfo.changeNameForm.title") }),
+            isLoading ? /* @__PURE__ */ jsx(Skeleton, {}) : /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsxs(
+                "div",
+                {
+                  className: clsx(
+                    "animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-bg-main p-5"
+                  ),
+                  children: [
+                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
+                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.firstName") }),
+                      /* @__PURE__ */ jsx(
+                        Textbox,
+                        {
+                          isWrong: firstNameFailed,
+                          value: firstName,
+                          placeholder: "First name",
+                          className: clsx("py-1 px-2 lg:max-w-[200px]"),
+                          onChange: (e) => setFirstName(e.target.value)
+                        }
+                      )
+                    ] }),
+                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
+                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.lastName") }),
+                      /* @__PURE__ */ jsx(
+                        Textbox,
+                        {
+                          isWrong: lastNameFailed,
+                          value: lastName,
+                          placeholder: "Last name",
+                          className: clsx("py-1 px-2 lg:max-w-[200px]"),
+                          onChange: (e) => setLastName(e.target.value)
+                        }
+                      )
+                    ] })
+                  ]
+                }
+              ),
+              errorMessage && /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "danger", className: clsx("mt-2 mx-4"), children: errorMessage })
+            ] }),
+            /* @__PURE__ */ jsx(Text, { className: clsx("mx-8 mt-8 mb-4 h-[0.5px] bg-primary-500") }),
+            /* @__PURE__ */ jsxs(Text, { sz: "sm-2", className: clsx("font-light px-2 mb-4 flex flex-col gap-1"), children: [
+              /* @__PURE__ */ jsxs(Text, { weight: "bold", className: clsx("text-single-second"), children: [
+                "* ",
+                t("settings:account.personalInfo.changeNameForm.note"),
+                ":"
+              ] }),
+              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
+                "- ",
+                t("settings:account.personalInfo.changeNameForm.noteText1"),
+                "  ",
+                /* @__PURE__ */ jsxs(Text, { weight: "bold", className: clsx("text-single-main"), children: [
+                  "7 ",
+                  t("settings:account.personalInfo.changeNameForm.day")
+                ] }),
+                "."
+              ] }),
+              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
+                "- ",
+                t("settings:account.personalInfo.changeNameForm.noteText2")
+              ] }),
+              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
+                "- ",
+                t("settings:account.personalInfo.changeNameForm.noteText3"),
+                "  ",
+                /* @__PURE__ */ jsx(Text, { sz: "md-1", children: "!, #, $, @, ..." }),
+                "."
+              ] })
+            ] }),
+            /* @__PURE__ */ jsx(
+              Button,
+              {
+                disabled: firstName === oldFirstName && lastName === oldLastName,
+                sz: "md-1",
+                className: clsx("mt-2"),
+                onClick: handleSubmit,
+                children: t("settings:account.personalInfo.changeNameForm.acceptButton")
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              Text,
+              {
+                sz: "lg-2",
+                className: clsx("absolute top-5 right-8 hover:text-primary-500 cursor-pointer"),
+                onClick: handleClose,
+                children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+              }
+            )
+          ]
+        }
+      )
+    }
+  );
+};
+const useLanguage = () => {
+  const changeLanguage = (lng) => {
+    console.log("Changing language to:", lng);
+    i18next.changeLanguage(lng);
+  };
+  const lang = i18next.language;
+  const currentLanguage = lang ? lang.split("-")[0] : void 0;
+  const availableLanguages = Object.keys(resources);
+  return { changeLanguage, availableLanguages, currentLanguage };
+};
+const SelectLanguage = ({ className }) => {
+  const { t } = useTranslation();
+  const { changeLanguage, availableLanguages, currentLanguage } = useLanguage();
+  const options = availableLanguages.map((lang) => ({
+    key: lang,
+    value: t(`common:language.${lang}`)
+  }));
+  const _changeLanguage = (key) => {
+    changeLanguage(key);
+  };
+  return /* @__PURE__ */ jsx(
+    SelectBox,
+    {
+      className: clsx(className),
+      options,
+      selectedOption: currentLanguage,
+      onSelect: _changeLanguage
+    }
+  );
+};
+const LanguageSettings = ({ className }) => {
+  const { t } = useTranslation();
+  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsx(Card, { title: t("settings:language.title"), children: /* @__PURE__ */ jsx(
+    SelectBoxSetting,
+    {
+      title: t("settings:language.yourLanguage"),
+      selectBox: /* @__PURE__ */ jsx(SelectLanguage, { className: "!min-w-[180px]" })
+    }
+  ) }) });
+};
+const LanguageSettingPage = () => {
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex justify-center w-full"), children: /* @__PURE__ */ jsx(LanguageSettings, { className: clsx("w-full !min-w-[200px]") }) });
+};
+const settingRoutes = {
+  path: "/settings",
+  element: /* @__PURE__ */ jsx(SettingPage, {}),
+  type: "private",
+  children: [
+    {
+      path: "",
+      element: /* @__PURE__ */ jsx(AccountSettingPage, {}),
+      children: [{ path: "name", element: /* @__PURE__ */ jsx(ChangeNameForm, {}) }]
+    },
+    { path: "theme", element: /* @__PURE__ */ jsx(ThemeSettingPage, {}) },
+    { path: "language", element: /* @__PURE__ */ jsx(LanguageSettingPage, {}) }
+  ]
+};
+const SocialButton = ({ icon, name, onClick }) => {
+  return /* @__PURE__ */ jsxs(
+    Button,
+    {
+      variant: "fourth",
+      className: "flex gap-2 flex-1 items-center justify-center !py-3",
+      onClick,
+      children: [
+        /* @__PURE__ */ jsx("img", { src: icon, alt: name, className: "w-5 h-5" }),
+        /* @__PURE__ */ jsx("span", { className: "hidden sm:inline", children: name })
+      ]
+    }
+  );
+};
+const SocialButtons = () => {
+  const { redirectToGoogle } = useAuth();
+  return /* @__PURE__ */ jsxs("div", { className: "flex gap-3 w-full", children: [
+    /* @__PURE__ */ jsx(
+      SocialButton,
+      {
+        name: "Google",
+        icon: "src/assets/svgs/google-icon.svg",
+        onClick: redirectToGoogle
+      }
+    ),
+    /* @__PURE__ */ jsx(SocialButton, { name: "Facebook", icon: "src/assets/svgs/facebook-icon.svg" })
+  ] });
+};
+const loginInitialValues = {
+  usernameOrEmail: "",
+  password: "",
+  isRememberMe: true
+};
+const loginValidationSchema = Yup.object().shape({
+  usernameOrEmail: Yup.string().required("auth:login.errors.usernameOrEmail.required").test(
+    "IS_VALID_USERNAME_OR_EMAIL",
+    "auth:login.errors.usernameOrEmail.invalidFormat",
+    function(value) {
+      if (!value) return false;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+      return emailRegex.test(value) || usernameRegex.test(value);
+    }
+  ),
+  password: Yup.string().required("auth:login.errors.password.required").min(6, "auth:login.errors.password.tooShort")
+});
+const errorCodeMap = {
+  PASSWORD_INCORRECT: { message: "auth:login.errors.password.incorrect", type: "password" },
+  ACCOUNT_NOT_FOUND: {
+    message: "auth:login.errors.usernameOrEmail.notFound",
+    type: "username"
+  }
+};
+const LoginForm = ({
+  switchForgotPassword,
+  showLogo = true,
+  showClose = false,
+  onClose,
+  className
+}) => {
+  const { t } = useTranslation();
+  const [passwordError, setPasswordError] = useState("");
+  const [usernameOrEmailError, setUsernameOrEmailError] = useState("");
+  const [isShowClose] = React.useState(showClose);
+  const [isShowLogo] = React.useState(showLogo);
+  const { logIn } = useAuth();
+  const formik = useFormik({
+    initialValues: loginInitialValues,
+    validationSchema: loginValidationSchema,
+    onSubmit: async (values) => {
+      setUsernameOrEmailError("");
+      setPasswordError("");
+      await logIn(
+        {
+          usernameOrEmail: values.usernameOrEmail,
+          password: values.password
+        },
+        {
+          onError: (err, _errs) => {
+            const errMap = errorCodeMap[err.code] ?? errorCodeMap["UNKNOWN_ERROR"];
+            if (errMap) {
+              errMap.type === "username" ? setUsernameOrEmailError(errMap.message) : errMap.type == "password" ? setPasswordError(errMap.message) : null;
+            }
+          }
+        }
+      );
+    }
+  });
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
+        "bg-bg-second rounded-2xl",
+        "p-12 animate-fade-in overflow-hidden",
+        className
+      ),
+      children: [
+        formik.isSubmitting && /* @__PURE__ */ jsx(OverlayLoading, {}),
+        isShowLogo && /* @__PURE__ */ jsx(Logo, { sz: "md-1" }),
+        /* @__PURE__ */ jsx(
+          Text,
+          {
+            sz: "xl-1",
+            weight: "extrabold",
+            className: clsx("uppercase !text-primary-500", "font-bold font-inter select-none"),
+            children: t("auth:login.title")
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              className: clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm"),
+              autoComplete: "username",
+              placeholder: t("auth:login.username"),
+              onChange: (e) => formik.setFieldValue("usernameOrEmail", e.target.value),
+              isWrong: formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail) || Boolean(usernameOrEmailError),
+              wrongMessage: t(usernameOrEmailError || formik.errors.usernameOrEmail || "")
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              type: "password",
+              className: clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm"),
+              placeholder: t("auth:login.password"),
+              onChange: (e) => formik.setFieldValue("password", e.target.value),
+              isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
+              wrongMessage: t(passwordError || formik.errors.password || ""),
+              autoComplete: "current-password"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex justify-between w-[98%] items-center gap-[50px]", children: [
+          /* @__PURE__ */ jsx(
+            Checkbox,
+            {
+              label: t("auth:login.rememberMe"),
+              onChange: (e) => {
+                formik.setFieldValue("rememberMe", e.target.checked);
+              }
+            }
+          ),
+          switchForgotPassword && /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "sm-3",
+              className: clsx(
+                "!text-primary-500 hover:!text-primary-600",
+                "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
+              ),
+              onClick: switchForgotPassword,
+              children: t("auth:login.forgotPassword")
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsx(
+          Button,
+          {
+            type: "button",
+            className: "w-full font-montserrat",
+            onClick: formik.submitForm,
+            sz: "md-1",
+            children: t("auth:login.loginButton")
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center gap-3", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center w-full gap-3", children: [
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" }),
+            /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: "text-text-third", children: "OR" }),
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" })
+          ] }),
+          /* @__PURE__ */ jsx(SocialButtons, {})
+        ] }),
+        /* @__PURE__ */ jsxs(Text, { children: [
+          t("auth:login.dontHaveAccount"),
+          " ",
+          /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/register", children: t("auth:login.registerButton") })
+        ] }),
+        isShowClose && /* @__PURE__ */ jsx(
+          Text,
+          {
+            className: clsx(
+              "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
+            ),
+            onClick: onClose,
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+          }
+        )
+      ]
+    }
+  );
+};
+const registerInitialValues = {
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  isRememberMe: true
+};
+const registerValidationSchema = Yup.object().shape({
+  username: Yup.string().required("auth:register.errors.username.required").min(3, "auth:register.errors.username.tooShort").max(30, "auth:register.errors.username.tooLong").matches(/^[a-zA-Z0-9_]+$/, "auth:register.errors.username.notCorrectFormat"),
+  email: Yup.string().required("auth:register.errors.email.required").email("auth:register.errors.email.notCorrectFormat"),
+  password: Yup.string().required("auth:register.errors.password.required").min(8, "auth:register.errors.password.tooShort").max(100, "auth:register.errors.password.tooLong"),
+  confirmPassword: Yup.string().required("auth:register.errors.confirmPassword.required").oneOf([Yup.ref("password")], "auth:register.errors.passwords.doNotMatch")
+});
+const registerErrorCodeMap = {
+  USERNAME_EXISTED: {
+    message: "auth:register.errors.username.alreadyExists",
+    type: "username"
+  },
+  EMAIL_EXISTED: { message: "auth:register.errors.email.alreadyExists", type: "email" },
+  PHONE_NUMBER_EXISTED: {
+    message: "auth:register.errors.phoneNumber.alreadyExists",
+    type: "phoneNumber"
+  },
+  PASSWORD_TOO_WEAK: { message: "auth:register.errors.password.tooWeak", type: "password" },
+  UNKNOWN_ERROR: { message: "auth:register.errors.unknown", type: "username" }
 };
 const RegisterForm = ({
   className,
@@ -4944,12 +3606,49 @@ const RegisterForm = ({
   const { t } = useTranslation();
   const [isShowClose] = React.useState(showClose);
   const [isShowLogo] = React.useState(showLogo);
-  useNavigate();
+  const navigate = useNavigate();
+  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const { fetch: register2, isFetching } = useResultFetcher(authService.register, {
+    onSuccess: () => {
+      navigate("/login");
+    },
+    onError: (err, _errs) => {
+      const errMap = registerErrorCodeMap[err?.code] ?? registerErrorCodeMap["UNKNOWN_ERROR"];
+      if (errMap) {
+        switch (errMap.type) {
+          case "username":
+            setUsernameError(errMap.message);
+            break;
+          case "email":
+            setEmailError(errMap.message);
+            break;
+          case "phoneNumber":
+            setPhoneNumberError(errMap.message);
+            break;
+          case "password":
+            setPasswordError(errMap.message);
+            break;
+          case "confirmPassword":
+            setConfirmPasswordError(errMap.message);
+            break;
+        }
+      }
+    }
+  });
   const formik = useFormik({
     initialValues: registerInitialValues,
     validationSchema: registerValidationSchema,
     onSubmit: async (values) => {
-      await authService.register({
+      setUsernameError("");
+      setEmailError("");
+      setPhoneNumberError("");
+      setPasswordError("");
+      setConfirmPasswordError("");
+      await register2({
         username: values.username,
         password: values.password,
         confirmPassword: values.confirmPassword,
@@ -4958,7 +3657,7 @@ const RegisterForm = ({
       });
     }
   });
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -4969,35 +3668,19 @@ const RegisterForm = ({
       ),
       onSubmit: formik.submitForm,
       children: [
-        formik.isSubmitting && /* @__PURE__ */ jsxDEV(OverlayLoading, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-          lineNumber: 59,
-          columnNumber: 31
-        }, void 0),
-        isShowLogo && /* @__PURE__ */ jsxDEV(Logo, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-          lineNumber: 61,
-          columnNumber: 22
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(
+        (formik.isSubmitting || isFetching) && /* @__PURE__ */ jsx(OverlayLoading, {}),
+        isShowLogo && /* @__PURE__ */ jsx(Logo, {}),
+        /* @__PURE__ */ jsx(
           Text,
           {
             sz: "xl-1",
             weight: "extrabold",
             className: "uppercase !text-primary-500 select-none text-center",
             children: t("auth:register.title")
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-            lineNumber: 63,
-            columnNumber: 7
-          },
-          void 0
+          }
         ),
-        /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col gap-3 w-full", children: [
-          /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
+          /* @__PURE__ */ jsx(
             Textbox,
             {
               value: formik.values.username,
@@ -5005,19 +3688,11 @@ const RegisterForm = ({
               className: "text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm",
               placeholder: t("auth:register.username"),
               onChange: (e) => formik.setFieldValue("username", e.target.value),
-              isWrong: formik.touched.username && Boolean(formik.errors.username),
-              wrongMessage: t(formik.errors.username || "")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 71,
-              columnNumber: 9
-            },
-            void 0
+              isWrong: formik.touched.username && Boolean(formik.errors.username) || Boolean(usernameError),
+              wrongMessage: t(usernameError || formik.errors.username || "")
+            }
           ),
-          /* @__PURE__ */ jsxDEV(
+          /* @__PURE__ */ jsx(
             Textbox,
             {
               value: formik.values.email,
@@ -5025,19 +3700,11 @@ const RegisterForm = ({
               className: "text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm",
               placeholder: t("auth:register.email"),
               onChange: (e) => formik.setFieldValue("email", e.target.value),
-              isWrong: formik.touched.email && Boolean(formik.errors.email),
-              wrongMessage: t(formik.errors.email || "")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 80,
-              columnNumber: 9
-            },
-            void 0
+              isWrong: formik.touched.email && Boolean(formik.errors.email) || Boolean(emailError),
+              wrongMessage: t(emailError || formik.errors.email || "")
+            }
           ),
-          /* @__PURE__ */ jsxDEV(
+          /* @__PURE__ */ jsx(
             Textbox,
             {
               value: formik.values.phoneNumber,
@@ -5045,19 +3712,11 @@ const RegisterForm = ({
               className: "text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm",
               placeholder: t("auth:register.phoneNumber"),
               onChange: (e) => formik.setFieldValue("phoneNumber", e.target.value),
-              isWrong: formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber),
-              wrongMessage: t(formik.errors.phoneNumber || "")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 89,
-              columnNumber: 9
-            },
-            void 0
+              isWrong: formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber) || Boolean(phoneNumberError),
+              wrongMessage: t(phoneNumberError || formik.errors.phoneNumber || "")
+            }
           ),
-          /* @__PURE__ */ jsxDEV(
+          /* @__PURE__ */ jsx(
             Textbox,
             {
               type: "password",
@@ -5065,19 +3724,11 @@ const RegisterForm = ({
               className: "text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm",
               placeholder: t("auth:register.password"),
               onChange: (e) => formik.setFieldValue("password", e.target.value),
-              isWrong: formik.touched.password && Boolean(formik.errors.password),
-              wrongMessage: t(formik.errors.password || "")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 98,
-              columnNumber: 9
-            },
-            void 0
+              isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
+              wrongMessage: t(passwordError || formik.errors.password || "")
+            }
           ),
-          /* @__PURE__ */ jsxDEV(
+          /* @__PURE__ */ jsx(
             Textbox,
             {
               type: "password",
@@ -5085,106 +3736,38 @@ const RegisterForm = ({
               className: "text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm",
               placeholder: t("auth:register.confirmPassword"),
               onChange: (e) => formik.setFieldValue("confirmPassword", e.target.value),
-              isWrong: formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword),
-              wrongMessage: t(formik.errors.confirmPassword || "")
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 107,
-              columnNumber: 9
-            },
-            void 0
+              isWrong: formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword) || Boolean(confirmPasswordError),
+              wrongMessage: t(confirmPasswordError || formik.errors.confirmPassword || "")
+            }
           )
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-          lineNumber: 70,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(
+        ] }),
+        /* @__PURE__ */ jsx(
           Checkbox,
           {
             className: "text-[15px] text-single-third gap-[8px]",
-            label: /* @__PURE__ */ jsxDEV(Text, { className: "flex items-center flex-wrap", children: [
+            label: /* @__PURE__ */ jsxs(Text, { className: "flex items-center flex-wrap", children: [
               t("auth:register.agree"),
               " ",
-              /* @__PURE__ */ jsxDEV(Link, { className: "sm:text-[15px]", to: "/terms", children: t("auth:register.termsOfService") }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-                lineNumber: 122,
-                columnNumber: 13
-              }, void 0),
+              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/terms", children: t("auth:register.termsOfService") }),
               " ",
               t("auth:register.and"),
               " ",
-              /* @__PURE__ */ jsxDEV(Link, { className: "sm:text-[15px]", to: "/policy", children: t("auth:register.privacyPolicy") }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-                lineNumber: 127,
-                columnNumber: 13
-              }, void 0),
+              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/policy", children: t("auth:register.privacyPolicy") }),
               "."
-            ] }, void 0, true, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 120,
-              columnNumber: 11
-            }, void 0)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-            lineNumber: 117,
-            columnNumber: 7
-          },
-          void 0
+            ] })
+          }
         ),
-        /* @__PURE__ */ jsxDEV(Button, { type: "button", sz: "md-1", className: "w-full", onClick: formik.submitForm, children: /* @__PURE__ */ jsxDEV(Text, { children: t("auth:register.registerButton") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-          lineNumber: 135,
-          columnNumber: 9
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-          lineNumber: 134,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV("div", { className: "w-full flex flex-col items-center gap-3", children: [
-          /* @__PURE__ */ jsxDEV("div", { className: "flex items-center w-full gap-3", children: [
-            /* @__PURE__ */ jsxDEV("div", { className: "h-[1px] bg-border-main flex-1" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 139,
-              columnNumber: 11
-            }, void 0),
-            /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", className: "text-text-third", children: "OR" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 140,
-              columnNumber: 11
-            }, void 0),
-            /* @__PURE__ */ jsxDEV("div", { className: "h-[1px] bg-border-main flex-1" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 143,
-              columnNumber: 11
-            }, void 0)
-          ] }, void 0, true, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-            lineNumber: 138,
-            columnNumber: 9
-          }, void 0),
-          /* @__PURE__ */ jsxDEV(SocialButtons, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-            lineNumber: 145,
-            columnNumber: 9
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-          lineNumber: 137,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(Link, { className: "font-bold", to: "/login", children: t("auth:register.loginButton") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-          lineNumber: 147,
-          columnNumber: 7
-        }, void 0),
-        isShowClose && /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx(Button, { type: "button", sz: "md-1", className: "w-full", onClick: formik.submitForm, children: /* @__PURE__ */ jsx(Text, { children: t("auth:register.registerButton") }) }),
+        /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center gap-3", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center w-full gap-3", children: [
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" }),
+            /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: "text-text-third", children: "OR" }),
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" })
+          ] }),
+          /* @__PURE__ */ jsx(SocialButtons, {})
+        ] }),
+        /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/login", children: t("auth:register.loginButton") }),
+        isShowClose && /* @__PURE__ */ jsx(
           Text,
           {
             sz: "lg-1",
@@ -5192,87 +3775,35 @@ const RegisterForm = ({
               "absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer"
             ),
             onClick: onClose,
-            children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-xmark" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-              lineNumber: 158,
-              columnNumber: 11
-            }, void 0)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-            lineNumber: 151,
-            columnNumber: 9
-          },
-          void 0
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+          }
         )
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/auth/components/register-form.tsx",
-      lineNumber: 49,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 function RegisterPage() {
   useEffect(() => {
     document.title = "Register - Fatagram";
   }, []);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx("relative flex h-screen w-screen bg-bg-main", "justify-center items-center"),
       children: [
-        /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 filter blur-lg opacity-80 background-image" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/register/register-page.tsx",
-          lineNumber: 17,
-          columnNumber: 7
-        }, this),
-        /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx("div", { className: "absolute inset-0 filter blur-lg opacity-80 background-image" }),
+        /* @__PURE__ */ jsxs(
           "div",
           {
             className: clsx("relative flex items-center bg-bg-second", "rounded-3xl overflow-hidden"),
             children: [
-              /* @__PURE__ */ jsxDEV("div", { className: "relative hidden sm:block flex-1 login-bg w-[1000px] h-[800px]", children: /* @__PURE__ */ jsxDEV(Text, { sz: "xl-3", className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", children: "Feeling" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/register/register-page.tsx",
-                lineNumber: 22,
-                columnNumber: 11
-              }, this) }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/register/register-page.tsx",
-                lineNumber: 21,
-                columnNumber: 9
-              }, this),
-              /* @__PURE__ */ jsxDEV(RegisterForm, { className: "min-h-[700px] max-h-[800px]" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/register/register-page.tsx",
-                lineNumber: 26,
-                columnNumber: 9
-              }, this)
+              /* @__PURE__ */ jsx("div", { className: "relative hidden sm:block flex-1 login-bg w-[1000px] h-[800px]", children: /* @__PURE__ */ jsx(Text, { sz: "xl-3", className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", children: "Feeling" }) }),
+              /* @__PURE__ */ jsx(RegisterForm, { className: "min-h-[700px] max-h-[800px]" })
             ]
-          },
-          void 0,
-          true,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/register/register-page.tsx",
-            lineNumber: 18,
-            columnNumber: 7
-          },
-          this
+          }
         )
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/register/register-page.tsx",
-      lineNumber: 14,
-      columnNumber: 5
-    },
-    this
+    }
   );
 }
 function LoginPage() {
@@ -5280,7 +3811,7 @@ function LoginPage() {
   useEffect(() => {
     document.title = forgotPassword ? "Forgot Password - Fatagram" : "Login - Fatagram";
   }, [forgotPassword]);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -5288,12 +3819,8 @@ function LoginPage() {
         "justify-center items-center"
       ),
       children: [
-        /* @__PURE__ */ jsxDEV("div", { className: "absolute inset-0 filter blur-lg opacity-80 background-image" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/login/login-page.tsx",
-          lineNumber: 24,
-          columnNumber: 7
-        }, this),
-        /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx("div", { className: "absolute inset-0 filter blur-lg opacity-80 background-image" }),
+        /* @__PURE__ */ jsxs(
           "div",
           {
             className: clsx(
@@ -5301,87 +3828,43 @@ function LoginPage() {
               "rounded-3xl overflow-hidden"
             ),
             children: [
-              /* @__PURE__ */ jsxDEV("div", { className: "relative hidden sm:block flex-1 login-bg w-[1000px] h-[800px]", children: /* @__PURE__ */ jsxDEV(
+              /* @__PURE__ */ jsx("div", { className: "relative hidden sm:block flex-1 login-bg w-[1000px] h-[800px]", children: /* @__PURE__ */ jsx(
                 Text,
                 {
                   sz: "xl-3",
                   className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
                   children: "Feeling"
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/login/login-page.tsx",
-                  lineNumber: 32,
-                  columnNumber: 11
-                },
-                this
-              ) }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/login/login-page.tsx",
-                lineNumber: 31,
-                columnNumber: 9
-              }, this),
-              /* @__PURE__ */ jsxDEV(
+                }
+              ) }),
+              /* @__PURE__ */ jsx(
                 LoginForm,
                 {
                   className: "min-h-[700px]",
                   switchForgotPassword: () => setForgotPassword(true)
-                },
-                void 0,
-                false,
-                {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/login/login-page.tsx",
-                  lineNumber: 39,
-                  columnNumber: 9
-                },
-                this
+                }
               )
             ]
-          },
-          void 0,
-          true,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/login/login-page.tsx",
-            lineNumber: 25,
-            columnNumber: 7
-          },
-          this
+          }
         )
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/login/login-page.tsx",
-      lineNumber: 18,
-      columnNumber: 5
-    },
-    this
+    }
   );
 }
 const FriendsNavbar = ({ className, onSelect }) => {
   const { t } = useTranslation();
   const friendPageItems = [
     {
-      icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-user-plus" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friends-navbar.tsx",
-        lineNumber: 24,
-        columnNumber: 13
-      }, void 0),
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-plus" }),
       name: t("friends:navbar.suggestedFriends"),
       path: "/friends"
     },
     {
-      icon: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-user-check" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friends-navbar.tsx",
-        lineNumber: 29,
-        columnNumber: 13
-      }, void 0),
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-check" }),
       name: t("friends:navbar.invite"),
       path: "requests"
     }
   ];
-  return /* @__PURE__ */ jsxDEV(PageNavbar, { title: t("friends:navbar.title"), className: clsx("bg-bg-second", className), children: /* @__PURE__ */ jsxDEV(PageNavbar.Section, { children: friendPageItems.map((item, index) => /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(PageNavbar, { title: t("friends:navbar.title"), className: clsx("bg-bg-second", className), children: /* @__PURE__ */ jsx(PageNavbar.Section, { children: friendPageItems.map((item, index) => /* @__PURE__ */ jsx(
     PageNavbar.Item,
     {
       path: item.path,
@@ -5389,23 +3872,8 @@ const FriendsNavbar = ({ className, onSelect }) => {
       title: item.name,
       onClick: onSelect
     },
-    index,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friends-navbar.tsx",
-      lineNumber: 39,
-      columnNumber: 11
-    },
-    void 0
-  )) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friends-navbar.tsx",
-    lineNumber: 37,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friends-navbar.tsx",
-    lineNumber: 36,
-    columnNumber: 5
-  }, void 0);
+    index
+  )) }) });
 };
 const FriendPage = () => {
   const { t } = useTranslation();
@@ -5413,7 +3881,7 @@ const FriendPage = () => {
   useEffect(() => {
     document.title = t("friends:title");
   }, [t]);
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -5421,45 +3889,21 @@ const FriendPage = () => {
         "bg-[var(--second-bg-color)] sm:gap-4"
       ),
       children: [
-        /* @__PURE__ */ jsxDEV("div", { className: clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2"), children: /* @__PURE__ */ jsxDEV(Text, { sz: "lg-3", children: /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx("div", { className: clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2"), children: /* @__PURE__ */ jsx(Text, { sz: "lg-3", children: /* @__PURE__ */ jsx(
           "i",
           {
             className: "fa-solid fa-list text-gradient-main",
             onClick: () => setIsShowNavbar(!isShowNavbar)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-            lineNumber: 27,
-            columnNumber: 11
-          },
-          void 0
-        ) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-          lineNumber: 26,
-          columnNumber: 9
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-          lineNumber: 25,
-          columnNumber: 7
-        }, void 0),
-        isShowNavbar && /* @__PURE__ */ jsxDEV(
+          }
+        ) }) }),
+        isShowNavbar && /* @__PURE__ */ jsx(
           "div",
           {
             className: clsx("sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"),
             onClick: () => setIsShowNavbar(false)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-            lineNumber: 34,
-            columnNumber: 9
-          },
-          void 0
+          }
         ),
-        /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx(
           FriendsNavbar,
           {
             className: clsx(
@@ -5472,39 +3916,11 @@ const FriendPage = () => {
               }
             ),
             onSelect: () => setIsShowNavbar(false)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-            lineNumber: 39,
-            columnNumber: 7
-          },
-          void 0
+          }
         ),
-        /* @__PURE__ */ jsxDEV("div", { className: clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]"), children: /* @__PURE__ */ jsxDEV("div", { className: clsx("max-w-[1000px] w-full p-2"), children: /* @__PURE__ */ jsxDEV(Outlet, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-          lineNumber: 53,
-          columnNumber: 11
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-          lineNumber: 52,
-          columnNumber: 9
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-          lineNumber: 51,
-          columnNumber: 7
-        }, void 0)
+        /* @__PURE__ */ jsx("div", { className: clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]"), children: /* @__PURE__ */ jsx("div", { className: clsx("max-w-[1000px] w-full p-2"), children: /* @__PURE__ */ jsx(Outlet, {}) }) })
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/friends/friends-page.tsx",
-      lineNumber: 19,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const FriendRequestItem = ({
@@ -5520,7 +3936,7 @@ const FriendRequestItem = ({
   const handleNavigate = () => {
     navigate(path);
   };
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -5531,16 +3947,8 @@ const FriendRequestItem = ({
         "rounded-2xl shadow-lg p-4 gap-1"
       ),
       children: [
-        /* @__PURE__ */ jsxDEV("div", { className: "w-full cursor-pointer", onClick: handleNavigate, children: /* @__PURE__ */ jsxDEV(Avatar, { src: avatar, alt: "avatar", shape: "rounded", className: "w-full" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friend-request-item.tsx",
-          lineNumber: 42,
-          columnNumber: 9
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friend-request-item.tsx",
-          lineNumber: 41,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx("div", { className: "w-full cursor-pointer", onClick: handleNavigate, children: /* @__PURE__ */ jsx(Avatar, { src: avatar, alt: "avatar", shape: "rounded", className: "w-full" }) }),
+        /* @__PURE__ */ jsx(
           Text,
           {
             sz: "md-2",
@@ -5548,41 +3956,13 @@ const FriendRequestItem = ({
             onClick: handleNavigate,
             className: clsx("truncate overflow-hidden w-full"),
             children: name
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friend-request-item.tsx",
-            lineNumber: 44,
-            columnNumber: 7
-          },
-          void 0
+          }
         ),
-        /* @__PURE__ */ jsxDEV(Text, { sz: "sm-1", weight: "light", children: time2 }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friend-request-item.tsx",
-          lineNumber: 52,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(Button, { variant: "primary", sz: "sm-1", className: clsx("w-full mt-2 mb-1"), onClick: onAccept, children: t("user:profileHeader:acceptButton") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friend-request-item.tsx",
-          lineNumber: 55,
-          columnNumber: 7
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(Button, { variant: "fourth", sz: "sm-1", className: clsx("w-full mt-2r"), onClick: onCancel, children: t("user:profileHeader:declineButton") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friend-request-item.tsx",
-          lineNumber: 58,
-          columnNumber: 7
-        }, void 0)
+        /* @__PURE__ */ jsx(Text, { sz: "sm-1", weight: "light", children: time2 }),
+        /* @__PURE__ */ jsx(Button, { variant: "primary", sz: "sm-1", className: clsx("w-full mt-2 mb-1"), onClick: onAccept, children: t("user:profileHeader:acceptButton") }),
+        /* @__PURE__ */ jsx(Button, { variant: "fourth", sz: "sm-1", className: clsx("w-full mt-2r"), onClick: onCancel, children: t("user:profileHeader:declineButton") })
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/components/friend-request-item.tsx",
-      lineNumber: 32,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const FriendRequests = ({ className }) => {
@@ -5638,8 +4018,8 @@ const FriendRequests = ({ className }) => {
     observer.observe(loaderRef.current);
     return () => observer.disconnect();
   }, [loaderRef, isFull]);
-  return /* @__PURE__ */ jsxDEV(Card, { title: `Danh sách lời mời (${total})`, className, children: [
-    /* @__PURE__ */ jsxDEV("div", { className: "flex flex-wrap gap-2 h-full w-full", children: requests.length > 0 ? /* @__PURE__ */ jsxDEV(Fragment, { children: requests.map((request, index) => /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(Card, { title: `Danh sách lời mời (${total})`, className, children: [
+    /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2 h-full w-full", children: requests.length > 0 ? /* @__PURE__ */ jsx(Fragment, { children: requests.map((request, index) => /* @__PURE__ */ jsx(
       FriendRequestItem,
       {
         name: request.senderName,
@@ -5653,121 +4033,50 @@ const FriendRequests = ({ className }) => {
         onAccept: () => handleAcceptRequest(request.senderId),
         onCancel: () => handleRejectRequest(request.senderId)
       },
-      index,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-        lineNumber: 103,
-        columnNumber: 15
-      },
-      void 0
-    )) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-      lineNumber: 101,
-      columnNumber: 11
-    }, void 0) : /* @__PURE__ */ jsxDEV(Text, { sz: "md-2", children: t("friends:friendRequest.noRequests") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-      lineNumber: 126,
-      columnNumber: 11
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-      lineNumber: 99,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { ref: loaderRef, className: "w-full h-0" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-      lineNumber: 130,
-      columnNumber: 7
-    }, void 0),
-    isLoading && /* @__PURE__ */ jsxDEV("div", { className: clsx("flex justify-center items-center w-full h-10 gap-1 mt-5"), children: [
-      /* @__PURE__ */ jsxDEV(
+      index
+    )) }) : /* @__PURE__ */ jsx(Text, { sz: "md-2", children: t("friends:friendRequest.noRequests") }) }),
+    /* @__PURE__ */ jsx("div", { ref: loaderRef, className: "w-full h-0" }),
+    isLoading && /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-center items-center w-full h-10 gap-1 mt-5"), children: [
+      /* @__PURE__ */ jsx(
         "span",
         {
           className: clsx(
             "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0s]"
           )
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-          lineNumber: 133,
-          columnNumber: 11
-        },
-        void 0
+        }
       ),
-      /* @__PURE__ */ jsxDEV(
+      /* @__PURE__ */ jsx(
         "span",
         {
           className: clsx(
             "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.2s]"
           )
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-          lineNumber: 138,
-          columnNumber: 11
-        },
-        void 0
+        }
       ),
-      /* @__PURE__ */ jsxDEV(
+      /* @__PURE__ */ jsx(
         "span",
         {
           className: clsx(
             "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.4s]"
           )
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-          lineNumber: 143,
-          columnNumber: 11
-        },
-        void 0
+        }
       )
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-      lineNumber: 132,
-      columnNumber: 9
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/components/friend-request.tsx",
-    lineNumber: 98,
-    columnNumber: 5
-  }, void 0);
+    ] })
+  ] });
 };
 const FriendRequests$1 = React.memo(FriendRequests);
 const RequestsPage = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: "flex justify-center w-full", children: /* @__PURE__ */ jsxDEV(FriendRequests$1, { className: "w-full" }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/requests-page.tsx",
-    lineNumber: 9,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/friends/requests/requests-page.tsx",
-    lineNumber: 8,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx("div", { className: "flex justify-center w-full", children: /* @__PURE__ */ jsx(FriendRequests$1, { className: "w-full" }) });
 };
 const RequestsPage$1 = React.memo(RequestsPage);
 const friendsRoutes = {
   path: "/friends",
-  element: /* @__PURE__ */ jsxDEV(FriendPage, {}, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/friends.routes.tsx",
-    lineNumber: 7,
-    columnNumber: 12
-  }, void 0),
+  element: /* @__PURE__ */ jsx(FriendPage, {}),
   type: "private",
   children: [
     {
       path: "requests",
-      element: /* @__PURE__ */ jsxDEV(RequestsPage$1, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/friends.routes.tsx",
-        lineNumber: 12,
-        columnNumber: 16
-      }, void 0),
+      element: /* @__PURE__ */ jsx(RequestsPage$1, {}),
       keepAlive: true
     }
   ]
@@ -5781,15 +4090,7 @@ const NotificationsPage = () => {
       dispatch(setShowNotification(false));
     };
   }, []);
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("relative flex items-start justify-center w-full h-full mt-1"), children: /* @__PURE__ */ jsxDEV(NotificationMenu, { className: clsx("h-full max-w-[600px] w-full px-2 py-4 pb-2 mx-4") }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/notifications/notifications-page.tsx",
-    lineNumber: 24,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/notifications/notifications-page.tsx",
-    lineNumber: 23,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx("div", { className: clsx("relative flex items-start justify-center w-full h-full mt-1"), children: /* @__PURE__ */ jsx(NotificationMenu, { className: clsx("h-full max-w-[600px] w-full px-2 py-4 pb-2 mx-4") }) });
 };
 const SelectFile = ({
   onChange,
@@ -5808,7 +4109,7 @@ const SelectFile = ({
   const handleClick = () => {
     inputRef.current?.click();
   };
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -5818,7 +4119,7 @@ const SelectFile = ({
       ),
       onClick: handleClick,
       children: [
-        /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx(
           "input",
           {
             ref: inputRef,
@@ -5828,27 +4129,11 @@ const SelectFile = ({
             className: "hidden",
             onChange: handleChange,
             title: "Select a file"
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/molecules/select-file/select-file.tsx",
-            lineNumber: 40,
-            columnNumber: 7
-          },
-          void 0
+          }
         ),
         children
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/molecules/select-file/select-file.tsx",
-      lineNumber: 32,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 function useUserId(userParam) {
@@ -5862,7 +4147,7 @@ function useUserId(userParam) {
         }
       }, 1e4);
       try {
-        const response = await userProfileService.GetProfile(userParam, "id");
+        const response = await userProfileService.getProfile(userParam, "id");
         clearTimeout(timeoutId);
         console.log("Fetch userId for", userParam, response);
         if (response.success) {
@@ -5902,24 +4187,12 @@ const ProfilePageContext = createContext({
 });
 function ProfilePageProvider({ children }) {
   const { userId } = useAuth();
-  const { increment, decrement } = useLoading();
   const userParam = useParams();
-  const { userId: targetId, userExist, isLoading } = useUserId(userParam.userParam || "");
-  const prevLoadingRef = useRef(null);
+  const { userId: targetId, userExist } = useUserId(userParam.userParam || "");
   const cachedTargetIdRef = useRef(void 0);
   if (targetId) {
     cachedTargetIdRef.current = targetId;
   }
-  useEffect(() => {
-    if (isLoading !== prevLoadingRef.current) {
-      if (isLoading) {
-        increment();
-      } else if (prevLoadingRef.current !== null) {
-        decrement();
-      }
-      prevLoadingRef.current = isLoading;
-    }
-  }, [isLoading, increment, decrement]);
   const validTargetId = targetId || cachedTargetIdRef.current || "";
   const contextValue = useMemo(
     () => ({
@@ -5930,17 +4203,9 @@ function ProfilePageProvider({ children }) {
     [userId, validTargetId, userParam.userParam]
   );
   if (userExist === false) {
-    return /* @__PURE__ */ jsxDEV(NotFoundPage, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/context/profile-page-context.tsx",
-      lineNumber: 68,
-      columnNumber: 12
-    }, this);
+    return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
-  return /* @__PURE__ */ jsxDEV(ProfilePageContext.Provider, { value: contextValue, children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/context/profile-page-context.tsx",
-    lineNumber: 72,
-    columnNumber: 10
-  }, this);
+  return /* @__PURE__ */ jsx(ProfilePageContext.Provider, { value: contextValue, children });
 }
 function useProfilePage() {
   const context = useContext(ProfilePageContext);
@@ -5956,17 +4221,13 @@ const ProfileBackground = ({
 }) => {
   const { t } = useTranslation();
   const { isOwner } = useProfilePage();
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("relative aspect-[16/6] w-full rounded-[15px]"), children: isLoading ? /* @__PURE__ */ jsxDEV(Skeleton, { className: "h-full" }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-background.tsx",
-    lineNumber: 27,
-    columnNumber: 9
-  }, void 0) : /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx("div", { className: clsx("relative aspect-[16/6] w-full rounded-[15px]"), children: isLoading ? /* @__PURE__ */ jsx(Skeleton, { className: "h-full" }) : /* @__PURE__ */ jsx(
     BackgroundImage,
     {
       src: background,
       alt: "Background Image",
       className: clsx("relative h-full w-full"),
-      children: isOwner && /* @__PURE__ */ jsxDEV(
+      children: isOwner && /* @__PURE__ */ jsxs(
         SelectFile,
         {
           onChange: handleSelectBackground,
@@ -5977,41 +4238,13 @@ const ProfileBackground = ({
             "opacity-40 hover:opacity-70 gap-2"
           ),
           children: [
-            /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid fa-camera") }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-background.tsx",
-              lineNumber: 44,
-              columnNumber: 15
-            }, void 0),
-            /* @__PURE__ */ jsxDEV(Text, { className: clsx("sm:flex hidden"), sz: "md-1", children: background ? t("user:profileHeader.changeButton") : t("user:profileHeader.addButton") }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-background.tsx",
-              lineNumber: 45,
-              columnNumber: 15
-            }, void 0)
+            /* @__PURE__ */ jsx("i", { className: clsx("fa-solid fa-camera") }),
+            /* @__PURE__ */ jsx(Text, { className: clsx("sm:flex hidden"), sz: "md-1", children: background ? t("user:profileHeader.changeButton") : t("user:profileHeader.addButton") })
           ]
-        },
-        void 0,
-        true,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-background.tsx",
-          lineNumber: 35,
-          columnNumber: 13
-        },
-        void 0
+        }
       )
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-background.tsx",
-      lineNumber: 29,
-      columnNumber: 9
-    },
-    void 0
-  ) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-background.tsx",
-    lineNumber: 25,
-    columnNumber: 5
-  }, void 0);
+    }
+  ) });
 };
 const ProfileAvatar = ({
   isLoading,
@@ -6021,35 +4254,15 @@ const ProfileAvatar = ({
   handleSelectAvatar
 }) => {
   const { isOwner } = useProfilePage();
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx$1("relative", className), ref, children: isLoading ? /* @__PURE__ */ jsxDEV("div", { className: "bg-bg-main rounded-full", children: /* @__PURE__ */ jsxDEV(Skeleton, { className: "border-4 border-bg-main h-[192px]", variant: "circle" }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-avatar.tsx",
-    lineNumber: 26,
-    columnNumber: 11
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-avatar.tsx",
-    lineNumber: 25,
-    columnNumber: 9
-  }, void 0) : /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx("div", { className: clsx$1("relative", className), ref, children: isLoading ? /* @__PURE__ */ jsx("div", { className: "bg-bg-main rounded-full", children: /* @__PURE__ */ jsx(Skeleton, { className: "border-4 border-bg-main h-[192px]", variant: "circle" }) }) : /* @__PURE__ */ jsx(
     Avatar,
     {
       src: avatar,
       alt: "Avatar",
       sz: "lg-2",
       className: "border-4 border-bg-main flex-shrink-0"
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-avatar.tsx",
-      lineNumber: 29,
-      columnNumber: 9
-    },
-    void 0
-  ) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-avatar.tsx",
-    lineNumber: 23,
-    columnNumber: 5
-  }, void 0);
+    }
+  ) });
 };
 const Dropdown = ({
   items,
@@ -6060,8 +4273,8 @@ const Dropdown = ({
   ref
 }) => {
   if (!isShow) return null;
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("rounded-2xl p-2 bg-bg-seventh", className), ref, children: [
-    showPolygon && /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: clsx("rounded-2xl p-2 bg-bg-seventh", className), ref, children: [
+    showPolygon && /* @__PURE__ */ jsx(
       "div",
       {
         className: clsx(
@@ -6070,17 +4283,9 @@ const Dropdown = ({
           "border-r-8 border-r-transparent",
           "border-b-8 border-b-bg-seventh rounded-sm"
         )
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/molecules/dropdown/dropdown.tsx",
-        lineNumber: 34,
-        columnNumber: 9
-      },
-      void 0
+      }
     ),
-    /* @__PURE__ */ jsxDEV("ul", { className: "flex flex-col gap-1 w-full", children: items.map((item, index) => /* @__PURE__ */ jsxDEV(
+    /* @__PURE__ */ jsx("ul", { className: "flex flex-col gap-1 w-full", children: items.map((item, index) => /* @__PURE__ */ jsx(
       "li",
       {
         onClick: () => {
@@ -6093,24 +4298,9 @@ const Dropdown = ({
         ),
         children: item.content
       },
-      index,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/molecules/dropdown/dropdown.tsx",
-        lineNumber: 45,
-        columnNumber: 11
-      },
-      void 0
-    )) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/molecules/dropdown/dropdown.tsx",
-      lineNumber: 43,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/molecules/dropdown/dropdown.tsx",
-    lineNumber: 32,
-    columnNumber: 5
-  }, void 0);
+      index
+    )) })
+  ] });
 };
 const FriendButton = ({ uid, sz = "md-1" }) => {
   const { t } = useTranslation();
@@ -6188,19 +4378,11 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
     () => [
       {
         id: "unfriend",
-        content: /* @__PURE__ */ jsxDEV("div", { children: [
-          /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid", "fa-user-xmark", "mr-2") }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-            lineNumber: 107,
-            columnNumber: 13
-          }, void 0),
+        content: /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-user-xmark", "mr-2") }),
           " ",
           t("user:profileHeader.unfriendButton")
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-          lineNumber: 106,
-          columnNumber: 11
-        }, void 0),
+        ] }),
         onClick: async () => {
           await handleUnfriend?.(uid);
         }
@@ -6212,67 +4394,35 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
     () => [
       {
         id: "acceptRequest",
-        content: /* @__PURE__ */ jsxDEV("div", { children: [
-          /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid", "fa-check", "mr-2") }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-            lineNumber: 126,
-            columnNumber: 13
-          }, void 0),
+        content: /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-check", "mr-2") }),
           " ",
           t("user:profileHeader.acceptButton")
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-          lineNumber: 125,
-          columnNumber: 11
-        }, void 0),
+        ] }),
         onClick: async () => await handleAcceptAddFriendRequest?.(uid)
       },
       {
         id: "cancelRequest",
-        content: /* @__PURE__ */ jsxDEV("div", { children: [
-          /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid", "fa-xmark", "mr-2") }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-            lineNumber: 136,
-            columnNumber: 13
-          }, void 0),
+        content: /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-xmark", "mr-2") }),
           " ",
           t("user:profileHeader.declineButton")
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-          lineNumber: 135,
-          columnNumber: 11
-        }, void 0),
+        ] }),
         onClick: async () => await handleDeclineAddFriendRequest?.(uid)
       }
     ],
     [uid, handleAcceptAddFriendRequest, handleDeclineAddFriendRequest, t]
   );
-  return /* @__PURE__ */ jsxDEV("div", { children: friendshipStatus === "None" ? /* @__PURE__ */ jsxDEV(Button, { sz, onClick: handleSentAddFriendRequest, children: [
-    /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid", "fa-plus") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-      lineNumber: 150,
-      columnNumber: 11
-    }, void 0),
+  return /* @__PURE__ */ jsx("div", { children: friendshipStatus === "None" ? /* @__PURE__ */ jsxs(Button, { sz, onClick: handleSentAddFriendRequest, children: [
+    /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-plus") }),
     " ",
     t("user:profileHeader.addFriendButton")
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-    lineNumber: 149,
-    columnNumber: 9
-  }, void 0) : friendshipStatus === "SentByMe" ? /* @__PURE__ */ jsxDEV(Button, { sz, onClick: handleCancelAddFriendRequest, children: [
-    /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid", "fa-xmark") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-      lineNumber: 154,
-      columnNumber: 11
-    }, void 0),
+  ] }) : friendshipStatus === "SentByMe" ? /* @__PURE__ */ jsxs(Button, { sz, onClick: handleCancelAddFriendRequest, children: [
+    /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-xmark") }),
     " ",
     t("user:profileHeader.cancelRequestButton")
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-    lineNumber: 153,
-    columnNumber: 9
-  }, void 0) : friendshipStatus === "SentByThem" ? /* @__PURE__ */ jsxDEV("div", { className: clsx("sm:relative", "z-50"), children: [
-    /* @__PURE__ */ jsxDEV(
+  ] }) : friendshipStatus === "SentByThem" ? /* @__PURE__ */ jsxs("div", { className: clsx("sm:relative", "z-50"), children: [
+    /* @__PURE__ */ jsxs(
       Button,
       {
         sz,
@@ -6281,25 +4431,13 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
           setIsShowRequestOptions(!isShowRequestOptions);
         },
         children: [
-          /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid", "fa-reply") }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-            lineNumber: 166,
-            columnNumber: 13
-          }, void 0),
+          /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-reply") }),
           " ",
           t("user:profileHeader.respondRequestButton")
         ]
-      },
-      void 0,
-      true,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-        lineNumber: 159,
-        columnNumber: 11
-      },
-      void 0
+      }
     ),
-    /* @__PURE__ */ jsxDEV(
+    /* @__PURE__ */ jsx(
       Dropdown,
       {
         ref: requestOptionsRef,
@@ -6317,22 +4455,10 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
           "w-[calc(100%-2%)]"
         ),
         items: requestOptions
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-        lineNumber: 169,
-        columnNumber: 11
-      },
-      void 0
+      }
     )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-    lineNumber: 158,
-    columnNumber: 9
-  }, void 0) : /* @__PURE__ */ jsxDEV("div", { className: clsx("sm:relative", "z-50"), children: [
-    /* @__PURE__ */ jsxDEV(
+  ] }) : /* @__PURE__ */ jsxs("div", { className: clsx("sm:relative", "z-50"), children: [
+    /* @__PURE__ */ jsxs(
       Button,
       {
         sz,
@@ -6341,25 +4467,13 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
           setIsShowFriendOptions(!isShowFriendOptions);
         },
         children: [
-          /* @__PURE__ */ jsxDEV("i", { className: clsx("fa-solid", "fa-user-check") }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-            lineNumber: 196,
-            columnNumber: 13
-          }, void 0),
+          /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-user-check") }),
           " ",
           t("user:profileHeader.friendButton")
         ]
-      },
-      void 0,
-      true,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-        lineNumber: 189,
-        columnNumber: 11
-      },
-      void 0
+      }
     ),
-    /* @__PURE__ */ jsxDEV(
+    /* @__PURE__ */ jsx(
       Dropdown,
       {
         ref: friendOptionsRef,
@@ -6378,36 +4492,20 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
           "w-[calc(100%-2%)]"
         ),
         items: friendOptions
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-        lineNumber: 199,
-        columnNumber: 11
-      },
-      void 0
+      }
     )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-    lineNumber: 188,
-    columnNumber: 9
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/friend-button.tsx",
-    lineNumber: 147,
-    columnNumber: 5
-  }, void 0);
+  ] }) });
 };
 const ProfileHeader = ({ className, onUserNotFound }) => {
   const [fullName, setFullName] = React.useState("");
   const [nickname, setNickname] = React.useState(null);
   const [avatar, setAvatar] = React.useState("");
-  const [background, setBackground] = React.useState("");
+  const [background] = React.useState("");
   const [isLoading, setIsLoading] = React.useState(true);
   const [isLoadingNumOfFriends, setIsLoadingNumOfFriends] = React.useState(true);
   const [numberOfFriends, setNumberOfFriends] = React.useState(0);
   const avtRef = useRef(null);
-  const t = useLanguage();
+  const t = useLanguage$1();
   const navigate = useNavigate();
   const { openDialog, closeDialog } = useDialog();
   const { targetId, isOwner } = useProfilePage();
@@ -6415,7 +4513,7 @@ const ProfileHeader = ({ className, onUserNotFound }) => {
   useEffect(() => {
     const fetchProfile = async () => {
       setIsLoading(true);
-      const response = await userProfileService.GetProfile(
+      const response = await userProfileService.getProfile(
         targetId,
         "avatar,background,fullName,nickname"
       );
@@ -6444,7 +4542,7 @@ const ProfileHeader = ({ className, onUserNotFound }) => {
     async (file) => {
       const result = await userProfileService.UploadBackground(file);
       if (result.success) ;
-      else if (result.errorCode === "LARGE_FILE_ERROR") {
+      else if (result.error?.code === "LARGE_FILE_ERROR") {
         openDialog({
           title: t("user:profileHeader.oversizeErrorTitle"),
           content: t("user:profileHeader.oversizeErrorMessage"),
@@ -6462,7 +4560,7 @@ const ProfileHeader = ({ className, onUserNotFound }) => {
       const result = await userProfileService.UploadAvatar(file);
       if (result.success) {
         setAvatar(result.data);
-      } else if (result.errorCode === "LARGE_FILE_ERROR") {
+      } else if (result.error?.code === "LARGE_FILE_ERROR") {
         openDialog({
           title: t("user:profileHeader.oversizeErrorTitle"),
           content: t("user:profileHeader.oversizeErrorMessage"),
@@ -6475,78 +4573,38 @@ const ProfileHeader = ({ className, onUserNotFound }) => {
     },
     [openDialog, closeDialog, t]
   );
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("relative w-full flex flex-col items-center", className), children: [
-    /* @__PURE__ */ jsxDEV("div", { className: "relative w-full mt-2", children: /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: clsx("relative w-full flex flex-col items-center", className), children: [
+    /* @__PURE__ */ jsx("div", { className: "relative w-full mt-2", children: /* @__PURE__ */ jsx(
       ProfileBackground,
       {
         isLoading,
         background,
         handleSelectBackground
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-        lineNumber: 126,
-        columnNumber: 9
-      },
-      void 0
-    ) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-      lineNumber: 125,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: "-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3", children: [
-      /* @__PURE__ */ jsxDEV(
+      }
+    ) }),
+    /* @__PURE__ */ jsxs("div", { className: "-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3", children: [
+      /* @__PURE__ */ jsx(
         ProfileAvatar,
         {
           isLoading,
           avatar,
           handleSelectAvatar,
           ref: avtRef
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-          lineNumber: 134,
-          columnNumber: 9
-        },
-        void 0
+        }
       ),
-      /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col gap-2 items-start flex-1 mb-3 ml-4", children: [
-        isLoading ? /* @__PURE__ */ jsxDEV(Skeleton, { sz: "sm-3", className: "w-56" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-          lineNumber: 142,
-          columnNumber: 13
-        }, void 0) : /* @__PURE__ */ jsxDEV(Text, { sz: "xl-1", weight: "bold", className: "lg:text-left text-center break-words", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 items-start flex-1 mb-3 ml-4", children: [
+        isLoading ? /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-56" }) : /* @__PURE__ */ jsxs(Text, { sz: "xl-1", weight: "bold", className: "lg:text-left text-center break-words", children: [
           fullName,
-          nickname && /* @__PURE__ */ jsxDEV(Text, { sz: "lg-3", weight: "light", className: "lg:text-left text-center lg:ml-2", children: [
+          nickname && /* @__PURE__ */ jsxs(Text, { sz: "lg-3", weight: "light", className: "lg:text-left text-center lg:ml-2", children: [
             "(",
             nickname,
             ")"
-          ] }, void 0, true, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-            lineNumber: 147,
-            columnNumber: 17
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-          lineNumber: 144,
-          columnNumber: 13
-        }, void 0),
-        /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col items-center w-full lg:flex-row", children: [
-          !isLoadingNumOfFriends ? /* @__PURE__ */ jsxDEV(Text, { sz: "md-2", weight: "semibold", className: "text-[var(--text-color)] opacity-70", children: numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") : t("user:profileHeader.noFriendsCount") }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-            lineNumber: 156,
-            columnNumber: 15
-          }, void 0) : /* @__PURE__ */ jsxDEV(Skeleton, { sz: "sm-3", className: "w-36" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-            lineNumber: 162,
-            columnNumber: 15
-          }, void 0),
-          !isLoading ? /* @__PURE__ */ jsxDEV("div", { className: "flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0", children: [
-            isAuthenticated && /* @__PURE__ */ jsxDEV(Fragment, { children: isOwner ? /* @__PURE__ */ jsxDEV(
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center w-full lg:flex-row", children: [
+          !isLoadingNumOfFriends ? /* @__PURE__ */ jsx(Text, { sz: "md-2", weight: "semibold", className: "text-[var(--text-color)] opacity-70", children: numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") : t("user:profileHeader.noFriendsCount") }) : /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-36" }),
+          !isLoading ? /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0", children: [
+            isAuthenticated && /* @__PURE__ */ jsx(Fragment, { children: isOwner ? /* @__PURE__ */ jsxs(
               Button,
               {
                 sz: "sm-1",
@@ -6554,83 +4612,23 @@ const ProfileHeader = ({ className, onUserNotFound }) => {
                   navigate(`/settings`);
                 },
                 children: [
-                  /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-user-pen" }, void 0, false, {
-                    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-                    lineNumber: 175,
-                    columnNumber: 25
-                  }, void 0),
+                  /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-pen" }),
                   " ",
                   t("user:profileHeader.editButton")
                 ]
-              },
-              void 0,
-              true,
-              {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-                lineNumber: 169,
-                columnNumber: 23
-              },
-              void 0
-            ) : /* @__PURE__ */ jsxDEV(FriendButton, { sz: "sm-1", uid: targetId }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-              lineNumber: 179,
-              columnNumber: 23
-            }, void 0) }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-              lineNumber: 167,
-              columnNumber: 19
-            }, void 0),
-            !isOwner && isAuthenticated && /* @__PURE__ */ jsxDEV(Button, { sz: "sm-1", variant: "secondary", children: [
-              /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-comment" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-                lineNumber: 186,
-                columnNumber: 21
-              }, void 0),
+              }
+            ) : /* @__PURE__ */ jsx(FriendButton, { sz: "sm-1", uid: targetId }) }),
+            !isOwner && isAuthenticated && /* @__PURE__ */ jsxs(Button, { sz: "sm-1", variant: "secondary", children: [
+              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-comment" }),
               " ",
               t("user:profileHeader.messageButton")
-            ] }, void 0, true, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-              lineNumber: 185,
-              columnNumber: 19
-            }, void 0),
-            /* @__PURE__ */ jsxDEV(Button, { sz: "sm-1", variant: "secondary", children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-circle-info" }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-              lineNumber: 190,
-              columnNumber: 19
-            }, void 0) }, void 0, false, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-              lineNumber: 189,
-              columnNumber: 17
-            }, void 0)
-          ] }, void 0, true, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-            lineNumber: 165,
-            columnNumber: 15
-          }, void 0) : /* @__PURE__ */ jsxDEV(Skeleton, { sz: "md-1", className: "w-[250px] lg:ml-auto mb-1" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-            lineNumber: 194,
-            columnNumber: 15
-          }, void 0)
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-          lineNumber: 154,
-          columnNumber: 11
-        }, void 0)
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-        lineNumber: 140,
-        columnNumber: 9
-      }, void 0)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-      lineNumber: 133,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-header.tsx",
-    lineNumber: 124,
-    columnNumber: 5
-  }, void 0);
+            ] }),
+            /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-info" }) })
+          ] }) : /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-[250px] lg:ml-auto mb-1" })
+        ] })
+      ] })
+    ] })
+  ] });
 };
 function useSize() {
   const ref = React.useRef(null);
@@ -6743,48 +4741,29 @@ const ProfileNavbar = ({ className = "" }) => {
     const foundInHidden = hiddenItems.some((item) => item.href === currentPath);
     setIsChooseHiddenItem(foundInHidden);
   }, [location.pathname, hiddenItems]);
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("relative flex py-2", className), ref: containerRef, children: [
-    /* @__PURE__ */ jsxDEV("div", { className: "absolute invisible", children: navbarItems.map((item, index) => {
+  return /* @__PURE__ */ jsxs("div", { className: clsx("relative flex py-2", className), ref: containerRef, children: [
+    /* @__PURE__ */ jsx("div", { className: "absolute invisible", children: navbarItems.map((item, index) => {
       if (item.isOwnerOnly && !isOwner) return null;
-      return /* @__PURE__ */ jsxDEV(
+      return /* @__PURE__ */ jsx(
         "div",
         {
           ref: (el) => {
             if (el) itemRefs.current[index] = el;
           },
-          children: /* @__PURE__ */ jsxDEV(
+          children: /* @__PURE__ */ jsx(
             NavbarItem,
             {
               path: item.href ?? "",
               children: item.name,
               onClick: () => setShowDropdown(false),
               activeRoute: item.isIndex ?? true
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-              lineNumber: 128,
-              columnNumber: 15
-            },
-            void 0
+            }
           )
         },
-        index,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-          lineNumber: 122,
-          columnNumber: 13
-        },
-        void 0
+        index
       );
-    }) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-      lineNumber: 118,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: "flex", children: visibleItems.map((item) => /* @__PURE__ */ jsxDEV(
+    }) }),
+    /* @__PURE__ */ jsx("div", { className: "flex", children: visibleItems.map((item) => /* @__PURE__ */ jsx(
       NavbarItem,
       {
         path: item.href ?? "",
@@ -6792,20 +4771,9 @@ const ProfileNavbar = ({ className = "" }) => {
         onClick: () => setShowDropdown(false),
         activeRoute: item.isIndex ?? true
       },
-      item.name,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-        lineNumber: 140,
-        columnNumber: 11
-      },
-      void 0
-    )) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-      lineNumber: 138,
-      columnNumber: 7
-    }, void 0),
-    hiddenItems.length > 0 && /* @__PURE__ */ jsxDEV(
+      item.name
+    )) }),
+    hiddenItems.length > 0 && /* @__PURE__ */ jsxs(
       Button,
       {
         variant: "secondary",
@@ -6813,7 +4781,7 @@ const ProfileNavbar = ({ className = "" }) => {
         onClick: () => setShowDropdown(!showDropdown),
         ref: showMoreRef,
         children: [
-          /* @__PURE__ */ jsxDEV(
+          /* @__PURE__ */ jsxs(
             Text,
             {
               className: clsx(
@@ -6822,51 +4790,23 @@ const ProfileNavbar = ({ className = "" }) => {
               ),
               children: [
                 "More ",
-                /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-caret-down ml-1" }, void 0, false, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-                  lineNumber: 162,
-                  columnNumber: 18
-                }, void 0)
+                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-caret-down ml-1" })
               ]
-            },
-            void 0,
-            true,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-              lineNumber: 156,
-              columnNumber: 11
-            },
-            void 0
+            }
           ),
-          isChooseHiddenItem && /* @__PURE__ */ jsxDEV(
+          isChooseHiddenItem && /* @__PURE__ */ jsx(
             "div",
             {
               className: clsx(
                 "absolute bg-primary-500 h-[2px] rounded-full",
                 "w-full bottom-0 left-0"
               )
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-              lineNumber: 165,
-              columnNumber: 13
-            },
-            void 0
+            }
           )
         ]
-      },
-      void 0,
-      true,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-        lineNumber: 150,
-        columnNumber: 9
-      },
-      void 0
+      }
     ),
-    showDropdown && /* @__PURE__ */ jsxDEV(
+    showDropdown && /* @__PURE__ */ jsx(
       Dropdown,
       {
         className: clsx(
@@ -6877,7 +4817,7 @@ const ProfileNavbar = ({ className = "" }) => {
         isShow: showDropdown,
         items: hiddenItems.map((item) => ({
           id: item.name,
-          content: /* @__PURE__ */ jsxDEV(
+          content: /* @__PURE__ */ jsxs(
             "div",
             {
               className: clsx(
@@ -6886,94 +4826,30 @@ const ProfileNavbar = ({ className = "" }) => {
               ),
               children: [
                 item.name,
-                location.pathname === item.href && /* @__PURE__ */ jsxDEV("i", { className: "fas fa-check" }, void 0, false, {
-                  fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-                  lineNumber: 192,
-                  columnNumber: 53
-                }, void 0)
+                location.pathname === item.href && /* @__PURE__ */ jsx("i", { className: "fas fa-check" })
               ]
-            },
-            void 0,
-            true,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-              lineNumber: 185,
-              columnNumber: 15
-            },
-            void 0
+            }
           ),
           onClick: () => {
             navigate(item.href ?? "/");
             setShowDropdown(false);
           }
         }))
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-        lineNumber: 175,
-        columnNumber: 9
-      },
-      void 0
+      }
     )
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-navbar.tsx",
-    lineNumber: 117,
-    columnNumber: 5
-  }, void 0);
+  ] });
 };
 const ProfileBody = ({ className }) => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("w-full flex flex-col", className), children: [
-    /* @__PURE__ */ jsxDEV(ProfileNavbar, { className: "bg-bg-main justify-start rounded-2xl shadow-md mt-2 p-2 w-full" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-body.tsx",
-      lineNumber: 13,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: "w-full", children: /* @__PURE__ */ jsxDEV(Outlet, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-body.tsx",
-      lineNumber: 15,
-      columnNumber: 9
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-body.tsx",
-      lineNumber: 14,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/components/profile-body.tsx",
-    lineNumber: 12,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("w-full flex flex-col", className), children: [
+    /* @__PURE__ */ jsx(ProfileNavbar, { className: "bg-bg-main justify-start rounded-2xl shadow-md mt-2 p-2 w-full" }),
+    /* @__PURE__ */ jsx("div", { className: "w-full", children: /* @__PURE__ */ jsx(Outlet, {}) })
+  ] });
 };
 const ProfilePage = () => {
-  return /* @__PURE__ */ jsxDEV(ProfilePageProvider, { children: /* @__PURE__ */ jsxDEV("div", { className: clsx("relative", "justify-start", "items-center", "flex", "flex-col"), children: [
-    /* @__PURE__ */ jsxDEV("div", { className: clsx("flex", "justify-center", "w-full", "bg-bg-main", "z-10"), children: /* @__PURE__ */ jsxDEV(ProfileHeader, { className: "layout-1000" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/profile/profile-page.tsx",
-      lineNumber: 12,
-      columnNumber: 11
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/profile/profile-page.tsx",
-      lineNumber: 11,
-      columnNumber: 9
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: clsx("layout-1000", "w-full"), children: /* @__PURE__ */ jsxDEV(ProfileBody, { className: "w-full" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/profile/profile-page.tsx",
-      lineNumber: 15,
-      columnNumber: 11
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/profile/profile-page.tsx",
-      lineNumber: 14,
-      columnNumber: 9
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/profile/profile-page.tsx",
-    lineNumber: 10,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/pages/profile/profile-page.tsx",
-    lineNumber: 9,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx(ProfilePageProvider, { children: /* @__PURE__ */ jsxs("div", { className: clsx("relative", "justify-start", "items-center", "flex", "flex-col"), children: [
+    /* @__PURE__ */ jsx("div", { className: clsx("flex", "justify-center", "w-full", "bg-bg-main", "z-10"), children: /* @__PURE__ */ jsx(ProfileHeader, { className: "layout-1000" }) }),
+    /* @__PURE__ */ jsx("div", { className: clsx("layout-1000", "w-full"), children: /* @__PURE__ */ jsx(ProfileBody, { className: "w-full" }) })
+  ] }) });
 };
 const EditableTextArea = ({
   editableMode = "none",
@@ -6996,15 +4872,11 @@ const EditableTextArea = ({
   useEffect(() => {
     setInputValue(value);
   }, [value]);
-  return /* @__PURE__ */ jsxDEV("div", { className: "flex justify-between items-center w-full", children: [
-    title2 && /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", className: "font-light m-2", children: title2 }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-      lineNumber: 52,
-      columnNumber: 9
-    }, void 0),
-    /* @__PURE__ */ jsxDEV("div", { className: "flex items-center gap-1 flex-col w-full", children: [
-      editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxDEV("div", { className: "relative flex flex-col gap-1 w-full", children: [
-        /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: "flex justify-between items-center w-full", children: [
+    title2 && /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: "font-light m-2", children: title2 }),
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1 flex-col w-full", children: [
+      editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxs("div", { className: "relative flex flex-col gap-1 w-full", children: [
+        /* @__PURE__ */ jsx(
           TextArea,
           {
             className: clsx("animate-fade-in px-2 py-1 w-full h-[50px]", isError && "mt-[5px]"),
@@ -7012,44 +4884,20 @@ const EditableTextArea = ({
             value: inputValue,
             isWrong: isError,
             onChange: (e) => setInputValue(e.target.value)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-            lineNumber: 59,
-            columnNumber: 13
-          },
-          void 0
+          }
         ),
-        isError && /* @__PURE__ */ jsxDEV(Text, { sz: "sm-1", className: "text-red-500 ml-2 h-[5px]", children: errorMessage }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-          lineNumber: 67,
-          columnNumber: 15
-        }, void 0)
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-        lineNumber: 58,
-        columnNumber: 11
-      }, void 0) : /* @__PURE__ */ jsxDEV(
+        isError && /* @__PURE__ */ jsx(Text, { sz: "sm-1", className: "text-red-500 ml-2 h-[5px]", children: errorMessage })
+      ] }) : /* @__PURE__ */ jsx(
         Text,
         {
           sz: "lg-1",
           className: clsx(valueClassName, "select-auto"),
           wrap: "whitespace-pre-wrap",
           children: value ?? noDataValue
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-          lineNumber: 73,
-          columnNumber: 11
-        },
-        void 0
+        }
       ),
-      canEdit && /* @__PURE__ */ jsxDEV(Fragment, { children: editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxDEV("div", { className: "animate-fade-in gap-1 flex w-full", children: [
-        /* @__PURE__ */ jsxDEV(
+      canEdit && /* @__PURE__ */ jsx(Fragment, { children: editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxs("div", { className: "animate-fade-in gap-1 flex w-full", children: [
+        /* @__PURE__ */ jsxs(
           Button,
           {
             disabled: value === inputValue,
@@ -7060,24 +4908,12 @@ const EditableTextArea = ({
             },
             className: "flex-1",
             children: [
-              /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-floppy-disk mr-2" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-                lineNumber: 94,
-                columnNumber: 19
-              }, void 0),
+              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-floppy-disk mr-2" }),
               t("settings:editableField.saveButton")
             ]
-          },
-          void 0,
-          true,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-            lineNumber: 85,
-            columnNumber: 17
-          },
-          void 0
+          }
         ),
-        /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx(
           Button,
           {
             sz: "sm-1",
@@ -7087,21 +4923,9 @@ const EditableTextArea = ({
             },
             className: "flex-1",
             children: t("settings:editableField.cancelButton")
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-            lineNumber: 97,
-            columnNumber: 17
-          },
-          void 0
+          }
         )
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-        lineNumber: 84,
-        columnNumber: 15
-      }, void 0) : /* @__PURE__ */ jsxDEV(
+      ] }) : /* @__PURE__ */ jsx(
         Button,
         {
           sz: "sm-1",
@@ -7111,30 +4935,10 @@ const EditableTextArea = ({
           },
           className: "w-full",
           children: btnChildren
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-          lineNumber: 109,
-          columnNumber: 15
-        },
-        void 0
-      ) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-        lineNumber: 82,
-        columnNumber: 11
-      }, void 0)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-      lineNumber: 56,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/settings/components/editable-textarea.tsx",
-    lineNumber: 50,
-    columnNumber: 5
-  }, void 0);
+        }
+      ) })
+    ] })
+  ] });
 };
 const ProfileIntroduction = ({ className }) => {
   const [bio, setBio] = React.useState(void 0);
@@ -7173,14 +4977,14 @@ const ProfileIntroduction = ({ className }) => {
       setIsEditDescription(false);
     }
   };
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     Card,
     {
       title: t("user:profilePosts.overview"),
       className: clsx("flex-col gap-4", className),
       titleClassName: "text-2xl font-bold !mb-0",
       children: [
-        (bio || canEdit) && /* @__PURE__ */ jsxDEV(
+        (bio || canEdit) && /* @__PURE__ */ jsx(
           EditableTextArea,
           {
             editableMode: "inline",
@@ -7192,35 +4996,15 @@ const ProfileIntroduction = ({ className }) => {
             valueClassName: "text-[1.2rem] font-semibold",
             canEdit: canEdit || false,
             onCancelClick: () => setIsEditBio(false),
-            btnChildren: /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", children: [
-              /* @__PURE__ */ jsxDEV("i", { className: "fas fa-pencil-alt" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-                lineNumber: 81,
-                columnNumber: 15
-              }, void 0),
+            btnChildren: /* @__PURE__ */ jsxs(Text, { sz: "sm-2", children: [
+              /* @__PURE__ */ jsx("i", { className: "fas fa-pencil-alt" }),
               "   ",
               t("user:profilePosts.bioBtn")
-            ] }, void 0, true, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-              lineNumber: 80,
-              columnNumber: 13
-            }, void 0)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-            lineNumber: 69,
-            columnNumber: 9
-          },
-          void 0
+            ] })
+          }
         ),
-        description2 && /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", weight: "bold", children: t("user:profilePosts.description") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-          lineNumber: 88,
-          columnNumber: 9
-        }, void 0),
-        (description2 || canEdit) && /* @__PURE__ */ jsxDEV(
+        description2 && /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: t("user:profilePosts.description") }),
+        (description2 || canEdit) && /* @__PURE__ */ jsx(
           EditableTextArea,
           {
             editableMode: "inline",
@@ -7232,97 +5016,33 @@ const ProfileIntroduction = ({ className }) => {
             onChangeClick: () => setIsEditDescription(true),
             onSaveClick: (value) => handleSaveDescription(value),
             onCancelClick: () => setIsEditDescription(false),
-            btnChildren: /* @__PURE__ */ jsxDEV(Text, { sz: "sm-2", children: [
-              /* @__PURE__ */ jsxDEV("i", { className: "fas fa-pencil-alt" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-                lineNumber: 105,
-                columnNumber: 15
-              }, void 0),
+            btnChildren: /* @__PURE__ */ jsxs(Text, { sz: "sm-2", children: [
+              /* @__PURE__ */ jsx("i", { className: "fas fa-pencil-alt" }),
               "   ",
               t("user:profilePosts.descriptionBtn")
-            ] }, void 0, true, {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-              lineNumber: 104,
-              columnNumber: 13
-            }, void 0)
-          },
-          void 0,
-          false,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-            lineNumber: 93,
-            columnNumber: 9
-          },
-          void 0
+            ] })
+          }
         ),
-        (bio || description2) && /* @__PURE__ */ jsxDEV("hr", { className: "border-[var(--border-color)] w-full" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-          lineNumber: 111,
-          columnNumber: 32
-        }, void 0),
-        email && /* @__PURE__ */ jsxDEV("div", { children: /* @__PURE__ */ jsxDEV(Text, { className: "hover:text-primary-500", children: [
-          /* @__PURE__ */ jsxDEV("i", { className: "fas fa-envelope" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-            lineNumber: 116,
-            columnNumber: 13
-          }, void 0),
+        (bio || description2) && /* @__PURE__ */ jsx("hr", { className: "border-[var(--border-color)] w-full" }),
+        email && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Text, { className: "hover:text-primary-500", children: [
+          /* @__PURE__ */ jsx("i", { className: "fas fa-envelope" }),
           "   ",
           email
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-          lineNumber: 115,
-          columnNumber: 11
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-          lineNumber: 114,
-          columnNumber: 9
-        }, void 0),
-        phone && /* @__PURE__ */ jsxDEV("div", { children: /* @__PURE__ */ jsxDEV(Text, { className: "hover:text-primary-500", children: [
-          /* @__PURE__ */ jsxDEV("i", { className: "fas fa-phone" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-            lineNumber: 123,
-            columnNumber: 13
-          }, void 0),
+        ] }) }),
+        phone && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Text, { className: "hover:text-primary-500", children: [
+          /* @__PURE__ */ jsx("i", { className: "fas fa-phone" }),
           "   ",
           phone
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-          lineNumber: 122,
-          columnNumber: 11
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-          lineNumber: 121,
-          columnNumber: 9
-        }, void 0)
+        ] }) })
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/components/profile-introduction.tsx",
-      lineNumber: 63,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const PostsPage = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("grid grid-cols-golden gap-2 w-full"), children: [
-    /* @__PURE__ */ jsxDEV(ProfileIntroduction, { className: clsx("bg-bg-main rounded-md rounded-l-2xl mt-2") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/posts-page.tsx",
-      lineNumber: 8,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(Card, { className: clsx("bg-bg-main rounded-md rounded-r-2xl mt-2") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/posts-page.tsx",
-      lineNumber: 9,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/posts/posts-page.tsx",
-    lineNumber: 7,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("grid grid-cols-golden gap-2 w-full"), children: [
+    /* @__PURE__ */ jsx(ProfileIntroduction, { className: clsx("bg-bg-main rounded-md rounded-l-2xl mt-2") }),
+    /* @__PURE__ */ jsx(Card, { className: clsx("bg-bg-main rounded-md rounded-r-2xl mt-2") })
+  ] });
 };
 const useFriends = ({ userId = "", keyword, page = 1, pageSize = 10 }) => {
   return useQuery({
@@ -7362,25 +5082,17 @@ const FriendItem = ({ className = "", friendDto }) => {
     () => [
       {
         id: "unfriend",
-        content: /* @__PURE__ */ jsxDEV("div", { children: [
-          /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-user-xmark mr-2" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-            lineNumber: 52,
-            columnNumber: 13
-          }, void 0),
+        content: /* @__PURE__ */ jsxs("div", { children: [
+          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-xmark mr-2" }),
           " ",
           t("user:profileHeader.unfriendButton")
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-          lineNumber: 51,
-          columnNumber: 11
-        }, void 0),
+        ] }),
         onClick: async () => await handleUnfriend?.(friendDto.id)
       }
     ],
     [friendDto.id, handleUnfriend, t]
   );
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -7389,43 +5101,19 @@ const FriendItem = ({ className = "", friendDto }) => {
         className
       ),
       children: [
-        /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsxs(
           "div",
           {
             className: "relative flex p-3 gap-4 items-center",
             onClick: () => navigate(`/${friendDto.id}`),
             children: [
-              /* @__PURE__ */ jsxDEV("div", { children: /* @__PURE__ */ jsxDEV(Avatar, { alt: "Avatar", src: friendDto.avatar ?? void 0, sz: "sm-1" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-                lineNumber: 74,
-                columnNumber: 11
-              }, void 0) }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-                lineNumber: 73,
-                columnNumber: 9
-              }, void 0),
-              /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col h-full justify-center flex-1", children: /* @__PURE__ */ jsxDEV(Text, { sz: "md-2", weight: "bold", children: friendDto.name }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-                lineNumber: 77,
-                columnNumber: 11
-              }, void 0) }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-                lineNumber: 76,
-                columnNumber: 9
-              }, void 0)
+              /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(Avatar, { alt: "Avatar", src: friendDto.avatar ?? void 0, sz: "sm-1" }) }),
+              /* @__PURE__ */ jsx("div", { className: "flex flex-col h-full justify-center flex-1", children: /* @__PURE__ */ jsx(Text, { sz: "md-2", weight: "bold", children: friendDto.name }) })
             ]
-          },
-          void 0,
-          true,
-          {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-            lineNumber: 69,
-            columnNumber: 7
-          },
-          void 0
+          }
         ),
-        /* @__PURE__ */ jsxDEV("div", { className: "relative pr-2", children: isFriend ? /* @__PURE__ */ jsxDEV(Fragment, { children: [
-          /* @__PURE__ */ jsxDEV(
+        /* @__PURE__ */ jsx("div", { className: "relative pr-2", children: isFriend ? /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx(
             "button",
             {
               "aria-label": "More options",
@@ -7435,22 +5123,10 @@ const FriendItem = ({ className = "", friendDto }) => {
                 e.stopPropagation();
                 setIsShowDropdown(!isShowDrowdown);
               },
-              children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-ellipsis-v" }, void 0, false, {
-                fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-                lineNumber: 94,
-                columnNumber: 15
-              }, void 0)
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-              lineNumber: 85,
-              columnNumber: 13
-            },
-            void 0
+              children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-ellipsis-v" })
+            }
           ),
-          /* @__PURE__ */ jsxDEV(
+          /* @__PURE__ */ jsx(
             Dropdown,
             {
               isShow: isShowDrowdown,
@@ -7460,39 +5136,11 @@ const FriendItem = ({ className = "", friendDto }) => {
               ),
               ref: dropdownRef,
               items: requestOptions
-            },
-            void 0,
-            false,
-            {
-              fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-              lineNumber: 96,
-              columnNumber: 13
-            },
-            void 0
+            }
           )
-        ] }, void 0, true, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-          lineNumber: 84,
-          columnNumber: 11
-        }, void 0) : /* @__PURE__ */ jsxDEV(FriendButton, { sz: "sm-1", uid: friendDto.id }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-          lineNumber: 107,
-          columnNumber: 11
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-          lineNumber: 82,
-          columnNumber: 7
-        }, void 0)
+        ] }) : /* @__PURE__ */ jsx(FriendButton, { sz: "sm-1", uid: friendDto.id }) })
       ]
-    },
-    void 0,
-    true,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/friend-item.tsx",
-      lineNumber: 62,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const ProfileFriends = ({ className = "" }) => {
@@ -7528,84 +5176,28 @@ const ProfileFriends = ({ className = "" }) => {
     };
     fetchFriends();
   }, [page, keyword, targetId]);
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("flex flex-1 justify-end flex-col w-full", className), children: [
-    /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-1 justify-end flex-col w-full", className), children: [
+    /* @__PURE__ */ jsx(
       Textbox,
       {
         type: "search",
         placeholder: t("user:profileFriends.searchFriends"),
         className: "p-1",
         onChange: handleOnChange
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-        lineNumber: 55,
-        columnNumber: 7
-      },
-      void 0
+      }
     ),
-    !isLoading ? /* @__PURE__ */ jsxDEV("div", { className: "relative flex flex-wrap gap-2 w-full mt-2", children: [
-      friends2.map((friend, index) => /* @__PURE__ */ jsxDEV(FriendItem, { className: "w-[calc(50%-4px)]", friendDto: friend }, index, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-        lineNumber: 64,
-        columnNumber: 13
-      }, void 0)),
-      friends2.length === 0 && /* @__PURE__ */ jsxDEV("div", { className: "flex w-full justify-center mb-10 mt-10", children: /* @__PURE__ */ jsxDEV("div", { className: "flex flex-col items-center text-[var(--text-color)] opacity-30", children: [
-        /* @__PURE__ */ jsxDEV(Text, { sz: "xl-3", weight: "bold", children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-user-xmark" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-          lineNumber: 70,
-          columnNumber: 19
-        }, void 0) }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-          lineNumber: 69,
-          columnNumber: 17
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(Text, { sz: "md-2", className: "mt-2", children: t("user:profileFriends.noFriends") }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-          lineNumber: 72,
-          columnNumber: 17
-        }, void 0)
-      ] }, void 0, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-        lineNumber: 68,
-        columnNumber: 15
-      }, void 0) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-        lineNumber: 67,
-        columnNumber: 13
-      }, void 0)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-      lineNumber: 62,
-      columnNumber: 9
-    }, void 0) : /* @__PURE__ */ jsxDEV("div", { className: "relative flex flex-wrap gap-2 w-full mt-4 items-center justify-center", children: /* @__PURE__ */ jsxDEV("div", { className: "fa-solid fa-spinner animate-spin text-2xl text-single-main" }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-      lineNumber: 81,
-      columnNumber: 11
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-      lineNumber: 80,
-      columnNumber: 9
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/components/profile-friend.tsx",
-    lineNumber: 54,
-    columnNumber: 5
-  }, void 0);
+    !isLoading ? /* @__PURE__ */ jsxs("div", { className: "relative flex flex-wrap gap-2 w-full mt-2", children: [
+      friends2.map((friend, index) => /* @__PURE__ */ jsx(FriendItem, { className: "w-[calc(50%-4px)]", friendDto: friend }, index)),
+      friends2.length === 0 && /* @__PURE__ */ jsx("div", { className: "flex w-full justify-center mb-10 mt-10", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center text-[var(--text-color)] opacity-30", children: [
+        /* @__PURE__ */ jsx(Text, { sz: "xl-3", weight: "bold", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-xmark" }) }),
+        /* @__PURE__ */ jsx(Text, { sz: "md-2", className: "mt-2", children: t("user:profileFriends.noFriends") })
+      ] }) })
+    ] }) : /* @__PURE__ */ jsx("div", { className: "relative flex flex-wrap gap-2 w-full mt-4 items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "fa-solid fa-spinner animate-spin text-2xl text-single-main" }) })
+  ] });
 };
 const ProfileFriendsPage = () => {
   const { t } = useTranslation();
-  return /* @__PURE__ */ jsxDEV(Card, { title: t("user:profileFriends.friends"), className: clsx("rounded-2xl mt-2"), children: /* @__PURE__ */ jsxDEV(ProfileFriends, {}, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/profile-friends-page.tsx",
-    lineNumber: 11,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/friends/profile-friends-page.tsx",
-    lineNumber: 10,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx(Card, { title: t("user:profileFriends.friends"), className: clsx("rounded-2xl mt-2"), children: /* @__PURE__ */ jsx(ProfileFriends, {}) });
 };
 const ProfileAboutNavbar = ({ className }) => {
   const { t } = useTranslation();
@@ -7617,59 +5209,23 @@ const ProfileAboutNavbar = ({ className }) => {
     },
     { title: t("user:profileAbout.placesLived"), path: "places-lived" }
   ];
-  return /* @__PURE__ */ jsxDEV(Card, { title: t("user:profileAbout.title"), className: clsx(className), children: /* @__PURE__ */ jsxDEV(SubNavbar, { className: "w-full", children: aboutNavbarItems.map((item, index) => /* @__PURE__ */ jsxDEV(SubNavbar.Item, { title: item.title, path: item.path }, index, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-about-navbar.tsx",
-    lineNumber: 30,
-    columnNumber: 11
-  }, void 0)) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-about-navbar.tsx",
-    lineNumber: 28,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-about-navbar.tsx",
-    lineNumber: 27,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx(Card, { title: t("user:profileAbout.title"), className: clsx(className), children: /* @__PURE__ */ jsx(SubNavbar, { className: "w-full", children: aboutNavbarItems.map((item, index) => /* @__PURE__ */ jsx(SubNavbar.Item, { title: item.title, path: item.path }, index)) }) });
 };
 const ProfileAboutPage = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("grid grid-cols-golden gap-2 lg:flex-row flex-col"), children: [
-    /* @__PURE__ */ jsxDEV(ProfileAboutNavbar, { className: clsx("rounded-r-lg mt-2") }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/profile-about-page.tsx",
-      lineNumber: 9,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(Card, { className: clsx("rounded-l-lg mt-2 pt-0"), children: /* @__PURE__ */ jsxDEV(Outlet, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/profile-about-page.tsx",
-      lineNumber: 11,
-      columnNumber: 9
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/profile-about-page.tsx",
-      lineNumber: 10,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/profile-about-page.tsx",
-    lineNumber: 8,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("grid grid-cols-golden gap-2 lg:flex-row flex-col"), children: [
+    /* @__PURE__ */ jsx(ProfileAboutNavbar, { className: clsx("rounded-r-lg mt-2") }),
+    /* @__PURE__ */ jsx(Card, { className: clsx("rounded-l-lg mt-2 pt-0"), children: /* @__PURE__ */ jsx(Outlet, {}) })
+  ] });
 };
 const ProfileAboutSection = ({
   title: title2,
   className,
   children
 }) => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx(className), children: [
-    title2 && /* @__PURE__ */ jsxDEV(Text, { sz: "lg-1", weight: "bold", children: title2 }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-about-section.tsx",
-      lineNumber: 18,
-      columnNumber: 9
-    }, void 0),
+  return /* @__PURE__ */ jsxs("div", { className: clsx(className), children: [
+    title2 && /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: title2 }),
     children
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-about-section.tsx",
-    lineNumber: 16,
-    columnNumber: 5
-  }, void 0);
+  ] });
 };
 const ProfileOverview = ({}) => {
   const [emails, setEmails] = useState([]);
@@ -7689,258 +5245,106 @@ const ProfileOverview = ({}) => {
     };
     fetchData();
   }, []);
-  return /* @__PURE__ */ jsxDEV("div", { children: /* @__PURE__ */ jsxDEV(ProfileAboutSection, { title: "Liên hệ", className: clsx("mb-4", "w-full"), children: [
-    emails.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: clsx("flex", "items-start", "w-full", "gap-4", "mb-6", "mt-4"), children: [
-      /* @__PURE__ */ jsxDEV(Text, { sz: "lg-3", className: clsx("opacity-50"), children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-envelope" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 37,
-        columnNumber: 15
-      }, void 0) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 36,
-        columnNumber: 13
-      }, void 0),
-      /* @__PURE__ */ jsxDEV("div", { children: emails.map((email, index) => /* @__PURE__ */ jsxDEV("div", { className: clsx("flex", "flex-col"), children: [
-        /* @__PURE__ */ jsxDEV(Text, { weight: "bold", children: email }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-          lineNumber: 42,
-          columnNumber: 19
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(Text, { sz: "sm-3", className: clsx("opacity-50"), children: "Email" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-          lineNumber: 43,
-          columnNumber: 19
-        }, void 0)
-      ] }, index, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 41,
-        columnNumber: 17
-      }, void 0)) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 39,
-        columnNumber: 13
-      }, void 0),
-      isOwner && /* @__PURE__ */ jsxDEV("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(ProfileAboutSection, { title: "Liên hệ", className: clsx("mb-4", "w-full"), children: [
+    emails.length > 0 && /* @__PURE__ */ jsxs("div", { className: clsx("flex", "items-start", "w-full", "gap-4", "mb-6", "mt-4"), children: [
+      /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("opacity-50"), children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-envelope" }) }),
+      /* @__PURE__ */ jsx("div", { children: emails.map((email, index) => /* @__PURE__ */ jsxs("div", { className: clsx("flex", "flex-col"), children: [
+        /* @__PURE__ */ jsx(Text, { weight: "bold", children: email }),
+        /* @__PURE__ */ jsx(Text, { sz: "sm-3", className: clsx("opacity-50"), children: "Email" })
+      ] }, index)) }),
+      isOwner && /* @__PURE__ */ jsx("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsx(
         Button,
         {
           variant: "secondary",
           className: clsx("!rounded-full", "!p-0", "w-10", "h-10"),
-          children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-pencil-alt" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-            lineNumber: 55,
-            columnNumber: 19
-          }, void 0)
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-          lineNumber: 51,
-          columnNumber: 17
-        },
-        void 0
-      ) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 50,
-        columnNumber: 15
-      }, void 0)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-      lineNumber: 35,
-      columnNumber: 11
-    }, void 0),
-    phoneNumbers.length > 0 && /* @__PURE__ */ jsxDEV("div", { className: clsx("flex", "items-start", "gap-4"), children: [
-      /* @__PURE__ */ jsxDEV(Text, { sz: "lg-3", className: clsx("opacity-50"), children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-phone" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 64,
-        columnNumber: 15
-      }, void 0) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 63,
-        columnNumber: 13
-      }, void 0),
-      /* @__PURE__ */ jsxDEV("div", { children: phoneNumbers.map((phone, index) => /* @__PURE__ */ jsxDEV("div", { className: clsx("flex", "flex-col"), children: [
-        /* @__PURE__ */ jsxDEV(Text, { weight: "bold", children: phone }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-          lineNumber: 69,
-          columnNumber: 19
-        }, void 0),
-        /* @__PURE__ */ jsxDEV(Text, { sz: "sm-3", className: clsx("opacity-50"), children: "Di động" }, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-          lineNumber: 70,
-          columnNumber: 19
-        }, void 0)
-      ] }, index, true, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 68,
-        columnNumber: 17
-      }, void 0)) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 66,
-        columnNumber: 13
-      }, void 0),
-      isOwner && /* @__PURE__ */ jsxDEV("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsxDEV(
+          children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pencil-alt" })
+        }
+      ) })
+    ] }),
+    phoneNumbers.length > 0 && /* @__PURE__ */ jsxs("div", { className: clsx("flex", "items-start", "gap-4"), children: [
+      /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("opacity-50"), children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-phone" }) }),
+      /* @__PURE__ */ jsx("div", { children: phoneNumbers.map((phone, index) => /* @__PURE__ */ jsxs("div", { className: clsx("flex", "flex-col"), children: [
+        /* @__PURE__ */ jsx(Text, { weight: "bold", children: phone }),
+        /* @__PURE__ */ jsx(Text, { sz: "sm-3", className: clsx("opacity-50"), children: "Di động" })
+      ] }, index)) }),
+      isOwner && /* @__PURE__ */ jsx("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsx(
         Button,
         {
           variant: "secondary",
           className: clsx("!rounded-full", "!p-0", "w-10", "h-10"),
-          children: /* @__PURE__ */ jsxDEV("i", { className: "fa-solid fa-pencil-alt" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-            lineNumber: 82,
-            columnNumber: 19
-          }, void 0)
-        },
-        void 0,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-          lineNumber: 78,
-          columnNumber: 17
-        },
-        void 0
-      ) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-        lineNumber: 77,
-        columnNumber: 15
-      }, void 0)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-      lineNumber: 62,
-      columnNumber: 11
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-    lineNumber: 33,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-overview.tsx",
-    lineNumber: 32,
-    columnNumber: 5
-  }, void 0);
+          children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pencil-alt" })
+        }
+      ) })
+    ] })
+  ] }) });
 };
 const ProfileAboutOverview = () => {
-  return /* @__PURE__ */ jsxDEV("div", { className: clsx("w-full"), children: /* @__PURE__ */ jsxDEV(ProfileOverview, {}, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-about-overview.tsx",
-    lineNumber: 7,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/features/profile/about/components/profile-about-overview.tsx",
-    lineNumber: 6,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx("div", { className: clsx("w-full"), children: /* @__PURE__ */ jsx(ProfileOverview, {}) });
 };
 const userRoute = {
   path: "/:userParam",
-  element: /* @__PURE__ */ jsxDEV(ProfilePage, {}, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-    lineNumber: 10,
-    columnNumber: 12
-  }, void 0),
+  element: /* @__PURE__ */ jsx(ProfilePage, {}),
   type: "public",
   children: [
     {
       path: "",
-      element: /* @__PURE__ */ jsxDEV(PostsPage, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-        lineNumber: 15,
-        columnNumber: 16
-      }, void 0),
+      element: /* @__PURE__ */ jsx(PostsPage, {}),
       type: "public",
       index: true
     },
     {
       path: "friends",
-      element: /* @__PURE__ */ jsxDEV(ProfileFriendsPage, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-        lineNumber: 21,
-        columnNumber: 16
-      }, void 0),
+      element: /* @__PURE__ */ jsx(ProfileFriendsPage, {}),
       type: "public"
     },
     {
       path: "about",
-      element: /* @__PURE__ */ jsxDEV(ProfileAboutPage, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-        lineNumber: 26,
-        columnNumber: 16
-      }, void 0),
+      element: /* @__PURE__ */ jsx(ProfileAboutPage, {}),
       type: "public",
       children: [
         {
           path: "overview",
-          element: /* @__PURE__ */ jsxDEV(ProfileAboutOverview, {}, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-            lineNumber: 31,
-            columnNumber: 20
-          }, void 0),
+          element: /* @__PURE__ */ jsx(ProfileAboutOverview, {}),
           type: "public",
           index: true
         },
         {
           path: "work-and-education",
-          element: /* @__PURE__ */ jsxDEV("div", { children: "Work and Education" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-            lineNumber: 37,
-            columnNumber: 20
-          }, void 0),
+          element: /* @__PURE__ */ jsx("div", { children: "Work and Education" }),
           type: "public"
         },
         {
           path: "contact-info",
-          element: /* @__PURE__ */ jsxDEV("div", { children: "Contact Information" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-            lineNumber: 42,
-            columnNumber: 20
-          }, void 0),
+          element: /* @__PURE__ */ jsx("div", { children: "Contact Information" }),
           type: "public"
         },
         {
           path: "places-lived",
-          element: /* @__PURE__ */ jsxDEV("div", { children: "Places Lived" }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-            lineNumber: 47,
-            columnNumber: 20
-          }, void 0),
+          element: /* @__PURE__ */ jsx("div", { children: "Places Lived" }),
           type: "public"
         }
       ]
     },
     {
       path: "photos",
-      element: /* @__PURE__ */ jsxDEV("div", { children: "Photos" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-        lineNumber: 54,
-        columnNumber: 16
-      }, void 0),
+      element: /* @__PURE__ */ jsx("div", { children: "Photos" }),
       type: "public"
     },
     {
       path: "videos",
-      element: /* @__PURE__ */ jsxDEV("div", { children: "Videos" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-        lineNumber: 59,
-        columnNumber: 16
-      }, void 0),
+      element: /* @__PURE__ */ jsx("div", { children: "Videos" }),
       type: "public"
     },
     {
       path: "settings",
-      element: /* @__PURE__ */ jsxDEV("div", { children: "Settings" }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/profile.routes.tsx",
-        lineNumber: 64,
-        columnNumber: 16
-      }, void 0),
+      element: /* @__PURE__ */ jsx("div", { children: "Settings" }),
       type: "public"
     }
   ]
 };
 const LayoutHeader = forwardRef(
   ({ children, className }, ref) => {
-    return /* @__PURE__ */ jsxDEV("header", { ref, className: clsx("fixed z-40 w-full", className), children }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/layout/layout.tsx",
-      lineNumber: 13,
-      columnNumber: 7
-    }, void 0);
+    return /* @__PURE__ */ jsx("header", { ref, className: clsx("fixed z-40 w-full", className), children });
   }
 );
 LayoutHeader.displayName = "Layout.Header";
@@ -7949,31 +5353,19 @@ const LayoutMain = ({
   className,
   style: style2
 }) => {
-  return /* @__PURE__ */ jsxDEV("main", { className: clsx("relative h-full", className), style: style2, children }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/layout/layout.tsx",
-    lineNumber: 33,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx("main", { className: clsx("relative h-full", className), style: style2, children });
 };
 const LayoutFooter = ({ children, className }) => {
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(
     "footer",
     {
       className: clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className),
       children
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/layout/layout.tsx",
-      lineNumber: 46,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 const Layout = ({ children, className }) => {
-  return /* @__PURE__ */ jsxDEV(
+  return /* @__PURE__ */ jsx(
     "div",
     {
       className: clsx(
@@ -7981,127 +5373,285 @@ const Layout = ({ children, className }) => {
         className
       ),
       children
-    },
-    void 0,
-    false,
-    {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/components/layout/layout.tsx",
-      lineNumber: 69,
-      columnNumber: 5
-    },
-    void 0
+    }
   );
 };
 Layout.Header = LayoutHeader;
 Layout.Main = LayoutMain;
 Layout.Footer = LayoutFooter;
 const DefaultLayout = () => {
-  const { isAuthenticated, isInitialized } = useAuth();
+  const { isAuthenticated } = useAuth();
   const { openDialog, closeDialog } = useDialog();
   const [headerRef, headerSize] = useSize();
   const openLoginOverlay = useCallback(() => {
     openDialog({
-      content: /* @__PURE__ */ jsxDEV(LoginForm, { showLogo: false }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-        lineNumber: 18,
-        columnNumber: 16
-      }, void 0)
+      content: /* @__PURE__ */ jsx(LoginForm, { showLogo: false })
     });
   }, [openDialog]);
   const openRegisterOverlay = useCallback(() => {
     openDialog({
-      content: /* @__PURE__ */ jsxDEV(RegisterForm, { showLogo: false }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-        lineNumber: 24,
-        columnNumber: 16
-      }, void 0)
+      content: /* @__PURE__ */ jsx(RegisterForm, { showLogo: false })
     });
   }, [openDialog]);
   useEffect(() => {
-    if (!isInitialized) return;
     if (isAuthenticated) {
       closeDialog();
     } else {
       openLoginOverlay();
     }
     return () => closeDialog();
-  }, [isAuthenticated, isInitialized, closeDialog, openLoginOverlay]);
-  return /* @__PURE__ */ jsxDEV(Layout, { children: [
-    /* @__PURE__ */ jsxDEV(Layout.Header, { ref: headerRef, children: /* @__PURE__ */ jsxDEV(
+  }, [isAuthenticated, closeDialog, openLoginOverlay]);
+  return /* @__PURE__ */ jsxs(Layout, { children: [
+    /* @__PURE__ */ jsx(Layout.Header, { ref: headerRef, children: /* @__PURE__ */ jsx(
       Navbar,
       {
         isAuthenticated,
         onLogin: openLoginOverlay,
         onSignup: openRegisterOverlay
-      },
-      void 0,
-      false,
-      {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-        lineNumber: 43,
-        columnNumber: 9
-      },
-      void 0
-    ) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-      lineNumber: 42,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(Layout.Main, { style: { paddingTop: headerSize?.height }, children: /* @__PURE__ */ jsxDEV(Outlet, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-      lineNumber: 50,
-      columnNumber: 9
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-      lineNumber: 49,
-      columnNumber: 7
-    }, void 0),
-    /* @__PURE__ */ jsxDEV(Layout.Footer, { children: /* @__PURE__ */ jsxDEV(NavbarFooter, { isAuthenticated }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-      lineNumber: 53,
-      columnNumber: 9
-    }, void 0) }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-      lineNumber: 52,
-      columnNumber: 7
-    }, void 0)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/default-layout.tsx",
-    lineNumber: 41,
-    columnNumber: 5
-  }, void 0);
+      }
+    ) }),
+    /* @__PURE__ */ jsx(Layout.Main, { style: { paddingTop: headerSize?.height }, children: /* @__PURE__ */ jsx(Outlet, {}) }),
+    /* @__PURE__ */ jsx(Layout.Footer, { children: /* @__PURE__ */ jsx(NavbarFooter, { isAuthenticated }) })
+  ] });
 };
 const SecondLayout = () => {
-  return /* @__PURE__ */ jsxDEV(Layout, { children: /* @__PURE__ */ jsxDEV(Layout.Main, { children: /* @__PURE__ */ jsxDEV(Outlet, {}, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/second-layout.tsx",
-    lineNumber: 8,
-    columnNumber: 9
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/second-layout.tsx",
-    lineNumber: 7,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/layouts/second-layout.tsx",
-    lineNumber: 6,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx(Layout, { children: /* @__PURE__ */ jsx(Layout.Main, { children: /* @__PURE__ */ jsx(Outlet, {}) }) });
 };
+function GoogleCallbackPage() {
+  const navigate = useNavigate();
+  const { loginWithGoogle } = useAuth();
+  useEffect(() => {
+    const code = new URLSearchParams(window.location.search).get("code");
+    if (!code) {
+      navigate("/login");
+      return;
+    }
+    loginWithGoogle(code);
+  }, []);
+  return null;
+}
+const onboardingValidationSchema = Yup.object({
+  firstName: Yup.string().min(2, "onboarding:validation.firstNameTooShort").required("onboarding:validation.firstNameRequired"),
+  middleName: Yup.string(),
+  lastName: Yup.string().min(2, "onboarding:validation.lastNameTooShort").required("onboarding:validation.lastNameRequired"),
+  birthday: Yup.date().max(/* @__PURE__ */ new Date(), "onboarding:validation.birthdayInvalid").required("onboarding:validation.birthdayRequired"),
+  gender: Yup.string().required("onboarding:validation.genderRequired")
+});
+const onboardingInitialValues = {
+  firstName: "",
+  middleName: "",
+  lastName: "",
+  birthday: "",
+  gender: ""
+};
+const ErrorCodes = {
+  FIRSTNAME_REQUIRED: {
+    message: "onboarding:errorMessages.firstNameRequired",
+    type: "FirstName"
+  },
+  FIRSTNAME_TOO_SHORT: {
+    message: "onboarding:errorMessages.firstNameTooShort",
+    type: "FirstName"
+  },
+  LASTNAME_REQUIRED: {
+    message: "onboarding:errorMessages.lastNameRequired",
+    type: "LastName"
+  },
+  LASTNAME_TOO_SHORT: {
+    message: "onboarding:errorMessages.lastNameTooShort",
+    type: "LastName"
+  },
+  BIRTHDAY_REQUIRED: {
+    message: "onboarding:errorMessages.birthdayRequired",
+    type: "Birthday"
+  },
+  BIRTHDAY_INVALID: {
+    message: "onboarding:errorMessages.birthdayInvalid",
+    type: "Birthday"
+  },
+  GENDER_REQUIRED: {
+    message: "onboarding:errorMessages.genderRequired",
+    type: "Gender"
+  },
+  UNKNOWN_ERROR: {
+    message: "onboarding:errorMessages.unknownError",
+    type: "UnknownError"
+  }
+};
+const genderOptions = [
+  { key: "male", value: "Nam" },
+  { key: "female", value: "Nữ" },
+  { key: "other", value: "Khác" }
+];
+const OnboardingForm = () => {
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const [errors, setErrors] = useState({});
+  const formik = useFormik({
+    initialValues: { ...onboardingInitialValues, gender: genderOptions[0].key },
+    validationSchema: onboardingValidationSchema,
+    onSubmit: async (values) => {
+      setErrors({});
+      const result = await userProfileService.completeOnboarding({
+        firstName: values.firstName,
+        middleName: values.middleName,
+        lastName: values.lastName,
+        birthday: values.birthday,
+        gender: values.gender.toString()
+      });
+      if (result.success) {
+        navigate("/");
+      } else {
+        const errorCode = result.error?.code;
+        if (errorCode && ErrorCodes[errorCode]) {
+          const errorInfo = ErrorCodes[errorCode];
+          setErrors({ [errorInfo.type]: errorInfo.message });
+        }
+      }
+    }
+  });
+  React.useEffect(() => {
+    const fetchDefaults = async () => {
+      const result = await userProfileService.getOnboardingDefaults();
+      if (result.success && result.data) {
+        const data = result.data;
+        const genderMap = {
+          0: "male",
+          1: "female",
+          2: "other"
+        };
+        formik.setValues({
+          firstName: data.firstName || "",
+          middleName: data.middleName || "",
+          lastName: data.lastName || "",
+          birthday: data.birthDay ? data.birthDay.split("T")[0] : "",
+          gender: data.gender !== void 0 ? genderMap[data.gender] || "male" : "male"
+        });
+      }
+    };
+    fetchDefaults();
+  }, [formik.setValues]);
+  return /* @__PURE__ */ jsxs("div", { className: "relative w-full", children: [
+    formik.isSubmitting && /* @__PURE__ */ jsx(OverlayLoading, {}),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-4 w-full", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex gap-2 w-full", children: [
+        /* @__PURE__ */ jsx(
+          Textbox,
+          {
+            title: "Họ",
+            className: "w-full",
+            isRequired: true,
+            placeholder: "Họ",
+            value: formik.values.firstName,
+            onChange: (e) => formik.setFieldValue("firstName", e.target.value),
+            isWrong: formik.touched.firstName && Boolean(formik.errors.firstName) || Boolean(errors.FirstName),
+            wrongMessage: t(errors.FirstName || formik.errors.firstName || "")
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          Textbox,
+          {
+            title: "Tên đệm",
+            className: "w-full",
+            placeholder: "Tên đệm",
+            value: formik.values.middleName,
+            onChange: (e) => formik.setFieldValue("middleName", e.target.value)
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          Textbox,
+          {
+            title: "Tên",
+            isRequired: true,
+            placeholder: "Tên",
+            className: "w-full",
+            value: formik.values.lastName,
+            onChange: (e) => formik.setFieldValue("lastName", e.target.value),
+            isWrong: formik.touched.lastName && Boolean(formik.errors.lastName) || Boolean(errors.LastName),
+            wrongMessage: t(errors.LastName || formik.errors.lastName || "")
+          }
+        )
+      ] }),
+      /* @__PURE__ */ jsx(
+        SelectDay,
+        {
+          title: "Ngày sinh",
+          isRequired: true,
+          value: formik.values.birthday,
+          onChange: (e) => formik.setFieldValue("birthday", e.target.value),
+          isWrong: formik.touched.birthday && Boolean(formik.errors.birthday) || Boolean(errors.Birthday),
+          wrongMessage: t(errors.Birthday || formik.errors.birthday || "")
+        }
+      ),
+      /* @__PURE__ */ jsx("div", { className: "flex gap-2 w-full", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col flex-1", children: [
+        /* @__PURE__ */ jsx(
+          SelectBox,
+          {
+            title: "Giới tính",
+            isRequired: true,
+            options: genderOptions,
+            selectedOption: formik.values.gender,
+            onSelect: (key) => formik.setFieldValue("gender", key)
+          }
+        ),
+        (formik.touched.gender && formik.errors.gender || errors.Gender) && /* @__PURE__ */ jsx("span", { className: "text-xs text-error ml-1", children: t(errors.Gender || formik.errors.gender || "") })
+      ] }) }),
+      /* @__PURE__ */ jsx(
+        Button,
+        {
+          type: "button",
+          className: "w-full mt-4 font-montserrat",
+          onClick: formik.submitForm,
+          sz: "md-1",
+          children: "Hoàn tất"
+        }
+      )
+    ] })
+  ] });
+};
+function OnboardingPage() {
+  return /* @__PURE__ */ jsx("div", { className: "min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-primary-500/10 via-bg-main to-primary-600/10 p-6", children: /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex flex-col items-center gap-8 w-full max-w-[700px]",
+        "bg-bg-second/80 backdrop-blur-xl rounded-3xl shadow-2xl",
+        "p-10 animate-fade-in border border-border-main/50"
+      ),
+      children: [
+        /* @__PURE__ */ jsx("div", { className: "absolute -top-20 -left-20 w-40 h-40 bg-primary-500/20 rounded-full blur-3xl" }),
+        /* @__PURE__ */ jsx("div", { className: "absolute -bottom-20 -right-20 w-40 h-40 bg-primary-600/20 rounded-full blur-3xl" }),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3 z-10", children: [
+          /* @__PURE__ */ jsx(Logo, { sz: "lg-1" }),
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "xl-2",
+              weight: "extrabold",
+              className: "mt-2 !text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-600 font-inter",
+              children: "Chào bạn!"
+            }
+          ),
+          /* @__PURE__ */ jsx(Text, { sz: "md-2", className: "text-text-secondary text-center max-w-[400px]", children: "Hãy hoàn tất thông tin cần thiết" })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "w-full h-[1px] bg-gradient-to-r from-transparent via-border-main to-transparent" }),
+        /* @__PURE__ */ jsx(OnboardingForm, {}),
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 text-text-third", children: [
+          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-shield-halved text-primary-500" }),
+          /* @__PURE__ */ jsx(Text, { sz: "sm-2", children: "Thông tin của bạn được bảo mật tuyệt đối" })
+        ] })
+      ]
+    }
+  ) });
+}
 const mainRoutes = [
   {
-    element: /* @__PURE__ */ jsxDEV(DefaultLayout, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/main.routes.tsx",
-      lineNumber: 17,
-      columnNumber: 14
-    }, void 0),
+    element: /* @__PURE__ */ jsx(DefaultLayout, {}),
     type: "public",
     children: [
       {
         path: "/",
-        element: /* @__PURE__ */ jsxDEV(HomePage, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/main.routes.tsx",
-          lineNumber: 22,
-          columnNumber: 18
-        }, void 0),
+        element: /* @__PURE__ */ jsx(HomePage, {}),
         type: "private",
         index: true,
         keepAlive: true
@@ -8111,50 +5661,36 @@ const mainRoutes = [
       userRoute,
       {
         path: "/notifications",
-        element: /* @__PURE__ */ jsxDEV(NotificationsPage, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/main.routes.tsx",
-          lineNumber: 32,
-          columnNumber: 18
-        }, void 0),
+        element: /* @__PURE__ */ jsx(NotificationsPage, {}),
         type: "private"
       },
-      { path: "/loading", type: "public", element: /* @__PURE__ */ jsxDEV(LoadingPage, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/main.routes.tsx",
-        lineNumber: 35,
-        columnNumber: 52
-      }, void 0) },
-      { path: "*", type: "public", element: /* @__PURE__ */ jsxDEV(NotFoundPage, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/main.routes.tsx",
-        lineNumber: 36,
-        columnNumber: 45
-      }, void 0) }
+      { path: "/loading", type: "public", element: /* @__PURE__ */ jsx(LoadingPage, {}) },
+      { path: "*", type: "public", element: /* @__PURE__ */ jsx(NotFoundPage, {}) }
     ]
   },
   {
-    element: /* @__PURE__ */ jsxDEV(SecondLayout, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/main.routes.tsx",
-      lineNumber: 40,
-      columnNumber: 14
-    }, void 0),
+    element: /* @__PURE__ */ jsx(SecondLayout, {}),
     type: "public",
     children: [
       {
         path: "/login",
-        element: /* @__PURE__ */ jsxDEV(LoginPage, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/main.routes.tsx",
-          lineNumber: 45,
-          columnNumber: 18
-        }, void 0),
+        element: /* @__PURE__ */ jsx(LoginPage, {}),
         type: "auth"
       },
       {
         path: "/register",
-        element: /* @__PURE__ */ jsxDEV(RegisterPage, {}, void 0, false, {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/routes/main.routes.tsx",
-          lineNumber: 50,
-          columnNumber: 18
-        }, void 0),
+        element: /* @__PURE__ */ jsx(RegisterPage, {}),
         type: "auth"
+      },
+      {
+        path: "/auth/google/callback",
+        element: /* @__PURE__ */ jsx(GoogleCallbackPage, {}),
+        type: "auth"
+      },
+      {
+        path: "/onboarding",
+        element: /* @__PURE__ */ jsx(OnboardingPage, {}),
+        type: "private"
       }
     ]
   }
@@ -8164,23 +5700,27 @@ const GuestOnlyRoute = ({ children }) => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   useEffect(() => {
-    if (auth2 && auth2.isAuthenticated) {
+    if (auth2?.isAuthenticated) {
       const returnTo = searchParams.get("returnTo") || "/";
       navigate(returnTo, { replace: true });
     }
-  }, [auth2, navigate, searchParams]);
-  if (!auth2) return null;
+  }, [auth2?.isAuthenticated, navigate, searchParams]);
+  if (auth2?.isAuthenticated) {
+    return null;
+  }
   return children;
 };
 const UserOnlyRoute = ({ children }) => {
-  const auth2 = useAuth();
+  const user2 = useAuth();
   const navigate = useNavigate();
   useEffect(() => {
-    if (auth2 && auth2.isAuthenticated === false) {
+    if (!user2?.isAuthenticated) {
       navigate("/login", { replace: true });
     }
-  }, [auth2, navigate]);
-  if (!auth2) return null;
+  }, [user2?.isAuthenticated, navigate]);
+  if (!user2?.isAuthenticated) {
+    return null;
+  }
   return children;
 };
 const RouteWrapper = ({
@@ -8190,144 +5730,35 @@ const RouteWrapper = ({
   element
 }) => {
   let wrapped = element;
-  if (type === "private") wrapped = /* @__PURE__ */ jsxDEV(UserOnlyRoute, { children: wrapped }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/routes/route-wrapper.tsx",
-    lineNumber: 28,
-    columnNumber: 37
-  }, void 0);
+  if (type === "private") wrapped = /* @__PURE__ */ jsx(UserOnlyRoute, { children: wrapped });
   else if (type === "auth")
-    wrapped = /* @__PURE__ */ jsxDEV(GuestOnlyRoute, { children: wrapped }, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/routes/route-wrapper.tsx",
-      lineNumber: 30,
-      columnNumber: 15
-    }, void 0);
-  return /* @__PURE__ */ jsxDEV(Fragment, { children: wrapped }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/components/routes/route-wrapper.tsx",
-    lineNumber: 32,
-    columnNumber: 10
-  }, void 0);
+    wrapped = /* @__PURE__ */ jsx(GuestOnlyRoute, { children: wrapped });
+  return /* @__PURE__ */ jsx(Fragment, { children: wrapped });
 };
 const AppRoutes = () => {
   const generateRoutes = useCallback((routes) => {
     return routes.map((route, idx) => {
       const key = route.path ?? `route-${idx}`;
-      return /* @__PURE__ */ jsxDEV(
+      return /* @__PURE__ */ jsx(
         Route,
         {
           path: route.path,
-          element: /* @__PURE__ */ jsxDEV(RouteWrapper, { ...route }, void 0, false, {
-            fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/index.tsx",
-            lineNumber: 16,
-            columnNumber: 20
-          }, void 0),
+          element: /* @__PURE__ */ jsx(RouteWrapper, { ...route }),
           children: route.children && generateRoutes(route.children)
         },
-        key,
-        false,
-        {
-          fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/index.tsx",
-          lineNumber: 13,
-          columnNumber: 9
-        },
-        void 0
+        key
       );
     });
   }, []);
-  return /* @__PURE__ */ jsxDEV(AliveScope, { children: /* @__PURE__ */ jsxDEV(Routes, { children: generateRoutes(mainRoutes) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/index.tsx",
-    lineNumber: 26,
-    columnNumber: 7
-  }, void 0) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/routes/index.tsx",
-    lineNumber: 25,
-    columnNumber: 5
-  }, void 0);
+  return /* @__PURE__ */ jsx(AliveScope, { children: /* @__PURE__ */ jsx(Routes, { children: generateRoutes(mainRoutes) }) });
 };
-let connection = null;
-const createSignalRConnection = () => {
-  try {
-    connection = new signalR.HubConnectionBuilder().withUrl(`${appConfig.apiUrl}/hubs/notification`, {
-      withCredentials: true
-    }).withAutomaticReconnect().configureLogging(signalR.LogLevel.Error).build();
-    return connection;
-  } catch (error) {
-    console.error("Error creating SignalR connection: ", error);
-    throw error;
-  }
-};
-function useNotificationHub(onReceiveNotification) {
-  const connectionRef = useRef(null);
-  const { isAuthenticated } = useAuth();
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    let isMounted = true;
-    const startConnection = async () => {
-      const conn = createSignalRConnection();
-      connectionRef.current = conn;
-      const tryConnect = async (retry = 0) => {
-        try {
-          await conn.start();
-          conn.on("ReceiveNotification", (data) => {
-            if (isMounted) {
-              onReceiveNotification(data);
-            }
-          });
-        } catch (err) {
-          console.error("SignalR connection error: ", err);
-          if (retry < 5) {
-            setTimeout(() => tryConnect(retry + 1), 500);
-          }
-        }
-      };
-      tryConnect();
-    };
-    startConnection();
-    return () => {
-      isMounted = false;
-      if (connectionRef.current) {
-        connectionRef.current.stop();
-        connectionRef.current = null;
-      }
-    };
-  }, [isAuthenticated]);
+function Main() {
+  return /* @__PURE__ */ jsxs("main", { children: [
+    /* @__PURE__ */ jsx(AppRoutes, {}),
+    /* @__PURE__ */ jsx(GlobalDialog, {}),
+    /* @__PURE__ */ jsx(NotificationListener, {})
+  ] });
 }
-const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider");
-  }
-  return context;
-};
-function NotificationListener() {
-  const dispatch = useDispatch();
-  const { pushToast } = useToast();
-  const handleNewNotification = useCallback(
-    (data) => {
-      if (data.type === "CancelNotification") {
-        dispatch(deleteNotification(data.data.noticationId));
-        return;
-      } else {
-        dispatch(addNewNotification(data));
-      }
-      pushToast({
-        id: data.id,
-        type: "notification",
-        payload: {
-          notificationDto: data
-        },
-        duration: 5e3
-      });
-    },
-    [dispatch, pushToast]
-  );
-  useNotificationHub(handleNewNotification);
-  return null;
-}
-const store = configureStore({
-  reducer: {
-    notifications: notificationsReducer
-  }
-});
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
@@ -8340,66 +5771,23 @@ const queryClient = new QueryClient({
     }
   }
 });
-function App() {
-  return /* @__PURE__ */ jsxDEV(Provider, { store, children: /* @__PURE__ */ jsxDEV(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsxDEV(ContextTree, { children: /* @__PURE__ */ jsxDEV("main", { children: [
-    /* @__PURE__ */ jsxDEV(AppRoutes, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/App.tsx",
-      lineNumber: 28,
-      columnNumber: 13
-    }, this),
-    /* @__PURE__ */ jsxDEV(GlobalDialog, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/App.tsx",
-      lineNumber: 29,
-      columnNumber: 13
-    }, this),
-    /* @__PURE__ */ jsxDEV(NotificationListener, {}, void 0, false, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/App.tsx",
-      lineNumber: 30,
-      columnNumber: 13
-    }, this)
-  ] }, void 0, true, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/App.tsx",
-    lineNumber: 27,
-    columnNumber: 11
-  }, this) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/App.tsx",
-    lineNumber: 26,
-    columnNumber: 9
-  }, this) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/App.tsx",
-    lineNumber: 25,
-    columnNumber: 7
-  }, this) }, void 0, false, {
-    fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/App.tsx",
-    lineNumber: 24,
-    columnNumber: 5
-  }, this);
+function App({ authContext }) {
+  return /* @__PURE__ */ jsx(Provider, { store, children: /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsx(ContextTree, { authContext, children: /* @__PURE__ */ jsx(Main, {}) }) }) });
 }
-function render(_url, options) {
+function render(_url, context) {
   const url = _url.startsWith("/") ? _url : "/" + _url;
-  return renderToPipeableStream(
-    /* @__PURE__ */ jsxDEV(StrictMode, { children: [
-      /* @__PURE__ */ jsxDEV(StaticRouter, { location: url, children: /* @__PURE__ */ jsxDEV(App, {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/entry-server.tsx",
-        lineNumber: 15,
-        columnNumber: 9
-      }, this) }, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/entry-server.tsx",
-        lineNumber: 14,
-        columnNumber: 7
-      }, this),
-      /* @__PURE__ */ jsxDEV("vite-streaming-end", {}, void 0, false, {
-        fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/entry-server.tsx",
-        lineNumber: 17,
-        columnNumber: 7
-      }, this)
-    ] }, void 0, true, {
-      fileName: "/home/ngocphat/projects/fatagram/fatagram-frontend-ssr/src/entry-server.tsx",
-      lineNumber: 13,
-      columnNumber: 5
-    }, this),
-    options
-  );
+  try {
+    const html = renderToString(
+      /* @__PURE__ */ jsx(StrictMode, { children: /* @__PURE__ */ jsx(StaticRouter, { location: url, children: /* @__PURE__ */ jsx(App, { authContext: context }) }) })
+    );
+    return html;
+  } catch (error) {
+    console.error("SSR Error during render:", error);
+    if (error instanceof Error) {
+      console.error(error.stack);
+    }
+    return "";
+  }
 }
 export {
   render

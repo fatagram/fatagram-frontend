@@ -1,9 +1,8 @@
-import { createContext, useContext, useEffect, useMemo, useRef } from "react";
+import { createContext, useMemo, useRef } from "react";
 import { useParams } from "react-router-dom";
 import NotFoundPage from "@/pages/not-found/not-found-page";
 import { useUserId } from "../hooks/use-userid";
 import { useAuth } from "@/hooks/contexts/use-auth";
-import { useLoading } from "@/hooks/contexts/use-loading";
 
 export interface ProfilePageContextType {
   isOwner: boolean;
@@ -24,12 +23,11 @@ type ProfilePageProviderProps = {
 // Using function declaration instead of arrow function for better Fast Refresh compatibility
 export default function ProfilePageProvider({ children }: ProfilePageProviderProps) {
   const { userId } = useAuth();
-  const { increment, decrement } = useLoading();
   const userParam = useParams<{ userParam: string }>();
-  const { userId: targetId, userExist, isLoading } = useUserId(userParam.userParam || "");
+  const { userId: targetId, userExist } = useUserId(userParam.userParam || "");
 
   // Track previous loading state to avoid unnecessary increment/decrement calls
-  const prevLoadingRef = useRef<boolean | null>(null);
+  // const prevLoadingRef = useRef<boolean | null>(null);
   // Cache the last valid targetId to prevent it from becoming undefined during reload
   const cachedTargetIdRef = useRef<string | undefined>(undefined);
 
@@ -38,18 +36,18 @@ export default function ProfilePageProvider({ children }: ProfilePageProviderPro
     cachedTargetIdRef.current = targetId;
   }
 
-  useEffect(() => {
-    // Only call increment/decrement when isLoading actually changes
-    if (isLoading !== prevLoadingRef.current) {
-      if (isLoading) {
-        increment();
-      } else if (prevLoadingRef.current !== null) {
-        // Only decrement if we've previously incremented (not on initial mount)
-        decrement();
-      }
-      prevLoadingRef.current = isLoading;
-    }
-  }, [isLoading, increment, decrement]);
+  // useEffect(() => {
+  //   // Only call increment/decrement when isLoading actually changes
+  //   if (isLoading !== prevLoadingRef.current) {
+  //     if (isLoading) {
+  //       increment();
+  //     } else if (prevLoadingRef.current !== null) {
+  //       // Only decrement if we've previously incremented (not on initial mount)
+  //       decrement();
+  //     }
+  //     prevLoadingRef.current = isLoading;
+  //   }
+  // }, [isLoading, increment, decrement]);
 
   // Memoize context value to prevent unnecessary re-renders of consumers
   // Use cached targetId if current one is undefined (during reload)

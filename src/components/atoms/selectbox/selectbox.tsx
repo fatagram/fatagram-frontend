@@ -12,15 +12,25 @@ export type Option = {
 };
 
 interface SelectBoxProps extends Omit<ComponentProps, "onSelect"> {
+  title?: string;
+  isRequired?: boolean;
+  optionClassName?: string;
+  optionActiveClassName?: string;
+  dropdownClassName?: string;
   options: Option[];
-  selectedOption: string;
+  selectedOption: OptionKey;
   onSelect: (option: OptionKey) => void;
 }
 
 export const SelectBox: React.FC<SelectBoxProps> = ({
+  title,
+  isRequired = false,
   options,
   selectedOption,
   onSelect,
+  optionClassName,
+  optionActiveClassName,
+  dropdownClassName,
   className,
 }) => {
   const [isOpen, setIsOpen] = React.useState<boolean>(false);
@@ -37,12 +47,18 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
   );
 
   return (
-    <div className={clsx("relative", className)}>
-      <button ref={btnRef} className="w-full">
+    <div className={clsx("relative")}>
+      {title && (
+        <div className="flex items-center gap-1 mb-1 ml-1">
+          <label className="text-sm text-text-secondary font-medium">{title}</label>
+          {isRequired && <span className="text-red-400">*</span>}
+        </div>
+      )}
+      <button ref={btnRef} className={clsx("w-full", className)}>
         <div
           className={clsx(
             "flex items-center justify-between cursor-pointer",
-            "bg-bg-fourth px-4 py-2 rounded-xl shadow-md gap-5",
+            "bg-bg-fourth px-4 py-2 text-[13px] rounded-xl shadow-md gap-5",
             "hover:bg-bg-hover transition-colors",
           )}
           onClick={() => setIsOpen(!isOpen)}
@@ -57,6 +73,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
           className={clsx(
             "absolute w-full animate-dropdown-slide",
             "bg-bg-card rounded-lg shadow-md mt-1 z-50 border border-border-main",
+            dropdownClassName,
           )}
           ref={selectBoxRef}
         >
@@ -67,6 +84,8 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
                 className={clsx(
                   "px-4 py-2 hover:bg-bg-hover",
                   "cursor-pointer rounded-lg transition-colors",
+                  optionClassName,
+                  selected === item.key && optionActiveClassName,
                 )}
                 onClick={() => {
                   setSelected(item.key);
