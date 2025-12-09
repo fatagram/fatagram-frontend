@@ -1,6 +1,8 @@
 import { useState } from "react";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
+import Transition, { AnimationLib } from "@/components/utils/transition";
+import HeightTransition from "@/components/utils/height-transition";
 
 type PageNavbarSectionProps = {
   title?: string;
@@ -49,9 +51,9 @@ export const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({
           />
         </div>
       )}
-      {showChildren && (
-        <div className={clsx("w-full animate-dropdown-slide mt-1 space-y-1")}>{children}</div>
-      )}
+      <HeightTransition show={showChildren}>
+        <div className={clsx("w-full mt-1 space-y-1")}>{children}</div>
+      </HeightTransition>
     </div>
   );
 };

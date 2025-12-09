@@ -1,6 +1,6 @@
 import { StrictMode } from "react";
-// Import CSS to let Vite handle CSS modules hashing
-import "./index.css";
+// Don't import CSS in SSR - it's inlined by server.js
+// import "./index.css";
 import { renderToString } from "react-dom/server";
 import { StaticRouter } from "react-router-dom";
 import App from "./App";

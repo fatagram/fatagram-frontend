@@ -1,4 +1,3 @@
-import { Text } from "@/components/atoms";
 import clsx from "clsx";
 import { SubNavbarSection } from "./sub-navbar-section";
 import { SubNavbarItem } from "./sub-navbar-item";

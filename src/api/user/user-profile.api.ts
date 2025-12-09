@@ -7,6 +7,7 @@ import ChangeUrlNameDto from "./dto/change-url-name.dto";
 import GetMeDto from "./dto/get-me.dto";
 import OnboardingDto from "./dto/onboarding.dto";
 import { OnboardingDefaultDataDto } from "./dto/onboarding-default-data.dto";
+import { User } from "@/types/entities/user.type";
 
 const PREFIX = `/api/UserProfile`;
 
@@ -22,11 +23,61 @@ export class UserProfileService {
   }
 
   // Get user profile by id or urlName
-  async getProfile(id: string, fields: string): Promise<Result<any>> {
+  async getHeaderProfile(id: string): Promise<Result<User>> {
     try {
-      const res = await apiClient.get(`${PREFIX}/${id}?fields=${fields}`);
+      const res = await apiClient.get(`${PREFIX}/${id}?fields=avatar,fullName,background,nickname`);
       const response = res.data as ApiResponse<any>;
-      return { success: true, data: response.data };
+      return { success: true, data: response.data?.infos };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  }
+
+  async getUserAvatar(id: string): Promise<Result<User>> {
+    try {
+      const res = await apiClient.get(`${PREFIX}/${id}?fields=avatar`);
+      const response = res.data as ApiResponse<any>;
+      return { success: true, data: response.data?.infos };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  }
+
+  async getUserBackground(id: string): Promise<Result<User>> {
+    try {
+      const res = await apiClient.get(`${PREFIX}/${id}?fields=background`);
+      const response = res.data as ApiResponse<any>;
+      return { success: true, data: response.data?.infos };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  }
+
+  async getUserFullName(id: string): Promise<Result<User>> {
+    try {
+      const res = await apiClient.get(`${PREFIX}/${id}?fields=fullName`);
+      const response = res.data as ApiResponse<any>;
+      return { success: true, data: response.data?.infos };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  }
+
+  async getUserUrlName(id: string): Promise<Result<User>> {
+    try {
+      const res = await apiClient.get(`${PREFIX}/${id}?fields=urlName`);
+      const response = res.data as ApiResponse<any>;
+      return { success: true, data: response.data?.infos };
+    } catch (error: any) {
+      return handleApiError(error);
+    }
+  }
+
+  async getUserId(id: string): Promise<Result<User>> {
+    try {
+      const res = await apiClient.get(`${PREFIX}/${id}?fields=id`);
+      const response = res.data as ApiResponse<any>;
+      return { success: true, data: response.data?.infos };
     } catch (error: any) {
       return handleApiError(error);
     }

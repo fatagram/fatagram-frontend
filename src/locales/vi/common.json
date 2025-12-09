@@ -13,5 +13,14 @@
     "title": "Không tìm thấy",
     "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại.",
     "backButton": "Quay lại trang chủ"
+  },
+  "themes": {
+    "light": "Sáng",
+    "dark": "Tối",
+    "universe": "Vũ trụ",
+    "neon": "Neon",
+    "darkSea": "Biển đêm",
+    "darkYellow": "Vàng tối",
+    "lightYellowPink": "Vàng hồng"
   }
 }

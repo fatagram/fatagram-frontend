@@ -90,7 +90,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
     lang: userData?.languageCode as LocaleKeys,
     isOnBoarding: userData?.isOnBoarding,
   });
-  console.log("AuthContext", userData);
+  // console.log("AuthContext", userData);
   // const { changeLanguage } = useLanguage();
   const _dispatch = useDispatch();
   const queryClient = useQueryClient();
@@ -156,7 +156,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
 
   useEffect(() => {
     const handleRedirectToOnboarding = () => {
-      console.log("Redirect to onboarding");
+      // console.log("Redirect to onboarding");
       navigate("/onboarding");
     };
 

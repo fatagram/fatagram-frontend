@@ -10,7 +10,19 @@
   }
 }
 
-@keyframes dropdown-slide {
+@keyframes fadeOut {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+
+  to {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+}
+
+@keyframes dropdown-slide-in {
   0% {
     opacity: 0;
     transform: translateY(-10px);
@@ -22,44 +34,96 @@
   }
 }
 
-@keyframes slide-left-to-right {
+@keyframes dropdown-slide-out {
+  0% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+
+  100% {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes left-to-right-in {
   from {
     opacity: 0;
     transform: translateX(-10%);
   }
 
   to {
-    opacity: 100;
+    opacity: 1;
     transform: translateX(0);
   }
 }
 
-@keyframes slide-right-to-left {
+@keyframes left-to-right-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(-10%);
+  }
+}
+
+@keyframes right-to-left-in {
   from {
     opacity: 0;
     transform: translateX(10%);
   }
 
   to {
-    opacity: 100;
+    opacity: 1;
     transform: translateX(0);
+  }
+}
+
+@keyframes right-to-left-out {
+  from {
+    opacity: 1;
+    transform: translateX(0);
+  }
+
+  to {
+    opacity: 0;
+    transform: translateX(10%);
   }
 }
 
 @layer utilities {
   .animate-fade-in {
-    animation: fadeIn 0.25s ease-out;
+    animation: fadeIn ease-out forwards;
   }
 
-  .animate-dropdown-slide {
-    animation: dropdown-slide 0.15s ease-out;
+  .animate-fade-out {
+    animation: fadeOut ease-out forwards;
   }
 
-  .animate-left-to-right {
-    animation: slide-left-to-right 0.3s ease-out forwards;
+  .animate-dropdown-slide-in {
+    animation: dropdown-slide-in ease-out forwards;
   }
 
-  .animate-right-to-left {
-    animation: slide-right-to-left 0.3s ease-out forwards;
+  .animate-dropdown-slide-out {
+    animation: dropdown-slide-out ease-out forwards;
+  }
+
+  .animate-left-to-right-in {
+    animation: left-to-right-in ease-out forwards;
+  }
+
+  .animate-left-to-right-out {
+    animation: left-to-right-out ease-out forwards;
+  }
+
+  .animate-right-to-left-in {
+    animation: right-to-left-in ease-out forwards;
+  }
+
+  .animate-right-to-left-out {
+    animation: right-to-left-out ease-out forwards;
   }
 }

@@ -76,7 +76,7 @@ export function getThemeScript() {
 (function() {
   try {
     var theme = localStorage.getItem('theme');
-    var validThemes = ['light', 'dark', 'universe'];
+    var validThemes = ['light', 'dark', 'universe', 'neon', 'dark-sea', 'dark-yellow', 'light-yellow-pink'];
     if (!theme || validThemes.indexOf(theme) === -1) {
       var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       theme = prefersDark ? 'dark' : 'light';

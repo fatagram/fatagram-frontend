@@ -2,6 +2,7 @@ import React from "react";
 import { clsx } from "clsx";
 import { useProfilePage } from "../hooks/use-profile-page";
 import { Avatar, Skeleton } from "@/components/atoms";
+import SelectFile from "@/components/molecules/select-file";
 
 interface ProfileAvatarProps {
   isLoading: boolean;
@@ -31,7 +32,19 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({
           alt="Avatar"
           sz="lg-2"
           className="border-4 border-bg-main flex-shrink-0"
-        />
+        >
+          {isOwner && (
+            <SelectFile
+              onChange={handleSelectAvatar}
+              accept="image/*"
+              className="absolute z-10 inset-0 cursor-pointer bg-black bg-opacity-50
+                flex justify-center items-center opacity-0 hover:opacity-90 hover:bg-black hover:bg-opacity-50 active:opacity-100
+                translate-all duration-150 ease"
+            >
+              <i className="fa-solid fa-camera text-white text-2xl"></i>
+            </SelectFile>
+          )}
+        </Avatar>
       )}
     </div>
   );

@@ -13,5 +13,14 @@
     "title": "Page Not Found",
     "description": "Oops! The page you're looking for doesn't exist or has been moved.",
     "backButton": "Back to Home"
+  },
+  "themes": {
+    "light": "Light",
+    "dark": "Dark",
+    "universe": "Universe",
+    "neon": "Neon",
+    "darkSea": "Dark Sea",
+    "darkYellow": "Dark Yellow",
+    "lightYellowPink": "Light Yellow Pink"
   }
 }

@@ -3,6 +3,7 @@ import useClickOutside from "@/hooks/use-click-outside";
 import { ComponentProps } from "@/components/common/types/component-type";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
+import Transition, { AnimationLib } from "@/components/utils/transition";
 
 export type OptionKey = string | number | boolean;
 
@@ -68,10 +69,10 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
         </div>
       </button>
 
-      {isOpen && (
+      <Transition animation={AnimationLib.DropdownSlide} show={isOpen} duration={100}>
         <div
           className={clsx(
-            "absolute w-full animate-dropdown-slide",
+            "absolute w-full",
             "bg-bg-card rounded-lg shadow-md mt-1 z-50 border border-border-main",
             dropdownClassName,
           )}
@@ -98,7 +99,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
             ))}
           </ul>
         </div>
-      )}
+      </Transition>
     </div>
   );
 };

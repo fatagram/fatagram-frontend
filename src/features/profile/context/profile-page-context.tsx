@@ -3,6 +3,7 @@ import { useParams } from "react-router-dom";
 import NotFoundPage from "@/pages/not-found/not-found-page";
 import { useUserId } from "../hooks/use-userid";
 import { useAuth } from "@/hooks/contexts/use-auth";
+import LoadingPage from "@/pages/loading/loading-page";
 
 export interface ProfilePageContextType {
   isOwner: boolean;
@@ -24,33 +25,19 @@ type ProfilePageProviderProps = {
 export default function ProfilePageProvider({ children }: ProfilePageProviderProps) {
   const { userId } = useAuth();
   const userParam = useParams<{ userParam: string }>();
-  const { userId: targetId, userExist } = useUserId(userParam.userParam || "");
+  const {
+    userId: targetId,
+    userExist,
+    isLoading,
+    isFetching,
+  } = useUserId(userParam.userParam || "");
 
-  // Track previous loading state to avoid unnecessary increment/decrement calls
-  // const prevLoadingRef = useRef<boolean | null>(null);
-  // Cache the last valid targetId to prevent it from becoming undefined during reload
   const cachedTargetIdRef = useRef<string | undefined>(undefined);
 
   // Update cached targetId only when we have a valid one
   if (targetId) {
     cachedTargetIdRef.current = targetId;
   }
-
-  // useEffect(() => {
-  //   // Only call increment/decrement when isLoading actually changes
-  //   if (isLoading !== prevLoadingRef.current) {
-  //     if (isLoading) {
-  //       increment();
-  //     } else if (prevLoadingRef.current !== null) {
-  //       // Only decrement if we've previously incremented (not on initial mount)
-  //       decrement();
-  //     }
-  //     prevLoadingRef.current = isLoading;
-  //   }
-  // }, [isLoading, increment, decrement]);
-
-  // Memoize context value to prevent unnecessary re-renders of consumers
-  // Use cached targetId if current one is undefined (during reload)
   const validTargetId = targetId || cachedTargetIdRef.current || "";
   const contextValue = useMemo(
     () => ({
@@ -60,6 +47,10 @@ export default function ProfilePageProvider({ children }: ProfilePageProviderPro
     }),
     [userId, validTargetId, userParam.userParam],
   );
+
+  if (isLoading || isFetching) {
+    return <LoadingPage />;
+  }
 
   // Show NotFoundPage if user doesn't exist (but not while loading)
   if (userExist === false) {

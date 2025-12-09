@@ -4,19 +4,22 @@ import SettingCard from "@/components/molecules/card";
 import { useTranslation } from "react-i18next";
 import { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
 import SelectBoxSetting from "../../components/selectbox-setting";
-import { availableThemes, Theme, useTheme } from "@/contexts/common/theme-context";
+import { Theme, useTheme } from "@/contexts/common/theme-context";
+import { useSnackbar } from "@/hooks/contexts/use-snackbar";
 
 interface ThemeSettingsProps {
   className?: string;
 }
 
 const ThemeSettings: React.FC<ThemeSettingsProps> = ({ className }) => {
-  const { theme, setTheme } = useTheme();
+  const { availableThemes, theme, setTheme } = useTheme();
   const [themeOptions, setThemeOptions] = useState<Option[]>([]);
   const { t } = useTranslation() as { t: (key: string) => string };
+  const { showSnackbar } = useSnackbar();
 
   const selectTheme = (opt: OptionKey) => {
     setTheme(opt as Theme);
+    showSnackbar(t("settings:theme.themeChanged"), "info");
   };
 
   useEffect(() => {
@@ -25,7 +28,7 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = ({ className }) => {
       value: t(theme.label),
     }));
     setThemeOptions(options);
-  }, [availableThemes]);
+  }, [availableThemes, t]);
 
   return (
     <div className={clsx(className)}>

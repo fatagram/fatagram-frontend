@@ -20,6 +20,7 @@ export const Avatar: React.FC<AvatarProps> = ({
   sz = "md-1",
   shape = "circle",
   className,
+  children,
 }) => {
   const sizeClass = sizeClasses[sz];
   const shapeClass = shapeClasses[shape];
@@ -59,6 +60,7 @@ export const Avatar: React.FC<AvatarProps> = ({
           className={clsx("relative z-0 w-full h-full object-cover")}
           onError={() => setImgSrc(emptyAvatar)}
         />
+        {children}
       </div>
     </div>
   );

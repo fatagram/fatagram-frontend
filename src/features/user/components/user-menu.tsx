@@ -1,12 +1,12 @@
-import React, { RefObject, useCallback, useEffect, useRef, useState } from "react";
+import React, { RefObject, useCallback, useRef, useState } from "react";
 import clsx from "clsx";
-import { userProfileService } from "@/api/user/user-profile.api";
 import useClickOutside from "@/hooks/use-click-outside";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
 import { List } from "@/components/atoms/list";
 import { Avatar, Button, Text } from "@/components/atoms";
 import { useAuth } from "@/hooks/contexts/use-auth";
+import { useGetUserAvatar, useGetUserFullName } from "@/features/hooks/use-user-profile";
 
 /**
  * ProfileMenu component displays a profile menu with options for the user.
@@ -15,13 +15,16 @@ import { useAuth } from "@/hooks/contexts/use-auth";
  * @returns {JSX.Element} The rendered ProfileMenu component.
  */
 const UserMenu: React.FC = () => {
-  const [avatar, setAvatar] = useState<string>("");
-  const [fullName, setFullName] = useState<string>("");
+  // const [avatar, setAvatar] = useState<string>("");
+  // const [fullName, setFullName] = useState<string>("");
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
   const { userId, urlName, logOut } = useAuth();
   const { t } = useTranslation() as { t: (key: string) => string };
 
   const navigate = useNavigate();
+
+  const { data: avatarData } = useGetUserAvatar(userId || "");
+  const { data: fullNameData } = useGetUserFullName(userId || "");
 
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLDivElement>(null);
@@ -36,16 +39,16 @@ const UserMenu: React.FC = () => {
     handleClickOutside,
   );
 
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const response = await userProfileService.getProfile(userId || "", "avatar,fullName");
-      if (response.success) {
-        setAvatar(response.data.infos.avatar);
-        setFullName(response.data.infos.fullName);
-      }
-    };
-    fetchProfile();
-  }, [userId]);
+  // useEffect(() => {
+  //   const fetchProfile = async () => {
+  //     const response = await userProfileService.getProfile(userId || "", "avatar,fullName");
+  //     if (response.success) {
+  //       setAvatar(response.data.infos.avatar);
+  //       setFullName(response.data.infos.fullName);
+  //     }
+  //   };
+  //   fetchProfile();
+  // }, [userId]);
 
   // Navigation to personal page
   const handlePersonalPage = useCallback(() => {
@@ -76,7 +79,12 @@ const UserMenu: React.FC = () => {
           setIsOpenMenu(!isOpenMenu);
         }}
       >
-        <Avatar src={avatar} alt="Profile" sz="sm-1" className="border-4 border-bg-third" />
+        <Avatar
+          src={avatarData?.avatar ?? ""}
+          alt="Profile"
+          sz="sm-1"
+          className="border-4 border-bg-third"
+        />
       </Button>
       {isOpenMenu && (
         <div
@@ -99,9 +107,9 @@ const UserMenu: React.FC = () => {
                 )}
                 onClick={handlePersonalPage}
               >
-                <Avatar src={avatar} alt="avatar" sz="sm-1"></Avatar>
+                <Avatar src={avatarData?.avatar ?? ""} alt="avatar" sz="sm-1"></Avatar>
                 <Text sz="lg-1" weight="bold">
-                  {fullName}
+                  {fullNameData?.fullName ?? ""}
                 </Text>
               </Button>
             </List.Item>

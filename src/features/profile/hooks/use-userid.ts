@@ -2,24 +2,14 @@ import { userProfileService } from "@/api/user/user-profile.api";
 import { useQuery } from "@tanstack/react-query";
 
 export function useUserId(userParam: string) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isFetching, isError } = useQuery({
     queryKey: ["user-profile-id", userParam],
-    queryFn: async ({ signal }) => {
-      // Add 10s timeout to prevent stuck loading
-      const timeoutId = setTimeout(() => {
-        if (signal) {
-          const controller = signal as AbortSignal & { abort?: () => void };
-          controller.abort?.();
-        }
-      }, 10000);
-
+    queryFn: async () => {
       try {
-        const response = await userProfileService.getProfile(userParam, "id");
-        clearTimeout(timeoutId);
-        console.log("Fetch userId for", userParam, response);
+        const response = await userProfileService.getUserId(userParam);
         if (response.success) {
           return {
-            userId: response.data.infos.id,
+            userId: response.data?.id,
             userExist: true,
           };
         }
@@ -28,8 +18,6 @@ export function useUserId(userParam: string) {
           userExist: false,
         };
       } catch (error) {
-        clearTimeout(timeoutId);
-        // If timeout or error, return userExist: false
         console.error("Error fetching userId:", error);
         return {
           userId: undefined,
@@ -47,5 +35,6 @@ export function useUserId(userParam: string) {
     userId: data?.userId,
     userExist: isError ? false : data?.userExist,
     isLoading,
+    isFetching,
   };
 }

@@ -14,7 +14,7 @@ interface SelectBoxSettingProps {
 const SelectBoxSetting: React.FC<SelectBoxSettingProps> = ({
   options = [],
   selectedOption = "",
-  onOptionChange = (e: OptionKey) => {},
+  onOptionChange = () => {},
   title,
   className,
   selectBox,
@@ -31,7 +31,7 @@ const SelectBoxSetting: React.FC<SelectBoxSettingProps> = ({
           className="!min-w-[170px]"
           selectedOption={selectedOption}
           options={options}
-          onSelect={onOptionChange}
+          onSelect={(e) => onOptionChange(e)}
         />
       )}
     </div>
