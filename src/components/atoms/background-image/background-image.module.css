@@ -3,6 +3,6 @@
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  background-color: #e1e1e1;
+  background-color: rgba(var(--bg-third));
   background-image: var(--bg-image);
 }

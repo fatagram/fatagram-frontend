@@ -115,7 +115,7 @@ const UserMenu: React.FC = () => {
             </List.Item>
             <List.Item
               className={clsx("items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full")}
-            ></List.Item>
+            />
             <List.Item>
               <Button
                 sz="md-1"
@@ -139,7 +139,7 @@ const UserMenu: React.FC = () => {
                 variant="secondary"
                 className={clsx(
                   "flex items-center justify-start w-full gap-3 text-red-400",
-                  "hover:!bg-red-50 transition-all duration-200",
+                  "hover:!bg-bg-fourth transition-all duration-200",
                   "hover:scale-[1.02] active:scale-[0.98]",
                 )}
                 onClick={handleLogout}

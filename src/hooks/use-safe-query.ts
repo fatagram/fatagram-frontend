@@ -1,6 +1,12 @@
-import { Result } from "@/api/common/result";
-import { useQuery, UseQueryOptions, UseQueryResult } from "@tanstack/react-query";
-import { useSnackbar } from "./contexts/use-snackbar";
+import { CursorResult, Result } from "@/api/common/result";
+import {
+  InfiniteData,
+  useInfiniteQuery,
+  UseInfiniteQueryOptions,
+  useQuery,
+  UseQueryOptions,
+  UseQueryResult,
+} from "@tanstack/react-query";
 
 type SafeQueryOptions<TData = unknown> = UseQueryOptions<TData> & {
   onSuccess: (data: TData) => void;
@@ -54,4 +60,54 @@ export function useSafeQueryResult<TData>(params: SafeQueryResult<TData>) {
     },
   };
   return useQuery<TData>(wrappedOptions);
+}
+
+type SafeInfiniteQueryResultOptions<TData> = {
+  onSuccess?: (data: TData) => void;
+  onError?: (err: Error, errs?: Error[]) => void;
+  errorMessage?: string;
+};
+
+type SafeInfiniteQueryResult<TData, TCursor> = Omit<
+  UseInfiniteQueryOptions<
+    CursorResult<TData, TCursor>,
+    Error,
+    InfiniteData<CursorResult<TData, TCursor>>
+  >,
+  "queryFn" | "getNextPageParam" | "initialPageParam"
+> & {
+  fn: (cursor?: TCursor) => Promise<Result<CursorResult<TData, TCursor>>>;
+  options?: SafeInfiniteQueryResultOptions<CursorResult<TData, TCursor>>;
+};
+
+export function useSafeInfiniteQueryResult<TData, TCursor = string>({
+  fn,
+  options,
+  ...params
+}: SafeInfiniteQueryResult<TData, TCursor>) {
+  return useInfiniteQuery<
+    CursorResult<TData, TCursor>,
+    Error,
+    InfiniteData<CursorResult<TData, TCursor>>
+  >({
+    ...params,
+    queryFn: async (context) => {
+      if (typeof fn !== "function") {
+        throw new Error("fn is not a function");
+      }
+      const result = await fn(context.pageParam as TCursor | undefined);
+      if (result.success) {
+        options?.onSuccess?.(result.data as CursorResult<TData, TCursor>);
+        return result.data as CursorResult<TData, TCursor>;
+      } else {
+        const error = new Error(result.error?.toString() || "Query failed");
+        options?.onError?.(error, result.errors as any);
+        throw error;
+      }
+    },
+    initialPageParam: undefined,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasNext ? lastPage.nextCursor : undefined;
+    },
+  });
 }

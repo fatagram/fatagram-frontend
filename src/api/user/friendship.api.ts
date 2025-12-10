@@ -1,9 +1,11 @@
 import { TimeUnit } from "@/types/time-unit";
 import { FriendsDto } from "./dto/friend.dto";
-import { Result } from "../common/result";
+import { CursorResult, Result } from "../common/result";
 import { apiClient } from "../common/axiosInterceptor";
-import { ApiResponse } from "../common/apiResponse";
+import { ApiResponse, CursorResponse } from "../common/apiResponse";
 import { handleApiError } from "../common/handleApiError";
+import { FriendRequest } from "@/types/entities/friend-request.type";
+import { CursorQuery } from "@/types/query";
 
 const PREFIX = `/api/friendship`;
 
@@ -81,44 +83,21 @@ export class FriendshipService {
   }
 
   async GetFriendRequests(
-    page: number,
-    pageSize: number,
-  ): Promise<
-    Result<{
-      friendRequests: {
-        senderId: string;
-        senderUrlName: string;
-        senderAvatar: string;
-        senderName: string;
-        createdAt: {
-          value: number;
-          unit: TimeUnit;
-        };
-      }[];
-      total: number;
-    }>
-  > {
+    query: CursorQuery<string>,
+  ): Promise<Result<CursorResult<FriendRequest, string>>> {
     try {
       const res = await apiClient.get(`${PREFIX}/requests`, {
-        params: {
-          page,
-          pageSize,
-        },
+        params: query,
       });
-      const response = res.data as ApiResponse<{
-        friendRequests: {
-          senderId: string;
-          senderUrlName: string;
-          senderAvatar: string;
-          senderName: string;
-          createdAt: {
-            value: number;
-            unit: TimeUnit;
-          };
-        }[];
-        total: number;
-      }>;
-      return { success: true, data: response.data };
+      const resp = res.data as CursorResponse<string, FriendRequest>;
+      return {
+        success: true,
+        data: {
+          data: resp.data ?? [],
+          nextCursor: resp.nextCursor,
+          hasNext: resp.hasNext,
+        },
+      };
     } catch (error: any) {
       return handleApiError(error);
     }

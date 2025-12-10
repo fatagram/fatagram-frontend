@@ -49,6 +49,7 @@ export async function handleSSR(req, res, vite, templateHtml) {
         isAuthenticated,
         userData,
       };
+      console.log("[SSR] Initial Data:", initialData);
       const initialDataScript = `<script>window.__INITIAL_DATA__ = ${JSON.stringify(
         initialData,
       )};</script>`;

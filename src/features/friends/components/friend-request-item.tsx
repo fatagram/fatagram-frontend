@@ -3,11 +3,12 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Avatar, Button, Text } from "@/components/atoms";
 import clsx from "clsx";
+import { timeDistance } from "@/helpers/time-distance";
 
 type FriendRequestItemProps = {
   avatar?: string;
   name?: string;
-  time?: string;
+  time?: Date;
   onAccept?: () => void;
   onCancel?: () => void;
   path?: string;
@@ -21,8 +22,12 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
   onCancel,
   path = "",
 }) => {
-  const { t } = useTranslation() as { t: (key: string) => string };
+  const { t } = useTranslation();
   const navigate = useNavigate();
+
+  const timeDist = time ? timeDistance(time) : { text: "" };
+
+  console.log("Time Distance:", time);
 
   const handleNavigate = () => {
     navigate(path);
@@ -50,7 +55,7 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
         {name}
       </Text>
       <Text sz="sm-1" weight="light">
-        {time}
+        {timeDist.count && t(timeDist.unit || "", { count: timeDist.count })} {t(timeDist.text)}
       </Text>
       <Button variant="primary" sz="sm-1" className={clsx("w-full mt-2 mb-1")} onClick={onAccept}>
         {t("user:profileHeader:acceptButton")}

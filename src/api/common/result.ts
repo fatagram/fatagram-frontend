@@ -10,3 +10,9 @@ export type Result<T> = {
   error?: Error;
   errors?: Error[];
 };
+
+export type CursorResult<TData, TCursor> = {
+  data: TData[];
+  nextCursor?: TCursor;
+  hasNext: boolean;
+};

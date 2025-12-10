@@ -6,6 +6,7 @@ import React, { useCallback, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import { Text } from "@/components/atoms";
+import { useListFriendRequests } from "@/features/hooks/use-friend";
 
 type FriendRequestsProps = {
   className?: string;
@@ -38,18 +39,22 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
   };
 
   // Fetch friend requests from the API
-  const fetchFriendRequests = React.useCallback(async () => {
-    setIsLoading(true);
-    const response = await friendshipService.GetFriendRequests(page, limit);
-    if (response.success) {
-      setRequests((prev) => [...prev, ...(response.data?.friendRequests ?? [])]);
-      setTotal(response.data?.total ?? 0);
-      if (response.data?.friendRequests.length && response.data?.friendRequests.length < limit) {
-        setIsFull(true);
-      }
-    }
-    setIsLoading(false);
-  }, [page, limit]);
+  // const fetchFriendRequests = React.useCallback(async () => {
+  //   setIsLoading(true);
+  //   const response = await friendshipService.GetFriendRequests(page, limit);
+  //   if (response.success) {
+  //     setRequests((prev) => [...prev, ...(response.data?.friendRequests ?? [])]);
+  //     setTotal(response.data?.total ?? 0);
+  //     if (response.data?.friendRequests.length && response.data?.friendRequests.length < limit) {
+  //       setIsFull(true);
+  //     }
+  //   }
+  //   setIsLoading(false);
+  // }, [page, limit]);
+
+  const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests();
+  console.log("Friend Requests Data:", data);
+  const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.data) || [], [data]);
 
   // Handle accept friend request
   const handleAcceptRequest = useCallback(async (requestId: string) => {
@@ -73,13 +78,6 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     }
   }, []);
 
-  // === USE EFFECTS ===
-  // Fetch friend requests on mount
-  useEffect(() => {
-    setIsLoading(true);
-    fetchFriendRequests();
-  }, [fetchFriendRequests]);
-
   useEffect(() => {
     if (!loaderRef.current || isFull) return;
 
@@ -97,26 +95,15 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
   return (
     <Card title={`Danh sách lời mời (${total})`} className={className}>
       <div className="flex flex-wrap gap-2 h-full w-full">
-        {requests.length > 0 ? (
+        {requestsData?.length > 0 ? (
           <>
-            {requests.map((request, index) => (
+            {requestsData.map((request, index) => (
               <FriendRequestItem
                 key={index}
                 name={request.senderName}
                 avatar={request.senderAvatar}
                 path={`/${request.senderUrlName || request.senderId}`}
-                time={
-                  request.createdAt.unit === TimeUnit.Seconds ||
-                  request.createdAt.unit === TimeUnit.Miliseconds
-                    ? t("times:just_now")
-                    : `${t(
-                        `${TimeUnitTranslateMap[request.createdAt.unit]}.${
-                          request.createdAt.value === 1 ? "one" : "other"
-                        }`,
-                        { count: request.createdAt.value },
-                      )} 
-                                        ${t("times:ago")}`
-                }
+                time={new Date(request.createdAt)}
                 onAccept={() => handleAcceptRequest(request.senderId)}
                 onCancel={() => handleRejectRequest(request.senderId)}
               />

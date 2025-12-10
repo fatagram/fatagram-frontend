@@ -41,3 +41,19 @@ export const useGetUserUrlName = (userId: string) => {
     enabled: !!userId,
   });
 };
+
+export const useUserProfile = (userId: string) => {
+  const { data: profile } = useGetUserProfile(userId);
+  const { data: fullName } = useGetUserFullName(userId);
+  const { data: avatar } = useGetUserAvatar(userId);
+  const { data: background } = useGetUserBackground(userId);
+  const { data: urlName } = useGetUserUrlName(userId);
+
+  return {
+    profile,
+    fullName,
+    avatar,
+    background,
+    urlName,
+  };
+};
