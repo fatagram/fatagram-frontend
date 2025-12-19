@@ -72,10 +72,11 @@ export class FriendshipService {
     }
   }
 
-  async GetNumberOfFriends(targetId: string): Promise<Result<{ numberOfFriends: number }>> {
+  async GetNumberOfFriends(targetId: string): Promise<Result<number>> {
     try {
+      console.log("GetNumberOfFriends called with targetId:", targetId);
       const res = await apiClient.get(`${PREFIX}/count/${targetId}`);
-      const response = res.data as ApiResponse<{ numberOfFriends: number }>;
+      const response = res.data as ApiResponse<number>;
       return { success: true, data: response.data };
     } catch (error: any) {
       return handleApiError(error);

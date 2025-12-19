@@ -1,6 +1,6 @@
 import { friendshipService } from "@/api/user/friendship.api";
 import { useResultFetcher } from "@/hooks/use-fetcher";
-import { useSafeInfiniteQueryResult } from "@/hooks/use-safe-query";
+import { useSafeInfiniteQueryResult, useSafeQueryResult } from "@/hooks/use-safe-query";
 import { CursorQuery } from "@/types/query";
 
 export const useSentFriendRequest = () => {
@@ -28,5 +28,13 @@ export const useListFriendRequests = (queryParams?: Omit<CursorQuery<string>, "c
     queryKey: ["friendship", "friend-requests", queryParams],
     fn: (cursor?: string) => friendshipService.GetFriendRequests({ ...queryParams, cursor }),
     enabled: true,
+  });
+};
+
+export const useGetNumberOfFriends = (userId: string) => {
+  return useSafeQueryResult({
+    queryKey: ["friendship", "number-of-friends", userId],
+    fn: () => friendshipService.GetNumberOfFriends(userId),
+    enabled: !!userId,
   });
 };

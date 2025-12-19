@@ -16,6 +16,7 @@ import {
 } from "@/features/hooks/use-user-profile";
 import { useSelectBackground } from "../hooks/use-select-background";
 import { useSelectAvatar } from "../hooks/use-select-avatar";
+import { useGetNumberOfFriends } from "@/features/hooks/use-friend";
 
 export type ProfileHeaderProps = {
   className?: string;
@@ -30,10 +31,8 @@ export type ProfileHeaderProps = {
  * @param {boolean} isOwner - Indicates if the current authenticated user is the owner of the profile.
  * @param {function} onUserNotFound - Callback function to handle when a user is not found.
  */
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound }) => {
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
   // States
-  const [isLoadingNumOfFriends, setIsLoadingNumOfFriends] = useState<boolean>(true);
-  const [numberOfFriends, setNumberOfFriends] = useState<number>(0);
 
   const avtRef = useRef<HTMLDivElement>(null);
 
@@ -60,23 +59,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
 
   const { fetch: fetchAvatar } = useSelectAvatar(targetId);
 
-  // Fetch user profile
-  useEffect(() => {
-    const fetchNumberOfFriends = async () => {
-      setIsLoadingNumOfFriends(true);
-      const response = await friendshipService.GetNumberOfFriends(targetId);
-      if (response.success) {
-        setNumberOfFriends(response.data?.numberOfFriends ?? 0);
-      } else {
-        // console.log(response.errorCodes);
-      }
-      setIsLoadingNumOfFriends(false);
-    };
-    if (targetId) {
-      // fetchProfile();
-      fetchNumberOfFriends();
-    }
-  }, [targetId, onUserNotFound, friendshipService]);
+  const { data: numberOfFriends, isFetching: numberOfFriendsFetching } =
+    useGetNumberOfFriends(targetId);
 
   // Handle background and avatar selection
   const handleSelectBackground = async (file: File) => {
@@ -119,9 +103,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
           )}
 
           <div className="flex flex-col items-center w-full lg:flex-row">
-            {!isLoadingNumOfFriends ? (
+            {!numberOfFriendsFetching ? (
               <Text sz="md-2" weight="semibold" className="text-[var(--text-color)] opacity-70">
-                {numberOfFriends > 0
+                {numberOfFriends && numberOfFriends > 0
                   ? numberOfFriends + " " + t("user:profileHeader.friendsCount")
                   : t("user:profileHeader.noFriendsCount")}
               </Text>
