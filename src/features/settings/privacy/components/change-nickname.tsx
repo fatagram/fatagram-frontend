@@ -1,42 +1,48 @@
-import { FC, useEffect, useState } from "react";
+import { FC, useState } from "react";
 import { Skeleton, Text } from "@/components/atoms";
 import EditableField from "../../components/editable-field";
 import clsx from "clsx";
 import useLanguage from "@/utils/i18n";
-import ChangeNicknameDto, { ErrorCodes, ErrorKey } from "@/api/user/dto/change-nickname.dto";
-import { userInfoService } from "@/api/user/user-info.api";
+import { useGetUserProfile, useUpdateNickname } from "@/features/hooks/use-user-profile";
+import { ErrorCodes } from "@/api/user/dto/change-nickname.dto";
 
 interface ChangeNicknameProps {
-  isLoading: boolean;
-  nickname: string | undefined;
+  userId: string;
 }
 
-export const ChangeNickname: FC<ChangeNicknameProps> = ({ isLoading, nickname: n }) => {
+export const ChangeNickname: FC<ChangeNicknameProps> = ({ userId }) => {
   const t = useLanguage();
   // Nickname setting state
-  const [nickname, setNickname] = useState<string | undefined>();
   const [isEditNickname, setIsEditNickname] = useState<boolean>(false);
   const [isEditNicknameFailed, setIsEditNicknameFailed] = useState<boolean>(false);
   const [editNicknameFailedMessage, setEditNicknameFailedMessage] = useState<string>("");
 
-  useEffect(() => {
-    setNickname(n);
-  }, [n]);
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
+  const updateNicknameMutation = useUpdateNickname(userId);
 
-  // Handle change nickname
-  const handleChangeNickname = async (nickname: string | undefined) => {
-    const changeNickname: ChangeNicknameDto = {
-      nickname: nickname ?? "",
-    };
-    const response = await userInfoService.UpdateNickname(changeNickname);
-    if (response.success) {
-      setNickname(nickname);
-      setIsEditNickname(false);
-    } else {
-      setIsEditNicknameFailed(true);
-      const errorCode = response?.errorCode;
-      setEditNicknameFailedMessage(t(ErrorCodes[errorCode as ErrorKey]));
-    }
+  const handleSaveNickname = (newNickname: string | undefined) => {
+    if (!newNickname) return;
+
+    updateNicknameMutation.fetch(
+      { nickname: newNickname },
+      {
+        onSuccess: () => {
+          setIsEditNickname(false);
+          setIsEditNicknameFailed(false);
+        },
+        onError: (error) => {
+          const errorCode = error?.code;
+          if (errorCode && ErrorCodes[errorCode]) {
+            setEditNicknameFailedMessage(t(ErrorCodes[errorCode]));
+          } else {
+            setEditNicknameFailedMessage(
+              t("settings:account.personalInfo.errorMessages.changeNickname.unknownError"),
+            );
+          }
+          setIsEditNicknameFailed(true);
+        },
+      },
+    );
   };
 
   if (isLoading) {
@@ -46,10 +52,10 @@ export const ChangeNickname: FC<ChangeNicknameProps> = ({ isLoading, nickname: n
   return (
     <EditableField
       title={t("settings:account.personalInfo.nickname")}
-      value={nickname}
+      value={userProfile?.nickname}
       noDataValue={t("settings:account.personalInfo.noNickname")}
       placeholder={t("settings:account.personalInfo.nicknamePlaceholder")}
-      valueClassName={clsx(!nickname && "!opacity-50")}
+      valueClassName={clsx(!userProfile?.nickname && "!opacity-50")}
       btnChildren={
         <Text>
           <i className="fa-solid fa-pen mr-2"></i>
@@ -67,7 +73,7 @@ export const ChangeNickname: FC<ChangeNicknameProps> = ({ isLoading, nickname: n
         setIsEditNickname(false);
         setIsEditNicknameFailed(false);
       }}
-      onSaveClick={(e) => handleChangeNickname(e)}
+      onSaveClick={handleSaveNickname}
     />
   );
 };

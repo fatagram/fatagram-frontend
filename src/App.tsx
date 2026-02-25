@@ -1,7 +1,5 @@
 import "./i18n";
 import ContextTree from "./context-tree";
-import { Provider } from "react-redux";
-import store from "./store/store";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Main from "./main";
 
@@ -19,13 +17,11 @@ const queryClient = new QueryClient({
 
 function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userData?: any } }) {
   return (
-    <Provider store={store}>
-      <QueryClientProvider client={queryClient}>
-        <ContextTree authContext={authContext}>
-          <Main />
-        </ContextTree>
-      </QueryClientProvider>
-    </Provider>
+    <QueryClientProvider client={queryClient}>
+      <ContextTree authContext={authContext}>
+        <Main />
+      </ContextTree>
+    </QueryClientProvider>
   );
 }
 

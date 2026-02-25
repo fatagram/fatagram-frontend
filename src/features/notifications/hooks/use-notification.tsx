@@ -1,23 +1,14 @@
 import { notificationService } from "@/api/notification/notification.api";
-import { useQuery } from "@tanstack/react-query";
-import { useDispatch, useSelector } from "react-redux";
-import { loadNotifications } from "../stores/notification-slice";
+import { useSafeInfiniteQueryResult } from "@/hooks/use-safe-query";
+import { CursorQuery } from "@/types/query";
 import { useAuth } from "@/hooks/contexts/use-auth";
 
-export const useNotifications = () => {
-  const dispatch = useDispatch();
+export const useNotifications = (queryParams?: Omit<CursorQuery<string>, "cursor">) => {
   const { userId } = useAuth();
-  const { pageSize, cursorId } = useSelector((state: any) => state.notifications);
 
-  return useQuery({
-    queryKey: ["notifications", userId],
-    queryFn: async () => {
-      const res = await notificationService.getNotifications(cursorId, pageSize);
-      await new Promise((resolve) => setTimeout(resolve, 100000));
-      dispatch(loadNotifications(res.data as any));
-      return res.data;
-    },
-    staleTime: 1000 * 60 * 5,
+  return useSafeInfiniteQueryResult({
+    queryKey: ["notifications", userId, queryParams],
+    fn: (cursor?: string) => notificationService.getNotifications({ ...queryParams, cursor }),
     enabled: !!userId,
   });
 };

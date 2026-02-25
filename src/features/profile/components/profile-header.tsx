@@ -1,5 +1,4 @@
-import React, { useEffect, useRef, useState } from "react";
-import { friendshipService } from "@/api/user/friendship.api";
+import React, { useRef } from "react";
 import ProfileBackground from "./profile-background";
 import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
@@ -10,12 +9,10 @@ import { useProfilePage } from "../hooks/use-profile-page";
 import useLanguage from "@/utils/i18n";
 import { Button, Text, Skeleton } from "@/components/atoms";
 import {
-  useGetUserAvatar,
-  useGetUserBackground,
   useGetUserProfile,
+  useSelectAvatar,
+  useSelectBackground,
 } from "@/features/hooks/use-user-profile";
-import { useSelectBackground } from "../hooks/use-select-background";
-import { useSelectAvatar } from "../hooks/use-select-avatar";
 import { useGetNumberOfFriends } from "@/features/hooks/use-friend";
 
 export type ProfileHeaderProps = {
@@ -40,24 +37,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
   const t = useLanguage();
   const navigate = useNavigate();
   const { targetId, isOwner } = useProfilePage();
-  const { isAuthenticated } = useAuth();
+  const { userId, isAuthenticated } = useAuth();
 
-  const { data: _userProfile, isLoading, isFetching } = useGetUserProfile(targetId);
-  const {
-    data: background,
-    isLoading: isLoadingBackground,
-    isFetching: isFetchingBackground,
-  } = useGetUserBackground(targetId);
-
-  const { fetch: fetchBackground } = useSelectBackground(targetId);
-
-  const {
-    data: avatar,
-    isLoading: isLoadingAvatar,
-    isFetching: isFetchingAvatar,
-  } = useGetUserAvatar(targetId);
-
-  const { fetch: fetchAvatar } = useSelectAvatar(targetId);
+  const { data: userProfile, isLoading, isFetching } = useGetUserProfile(targetId);
+  const { fetch: fetchBackground } = useSelectBackground(userId!);
+  const { fetch: fetchAvatar } = useSelectAvatar(userId!);
 
   const { data: numberOfFriends, isFetching: numberOfFriendsFetching } =
     useGetNumberOfFriends(targetId);
@@ -75,16 +59,16 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
     <div className={clsx("relative w-full flex flex-col items-center", className)}>
       <div className="relative w-full mt-2">
         <ProfileBackground
-          isLoading={isLoadingBackground || isFetchingBackground}
-          background={background?.background ?? ""}
+          isLoading={isLoading || isFetching}
+          background={userProfile?.background ?? ""}
           handleSelectBackground={handleSelectBackground}
         />
       </div>
 
       <div className="-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3">
         <ProfileAvatar
-          isLoading={isLoadingAvatar || isFetchingAvatar}
-          avatar={avatar?.avatar ?? ""}
+          isLoading={isLoading || isFetching}
+          avatar={userProfile?.avatar ?? ""}
           handleSelectAvatar={handleSelectAvatar}
           ref={avtRef}
         />
@@ -93,10 +77,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
             <Skeleton sz="sm-3" className="w-56" />
           ) : (
             <Text sz="xl-1" weight="bold" className="lg:text-left text-center break-words">
-              {_userProfile?.fullName}
-              {_userProfile?.nickname && (
+              {userProfile?.fullName}
+              {userProfile?.nickname && (
                 <Text sz="lg-3" weight="light" className="lg:text-left text-center lg:ml-2">
-                  ({_userProfile?.nickname})
+                  ({userProfile?.nickname})
                 </Text>
               )}
             </Text>

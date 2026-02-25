@@ -34,7 +34,7 @@ apiClient.interceptors.response.use(
       try {
         // Refresh token
         const refreshResult = await axios.post(
-          `${appConfig.apiUrl}/api/auth/refreshToken`,
+          `${appConfig.apiUrl}/api/v1/auth/refreshToken`,
           {},
           {
             withCredentials: true,
@@ -66,7 +66,7 @@ apiClientFormData.interceptors.response.use(
       try {
         // Refresh token
         const refreshResult = await axios.post(
-          `${appConfig.apiUrl}/api/auth/refresh-token`,
+          `${appConfig.apiUrl}/api/v1/auth/refreshToken`,
           {},
           {
             withCredentials: true,

@@ -1,25 +1,32 @@
-import { useDispatch } from "react-redux";
 import { useNotificationHub } from "../hubs/use-notification-hub";
-import { NotificationDto } from "@/api/notification/dto/notification.dto";
-import { addNewNotification, deleteNotification } from "../stores/notification-slice";
+import { NotificationDto, NotificationType } from "@/api/notification/dto/notification.dto";
 import { useCallback } from "react";
 import { useToast } from "@/hooks/contexts/use-toast";
+import { useNotificationCacheMutations, useUnreadCount } from "../hooks/use-notification-store";
 
 export function NotificationListener() {
-  const dispatch = useDispatch();
   const { pushToast } = useToast();
+  const { incrementUnread, decrementUnread } = useUnreadCount();
+  const { addNotificationToCache, removeNotificationFromCache } = useNotificationCacheMutations();
 
   const handleNewNotification = useCallback(
     (data: NotificationDto) => {
-      // console.log("New notification received:", data);
-      if (data.type === "CancelNotification") {
-        // If notification type is CancelNotification, remove it from the list
-        // setNotification(prevNotifications => prevNotifications.filter(n => n.id !== data.data.noticationId));
-        dispatch(deleteNotification(data.data.noticationId));
+      console.log("Received CancelNotification with data:", data);
+
+      if (data.type === NotificationType.CancelNotification) {
+        const notificationIdToCancel = data.data.notificationId;
+        console.log("12 Canceling notification with ID:", notificationIdToCancel);
+
+        // Remove from notification list AND decrement unread count
+        removeNotificationFromCache(notificationIdToCancel);
+        decrementUnread();
         return;
-      } else {
-        dispatch(addNewNotification(data));
       }
+
+      // Add to notification list AND increment unread count
+      addNotificationToCache(data);
+      incrementUnread();
+
       pushToast({
         id: data.id,
         type: "notification",
@@ -29,7 +36,13 @@ export function NotificationListener() {
         duration: 5000,
       });
     },
-    [dispatch, pushToast],
+    [
+      pushToast,
+      addNotificationToCache,
+      removeNotificationFromCache,
+      incrementUnread,
+      decrementUnread,
+    ],
   );
 
   useNotificationHub(handleNewNotification);

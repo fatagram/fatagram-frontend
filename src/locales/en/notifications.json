@@ -4,8 +4,14 @@
     "no-notifications": "No notifications available.",
     "has-a-friend-request": "has sent you a friend request.",
     "accepted-friend-request": "has accepted your friend request.",
+    "canceled-friend-request": "has canceled the friend request.",
+    "system-notification": "System notification.",
+    "default-notification": "sent you a notification.",
     "accepted": "Accepted friend request.",
     "declined": "Declined friend request.",
-    "showMore": "Show more"
+    "showMore": "Show more",
+    "mark-all-read": "Mark all as read",
+    "delete-all": "Delete all",
+    "open-notifications": "Open notifications"
   }
 }

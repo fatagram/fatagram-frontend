@@ -1,15 +1,19 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
-import React, { use, useEffect } from "react";
+import React from "react";
 import { useTranslation } from "react-i18next";
 import NotificationFactory from "../notification-factory";
 import { useNavigate } from "react-router";
 import { notificationService } from "@/api/notification/notification.api";
 import NotificationSkeletonLoading from "../notification-items/notification.skeleton";
-import { useDispatch, useSelector } from "react-redux";
-import { markAsRead, setShowFull } from "../../stores/notification-slice";
-import { Text, Button } from "@/components/atoms";
+import { Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useNotifications } from "../../hooks/use-notification";
+import InfiniteScroll from "@/components/utils/infinite-scroll";
+import {
+  useNotificationCacheMutations,
+  useNotificationUiState,
+  useUnreadCount,
+} from "../../hooks/use-notification-store";
 
 type NotificationMenuProps = {
   className?: string;
@@ -19,27 +23,33 @@ type NotificationMenuProps = {
 
 const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick, ref }) => {
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { isLoading, refetch } = useNotifications();
+  const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
+    limit: 20,
+  });
 
-  const { notifications, isInNotificationPage, isFull, isShowFull } = useSelector(
-    (state: any) => state.notifications,
-  );
+  const { isInNotificationPage } = useNotificationUiState();
+  const { unreadCount, setUnreadCount } = useUnreadCount();
+  const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } =
+    useNotificationCacheMutations();
 
-  const loaderRef = React.useRef<HTMLLIElement>(null);
+  const notifications = React.useMemo(() => {
+    return data?.pages.flatMap((page) => page.data) || [];
+  }, [data]);
 
-  useEffect(() => {
-    if (!loaderRef.current || isFull) return;
+  const handleMarkAllAsRead = async () => {
+    markAllAsReadInCache();
+    setUnreadCount(0);
+    await notificationService.markAllAsRead();
+    invalidateNotifications();
+  };
 
-    const observer = new IntersectionObserver(async ([entry]) => {
-      if (entry.isIntersecting) {
-        await refetch();
-      }
-    });
-    observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [loaderRef, isShowFull, isFull, refetch]);
+  const handleDeleteAll = async () => {
+    clearAllFromCache();
+    setUnreadCount(0);
+    await notificationService.deleteAllNotifications();
+    invalidateNotifications();
+  };
 
   return (
     <div
@@ -50,78 +60,75 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
       )}
       ref={ref}
     >
-      <Text sz="lg-1" weight="bold" className="px-2 pt-2">
-        {t("notifications:notifications.title")}
-      </Text>
-      {notifications && notifications.length > 0 ? (
-        <ul className="relative py-1 overflow-y-scroll scrollbar-none">
-          {isShowFull
-            ? notifications.map((notification: NotificationDto) => (
-                <li
-                  key={notification.id}
-                  className={clsx(
-                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
-                    "transition-all duration-200 hover:scale-[1.01]",
-                    "active:scale-[0.99]",
-                  )}
-                >
-                  <NotificationFactory
-                    notificationDto={notification}
-                    onClick={async () => {
-                      navigate(notification.link || "/");
-                      dispatch(markAsRead(notification.id));
-                      await notificationService.markAsRead(notification.id);
-                      onClick?.();
-                    }}
-                  />
-                </li>
-              ))
-            : notifications.slice(0, 5).map((notification: NotificationDto) => (
-                <li
-                  key={notification.id}
-                  className={clsx(
-                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
-                    "transition-all duration-200 hover:scale-[1.01]",
-                    "active:scale-[0.99]",
-                  )}
-                >
-                  <NotificationFactory
-                    notificationDto={notification}
-                    onClick={async () => {
-                      navigate(notification.link || "/");
-                      dispatch(markAsRead(notification.id));
-                      await notificationService.markAsRead(notification.id);
-                      onClick?.();
-                    }}
-                  />
-                </li>
-              ))}
-          {isLoading &&
-            [...Array(2)].map((_, i) => (
-              <li key={`skeleton-${i}`} className="mt-1">
-                <NotificationSkeletonLoading />
-              </li>
-            ))}
-          {!isShowFull ? (
-            <li className="mt-2">
-              <Button
+      <div className="flex items-center justify-between px-2 pt-2">
+        <Text sz="lg-1" weight="bold">
+          {t("notifications:notifications.title")}
+        </Text>
+        {notifications.length > 0 && (
+          <div className="flex items-center gap-3">
+            {unreadCount > 0 && (
+              <Text
                 sz="sm-1"
-                variant="fourth"
-                className="w-full"
-                onClick={() => {
-                  dispatch(setShowFull(true));
-                }}
+                color="secondary"
+                className="cursor-pointer hover:underline"
+                onClick={handleMarkAllAsRead}
               >
-                {t("notifications:notifications.showMore")}
-              </Button>
-            </li>
-          ) : (
-            <li ref={loaderRef} />
-          )}
-        </ul>
+                {t("notifications:notifications.mark-all-read")}
+              </Text>
+            )}
+            <Text
+              sz="sm-1"
+              color="secondary"
+              className="cursor-pointer hover:underline"
+              onClick={handleDeleteAll}
+            >
+              {t("notifications:notifications.delete-all")}
+            </Text>
+          </div>
+        )}
+      </div>
+      {notifications.length > 0 ? (
+        <div className="relative py-1 overflow-y-scroll scrollbar-none max-h-[500px]">
+          <InfiniteScroll
+            itemInRow={1}
+            items={notifications}
+            onLoadMore={fetchNextPage}
+            className="gap-0"
+            itemTemplate={(item: any) => {
+              const notification = item as NotificationDto;
+              return (
+                <div
+                  key={notification.id}
+                  className={clsx(
+                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
+                    "transition-all duration-200 hover:scale-[1.01]",
+                    "active:scale-[0.99]",
+                  )}
+                >
+                  <NotificationFactory
+                    notificationDto={notification}
+                    onClick={async () => {
+                      navigate(notification.link || "/");
+                      if (!notification.isRead) {
+                        markAsReadInCache(notification.id);
+                        setUnreadCount((prev: number) => Math.max(prev - 1, 0));
+                      }
+                      await notificationService.markAsRead(notification.id);
+                      onClick?.();
+                    }}
+                  />
+                </div>
+              );
+            }}
+            hasMore={!!hasNextPage}
+            isLoading={isFetching}
+            loadingSkeleton={<NotificationSkeletonLoading />}
+            numberOfSkeletons={2}
+          />
+        </div>
       ) : (
         <>
-          {!isLoading ? (
+          {!isFetching ? (
             <div className="flex items-center justify-center h-40">
               {t("notifications:notifications.no-notifications")}
             </div>
@@ -140,7 +147,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
       {!isInNotificationPage && (
         <div className="absolute right-4" onClick={() => navigate("/notifications")}>
           <Text sz="sm-1" color="secondary" className={clsx("cursor-pointer underline")}>
-            Mở thông báo
+            {t("notifications:notifications.open-notifications")}
           </Text>
         </div>
       )}

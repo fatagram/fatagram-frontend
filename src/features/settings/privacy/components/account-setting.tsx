@@ -1,14 +1,14 @@
 import clsx from "clsx";
 import EditableField from "@/features/settings/components/editable-field";
 import { Skeleton, Text } from "@/components/atoms";
-import { userProfileService } from "@/api/user/user-profile.api";
-import React, { useEffect } from "react";
-import { useLocation, useNavigate } from "react-router-dom";
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import Card from "@/components/molecules/card";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import useLanguage from "@/utils/i18n";
+import { useAuth } from "@/hooks/contexts/use-auth";
 import { ChangeUrlName } from "./change-url-name";
 import { ChangeNickname } from "./change-nickname";
+import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 
 type AccountSettingProps = {
   className?: string;
@@ -16,31 +16,16 @@ type AccountSettingProps = {
 
 const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
   const t = useLanguage();
-  const [fullName, setFullName] = React.useState<string>("");
-  const [urlName, setUrlName] = React.useState<string | undefined>();
-  const [nickname, setNickname] = React.useState<string | undefined>();
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
-
+  // const [fullName, setFullName] = React.useState<string>("");
+  // const [urlName, setUrlName] = React.useState<string | undefined>();
+  // const [nickname, setNickname] = React.useState<string | undefined>();
+  // const [isLoading, setIsLoading] = React.useState<boolean>(true);
   const { userId } = useAuth();
+  const { data: userProfile, isLoading } = useGetUserProfile(userId!);
 
   const navigate = useNavigate();
-  const location = useLocation();
+  // const location = useLocation();
   const handleChangeName = () => navigate("name");
-
-  // Fetch user profile
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const _userId: string = userId ?? "";
-      const response = await userProfileService.getProfile(_userId, "fullName,urlName,nickname");
-      if (response.success) {
-        setFullName(response.data.infos.fullName);
-        setUrlName(response.data.infos.urlName);
-        setNickname(response.data.infos.nickname);
-      }
-      setIsLoading(false);
-    };
-    fetchProfile();
-  }, [userProfileService, location.key, userId]);
 
   return (
     <div className={clsx(className)}>
@@ -50,18 +35,18 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
         ) : (
           <EditableField
             title={t("settings:account.personalInfo.yourName")}
-            value={fullName}
+            value={userProfile?.fullName}
             btnChildren={
               <Text>
-                <i className="fa-solid fa-pen mr-2"></i>{" "}
+                <i className="fa-solid fa-pen mr-2" />{" "}
                 {t("settings:account.personalInfo.changeButton")}
               </Text>
             }
             onChangeClick={handleChangeName}
           />
         )}
-        <ChangeUrlName isLoading={isLoading} urlName={urlName} />
-        <ChangeNickname isLoading={isLoading} nickname={nickname} />
+        <ChangeUrlName userId={userId!} />
+        <ChangeNickname userId={userId!} />
       </Card>
     </div>
   );

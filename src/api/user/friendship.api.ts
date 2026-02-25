@@ -1,86 +1,42 @@
-import { TimeUnit } from "@/types/time-unit";
 import { FriendsDto } from "./dto/friend.dto";
 import { CursorResult, Result } from "../common/result";
-import { apiClient } from "../common/axiosInterceptor";
-import { ApiResponse, CursorResponse } from "../common/apiResponse";
-import { handleApiError } from "../common/handleApiError";
+import { apiClient } from "../common/axios-interceptor";
+import { ApiResponse, CursorResponse } from "../common/api-response";
+import { handleApiError } from "../common/handle-api-error";
 import { FriendRequest } from "@/types/entities/friend-request.type";
 import { CursorQuery } from "@/types/query";
+import { apiGet, apiPost, apiDelete, buildApiPath } from "../common/api-helpers";
 
-const PREFIX = `/api/friendship`;
+const PREFIX = buildApiPath("/friendship");
 
 export class FriendshipService {
   async GetFriendshipStatus(targetId: string): Promise<Result<{ status: string }>> {
-    try {
-      const res = await apiClient.get(`${PREFIX}/status/${targetId}`);
-      const response = res.data as ApiResponse<{ status: string }>;
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    return apiGet(`${PREFIX}/status/${targetId}`);
   }
 
   async SendAddFriendRequest(receiverId: string): Promise<Result<any>> {
-    try {
-      const res = await apiClient.post(`${PREFIX}/add/${receiverId}`);
-      const response = res.data as ApiResponse<any>;
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX}/add/${receiverId}`);
   }
 
   async CancelAddFriendRequest(senderId: string): Promise<Result<any>> {
-    try {
-      const res = await apiClient.delete(`${PREFIX}/cancel/${senderId}`);
-      const response = res.data as ApiResponse<any>;
-
-      // console.log(response);
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    return apiDelete(`${PREFIX}/cancel/${senderId}`);
   }
 
   async AcceptAddFriendRequest(senderId: string): Promise<Result<any>> {
-    try {
-      const res = await apiClient.post(`${PREFIX}/accept/${senderId}`);
-      const response = res.data as ApiResponse<any>;
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX}/accept/${senderId}`);
   }
 
   async DeclineAddFriendRequest(requesterId: string): Promise<Result<any>> {
-    try {
-      const res = await apiClient.delete(`${PREFIX}/decline/${requesterId}`);
-      const response = res.data as ApiResponse<any>;
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    return apiDelete(`${PREFIX}/decline/${requesterId}`);
   }
 
   async Unfriend(friendId: string): Promise<Result<any>> {
-    try {
-      const res = await apiClient.delete(`${PREFIX}/unfriend/${friendId}`);
-      const response = res.data as ApiResponse<any>;
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    return apiDelete(`${PREFIX}/unfriend/${friendId}`);
   }
 
   async GetNumberOfFriends(targetId: string): Promise<Result<number>> {
-    try {
-      console.log("GetNumberOfFriends called with targetId:", targetId);
-      const res = await apiClient.get(`${PREFIX}/count/${targetId}`);
-      const response = res.data as ApiResponse<number>;
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    console.log("GetNumberOfFriends called with targetId:", targetId);
+    return apiGet(`${PREFIX}/count/${targetId}`);
   }
 
   async GetFriendRequests(
@@ -90,6 +46,8 @@ export class FriendshipService {
       const res = await apiClient.get(`${PREFIX}/requests`, {
         params: query,
       });
+      // Delay for testing
+      await new Promise((resolve) => setTimeout(resolve, 3000));
       const resp = res.data as CursorResponse<string, FriendRequest>;
       return {
         success: true,

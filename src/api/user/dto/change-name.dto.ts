@@ -1,5 +1,6 @@
 export default interface ChangeNameDto {
   firstName: string;
+  middleName?: string | null;
   lastName: string;
 }
 

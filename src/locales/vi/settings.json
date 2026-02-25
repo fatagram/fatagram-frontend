@@ -33,13 +33,15 @@
       "changeNameForm": {
         "title": "Tên",
         "firstName": "Họ",
+        "middleName": "Tên đệm",
         "lastName": "Tên",
         "note": "Lưu ý",
         "noteText1": "Chỉ có thể thay đổi tên của bạn sau mỗi",
         "day": "ngày",
         "noteText2": "Tên của bạn phải nhiều hơn 3 ký tự và ít hơn 36 ký tự",
         "noteText3": "Tên của bạn không được chứa các ký tự đặc biệt như",
-        "acceptButton": "Xác nhận"
+        "acceptButton": "Xác nhận",
+        "submitting": "Đang xử lý..."
       },
       "errorMessages": {
         "changeUrlName": {
@@ -57,6 +59,10 @@
           "lastNameNotCorrectFormat": "Tên không đúng định dạng",
           "unknownError": "Đã xảy ra lỗi không xác định",
           "internalServerError": "Lỗi máy chủ nội bộ"
+        },
+        "changeNickname": {
+          "nicknameTooLong": "Biệt danh quá dài",
+          "unknownError": "Đã xảy ra lỗi không xác định"
         }
       }
     }

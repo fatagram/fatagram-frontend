@@ -20,8 +20,6 @@ export function timeDistance(date: Date, now: Date = new Date()) {
       const prev = i === 0 ? 1 : intervals[i - 1][0];
       const count = Math.floor(seconds / prev);
 
-      console.log("Seconds:", seconds, "Prev:", prev, "Count:", count);
-
       return {
         count,
         unit: intervals[i][1] + (count > 1 ? ":other" : ":one"),

@@ -1,19 +1,13 @@
-import { apiClient } from "../common/axiosInterceptor";
 import { Result } from "../common/result";
-import { handleApiError } from "../common/handleApiError";
+import { apiPut, buildApiPath } from "../common/api-helpers";
 
-const PREFIX = `/api`;
+const PREFIX = buildApiPath("");
 
 export class UserConfigService {
   async changeLanguage(dto: ChangeLanguageDto): Promise<Result<any>> {
-    try {
-      const res = await apiClient.put(`${PREFIX}/userConfig/language`, {
-        LanguageCode: dto.LanguageCode,
-      });
-      return { success: true };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPut(`${PREFIX}/userConfig/language`, {
+      LanguageCode: dto.LanguageCode,
+    });
   }
 }
 

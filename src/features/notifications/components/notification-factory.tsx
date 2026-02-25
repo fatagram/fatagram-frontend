@@ -1,5 +1,10 @@
-import { NotificationDefault, NotificationDto } from "@/api/notification/dto/notification.dto";
+import {
+  NotificationDefault,
+  NotificationDto,
+  NotificationType,
+} from "@/api/notification/dto/notification.dto";
 import NewFriendRequestCard from "./notification-items/new-friend-request";
+import CanceledFriendRequest from "./notification-items/canceled-friend-request";
 import BaseNotification from "./notification-items/base-notification";
 
 // NotificationFactoryProps defines the props for the NotificationFactory component
@@ -14,10 +19,16 @@ const NotificationFactory: React.FC<NotificationFactoryProps> = ({
   onClick = () => {},
 }) => {
   switch (notificationDto.type) {
-    case "NewFriendRequest":
+    case NotificationType.NewFriendRequest:
       return <NewFriendRequestCard notificationDto={notificationDto} onClick={onClick} />;
 
-    case "FriendRequestAccepted": // Friend request accepted notification
+    case NotificationType.FriendRequestAccepted:
+      return <BaseNotification notificationDto={notificationDto} onClick={onClick} />;
+
+    case NotificationType.FriendRequestCanceled:
+      return <CanceledFriendRequest notificationDto={notificationDto} onClick={onClick} />;
+
+    case NotificationType.System:
       return <BaseNotification notificationDto={notificationDto} onClick={onClick} />;
 
     default:

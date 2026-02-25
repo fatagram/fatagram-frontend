@@ -9,7 +9,7 @@ export function useUserId(userParam: string) {
         const response = await userProfileService.getUserId(userParam);
         if (response.success) {
           return {
-            userId: response.data?.id,
+            userId: response.data,
             userExist: true,
           };
         }

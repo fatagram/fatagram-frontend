@@ -27,8 +27,6 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
 
   const timeDist = time ? timeDistance(time) : { text: "" };
 
-  console.log("Time Distance:", time);
-
   const handleNavigate = () => {
     navigate(path);
   };

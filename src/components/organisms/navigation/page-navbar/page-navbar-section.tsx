@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
-import Transition, { AnimationLib } from "@/components/utils/transition";
 import HeightTransition from "@/components/utils/height-transition";
 
 type PageNavbarSectionProps = {

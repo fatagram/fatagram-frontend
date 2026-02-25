@@ -18,6 +18,7 @@ type EditableTextAreaProps = {
   btnChildren?: React.ReactNode;
   noDataValue?: string;
   canEdit?: boolean;
+  isLoading?: boolean; // Loading state for save button
   onChangeClick?: () => void;
   onSaveClick?: (value: string | undefined) => void;
   onCancelClick?: () => void;
@@ -35,6 +36,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   errorMessage,
   noDataValue,
   canEdit = true,
+  isLoading = false,
   onChangeClick,
   onSaveClick,
   onCancelClick,
@@ -83,7 +85,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
             {editableMode === "inline" && isEdit ? (
               <div className="animate-fade-in gap-1 flex w-full">
                 <Button
-                  disabled={value === inputValue}
+                  disabled={value === inputValue || isLoading}
                   sz="sm-1"
                   variant="primary"
                   onClick={() => {

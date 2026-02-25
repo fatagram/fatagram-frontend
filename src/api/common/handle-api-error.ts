@@ -1,4 +1,4 @@
-import { ApiResponse } from "./apiResponse";
+import { ApiResponse } from "./api-response";
 import { Result } from "./result";
 
 export const handleApiError = (error: any): Result<any> => {

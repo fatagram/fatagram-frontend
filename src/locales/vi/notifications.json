@@ -4,8 +4,14 @@
     "no-notifications": "Không có thông báo nào.",
     "has-a-friend-request": "đã gửi cho bạn lời mời kết bạn.",
     "accepted-friend-request": "đã chấp nhận lời mời kết bạn.",
+    "canceled-friend-request": "đã hủy lời mời kết bạn.",
+    "system-notification": "Thông báo hệ thống.",
+    "default-notification": "đã gửi cho bạn một thông báo.",
     "accepted": "Đã chấp nhận lời mời kết bạn.",
     "declined": "Đã từ chối lời mời kết bạn.",
-    "showMore": "Hiển thị thêm"
+    "showMore": "Hiển thị thêm",
+    "mark-all-read": "Đánh dấu tất cả đã đọc",
+    "delete-all": "Xóa tất cả",
+    "open-notifications": "Mở thông báo"
   }
 }

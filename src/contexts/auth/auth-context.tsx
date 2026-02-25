@@ -1,8 +1,6 @@
 import { authService } from "@/api/auth/auth.api";
 import { userProfileService } from "@/api/user/user-profile.api";
 import React, { createContext, FC, useCallback, useEffect, useMemo, useReducer } from "react";
-import { useDispatch } from "react-redux";
-import { resetState } from "@/features/notifications/stores/notification-slice";
 import { useQueryClient } from "@tanstack/react-query";
 import { AuthState, initialAuthStatus } from "@/types/auth-state";
 import { LocaleKeys } from "@/hooks/use-trans";
@@ -92,7 +90,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({
   });
   // console.log("AuthContext", userData);
   // const { changeLanguage } = useLanguage();
-  const _dispatch = useDispatch();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
@@ -144,8 +141,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
 
   const clearUserData = useCallback(() => {
     queryClient.clear();
-    _dispatch(resetState());
-  }, [queryClient, _dispatch]);
+  }, [queryClient]);
 
   const setUrlName = useCallback((urlName: string | undefined) => {
     dispatch({

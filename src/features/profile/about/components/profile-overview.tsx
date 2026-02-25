@@ -1,32 +1,17 @@
-import { userInfoService } from "@/api/user/user-info.api";
 import { Button, Text } from "@/components/atoms";
-import { useEffect, useState } from "react";
 import ProfileAboutSection from "./profile-about-section";
 import clsx from "clsx";
 import { useProfilePage } from "../../hooks/use-profile-page";
+import { useGetUserProfileDetails } from "@/features/hooks/use-user-profile";
 
 type ProfileOverviewProps = {};
 
 const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
-  const [emails, setEmails] = useState<string[]>([]);
-  const [phoneNumbers, setPhoneNumbers] = useState<string[]>([]);
-
   const { targetId, isOwner } = useProfilePage();
+  const { data: userProfile } = useGetUserProfileDetails(targetId ?? "");
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await userInfoService.GetUserInfoOverview(targetId ?? "");
-      if (response) {
-        if (response.data?.email) {
-          setEmails([...emails, response.data.email]);
-        }
-        if (response.data?.phone) {
-          setPhoneNumbers([...phoneNumbers, response.data.phone]);
-        }
-      }
-    };
-    fetchData();
-  }, []);
+  const emails = userProfile?.email ? [userProfile.email] : [];
+  const phoneNumbers = userProfile?.phone ? [userProfile.phone] : [];
 
   return (
     <div>

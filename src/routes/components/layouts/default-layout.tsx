@@ -6,7 +6,6 @@ import { useAuth } from "@/hooks/contexts/use-auth";
 import { useDialog } from "@/hooks/contexts/use-dialog";
 import { useCallback, useEffect } from "react";
 import { Outlet } from "react-router-dom";
-import LoadingPage from "@/pages/loading/loading-page";
 
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
@@ -27,18 +26,14 @@ const DefaultLayout = () => {
   }, [openDialog]);
 
   useEffect(() => {
-    if (isAuthenticated === true) {
+    if (isAuthenticated) {
       closeDialog();
-    } else if (isAuthenticated === false) {
+    } else {
       openLoginOverlay();
     }
 
     return () => closeDialog();
   }, [isAuthenticated, closeDialog, openLoginOverlay]);
-
-  if (isAuthenticated === null) {
-    return <LoadingPage />;
-  }
 
   return (
     <Layout>

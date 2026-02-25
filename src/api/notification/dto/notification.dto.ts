@@ -1,4 +1,19 @@
-import { TimeUnit } from "@/types/time-unit";
+// ---- Enums ----
+
+export enum NotificationType {
+  NewFriendRequest = "NewFriendRequest",
+  FriendRequestAccepted = "FriendRequestAccepted",
+  FriendRequestCanceled = "FriendRequestCanceled",
+  System = "System",
+  CancelNotification = "CancelNotification",
+}
+
+export enum ActorType {
+  User = "User",
+  System = "System",
+  Group = "Group",
+  Page = "Page",
+}
 
 export interface NotificationDto {
   id: string;
@@ -6,19 +21,24 @@ export interface NotificationDto {
   type: string;
   data: Record<string, string>;
   actorId: string;
+  actorType?: ActorType;
   actorName: string;
   actorImageUrl?: string;
   link: string;
   content?: string;
   isRead: boolean;
-  timeDistance: {
-    value: number;
-    unit: TimeUnit;
-  };
+  createdAt: string;
 }
 
 export interface NotificationsDto {
   notifications: NotificationDto[];
+  unreadCount: number;
+}
+
+export interface NotificationResponse {
+  data: NotificationDto[];
+  nextCursor?: string;
+  hasNext: boolean;
   unreadCount: number;
 }
 
@@ -33,8 +53,5 @@ export const NotificationDefault: NotificationDto = {
   link: "/",
   content: "You have a new notification",
   isRead: true,
-  timeDistance: {
-    value: 0,
-    unit: TimeUnit.Miliseconds,
-  },
+  createdAt: new Date().toISOString(),
 };

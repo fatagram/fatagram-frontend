@@ -1,4 +1,5 @@
 import { useAuth } from "@/hooks/contexts/use-auth";
+import LoadingPage from "@/pages/loading/loading-page";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 
@@ -14,5 +15,5 @@ export default function GoogleCallbackPage() {
     loginWithGoogle(code);
   }, []);
 
-  return null;
+  return <LoadingPage />;
 }

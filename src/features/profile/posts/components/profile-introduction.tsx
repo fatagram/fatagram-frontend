@@ -1,7 +1,6 @@
-import { userInfoService } from "@/api/user/user-info.api";
-import { userProfileService } from "@/api/user/user-profile.api";
+import { useGetUserProfileDetails, useUpdateProfile } from "@/features/hooks/use-user-profile";
 import Card from "@/components/molecules/card";
-import React, { useEffect, useMemo } from "react";
+import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import EditableTextArea from "@/features/settings/components/editable-textarea";
 import clsx from "clsx";
@@ -14,49 +13,48 @@ interface ProfileIntroductionProps {
 }
 
 const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) => {
-  const [bio, setBio] = React.useState<string | undefined>(undefined);
   const [isEditBio, setIsEditBio] = React.useState<boolean>(false);
-  const [description, setDescription] = React.useState<string | undefined>(undefined);
   const [isEditDescription, setIsEditDescription] = React.useState<boolean>(false);
-  const [email, setEmail] = React.useState<string | undefined>(undefined);
-  const [phone, setPhone] = React.useState<string | undefined>(undefined);
 
   const { t } = useTranslation() as { t: (key: string) => string };
 
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userId } = useAuth();
   const { isOwner, targetId } = useProfilePage();
+
+  const updateProfileMutation = useUpdateProfile(userId!);
 
   const canEdit = useMemo(() => isAuthenticated && isOwner, [isAuthenticated, isOwner]);
 
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await userInfoService.GetUserInfoOverview(targetId ?? "");
-      if (response) {
-        setBio(response.data?.bio);
-        setDescription(response.data?.description);
-        setEmail(response.data?.email);
-        setPhone(response.data?.phone);
-      }
-    };
-    fetchData();
-  }, [targetId]);
+  const { data: userProfile } = useGetUserProfileDetails(targetId ?? "");
 
   // Handle save bio
-  const handleSaveBio = async (value: string | undefined) => {
-    var res = await userProfileService.UpdateProfile({ bio: value });
-    if (res.success) {
-      setBio(value);
-      setIsEditBio(false);
-    }
+  const handleSaveBio = (value: string | undefined) => {
+    updateProfileMutation.fetch(
+      { bio: value },
+      {
+        onSuccess: () => {
+          setIsEditBio(false);
+        },
+        onError: () => {
+          console.error("Failed to update bio");
+        },
+      },
+    );
   };
 
   // Handle save description
-  const handleSaveDescription = async (value: string | undefined) => {
-    var res = await userProfileService.UpdateProfile({ description: value });
-    if (res.success) {
-      setDescription(value);
-      setIsEditDescription(false);
-    }
+  const handleSaveDescription = (value: string | undefined) => {
+    updateProfileMutation.fetch(
+      { description: value },
+      {
+        onSuccess: () => {
+          setIsEditDescription(false);
+        },
+        onError: () => {
+          console.error("Failed to update description");
+        },
+      },
+    );
   };
 
   return (
@@ -65,16 +63,17 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
       className={clsx("flex-col gap-4", className)}
       titleClassName="text-2xl font-bold !mb-0"
     >
-      {(bio || canEdit) && (
+      {(userProfile?.bio || canEdit) && (
         <EditableTextArea
           editableMode="inline"
           isEdit={isEditBio}
           placeholder={t("user:profilePosts.bioPlaceholder")}
-          value={bio}
+          value={userProfile?.bio}
           onChangeClick={() => setIsEditBio(true)}
           onSaveClick={(value) => handleSaveBio(value)}
           valueClassName="text-[1.2rem] font-semibold"
           canEdit={canEdit || false}
+          isLoading={updateProfileMutation.isFetching}
           onCancelClick={() => setIsEditBio(false)}
           btnChildren={
             <Text sz="sm-2">
@@ -84,19 +83,20 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
         />
       )}
 
-      {description && (
+      {userProfile?.description && (
         <Text sz="lg-1" weight="bold">
           {t("user:profilePosts.description")}
         </Text>
       )}
-      {(description || canEdit) && (
+      {(userProfile?.description || canEdit) && (
         <EditableTextArea
           editableMode="inline"
           isEdit={isEditDescription}
           placeholder={t("user:profilePosts.descriptionPlaceholder")}
-          value={description}
+          value={userProfile?.description}
           canEdit={canEdit || false}
           valueClassName="text-[1.1rem]"
+          isLoading={updateProfileMutation.isFetching}
           onChangeClick={() => setIsEditDescription(true)}
           onSaveClick={(value) => handleSaveDescription(value)}
           onCancelClick={() => setIsEditDescription(false)}
@@ -108,16 +108,18 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
         />
       )}
 
-      {(bio || description) && <hr className="border-[var(--border-color)] w-full" />}
+      {(userProfile?.bio || userProfile?.description) && (
+        <hr className="border-[var(--border-color)] w-full" />
+      )}
 
-      {email && (
+      {userProfile?.email && (
         <div>
           <Text className="hover:text-primary-500">
-            <i className="fas fa-envelope" /> &nbsp; {email}
+            <i className="fas fa-envelope" /> &nbsp; {userProfile?.email}
           </Text>
         </div>
       )}
-      {phone && (
+      {userProfile?.phone && (
         <div>
           <Text className="hover:text-primary-500">
             <i className="fas fa-phone"></i> &nbsp; {phone}

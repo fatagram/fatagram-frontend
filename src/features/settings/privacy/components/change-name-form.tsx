@@ -1,28 +1,37 @@
-import { ErrorCodes } from "@/api/user/dto/change-name.dto";
-import { userProfileService } from "@/api/user/user-profile.api";
 import { Text, Textbox, Button, Skeleton } from "@/components/atoms";
 import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
 import { useAuth } from "@/hooks/contexts/use-auth";
+import { useGetUserProfile, useUpdateName } from "@/features/hooks/use-user-profile";
+import { ErrorCodes } from "@/api/user/dto/change-name.dto";
 
 type ChangeNameFormProps = {
   className?: string;
 };
 
 const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
-  const [oldFirstName, setOldFirstName] = React.useState<string>("");
-  const [oldLastName, setOldLastName] = React.useState<string>("");
-  const [firstName, setFirstName] = React.useState<string>("");
-  const [lastName, setLastName] = React.useState<string>("");
   const [firstNameFailed, setFirstNameFailed] = React.useState<boolean>(false);
+  const [middleNameFailed, setMiddleNameFailed] = React.useState<boolean>(false);
   const [lastNameFailed, setLastNameFailed] = React.useState<boolean>(false);
   const [errorMessage, setErrorMessage] = React.useState<string>("");
-  const [isLoading, setIsLoading] = React.useState<boolean>(true);
+  const [isSubmitting, setIsSubmitting] = React.useState<boolean>(false);
   const navigate = useNavigate();
   const { t } = useTranslation() as { t: (key: string) => string };
   const { userId } = useAuth();
+
+  const { data: userProfile, isLoading } = useGetUserProfile(userId!);
+  const updateNameMutation = useUpdateName(userId!);
+  const [newFirstName, setNewFirstName] = React.useState<string>("");
+  const [newMiddleName, setNewMiddleName] = React.useState<string>("");
+  const [newLastName, setNewLastName] = React.useState<string>("");
+
+  useEffect(() => {
+    setNewFirstName(userProfile?.firstName || "");
+    setNewMiddleName(userProfile?.middleName || "");
+    setNewLastName(userProfile?.lastName || "");
+  }, [userProfile]);
 
   // Close change name form
   const handleClose = () => {
@@ -30,40 +39,38 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   };
 
   const handleSubmit = async () => {
-    const response = await userProfileService.updateName({ firstName, lastName });
-    if (response.success) {
-      navigate("/settings", { state: { reload: true } });
-    } else {
-      const errorCode = response?.error?.code;
-      if (errorCode) {
-        setErrorMessage(t(ErrorCodes[errorCode].message));
-        setFirstNameFailed(ErrorCodes[errorCode].type === "FirstName");
-        setLastNameFailed(ErrorCodes[errorCode].type === "LastName");
-      } else {
-        setErrorMessage(t(ErrorCodes["UNKNOWN_ERROR"].message));
-        setFirstNameFailed(false);
-        setLastNameFailed(false);
-      }
-    }
-  };
-
-  // Fetch user profile
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const response = await userProfileService.getProfile(userId ?? "", "firstName,lastName");
-      if (response.success) {
-        setFirstName(response.data.infos.firstName);
-        setLastName(response.data.infos.lastName);
-        setOldFirstName(response.data.infos.firstName);
-        setOldLastName(response.data.infos.lastName);
-      }
-      setIsLoading(false);
-    };
+    // Reset errors
     setErrorMessage("");
     setFirstNameFailed(false);
+    setMiddleNameFailed(false);
     setLastNameFailed(false);
-    fetchProfile();
-  }, [userProfileService, userId]);
+    setIsSubmitting(true);
+
+    await updateNameMutation.fetch(
+      {
+        firstName: newFirstName,
+        middleName: newMiddleName || null,
+        lastName: newLastName,
+      },
+      {
+        onSuccess: () => {
+          setIsSubmitting(false);
+          navigate("/settings");
+        },
+        onError: (error) => {
+          const errorCode = error?.code;
+          if (errorCode && ErrorCodes[errorCode]) {
+            setErrorMessage(t(ErrorCodes[errorCode].message));
+            setFirstNameFailed(ErrorCodes[errorCode].type === "FirstName");
+            setLastNameFailed(ErrorCodes[errorCode].type === "LastName");
+          } else {
+            setErrorMessage(t(ErrorCodes["UNKNOWN_ERROR"].message));
+          }
+          setIsSubmitting(false);
+        },
+      },
+    );
+  };
 
   return (
     <div
@@ -95,10 +102,22 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                 </Text>
                 <Textbox
                   isWrong={firstNameFailed}
-                  value={firstName}
+                  value={newFirstName}
+                  onChange={(e) => setNewFirstName(e.target.value)}
                   placeholder="First name"
                   className={clsx("py-1 px-2 lg:max-w-[200px]")}
-                  onChange={(e) => setFirstName(e.target.value)}
+                />
+              </div>
+              <div className={clsx("flex flex-col")}>
+                <Text sz="md-2" className={clsx("ml-2 mb-1")}>
+                  {t("settings:account.personalInfo.changeNameForm.middleName")}
+                </Text>
+                <Textbox
+                  isWrong={middleNameFailed}
+                  value={newMiddleName}
+                  onChange={(e) => setNewMiddleName(e.target.value)}
+                  placeholder="Middle name"
+                  className={clsx("py-1 px-2 lg:max-w-[200px]")}
                 />
               </div>
               <div className={clsx("flex flex-col")}>
@@ -107,10 +126,10 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                 </Text>
                 <Textbox
                   isWrong={lastNameFailed}
-                  value={lastName}
+                  value={newLastName}
+                  onChange={(e) => setNewLastName(e.target.value)}
                   placeholder="Last name"
                   className={clsx("py-1 px-2 lg:max-w-[200px]")}
-                  onChange={(e) => setLastName(e.target.value)}
                 />
               </div>
             </div>
@@ -142,12 +161,19 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
           </Text>
         </Text>
         <Button
-          disabled={firstName === oldFirstName && lastName === oldLastName}
+          disabled={
+            isSubmitting ||
+            (newFirstName === userProfile?.firstName &&
+              newMiddleName === (userProfile?.middleName || "") &&
+              newLastName === userProfile?.lastName)
+          }
           sz="md-1"
           className={clsx("mt-2")}
           onClick={handleSubmit}
         >
-          {t("settings:account.personalInfo.changeNameForm.acceptButton")}
+          {isSubmitting
+            ? t("settings:account.personalInfo.changeNameForm.submitting")
+            : t("settings:account.personalInfo.changeNameForm.acceptButton")}
         </Button>
         <Text
           sz="lg-2"

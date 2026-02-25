@@ -3,7 +3,7 @@ import "dotenv/config";
 
 export async function auth(req, res) {
   try {
-    await axios.get(`${process.env.VITE_API_URL}/api/auth/ping`, {
+    await axios.get(`${process.env.VITE_API_URL}/api/v1/auth/ping`, {
       headers: { Cookie: req.headers.cookie || "" },
       withCredentials: true,
     });
@@ -13,7 +13,7 @@ export async function auth(req, res) {
     if (err.response?.status === 401) {
       try {
         const refreshRes = await axios.post(
-          `${process.env.VITE_API_URL}/api/auth/refreshToken`,
+          `${process.env.VITE_API_URL}/api/v1/auth/refreshToken`,
           {},
           {
             headers: { Cookie: req.headers.cookie || "" },

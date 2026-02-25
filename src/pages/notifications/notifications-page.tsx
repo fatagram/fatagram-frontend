@@ -1,21 +1,18 @@
 import NotificationMenu from "@/features/notifications/components/notification-menu/notification-menu";
-import {
-  setInNotificationPage,
-  setShowNotification,
-} from "@/features/notifications/stores/notification-slice";
+import { useNotificationUiState } from "@/features/notifications/hooks/use-notification-store";
 import React, { useEffect } from "react";
-import { useDispatch } from "react-redux";
 import clsx from "clsx";
 
 type NotificationsPageProps = {};
 
 const NotificationsPage: React.FC<NotificationsPageProps> = () => {
-  const dispatch = useDispatch();
+  const { setInNotificationPage, setShowNotification } = useNotificationUiState();
+
   useEffect(() => {
-    dispatch(setInNotificationPage(true));
+    setInNotificationPage(true);
     return () => {
-      dispatch(setInNotificationPage(false));
-      dispatch(setShowNotification(false));
+      setInNotificationPage(false);
+      setShowNotification(false);
     };
   }, []);
 

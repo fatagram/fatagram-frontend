@@ -33,13 +33,15 @@
       "changeNameForm": {
         "title": "Name",
         "firstName": "First name",
+        "middleName": "Middle name",
         "lastName": "Last name",
         "note": "Note",
         "noteText1": "You can only change your name every",
         "day": "days",
         "noteText2": "Your name must have more than 3 characters and less than 36 characters.",
         "noteText3": "Your name must not contains special characters such as",
-        "acceptButton": "Accept"
+        "acceptButton": "Accept",
+        "submitting": "Submitting..."
       },
       "errorMessages": {
         "changeUrlName": {
@@ -57,6 +59,10 @@
           "lastNameNotCorrectFormat": "Last name is not in the correct format",
           "unknownError": "Unknown error occurred",
           "internalServerError": "Internal server error"
+        },
+        "changeNickname": {
+          "nicknameTooLong": "Nickname is too long",
+          "unknownError": "Unknown error occurred"
         }
       }
     }

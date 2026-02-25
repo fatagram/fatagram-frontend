@@ -1,9 +1,10 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { Text, Avatar } from "@/components/atoms";
 import { renderContent } from "../../helper/render-content";
-import { TimeUnit, TimeUnitTranslateMap } from "@/types/time-unit";
+import { getNotificationContent } from "../../helper/get-notification-content";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
+import { timeDistance } from "@/helpers/time-distance";
 
 interface BaseNotificationProps {
   notificationDto: NotificationDto;
@@ -18,6 +19,9 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
 }) => {
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
 
+  const content = getNotificationContent(notificationDto.type, notificationDto.content, t);
+  const time = timeDistance(new Date(notificationDto.createdAt));
+
   return (
     <div className="flex gap-2 select-none" onClick={onClick}>
       <div className="flex items-start">
@@ -25,7 +29,7 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
       </div>
       <div className="flex flex-col gap-1 flex-1">
         <Text sz="sm-2" className={clsx({ "opacity-60": notificationDto.isRead })}>
-          {renderContent(notificationDto.content ?? "", {
+          {renderContent(content, {
             actorName: (
               <Text key={notificationDto.actorId} sz="sm-2" weight="bold">
                 {notificationDto.actorName}
@@ -38,16 +42,7 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
           color={notificationDto.isRead ? "primary" : "secondary"}
           className={clsx({ "opacity-70": notificationDto.isRead })}
         >
-          {notificationDto.timeDistance.unit === TimeUnit.Seconds ||
-          notificationDto.timeDistance.unit === TimeUnit.Miliseconds
-            ? t("times:just_now")
-            : `${t(
-                `${TimeUnitTranslateMap[notificationDto.timeDistance.unit]}.${
-                  notificationDto.timeDistance.value === 1 ? "one" : "other"
-                }`,
-                { count: notificationDto.timeDistance.value },
-              )} 
-                                                ${t("times:ago")}`}
+          {time.count ? t(time.unit, { count: time.count }) + " " + t(time.text) : t(time.text)}
         </Text>
         {children}
       </div>
