@@ -2,7 +2,7 @@ import React from "react";
 import { clsx } from "clsx";
 import { useProfilePage } from "../hooks/use-profile-page";
 import { Avatar, Skeleton } from "@/components/atoms";
-import SelectFile from "@/components/molecules/select-file";
+import SelectFile from "@/components/atoms/select-file";
 
 interface ProfileAvatarProps {
   isLoading: boolean;

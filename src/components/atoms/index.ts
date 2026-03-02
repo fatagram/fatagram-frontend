@@ -13,3 +13,5 @@ export * from "./textarea";
 export * from "./text";
 export * from "./footer";
 export * from "./selectday";
+export * from "./select-file";
+export * from "./dropdown";

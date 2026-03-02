@@ -4,7 +4,7 @@ import { useTranslation } from "react-i18next";
 import NotificationFactory from "../notification-factory";
 import { useNavigate } from "react-router";
 import { notificationService } from "@/api/notification/notification.api";
-import NotificationSkeletonLoading from "../notification-items/notification.skeleton";
+import NotificationSkeletonLoading from "../notification-items/notification-skeleton";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useNotifications } from "../../hooks/use-notification";
@@ -55,7 +55,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
     <div
       className={clsx(
         "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
-        "animate-dropdown-slide origin-top",
+        "animate-dropdown-slide origin-top scrollbar-hide",
         className,
       )}
       ref={ref}
@@ -65,30 +65,32 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
           {t("notifications:notifications.title")}
         </Text>
         {notifications.length > 0 && (
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2">
             {unreadCount > 0 && (
-              <Text
-                sz="sm-1"
-                color="secondary"
-                className="cursor-pointer hover:underline"
+              <button
+                className="p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer"
                 onClick={handleMarkAllAsRead}
+                title={t("notifications:notifications.mark-all-read")}
               >
-                {t("notifications:notifications.mark-all-read")}
-              </Text>
+                <Text sz="md-1" color="secondary">
+                  <i className="fa-solid fa-check-double"></i>
+                </Text>
+              </button>
             )}
-            <Text
-              sz="sm-1"
-              color="secondary"
-              className="cursor-pointer hover:underline"
+            <button
+              className="p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer"
               onClick={handleDeleteAll}
+              title={t("notifications:notifications.delete-all")}
             >
-              {t("notifications:notifications.delete-all")}
-            </Text>
+              <Text sz="md-1" color="secondary">
+                <i className="fa-solid fa-trash-can"></i>
+              </Text>
+            </button>
           </div>
         )}
       </div>
       {notifications.length > 0 ? (
-        <div className="relative py-1 overflow-y-scroll scrollbar-none max-h-[500px]">
+        <div className="relative py-1 overflow-y-scroll max-h-[500px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
           <InfiniteScroll
             itemInRow={1}
             items={notifications}
@@ -145,10 +147,19 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
       )}
 
       {!isInNotificationPage && (
-        <div className="absolute right-4" onClick={() => navigate("/notifications")}>
-          <Text sz="sm-1" color="secondary" className={clsx("cursor-pointer underline")}>
-            {t("notifications:notifications.open-notifications")}
-          </Text>
+        <div className="flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2">
+          <button
+            className="p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2"
+            onClick={() => navigate("/notifications")}
+            title={t("notifications:notifications.open-notifications")}
+          >
+            <Text sz="sm-1" color="secondary">
+              {t("notifications:notifications.open-notifications")}
+            </Text>
+            <Text sz="sm-1" color="secondary">
+              <i className="fa-solid fa-arrow-up-right-from-square"></i>
+            </Text>
+          </button>
         </div>
       )}
     </div>

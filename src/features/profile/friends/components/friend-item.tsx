@@ -5,7 +5,7 @@ import React, { RefObject } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import AddFriendButton from "../../components/friend-button";
-import Dropdown from "@/components/molecules/dropdown";
+import Dropdown from "@/components/atoms/dropdown";
 import clsx from "clsx";
 import { Avatar, Text } from "@/components/atoms";
 

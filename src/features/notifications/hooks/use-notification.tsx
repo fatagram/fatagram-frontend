@@ -8,7 +8,9 @@ export const useNotifications = (queryParams?: Omit<CursorQuery<string>, "cursor
 
   return useSafeInfiniteQueryResult({
     queryKey: ["notifications", userId, queryParams],
-    fn: (cursor?: string) => notificationService.getNotifications({ ...queryParams, cursor }),
+    fn: async (cursor?: string) => {
+      return await notificationService.getNotifications({ ...queryParams, cursor });
+    },
     enabled: !!userId,
   });
 };

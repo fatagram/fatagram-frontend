@@ -11,6 +11,7 @@ interface InfiniteScrollProps {
   itemTemplate?: (item: React.ReactNode, index: number) => React.ReactNode;
   onLoadMore: () => void;
   rootMargin?: string;
+  isShowLastSeen?: boolean;
 }
 
 export default function InfiniteScroll({
@@ -23,6 +24,7 @@ export default function InfiniteScroll({
   isLoading = false,
   itemTemplate,
   onLoadMore,
+  isShowLastSeen = false,
 }: InfiniteScrollProps) {
   const sentinelRef = useRef<HTMLDivElement>(null);
   const loadingRef = useRef(false);
@@ -77,7 +79,7 @@ export default function InfiniteScroll({
           ))}
         </>
       )}
-      {!hasMore && !isLoading && (
+      {!hasMore && !isLoading && isShowLastSeen && (
         <div
           style={{
             gridColumn: "1 / -1",

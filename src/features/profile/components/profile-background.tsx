@@ -1,6 +1,6 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
-import SelectFile from "@/components/molecules/select-file";
+import SelectFile from "@/components/atoms/select-file";
 import clsx from "clsx";
 import { useProfilePage } from "../hooks/use-profile-page";
 import { Skeleton } from "@/components/atoms";
