@@ -1,4 +1,4 @@
-import { useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type HeightTransitionProps = {
   show: boolean;
@@ -17,7 +17,7 @@ export default function HeightTransition({
   const [maxHeight, setMaxHeight] = useState<string>(show ? "none" : "0px");
   const [isVisible, setIsVisible] = useState<boolean>(show);
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!mainRef.current) {
       return;
     }

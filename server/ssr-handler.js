@@ -12,7 +12,7 @@ export async function handleSSR(req, res, vite, templateHtml) {
   try {
     const url = req.originalUrl.replace(base, "");
 
-    const { isAuthenticated } = await auth(req, res);
+    const { isAuthenticated, refreshedCookie } = await auth(req, res);
     const redirected = handleRouteProtection(url, { isAuthenticated }, res);
     if (redirected) {
       return;
@@ -20,7 +20,8 @@ export async function handleSSR(req, res, vite, templateHtml) {
 
     let userData;
     if (isAuthenticated) {
-      userData = await user(req);
+      // Use refreshed cookies if token was refreshed, otherwise use original
+      userData = await user(req, refreshedCookie);
     }
 
     let template;
@@ -50,9 +51,14 @@ export async function handleSSR(req, res, vite, templateHtml) {
         userData,
       };
       console.log("[SSR] Initial Data:", initialData);
-      const initialDataScript = `<script>window.__INITIAL_DATA__ = ${JSON.stringify(
-        initialData,
-      )};</script>`;
+      // Escape JSON for safe embedding inside <script> tag
+      // Prevents </script>, <!--, and other sequences from breaking HTML parsing
+      const safeJson = JSON.stringify(initialData)
+        .replace(/</g, "\\u003c")
+        .replace(/>/g, "\\u003e")
+        .replace(/&/g, "\\u0026")
+        .replace(/'/g, "\\u0027");
+      const initialDataScript = `<script>window.__INITIAL_DATA__ = ${safeJson};</script>`;
 
       const themeScript = getThemeScript();
       const htmlWithStyles = htmlStart.replace(

@@ -24,6 +24,8 @@ export function render(_url: string, context?: { isAuthenticated?: boolean; user
     if (error instanceof Error) {
       console.error(error.stack);
     }
-    return ""; // Return empty on error
+    // Return empty string — entry-client.tsx will detect this and use createRoot
+    // instead of hydrateRoot, doing a full client-side render
+    return "";
   }
 }

@@ -4,7 +4,7 @@ import { NavbarItem } from "@/components/organisms/navigation/navbar";
 import { useSize } from "@/hooks/use-size";
 import { debounce } from "@/utils/debounce";
 import clsx from "clsx";
-import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProfilePage } from "../hooks/use-profile-page";
@@ -77,7 +77,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
     [userParam, t],
   );
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     // Don't early return - let effect run but handle logic inside
     const handleResize = () => {
       if (containerSize.width === 0) return; // Check inside function instead

@@ -1,13 +1,11 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, forwardRef, useContext, useRef, useLayoutEffect, StrictMode } from "react";
+import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, forwardRef, useRef, useContext, useLayoutEffect, StrictMode } from "react";
 import { renderToString } from "react-dom/server";
-import { useNavigate, Link as Link$1, useResolvedPath, useMatch, Outlet, useLocation, useParams, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
+import { useNavigate, Link as Link$1, useResolvedPath, useMatch, Outlet, useParams, useLocation, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
 import i18next from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
-import { useDispatch, useSelector, Provider } from "react-redux";
-import { createSlice, configureStore } from "@reduxjs/toolkit";
-import { useQueryClient, useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { useQueryClient, useInfiniteQuery, useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import clsx, { clsx as clsx$1 } from "clsx";
 import * as signalR from "@microsoft/signalr";
 import { ArrowLeft } from "lucide-react";
@@ -24,10 +22,12 @@ const auth$1 = {
 const language$3 = { "en": "EN English", "vi": "VN Vietnamese" };
 const navbar$5 = { "profileMenu": { "settings": "Settings", "logout": "Logout" } };
 const notFound$1 = { "title": "Page Not Found", "description": "Oops! The page you're looking for doesn't exist or has been moved.", "backButton": "Back to Home" };
+const themes$1 = { "light": "Light", "dark": "Dark", "universe": "Universe", "neon": "Neon", "darkSea": "Dark Sea", "darkYellow": "Dark Yellow", "lightYellowPink": "Light Yellow Pink" };
 const common$1 = {
   language: language$3,
   navbar: navbar$5,
-  notFound: notFound$1
+  notFound: notFound$1,
+  themes: themes$1
 };
 const title$5 = "Home";
 const description$3 = "Welcome to the home page! This is where you can find the latest updates and news.";
@@ -38,7 +38,7 @@ const home$1 = {
 const title$4 = "Settings";
 const navbar$4 = { "title": "Settings", "privacy": { "title": "Privacy Settings", "account": "Account", "privacy": "Privacy" }, "general": { "title": "General Settings", "notifications": "Notifications", "about": "About", "language": "Language", "theme": "Themes" } };
 const editableField$1 = { "saveButton": "Save", "cancelButton": "Cancel" };
-const account$1 = { "personalInfo": { "title": "Personal Informations", "yourName": "Your Name", "urlName": "URL Name", "nickname": "Nickname", "changeButton": "Change", "noUrlName": "No URL Name", "noNickname": "No Nickname", "urlNamePlaceholder": "Enter your URL name", "nicknamePlaceholder": "Enter your nickname", "changeNameForm": { "title": "Name", "firstName": "First name", "lastName": "Last name", "note": "Note", "noteText1": "You can only change your name every", "day": "days", "noteText2": "Your name must have more than 3 characters and less than 36 characters.", "noteText3": "Your name must not contains special characters such as", "acceptButton": "Accept" }, "errorMessages": { "changeUrlName": { "userNotFound": "User not found", "urlNameAlreadyExist": "URL name already exists", "urlNameTooShort": "URL name must be at least 3 characters long", "urlNameTooLong": "URL name must be less than 36 characters", "urlNameEmpty": "URL name cannot be empty", "urlNameContainsSpace": "URL name cannot contain spaces", "unknownError": "Unknown error occurred", "internalServerError": "Internal server error" }, "changeName": { "firstNameNotCorrectFormat": "First name is not in the correct format", "lastNameNotCorrectFormat": "Last name is not in the correct format", "unknownError": "Unknown error occurred", "internalServerError": "Internal server error" } } } };
+const account$1 = { "personalInfo": { "title": "Personal Informations", "yourName": "Your Name", "urlName": "URL Name", "nickname": "Nickname", "changeButton": "Change", "noUrlName": "No URL Name", "noNickname": "No Nickname", "urlNamePlaceholder": "Enter your URL name", "nicknamePlaceholder": "Enter your nickname", "changeNameForm": { "title": "Name", "firstName": "First name", "middleName": "Middle name", "lastName": "Last name", "note": "Note", "noteText1": "You can only change your name every", "day": "days", "noteText2": "Your name must have more than 3 characters and less than 36 characters.", "noteText3": "Your name must not contains special characters such as", "acceptButton": "Accept", "submitting": "Submitting..." }, "errorMessages": { "changeUrlName": { "userNotFound": "User not found", "urlNameAlreadyExist": "URL name already exists", "urlNameTooShort": "URL name must be at least 3 characters long", "urlNameTooLong": "URL name must be less than 36 characters", "urlNameEmpty": "URL name cannot be empty", "urlNameContainsSpace": "URL name cannot contain spaces", "unknownError": "Unknown error occurred", "internalServerError": "Internal server error" }, "changeName": { "firstNameNotCorrectFormat": "First name is not in the correct format", "lastNameNotCorrectFormat": "Last name is not in the correct format", "unknownError": "Unknown error occurred", "internalServerError": "Internal server error" }, "changeNickname": { "nicknameTooLong": "Nickname is too long", "unknownError": "Unknown error occurred" } } } };
 const language$2 = { "title": "Language Settings", "yourLanguage": "Your language" };
 const theme$1 = { "title": "Theme Settings", "selectTheme": "Select theme" };
 const settings$1 = {
@@ -79,7 +79,7 @@ const times$1 = {
   ago: ago$1,
   just_now: just_now$1
 };
-const notifications$2 = { "title": "Notifications", "no-notifications": "No notifications available.", "has-a-friend-request": "has sent you a friend request.", "accepted-friend-request": "has accepted your friend request.", "accepted": "Accepted friend request.", "declined": "Declined friend request.", "showMore": "Show more" };
+const notifications$2 = { "title": "Notifications", "no-notifications": "No notifications available.", "has-a-friend-request": "has sent you a friend request.", "accepted-friend-request": "has accepted your friend request.", "canceled-friend-request": "has canceled the friend request.", "system-notification": "System notification.", "default-notification": "sent you a notification.", "accepted": "Accepted friend request.", "declined": "Declined friend request.", "showMore": "Show more", "mark-all-read": "Mark all as read", "delete-all": "Delete all", "open-notifications": "Open notifications" };
 const notifications$3 = {
   notifications: notifications$2
 };
@@ -102,10 +102,12 @@ const auth = {
 const language$1 = { "en": "EN Tiếng Anh", "vi": "VN Tiếng Việt" };
 const navbar$2 = { "profileMenu": { "settings": "Cài đặt", "logout": "Đăng xuất" } };
 const notFound = { "title": "Không tìm thấy", "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại.", "backButton": "Quay lại trang chủ" };
+const themes = { "light": "Sáng", "dark": "Tối", "universe": "Vũ trụ", "neon": "Neon", "darkSea": "Biển đêm", "darkYellow": "Vàng tối", "lightYellowPink": "Vàng hồng" };
 const common = {
   language: language$1,
   navbar: navbar$2,
-  notFound
+  notFound,
+  themes
 };
 const title$2 = "Trang chủ";
 const description$1 = "Welcome to the home page! This is where you can find the latest updates and news.";
@@ -116,7 +118,7 @@ const home = {
 const title$1 = "Cài đặt";
 const navbar$1 = { "title": "Cài đặt", "privacy": { "title": "Thông tin riêng tư", "account": "Tài khoản", "privacy": "Quyền riêng tư" }, "general": { "title": "Cài đặt chung", "notifications": "Thông báo", "about": "Giới thiệu", "language": "Ngôn ngữ", "theme": "Chủ đề" } };
 const editableField = { "saveButton": "Lưu", "cancelButton": "Hủy" };
-const account = { "personalInfo": { "title": "Thông tin cá nhân", "yourName": "Tên của bạn", "urlName": "Tên URL", "nickname": "Biệt danh", "changeButton": "Thay đổi", "noUrlName": "Không có tên URL", "noNickname": "Không có biệt danh", "urlNamePlaceholder": "Nhập tên URL của bạn", "nicknamePlaceholder": "Nhập biệt danh của bạn", "changeNameForm": { "title": "Tên", "firstName": "Họ", "lastName": "Tên", "note": "Lưu ý", "noteText1": "Chỉ có thể thay đổi tên của bạn sau mỗi", "day": "ngày", "noteText2": "Tên của bạn phải nhiều hơn 3 ký tự và ít hơn 36 ký tự", "noteText3": "Tên của bạn không được chứa các ký tự đặc biệt như", "acceptButton": "Xác nhận" }, "errorMessages": { "changeUrlName": { "userNotFound": "Người dùng không tồn tại", "urlNameAlreadyExist": "Tên URL đã tồn tại", "urlNameTooShort": "Tên URL phải có ít nhất 3 ký tự", "urlNameTooLong": "Tên URL phải ít hơn 36 ký tự", "urlNameEmpty": "Tên URL không được để trống", "urlNameContainsSpace": "Tên URL không được chứa khoảng trắng", "unknownError": "Đã xảy ra lỗi không xác định", "internalServerError": "Lỗi máy chủ nội bộ" }, "changeName": { "firstNameNotCorrectFormat": "Họ không đúng định dạng", "lastNameNotCorrectFormat": "Tên không đúng định dạng", "unknownError": "Đã xảy ra lỗi không xác định", "internalServerError": "Lỗi máy chủ nội bộ" } } } };
+const account = { "personalInfo": { "title": "Thông tin cá nhân", "yourName": "Tên của bạn", "urlName": "Tên URL", "nickname": "Biệt danh", "changeButton": "Thay đổi", "noUrlName": "Không có tên URL", "noNickname": "Không có biệt danh", "urlNamePlaceholder": "Nhập tên URL của bạn", "nicknamePlaceholder": "Nhập biệt danh của bạn", "changeNameForm": { "title": "Tên", "firstName": "Họ", "middleName": "Tên đệm", "lastName": "Tên", "note": "Lưu ý", "noteText1": "Chỉ có thể thay đổi tên của bạn sau mỗi", "day": "ngày", "noteText2": "Tên của bạn phải nhiều hơn 3 ký tự và ít hơn 36 ký tự", "noteText3": "Tên của bạn không được chứa các ký tự đặc biệt như", "acceptButton": "Xác nhận", "submitting": "Đang xử lý..." }, "errorMessages": { "changeUrlName": { "userNotFound": "Người dùng không tồn tại", "urlNameAlreadyExist": "Tên URL đã tồn tại", "urlNameTooShort": "Tên URL phải có ít nhất 3 ký tự", "urlNameTooLong": "Tên URL phải ít hơn 36 ký tự", "urlNameEmpty": "Tên URL không được để trống", "urlNameContainsSpace": "Tên URL không được chứa khoảng trắng", "unknownError": "Đã xảy ra lỗi không xác định", "internalServerError": "Lỗi máy chủ nội bộ" }, "changeName": { "firstNameNotCorrectFormat": "Họ không đúng định dạng", "lastNameNotCorrectFormat": "Tên không đúng định dạng", "unknownError": "Đã xảy ra lỗi không xác định", "internalServerError": "Lỗi máy chủ nội bộ" }, "changeNickname": { "nicknameTooLong": "Biệt danh quá dài", "unknownError": "Đã xảy ra lỗi không xác định" } } } };
 const language = { "title": "Ngôn ngữ", "yourLanguage": "Ngôn ngữ của bạn" };
 const theme = { "title": "Chủ đề", "selectTheme": "Chọn chủ đề" };
 const settings = {
@@ -159,7 +161,7 @@ const times = {
   ago,
   just_now
 };
-const notifications = { "title": "Thông báo", "no-notifications": "Không có thông báo nào.", "has-a-friend-request": "đã gửi cho bạn lời mời kết bạn.", "accepted-friend-request": "đã chấp nhận lời mời kết bạn.", "accepted": "Đã chấp nhận lời mời kết bạn.", "declined": "Đã từ chối lời mời kết bạn.", "showMore": "Hiển thị thêm" };
+const notifications = { "title": "Thông báo", "no-notifications": "Không có thông báo nào.", "has-a-friend-request": "đã gửi cho bạn lời mời kết bạn.", "accepted-friend-request": "đã chấp nhận lời mời kết bạn.", "canceled-friend-request": "đã hủy lời mời kết bạn.", "system-notification": "Thông báo hệ thống.", "default-notification": "đã gửi cho bạn một thông báo.", "accepted": "Đã chấp nhận lời mời kết bạn.", "declined": "Đã từ chối lời mời kết bạn.", "showMore": "Hiển thị thêm", "mark-all-read": "Đánh dấu tất cả đã đọc", "delete-all": "Xóa tất cả", "open-notifications": "Mở thông báo" };
 const notifications$1 = {
   notifications
 };
@@ -244,7 +246,7 @@ apiClient.interceptors.response.use(
     if (error.response?.status === 401) {
       try {
         const refreshResult = await axios.post(
-          `${appConfig.apiUrl}/api/auth/refreshToken`,
+          `${appConfig.apiUrl}/api/v1/auth/refreshToken`,
           {},
           {
             withCredentials: true
@@ -268,7 +270,7 @@ apiClientFormData.interceptors.response.use(
     if (error.response?.status === 401) {
       try {
         const refreshResult = await axios.post(
-          `${appConfig.apiUrl}/api/auth/refresh-token`,
+          `${appConfig.apiUrl}/api/v1/auth/refreshToken`,
           {},
           {
             withCredentials: true
@@ -316,82 +318,168 @@ const handleApiError = (error) => {
     };
   }
 };
-const PREFIX$4 = `/api/auth`;
+const API_VERSION = "v1";
+const buildApiPath = (prefix) => {
+  const cleanPrefix = prefix.replace(/^\/+|\/+$/g, "");
+  const withoutApi = cleanPrefix.replace(/^api\/?/, "");
+  return `/api/${API_VERSION}/${withoutApi}`;
+};
+const apiGet = async (url, config) => {
+  try {
+    const res = await apiClient.get(url, config);
+    return { success: true, data: res.data.data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+const apiPost = async (url, data, config) => {
+  try {
+    const res = await apiClient.post(url, data, config);
+    return { success: true, data: res.data.data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+const apiPut = async (url, data, config) => {
+  try {
+    const res = await apiClient.put(url, data, config);
+    return { success: true, data: res.data.data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+const apiPatch = async (url, data, config) => {
+  try {
+    const res = await apiClient.patch(url, data, config);
+    return { success: true, data: res.data.data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+const apiDelete = async (url, config) => {
+  try {
+    const res = await apiClient.delete(url, config);
+    return { success: true, data: res.data.data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+const apiPatchFormData = async (url, formData, config) => {
+  try {
+    const res = await apiClientFormData.patch(url, formData, config);
+    return { success: true, data: res.data.data };
+  } catch (error) {
+    return handleApiError(error);
+  }
+};
+const PREFIX$3 = buildApiPath("/auth");
 class AuthService {
   // login method
   async login(dto) {
-    try {
-      const res = await apiClient.post(`${PREFIX$4}/login`, {
-        usernameOrEmail: dto.usernameOrEmail,
-        password: dto.password,
-        isRememberMe: dto.isRememberMe
-      });
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX$3}/login`, {
+      usernameOrEmail: dto.usernameOrEmail,
+      password: dto.password,
+      isRememberMe: dto.isRememberMe
+    });
   }
   async loginWithGoogle(code) {
-    try {
-      await apiClient.post(`${PREFIX$4}/google/callback`, { code });
-      return { success: true };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX$3}/google/callback`, { code });
   }
   // logout method
   async logout() {
-    try {
-      await apiClient.post(`${PREFIX$4}/logout`);
-      return { success: true };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX$3}/logout`);
   }
   async register(dto) {
-    try {
-      await apiClient.post(`${PREFIX$4}/register`, {
-        username: dto.username,
-        password: dto.password,
-        email: dto.email,
-        phone: dto.phoneNumber
-      });
-      return { success: true };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX$3}/register`, {
+      username: dto.username,
+      password: dto.password,
+      email: dto.email,
+      phone: dto.phoneNumber
+    });
   }
   // Ping method
   // This method is responsible for sending a ping request to the server.
   // The method returns a promise of void.
   async ping() {
-    try {
-      await apiClient.get(`${PREFIX$4}/ping`);
-      return { success: true };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiGet(`${PREFIX$3}/ping`);
   }
 }
 const authService = new AuthService();
-const PREFIX$3 = `/api/UserProfile`;
+const PREFIX$2 = buildApiPath("/UserProfile");
 class UserProfileService {
   // Check if user exists by id or urlName
   async checkUserExist(key) {
+    return apiGet(`${PREFIX$2}/exist?key=${key}`);
+  }
+  async getProfile(id, fields) {
     try {
-      await apiClient.get(`${PREFIX$3}/exist?key=${key}`);
-      return { success: true };
+      const res = await apiClient.get(`${PREFIX$2}/${id}?fields=${fields}`);
+      const response = res.data;
+      return { success: true, data: response.data?.infos };
     } catch (error) {
       return handleApiError(error);
     }
   }
-  // Get user profile by id or urlName
-  async getProfile(id, fields) {
+  // // Get user profile by id or urlName
+  // async getHeaderProfile(id: string): Promise<Result<User>> {
+  //   try {
+  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=avatar,fullName,background,nickname`);
+  //     const response = res.data as ApiResponse<any>;
+  //     return { success: true, data: response.data?.infos };
+  //   } catch (error: any) {
+  //     return handleApiError(error);
+  //   }
+  // }
+  // async getUserAvatar(id: string): Promise<Result<string>> {
+  //   try {
+  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=avatar`);
+  //     const response = res.data as ApiResponse<any>;
+  //     return { success: true, data: response.data?.infos?.avatar };
+  //   } catch (error: any) {
+  //     return handleApiError(error);
+  //   }
+  // }
+  // async getUserBackground(id: string): Promise<Result<string>> {
+  //   try {
+  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=background`);
+  //     const response = res.data as ApiResponse<any>;
+  //     return { success: true, data: response.data?.infos?.background };
+  //   } catch (error: any) {
+  //     return handleApiError(error);
+  //   }
+  // }
+  // async getUserFullName(id: string): Promise<Result<string>> {
+  //   try {
+  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=fullName`);
+  //     const response = res.data as ApiResponse<any>;
+  //     return { success: true, data: response.data?.infos?.fullName };
+  //   } catch (error: any) {
+  //     return handleApiError(error);
+  //   }
+  // }
+  // async getUserUrlName(id: string): Promise<Result<string>> {
+  //   try {
+  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=urlName`);
+  //     const response = res.data as ApiResponse<any>;
+  //     return { success: true, data: response.data?.infos?.urlName };
+  //   } catch (error: any) {
+  //     return handleApiError(error);
+  //   }
+  // }
+  // async getUserNickname(id: string): Promise<Result<string>> {
+  //   try {
+  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=nickname`);
+  //     const response = res.data as ApiResponse<any>;
+  //     return { success: true, data: response.data?.infos?.nickname };
+  //   } catch (error: any) {
+  //     return handleApiError(error);
+  //   }
+  // }
+  async getUserId(id) {
     try {
-      const res = await apiClient.get(`${PREFIX$3}/${id}?fields=${fields}`);
+      const res = await apiClient.get(`${PREFIX$2}/${id}?fields=id`);
       const response = res.data;
-      return { success: true, data: response.data };
+      return { success: true, data: response.data?.infos?.id };
     } catch (error) {
       return handleApiError(error);
     }
@@ -399,7 +487,7 @@ class UserProfileService {
   // Get current user profile
   async getMe() {
     try {
-      const res = await apiClient.get(`${PREFIX$3}/me`);
+      const res = await apiClient.get(`${PREFIX$2}/me`);
       const response = res.data.data.infos;
       return { success: true, data: response };
     } catch (error) {
@@ -407,152 +495,46 @@ class UserProfileService {
     }
   }
   // Upload avatar
-  async UploadAvatar(file) {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const { data } = await apiClientFormData.patch(`${PREFIX$3}/avatar`, formData);
-      return { success: true, data: data.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+  async uploadAvatar(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiPatchFormData(`${PREFIX$2}/avatar`, formData);
   }
   // Upload background image
-  async UploadBackground(file) {
-    try {
-      const formData = new FormData();
-      formData.append("file", file);
-      const { data } = await apiClientFormData.patch(`${PREFIX$3}/background`, formData);
-      return { success: true, data: data.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+  async uploadBackground(file) {
+    const formData = new FormData();
+    formData.append("file", file);
+    return apiPatchFormData(`${PREFIX$2}/background`, formData);
   }
   // Update simple profile fields such as bio, description, etc.
-  async UpdateProfile(data) {
-    try {
-      const res = await apiClient.put(`${PREFIX$3}`, data);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+  async updateProfile(data) {
+    return apiPut(`${PREFIX$2}`, data);
   }
   // Update user's URL name
-  async UpdateUrlName(changeUrlNameDto) {
-    try {
-      const res = await apiClient.patch(`${PREFIX$3}/urlName`, changeUrlNameDto);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+  async updateUrlName(changeUrlNameDto) {
+    return apiPatch(`${PREFIX$2}/urlName`, changeUrlNameDto);
   }
   // Complete onboarding
   async completeOnboarding(onboardingDto) {
-    try {
-      const res = await apiClient.post(`${PREFIX$3}/onboarding`, onboardingDto);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX$2}/onboarding`, onboardingDto);
   }
   // Update user's name
   async updateName(changeNameDto) {
-    try {
-      const res = await apiClient.patch(`${PREFIX$3}/name`, changeNameDto);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPatch(`${PREFIX$2}/name`, changeNameDto);
+  }
+  async updateNickname(changeNicknameDto) {
+    return apiPatch(`${PREFIX$2}/nickname`, changeNicknameDto);
   }
   // Get onboarding default data
   async getOnboardingDefaults() {
-    try {
-      const res = await apiClient.get(`${PREFIX$3}/onboarding/defaults`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiGet(`${PREFIX$2}/onboarding/defaults`);
   }
 }
 const userProfileService = new UserProfileService();
-const initialState = {
-  notifications: [],
-  unreadCount: 0,
-  isShowNotification: false,
-  isInNotificationPage: false,
-  pageSize: 5,
-  isFull: false,
-  isShowFull: false,
-  isInitialized: false
-};
-const notificationsSlice = createSlice({
-  name: "notifications",
-  initialState,
-  reducers: {
-    loadNotifications: (state, action) => {
-      state.notifications = [
-        ...state.notifications,
-        ...action.payload.notifications
-      ];
-      state.unreadCount = action.payload.unreadCount;
-      state.isInitialized = true;
-      if (action.payload.notifications.length > 0) {
-        state.cursorId = action.payload.notifications[action.payload.notifications.length - 1].id;
-      } else {
-        state.isFull = true;
-      }
-    },
-    addNewNotification: (state, action) => {
-      state.notifications = [action.payload, ...state.notifications];
-      state.unreadCount += 1;
-    },
-    deleteNotification: (state, action) => {
-      const id = action.payload;
-      const noti = state.notifications.find((n) => n.id === id);
-      state.notifications = state.notifications.filter((n) => n.id !== id);
-      if (noti && !noti.isRead) {
-        state.unreadCount = Math.max(state.unreadCount - 1, 0);
-      }
-    },
-    markAsRead: (state, action) => {
-      const id = action.payload;
-      const notification = state.notifications.find((n) => n.id === id);
-      if (notification && !notification.isRead) {
-        notification.isRead = true;
-        state.unreadCount = Math.max(state.unreadCount - 1, 0);
-      }
-    },
-    setShowNotification: (state, action) => {
-      state.isShowNotification = action.payload;
-    },
-    setInNotificationPage: (state, action) => {
-      state.isInNotificationPage = action.payload;
-    },
-    setShowFull: (state, action) => {
-      state.isShowFull = action.payload;
-    },
-    resetState: () => initialState
-  }
-});
-const {
-  loadNotifications,
-  addNewNotification,
-  deleteNotification,
-  markAsRead,
-  setShowNotification,
-  setInNotificationPage,
-  setShowFull,
-  resetState
-} = notificationsSlice.actions;
-const notificationsReducer = notificationsSlice.reducer;
 const initialAuthStatus = {
   isAuthenticated: false,
-  lang: "en"
+  lang: "en",
+  isOnBoarding: false
 };
 function useResultFetcher(fn, options) {
   const [data, setData] = useState();
@@ -639,7 +621,8 @@ const AuthContext = createContext({
   setUrlName: () => {
   },
   userId: void 0,
-  urlName: void 0
+  urlName: void 0,
+  isOnBoarding: false
 });
 const AuthProvider = ({
   children,
@@ -651,11 +634,10 @@ const AuthProvider = ({
     isAuthenticated: initialIsAuthenticated ?? null,
     userId: userData?.id,
     urlName: userData?.urlName,
-    lang: userData?.languageCode
+    lang: userData?.languageCode,
+    isOnBoarding: userData?.isOnBoarding
   });
-  console.log("AuthContext", userData);
-  const _dispatch = useDispatch();
-  const queryClient2 = useQueryClient();
+  const queryClient = useQueryClient();
   const navigate = useNavigate();
   const { fetch: me } = useResultFetcher(userProfileService.getMe, {});
   const { fetch: login2 } = useResultFetcher(authService.login, {
@@ -700,9 +682,8 @@ const AuthProvider = ({
     });
   };
   const clearUserData = useCallback(() => {
-    queryClient2.clear();
-    _dispatch(resetState());
-  }, [queryClient2, _dispatch]);
+    queryClient.clear();
+  }, [queryClient]);
   const setUrlName = useCallback((urlName) => {
     dispatch({
       type: "UPDATE_URL_NAME",
@@ -711,7 +692,6 @@ const AuthProvider = ({
   }, []);
   useEffect(() => {
     const handleRedirectToOnboarding = () => {
-      console.log("Redirect to onboarding");
       navigate("/onboarding");
     };
     authEvents.on("redirectToOnboarding", handleRedirectToOnboarding);
@@ -719,6 +699,22 @@ const AuthProvider = ({
       authEvents.off("redirectToOnboarding", handleRedirectToOnboarding);
     };
   }, [navigate]);
+  useEffect(() => {
+    if (state.isAuthenticated && !state.userId) {
+      me(void 0, {
+        onSuccess: (data) => {
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              userId: data?.id,
+              urlName: data?.urlName,
+              lang: data?.languageCode || "en"
+            }
+          });
+        }
+      });
+    }
+  }, [state.isAuthenticated, state.userId]);
   const contextValue = useMemo(
     () => ({
       isAuthenticated: state.isAuthenticated,
@@ -728,7 +724,8 @@ const AuthProvider = ({
       loginWithGoogle: handleLoginWithGoogle,
       redirectToGoogle,
       logOut: logout,
-      setUrlName
+      setUrlName,
+      isOnBoarding: state.isOnBoarding
     }),
     [
       state.isAuthenticated,
@@ -738,7 +735,8 @@ const AuthProvider = ({
       handleLoginWithGoogle,
       redirectToGoogle,
       logout,
-      setUrlName
+      setUrlName,
+      state.isOnBoarding
     ]
   );
   return /* @__PURE__ */ jsx(AuthContext.Provider, { value: contextValue, children });
@@ -821,7 +819,8 @@ const Avatar = ({
   alt,
   sz = "md-1",
   shape = "circle",
-  className
+  className,
+  children
 }) => {
   const sizeClass = sizeClasses$4[sz];
   const shapeClass = shapeClasses[shape];
@@ -839,15 +838,18 @@ const Avatar = ({
         shapeClass,
         className
       ),
-      children: /* @__PURE__ */ jsx("div", { className: clsx("absolute inset-0 bg-bg-main overflow-hidden"), children: /* @__PURE__ */ jsx(
-        "img",
-        {
-          src: imgSrc || emptyAvatar,
-          alt,
-          className: clsx("relative z-0 w-full h-full object-cover"),
-          onError: () => setImgSrc(emptyAvatar)
-        }
-      ) })
+      children: /* @__PURE__ */ jsxs("div", { className: clsx("absolute inset-0 bg-bg-main overflow-hidden"), children: [
+        /* @__PURE__ */ jsx(
+          "img",
+          {
+            src: imgSrc || emptyAvatar,
+            alt,
+            className: clsx("relative z-0 w-full h-full object-cover"),
+            onError: () => setImgSrc(emptyAvatar)
+          }
+        ),
+        children
+      ] })
     }
   );
 };
@@ -938,7 +940,7 @@ const Checkbox = ({
   ] });
 };
 const style = {
-  "user-bg-image": "_user-bg-image_1igzi_1"
+  "user-bg-image": "_user-bg-image_1szjy_1"
 };
 function BackgroundImage({
   src,
@@ -1096,6 +1098,61 @@ const useClickOutside = (refTarget, refException, callback) => {
     };
   }, [refTarget, refException, callback]);
 };
+const AnimationLib = {
+  SlideRightToLeft: {
+    in: "animate-right-to-left-in",
+    out: "animate-right-to-left-out",
+    duration: 300
+  },
+  DropdownSlide: {
+    in: "animate-dropdown-slide-in",
+    out: "animate-dropdown-slide-out",
+    duration: 200
+  },
+  None: {
+    in: "",
+    out: "",
+    duration: 0
+  }
+};
+function Transition({
+  animation = AnimationLib.None,
+  show,
+  children,
+  className = "",
+  duration
+}) {
+  const [render2, setRender] = useState(show);
+  const timeoutRef = useRef(null);
+  const animDuration = duration ?? animation.duration;
+  useEffect(() => {
+    if (show) {
+      setRender(true);
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      return;
+    }
+    if (timeoutRef.current) clearTimeout(timeoutRef.current);
+    timeoutRef.current = setTimeout(() => {
+      setRender(false);
+    }, animDuration);
+  }, [show]);
+  const onAnimationEnd = () => {
+    if (!show) {
+      if (timeoutRef.current) clearTimeout(timeoutRef.current);
+      setRender(false);
+    }
+  };
+  if (!render2) return null;
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx(className, show ? animation.in : animation.out),
+      onAnimationEnd,
+      style: { animationDuration: animDuration + "ms" },
+      children
+    }
+  );
+}
 const SelectBox = ({
   title: title2,
   isRequired = false,
@@ -1138,11 +1195,11 @@ const SelectBox = ({
         ]
       }
     ) }),
-    isOpen && /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsx(Transition, { animation: AnimationLib.DropdownSlide, show: isOpen, duration: 100, children: /* @__PURE__ */ jsx(
       "div",
       {
         className: clsx(
-          "absolute w-full animate-dropdown-slide",
+          "absolute w-full",
           "bg-bg-card rounded-lg shadow-md mt-1 z-50 border border-border-main",
           dropdownClassName
         ),
@@ -1166,7 +1223,7 @@ const SelectBox = ({
           index
         )) })
       }
-    )
+    ) })
   ] });
 };
 const sizeClasses$2 = {
@@ -1437,51 +1494,14 @@ const SelectDay = ({
     isWrong && wrongMessage && /* @__PURE__ */ jsx("span", { className: "text-xs text-error ml-1", children: wrongMessage })
   ] });
 };
-var TimeUnit = /* @__PURE__ */ ((TimeUnit2) => {
-  TimeUnit2["Miliseconds"] = "Miliseconds";
-  TimeUnit2["Seconds"] = "Seconds";
-  TimeUnit2["Minutes"] = "Minutes";
-  TimeUnit2["Hours"] = "Hours";
-  TimeUnit2["Days"] = "Days";
-  TimeUnit2["Weeks"] = "Weeks";
-  TimeUnit2["Months"] = "Months";
-  TimeUnit2["Years"] = "Years";
-  return TimeUnit2;
-})(TimeUnit || {});
-const TimeUnitTranslateMap = {
-  [
-    "Miliseconds"
-    /* Miliseconds */
-  ]: "times:time.milisecond",
-  [
-    "Seconds"
-    /* Seconds */
-  ]: "times:time.second",
-  [
-    "Minutes"
-    /* Minutes */
-  ]: "times:time.minute",
-  [
-    "Hours"
-    /* Hours */
-  ]: "times:time.hour",
-  [
-    "Days"
-    /* Days */
-  ]: "times:time.day",
-  [
-    "Weeks"
-    /* Weeks */
-  ]: "times:time.week",
-  [
-    "Months"
-    /* Months */
-  ]: "times:time.month",
-  [
-    "Years"
-    /* Years */
-  ]: "times:time.year"
-};
+var NotificationType = /* @__PURE__ */ ((NotificationType2) => {
+  NotificationType2["NewFriendRequest"] = "NewFriendRequest";
+  NotificationType2["FriendRequestAccepted"] = "FriendRequestAccepted";
+  NotificationType2["FriendRequestCanceled"] = "FriendRequestCanceled";
+  NotificationType2["System"] = "System";
+  NotificationType2["CancelNotification"] = "CancelNotification";
+  return NotificationType2;
+})(NotificationType || {});
 const NotificationDefault = {
   id: "",
   userId: "",
@@ -1493,86 +1513,47 @@ const NotificationDefault = {
   link: "/",
   content: "You have a new notification",
   isRead: true,
-  timeDistance: {
-    value: 0,
-    unit: TimeUnit.Miliseconds
-  }
+  createdAt: (/* @__PURE__ */ new Date()).toISOString()
 };
-const PREFIX$2 = `/api/friendship`;
+const PREFIX$1 = buildApiPath("/friendship");
 class FriendshipService {
   async GetFriendshipStatus(targetId) {
-    try {
-      const res = await apiClient.get(`${PREFIX$2}/status/${targetId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiGet(`${PREFIX$1}/status/${targetId}`);
   }
   async SendAddFriendRequest(receiverId) {
-    try {
-      const res = await apiClient.post(`${PREFIX$2}/add/${receiverId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX$1}/add/${receiverId}`);
   }
   async CancelAddFriendRequest(senderId) {
-    try {
-      const res = await apiClient.delete(`${PREFIX$2}/cancel/${senderId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiDelete(`${PREFIX$1}/cancel/${senderId}`);
   }
   async AcceptAddFriendRequest(senderId) {
-    try {
-      const res = await apiClient.post(`${PREFIX$2}/accept/${senderId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiPost(`${PREFIX$1}/accept/${senderId}`);
   }
   async DeclineAddFriendRequest(requesterId) {
-    try {
-      const res = await apiClient.delete(`${PREFIX$2}/decline/${requesterId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiDelete(`${PREFIX$1}/decline/${requesterId}`);
   }
   async Unfriend(friendId) {
-    try {
-      const res = await apiClient.delete(`${PREFIX$2}/unfriend/${friendId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return apiDelete(`${PREFIX$1}/unfriend/${friendId}`);
   }
   async GetNumberOfFriends(targetId) {
-    try {
-      const res = await apiClient.get(`${PREFIX$2}/count/${targetId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    console.log("GetNumberOfFriends called with targetId:", targetId);
+    return apiGet(`${PREFIX$1}/count/${targetId}`);
   }
-  async GetFriendRequests(page, pageSize) {
+  async GetFriendRequests(query) {
     try {
-      const res = await apiClient.get(`${PREFIX$2}/requests`, {
-        params: {
-          page,
-          pageSize
-        }
+      const res = await apiClient.get(`${PREFIX$1}/requests`, {
+        params: query
       });
-      const response = res.data;
-      return { success: true, data: response.data };
+      await new Promise((resolve) => setTimeout(resolve, 3e3));
+      const resp = res.data;
+      return {
+        success: true,
+        data: {
+          data: resp.data ?? [],
+          nextCursor: resp.nextCursor,
+          hasNext: resp.hasNext
+        }
+      };
     } catch (error) {
       return handleApiError(error);
     }
@@ -1583,7 +1564,7 @@ class FriendshipService {
       if (keyword) params.append("keyword", keyword);
       params.append("page", page.toString());
       params.append("pageSize", pageSize.toString());
-      const res = await apiClient.get(`${PREFIX$2}/friends/${userId}`, {
+      const res = await apiClient.get(`${PREFIX$1}/friends/${userId}`, {
         params
       });
       const response = res.data;
@@ -1611,16 +1592,67 @@ function renderContent(template, values) {
   }
   return /* @__PURE__ */ jsx(Fragment, { children: parts.map((part) => part) });
 }
+const typeToI18nKey = {
+  [NotificationType.NewFriendRequest]: "notifications:notifications.has-a-friend-request",
+  [NotificationType.FriendRequestAccepted]: "notifications:notifications.accepted-friend-request",
+  [NotificationType.FriendRequestCanceled]: "notifications:notifications.canceled-friend-request",
+  [NotificationType.System]: "notifications:notifications.system-notification"
+};
+function getNotificationContent(type, fallbackContent, t) {
+  const i18nKey = typeToI18nKey[type];
+  if (i18nKey && t) {
+    return `{actorName} ${t(i18nKey)}`;
+  }
+  if (fallbackContent) {
+    return fallbackContent;
+  }
+  return t ? `{actorName} ${t("notifications:notifications.default-notification")}` : "{actorName}";
+}
+function timeDistance(date, now = /* @__PURE__ */ new Date()) {
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1e3);
+  if (seconds < 10) {
+    return { text: "times:just_now" };
+  }
+  const intervals = [
+    [60, "times:time.second"],
+    // < 60s  → second
+    [3600, "times:time.minute"],
+    // < 1h   → minute
+    [86400, "times:time.hour"],
+    // < 24h  → hour
+    [604800, "times:time.day"],
+    // < 7d   → day
+    [2592e3, "times:time.week"],
+    // < 30d  → week
+    [31536e3, "times:time.month"],
+    // < 365d → month
+    [Number.MAX_SAFE_INTEGER, "times:time.year"]
+  ];
+  for (let i = 0; i < intervals.length; i++) {
+    if (seconds < intervals[i][0]) {
+      const prev = i === 0 ? 1 : intervals[i - 1][0];
+      const count = Math.floor(seconds / prev);
+      return {
+        count,
+        unit: intervals[i][1] + (count > 1 ? ":other" : ":one"),
+        text: "times:ago"
+      };
+    }
+  }
+  return { text: date.toLocaleDateString() };
+}
 const BaseNotification = ({
   notificationDto,
   children,
   onClick
 }) => {
   const { t } = useTranslation();
+  const content = getNotificationContent(notificationDto.type, notificationDto.content, t);
+  const time2 = timeDistance(new Date(notificationDto.createdAt));
   return /* @__PURE__ */ jsxs("div", { className: "flex gap-2 select-none", onClick, children: [
     /* @__PURE__ */ jsx("div", { className: "flex items-start", children: /* @__PURE__ */ jsx(Avatar, { border: 0, src: notificationDto.actorImageUrl, alt: "Avatar", sz: "sm-1" }) }),
     /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-1 flex-1", children: [
-      /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: clsx({ "opacity-60": notificationDto.isRead }), children: renderContent(notificationDto.content ?? "", {
+      /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: clsx({ "opacity-60": notificationDto.isRead }), children: renderContent(content, {
         actorName: /* @__PURE__ */ jsx(Text, { sz: "sm-2", weight: "bold", children: notificationDto.actorName }, notificationDto.actorId)
       }) }),
       /* @__PURE__ */ jsx(
@@ -1629,11 +1661,7 @@ const BaseNotification = ({
           sz: "sm-1",
           color: notificationDto.isRead ? "primary" : "secondary",
           className: clsx({ "opacity-70": notificationDto.isRead }),
-          children: notificationDto.timeDistance.unit === TimeUnit.Seconds || notificationDto.timeDistance.unit === TimeUnit.Miliseconds ? t("times:just_now") : `${t(
-            `${TimeUnitTranslateMap[notificationDto.timeDistance.unit]}.${notificationDto.timeDistance.value === 1 ? "one" : "other"}`,
-            { count: notificationDto.timeDistance.value }
-          )} 
-                                                ${t("times:ago")}`
+          children: time2.count ? t(time2.unit, { count: time2.count }) + " " + t(time2.text) : t(time2.text)
         }
       ),
       children
@@ -1680,15 +1708,26 @@ const NewFriendRequest = ({
     /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "secondary", onClick: handleDelete, children: t("user:profileHeader.declineButton") })
   ] }) : /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: clsx("opacity-70"), children: message }) });
 };
+const CanceledFriendRequest = ({
+  notificationDto,
+  onClick = () => {
+  }
+}) => {
+  return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick });
+};
 const NotificationFactory = ({
   notificationDto,
   onClick = () => {
   }
 }) => {
   switch (notificationDto.type) {
-    case "NewFriendRequest":
+    case NotificationType.NewFriendRequest:
       return /* @__PURE__ */ jsx(NewFriendRequest, { notificationDto, onClick });
-    case "FriendRequestAccepted":
+    case NotificationType.FriendRequestAccepted:
+      return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick });
+    case NotificationType.FriendRequestCanceled:
+      return /* @__PURE__ */ jsx(CanceledFriendRequest, { notificationDto, onClick });
+    case NotificationType.System:
       return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick });
     default:
       return /* @__PURE__ */ jsx(BaseNotification, { notificationDto: NotificationDefault, onClick });
@@ -1818,12 +1857,17 @@ const LoadingProvider = ({ children }) => {
     children
   ] });
 };
-const availableThemes = [
-  { key: "light", label: "common:themes:light" },
-  { key: "dark", label: "common:themes:dark" },
-  { key: "universe", label: "common:themes:universe" }
+const ThemeList = [
+  "light",
+  "dark",
+  "universe",
+  "neon",
+  "dark-sea",
+  "dark-yellow",
+  "light-yellow-pink"
 ];
 const ThemeContext = createContext({
+  availableThemes: [],
   theme: "light",
   setTheme: () => {
   }
@@ -1831,17 +1875,27 @@ const ThemeContext = createContext({
 function getInitialTheme() {
   if (typeof window === "undefined") return "light";
   const currentTheme = document.documentElement.getAttribute("data-theme");
-  if (availableThemes.some((t) => t.key === currentTheme)) {
+  if (ThemeList.some((t) => t === currentTheme)) {
     return currentTheme;
   }
   return "light";
 }
 function ThemeProvider({ children }) {
   const [theme2, setTheme] = useState(getInitialTheme);
+  const t = useTranslation().t;
+  const availableThemes = [
+    { key: "light", label: t("common:themes:light") },
+    { key: "dark", label: t("common:themes:dark") },
+    { key: "universe", label: t("common:themes:universe") },
+    { key: "neon", label: t("common:themes:neon") },
+    { key: "dark-sea", label: t("common:themes:darkSea") },
+    { key: "dark-yellow", label: t("common:themes:darkYellow") },
+    { key: "light-yellow-pink", label: t("common:themes:lightYellowPink") }
+  ];
   useEffect(() => {
     const storedTheme = localStorage.getItem("theme");
     const currentTheme = document.documentElement.getAttribute("data-theme");
-    if (storedTheme && storedTheme !== currentTheme && availableThemes.some((t) => t.key === storedTheme)) {
+    if (storedTheme && storedTheme !== currentTheme && availableThemes.some((t2) => t2.key === storedTheme)) {
       setTheme(storedTheme);
     }
   }, []);
@@ -1850,36 +1904,256 @@ function ThemeProvider({ children }) {
     root.setAttribute("data-theme", theme2);
     localStorage.setItem("theme", theme2);
   }, [theme2]);
-  return /* @__PURE__ */ jsx(ThemeContext.Provider, { value: { theme: theme2, setTheme }, children });
+  return /* @__PURE__ */ jsx(ThemeContext.Provider, { value: { availableThemes, theme: theme2, setTheme }, children });
 }
 function useTheme() {
   return useContext(ThemeContext);
 }
+const SnackbarContext = createContext({
+  showSnackbar: () => {
+  }
+});
+const SnackbarProvider = React.memo(function SnackbarProvider2({
+  children
+}) {
+  const [visibleSnackbar, setVisibleSnackbar] = useState(false);
+  const [timer, setTimer] = useState(null);
+  const [displaySnackbar, setDisplaySnackbar] = useState(null);
+  const durationAnim = 300;
+  const showSnackbar = useCallback(
+    (message, type = "info", duration = 3e3) => {
+      if (timer) {
+        clearTimeout(timer);
+      }
+      const id = Date.now().toString();
+      const newSnackbar = { id, message, type, duration };
+      setVisibleSnackbar(true);
+      setDisplaySnackbar(newSnackbar);
+      const newTimer = setTimeout(() => {
+        setVisibleSnackbar(false);
+        setTimeout(() => setDisplaySnackbar(null), durationAnim);
+      }, duration);
+      setTimer(newTimer);
+    },
+    [timer]
+  );
+  const value = useMemo(() => ({ showSnackbar }), [showSnackbar]);
+  const getIcon = (type) => {
+    switch (type) {
+      case "success":
+        return /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-check text-green-500" });
+      case "error":
+        return /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-xmark text-red-500" });
+      case "warning":
+        return /* @__PURE__ */ jsx("i", { className: "fa-solid fa-triangle-exclamation text-yellow-500" });
+      case "info":
+      default:
+        return /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-info text-blue-500" });
+    }
+  };
+  return /* @__PURE__ */ jsxs(SnackbarContext.Provider, { value, children: [
+    children,
+    /* @__PURE__ */ jsx(
+      Transition,
+      {
+        className: "fixed bottom-6 right-6 z-50",
+        animation: AnimationLib.SlideRightToLeft,
+        show: visibleSnackbar,
+        duration: durationAnim,
+        children: /* @__PURE__ */ jsxs(
+          "div",
+          {
+            className: `px-4 py-3 rounded-lg shadow-lg
+                     bg-bg-fourth 
+                     flex items-center gap-3
+                     min-w-[300px] max-w-[500px]`,
+            children: [
+              getIcon(displaySnackbar?.type ?? "info"),
+              /* @__PURE__ */ jsx("span", { className: "text-text-main flex-1", children: displaySnackbar?.message }),
+              /* @__PURE__ */ jsx(
+                "button",
+                {
+                  onClick: () => setVisibleSnackbar(false),
+                  className: "text-text-third hover:text-text-main transition-colors",
+                  children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+                }
+              )
+            ]
+          }
+        )
+      }
+    )
+  ] });
+});
 function ContextTree({ children, authContext }) {
   return /* @__PURE__ */ jsx(ThemeProvider, { children: /* @__PURE__ */ jsx(
     AuthProvider,
     {
       initialIsAuthenticated: authContext?.isAuthenticated,
       userData: authContext?.userData,
-      children: /* @__PURE__ */ jsx(LoadingProvider, { children: /* @__PURE__ */ jsx(DialogProvider, { children: /* @__PURE__ */ jsx(ToastProvider, { children }) }) })
+      children: /* @__PURE__ */ jsx(LoadingProvider, { children: /* @__PURE__ */ jsx(DialogProvider, { children: /* @__PURE__ */ jsx(SnackbarProvider, { children: /* @__PURE__ */ jsx(ToastProvider, { children }) }) }) })
     }
   ) });
 }
-const store = configureStore({
-  reducer: {
-    notifications: notificationsReducer
-  }
-});
 function useAuth() {
   return useContext(AuthContext);
 }
+function useSafeQueryResult(params) {
+  const wrappedOptions = {
+    ...params,
+    queryFn: async () => {
+      if (typeof params.fn !== "function") {
+        throw new Error("queryFn is not a function");
+      }
+      var result = await params.fn();
+      if (result.success) {
+        params.options?.onSuccess?.(result.data);
+        return result.data;
+      } else {
+        const error = new Error(result.error?.toString() || "Query failed");
+        params.options?.onError?.(error, result.errors);
+        throw error;
+      }
+    }
+  };
+  return useQuery(wrappedOptions);
+}
+function useSafeInfiniteQueryResult({
+  fn,
+  options,
+  ...params
+}) {
+  return useInfiniteQuery({
+    ...params,
+    queryFn: async (context) => {
+      if (typeof fn !== "function") {
+        throw new Error("fn is not a function");
+      }
+      const result = await fn(context.pageParam);
+      if (result.success) {
+        options?.onSuccess?.(result.data);
+        return result.data;
+      } else {
+        const error = new Error(result.error?.toString() || "Query failed");
+        options?.onError?.(error, result.errors);
+        throw error;
+      }
+    },
+    initialPageParam: void 0,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasNext ? lastPage.nextCursor : void 0;
+    }
+  });
+}
+const profileQueryKey = (userId) => ["user", "profile", userId];
+const profileDetailsQueryKey = (userId) => ["user", "profile", "details", userId];
+const useGetUserProfile = (userId) => {
+  return useSafeQueryResult({
+    queryKey: profileQueryKey(userId),
+    fn: () => userProfileService.getProfile(
+      userId,
+      "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName"
+    ),
+    enabled: !!userId
+  });
+};
+const useGetUserProfileDetails = (userId) => {
+  return useSafeQueryResult({
+    queryKey: profileDetailsQueryKey(userId),
+    fn: () => userProfileService.getProfile(userId, "bio,description"),
+    enabled: !!userId
+  });
+};
+const useUpdateName = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({
+      firstName,
+      middleName,
+      lastName
+    }) => userProfileService.updateName({
+      firstName,
+      middleName,
+      lastName
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateUrlName = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({ urlName }) => userProfileService.updateUrlName({
+      urlName
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateNickname = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({ nickname }) => userProfileService.updateNickname({
+      nickname
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateProfile = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher((data) => userProfileService.updateProfile(data), {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: profileQueryKey(userId)
+      });
+      qc.invalidateQueries({
+        queryKey: profileDetailsQueryKey(userId)
+      });
+    }
+  });
+};
+const useSelectBackground = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(userProfileService.uploadBackground, {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: profileQueryKey(userId)
+      });
+    }
+  });
+};
+const useSelectAvatar = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(userProfileService.uploadAvatar, {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: profileQueryKey(userId)
+      });
+    }
+  });
+};
 const UserMenu = () => {
-  const [avatar, setAvatar] = useState("");
-  const [fullName, setFullName] = useState("");
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const { userId, urlName, logOut } = useAuth();
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const { data: userProfile } = useGetUserProfile(userId);
   const menuRef = useRef(null);
   const btnRef = useRef(null);
   const handleClickOutside = () => {
@@ -1890,16 +2164,6 @@ const UserMenu = () => {
     btnRef,
     handleClickOutside
   );
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const response = await userProfileService.getProfile(userId || "", "avatar,fullName");
-      if (response.success) {
-        setAvatar(response.data.infos.avatar);
-        setFullName(response.data.infos.fullName);
-      }
-    };
-    fetchProfile();
-  }, [userId]);
   const handlePersonalPage = useCallback(() => {
     const user2 = urlName || userId;
     navigate(`/${user2}`);
@@ -1922,7 +2186,15 @@ const UserMenu = () => {
         onClick: () => {
           setIsOpenMenu(!isOpenMenu);
         },
-        children: /* @__PURE__ */ jsx(Avatar, { src: avatar, alt: "Profile", sz: "sm-1", className: "border-4 border-bg-third" })
+        children: /* @__PURE__ */ jsx(
+          Avatar,
+          {
+            src: userProfile?.avatar ?? "",
+            alt: "Profile",
+            sz: "sm-1",
+            className: "border-4 border-bg-third"
+          }
+        )
       }
     ),
     isOpenMenu && /* @__PURE__ */ jsx(
@@ -1947,8 +2219,8 @@ const UserMenu = () => {
               ),
               onClick: handlePersonalPage,
               children: [
-                /* @__PURE__ */ jsx(Avatar, { src: avatar, alt: "avatar", sz: "sm-1" }),
-                /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: fullName })
+                /* @__PURE__ */ jsx(Avatar, { src: userProfile?.avatar ?? "", alt: "avatar", sz: "sm-1" }),
+                /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: userProfile?.fullName ?? "" })
               ]
             }
           ) }),
@@ -1982,7 +2254,7 @@ const UserMenu = () => {
               variant: "secondary",
               className: clsx(
                 "flex items-center justify-start w-full gap-3 text-red-400",
-                "hover:!bg-red-50 transition-all duration-200",
+                "hover:!bg-bg-fourth transition-all duration-200",
                 "hover:scale-[1.02] active:scale-[0.98]"
               ),
               onClick: handleLogout,
@@ -1997,34 +2269,70 @@ const UserMenu = () => {
     )
   ] });
 };
-const PREFIX$1 = `/api/notification`;
+const PREFIX = buildApiPath("/notification");
 class NotificationService {
-  async getNotifications(cursorId, pageSize) {
+  async getNotifications(query) {
     try {
-      const res = await apiClient.get(`${PREFIX$1}/getNotifications`, {
-        params: {
-          cursorId,
-          pageSize
-        }
+      const res = await apiClient.get(`${PREFIX}`, {
+        params: query
       });
-      const response = res.data;
+      console.log("API Response for getNotifications:", res.data);
+      const resp = res.data;
       return {
         success: true,
-        data: response.data
+        data: {
+          data: resp.data ?? [],
+          nextCursor: resp.nextCursor,
+          hasNext: resp.hasNext
+        }
+      };
+    } catch (error) {
+      return handleApiError(error);
+    }
+  }
+  async getUnreadNotifications(query) {
+    try {
+      const res = await apiClient.get(`${PREFIX}/unread`, {
+        params: query
+      });
+      const resp = res.data;
+      return {
+        success: true,
+        data: {
+          data: resp.data ?? [],
+          nextCursor: resp.nextCursor,
+          hasNext: resp.hasNext
+        }
       };
     } catch (error) {
       return handleApiError(error);
     }
   }
   async markAsRead(notificationId) {
+    return apiPost(`${PREFIX}/read/${notificationId}`);
+  }
+  async markAllAsRead() {
+    return apiPost(`${PREFIX}/read/all`);
+  }
+  async getUnreadCount() {
     try {
-      await apiClient.post(`${PREFIX$1}/markNotificationAsRead/${notificationId}`);
+      const res = await apiClient.get(`${PREFIX}/unread`, {
+        params: { limit: 1 }
+      });
       return {
-        success: true
+        success: true,
+        data: res.data.unreadCount ?? 0
       };
     } catch (error) {
       return handleApiError(error);
     }
+  }
+  // ---------- DELETE ----------
+  async deleteNotification(notificationId) {
+    return apiDelete(`${PREFIX}/${notificationId}`);
+  }
+  async deleteAllNotifications() {
+    return apiDelete(`${PREFIX}/all`);
   }
 }
 const notificationService = new NotificationService();
@@ -2037,41 +2345,293 @@ const NotificationSkeleton = () => {
     ] })
   ] });
 };
-const useNotifications = () => {
-  const dispatch = useDispatch();
+const useNotifications = (queryParams) => {
   const { userId } = useAuth();
-  const { pageSize, cursorId } = useSelector((state) => state.notifications);
-  return useQuery({
-    queryKey: ["notifications", userId],
-    queryFn: async () => {
-      const res = await notificationService.getNotifications(cursorId, pageSize);
-      await new Promise((resolve) => setTimeout(resolve, 1e5));
-      dispatch(loadNotifications(res.data));
-      return res.data;
-    },
-    staleTime: 1e3 * 60 * 5,
+  return useSafeInfiniteQueryResult({
+    queryKey: ["notifications", userId, queryParams],
+    fn: (cursor) => notificationService.getNotifications({ ...queryParams, cursor }),
     enabled: !!userId
   });
 };
-const NotificationMenu = ({ className, onClick, ref }) => {
-  const { t } = useTranslation();
-  const dispatch = useDispatch();
-  const navigate = useNavigate$1();
-  const { isLoading, refetch } = useNotifications();
-  const { notifications: notifications2, isInNotificationPage, isFull, isShowFull } = useSelector(
-    (state) => state.notifications
-  );
-  const loaderRef = React.useRef(null);
+function InfiniteScroll({
+  itemInRow = 1,
+  items,
+  loadingSkeleton,
+  numberOfSkeletons = 4,
+  className,
+  hasMore = true,
+  isLoading = false,
+  itemTemplate,
+  onLoadMore
+}) {
+  const sentinelRef = useRef(null);
+  const loadingRef = useRef(false);
   useEffect(() => {
-    if (!loaderRef.current || isFull) return;
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
     const observer = new IntersectionObserver(async ([entry]) => {
       if (entry.isIntersecting) {
-        await refetch();
+        await onLoadMore();
       }
     });
-    observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [loaderRef, isShowFull, isFull, refetch]);
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+    };
+  }, [sentinelRef, hasMore]);
+  useEffect(() => {
+    if (!isLoading) {
+      loadingRef.current = false;
+    }
+  }, [isLoading]);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className,
+      style: {
+        display: "grid",
+        gridTemplateColumns: `repeat(${itemInRow}, 1fr)`,
+        gap: "0.5rem"
+      },
+      children: [
+        items.map((item, index) => itemTemplate ? itemTemplate(item, index) : item),
+        hasMore && /* @__PURE__ */ jsx("div", { ref: sentinelRef, className: "absolute bottom-1/2 h-[20px] w-[20px]" }),
+        isLoading && /* @__PURE__ */ jsx(Fragment, { children: Array.from({ length: numberOfSkeletons }).map((_, index) => /* @__PURE__ */ jsx(
+          "div",
+          {
+            style: {
+              textAlign: "center",
+              padding: "1rem 0"
+            },
+            children: loadingSkeleton ?? "Loading..."
+          },
+          index
+        )) }),
+        !hasMore && !isLoading && /* @__PURE__ */ jsx(
+          "div",
+          {
+            style: {
+              gridColumn: "1 / -1",
+              textAlign: "center",
+              padding: "1rem 0",
+              color: "var(--text-third-color)"
+            },
+            children: "Đã xem hết kết quả."
+          }
+        )
+      ]
+    }
+  );
+}
+const notificationKeys = {
+  list: (userId, params) => ["notifications", userId, params],
+  unreadCount: (userId) => ["notifications-unread-count", userId],
+  uiState: () => ["notifications-ui-state"]
+};
+const DEFAULT_UI_STATE = {
+  isShowNotification: false,
+  isInNotificationPage: false
+};
+function useNotificationUiState() {
+  const queryClient = useQueryClient();
+  const { data: uiState = DEFAULT_UI_STATE } = useQuery({
+    queryKey: notificationKeys.uiState(),
+    queryFn: () => DEFAULT_UI_STATE,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
+  });
+  const setShowNotification = useCallback(
+    (value) => {
+      queryClient.setQueryData(notificationKeys.uiState(), (old) => ({
+        ...old ?? DEFAULT_UI_STATE,
+        isShowNotification: value
+      }));
+    },
+    [queryClient]
+  );
+  const setInNotificationPage = useCallback(
+    (value) => {
+      queryClient.setQueryData(notificationKeys.uiState(), (old) => ({
+        ...old ?? DEFAULT_UI_STATE,
+        isInNotificationPage: value
+      }));
+    },
+    [queryClient]
+  );
+  return {
+    isShowNotification: uiState.isShowNotification,
+    isInNotificationPage: uiState.isInNotificationPage,
+    setShowNotification,
+    setInNotificationPage
+  };
+}
+function useUnreadCount() {
+  const { userId } = useAuth();
+  const queryClient = useQueryClient();
+  const { data: unreadCount = 0 } = useSafeQueryResult({
+    queryKey: notificationKeys.unreadCount(userId),
+    fn: () => notificationService.getUnreadCount(),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    enabled: !!userId
+  });
+  const setUnreadCount = useCallback(
+    (value) => {
+      queryClient.setQueryData(
+        notificationKeys.unreadCount(userId),
+        (old = 0) => typeof value === "function" ? value(old) : value
+      );
+    },
+    [queryClient, userId]
+  );
+  const incrementUnread = useCallback(
+    (by = 1) => setUnreadCount((prev) => prev + by),
+    [setUnreadCount]
+  );
+  const decrementUnread = useCallback(
+    (by = 1) => setUnreadCount((prev) => Math.max(prev - by, 0)),
+    [setUnreadCount]
+  );
+  return { unreadCount, setUnreadCount, incrementUnread, decrementUnread };
+}
+function useNotificationCacheMutations() {
+  const queryClient = useQueryClient();
+  const { userId } = useAuth();
+  const addNotificationToCache = useCallback(
+    (notification) => {
+      queryClient.setQueriesData(
+        { queryKey: ["notifications", userId] },
+        (oldData) => {
+          if (!oldData?.pages?.length) {
+            return {
+              pages: [{ data: [notification], nextCursor: void 0, hasNext: false }],
+              pageParams: [void 0]
+            };
+          }
+          const firstPage = oldData.pages[0];
+          if (firstPage.data.some((n) => n.id === notification.id)) return oldData;
+          return {
+            ...oldData,
+            pages: [
+              { ...firstPage, data: [notification, ...firstPage.data] },
+              ...oldData.pages.slice(1)
+            ]
+          };
+        }
+      );
+    },
+    [queryClient, userId]
+  );
+  const removeNotificationFromCache = useCallback(
+    (notificationId) => {
+      console.log("Removing notification from cache with ID:", notificationId);
+      queryClient.setQueriesData(
+        { queryKey: ["notifications", userId] },
+        (oldData) => {
+          console.log("Current cache data before removal:", oldData);
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              data: page.data.filter((n) => n.id !== notificationId)
+            }))
+          };
+        }
+      );
+    },
+    [queryClient, userId]
+  );
+  const markAsReadInCache = useCallback(
+    (notificationId) => {
+      queryClient.setQueriesData(
+        { queryKey: ["notifications", userId] },
+        (oldData) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              data: page.data.map((n) => n.id === notificationId ? { ...n, isRead: true } : n)
+            }))
+          };
+        }
+      );
+    },
+    [queryClient, userId]
+  );
+  const markAllAsReadInCache = useCallback(() => {
+    queryClient.setQueriesData(
+      { queryKey: ["notifications", userId] },
+      (oldData) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            data: page.data.map((n) => ({ ...n, isRead: true }))
+          }))
+        };
+      }
+    );
+  }, [queryClient, userId]);
+  const clearAllFromCache = useCallback(() => {
+    queryClient.setQueriesData(
+      { queryKey: ["notifications", userId] },
+      (oldData) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            data: []
+          }))
+        };
+      }
+    );
+  }, [queryClient, userId]);
+  const invalidateNotifications = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+  }, [queryClient, userId]);
+  return {
+    addNotificationToCache,
+    removeNotificationFromCache,
+    markAsReadInCache,
+    markAllAsReadInCache,
+    clearAllFromCache,
+    invalidateNotifications
+  };
+}
+const NotificationMenu = ({ className, onClick, ref }) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate$1();
+  const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
+    limit: 20
+  });
+  const { isInNotificationPage } = useNotificationUiState();
+  const { unreadCount, setUnreadCount } = useUnreadCount();
+  const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } = useNotificationCacheMutations();
+  const notifications2 = React.useMemo(() => {
+    return data?.pages.flatMap((page) => page.data) || [];
+  }, [data]);
+  const handleMarkAllAsRead = async () => {
+    markAllAsReadInCache();
+    setUnreadCount(0);
+    await notificationService.markAllAsRead();
+    invalidateNotifications();
+  };
+  const handleDeleteAll = async () => {
+    clearAllFromCache();
+    setUnreadCount(0);
+    await notificationService.deleteAllNotifications();
+    invalidateNotifications();
+  };
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -2082,96 +2642,99 @@ const NotificationMenu = ({ className, onClick, ref }) => {
       ),
       ref,
       children: [
-        /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", className: "px-2 pt-2", children: t("notifications:notifications.title") }),
-        notifications2 && notifications2.length > 0 ? /* @__PURE__ */ jsxs("ul", { className: "relative py-1 overflow-y-scroll scrollbar-none", children: [
-          isShowFull ? notifications2.map((notification) => /* @__PURE__ */ jsx(
-            "li",
-            {
-              className: clsx(
-                "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
-                "transition-all duration-200 hover:scale-[1.01]",
-                "active:scale-[0.99]"
-              ),
-              children: /* @__PURE__ */ jsx(
-                NotificationFactory,
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-2 pt-2", children: [
+          /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: t("notifications:notifications.title") }),
+          notifications2.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+            unreadCount > 0 && /* @__PURE__ */ jsx(
+              Text,
+              {
+                sz: "sm-1",
+                color: "secondary",
+                className: "cursor-pointer hover:underline",
+                onClick: handleMarkAllAsRead,
+                children: t("notifications:notifications.mark-all-read")
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              Text,
+              {
+                sz: "sm-1",
+                color: "secondary",
+                className: "cursor-pointer hover:underline",
+                onClick: handleDeleteAll,
+                children: t("notifications:notifications.delete-all")
+              }
+            )
+          ] })
+        ] }),
+        notifications2.length > 0 ? /* @__PURE__ */ jsx("div", { className: "relative py-1 overflow-y-scroll scrollbar-none max-h-[500px]", children: /* @__PURE__ */ jsx(
+          InfiniteScroll,
+          {
+            itemInRow: 1,
+            items: notifications2,
+            onLoadMore: fetchNextPage,
+            className: "gap-0",
+            itemTemplate: (item) => {
+              const notification = item;
+              return /* @__PURE__ */ jsx(
+                "div",
                 {
-                  notificationDto: notification,
-                  onClick: async () => {
-                    navigate(notification.link || "/");
-                    dispatch(markAsRead(notification.id));
-                    await notificationService.markAsRead(notification.id);
-                    onClick?.();
-                  }
-                }
-              )
+                  className: clsx(
+                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
+                    "transition-all duration-200 hover:scale-[1.01]",
+                    "active:scale-[0.99]"
+                  ),
+                  children: /* @__PURE__ */ jsx(
+                    NotificationFactory,
+                    {
+                      notificationDto: notification,
+                      onClick: async () => {
+                        navigate(notification.link || "/");
+                        if (!notification.isRead) {
+                          markAsReadInCache(notification.id);
+                          setUnreadCount((prev) => Math.max(prev - 1, 0));
+                        }
+                        await notificationService.markAsRead(notification.id);
+                        onClick?.();
+                      }
+                    }
+                  )
+                },
+                notification.id
+              );
             },
-            notification.id
-          )) : notifications2.slice(0, 5).map((notification) => /* @__PURE__ */ jsx(
-            "li",
-            {
-              className: clsx(
-                "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
-                "transition-all duration-200 hover:scale-[1.01]",
-                "active:scale-[0.99]"
-              ),
-              children: /* @__PURE__ */ jsx(
-                NotificationFactory,
-                {
-                  notificationDto: notification,
-                  onClick: async () => {
-                    navigate(notification.link || "/");
-                    dispatch(markAsRead(notification.id));
-                    await notificationService.markAsRead(notification.id);
-                    onClick?.();
-                  }
-                }
-              )
-            },
-            notification.id
-          )),
-          isLoading && [...Array(2)].map((_, i) => /* @__PURE__ */ jsx("li", { className: "mt-1", children: /* @__PURE__ */ jsx(NotificationSkeleton, {}) }, `skeleton-${i}`)),
-          !isShowFull ? /* @__PURE__ */ jsx("li", { className: "mt-2", children: /* @__PURE__ */ jsx(
-            Button,
-            {
-              sz: "sm-1",
-              variant: "fourth",
-              className: "w-full",
-              onClick: () => {
-                dispatch(setShowFull(true));
-              },
-              children: t("notifications:notifications.showMore")
-            }
-          ) }) : /* @__PURE__ */ jsx("li", { ref: loaderRef })
-        ] }) : /* @__PURE__ */ jsx(Fragment, { children: !isLoading ? /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center h-40", children: t("notifications:notifications.no-notifications") }) : /* @__PURE__ */ jsxs("div", { className: "flex flex-col px-2 py-2 gap-3", children: [
+            hasMore: !!hasNextPage,
+            isLoading: isFetching,
+            loadingSkeleton: /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+            numberOfSkeletons: 2
+          }
+        ) }) : /* @__PURE__ */ jsx(Fragment, { children: !isFetching ? /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center h-40", children: t("notifications:notifications.no-notifications") }) : /* @__PURE__ */ jsxs("div", { className: "flex flex-col px-2 py-2 gap-3", children: [
           /* @__PURE__ */ jsx(NotificationSkeleton, {}),
           /* @__PURE__ */ jsx(NotificationSkeleton, {}),
           /* @__PURE__ */ jsx(NotificationSkeleton, {}),
           /* @__PURE__ */ jsx(NotificationSkeleton, {}),
           /* @__PURE__ */ jsx(NotificationSkeleton, {})
         ] }) }),
-        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "absolute right-4", onClick: () => navigate("/notifications"), children: /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", className: clsx("cursor-pointer underline"), children: "Mở thông báo" }) })
+        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "absolute right-4", onClick: () => navigate("/notifications"), children: /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", className: clsx("cursor-pointer underline"), children: t("notifications:notifications.open-notifications") }) })
       ]
     }
   );
 };
 const NotificationBadge = ({}) => {
-  const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { unreadCount, isShowNotification, isInNotificationPage } = useSelector(
-    (state) => state.notifications
-  );
+  const { unreadCount } = useUnreadCount();
+  const { isShowNotification, isInNotificationPage, setShowNotification } = useNotificationUiState();
   const menuRef = React.useRef(null);
   const btnRef = React.useRef(null);
   useClickOutside(menuRef, btnRef, () => {
-    if (isShowNotification) dispatch(setShowNotification(false));
+    if (isShowNotification) setShowNotification(false);
   });
-  useNotifications();
   const handleToggleNotifications = () => {
     if (window.innerWidth < 640 && !isShowNotification) {
       navigate("/notifications");
       return;
     }
-    dispatch(setShowNotification(!isShowNotification));
+    setShowNotification(!isShowNotification);
   };
   const isActive = isShowNotification || isInNotificationPage;
   return /* @__PURE__ */ jsxs("div", { className: "relative flex items-center justify-center", children: [
@@ -2203,7 +2766,7 @@ const NotificationBadge = ({}) => {
           "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
           "top-[108%] -right-[70px] w-screen h-screen p-6"
         ),
-        onClick: () => dispatch(setShowNotification(!isShowNotification)),
+        onClick: () => setShowNotification(!isShowNotification),
         ref: menuRef
       }
     )
@@ -2364,6 +2927,46 @@ const PageNavbarItem = ({
     }
   );
 };
+function HeightTransition({
+  show,
+  children,
+  duration = 150,
+  fade = true
+}) {
+  const mainRef = useRef(null);
+  const [maxHeight, setMaxHeight] = useState(show ? "none" : "0px");
+  const [isVisible, setIsVisible] = useState(show);
+  useLayoutEffect(() => {
+    if (!mainRef.current) {
+      return;
+    }
+    const element = mainRef.current;
+    const measuredHeight = element.scrollHeight;
+    if (show) {
+      setIsVisible(true);
+      setMaxHeight(measuredHeight + "px");
+    } else {
+      setIsVisible(false);
+      setMaxHeight("0px");
+    }
+  }, [show]);
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      ref: mainRef,
+      style: {
+        overflow: "hidden",
+        maxHeight,
+        transitionDuration: duration + "ms",
+        opacity: fade ? show ? 1 : 0.5 : 1,
+        transform: fade ? show ? "translateY(0)" : "translateY(-10px)" : "none",
+        transitionProperty: fade ? `max-height, opacity, transform` : `max-height`
+      },
+      "aria-hidden": !isVisible,
+      children
+    }
+  );
+}
 const PageNavbarSection = ({
   title: title2,
   className,
@@ -2409,7 +3012,7 @@ const PageNavbarSection = ({
         ]
       }
     ),
-    showChildren && /* @__PURE__ */ jsx("div", { className: clsx("w-full animate-dropdown-slide mt-1 space-y-1"), children })
+    /* @__PURE__ */ jsx(HeightTransition, { show: showChildren, children: /* @__PURE__ */ jsx("div", { className: clsx("w-full mt-1 space-y-1"), children }) })
   ] });
 };
 const PageNavbar = ({ title: title2, className, children }) => {
@@ -2630,16 +3233,21 @@ const useToast = () => {
   return context;
 };
 function NotificationListener() {
-  const dispatch = useDispatch();
   const { pushToast } = useToast();
+  const { incrementUnread, decrementUnread } = useUnreadCount();
+  const { addNotificationToCache, removeNotificationFromCache } = useNotificationCacheMutations();
   const handleNewNotification = useCallback(
     (data) => {
-      if (data.type === "CancelNotification") {
-        dispatch(deleteNotification(data.data.noticationId));
+      console.log("Received CancelNotification with data:", data);
+      if (data.type === NotificationType.CancelNotification) {
+        const notificationIdToCancel = data.data.notificationId;
+        console.log("12 Canceling notification with ID:", notificationIdToCancel);
+        removeNotificationFromCache(notificationIdToCancel);
+        decrementUnread();
         return;
-      } else {
-        dispatch(addNewNotification(data));
       }
+      addNotificationToCache(data);
+      incrementUnread();
       pushToast({
         id: data.id,
         type: "notification",
@@ -2649,7 +3257,13 @@ function NotificationListener() {
         duration: 5e3
       });
     },
-    [dispatch, pushToast]
+    [
+      pushToast,
+      addNotificationToCache,
+      removeNotificationFromCache,
+      incrementUnread,
+      decrementUnread
+    ]
   );
   useNotificationHub(handleNewNotification);
   return null;
@@ -2917,30 +3531,35 @@ const ErrorCodes$3 = {
   UNKNOWN_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.unknownError",
   INTERNAL_SERVER_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.internalServerError"
 };
-const ChangeUrlName = ({ isLoading, urlName: u }) => {
+const ChangeUrlName = ({ userId }) => {
   const t = useLanguage$1();
   const { setUrlName: _setUrlName } = useAuth();
-  const [urlName, setUrlName] = useState();
   const [isEditUrlName, setIsEditUrlName] = useState(false);
   const [isEditUrlNameFailed, setIsEditUrlNameFailed] = useState(false);
   const [editUrlFailedMessage, setEditUrlFailedMessage] = useState("");
-  useEffect(() => {
-    setUrlName(u);
-  }, [u]);
-  const handleChangeUrlName = async (urlName2) => {
-    const changeUrlNameDto = {
-      urlName: urlName2 ?? ""
-    };
-    const response = await userProfileService.UpdateUrlName(changeUrlNameDto);
-    if (response.success) {
-      setUrlName(urlName2);
-      _setUrlName?.(urlName2);
-      setIsEditUrlName(false);
-    } else {
-      setIsEditUrlNameFailed(true);
-      const errorCode = response?.errorCode;
-      setEditUrlFailedMessage(t(ErrorCodes$3[errorCode]));
-    }
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
+  const updateUrlNameMutation = useUpdateUrlName(userId);
+  const handleSaveUrlName = (newUrlName) => {
+    if (!newUrlName) return;
+    updateUrlNameMutation.fetch(
+      { urlName: newUrlName },
+      {
+        onSuccess: () => {
+          setIsEditUrlName(false);
+          setIsEditUrlNameFailed(false);
+          _setUrlName?.(newUrlName);
+        },
+        onError: (error) => {
+          const errorCode = error?.code;
+          if (errorCode && ErrorCodes$3[errorCode]) {
+            setEditUrlFailedMessage(t(ErrorCodes$3[errorCode]));
+          } else {
+            setEditUrlFailedMessage(t(ErrorCodes$3["UNKNOWN_ERROR"]));
+          }
+          setIsEditUrlNameFailed(true);
+        }
+      }
+    );
   };
   if (isLoading) {
     return /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" });
@@ -2949,10 +3568,10 @@ const ChangeUrlName = ({ isLoading, urlName: u }) => {
     EditableField,
     {
       title: t("settings:account.personalInfo.urlName"),
-      value: urlName,
+      value: userProfile?.urlName,
       noDataValue: t("settings:account.personalInfo.noUrlName"),
       placeholder: t("settings:account.personalInfo.urlNamePlaceholder"),
-      valueClassName: clsx(!urlName && "!opacity-50"),
+      valueClassName: clsx(!userProfile?.urlName && "!opacity-50"),
       btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
         /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
         t("settings:account.personalInfo.changeButton")
@@ -2968,57 +3587,42 @@ const ChangeUrlName = ({ isLoading, urlName: u }) => {
         setIsEditUrlName(false);
         setIsEditUrlNameFailed(false);
       },
-      onSaveClick: (e) => handleChangeUrlName(e)
+      onSaveClick: handleSaveUrlName
     }
   );
 };
 const ErrorCodes$2 = {
   NICKNAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeNickname.nicknameTooLong"
 };
-const PREFIX = `/api/userinfo`;
-class UserInfoService {
-  async UpdateNickname(changeNicknameDto) {
-    try {
-      const res = await apiClient.patch(`${PREFIX}/nickname`, changeNicknameDto);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
-  }
-  async GetUserInfoOverview(userId) {
-    try {
-      const res = await apiClient.get(`${PREFIX}/overview/${userId}`);
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
-  }
-}
-const userInfoService = new UserInfoService();
-const ChangeNickname = ({ isLoading, nickname: n }) => {
+const ChangeNickname = ({ userId }) => {
   const t = useLanguage$1();
-  const [nickname, setNickname] = useState();
   const [isEditNickname, setIsEditNickname] = useState(false);
   const [isEditNicknameFailed, setIsEditNicknameFailed] = useState(false);
   const [editNicknameFailedMessage, setEditNicknameFailedMessage] = useState("");
-  useEffect(() => {
-    setNickname(n);
-  }, [n]);
-  const handleChangeNickname = async (nickname2) => {
-    const changeNickname = {
-      nickname: nickname2 ?? ""
-    };
-    const response = await userInfoService.UpdateNickname(changeNickname);
-    if (response.success) {
-      setNickname(nickname2);
-      setIsEditNickname(false);
-    } else {
-      setIsEditNicknameFailed(true);
-      const errorCode = response?.errorCode;
-      setEditNicknameFailedMessage(t(ErrorCodes$2[errorCode]));
-    }
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
+  const updateNicknameMutation = useUpdateNickname(userId);
+  const handleSaveNickname = (newNickname) => {
+    if (!newNickname) return;
+    updateNicknameMutation.fetch(
+      { nickname: newNickname },
+      {
+        onSuccess: () => {
+          setIsEditNickname(false);
+          setIsEditNicknameFailed(false);
+        },
+        onError: (error) => {
+          const errorCode = error?.code;
+          if (errorCode && ErrorCodes$2[errorCode]) {
+            setEditNicknameFailedMessage(t(ErrorCodes$2[errorCode]));
+          } else {
+            setEditNicknameFailedMessage(
+              t("settings:account.personalInfo.errorMessages.changeNickname.unknownError")
+            );
+          }
+          setIsEditNicknameFailed(true);
+        }
+      }
+    );
   };
   if (isLoading) {
     return /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" });
@@ -3027,10 +3631,10 @@ const ChangeNickname = ({ isLoading, nickname: n }) => {
     EditableField,
     {
       title: t("settings:account.personalInfo.nickname"),
-      value: nickname,
+      value: userProfile?.nickname,
       noDataValue: t("settings:account.personalInfo.noNickname"),
       placeholder: t("settings:account.personalInfo.nicknamePlaceholder"),
-      valueClassName: clsx(!nickname && "!opacity-50"),
+      valueClassName: clsx(!userProfile?.nickname && "!opacity-50"),
       btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
         /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
         t("settings:account.personalInfo.changeButton")
@@ -3046,39 +3650,22 @@ const ChangeNickname = ({ isLoading, nickname: n }) => {
         setIsEditNickname(false);
         setIsEditNicknameFailed(false);
       },
-      onSaveClick: (e) => handleChangeNickname(e)
+      onSaveClick: handleSaveNickname
     }
   );
 };
 const AccountSetting = ({ className }) => {
   const t = useLanguage$1();
-  const [fullName, setFullName] = React.useState("");
-  const [urlName, setUrlName] = React.useState();
-  const [nickname, setNickname] = React.useState();
-  const [isLoading, setIsLoading] = React.useState(true);
   const { userId } = useAuth();
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
   const navigate = useNavigate();
-  const location = useLocation();
   const handleChangeName = () => navigate("name");
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const _userId = userId ?? "";
-      const response = await userProfileService.getProfile(_userId, "fullName,urlName,nickname");
-      if (response.success) {
-        setFullName(response.data.infos.fullName);
-        setUrlName(response.data.infos.urlName);
-        setNickname(response.data.infos.nickname);
-      }
-      setIsLoading(false);
-    };
-    fetchProfile();
-  }, [userProfileService, location.key, userId]);
   return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsxs(Card, { title: t("settings:account.personalInfo.title"), className: "mb-0 gap-5", children: [
     isLoading ? /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" }) : /* @__PURE__ */ jsx(
       EditableField,
       {
         title: t("settings:account.personalInfo.yourName"),
-        value: fullName,
+        value: userProfile?.fullName,
         btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
           /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
           " ",
@@ -3087,8 +3674,8 @@ const AccountSetting = ({ className }) => {
         onChangeClick: handleChangeName
       }
     ),
-    /* @__PURE__ */ jsx(ChangeUrlName, { isLoading, urlName }),
-    /* @__PURE__ */ jsx(ChangeNickname, { isLoading, nickname })
+    /* @__PURE__ */ jsx(ChangeUrlName, { userId }),
+    /* @__PURE__ */ jsx(ChangeNickname, { userId })
   ] }) });
 };
 const AccountSettingPage = () => {
@@ -3100,7 +3687,7 @@ const AccountSettingPage = () => {
 const SelectBoxSetting = ({
   options = [],
   selectedOption = "",
-  onOptionChange = (e) => {
+  onOptionChange = () => {
   },
   title: title2,
   className,
@@ -3114,17 +3701,26 @@ const SelectBoxSetting = ({
         className: "!min-w-[170px]",
         selectedOption,
         options,
-        onSelect: onOptionChange
+        onSelect: (e) => onOptionChange(e)
       }
     )
   ] });
 };
+function useSnackbar() {
+  const context = useContext(SnackbarContext);
+  if (!context) {
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
+  }
+  return context;
+}
 const ThemeSettings = ({ className }) => {
-  const { theme: theme2, setTheme } = useTheme();
+  const { availableThemes, theme: theme2, setTheme } = useTheme();
   const [themeOptions, setThemeOptions] = useState([]);
   const { t } = useTranslation();
+  const { showSnackbar } = useSnackbar();
   const selectTheme = (opt) => {
     setTheme(opt);
+    showSnackbar(t("settings:theme.themeChanged"), "info");
   };
   useEffect(() => {
     const options = availableThemes.map((theme22) => ({
@@ -3132,7 +3728,7 @@ const ThemeSettings = ({ className }) => {
       value: t(theme22.label)
     }));
     setThemeOptions(options);
-  }, [availableThemes]);
+  }, [availableThemes, t]);
   return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsx(Card, { title: t("settings:theme.title"), children: /* @__PURE__ */ jsx(
     SelectBoxSetting,
     {
@@ -3165,53 +3761,58 @@ const ErrorCodes$1 = {
   }
 };
 const ChangeNameForm = ({ className }) => {
-  const [oldFirstName, setOldFirstName] = React.useState("");
-  const [oldLastName, setOldLastName] = React.useState("");
-  const [firstName, setFirstName] = React.useState("");
-  const [lastName, setLastName] = React.useState("");
   const [firstNameFailed, setFirstNameFailed] = React.useState(false);
+  const [middleNameFailed, setMiddleNameFailed] = React.useState(false);
   const [lastNameFailed, setLastNameFailed] = React.useState(false);
   const [errorMessage, setErrorMessage] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(true);
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
   const navigate = useNavigate();
   const { t } = useTranslation();
   const { userId } = useAuth();
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
+  const updateNameMutation = useUpdateName(userId);
+  const [newFirstName, setNewFirstName] = React.useState("");
+  const [newMiddleName, setNewMiddleName] = React.useState("");
+  const [newLastName, setNewLastName] = React.useState("");
+  useEffect(() => {
+    setNewFirstName(userProfile?.firstName || "");
+    setNewMiddleName(userProfile?.middleName || "");
+    setNewLastName(userProfile?.lastName || "");
+  }, [userProfile]);
   const handleClose = () => {
     navigate("/settings");
   };
   const handleSubmit = async () => {
-    const response = await userProfileService.updateName({ firstName, lastName });
-    if (response.success) {
-      navigate("/settings", { state: { reload: true } });
-    } else {
-      const errorCode = response?.error?.code;
-      if (errorCode) {
-        setErrorMessage(t(ErrorCodes$1[errorCode].message));
-        setFirstNameFailed(ErrorCodes$1[errorCode].type === "FirstName");
-        setLastNameFailed(ErrorCodes$1[errorCode].type === "LastName");
-      } else {
-        setErrorMessage(t(ErrorCodes$1["UNKNOWN_ERROR"].message));
-        setFirstNameFailed(false);
-        setLastNameFailed(false);
-      }
-    }
-  };
-  useEffect(() => {
-    const fetchProfile = async () => {
-      const response = await userProfileService.getProfile(userId ?? "", "firstName,lastName");
-      if (response.success) {
-        setFirstName(response.data.infos.firstName);
-        setLastName(response.data.infos.lastName);
-        setOldFirstName(response.data.infos.firstName);
-        setOldLastName(response.data.infos.lastName);
-      }
-      setIsLoading(false);
-    };
     setErrorMessage("");
     setFirstNameFailed(false);
+    setMiddleNameFailed(false);
     setLastNameFailed(false);
-    fetchProfile();
-  }, [userProfileService, userId]);
+    setIsSubmitting(true);
+    await updateNameMutation.fetch(
+      {
+        firstName: newFirstName,
+        middleName: newMiddleName || null,
+        lastName: newLastName
+      },
+      {
+        onSuccess: () => {
+          setIsSubmitting(false);
+          navigate("/settings");
+        },
+        onError: (error) => {
+          const errorCode = error?.code;
+          if (errorCode && ErrorCodes$1[errorCode]) {
+            setErrorMessage(t(ErrorCodes$1[errorCode].message));
+            setFirstNameFailed(ErrorCodes$1[errorCode].type === "FirstName");
+            setLastNameFailed(ErrorCodes$1[errorCode].type === "LastName");
+          } else {
+            setErrorMessage(t(ErrorCodes$1["UNKNOWN_ERROR"].message));
+          }
+          setIsSubmitting(false);
+        }
+      }
+    );
+  };
   return /* @__PURE__ */ jsx(
     "div",
     {
@@ -3241,10 +3842,23 @@ const ChangeNameForm = ({ className }) => {
                         Textbox,
                         {
                           isWrong: firstNameFailed,
-                          value: firstName,
+                          value: newFirstName,
+                          onChange: (e) => setNewFirstName(e.target.value),
                           placeholder: "First name",
-                          className: clsx("py-1 px-2 lg:max-w-[200px]"),
-                          onChange: (e) => setFirstName(e.target.value)
+                          className: clsx("py-1 px-2 lg:max-w-[200px]")
+                        }
+                      )
+                    ] }),
+                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
+                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.middleName") }),
+                      /* @__PURE__ */ jsx(
+                        Textbox,
+                        {
+                          isWrong: middleNameFailed,
+                          value: newMiddleName,
+                          onChange: (e) => setNewMiddleName(e.target.value),
+                          placeholder: "Middle name",
+                          className: clsx("py-1 px-2 lg:max-w-[200px]")
                         }
                       )
                     ] }),
@@ -3254,10 +3868,10 @@ const ChangeNameForm = ({ className }) => {
                         Textbox,
                         {
                           isWrong: lastNameFailed,
-                          value: lastName,
+                          value: newLastName,
+                          onChange: (e) => setNewLastName(e.target.value),
                           placeholder: "Last name",
-                          className: clsx("py-1 px-2 lg:max-w-[200px]"),
-                          onChange: (e) => setLastName(e.target.value)
+                          className: clsx("py-1 px-2 lg:max-w-[200px]")
                         }
                       )
                     ] })
@@ -3298,11 +3912,11 @@ const ChangeNameForm = ({ className }) => {
             /* @__PURE__ */ jsx(
               Button,
               {
-                disabled: firstName === oldFirstName && lastName === oldLastName,
+                disabled: isSubmitting || newFirstName === userProfile?.firstName && newMiddleName === (userProfile?.middleName || "") && newLastName === userProfile?.lastName,
                 sz: "md-1",
                 className: clsx("mt-2"),
                 onClick: handleSubmit,
-                children: t("settings:account.personalInfo.changeNameForm.acceptButton")
+                children: isSubmitting ? t("settings:account.personalInfo.changeNameForm.submitting") : t("settings:account.personalInfo.changeNameForm.acceptButton")
               }
             ),
             /* @__PURE__ */ jsx(
@@ -3933,6 +4547,7 @@ const FriendRequestItem = ({
 }) => {
   const { t } = useTranslation();
   const navigate = useNavigate();
+  const timeDist = time2 ? timeDistance(time2) : { text: "" };
   const handleNavigate = () => {
     navigate(path);
   };
@@ -3958,111 +4573,69 @@ const FriendRequestItem = ({
             children: name
           }
         ),
-        /* @__PURE__ */ jsx(Text, { sz: "sm-1", weight: "light", children: time2 }),
+        /* @__PURE__ */ jsxs(Text, { sz: "sm-1", weight: "light", children: [
+          timeDist.count && t(timeDist.unit || "", { count: timeDist.count }),
+          " ",
+          t(timeDist.text)
+        ] }),
         /* @__PURE__ */ jsx(Button, { variant: "primary", sz: "sm-1", className: clsx("w-full mt-2 mb-1"), onClick: onAccept, children: t("user:profileHeader:acceptButton") }),
         /* @__PURE__ */ jsx(Button, { variant: "fourth", sz: "sm-1", className: clsx("w-full mt-2r"), onClick: onCancel, children: t("user:profileHeader:declineButton") })
       ]
     }
   );
 };
+const useAcceptFriendRequest = () => {
+  return useResultFetcher(friendshipService.AcceptAddFriendRequest);
+};
+const useDeclineFriendRequest = () => {
+  return useResultFetcher(friendshipService.DeclineAddFriendRequest);
+};
+const useListFriendRequests = (queryParams) => {
+  return useSafeInfiniteQueryResult({
+    queryKey: ["friendship", "friend-requests", queryParams],
+    fn: (cursor) => friendshipService.GetFriendRequests({ ...queryParams, cursor }),
+    enabled: true
+  });
+};
+const useGetNumberOfFriends = (userId) => {
+  return useSafeQueryResult({
+    queryKey: ["friendship", "number-of-friends", userId],
+    fn: () => friendshipService.GetNumberOfFriends(userId),
+    enabled: !!userId
+  });
+};
 const FriendRequests = ({ className }) => {
-  const [requests, setRequests] = React.useState([]);
-  const [page, setPage] = React.useState(1);
-  const [limit] = React.useState(8);
-  const [isLoading, setIsLoading] = React.useState(false);
-  const [isFull, setIsFull] = React.useState(false);
-  const loaderRef = React.useRef(null);
   const [total, setTotal] = React.useState(0);
-  const { t } = useTranslation();
-  const fetchFriendRequests = React.useCallback(async () => {
-    setIsLoading(true);
-    const response = await friendshipService.GetFriendRequests(page, limit);
-    if (response.success) {
-      setRequests((prev) => [...prev, ...response.data?.friendRequests ?? []]);
-      setTotal(response.data?.total ?? 0);
-      if (response.data?.friendRequests.length && response.data?.friendRequests.length < limit) {
-        setIsFull(true);
-      }
-    }
-    setIsLoading(false);
-  }, [page, limit]);
-  const handleAcceptRequest = useCallback(async (requestId) => {
-    const response = await friendshipService.AcceptAddFriendRequest(requestId);
-    if (response.success) {
-      setRequests(
-        (prevRequests) => prevRequests.filter((request) => request.senderId !== requestId)
-      );
-      setTotal((prevTotal) => prevTotal - 1);
-    }
-  }, []);
-  const handleRejectRequest = useCallback(async (senderId) => {
-    const response = await friendshipService.DeclineAddFriendRequest(senderId);
-    if (response.success) {
-      setRequests(
-        (prevRequests) => prevRequests.filter((request) => request.senderId !== senderId)
-      );
-      setTotal((prevTotal) => prevTotal - 1);
-    }
-  }, []);
-  useEffect(() => {
-    setIsLoading(true);
-    fetchFriendRequests();
-  }, [fetchFriendRequests]);
-  useEffect(() => {
-    if (!loaderRef.current || isFull) return;
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting) {
-        setPage((prev) => prev + 1);
-      }
-    });
-    observer.observe(loaderRef.current);
-    return () => observer.disconnect();
-  }, [loaderRef, isFull]);
-  return /* @__PURE__ */ jsxs(Card, { title: `Danh sách lời mời (${total})`, className, children: [
-    /* @__PURE__ */ jsx("div", { className: "flex flex-wrap gap-2 h-full w-full", children: requests.length > 0 ? /* @__PURE__ */ jsx(Fragment, { children: requests.map((request, index) => /* @__PURE__ */ jsx(
-      FriendRequestItem,
-      {
-        name: request.senderName,
-        avatar: request.senderAvatar,
-        path: `/${request.senderUrlName || request.senderId}`,
-        time: request.createdAt.unit === TimeUnit.Seconds || request.createdAt.unit === TimeUnit.Miliseconds ? t("times:just_now") : `${t(
-          `${TimeUnitTranslateMap[request.createdAt.unit]}.${request.createdAt.value === 1 ? "one" : "other"}`,
-          { count: request.createdAt.value }
-        )} 
-                                        ${t("times:ago")}`,
-        onAccept: () => handleAcceptRequest(request.senderId),
-        onCancel: () => handleRejectRequest(request.senderId)
-      },
-      index
-    )) }) : /* @__PURE__ */ jsx(Text, { sz: "md-2", children: t("friends:friendRequest.noRequests") }) }),
-    /* @__PURE__ */ jsx("div", { ref: loaderRef, className: "w-full h-0" }),
-    isLoading && /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-center items-center w-full h-10 gap-1 mt-5"), children: [
-      /* @__PURE__ */ jsx(
-        "span",
+  const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
+    limit: 20
+  });
+  console.log(hasNextPage);
+  const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.data) || [], [data]);
+  const { fetch: acceptFriendRequest } = useAcceptFriendRequest();
+  const { fetch: rejectFriendRequest } = useDeclineFriendRequest();
+  return /* @__PURE__ */ jsx(Card, { title: `Danh sách lời mời (${total})`, className, children: /* @__PURE__ */ jsx(
+    InfiniteScroll,
+    {
+      itemInRow: 4,
+      items: requestsData,
+      onLoadMore: fetchNextPage,
+      className: clsx("gap-2 h-full w-full"),
+      itemTemplate: (item, index) => /* @__PURE__ */ jsx(
+        FriendRequestItem,
         {
-          className: clsx(
-            "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0s]"
-          )
-        }
+          name: item.senderName,
+          avatar: item.senderAvatar,
+          path: `/${item.senderUrlName || item.senderId}`,
+          time: new Date(item.createdAt),
+          onAccept: () => acceptFriendRequest(item.senderId),
+          onCancel: () => rejectFriendRequest(item.senderId)
+        },
+        index
       ),
-      /* @__PURE__ */ jsx(
-        "span",
-        {
-          className: clsx(
-            "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.2s]"
-          )
-        }
-      ),
-      /* @__PURE__ */ jsx(
-        "span",
-        {
-          className: clsx(
-            "w-2 h-2 rounded-full bg-[var(--text-color)] animate-bounce [animation-delay:0.4s]"
-          )
-        }
-      )
-    ] })
-  ] });
+      hasMore: !!hasNextPage,
+      isLoading: isFetching
+    }
+  ) });
 };
 const FriendRequests$1 = React.memo(FriendRequests);
 const RequestsPage = () => {
@@ -4082,12 +4655,12 @@ const friendsRoutes = {
   ]
 };
 const NotificationsPage = () => {
-  const dispatch = useDispatch();
+  const { setInNotificationPage, setShowNotification } = useNotificationUiState();
   useEffect(() => {
-    dispatch(setInNotificationPage(true));
+    setInNotificationPage(true);
     return () => {
-      dispatch(setInNotificationPage(false));
-      dispatch(setShowNotification(false));
+      setInNotificationPage(false);
+      setShowNotification(false);
     };
   }, []);
   return /* @__PURE__ */ jsx("div", { className: clsx("relative flex items-start justify-center w-full h-full mt-1"), children: /* @__PURE__ */ jsx(NotificationMenu, { className: clsx("h-full max-w-[600px] w-full px-2 py-4 pb-2 mx-4") }) });
@@ -4137,22 +4710,14 @@ const SelectFile = ({
   );
 };
 function useUserId(userParam) {
-  const { data, isLoading, isError } = useQuery({
+  const { data, isLoading, isFetching, isError } = useQuery({
     queryKey: ["user-profile-id", userParam],
-    queryFn: async ({ signal }) => {
-      const timeoutId = setTimeout(() => {
-        if (signal) {
-          const controller = signal;
-          controller.abort?.();
-        }
-      }, 1e4);
+    queryFn: async () => {
       try {
-        const response = await userProfileService.getProfile(userParam, "id");
-        clearTimeout(timeoutId);
-        console.log("Fetch userId for", userParam, response);
+        const response = await userProfileService.getUserId(userParam);
         if (response.success) {
           return {
-            userId: response.data.infos.id,
+            userId: response.data,
             userExist: true
           };
         }
@@ -4161,7 +4726,6 @@ function useUserId(userParam) {
           userExist: false
         };
       } catch (error) {
-        clearTimeout(timeoutId);
         console.error("Error fetching userId:", error);
         return {
           userId: void 0,
@@ -4177,7 +4741,8 @@ function useUserId(userParam) {
   return {
     userId: data?.userId,
     userExist: isError ? false : data?.userExist,
-    isLoading
+    isLoading,
+    isFetching
   };
 }
 const ProfilePageContext = createContext({
@@ -4188,7 +4753,12 @@ const ProfilePageContext = createContext({
 function ProfilePageProvider({ children }) {
   const { userId } = useAuth();
   const userParam = useParams();
-  const { userId: targetId, userExist } = useUserId(userParam.userParam || "");
+  const {
+    userId: targetId,
+    userExist,
+    isLoading,
+    isFetching
+  } = useUserId(userParam.userParam || "");
   const cachedTargetIdRef = useRef(void 0);
   if (targetId) {
     cachedTargetIdRef.current = targetId;
@@ -4202,6 +4772,9 @@ function ProfilePageProvider({ children }) {
     }),
     [userId, validTargetId, userParam.userParam]
   );
+  if (isLoading || isFetching) {
+    return /* @__PURE__ */ jsx(LoadingPage, {});
+  }
   if (userExist === false) {
     return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
@@ -4260,7 +4833,16 @@ const ProfileAvatar = ({
       src: avatar,
       alt: "Avatar",
       sz: "lg-2",
-      className: "border-4 border-bg-main flex-shrink-0"
+      className: "border-4 border-bg-main flex-shrink-0",
+      children: isOwner && /* @__PURE__ */ jsx(
+        SelectFile,
+        {
+          onChange: handleSelectAvatar,
+          accept: "image/*",
+          className: "absolute z-10 inset-0 cursor-pointer bg-black bg-opacity-50\n                flex justify-center items-center opacity-0 hover:opacity-90 hover:bg-black hover:bg-opacity-50 active:opacity-100\n                translate-all duration-150 ease",
+          children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-camera text-white text-2xl" })
+        }
+      )
     }
   ) });
 };
@@ -4496,89 +5078,28 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
     )
   ] }) });
 };
-const ProfileHeader = ({ className, onUserNotFound }) => {
-  const [fullName, setFullName] = React.useState("");
-  const [nickname, setNickname] = React.useState(null);
-  const [avatar, setAvatar] = React.useState("");
-  const [background] = React.useState("");
-  const [isLoading, setIsLoading] = React.useState(true);
-  const [isLoadingNumOfFriends, setIsLoadingNumOfFriends] = React.useState(true);
-  const [numberOfFriends, setNumberOfFriends] = React.useState(0);
+const ProfileHeader = ({ className }) => {
   const avtRef = useRef(null);
   const t = useLanguage$1();
   const navigate = useNavigate();
-  const { openDialog, closeDialog } = useDialog();
   const { targetId, isOwner } = useProfilePage();
-  const { isAuthenticated } = useAuth();
-  useEffect(() => {
-    const fetchProfile = async () => {
-      setIsLoading(true);
-      const response = await userProfileService.getProfile(
-        targetId,
-        "avatar,background,fullName,nickname"
-      );
-      if (response.success) {
-        setFullName(response.data.infos.fullName);
-        setNickname(response.data.infos.nickname);
-      } else {
-        onUserNotFound?.();
-      }
-      setIsLoading(false);
-    };
-    const fetchNumberOfFriends = async () => {
-      setIsLoadingNumOfFriends(true);
-      const response = await friendshipService.GetNumberOfFriends(targetId);
-      if (response.success) {
-        setNumberOfFriends(response.data?.numberOfFriends ?? 0);
-      }
-      setIsLoadingNumOfFriends(false);
-    };
-    if (targetId) {
-      fetchProfile();
-      fetchNumberOfFriends();
-    }
-  }, [targetId, onUserNotFound, friendshipService]);
-  const handleSelectBackground = useCallback(
-    async (file) => {
-      const result = await userProfileService.UploadBackground(file);
-      if (result.success) ;
-      else if (result.error?.code === "LARGE_FILE_ERROR") {
-        openDialog({
-          title: t("user:profileHeader.oversizeErrorTitle"),
-          content: t("user:profileHeader.oversizeErrorMessage"),
-          primaryButton: {
-            text: t("user:profileHeader.oversizeErrorButton"),
-            onClick: closeDialog
-          }
-        });
-      }
-    },
-    [openDialog, closeDialog, t]
-  );
-  const handleSelectAvatar = useCallback(
-    async (file) => {
-      const result = await userProfileService.UploadAvatar(file);
-      if (result.success) {
-        setAvatar(result.data);
-      } else if (result.error?.code === "LARGE_FILE_ERROR") {
-        openDialog({
-          title: t("user:profileHeader.oversizeErrorTitle"),
-          content: t("user:profileHeader.oversizeErrorMessage"),
-          primaryButton: {
-            text: t("user:profileHeader.oversizeErrorButton"),
-            onClick: closeDialog
-          }
-        });
-      }
-    },
-    [openDialog, closeDialog, t]
-  );
+  const { userId, isAuthenticated } = useAuth();
+  const { data: userProfile, isLoading, isFetching } = useGetUserProfile(targetId);
+  const { fetch: fetchBackground } = useSelectBackground(userId);
+  const { fetch: fetchAvatar } = useSelectAvatar(userId);
+  const { data: numberOfFriends, isFetching: numberOfFriendsFetching } = useGetNumberOfFriends(targetId);
+  const handleSelectBackground = async (file) => {
+    await fetchBackground(file);
+  };
+  const handleSelectAvatar = async (file) => {
+    await fetchAvatar(file);
+  };
   return /* @__PURE__ */ jsxs("div", { className: clsx("relative w-full flex flex-col items-center", className), children: [
     /* @__PURE__ */ jsx("div", { className: "relative w-full mt-2", children: /* @__PURE__ */ jsx(
       ProfileBackground,
       {
-        isLoading,
-        background,
+        isLoading: isLoading || isFetching,
+        background: userProfile?.background ?? "",
         handleSelectBackground
       }
     ) }),
@@ -4586,24 +5107,24 @@ const ProfileHeader = ({ className, onUserNotFound }) => {
       /* @__PURE__ */ jsx(
         ProfileAvatar,
         {
-          isLoading,
-          avatar,
+          isLoading: isLoading || isFetching,
+          avatar: userProfile?.avatar ?? "",
           handleSelectAvatar,
           ref: avtRef
         }
       ),
       /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 items-start flex-1 mb-3 ml-4", children: [
-        isLoading ? /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-56" }) : /* @__PURE__ */ jsxs(Text, { sz: "xl-1", weight: "bold", className: "lg:text-left text-center break-words", children: [
-          fullName,
-          nickname && /* @__PURE__ */ jsxs(Text, { sz: "lg-3", weight: "light", className: "lg:text-left text-center lg:ml-2", children: [
+        isLoading || isFetching ? /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-56" }) : /* @__PURE__ */ jsxs(Text, { sz: "xl-1", weight: "bold", className: "lg:text-left text-center break-words", children: [
+          userProfile?.fullName,
+          userProfile?.nickname && /* @__PURE__ */ jsxs(Text, { sz: "lg-3", weight: "light", className: "lg:text-left text-center lg:ml-2", children: [
             "(",
-            nickname,
+            userProfile?.nickname,
             ")"
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center w-full lg:flex-row", children: [
-          !isLoadingNumOfFriends ? /* @__PURE__ */ jsx(Text, { sz: "md-2", weight: "semibold", className: "text-[var(--text-color)] opacity-70", children: numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") : t("user:profileHeader.noFriendsCount") }) : /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-36" }),
-          !isLoading ? /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0", children: [
+          !numberOfFriendsFetching ? /* @__PURE__ */ jsx(Text, { sz: "md-2", weight: "semibold", className: "text-[var(--text-color)] opacity-70", children: numberOfFriends && numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") : t("user:profileHeader.noFriendsCount") }) : /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-36" }),
+          !isLoading || isFetching ? /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0", children: [
             isAuthenticated && /* @__PURE__ */ jsx(Fragment, { children: isOwner ? /* @__PURE__ */ jsxs(
               Button,
               {
@@ -4863,6 +5384,7 @@ const EditableTextArea = ({
   errorMessage,
   noDataValue,
   canEdit = true,
+  isLoading = false,
   onChangeClick,
   onSaveClick,
   onCancelClick
@@ -4900,7 +5422,7 @@ const EditableTextArea = ({
         /* @__PURE__ */ jsxs(
           Button,
           {
-            disabled: value === inputValue,
+            disabled: value === inputValue || isLoading,
             sz: "sm-1",
             variant: "primary",
             onClick: () => {
@@ -4941,41 +5463,39 @@ const EditableTextArea = ({
   ] });
 };
 const ProfileIntroduction = ({ className }) => {
-  const [bio, setBio] = React.useState(void 0);
   const [isEditBio, setIsEditBio] = React.useState(false);
-  const [description2, setDescription] = React.useState(void 0);
   const [isEditDescription, setIsEditDescription] = React.useState(false);
-  const [email, setEmail] = React.useState(void 0);
-  const [phone, setPhone] = React.useState(void 0);
   const { t } = useTranslation();
-  const { isAuthenticated } = useAuth();
+  const { isAuthenticated, userId } = useAuth();
   const { isOwner, targetId } = useProfilePage();
+  const updateProfileMutation = useUpdateProfile(userId);
   const canEdit = useMemo(() => isAuthenticated && isOwner, [isAuthenticated, isOwner]);
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await userInfoService.GetUserInfoOverview(targetId ?? "");
-      if (response) {
-        setBio(response.data?.bio);
-        setDescription(response.data?.description);
-        setEmail(response.data?.email);
-        setPhone(response.data?.phone);
+  const { data: userProfile } = useGetUserProfileDetails(targetId ?? "");
+  const handleSaveBio = (value) => {
+    updateProfileMutation.fetch(
+      { bio: value },
+      {
+        onSuccess: () => {
+          setIsEditBio(false);
+        },
+        onError: () => {
+          console.error("Failed to update bio");
+        }
       }
-    };
-    fetchData();
-  }, [targetId]);
-  const handleSaveBio = async (value) => {
-    var res = await userProfileService.UpdateProfile({ bio: value });
-    if (res.success) {
-      setBio(value);
-      setIsEditBio(false);
-    }
+    );
   };
-  const handleSaveDescription = async (value) => {
-    var res = await userProfileService.UpdateProfile({ description: value });
-    if (res.success) {
-      setDescription(value);
-      setIsEditDescription(false);
-    }
+  const handleSaveDescription = (value) => {
+    updateProfileMutation.fetch(
+      { description: value },
+      {
+        onSuccess: () => {
+          setIsEditDescription(false);
+        },
+        onError: () => {
+          console.error("Failed to update description");
+        }
+      }
+    );
   };
   return /* @__PURE__ */ jsxs(
     Card,
@@ -4984,17 +5504,18 @@ const ProfileIntroduction = ({ className }) => {
       className: clsx("flex-col gap-4", className),
       titleClassName: "text-2xl font-bold !mb-0",
       children: [
-        (bio || canEdit) && /* @__PURE__ */ jsx(
+        (userProfile?.bio || canEdit) && /* @__PURE__ */ jsx(
           EditableTextArea,
           {
             editableMode: "inline",
             isEdit: isEditBio,
             placeholder: t("user:profilePosts.bioPlaceholder"),
-            value: bio,
+            value: userProfile?.bio,
             onChangeClick: () => setIsEditBio(true),
             onSaveClick: (value) => handleSaveBio(value),
             valueClassName: "text-[1.2rem] font-semibold",
             canEdit: canEdit || false,
+            isLoading: updateProfileMutation.isFetching,
             onCancelClick: () => setIsEditBio(false),
             btnChildren: /* @__PURE__ */ jsxs(Text, { sz: "sm-2", children: [
               /* @__PURE__ */ jsx("i", { className: "fas fa-pencil-alt" }),
@@ -5003,16 +5524,17 @@ const ProfileIntroduction = ({ className }) => {
             ] })
           }
         ),
-        description2 && /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: t("user:profilePosts.description") }),
-        (description2 || canEdit) && /* @__PURE__ */ jsx(
+        userProfile?.description && /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: t("user:profilePosts.description") }),
+        (userProfile?.description || canEdit) && /* @__PURE__ */ jsx(
           EditableTextArea,
           {
             editableMode: "inline",
             isEdit: isEditDescription,
             placeholder: t("user:profilePosts.descriptionPlaceholder"),
-            value: description2,
+            value: userProfile?.description,
             canEdit: canEdit || false,
             valueClassName: "text-[1.1rem]",
+            isLoading: updateProfileMutation.isFetching,
             onChangeClick: () => setIsEditDescription(true),
             onSaveClick: (value) => handleSaveDescription(value),
             onCancelClick: () => setIsEditDescription(false),
@@ -5023,13 +5545,13 @@ const ProfileIntroduction = ({ className }) => {
             ] })
           }
         ),
-        (bio || description2) && /* @__PURE__ */ jsx("hr", { className: "border-[var(--border-color)] w-full" }),
-        email && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Text, { className: "hover:text-primary-500", children: [
+        (userProfile?.bio || userProfile?.description) && /* @__PURE__ */ jsx("hr", { className: "border-[var(--border-color)] w-full" }),
+        userProfile?.email && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Text, { className: "hover:text-primary-500", children: [
           /* @__PURE__ */ jsx("i", { className: "fas fa-envelope" }),
           "   ",
-          email
+          userProfile?.email
         ] }) }),
-        phone && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Text, { className: "hover:text-primary-500", children: [
+        userProfile?.phone && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Text, { className: "hover:text-primary-500", children: [
           /* @__PURE__ */ jsx("i", { className: "fas fa-phone" }),
           "   ",
           phone
@@ -5228,23 +5750,10 @@ const ProfileAboutSection = ({
   ] });
 };
 const ProfileOverview = ({}) => {
-  const [emails, setEmails] = useState([]);
-  const [phoneNumbers, setPhoneNumbers] = useState([]);
   const { targetId, isOwner } = useProfilePage();
-  useEffect(() => {
-    const fetchData = async () => {
-      const response = await userInfoService.GetUserInfoOverview(targetId ?? "");
-      if (response) {
-        if (response.data?.email) {
-          setEmails([...emails, response.data.email]);
-        }
-        if (response.data?.phone) {
-          setPhoneNumbers([...phoneNumbers, response.data.phone]);
-        }
-      }
-    };
-    fetchData();
-  }, []);
+  const { data: userProfile } = useGetUserProfileDetails(targetId ?? "");
+  const emails = userProfile?.email ? [userProfile.email] : [];
+  const phoneNumbers = userProfile?.phone ? [userProfile.phone] : [];
   return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(ProfileAboutSection, { title: "Liên hệ", className: clsx("mb-4", "w-full"), children: [
     emails.length > 0 && /* @__PURE__ */ jsxs("div", { className: clsx("flex", "items-start", "w-full", "gap-4", "mb-6", "mt-4"), children: [
       /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("opacity-50"), children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-envelope" }) }),
@@ -5263,8 +5772,8 @@ const ProfileOverview = ({}) => {
     ] }),
     phoneNumbers.length > 0 && /* @__PURE__ */ jsxs("div", { className: clsx("flex", "items-start", "gap-4"), children: [
       /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("opacity-50"), children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-phone" }) }),
-      /* @__PURE__ */ jsx("div", { children: phoneNumbers.map((phone, index) => /* @__PURE__ */ jsxs("div", { className: clsx("flex", "flex-col"), children: [
-        /* @__PURE__ */ jsx(Text, { weight: "bold", children: phone }),
+      /* @__PURE__ */ jsx("div", { children: phoneNumbers.map((phone2, index) => /* @__PURE__ */ jsxs("div", { className: clsx("flex", "flex-col"), children: [
+        /* @__PURE__ */ jsx(Text, { weight: "bold", children: phone2 }),
         /* @__PURE__ */ jsx(Text, { sz: "sm-3", className: clsx("opacity-50"), children: "Di động" })
       ] }, index)) }),
       isOwner && /* @__PURE__ */ jsx("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsx(
@@ -5428,7 +5937,7 @@ function GoogleCallbackPage() {
     }
     loginWithGoogle(code);
   }, []);
-  return null;
+  return /* @__PURE__ */ jsx(LoadingPage, {});
 }
 const onboardingValidationSchema = Yup.object({
   firstName: Yup.string().min(2, "onboarding:validation.firstNameTooShort").required("onboarding:validation.firstNameRequired"),
@@ -5610,6 +6119,16 @@ const OnboardingForm = () => {
   ] });
 };
 function OnboardingPage() {
+  const navigate = useNavigate();
+  const { isOnBoarding } = useAuth();
+  useEffect(() => {
+    if (isOnBoarding) {
+      navigate("/", { replace: true });
+    }
+  }, [isOnBoarding]);
+  if (isOnBoarding) {
+    return /* @__PURE__ */ jsx(LoadingPage, {});
+  }
   return /* @__PURE__ */ jsx("div", { className: "min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-primary-500/10 via-bg-main to-primary-600/10 p-6", children: /* @__PURE__ */ jsxs(
     "div",
     {
@@ -5759,20 +6278,21 @@ function Main() {
     /* @__PURE__ */ jsx(NotificationListener, {})
   ] });
 }
-const queryClient = new QueryClient({
-  defaultOptions: {
-    queries: {
-      refetchOnWindowFocus: false,
-      retry: 1,
-      staleTime: 5 * 60 * 1e3,
-      // 5 minutes
-      gcTime: 10 * 60 * 1e3
-      // 10 minutes (garbage collection time)
-    }
-  }
-});
 function App({ authContext }) {
-  return /* @__PURE__ */ jsx(Provider, { store, children: /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClient, children: /* @__PURE__ */ jsx(ContextTree, { authContext, children: /* @__PURE__ */ jsx(Main, {}) }) }) });
+  const queryClientRef = useRef(null);
+  if (!queryClientRef.current) {
+    queryClientRef.current = new QueryClient({
+      defaultOptions: {
+        queries: {
+          refetchOnWindowFocus: false,
+          retry: 1,
+          staleTime: 5 * 60 * 1e3,
+          gcTime: 10 * 60 * 1e3
+        }
+      }
+    });
+  }
+  return /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClientRef.current, children: /* @__PURE__ */ jsx(ContextTree, { authContext, children: /* @__PURE__ */ jsx(Main, {}) }) });
 }
 function render(_url, context) {
   const url = _url.startsWith("/") ? _url : "/" + _url;

@@ -152,7 +152,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({
 
   useEffect(() => {
     const handleRedirectToOnboarding = () => {
-      // console.log("Redirect to onboarding");
       navigate("/onboarding");
     };
 
@@ -162,6 +161,23 @@ export const AuthProvider: FC<AuthProviderProps> = ({
       authEvents.off("redirectToOnboarding", handleRedirectToOnboarding);
     };
   }, [navigate]);
+
+  useEffect(() => {
+    if (state.isAuthenticated && !state.userId) {
+      me(undefined, {
+        onSuccess: (data) => {
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              userId: data?.id,
+              urlName: data?.urlName,
+              lang: (data?.languageCode as LocaleKeys) || "en",
+            },
+          });
+        },
+      });
+    }
+  }, [state.isAuthenticated, state.userId]);
 
   const contextValue = useMemo(
     () => ({

@@ -8,7 +8,7 @@ export async function auth(req, res) {
       withCredentials: true,
     });
 
-    return { isAuthenticated: true };
+    return { isAuthenticated: true, refreshedCookie: null };
   } catch (err) {
     if (err.response?.status === 401) {
       try {
@@ -22,19 +22,23 @@ export async function auth(req, res) {
         );
 
         const setCookieHeaders = refreshRes.headers["set-cookie"];
+        let refreshedCookie = req.headers.cookie || "";
         if (setCookieHeaders) {
           setCookieHeaders.forEach((c) => {
             res.append("Set-Cookie", c);
           });
+          // Build cookie string from Set-Cookie headers for subsequent server-side requests
+          const newCookies = setCookieHeaders.map((c) => c.split(";")[0]).join("; ");
+          refreshedCookie = newCookies;
         }
 
-        return { isAuthenticated: true };
+        return { isAuthenticated: true, refreshedCookie };
       } catch (refreshErr) {
         console.log("Refresh token failed, treating as guest");
-        return { isAuthenticated: false };
+        return { isAuthenticated: false, refreshedCookie: null };
       }
     }
 
-    return { isAuthenticated: false };
+    return { isAuthenticated: false, refreshedCookie: null };
   }
 }

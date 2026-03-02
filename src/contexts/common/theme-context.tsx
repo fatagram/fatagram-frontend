@@ -42,8 +42,8 @@ function getInitialTheme(): Theme {
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  // Initialize from DOM to match SSR
-  const [theme, setTheme] = useState<Theme>(getInitialTheme);
+  // Initialize from a safe default "light" to match server render
+  const [theme, setTheme] = useState<Theme>("light");
   const t = useTranslation().t;
 
   const availableThemes: { key: Theme; label: string }[] = [
@@ -56,18 +56,17 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     { key: "light-yellow-pink", label: t("common:themes:lightYellowPink") },
   ];
 
-  // Only run once on mount to sync with localStorage if needed
+  // Sync theme on mount
   useEffect(() => {
+    // 1. Check DOM (set by SSR script)
+    const domTheme = document.documentElement.getAttribute("data-theme") as Theme | null;
+    // 2. Check LocalStorage
     const storedTheme = localStorage.getItem("theme") as Theme | null;
-    const currentTheme = document.documentElement.getAttribute("data-theme");
 
-    // If stored theme differs from current, update
-    if (
-      storedTheme &&
-      storedTheme !== currentTheme &&
-      availableThemes.some((t) => t.key === storedTheme)
-    ) {
-      setTheme(storedTheme);
+    const initialTheme = storedTheme || domTheme || "light";
+
+    if (ThemeList.some((t) => t === initialTheme)) {
+      setTheme(initialTheme as Theme);
     }
   }, []);
 

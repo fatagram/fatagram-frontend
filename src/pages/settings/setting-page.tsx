@@ -1,4 +1,4 @@
-import React, { useLayoutEffect } from "react";
+import React, { useEffect } from "react";
 import SettingsNavbar from "../../features/settings/components/settings-navbar";
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -12,7 +12,7 @@ type SettingPageProps = {
 const SettingPage: React.FC<SettingPageProps> = () => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     document.title = t("settings:title");
   }, [t]);
 
