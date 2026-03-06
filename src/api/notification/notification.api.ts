@@ -13,7 +13,7 @@ export class NotificationService {
   }
 
   public async markAsRead(notificationId: string): Promise<Result<any>> {
-    return await apiPost(`${PREFIX}/read/${notificationId}`);
+    return await apiPost(`${PREFIX}/${notificationId}/read`);
   }
 
   public async markAllAsRead(): Promise<Result<any>> {

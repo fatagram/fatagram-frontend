@@ -1,10 +1,11 @@
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { friendshipService } from "@/api/user/friendship.api";
 import clsx from "clsx";
-import React from "react";
+import React, { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import BaseNotification from "./base-notification";
 import { Button, Text } from "@/components/atoms";
+import { useNavigate } from "react-router";
 
 interface NewFriendRequestProps {
   notificationDto: NotificationDto;
@@ -22,6 +23,12 @@ const NewFriendRequest: React.FC<NewFriendRequestProps> = ({
     messageMap[notificationDto.id] || null,
   );
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
+  const navigate = useNavigate();
+
+  const handleClick = useCallback(() => {
+    onClick();
+    navigate(notificationDto.actorId);
+  }, [onClick, navigate, notificationDto.actorId]);
 
   const handleAccept = (e: any) => {
     e.preventDefault();
@@ -32,7 +39,6 @@ const NewFriendRequest: React.FC<NewFriendRequestProps> = ({
       if (response.success) {
         setMessage(t("notifications:notifications.accepted"));
         messageMap[notificationDto.id] = t("notifications:notifications.accepted");
-        // console.log(message);
       }
     };
     acceptFriendRequest();
@@ -53,7 +59,7 @@ const NewFriendRequest: React.FC<NewFriendRequestProps> = ({
   };
 
   return (
-    <BaseNotification notificationDto={notificationDto} onClick={onClick}>
+    <BaseNotification notificationDto={notificationDto} onClick={handleClick}>
       {!message ? (
         <div className={clsx("flex", "gap-1", "mt-1", "justify-start")}>
           <Button sz="sm-1" variant="primary" onClick={handleAccept}>

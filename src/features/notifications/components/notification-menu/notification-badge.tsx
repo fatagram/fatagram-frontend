@@ -54,15 +54,17 @@ const NotificationBadge: React.FC<NotificationButtonProps> = ({}) => {
         </Text>
       </Badge>
       {isShowNotification && !isInNotificationPage && (
-        <NotificationMenu
-          className={clsx(
-            "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
-            "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
-            "top-[108%] -right-[70px] w-screen h-screen p-6",
-          )}
-          onClick={() => setShowNotification(!isShowNotification)}
-          ref={menuRef}
-        />
+        <div onClick={() => setShowNotification(false)}>
+          <NotificationMenu
+            className={clsx(
+              "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
+              "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
+              "top-[108%] -right-[70px] w-screen h-screen p-6",
+            )}
+            onClick={() => setShowNotification(!isShowNotification)}
+            ref={menuRef}
+          />
+        </div>
       )}
     </div>
   );

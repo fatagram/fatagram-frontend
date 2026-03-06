@@ -100,7 +100,7 @@ export function useUnreadCount() {
 }
 
 type NotificationPages = {
-  pages: Array<{ data: NotificationDto[]; nextCursor?: string; hasNext: boolean }>;
+  pages: Array<{ items: NotificationDto[]; nextCursor?: string; hasNext: boolean }>;
   pageParams: any[];
 };
 
@@ -115,19 +115,19 @@ export function useNotificationCacheMutations() {
         (oldData) => {
           if (!oldData?.pages?.length) {
             return {
-              pages: [{ data: [notification], nextCursor: undefined, hasNext: false }],
+              pages: [{ items: [notification], nextCursor: undefined, hasNext: false }],
               pageParams: [undefined],
             };
           }
 
           const firstPage = oldData.pages[0];
           // Avoid duplicates
-          if (firstPage.data.some((n) => n.id === notification.id)) return oldData;
+          if (firstPage.items.some((n) => n.id === notification.id)) return oldData;
 
           return {
             ...oldData,
             pages: [
-              { ...firstPage, data: [notification, ...firstPage.data] },
+              { ...firstPage, items: [notification, ...firstPage.items] },
               ...oldData.pages.slice(1),
             ],
           };
@@ -149,7 +149,7 @@ export function useNotificationCacheMutations() {
             ...oldData,
             pages: oldData.pages.map((page) => ({
               ...page,
-              data: page.data.filter((n) => n.id !== notificationId),
+              items: page.items.filter((n) => n.id !== notificationId),
             })),
           };
         },
@@ -168,7 +168,7 @@ export function useNotificationCacheMutations() {
             ...oldData,
             pages: oldData.pages.map((page) => ({
               ...page,
-              data: page.data.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)),
+              items: page.items.map((n) => (n.id === notificationId ? { ...n, isRead: true } : n)),
             })),
           };
         },
@@ -186,7 +186,7 @@ export function useNotificationCacheMutations() {
           ...oldData,
           pages: oldData.pages.map((page) => ({
             ...page,
-            data: page.data.map((n) => ({ ...n, isRead: true })),
+            items: page.items.map((n) => ({ ...n, isRead: true })),
           })),
         };
       },
@@ -202,7 +202,7 @@ export function useNotificationCacheMutations() {
           ...oldData,
           pages: oldData.pages.map((page) => ({
             ...page,
-            data: [],
+            items: [],
           })),
         };
       },

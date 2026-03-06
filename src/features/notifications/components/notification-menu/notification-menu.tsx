@@ -7,7 +7,7 @@ import { notificationService } from "@/api/notification/notification.api";
 import NotificationSkeletonLoading from "../notification-items/notification-skeleton";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
-import { useNotifications } from "../../hooks/use-notification";
+import { useMarkNotificationAsRead, useNotifications } from "../../hooks/use-notification";
 import InfiniteScroll from "@/components/utils/infinite-scroll";
 import {
   useNotificationCacheMutations,
@@ -21,7 +21,7 @@ type NotificationMenuProps = {
   ref?: React.RefObject<HTMLDivElement | null>;
 };
 
-const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick, ref }) => {
+const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) => {
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
   const navigate = useNavigate();
   const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
@@ -33,9 +33,13 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
   const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } =
     useNotificationCacheMutations();
 
+  const { fetch: markAsRead } = useMarkNotificationAsRead();
+
   const notifications = React.useMemo(() => {
     return data?.pages.flatMap((page) => page.items) || [];
   }, [data]);
+
+  console.log("Notifications:", notifications);
 
   const handleMarkAllAsRead = async () => {
     markAllAsReadInCache();
@@ -110,13 +114,12 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
                   <NotificationFactory
                     notificationDto={notification}
                     onClick={async () => {
-                      navigate(notification.link || "/");
-                      if (!notification.isRead) {
-                        markAsReadInCache(notification.id);
-                        setUnreadCount((prev: number) => Math.max(prev - 1, 0));
-                      }
-                      await notificationService.markAsRead(notification.id);
-                      onClick?.();
+                      markAsRead(notification.id, {
+                        onSuccess: () => {
+                          markAsReadInCache(notification.id);
+                          setUnreadCount((prev: number) => Math.max(prev - 1, 0));
+                        },
+                      });
                     }}
                   />
                 </div>
