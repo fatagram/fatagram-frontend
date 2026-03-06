@@ -8,4 +8,6 @@ export type User = {
   avatar?: string | null;
   background?: string | null;
   urlName?: string;
+  bio?: string;
+  description?: string;
 };

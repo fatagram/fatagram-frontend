@@ -109,10 +109,10 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
       )}
 
       {(userProfile?.bio || userProfile?.description) && (
-        <hr className="border-[var(--border-color)] w-full" />
+        <hr className="border-[var(--border-color)] w-full opacity-10" />
       )}
 
-      {userProfile?.email && (
+      {/* {userProfile?.email && (
         <div>
           <Text className="hover:text-primary-500">
             <i className="fas fa-envelope" /> &nbsp; {userProfile?.email}
@@ -125,7 +125,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
             <i className="fas fa-phone"></i> &nbsp; {phone}
           </Text>
         </div>
-      )}
+      )} */}
     </Card>
   );
 };

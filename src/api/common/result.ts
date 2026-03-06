@@ -11,8 +11,8 @@ export type Result<T> = {
   errors?: Error[];
 };
 
-export type CursorResult<TData, TCursor> = {
-  data: TData[];
+export type CursorResult<TItem, TCursor> = {
+  items: TItem[];
   nextCursor?: TCursor;
   hasNext: boolean;
 };

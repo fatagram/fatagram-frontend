@@ -34,7 +34,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, onClick,
     useNotificationCacheMutations();
 
   const notifications = React.useMemo(() => {
-    return data?.pages.flatMap((page) => page.data) || [];
+    return data?.pages.flatMap((page) => page.items) || [];
   }, [data]);
 
   const handleMarkAllAsRead = async () => {
