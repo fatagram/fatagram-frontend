@@ -20,3 +20,15 @@ export const useMarkNotificationAsRead = () => {
     notificationService.markAsRead(notificationId),
   );
 };
+
+export const useMarkAllNotificationsAsRead = () => {
+  return useResultFetcher(() => notificationService.markAllAsRead());
+};
+
+export const useDeleteAllNotifications = () => {
+  return useResultFetcher(() => notificationService.deleteAll());
+};
+
+export const useDeleteNotification = () => {
+  return useResultFetcher((notificationId: string) => notificationService.delete(notificationId));
+};

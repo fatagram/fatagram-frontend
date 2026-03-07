@@ -24,11 +24,11 @@ export class NotificationService {
     return await apiGet(`${PREFIX}/unread-count`);
   }
 
-  public async deleteNotification(notificationId: string): Promise<Result<any>> {
+  public async delete(notificationId: string): Promise<Result<any>> {
     return await apiDelete(`${PREFIX}/${notificationId}`);
   }
 
-  public async deleteAllNotifications(): Promise<Result<any>> {
+  public async deleteAll(): Promise<Result<any>> {
     return await apiDelete(`${PREFIX}`);
   }
 }

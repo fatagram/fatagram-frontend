@@ -68,7 +68,7 @@ export function useUnreadCount() {
 
   const { data: unreadCount = 0 } = useSafeQueryResult<number>({
     queryKey: notificationKeys.unreadCount(userId),
-    fn: () => notificationService.getUnreadCount(),
+    fn: async () => await notificationService.getUnreadCount(),
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,

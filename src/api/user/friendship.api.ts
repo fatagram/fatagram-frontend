@@ -36,7 +36,11 @@ export class FriendshipService {
 
   async GetNumberOfFriends(targetId: string): Promise<Result<number>> {
     console.log("GetNumberOfFriends called with targetId:", targetId);
-    return apiGet(`${PREFIX}/count/${targetId}`);
+    const res = await apiGet<number>(`${PREFIX}/count/${targetId}`);
+    if (res.success) {
+      return { success: true, data: (res.data ?? 0) as number };
+    }
+    return res;
   }
 
   async GetFriendRequests(

@@ -39,8 +39,6 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
     return data?.pages.flatMap((page) => page.items) || [];
   }, [data]);
 
-  console.log("Notifications:", notifications);
-
   const handleMarkAllAsRead = async () => {
     markAllAsReadInCache();
     setUnreadCount(0);
@@ -48,10 +46,12 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
     invalidateNotifications();
   };
 
-  const handleDeleteAll = async () => {
+  const handleDeleteAll = async (e: React.MouseEvent<HTMLButtonElement>) => {
+    e.preventDefault();
+    e.stopPropagation();
     clearAllFromCache();
     setUnreadCount(0);
-    await notificationService.deleteAllNotifications();
+    await notificationService.deleteAll();
     invalidateNotifications();
   };
 
