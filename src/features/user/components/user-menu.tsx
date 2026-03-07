@@ -23,8 +23,8 @@ const UserMenu: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const { data: userProfile } = useGetUserProfile(userId!);
-
+  const { data } = useGetUserProfile(userId!);
+  const userProfile = data?.infos;
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -37,17 +37,6 @@ const UserMenu: React.FC = () => {
     btnRef as RefObject<HTMLDivElement>,
     handleClickOutside,
   );
-
-  // useEffect(() => {
-  //   const fetchProfile = async () => {
-  //     const response = await userProfileService.getProfile(userId || "", "avatar,fullName");
-  //     if (response.success) {
-  //       setAvatar(response.data.infos.avatar);
-  //       setFullName(response.data.infos.fullName);
-  //     }
-  //   };
-  //   fetchProfile();
-  // }, [userId]);
 
   // Navigation to personal page
   const handlePersonalPage = useCallback(() => {

@@ -102,9 +102,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({
           dispatch({
             type: "LOGIN",
             payload: {
-              userId: data?.id,
-              urlName: data?.urlName,
-              lang: (data?.languageCode as LocaleKeys) || "en",
+              userId: data?.infos.id,
+              urlName: data?.infos.urlName,
+              lang: (data?.infos.languageCode as LocaleKeys) || "en",
             },
           });
         },
@@ -128,9 +128,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({
             dispatch({
               type: "LOGIN",
               payload: {
-                userId: data?.id,
-                urlName: data?.urlName,
-                lang: (data?.languageCode as LocaleKeys) || "en",
+                userId: data?.infos.id,
+                urlName: data?.infos.urlName,
+                lang: (data?.infos.languageCode as LocaleKeys) || "en",
               },
             });
           },
@@ -169,9 +169,9 @@ export const AuthProvider: FC<AuthProviderProps> = ({
           dispatch({
             type: "LOGIN",
             payload: {
-              userId: data?.id,
-              urlName: data?.urlName,
-              lang: (data?.languageCode as LocaleKeys) || "en",
+              userId: data?.infos.id,
+              urlName: data?.infos.urlName,
+              lang: (data?.infos.languageCode as LocaleKeys) || "en",
             },
           });
         },

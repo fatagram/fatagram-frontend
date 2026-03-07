@@ -1,40 +1,13 @@
 import { userProfileService } from "@/api/user/user-profile.api";
-import { useQuery } from "@tanstack/react-query";
+import { useSafeQueryResult } from "@/hooks/use-safe-query";
 
-export function useUserId(userParam: string) {
-  const { data, isLoading, isFetching, isError } = useQuery({
+export const useUserId = (userParam: string) => {
+  return useSafeQueryResult({
     queryKey: ["user-profile-id", userParam],
-    queryFn: async () => {
-      try {
-        const response = await userProfileService.getUserId(userParam);
-        if (response.success) {
-          return {
-            userId: response.data,
-            userExist: true,
-          };
-        }
-        return {
-          userId: undefined,
-          userExist: false,
-        };
-      } catch (error) {
-        console.error("Error fetching userId:", error);
-        return {
-          userId: undefined,
-          userExist: false,
-        };
-      }
-    },
+    fn: async () => await userProfileService.getUserId(userParam),
     staleTime: 1000 * 60 * 5,
     gcTime: 1000 * 60 * 10,
     enabled: !!userParam,
     retry: 1,
   });
-
-  return {
-    userId: data?.userId,
-    userExist: isError ? false : data?.userExist,
-    isLoading,
-    isFetching,
-  };
-}
+};

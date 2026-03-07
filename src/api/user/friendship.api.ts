@@ -1,8 +1,5 @@
 import { FriendsDto } from "./dto/friend.dto";
 import { CursorResult, Result } from "../common/result";
-import { apiClient } from "../common/axios-interceptor";
-import { ApiResponse, CursorResponse } from "../common/api-response";
-import { handleApiError } from "../common/handle-api-error";
 import { FriendRequest } from "@/types/entities/friend-request.type";
 import { CursorQuery } from "@/types/query";
 import { apiGet, apiPost, apiDelete, buildApiPath } from "../common/api-helpers";
@@ -35,35 +32,13 @@ export class FriendshipService {
   }
 
   async GetNumberOfFriends(targetId: string): Promise<Result<number>> {
-    console.log("GetNumberOfFriends called with targetId:", targetId);
-    const res = await apiGet<number>(`${PREFIX}/count/${targetId}`);
-    if (res.success) {
-      return { success: true, data: (res.data ?? 0) as number };
-    }
-    return res;
+    return apiGet(`${PREFIX}/count/${targetId}`);
   }
 
   async GetFriendRequests(
     query: CursorQuery<string>,
   ): Promise<Result<CursorResult<FriendRequest, string>>> {
-    try {
-      const res = await apiClient.get(`${PREFIX}/requests`, {
-        params: query,
-      });
-      // Delay for testing
-      await new Promise((resolve) => setTimeout(resolve, 3000));
-      const resp = res.data as CursorResponse<string, FriendRequest>;
-      return {
-        success: true,
-        data: {
-          data: resp.data ?? [],
-          nextCursor: resp.nextCursor,
-          hasNext: resp.hasNext,
-        },
-      };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    return await apiGet(`${PREFIX}/requests`, query);
   }
 
   async GetFriends(
@@ -72,22 +47,7 @@ export class FriendshipService {
     pageSize: number,
     keyword?: string,
   ): Promise<Result<FriendsDto>> {
-    try {
-      const params = new URLSearchParams();
-
-      if (keyword) params.append("keyword", keyword);
-      params.append("page", page.toString());
-      params.append("pageSize", pageSize.toString());
-
-      const res = await apiClient.get(`${PREFIX}/friends/${userId}`, {
-        params,
-      });
-
-      const response = res.data as ApiResponse<FriendsDto>;
-      return { success: true, data: response.data };
-    } catch (error: any) {
-      return handleApiError(error);
-    }
+    return await apiGet(`${PREFIX}/list/${userId}`, { params: { page, pageSize, keyword } });
   }
 }
 

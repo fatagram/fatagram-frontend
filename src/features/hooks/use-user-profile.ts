@@ -1,17 +1,16 @@
 import { userProfileService } from "@/api/user/user-profile.api";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSafeQueryResult } from "@/hooks/use-safe-query";
-import { User } from "@/types/entities/user.type";
 import { useQueryClient } from "@tanstack/react-query";
 
 const profileQueryKey = (userId: string) => ["user", "profile", userId];
 const profileDetailsQueryKey = (userId: string) => ["user", "profile", "details", userId];
 
 export const useGetUserProfile = (userId: string) => {
-  return useSafeQueryResult<User>({
+  return useSafeQueryResult({
     queryKey: profileQueryKey(userId),
-    fn: () =>
-      userProfileService.getProfile(
+    fn: async () =>
+      await userProfileService.getProfile(
         userId,
         "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName",
       ),
@@ -20,9 +19,9 @@ export const useGetUserProfile = (userId: string) => {
 };
 
 export const useGetUserProfileDetails = (userId: string) => {
-  return useSafeQueryResult<User>({
+  return useSafeQueryResult({
     queryKey: profileDetailsQueryKey(userId),
-    fn: () => userProfileService.getProfile(userId, "bio,description"),
+    fn: async () => await userProfileService.getProfile(userId, "bio,description"),
     enabled: !!userId,
   });
 };

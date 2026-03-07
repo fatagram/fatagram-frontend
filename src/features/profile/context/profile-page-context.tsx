@@ -25,20 +25,15 @@ type ProfilePageProviderProps = {
 export default function ProfilePageProvider({ children }: ProfilePageProviderProps) {
   const { userId } = useAuth();
   const userParam = useParams<{ userParam: string }>();
-  const {
-    userId: targetId,
-    userExist,
-    isLoading,
-    isFetching,
-  } = useUserId(userParam.userParam || "");
+  const { data, isLoading, isFetching } = useUserId(userParam.userParam || "");
 
   const cachedTargetIdRef = useRef<string | undefined>(undefined);
 
   // Update cached targetId only when we have a valid one
-  if (targetId) {
-    cachedTargetIdRef.current = targetId;
+  if (data?.infos.id) {
+    cachedTargetIdRef.current = data.infos.id;
   }
-  const validTargetId = targetId || cachedTargetIdRef.current || "";
+  const validTargetId = data?.infos.id || cachedTargetIdRef.current || "";
   const contextValue = useMemo(
     () => ({
       isOwner: userId === validTargetId,
@@ -53,7 +48,7 @@ export default function ProfilePageProvider({ children }: ProfilePageProviderPro
   }
 
   // Show NotFoundPage if user doesn't exist (but not while loading)
-  if (userExist === false) {
+  if (!data) {
     return <NotFoundPage />;
   }
 

@@ -25,7 +25,8 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
 
   const canEdit = useMemo(() => isAuthenticated && isOwner, [isAuthenticated, isOwner]);
 
-  const { data: userProfile } = useGetUserProfileDetails(targetId ?? "");
+  const { data } = useGetUserProfileDetails(targetId ?? "");
+  const userProfile = data?.infos;
 
   // Handle save bio
   const handleSaveBio = (value: string | undefined) => {

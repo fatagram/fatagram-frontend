@@ -12,9 +12,9 @@ export const buildApiPath = (prefix: string): string => {
   return `/api/${API_VERSION}/${withoutApi}`;
 };
 
-export const apiGet = async <T = any>(url: string, config?: any): Promise<Result<T>> => {
+export const apiGet = async <T = any>(url: string, params?: any): Promise<Result<T>> => {
   try {
-    const res: AxiosResponse<ApiResponse<T>> = await apiClient.get(url, config);
+    const res: AxiosResponse<ApiResponse<T>> = await apiClient.get(url, { params });
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);
@@ -24,10 +24,10 @@ export const apiGet = async <T = any>(url: string, config?: any): Promise<Result
 export const apiPost = async <T = any>(
   url: string,
   data?: any,
-  config?: any,
+  params?: any,
 ): Promise<Result<T>> => {
   try {
-    const res: AxiosResponse<ApiResponse<T>> = await apiClient.post(url, data, config);
+    const res: AxiosResponse<ApiResponse<T>> = await apiClient.post(url, data, { params });
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);
@@ -37,10 +37,10 @@ export const apiPost = async <T = any>(
 export const apiPut = async <T = any>(
   url: string,
   data?: any,
-  config?: any,
+  params?: any,
 ): Promise<Result<T>> => {
   try {
-    const res: AxiosResponse<ApiResponse<T>> = await apiClient.put(url, data, config);
+    const res: AxiosResponse<ApiResponse<T>> = await apiClient.put(url, data, { params });
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);
@@ -50,19 +50,19 @@ export const apiPut = async <T = any>(
 export const apiPatch = async <T = any>(
   url: string,
   data?: any,
-  config?: any,
+  params?: any,
 ): Promise<Result<T>> => {
   try {
-    const res: AxiosResponse<ApiResponse<T>> = await apiClient.patch(url, data, config);
+    const res: AxiosResponse<ApiResponse<T>> = await apiClient.patch(url, data, { params });
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);
   }
 };
 
-export const apiDelete = async <T = any>(url: string, config?: any): Promise<Result<T>> => {
+export const apiDelete = async <T = any>(url: string, params?: any): Promise<Result<T>> => {
   try {
-    const res: AxiosResponse<ApiResponse<T>> = await apiClient.delete(url, config);
+    const res: AxiosResponse<ApiResponse<T>> = await apiClient.delete(url, { params });
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);
@@ -75,10 +75,12 @@ export const apiDelete = async <T = any>(url: string, config?: any): Promise<Res
 export const apiPostFormData = async <T = any>(
   url: string,
   formData: FormData,
-  config?: any,
+  params?: any,
 ): Promise<Result<T>> => {
   try {
-    const res: AxiosResponse<ApiResponse<T>> = await apiClientFormData.post(url, formData, config);
+    const res: AxiosResponse<ApiResponse<T>> = await apiClientFormData.post(url, formData, {
+      params,
+    });
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);
@@ -91,10 +93,12 @@ export const apiPostFormData = async <T = any>(
 export const apiPatchFormData = async <T = any>(
   url: string,
   formData: FormData,
-  config?: any,
+  params?: any,
 ): Promise<Result<T>> => {
   try {
-    const res: AxiosResponse<ApiResponse<T>> = await apiClientFormData.patch(url, formData, config);
+    const res: AxiosResponse<ApiResponse<T>> = await apiClientFormData.patch(url, formData, {
+      params,
+    });
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);
@@ -107,10 +111,12 @@ export const apiPatchFormData = async <T = any>(
 export const apiPutFormData = async <T = any>(
   url: string,
   formData: FormData,
-  config?: any,
+  params?: any,
 ): Promise<Result<T>> => {
   try {
-    const res: AxiosResponse<ApiResponse<T>> = await apiClientFormData.put(url, formData, config);
+    const res: AxiosResponse<ApiResponse<T>> = await apiClientFormData.put(url, formData, {
+      params,
+    });
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);

@@ -39,7 +39,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
   const { targetId, isOwner } = useProfilePage();
   const { userId, isAuthenticated } = useAuth();
 
-  const { data: userProfile, isLoading, isFetching } = useGetUserProfile(targetId);
+  const { data, isLoading, isFetching } = useGetUserProfile(targetId);
+  const userProfile = data?.infos;
   const { fetch: fetchBackground } = useSelectBackground(userId!);
   const { fetch: fetchAvatar } = useSelectAvatar(userId!);
 
