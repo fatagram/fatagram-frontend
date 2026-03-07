@@ -52,10 +52,10 @@ export const ChangeUrlName: React.FC<ChangeUrlNameProps> = ({ userId }) => {
   return (
     <EditableField
       title={t("settings:account.personalInfo.urlName")}
-      value={userProfile?.urlName}
+      value={userProfile?.infos.urlName}
       noDataValue={t("settings:account.personalInfo.noUrlName")}
       placeholder={t("settings:account.personalInfo.urlNamePlaceholder")}
-      valueClassName={clsx(!userProfile?.urlName && "!opacity-50")}
+      valueClassName={clsx(!userProfile?.infos.urlName && "!opacity-50")}
       btnChildren={
         <Text>
           <i className="fa-solid fa-pen mr-2"></i>

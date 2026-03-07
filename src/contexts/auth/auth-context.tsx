@@ -97,7 +97,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
 
   const { fetch: login } = useResultFetcher(authService.login, {
     onSuccess: async () => {
-      await me(undefined, {
+      await me({
         onSuccess: (data) => {
           dispatch({
             type: "LOGIN",
@@ -123,7 +123,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
   const handleLoginWithGoogle = async (code: string) => {
     await loginWithGoogle.fetch(code, {
       onSuccess: async () => {
-        await me(undefined, {
+        await me({
           onSuccess: async (data) => {
             dispatch({
               type: "LOGIN",
@@ -164,7 +164,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
 
   useEffect(() => {
     if (state.isAuthenticated && !state.userId) {
-      me(undefined, {
+      me({
         onSuccess: (data) => {
           dispatch({
             type: "LOGIN",

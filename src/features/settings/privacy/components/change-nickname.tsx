@@ -52,10 +52,10 @@ export const ChangeNickname: FC<ChangeNicknameProps> = ({ userId }) => {
   return (
     <EditableField
       title={t("settings:account.personalInfo.nickname")}
-      value={userProfile?.nickname}
+      value={userProfile?.infos.nickname}
       noDataValue={t("settings:account.personalInfo.noNickname")}
       placeholder={t("settings:account.personalInfo.nicknamePlaceholder")}
-      valueClassName={clsx(!userProfile?.nickname && "!opacity-50")}
+      valueClassName={clsx(!userProfile?.infos.nickname && "!opacity-50")}
       btnChildren={
         <Text>
           <i className="fa-solid fa-pen mr-2"></i>

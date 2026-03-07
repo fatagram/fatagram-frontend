@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React from "react";
 import ProfileBackground from "./profile-background";
 import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
@@ -8,11 +8,7 @@ import { useAuth } from "@/hooks/contexts/use-auth";
 import { useProfilePage } from "../hooks/use-profile-page";
 import useLanguage from "@/utils/i18n";
 import { Button, Text, Skeleton } from "@/components/atoms";
-import {
-  useGetUserProfile,
-  useSelectAvatar,
-  useSelectBackground,
-} from "@/features/hooks/use-user-profile";
+import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useGetNumberOfFriends } from "@/features/hooks/use-friend";
 
 export type ProfileHeaderProps = {
@@ -29,50 +25,26 @@ export type ProfileHeaderProps = {
  * @param {function} onUserNotFound - Callback function to handle when a user is not found.
  */
 const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
-  // States
-
-  const avtRef = useRef<HTMLDivElement>(null);
-
   // Auth info hook
   const t = useLanguage();
   const navigate = useNavigate();
   const { targetId, isOwner } = useProfilePage();
-  const { userId, isAuthenticated } = useAuth();
+  const { isAuthenticated } = useAuth();
 
   const { data, isLoading, isFetching } = useGetUserProfile(targetId);
   const userProfile = data?.infos;
-  const { fetch: fetchBackground } = useSelectBackground(userId!);
-  const { fetch: fetchAvatar } = useSelectAvatar(userId!);
 
   const { data: numberOfFriends, isFetching: numberOfFriendsFetching } =
     useGetNumberOfFriends(targetId);
 
-  // Handle background and avatar selection
-  const handleSelectBackground = async (file: File) => {
-    await fetchBackground(file);
-  };
-
-  const handleSelectAvatar = async (file: File) => {
-    await fetchAvatar(file);
-  };
-
   return (
     <div className={clsx("relative w-full flex flex-col items-center", className)}>
       <div className="relative w-full mt-2">
-        <ProfileBackground
-          isLoading={isLoading || isFetching}
-          background={userProfile?.background ?? ""}
-          handleSelectBackground={handleSelectBackground}
-        />
+        <ProfileBackground />
       </div>
 
       <div className="-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3">
-        <ProfileAvatar
-          isLoading={isLoading || isFetching}
-          avatar={userProfile?.avatar ?? ""}
-          handleSelectAvatar={handleSelectAvatar}
-          ref={avtRef}
-        />
+        <ProfileAvatar />
         <div className="flex flex-col gap-2 items-start flex-1 mb-3 ml-4">
           {isLoading || isFetching ? (
             <Skeleton sz="sm-3" className="w-56" />

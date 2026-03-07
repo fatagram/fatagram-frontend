@@ -7,7 +7,11 @@ import { notificationService } from "@/api/notification/notification.api";
 import NotificationSkeletonLoading from "../notification-items/notification-skeleton";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
-import { useMarkNotificationAsRead, useNotifications } from "../../hooks/use-notification";
+import {
+  useDeleteAllNotifications,
+  useMarkNotificationAsRead,
+  useNotifications,
+} from "../../hooks/use-notification";
 import InfiniteScroll from "@/components/utils/infinite-scroll";
 import {
   useNotificationCacheMutations,
@@ -27,6 +31,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
   const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
     limit: 20,
   });
+  const { fetch: deleteAll } = useDeleteAllNotifications();
 
   const { isInNotificationPage } = useNotificationUiState();
   const { unreadCount, setUnreadCount } = useUnreadCount();
@@ -49,10 +54,16 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
   const handleDeleteAll = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     e.stopPropagation();
-    clearAllFromCache();
-    setUnreadCount(0);
-    await notificationService.deleteAll();
-    invalidateNotifications();
+    await deleteAll({
+      onSuccess: () => {
+        clearAllFromCache();
+        setUnreadCount(0);
+        invalidateNotifications();
+      },
+      onError: () => {
+        console.error("Failed to delete all notifications");
+      },
+    });
   };
 
   return (

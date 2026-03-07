@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { List } from "@/components/atoms/list";
 import { Avatar, Button, Text } from "@/components/atoms";
 import { useAuth } from "@/hooks/contexts/use-auth";
-import { useGetUserProfile } from "@/features/hooks/use-user-profile";
+import { useGetUserAvatar, useGetUserProfile } from "@/features/hooks/use-user-profile";
 
 /**
  * ProfileMenu component displays a profile menu with options for the user.
@@ -23,8 +23,8 @@ const UserMenu: React.FC = () => {
 
   const navigate = useNavigate();
 
-  const { data } = useGetUserProfile(userId!);
-  const userProfile = data?.infos;
+  const { data: userProfile } = useGetUserProfile(userId!);
+  const { data: avatarProfile } = useGetUserAvatar(userId!);
   const menuRef = useRef<HTMLDivElement>(null);
   const btnRef = useRef<HTMLDivElement>(null);
 
@@ -68,7 +68,7 @@ const UserMenu: React.FC = () => {
         }}
       >
         <Avatar
-          src={userProfile?.avatar ?? ""}
+          src={avatarProfile?.infos.avatar ?? ""}
           alt="Profile"
           sz="sm-1"
           className="border-4 border-bg-third"
@@ -95,9 +95,9 @@ const UserMenu: React.FC = () => {
                 )}
                 onClick={handlePersonalPage}
               >
-                <Avatar src={userProfile?.avatar ?? ""} alt="avatar" sz="sm-1"></Avatar>
+                <Avatar src={avatarProfile?.infos.avatar ?? ""} alt="avatar" sz="sm-1"></Avatar>
                 <Text sz="lg-1" weight="bold">
-                  {userProfile?.fullName ?? ""}
+                  {userProfile?.infos.fullName ?? ""}
                 </Text>
               </Button>
             </List.Item>

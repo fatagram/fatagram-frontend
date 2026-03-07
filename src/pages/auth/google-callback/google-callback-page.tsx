@@ -8,6 +8,7 @@ export default function GoogleCallbackPage() {
   const { loginWithGoogle } = useAuth();
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("code");
+    console.log("Google callback code: ", code);
     if (!code) {
       navigate("/login");
       return;

@@ -51,10 +51,18 @@ export function useResultFetcher<TData, TParam = void>(
   const [isFetching, setIsFetching] = useState<boolean>(false);
 
   const fetch = useCallback(
-    async (params: TParam, opts?: ResultFetcherOptions<TData>) => {
+    async (
+      ...args: TParam extends void
+        ? [opts?: ResultFetcherOptions<TData>]
+        : [params: TParam, opts?: ResultFetcherOptions<TData>]
+    ) => {
+      const params = (args.length === 2 ? args[0] : undefined) as TParam;
+      const opts = (args.length === 2 ? args[1] : args[0]) as ResultFetcherOptions<TData>;
+
       setIsFetching(true);
       setError(undefined);
       setErrors(undefined);
+
       try {
         const result = await fn(params);
         if (result.success) {

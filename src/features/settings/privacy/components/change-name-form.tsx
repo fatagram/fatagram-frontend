@@ -28,9 +28,9 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   const [newLastName, setNewLastName] = React.useState<string>("");
 
   useEffect(() => {
-    setNewFirstName(userProfile?.firstName || "");
-    setNewMiddleName(userProfile?.middleName || "");
-    setNewLastName(userProfile?.lastName || "");
+    setNewFirstName(userProfile?.infos.firstName || "");
+    setNewMiddleName(userProfile?.infos.middleName || "");
+    setNewLastName(userProfile?.infos.lastName || "");
   }, [userProfile]);
 
   // Close change name form
@@ -163,9 +163,9 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
         <Button
           disabled={
             isSubmitting ||
-            (newFirstName === userProfile?.firstName &&
-              newMiddleName === (userProfile?.middleName || "") &&
-              newLastName === userProfile?.lastName)
+            (newFirstName === userProfile?.infos.firstName &&
+              newMiddleName === (userProfile?.infos.middleName || "") &&
+              newLastName === userProfile?.infos.lastName)
           }
           sz="md-1"
           className={clsx("mt-2")}

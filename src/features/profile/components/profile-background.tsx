@@ -6,28 +6,33 @@ import { useProfilePage } from "../hooks/use-profile-page";
 import { Skeleton } from "@/components/atoms";
 import BackgroundImage from "@/components/atoms/background-image/background-image";
 import { Text } from "@/components/atoms";
+import { useGetUserBackground, useSelectBackground } from "@/features/hooks/use-user-profile";
+import { useSnackbar } from "@/hooks/contexts/use-snackbar";
 
-type ProfileBackgroundProps = {
-  isLoading: boolean;
-  background: string;
-  handleSelectBackground: (file: File) => Promise<void>;
-};
+type ProfileBackgroundProps = {};
 
-const ProfileBackground: React.FC<ProfileBackgroundProps> = ({
-  isLoading,
-  background,
-  handleSelectBackground,
-}) => {
+const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
   const { t } = useTranslation() as { t: (key: string) => string };
-  const { isOwner } = useProfilePage();
+  const { targetId, isOwner } = useProfilePage();
+  const { data, isLoading, isFetching } = useGetUserBackground(targetId);
+  const { fetch, isFetching: isUpdating } = useSelectBackground(targetId);
+  const { showSnackbar } = useSnackbar();
+
+  const handleSelectBackground = async (file: File) => {
+    await fetch(file, {
+      onSuccess: () => {
+        showSnackbar("Background updated successfully", "success");
+      },
+    });
+  };
 
   return (
-    <div className={clsx("relative aspect-[16/6] w-full rounded-[15px]")}>
-      {isLoading ? (
+    <div className={clsx("relative aspect-[16/6] w-full")}>
+      {isLoading || isFetching || isUpdating ? (
         <Skeleton className="h-full" />
       ) : (
         <BackgroundImage
-          src={background}
+          src={data?.infos.background}
           alt="Background Image"
           className={clsx("relative h-full w-full")}
         >
@@ -43,7 +48,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({
             >
               <i className={clsx("fa-solid fa-camera")}></i>
               <Text className={clsx("sm:flex hidden")} sz="md-1">
-                {background
+                {data?.infos.background
                   ? t("user:profileHeader.changeButton")
                   : t("user:profileHeader.addButton")}
               </Text>

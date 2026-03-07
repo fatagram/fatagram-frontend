@@ -4,6 +4,8 @@ import { useSafeQueryResult } from "@/hooks/use-safe-query";
 import { useQueryClient } from "@tanstack/react-query";
 
 const profileQueryKey = (userId: string) => ["user", "profile", userId];
+const avatarQueryKey = (userId: string) => ["user", "avatar", userId];
+const backgroundQueryKey = (userId: string) => ["user", "background", userId];
 const profileDetailsQueryKey = (userId: string) => ["user", "profile", "details", userId];
 
 export const useGetUserProfile = (userId: string) => {
@@ -14,6 +16,22 @@ export const useGetUserProfile = (userId: string) => {
         userId,
         "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName",
       ),
+    enabled: !!userId,
+  });
+};
+
+export const useGetUserAvatar = (userId: string) => {
+  return useSafeQueryResult({
+    queryKey: avatarQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "avatar"),
+    enabled: !!userId,
+  });
+};
+
+export const useGetUserBackground = (userId: string) => {
+  return useSafeQueryResult({
+    queryKey: backgroundQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "background"),
     enabled: !!userId,
   });
 };
@@ -111,7 +129,7 @@ export const useSelectBackground = (userId: string) => {
   return useResultFetcher(userProfileService.uploadBackground, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: profileQueryKey(userId),
+        queryKey: backgroundQueryKey(userId),
       });
     },
   });
@@ -123,7 +141,7 @@ export const useSelectAvatar = (userId: string) => {
   return useResultFetcher(userProfileService.uploadAvatar, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: profileQueryKey(userId),
+        queryKey: avatarQueryKey(userId),
       });
     },
   });

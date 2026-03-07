@@ -17,7 +17,8 @@ export class AuthService {
   }
 
   async loginWithGoogle(code: string): Promise<Result<void>> {
-    return apiPost(`${PREFIX}/google/callback`, { code });
+    console.log("Login with Google, code: ", code);
+    return apiPost(`${PREFIX}/oauth/google/callback`, { code });
   }
 
   // logout method
