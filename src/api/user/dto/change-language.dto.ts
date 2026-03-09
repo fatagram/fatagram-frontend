@@ -1,3 +1,0 @@
-interface ChangeLanguageDto {
-  LanguageCode: string;
-}

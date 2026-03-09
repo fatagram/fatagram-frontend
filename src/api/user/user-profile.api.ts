@@ -33,9 +33,7 @@ export class UserProfileService {
 
   // Get current user profile
   async getMe(): Promise<Result<GetMeDto>> {
-    const data = await apiGet(`${PREFIX}/me`);
-    console.log("getMe response:", data); // Debug log
-    return data;
+    return await apiGet(`${PREFIX}/me`);
   }
 
   // Upload avatar

@@ -1,4 +1,5 @@
 import "./i18n";
+import i18next from "i18next";
 import ContextTree from "./context-tree";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Main from "./main";
@@ -17,6 +18,10 @@ function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userD
         },
       },
     });
+  }
+
+  if (authContext?.userData.languageCode) {
+    i18next.changeLanguage(authContext.userData.languageCode);
   }
 
   return (

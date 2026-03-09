@@ -93,7 +93,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 
-  const { fetch: me } = useResultFetcher(userProfileService.getMe, {});
+  const { fetch: me } = useResultFetcher(userProfileService.getMe);
 
   const { fetch: login } = useResultFetcher(authService.login, {
     onSuccess: async () => {
