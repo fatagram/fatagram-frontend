@@ -1,5 +1,5 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, forwardRef, useRef, useContext, useLayoutEffect, StrictMode } from "react";
+import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, forwardRef, useRef, useContext, StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 import { useNavigate, Link as Link$1, useResolvedPath, useMatch, Outlet, useParams, useLocation, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
 import i18next from "i18next";
@@ -7,12 +7,11 @@ import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
 import { useQueryClient, useInfiniteQuery, useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import clsx, { clsx as clsx$1 } from "clsx";
+import { useNavigate as useNavigate$1 } from "react-router";
 import * as signalR from "@microsoft/signalr";
 import { ArrowLeft } from "lucide-react";
 import * as Yup from "yup";
 import { useFormik } from "formik";
-import { useNavigate as useNavigate$1 } from "react-router";
-import { AliveScope } from "react-activation";
 const login$1 = { "title": "Login", "username": "Username", "password": "Password", "rememberMe": "Remember me", "forgotPassword": "Forgot password?", "loginButton": "Login", "dontHaveAccount": "Don't have an account?", "registerButton": "Register", "errors": { "usernameOrEmail": { "required": "Username or email is required", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)", "notFound": "Username or email not found" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)", "incorrect": "Incorrect password" }, "account": { "locked": "Account is locked", "disabled": "Account is disabled" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const register$2 = { "title": "Register", "username": "Username", "password": "Password", "confirmPassword": "Confirm password", "email": "Email", "phoneNumber": "Phone number", "registerButton": "Register", "backToLogin": "Back to login", "agree": "I agree to the", "termsOfService": "Terms of Service", "and": " and ", "privacyPolicy": "Privacy Policy", "loginButton": "Login", "errors": { "username": { "required": "Username is required", "alreadyExists": "Username already exists", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)" }, "email": { "required": "Email is required", "alreadyExists": "Email already exists", "invalidFormat": "Invalid email format" }, "phoneNumber": { "alreadyExists": "Phone number already exists", "invalidFormat": "Invalid phone number format" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)" }, "confirmPassword": { "required": "Please confirm your password", "doNotMatch": "Passwords do not match" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const auth$1 = {
@@ -324,73 +323,77 @@ const buildApiPath = (prefix) => {
   const withoutApi = cleanPrefix.replace(/^api\/?/, "");
   return `/api/${API_VERSION}/${withoutApi}`;
 };
-const apiGet = async (url, config) => {
+const apiGet = async (url, params) => {
   try {
-    const res = await apiClient.get(url, config);
+    const res = await apiClient.get(url, { params });
+    console.log(`GET ${url} response:`, res.data);
     return { success: true, data: res.data.data };
   } catch (error) {
     return handleApiError(error);
   }
 };
-const apiPost = async (url, data, config) => {
+const apiPost = async (url, data, params) => {
   try {
-    const res = await apiClient.post(url, data, config);
+    const res = await apiClient.post(url, data, { params });
     return { success: true, data: res.data.data };
   } catch (error) {
     return handleApiError(error);
   }
 };
-const apiPut = async (url, data, config) => {
+const apiPut = async (url, data, params) => {
   try {
-    const res = await apiClient.put(url, data, config);
+    const res = await apiClient.put(url, data, { params });
     return { success: true, data: res.data.data };
   } catch (error) {
     return handleApiError(error);
   }
 };
-const apiPatch = async (url, data, config) => {
+const apiPatch = async (url, data, params) => {
   try {
-    const res = await apiClient.patch(url, data, config);
+    const res = await apiClient.patch(url, data, { params });
     return { success: true, data: res.data.data };
   } catch (error) {
     return handleApiError(error);
   }
 };
-const apiDelete = async (url, config) => {
+const apiDelete = async (url, params) => {
   try {
-    const res = await apiClient.delete(url, config);
+    const res = await apiClient.delete(url, { params });
     return { success: true, data: res.data.data };
   } catch (error) {
     return handleApiError(error);
   }
 };
-const apiPatchFormData = async (url, formData, config) => {
+const apiPatchFormData = async (url, formData, params) => {
   try {
-    const res = await apiClientFormData.patch(url, formData, config);
+    const res = await apiClientFormData.patch(url, formData, {
+      params
+    });
     return { success: true, data: res.data.data };
   } catch (error) {
     return handleApiError(error);
   }
 };
-const PREFIX$3 = buildApiPath("/auth");
+const PREFIX$4 = buildApiPath("/auth");
 class AuthService {
   // login method
   async login(dto) {
-    return apiPost(`${PREFIX$3}/login`, {
+    return apiPost(`${PREFIX$4}/login`, {
       usernameOrEmail: dto.usernameOrEmail,
       password: dto.password,
       isRememberMe: dto.isRememberMe
     });
   }
   async loginWithGoogle(code) {
-    return apiPost(`${PREFIX$3}/google/callback`, { code });
+    console.log("Login with Google, code: ", code);
+    return apiPost(`${PREFIX$4}/oauth/google/callback`, { code });
   }
   // logout method
   async logout() {
-    return apiPost(`${PREFIX$3}/logout`);
+    return apiPost(`${PREFIX$4}/logout`);
   }
   async register(dto) {
-    return apiPost(`${PREFIX$3}/register`, {
+    return apiPost(`${PREFIX$4}/register`, {
       username: dto.username,
       password: dto.password,
       email: dto.email,
@@ -401,133 +404,60 @@ class AuthService {
   // This method is responsible for sending a ping request to the server.
   // The method returns a promise of void.
   async ping() {
-    return apiGet(`${PREFIX$3}/ping`);
+    return apiGet(`${PREFIX$4}/ping`);
   }
 }
 const authService = new AuthService();
-const PREFIX$2 = buildApiPath("/UserProfile");
+const PREFIX$3 = buildApiPath("/userprofile");
 class UserProfileService {
   // Check if user exists by id or urlName
   async checkUserExist(key) {
-    return apiGet(`${PREFIX$2}/exist?key=${key}`);
+    return await apiGet(`${PREFIX$3}/exist?key=${key}`);
   }
-  async getProfile(id, fields) {
-    try {
-      const res = await apiClient.get(`${PREFIX$2}/${id}?fields=${fields}`);
-      const response = res.data;
-      return { success: true, data: response.data?.infos };
-    } catch (error) {
-      return handleApiError(error);
-    }
+  async getProfile(target, fields) {
+    return await apiGet(`${PREFIX$3}/${target}`, { fields });
   }
-  // // Get user profile by id or urlName
-  // async getHeaderProfile(id: string): Promise<Result<User>> {
-  //   try {
-  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=avatar,fullName,background,nickname`);
-  //     const response = res.data as ApiResponse<any>;
-  //     return { success: true, data: response.data?.infos };
-  //   } catch (error: any) {
-  //     return handleApiError(error);
-  //   }
-  // }
-  // async getUserAvatar(id: string): Promise<Result<string>> {
-  //   try {
-  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=avatar`);
-  //     const response = res.data as ApiResponse<any>;
-  //     return { success: true, data: response.data?.infos?.avatar };
-  //   } catch (error: any) {
-  //     return handleApiError(error);
-  //   }
-  // }
-  // async getUserBackground(id: string): Promise<Result<string>> {
-  //   try {
-  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=background`);
-  //     const response = res.data as ApiResponse<any>;
-  //     return { success: true, data: response.data?.infos?.background };
-  //   } catch (error: any) {
-  //     return handleApiError(error);
-  //   }
-  // }
-  // async getUserFullName(id: string): Promise<Result<string>> {
-  //   try {
-  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=fullName`);
-  //     const response = res.data as ApiResponse<any>;
-  //     return { success: true, data: response.data?.infos?.fullName };
-  //   } catch (error: any) {
-  //     return handleApiError(error);
-  //   }
-  // }
-  // async getUserUrlName(id: string): Promise<Result<string>> {
-  //   try {
-  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=urlName`);
-  //     const response = res.data as ApiResponse<any>;
-  //     return { success: true, data: response.data?.infos?.urlName };
-  //   } catch (error: any) {
-  //     return handleApiError(error);
-  //   }
-  // }
-  // async getUserNickname(id: string): Promise<Result<string>> {
-  //   try {
-  //     const res = await apiClient.get(`${PREFIX}/${id}?fields=nickname`);
-  //     const response = res.data as ApiResponse<any>;
-  //     return { success: true, data: response.data?.infos?.nickname };
-  //   } catch (error: any) {
-  //     return handleApiError(error);
-  //   }
-  // }
-  async getUserId(id) {
-    try {
-      const res = await apiClient.get(`${PREFIX$2}/${id}?fields=id`);
-      const response = res.data;
-      return { success: true, data: response.data?.infos?.id };
-    } catch (error) {
-      return handleApiError(error);
-    }
+  async getUserId(target) {
+    return await apiGet(`${PREFIX$3}/${target}`, { fields: "id" });
   }
   // Get current user profile
   async getMe() {
-    try {
-      const res = await apiClient.get(`${PREFIX$2}/me`);
-      const response = res.data.data.infos;
-      return { success: true, data: response };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return await apiGet(`${PREFIX$3}/me`);
   }
   // Upload avatar
   async uploadAvatar(file) {
     const formData = new FormData();
     formData.append("file", file);
-    return apiPatchFormData(`${PREFIX$2}/avatar`, formData);
+    return await apiPatchFormData(`${PREFIX$3}/avatar`, formData);
   }
   // Upload background image
   async uploadBackground(file) {
     const formData = new FormData();
     formData.append("file", file);
-    return apiPatchFormData(`${PREFIX$2}/background`, formData);
+    return await apiPatchFormData(`${PREFIX$3}/background`, formData);
   }
   // Update simple profile fields such as bio, description, etc.
   async updateProfile(data) {
-    return apiPut(`${PREFIX$2}`, data);
+    return apiPut(`${PREFIX$3}`, data);
   }
   // Update user's URL name
   async updateUrlName(changeUrlNameDto) {
-    return apiPatch(`${PREFIX$2}/urlName`, changeUrlNameDto);
+    return apiPatch(`${PREFIX$3}/urlName`, changeUrlNameDto);
   }
   // Complete onboarding
   async completeOnboarding(onboardingDto) {
-    return apiPost(`${PREFIX$2}/onboarding`, onboardingDto);
+    return apiPost(`${PREFIX$3}/onboarding`, onboardingDto);
   }
   // Update user's name
   async updateName(changeNameDto) {
-    return apiPatch(`${PREFIX$2}/name`, changeNameDto);
+    return apiPatch(`${PREFIX$3}/name`, changeNameDto);
   }
   async updateNickname(changeNicknameDto) {
-    return apiPatch(`${PREFIX$2}/nickname`, changeNicknameDto);
+    return apiPatch(`${PREFIX$3}/nickname`, changeNicknameDto);
   }
   // Get onboarding default data
   async getOnboardingDefaults() {
-    return apiGet(`${PREFIX$2}/onboarding/defaults`);
+    return apiGet(`${PREFIX$3}/onboarding/defaults`);
   }
 }
 const userProfileService = new UserProfileService();
@@ -542,7 +472,9 @@ function useResultFetcher(fn, options) {
   const [errors, setErrors] = useState();
   const [isFetching, setIsFetching] = useState(false);
   const fetch = useCallback(
-    async (params, opts) => {
+    async (...args) => {
+      const params = args.length === 2 ? args[0] : void 0;
+      const opts = args.length === 2 ? args[1] : args[0];
       setIsFetching(true);
       setError(void 0);
       setErrors(void 0);
@@ -639,17 +571,17 @@ const AuthProvider = ({
   });
   const queryClient = useQueryClient();
   const navigate = useNavigate();
-  const { fetch: me } = useResultFetcher(userProfileService.getMe, {});
+  const { fetch: me } = useResultFetcher(userProfileService.getMe);
   const { fetch: login2 } = useResultFetcher(authService.login, {
     onSuccess: async () => {
-      await me(void 0, {
+      await me({
         onSuccess: (data) => {
           dispatch({
             type: "LOGIN",
             payload: {
-              userId: data?.id,
-              urlName: data?.urlName,
-              lang: data?.languageCode || "en"
+              userId: data?.infos.id,
+              urlName: data?.infos.urlName,
+              lang: data?.infos.languageCode || "en"
             }
           });
         }
@@ -666,14 +598,14 @@ const AuthProvider = ({
   const handleLoginWithGoogle = async (code) => {
     await loginWithGoogle.fetch(code, {
       onSuccess: async () => {
-        await me(void 0, {
+        await me({
           onSuccess: async (data) => {
             dispatch({
               type: "LOGIN",
               payload: {
-                userId: data?.id,
-                urlName: data?.urlName,
-                lang: data?.languageCode || "en"
+                userId: data?.infos.id,
+                urlName: data?.infos.urlName,
+                lang: data?.infos.languageCode || "en"
               }
             });
           }
@@ -701,14 +633,14 @@ const AuthProvider = ({
   }, [navigate]);
   useEffect(() => {
     if (state.isAuthenticated && !state.userId) {
-      me(void 0, {
+      me({
         onSuccess: (data) => {
           dispatch({
             type: "LOGIN",
             payload: {
-              userId: data?.id,
-              urlName: data?.urlName,
-              lang: data?.languageCode || "en"
+              userId: data?.infos.id,
+              urlName: data?.infos.urlName,
+              lang: data?.infos.languageCode || "en"
             }
           });
         }
@@ -1494,6 +1426,88 @@ const SelectDay = ({
     isWrong && wrongMessage && /* @__PURE__ */ jsx("span", { className: "text-xs text-error ml-1", children: wrongMessage })
   ] });
 };
+const SelectFile = ({
+  onChange,
+  accept = "*",
+  multiple = false,
+  className,
+  children
+}) => {
+  const handleChange = (e) => {
+    if (e.target.files) {
+      onChange(e.target.files[0]);
+      e.target.value = "";
+    }
+  };
+  const inputRef = React.useRef(null);
+  const handleClick = () => {
+    inputRef.current?.click();
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "bg-bg-fourth transition-all duration-200 ease hover:bg-bg-fourth/40",
+        "rounded-lg px-4 py-2 cursor-pointer text-[13px]",
+        className
+      ),
+      onClick: handleClick,
+      children: [
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            ref: inputRef,
+            type: "file",
+            accept,
+            multiple,
+            className: "hidden",
+            onChange: handleChange,
+            title: "Select a file"
+          }
+        ),
+        children
+      ]
+    }
+  );
+};
+const Dropdown = ({
+  items,
+  isShow,
+  onSelect,
+  showPolygon = true,
+  className,
+  ref
+}) => {
+  if (!isShow) return null;
+  return /* @__PURE__ */ jsxs("div", { className: clsx("rounded-2xl p-2 bg-bg-seventh", className), ref, children: [
+    showPolygon && /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: clsx(
+          "absolute hidden sm:flex sm:-top-2 sm:left-[10%] -translate-x-1/2 w-0 h-0",
+          "border-l-8 border-l-transparent",
+          "border-r-8 border-r-transparent",
+          "border-b-8 border-b-bg-seventh rounded-sm"
+        )
+      }
+    ),
+    /* @__PURE__ */ jsx("ul", { className: "flex flex-col gap-1 w-full", children: items.map((item, index) => /* @__PURE__ */ jsx(
+      "li",
+      {
+        onClick: () => {
+          item.onClick?.();
+          onSelect?.(item);
+        },
+        className: clsx(
+          "w-full text-left px-3 py-2 !rounded-md text-sm",
+          "hover:bg-bg-fourth cursor-pointer select-none"
+        ),
+        children: item.content
+      },
+      index
+    )) })
+  ] });
+};
 var NotificationType = /* @__PURE__ */ ((NotificationType2) => {
   NotificationType2["NewFriendRequest"] = "NewFriendRequest";
   NotificationType2["FriendRequestAccepted"] = "FriendRequestAccepted";
@@ -1515,63 +1529,34 @@ const NotificationDefault = {
   isRead: true,
   createdAt: (/* @__PURE__ */ new Date()).toISOString()
 };
-const PREFIX$1 = buildApiPath("/friendship");
+const PREFIX$2 = buildApiPath("/friendship");
 class FriendshipService {
   async GetFriendshipStatus(targetId) {
-    return apiGet(`${PREFIX$1}/status/${targetId}`);
+    return apiGet(`${PREFIX$2}/status/${targetId}`);
   }
   async SendAddFriendRequest(receiverId) {
-    return apiPost(`${PREFIX$1}/add/${receiverId}`);
+    return apiPost(`${PREFIX$2}/add/${receiverId}`);
   }
   async CancelAddFriendRequest(senderId) {
-    return apiDelete(`${PREFIX$1}/cancel/${senderId}`);
+    return apiDelete(`${PREFIX$2}/cancel/${senderId}`);
   }
   async AcceptAddFriendRequest(senderId) {
-    return apiPost(`${PREFIX$1}/accept/${senderId}`);
+    return apiPost(`${PREFIX$2}/accept/${senderId}`);
   }
   async DeclineAddFriendRequest(requesterId) {
-    return apiDelete(`${PREFIX$1}/decline/${requesterId}`);
+    return apiDelete(`${PREFIX$2}/decline/${requesterId}`);
   }
   async Unfriend(friendId) {
-    return apiDelete(`${PREFIX$1}/unfriend/${friendId}`);
+    return apiDelete(`${PREFIX$2}/unfriend/${friendId}`);
   }
   async GetNumberOfFriends(targetId) {
-    console.log("GetNumberOfFriends called with targetId:", targetId);
-    return apiGet(`${PREFIX$1}/count/${targetId}`);
+    return apiGet(`${PREFIX$2}/count/${targetId}`);
   }
   async GetFriendRequests(query) {
-    try {
-      const res = await apiClient.get(`${PREFIX$1}/requests`, {
-        params: query
-      });
-      await new Promise((resolve) => setTimeout(resolve, 3e3));
-      const resp = res.data;
-      return {
-        success: true,
-        data: {
-          data: resp.data ?? [],
-          nextCursor: resp.nextCursor,
-          hasNext: resp.hasNext
-        }
-      };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return await apiGet(`${PREFIX$2}/requests`, query);
   }
   async GetFriends(userId, page, pageSize, keyword) {
-    try {
-      const params = new URLSearchParams();
-      if (keyword) params.append("keyword", keyword);
-      params.append("page", page.toString());
-      params.append("pageSize", pageSize.toString());
-      const res = await apiClient.get(`${PREFIX$1}/friends/${userId}`, {
-        params
-      });
-      const response = res.data;
-      return { success: true, data: response.data };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return await apiGet(`${PREFIX$2}/list/${userId}`, { params: { page, pageSize, keyword } });
   }
 }
 const friendshipService = new FriendshipService();
@@ -1679,6 +1664,11 @@ const NewFriendRequest = ({
     messageMap[notificationDto.id] || null
   );
   const { t } = useTranslation();
+  const navigate = useNavigate$1();
+  const handleClick = useCallback(() => {
+    onClick();
+    navigate(notificationDto.actorId);
+  }, [onClick, navigate, notificationDto.actorId]);
   const handleAccept = (e) => {
     e.preventDefault();
     e.stopPropagation();
@@ -1703,7 +1693,7 @@ const NewFriendRequest = ({
     };
     deleteFriendRequest();
   };
-  return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick, children: !message ? /* @__PURE__ */ jsxs("div", { className: clsx("flex", "gap-1", "mt-1", "justify-start"), children: [
+  return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick: handleClick, children: !message ? /* @__PURE__ */ jsxs("div", { className: clsx("flex", "gap-1", "mt-1", "justify-start"), children: [
     /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "primary", onClick: handleAccept, children: t("user:profileHeader.acceptButton") }),
     /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "secondary", onClick: handleDelete, children: t("user:profileHeader.declineButton") })
   ] }) : /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: clsx("opacity-70"), children: message }) });
@@ -1872,16 +1862,8 @@ const ThemeContext = createContext({
   setTheme: () => {
   }
 });
-function getInitialTheme() {
-  if (typeof window === "undefined") return "light";
-  const currentTheme = document.documentElement.getAttribute("data-theme");
-  if (ThemeList.some((t) => t === currentTheme)) {
-    return currentTheme;
-  }
-  return "light";
-}
 function ThemeProvider({ children }) {
-  const [theme2, setTheme] = useState(getInitialTheme);
+  const [theme2, setTheme] = useState("light");
   const t = useTranslation().t;
   const availableThemes = [
     { key: "light", label: t("common:themes:light") },
@@ -1893,10 +1875,11 @@ function ThemeProvider({ children }) {
     { key: "light-yellow-pink", label: t("common:themes:lightYellowPink") }
   ];
   useEffect(() => {
+    const domTheme = document.documentElement.getAttribute("data-theme");
     const storedTheme = localStorage.getItem("theme");
-    const currentTheme = document.documentElement.getAttribute("data-theme");
-    if (storedTheme && storedTheme !== currentTheme && availableThemes.some((t2) => t2.key === storedTheme)) {
-      setTheme(storedTheme);
+    const initialTheme = storedTheme || domTheme || "light";
+    if (ThemeList.some((t2) => t2 === initialTheme)) {
+      setTheme(initialTheme);
     }
   }, []);
   useEffect(() => {
@@ -2046,21 +2029,37 @@ function useSafeInfiniteQueryResult({
   });
 }
 const profileQueryKey = (userId) => ["user", "profile", userId];
+const avatarQueryKey = (userId) => ["user", "avatar", userId];
+const backgroundQueryKey = (userId) => ["user", "background", userId];
 const profileDetailsQueryKey = (userId) => ["user", "profile", "details", userId];
 const useGetUserProfile = (userId) => {
   return useSafeQueryResult({
     queryKey: profileQueryKey(userId),
-    fn: () => userProfileService.getProfile(
+    fn: async () => await userProfileService.getProfile(
       userId,
       "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName"
     ),
     enabled: !!userId
   });
 };
+const useGetUserAvatar = (userId) => {
+  return useSafeQueryResult({
+    queryKey: avatarQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "avatar"),
+    enabled: !!userId
+  });
+};
+const useGetUserBackground = (userId) => {
+  return useSafeQueryResult({
+    queryKey: backgroundQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "background"),
+    enabled: !!userId
+  });
+};
 const useGetUserProfileDetails = (userId) => {
   return useSafeQueryResult({
     queryKey: profileDetailsQueryKey(userId),
-    fn: () => userProfileService.getProfile(userId, "bio,description"),
+    fn: async () => await userProfileService.getProfile(userId, "bio,description"),
     enabled: !!userId
   });
 };
@@ -2133,7 +2132,7 @@ const useSelectBackground = (userId) => {
   return useResultFetcher(userProfileService.uploadBackground, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: profileQueryKey(userId)
+        queryKey: backgroundQueryKey(userId)
       });
     }
   });
@@ -2143,7 +2142,7 @@ const useSelectAvatar = (userId) => {
   return useResultFetcher(userProfileService.uploadAvatar, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: profileQueryKey(userId)
+        queryKey: avatarQueryKey(userId)
       });
     }
   });
@@ -2154,6 +2153,7 @@ const UserMenu = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const { data: userProfile } = useGetUserProfile(userId);
+  const { data: avatarProfile } = useGetUserAvatar(userId);
   const menuRef = useRef(null);
   const btnRef = useRef(null);
   const handleClickOutside = () => {
@@ -2189,7 +2189,7 @@ const UserMenu = () => {
         children: /* @__PURE__ */ jsx(
           Avatar,
           {
-            src: userProfile?.avatar ?? "",
+            src: avatarProfile?.infos.avatar ?? "",
             alt: "Profile",
             sz: "sm-1",
             className: "border-4 border-bg-third"
@@ -2219,8 +2219,8 @@ const UserMenu = () => {
               ),
               onClick: handlePersonalPage,
               children: [
-                /* @__PURE__ */ jsx(Avatar, { src: userProfile?.avatar ?? "", alt: "avatar", sz: "sm-1" }),
-                /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: userProfile?.fullName ?? "" })
+                /* @__PURE__ */ jsx(Avatar, { src: avatarProfile?.infos.avatar ?? "", alt: "avatar", sz: "sm-1" }),
+                /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: userProfile?.infos.fullName ?? "" })
               ]
             }
           ) }),
@@ -2269,70 +2269,27 @@ const UserMenu = () => {
     )
   ] });
 };
-const PREFIX = buildApiPath("/notification");
+const PREFIX$1 = buildApiPath("/notification");
 class NotificationService {
   async getNotifications(query) {
-    try {
-      const res = await apiClient.get(`${PREFIX}`, {
-        params: query
-      });
-      console.log("API Response for getNotifications:", res.data);
-      const resp = res.data;
-      return {
-        success: true,
-        data: {
-          data: resp.data ?? [],
-          nextCursor: resp.nextCursor,
-          hasNext: resp.hasNext
-        }
-      };
-    } catch (error) {
-      return handleApiError(error);
-    }
-  }
-  async getUnreadNotifications(query) {
-    try {
-      const res = await apiClient.get(`${PREFIX}/unread`, {
-        params: query
-      });
-      const resp = res.data;
-      return {
-        success: true,
-        data: {
-          data: resp.data ?? [],
-          nextCursor: resp.nextCursor,
-          hasNext: resp.hasNext
-        }
-      };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    return await apiGet(`${PREFIX$1}`, query);
   }
   async markAsRead(notificationId) {
-    return apiPost(`${PREFIX}/read/${notificationId}`);
+    return await apiPost(`${PREFIX$1}/${notificationId}/read`);
   }
   async markAllAsRead() {
-    return apiPost(`${PREFIX}/read/all`);
+    return await apiPost(`${PREFIX$1}/read-all`);
   }
   async getUnreadCount() {
-    try {
-      const res = await apiClient.get(`${PREFIX}/unread`, {
-        params: { limit: 1 }
-      });
-      return {
-        success: true,
-        data: res.data.unreadCount ?? 0
-      };
-    } catch (error) {
-      return handleApiError(error);
-    }
+    const result = await apiGet(`${PREFIX$1}/unread-count`);
+    console.log("getUnreadCount response:", result);
+    return result;
   }
-  // ---------- DELETE ----------
-  async deleteNotification(notificationId) {
-    return apiDelete(`${PREFIX}/${notificationId}`);
+  async delete(notificationId) {
+    return await apiDelete(`${PREFIX$1}/${notificationId}`);
   }
-  async deleteAllNotifications() {
-    return apiDelete(`${PREFIX}/all`);
+  async deleteAll() {
+    return await apiDelete(`${PREFIX$1}`);
   }
 }
 const notificationService = new NotificationService();
@@ -2345,12 +2302,26 @@ const NotificationSkeleton = () => {
     ] })
   ] });
 };
+const notificationQueryKey = (userId, queryParams) => ["notifications", userId, queryParams];
 const useNotifications = (queryParams) => {
   const { userId } = useAuth();
   return useSafeInfiniteQueryResult({
-    queryKey: ["notifications", userId, queryParams],
-    fn: (cursor) => notificationService.getNotifications({ ...queryParams, cursor }),
+    queryKey: notificationQueryKey(userId, queryParams),
+    fn: async (cursor) => await notificationService.getNotifications({ ...queryParams, cursor }),
     enabled: !!userId
+  });
+};
+const useMarkNotificationAsRead = () => {
+  return useResultFetcher(
+    (notificationId) => notificationService.markAsRead(notificationId)
+  );
+};
+const useDeleteAllNotifications = () => {
+  const qc = useQueryClient();
+  return useResultFetcher(notificationService.deleteAll, {
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+    }
   });
 };
 function InfiniteScroll({
@@ -2362,7 +2333,8 @@ function InfiniteScroll({
   hasMore = true,
   isLoading = false,
   itemTemplate,
-  onLoadMore
+  onLoadMore,
+  isShowLastSeen = false
 }) {
   const sentinelRef = useRef(null);
   const loadingRef = useRef(false);
@@ -2407,7 +2379,7 @@ function InfiniteScroll({
           },
           index
         )) }),
-        !hasMore && !isLoading && /* @__PURE__ */ jsx(
+        !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx(
           "div",
           {
             style: {
@@ -2473,7 +2445,7 @@ function useUnreadCount() {
   const queryClient = useQueryClient();
   const { data: unreadCount = 0 } = useSafeQueryResult({
     queryKey: notificationKeys.unreadCount(userId),
-    fn: () => notificationService.getUnreadCount(),
+    fn: async () => await notificationService.getUnreadCount(),
     staleTime: Infinity,
     gcTime: Infinity,
     refetchOnMount: false,
@@ -2510,16 +2482,16 @@ function useNotificationCacheMutations() {
         (oldData) => {
           if (!oldData?.pages?.length) {
             return {
-              pages: [{ data: [notification], nextCursor: void 0, hasNext: false }],
+              pages: [{ items: [notification], nextCursor: void 0, hasNext: false }],
               pageParams: [void 0]
             };
           }
           const firstPage = oldData.pages[0];
-          if (firstPage.data.some((n) => n.id === notification.id)) return oldData;
+          if (firstPage.items.some((n) => n.id === notification.id)) return oldData;
           return {
             ...oldData,
             pages: [
-              { ...firstPage, data: [notification, ...firstPage.data] },
+              { ...firstPage, items: [notification, ...firstPage.items] },
               ...oldData.pages.slice(1)
             ]
           };
@@ -2540,7 +2512,7 @@ function useNotificationCacheMutations() {
             ...oldData,
             pages: oldData.pages.map((page) => ({
               ...page,
-              data: page.data.filter((n) => n.id !== notificationId)
+              items: page.items.filter((n) => n.id !== notificationId)
             }))
           };
         }
@@ -2558,7 +2530,7 @@ function useNotificationCacheMutations() {
             ...oldData,
             pages: oldData.pages.map((page) => ({
               ...page,
-              data: page.data.map((n) => n.id === notificationId ? { ...n, isRead: true } : n)
+              items: page.items.map((n) => n.id === notificationId ? { ...n, isRead: true } : n)
             }))
           };
         }
@@ -2575,7 +2547,7 @@ function useNotificationCacheMutations() {
           ...oldData,
           pages: oldData.pages.map((page) => ({
             ...page,
-            data: page.data.map((n) => ({ ...n, isRead: true }))
+            items: page.items.map((n) => ({ ...n, isRead: true }))
           }))
         };
       }
@@ -2590,7 +2562,7 @@ function useNotificationCacheMutations() {
           ...oldData,
           pages: oldData.pages.map((page) => ({
             ...page,
-            data: []
+            items: []
           }))
         };
       }
@@ -2608,17 +2580,19 @@ function useNotificationCacheMutations() {
     invalidateNotifications
   };
 }
-const NotificationMenu = ({ className, onClick, ref }) => {
+const NotificationMenu = ({ className, ref }) => {
   const { t } = useTranslation();
   const navigate = useNavigate$1();
   const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
     limit: 20
   });
+  const { fetch: deleteAll } = useDeleteAllNotifications();
   const { isInNotificationPage } = useNotificationUiState();
   const { unreadCount, setUnreadCount } = useUnreadCount();
   const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } = useNotificationCacheMutations();
+  const { fetch: markAsRead } = useMarkNotificationAsRead();
   const notifications2 = React.useMemo(() => {
-    return data?.pages.flatMap((page) => page.data) || [];
+    return data?.pages.flatMap((page) => page.items) || [];
   }, [data]);
   const handleMarkAllAsRead = async () => {
     markAllAsReadInCache();
@@ -2626,48 +2600,54 @@ const NotificationMenu = ({ className, onClick, ref }) => {
     await notificationService.markAllAsRead();
     invalidateNotifications();
   };
-  const handleDeleteAll = async () => {
-    clearAllFromCache();
-    setUnreadCount(0);
-    await notificationService.deleteAllNotifications();
-    invalidateNotifications();
+  const handleDeleteAll = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await deleteAll({
+      onSuccess: () => {
+        clearAllFromCache();
+        setUnreadCount(0);
+        invalidateNotifications();
+      },
+      onError: () => {
+        console.error("Failed to delete all notifications");
+      }
+    });
   };
   return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
         "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
-        "animate-dropdown-slide origin-top",
+        "animate-dropdown-slide origin-top scrollbar-hide",
         className
       ),
       ref,
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-2 pt-2", children: [
           /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: t("notifications:notifications.title") }),
-          notifications2.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
+          notifications2.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
             unreadCount > 0 && /* @__PURE__ */ jsx(
-              Text,
+              "button",
               {
-                sz: "sm-1",
-                color: "secondary",
-                className: "cursor-pointer hover:underline",
+                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
                 onClick: handleMarkAllAsRead,
-                children: t("notifications:notifications.mark-all-read")
+                title: t("notifications:notifications.mark-all-read"),
+                children: /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-check-double" }) })
               }
             ),
             /* @__PURE__ */ jsx(
-              Text,
+              "button",
               {
-                sz: "sm-1",
-                color: "secondary",
-                className: "cursor-pointer hover:underline",
+                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
                 onClick: handleDeleteAll,
-                children: t("notifications:notifications.delete-all")
+                title: t("notifications:notifications.delete-all"),
+                children: /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-trash-can" }) })
               }
             )
           ] })
         ] }),
-        notifications2.length > 0 ? /* @__PURE__ */ jsx("div", { className: "relative py-1 overflow-y-scroll scrollbar-none max-h-[500px]", children: /* @__PURE__ */ jsx(
+        notifications2.length > 0 ? /* @__PURE__ */ jsx("div", { className: "relative py-1 overflow-y-scroll max-h-[500px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", children: /* @__PURE__ */ jsx(
           InfiniteScroll,
           {
             itemInRow: 1,
@@ -2689,13 +2669,12 @@ const NotificationMenu = ({ className, onClick, ref }) => {
                     {
                       notificationDto: notification,
                       onClick: async () => {
-                        navigate(notification.link || "/");
-                        if (!notification.isRead) {
-                          markAsReadInCache(notification.id);
-                          setUnreadCount((prev) => Math.max(prev - 1, 0));
-                        }
-                        await notificationService.markAsRead(notification.id);
-                        onClick?.();
+                        markAsRead(notification.id, {
+                          onSuccess: () => {
+                            markAsReadInCache(notification.id);
+                            setUnreadCount((prev) => Math.max(prev - 1, 0));
+                          }
+                        });
                       }
                     }
                   )
@@ -2715,7 +2694,18 @@ const NotificationMenu = ({ className, onClick, ref }) => {
           /* @__PURE__ */ jsx(NotificationSkeleton, {}),
           /* @__PURE__ */ jsx(NotificationSkeleton, {})
         ] }) }),
-        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "absolute right-4", onClick: () => navigate("/notifications"), children: /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", className: clsx("cursor-pointer underline"), children: t("notifications:notifications.open-notifications") }) })
+        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2", children: /* @__PURE__ */ jsxs(
+          "button",
+          {
+            className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2",
+            onClick: () => navigate("/notifications"),
+            title: t("notifications:notifications.open-notifications"),
+            children: [
+              /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", children: t("notifications:notifications.open-notifications") }),
+              /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-up-right-from-square" }) })
+            ]
+          }
+        ) })
       ]
     }
   );
@@ -2758,7 +2748,7 @@ const NotificationBadge = ({}) => {
         )
       }
     ),
-    isShowNotification && !isInNotificationPage && /* @__PURE__ */ jsx(
+    isShowNotification && !isInNotificationPage && /* @__PURE__ */ jsx("div", { onClick: () => setShowNotification(false), children: /* @__PURE__ */ jsx(
       NotificationMenu,
       {
         className: clsx(
@@ -2769,7 +2759,7 @@ const NotificationBadge = ({}) => {
         onClick: () => setShowNotification(!isShowNotification),
         ref: menuRef
       }
-    )
+    ) })
   ] });
 };
 const useActiveRoute = (to, end = false) => {
@@ -2936,7 +2926,7 @@ function HeightTransition({
   const mainRef = useRef(null);
   const [maxHeight, setMaxHeight] = useState(show ? "none" : "0px");
   const [isVisible, setIsVisible] = useState(show);
-  useLayoutEffect(() => {
+  useEffect(() => {
     if (!mainRef.current) {
       return;
     }
@@ -3379,7 +3369,7 @@ const SettingsNavbar = ({ className, onSelect }) => {
 };
 const SettingPage = () => {
   const { t } = useTranslation();
-  useLayoutEffect(() => {
+  useEffect(() => {
     document.title = t("settings:title");
   }, [t]);
   const [isShowNavbar, setIsShowNavbar] = React.useState(true);
@@ -3568,10 +3558,10 @@ const ChangeUrlName = ({ userId }) => {
     EditableField,
     {
       title: t("settings:account.personalInfo.urlName"),
-      value: userProfile?.urlName,
+      value: userProfile?.infos.urlName,
       noDataValue: t("settings:account.personalInfo.noUrlName"),
       placeholder: t("settings:account.personalInfo.urlNamePlaceholder"),
-      valueClassName: clsx(!userProfile?.urlName && "!opacity-50"),
+      valueClassName: clsx(!userProfile?.infos.urlName && "!opacity-50"),
       btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
         /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
         t("settings:account.personalInfo.changeButton")
@@ -3631,10 +3621,10 @@ const ChangeNickname = ({ userId }) => {
     EditableField,
     {
       title: t("settings:account.personalInfo.nickname"),
-      value: userProfile?.nickname,
+      value: userProfile?.infos.nickname,
       noDataValue: t("settings:account.personalInfo.noNickname"),
       placeholder: t("settings:account.personalInfo.nicknamePlaceholder"),
-      valueClassName: clsx(!userProfile?.nickname && "!opacity-50"),
+      valueClassName: clsx(!userProfile?.infos.nickname && "!opacity-50"),
       btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
         /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
         t("settings:account.personalInfo.changeButton")
@@ -3775,9 +3765,9 @@ const ChangeNameForm = ({ className }) => {
   const [newMiddleName, setNewMiddleName] = React.useState("");
   const [newLastName, setNewLastName] = React.useState("");
   useEffect(() => {
-    setNewFirstName(userProfile?.firstName || "");
-    setNewMiddleName(userProfile?.middleName || "");
-    setNewLastName(userProfile?.lastName || "");
+    setNewFirstName(userProfile?.infos.firstName || "");
+    setNewMiddleName(userProfile?.infos.middleName || "");
+    setNewLastName(userProfile?.infos.lastName || "");
   }, [userProfile]);
   const handleClose = () => {
     navigate("/settings");
@@ -3912,7 +3902,7 @@ const ChangeNameForm = ({ className }) => {
             /* @__PURE__ */ jsx(
               Button,
               {
-                disabled: isSubmitting || newFirstName === userProfile?.firstName && newMiddleName === (userProfile?.middleName || "") && newLastName === userProfile?.lastName,
+                disabled: isSubmitting || newFirstName === userProfile?.infos.firstName && newMiddleName === (userProfile?.infos.middleName || "") && newLastName === userProfile?.infos.lastName,
                 sz: "md-1",
                 className: clsx("mt-2"),
                 onClick: handleSubmit,
@@ -3944,22 +3934,39 @@ const useLanguage = () => {
   const availableLanguages = Object.keys(resources);
   return { changeLanguage, availableLanguages, currentLanguage };
 };
+const PREFIX = buildApiPath("/userconfig");
+class UserConfigService {
+  async changeLanguage(languageCode) {
+    return apiPut(`${PREFIX}/language`, { languageCode });
+  }
+}
+const userConfigService = new UserConfigService();
+const useChangeLanguage = () => {
+  return useResultFetcher(
+    (languageCode) => userConfigService.changeLanguage(languageCode)
+  );
+};
 const SelectLanguage = ({ className }) => {
   const { t } = useTranslation();
   const { changeLanguage, availableLanguages, currentLanguage } = useLanguage();
+  const { fetch: changeLanguageFetch } = useChangeLanguage();
   const options = availableLanguages.map((lang) => ({
     key: lang,
     value: t(`common:language.${lang}`)
   }));
   const _changeLanguage = (key) => {
-    changeLanguage(key);
+    changeLanguageFetch(key, {
+      onSuccess: () => {
+        changeLanguage(key);
+      }
+    });
   };
   return /* @__PURE__ */ jsx(
     SelectBox,
     {
       className: clsx(className),
       options,
-      selectedOption: currentLanguage,
+      selectedOption: currentLanguage ?? "en",
       onSelect: _changeLanguage
     }
   );
@@ -4665,86 +4672,16 @@ const NotificationsPage = () => {
   }, []);
   return /* @__PURE__ */ jsx("div", { className: clsx("relative flex items-start justify-center w-full h-full mt-1"), children: /* @__PURE__ */ jsx(NotificationMenu, { className: clsx("h-full max-w-[600px] w-full px-2 py-4 pb-2 mx-4") }) });
 };
-const SelectFile = ({
-  onChange,
-  accept = "*",
-  multiple = false,
-  className,
-  children
-}) => {
-  const handleChange = (e) => {
-    if (e.target.files) {
-      onChange(e.target.files[0]);
-      e.target.value = "";
-    }
-  };
-  const inputRef = React.useRef(null);
-  const handleClick = () => {
-    inputRef.current?.click();
-  };
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "bg-bg-fourth transition-all duration-200 ease hover:bg-bg-fourth/40",
-        "rounded-lg px-4 py-2 cursor-pointer text-[13px]",
-        className
-      ),
-      onClick: handleClick,
-      children: [
-        /* @__PURE__ */ jsx(
-          "input",
-          {
-            ref: inputRef,
-            type: "file",
-            accept,
-            multiple,
-            className: "hidden",
-            onChange: handleChange,
-            title: "Select a file"
-          }
-        ),
-        children
-      ]
-    }
-  );
-};
-function useUserId(userParam) {
-  const { data, isLoading, isFetching, isError } = useQuery({
+const useUserId = (userParam) => {
+  return useSafeQueryResult({
     queryKey: ["user-profile-id", userParam],
-    queryFn: async () => {
-      try {
-        const response = await userProfileService.getUserId(userParam);
-        if (response.success) {
-          return {
-            userId: response.data,
-            userExist: true
-          };
-        }
-        return {
-          userId: void 0,
-          userExist: false
-        };
-      } catch (error) {
-        console.error("Error fetching userId:", error);
-        return {
-          userId: void 0,
-          userExist: false
-        };
-      }
-    },
+    fn: async () => await userProfileService.getUserId(userParam),
     staleTime: 1e3 * 60 * 5,
     gcTime: 1e3 * 60 * 10,
     enabled: !!userParam,
     retry: 1
   });
-  return {
-    userId: data?.userId,
-    userExist: isError ? false : data?.userExist,
-    isLoading,
-    isFetching
-  };
-}
+};
 const ProfilePageContext = createContext({
   isOwner: false,
   targetId: "",
@@ -4753,17 +4690,12 @@ const ProfilePageContext = createContext({
 function ProfilePageProvider({ children }) {
   const { userId } = useAuth();
   const userParam = useParams();
-  const {
-    userId: targetId,
-    userExist,
-    isLoading,
-    isFetching
-  } = useUserId(userParam.userParam || "");
+  const { data, isLoading, isFetching } = useUserId(userParam.userParam || "");
   const cachedTargetIdRef = useRef(void 0);
-  if (targetId) {
-    cachedTargetIdRef.current = targetId;
+  if (data?.infos.id) {
+    cachedTargetIdRef.current = data.infos.id;
   }
-  const validTargetId = targetId || cachedTargetIdRef.current || "";
+  const validTargetId = data?.infos.id || cachedTargetIdRef.current || "";
   const contextValue = useMemo(
     () => ({
       isOwner: userId === validTargetId,
@@ -4775,7 +4707,7 @@ function ProfilePageProvider({ children }) {
   if (isLoading || isFetching) {
     return /* @__PURE__ */ jsx(LoadingPage, {});
   }
-  if (userExist === false) {
+  if (!data) {
     return /* @__PURE__ */ jsx(NotFoundPage, {});
   }
   return /* @__PURE__ */ jsx(ProfilePageContext.Provider, { value: contextValue, children });
@@ -4787,17 +4719,23 @@ function useProfilePage() {
   }
   return context;
 }
-const ProfileBackground = ({
-  isLoading,
-  background,
-  handleSelectBackground
-}) => {
+const ProfileBackground = ({}) => {
   const { t } = useTranslation();
-  const { isOwner } = useProfilePage();
-  return /* @__PURE__ */ jsx("div", { className: clsx("relative aspect-[16/6] w-full rounded-[15px]"), children: isLoading ? /* @__PURE__ */ jsx(Skeleton, { className: "h-full" }) : /* @__PURE__ */ jsx(
+  const { targetId, isOwner } = useProfilePage();
+  const { data, isLoading, isFetching } = useGetUserBackground(targetId);
+  const { fetch, isFetching: isUpdating } = useSelectBackground(targetId);
+  const { showSnackbar } = useSnackbar();
+  const handleSelectBackground = async (file) => {
+    await fetch(file, {
+      onSuccess: () => {
+        showSnackbar("Background updated successfully", "success");
+      }
+    });
+  };
+  return /* @__PURE__ */ jsx("div", { className: clsx("relative aspect-[16/6] w-full"), children: isLoading || isFetching || isUpdating ? /* @__PURE__ */ jsx(Skeleton, { className: "h-full" }) : /* @__PURE__ */ jsx(
     BackgroundImage,
     {
-      src: background,
+      src: data?.infos.background,
       alt: "Background Image",
       className: clsx("relative h-full w-full"),
       children: isOwner && /* @__PURE__ */ jsxs(
@@ -4812,25 +4750,29 @@ const ProfileBackground = ({
           ),
           children: [
             /* @__PURE__ */ jsx("i", { className: clsx("fa-solid fa-camera") }),
-            /* @__PURE__ */ jsx(Text, { className: clsx("sm:flex hidden"), sz: "md-1", children: background ? t("user:profileHeader.changeButton") : t("user:profileHeader.addButton") })
+            /* @__PURE__ */ jsx(Text, { className: clsx("sm:flex hidden"), sz: "md-1", children: data?.infos.background ? t("user:profileHeader.changeButton") : t("user:profileHeader.addButton") })
           ]
         }
       )
     }
   ) });
 };
-const ProfileAvatar = ({
-  isLoading,
-  avatar,
-  className,
-  ref,
-  handleSelectAvatar
-}) => {
-  const { isOwner } = useProfilePage();
-  return /* @__PURE__ */ jsx("div", { className: clsx$1("relative", className), ref, children: isLoading ? /* @__PURE__ */ jsx("div", { className: "bg-bg-main rounded-full", children: /* @__PURE__ */ jsx(Skeleton, { className: "border-4 border-bg-main h-[192px]", variant: "circle" }) }) : /* @__PURE__ */ jsx(
+const ProfileAvatar = ({ className }) => {
+  const { targetId, isOwner } = useProfilePage();
+  const { data, isLoading, isFetching } = useGetUserAvatar(targetId);
+  const { fetch, isFetching: isUpdating } = useSelectAvatar(targetId);
+  const { showSnackbar } = useSnackbar();
+  const handleSelectAvatar = async (file) => {
+    await fetch(file, {
+      onSuccess: () => {
+        showSnackbar("Avatar updated successfully", "success");
+      }
+    });
+  };
+  return /* @__PURE__ */ jsx("div", { className: clsx$1("relative", className), children: isLoading || isFetching || isUpdating ? /* @__PURE__ */ jsx("div", { className: "bg-bg-main rounded-full", children: /* @__PURE__ */ jsx(Skeleton, { className: "border-4 border-bg-main h-[192px]", variant: "circle" }) }) : /* @__PURE__ */ jsx(
     Avatar,
     {
-      src: avatar,
+      src: data?.infos.avatar,
       alt: "Avatar",
       sz: "lg-2",
       className: "border-4 border-bg-main flex-shrink-0",
@@ -4845,44 +4787,6 @@ const ProfileAvatar = ({
       )
     }
   ) });
-};
-const Dropdown = ({
-  items,
-  isShow,
-  onSelect,
-  showPolygon = true,
-  className,
-  ref
-}) => {
-  if (!isShow) return null;
-  return /* @__PURE__ */ jsxs("div", { className: clsx("rounded-2xl p-2 bg-bg-seventh", className), ref, children: [
-    showPolygon && /* @__PURE__ */ jsx(
-      "div",
-      {
-        className: clsx(
-          "absolute hidden sm:flex sm:-top-2 sm:left-[10%] -translate-x-1/2 w-0 h-0",
-          "border-l-8 border-l-transparent",
-          "border-r-8 border-r-transparent",
-          "border-b-8 border-b-bg-seventh rounded-sm"
-        )
-      }
-    ),
-    /* @__PURE__ */ jsx("ul", { className: "flex flex-col gap-1 w-full", children: items.map((item, index) => /* @__PURE__ */ jsx(
-      "li",
-      {
-        onClick: () => {
-          item.onClick?.();
-          onSelect?.(item);
-        },
-        className: clsx(
-          "w-full text-left px-3 py-2 !rounded-md text-sm",
-          "hover:bg-bg-fourth cursor-pointer select-none"
-        ),
-        children: item.content
-      },
-      index
-    )) })
-  ] });
 };
 const FriendButton = ({ uid, sz = "md-1" }) => {
   const { t } = useTranslation();
@@ -5079,40 +4983,17 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
   ] }) });
 };
 const ProfileHeader = ({ className }) => {
-  const avtRef = useRef(null);
   const t = useLanguage$1();
   const navigate = useNavigate();
   const { targetId, isOwner } = useProfilePage();
-  const { userId, isAuthenticated } = useAuth();
-  const { data: userProfile, isLoading, isFetching } = useGetUserProfile(targetId);
-  const { fetch: fetchBackground } = useSelectBackground(userId);
-  const { fetch: fetchAvatar } = useSelectAvatar(userId);
+  const { isAuthenticated } = useAuth();
+  const { data, isLoading, isFetching } = useGetUserProfile(targetId);
+  const userProfile = data?.infos;
   const { data: numberOfFriends, isFetching: numberOfFriendsFetching } = useGetNumberOfFriends(targetId);
-  const handleSelectBackground = async (file) => {
-    await fetchBackground(file);
-  };
-  const handleSelectAvatar = async (file) => {
-    await fetchAvatar(file);
-  };
   return /* @__PURE__ */ jsxs("div", { className: clsx("relative w-full flex flex-col items-center", className), children: [
-    /* @__PURE__ */ jsx("div", { className: "relative w-full mt-2", children: /* @__PURE__ */ jsx(
-      ProfileBackground,
-      {
-        isLoading: isLoading || isFetching,
-        background: userProfile?.background ?? "",
-        handleSelectBackground
-      }
-    ) }),
+    /* @__PURE__ */ jsx("div", { className: "relative w-full mt-2", children: /* @__PURE__ */ jsx(ProfileBackground, {}) }),
     /* @__PURE__ */ jsxs("div", { className: "-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3", children: [
-      /* @__PURE__ */ jsx(
-        ProfileAvatar,
-        {
-          isLoading: isLoading || isFetching,
-          avatar: userProfile?.avatar ?? "",
-          handleSelectAvatar,
-          ref: avtRef
-        }
-      ),
+      /* @__PURE__ */ jsx(ProfileAvatar, {}),
       /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 items-start flex-1 mb-3 ml-4", children: [
         isLoading || isFetching ? /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-56" }) : /* @__PURE__ */ jsxs(Text, { sz: "xl-1", weight: "bold", className: "lg:text-left text-center break-words", children: [
           userProfile?.fullName,
@@ -5235,7 +5116,7 @@ const ProfileNavbar = ({ className = "" }) => {
     ],
     [userParam, t]
   );
-  useLayoutEffect(() => {
+  useEffect(() => {
     const handleResize = () => {
       if (containerSize.width === 0) return;
       let total = showMoreRef.current?.offsetWidth ?? 0;
@@ -5470,7 +5351,8 @@ const ProfileIntroduction = ({ className }) => {
   const { isOwner, targetId } = useProfilePage();
   const updateProfileMutation = useUpdateProfile(userId);
   const canEdit = useMemo(() => isAuthenticated && isOwner, [isAuthenticated, isOwner]);
-  const { data: userProfile } = useGetUserProfileDetails(targetId ?? "");
+  const { data } = useGetUserProfileDetails(targetId ?? "");
+  const userProfile = data?.infos;
   const handleSaveBio = (value) => {
     updateProfileMutation.fetch(
       { bio: value },
@@ -5545,17 +5427,7 @@ const ProfileIntroduction = ({ className }) => {
             ] })
           }
         ),
-        (userProfile?.bio || userProfile?.description) && /* @__PURE__ */ jsx("hr", { className: "border-[var(--border-color)] w-full" }),
-        userProfile?.email && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Text, { className: "hover:text-primary-500", children: [
-          /* @__PURE__ */ jsx("i", { className: "fas fa-envelope" }),
-          "   ",
-          userProfile?.email
-        ] }) }),
-        userProfile?.phone && /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(Text, { className: "hover:text-primary-500", children: [
-          /* @__PURE__ */ jsx("i", { className: "fas fa-phone" }),
-          "   ",
-          phone
-        ] }) })
+        (userProfile?.bio || userProfile?.description) && /* @__PURE__ */ jsx("hr", { className: "border-[var(--border-color)] w-full opacity-10" })
       ]
     }
   );
@@ -5752,40 +5624,26 @@ const ProfileAboutSection = ({
 const ProfileOverview = ({}) => {
   const { targetId, isOwner } = useProfilePage();
   const { data: userProfile } = useGetUserProfileDetails(targetId ?? "");
-  const emails = userProfile?.email ? [userProfile.email] : [];
-  const phoneNumbers = userProfile?.phone ? [userProfile.phone] : [];
-  return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsxs(ProfileAboutSection, { title: "Liên hệ", className: clsx("mb-4", "w-full"), children: [
+  const emails = [];
+  const phoneNumbers = [];
+  return /* @__PURE__ */ jsxs(ProfileAboutSection, { title: "Liên hệ", className: clsx("mb-4", "w-full"), children: [
     emails.length > 0 && /* @__PURE__ */ jsxs("div", { className: clsx("flex", "items-start", "w-full", "gap-4", "mb-6", "mt-4"), children: [
       /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("opacity-50"), children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-envelope" }) }),
       /* @__PURE__ */ jsx("div", { children: emails.map((email, index) => /* @__PURE__ */ jsxs("div", { className: clsx("flex", "flex-col"), children: [
         /* @__PURE__ */ jsx(Text, { weight: "bold", children: email }),
         /* @__PURE__ */ jsx(Text, { sz: "sm-3", className: clsx("opacity-50"), children: "Email" })
       ] }, index)) }),
-      isOwner && /* @__PURE__ */ jsx("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsx(
-        Button,
-        {
-          variant: "secondary",
-          className: clsx("!rounded-full", "!p-0", "w-10", "h-10"),
-          children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pencil-alt" })
-        }
-      ) })
+      isOwner && /* @__PURE__ */ jsx("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsx(Button, { variant: "secondary", className: clsx("!rounded-full", "!p-0", "w-10", "h-10"), children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pencil-alt" }) }) })
     ] }),
     phoneNumbers.length > 0 && /* @__PURE__ */ jsxs("div", { className: clsx("flex", "items-start", "gap-4"), children: [
       /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("opacity-50"), children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-phone" }) }),
-      /* @__PURE__ */ jsx("div", { children: phoneNumbers.map((phone2, index) => /* @__PURE__ */ jsxs("div", { className: clsx("flex", "flex-col"), children: [
-        /* @__PURE__ */ jsx(Text, { weight: "bold", children: phone2 }),
+      /* @__PURE__ */ jsx("div", { children: phoneNumbers.map((phone, index) => /* @__PURE__ */ jsxs("div", { className: clsx("flex", "flex-col"), children: [
+        /* @__PURE__ */ jsx(Text, { weight: "bold", children: phone }),
         /* @__PURE__ */ jsx(Text, { sz: "sm-3", className: clsx("opacity-50"), children: "Di động" })
       ] }, index)) }),
-      isOwner && /* @__PURE__ */ jsx("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsx(
-        Button,
-        {
-          variant: "secondary",
-          className: clsx("!rounded-full", "!p-0", "w-10", "h-10"),
-          children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pencil-alt" })
-        }
-      ) })
+      isOwner && /* @__PURE__ */ jsx("div", { className: clsx("ml-auto"), children: /* @__PURE__ */ jsx(Button, { variant: "secondary", className: clsx("!rounded-full", "!p-0", "w-10", "h-10"), children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pencil-alt" }) }) })
     ] })
-  ] }) });
+  ] });
 };
 const ProfileAboutOverview = () => {
   return /* @__PURE__ */ jsx("div", { className: clsx("w-full"), children: /* @__PURE__ */ jsx(ProfileOverview, {}) });
@@ -5931,6 +5789,7 @@ function GoogleCallbackPage() {
   const { loginWithGoogle } = useAuth();
   useEffect(() => {
     const code = new URLSearchParams(window.location.search).get("code");
+    console.log("Google callback code: ", code);
     if (!code) {
       navigate("/login");
       return;
@@ -6258,18 +6117,10 @@ const AppRoutes = () => {
   const generateRoutes = useCallback((routes) => {
     return routes.map((route, idx) => {
       const key = route.path ?? `route-${idx}`;
-      return /* @__PURE__ */ jsx(
-        Route,
-        {
-          path: route.path,
-          element: /* @__PURE__ */ jsx(RouteWrapper, { ...route }),
-          children: route.children && generateRoutes(route.children)
-        },
-        key
-      );
+      return /* @__PURE__ */ jsx(Route, { path: route.path, element: /* @__PURE__ */ jsx(RouteWrapper, { ...route }), children: route.children && generateRoutes(route.children) }, key);
     });
   }, []);
-  return /* @__PURE__ */ jsx(AliveScope, { children: /* @__PURE__ */ jsx(Routes, { children: generateRoutes(mainRoutes) }) });
+  return /* @__PURE__ */ jsx(Routes, { children: generateRoutes(mainRoutes) });
 };
 function Main() {
   return /* @__PURE__ */ jsxs("main", { children: [
@@ -6291,6 +6142,9 @@ function App({ authContext }) {
         }
       }
     });
+  }
+  if (authContext?.userData?.languageCode) {
+    i18next.changeLanguage(authContext.userData.languageCode);
   }
   return /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClientRef.current, children: /* @__PURE__ */ jsx(ContextTree, { authContext, children: /* @__PURE__ */ jsx(Main, {}) }) });
 }

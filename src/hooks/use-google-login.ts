@@ -9,7 +9,8 @@ export function useGoogleLogin() {
       "https://accounts.google.com/o/oauth2/v2/auth" +
       "?client_id=" +
       appConfig.googleClientId +
-      "&redirect_uri=http://localhost:3000/auth/google/callback" +
+      "&redirect_uri=" +
+      appConfig.googleRedirectUri +
       "&response_type=code" +
       "&scope=openid%20profile%20email";
     window.location.href = url;
