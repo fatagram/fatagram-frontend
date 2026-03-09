@@ -15,6 +15,7 @@ export const buildApiPath = (prefix: string): string => {
 export const apiGet = async <T = any>(url: string, params?: any): Promise<Result<T>> => {
   try {
     const res: AxiosResponse<ApiResponse<T>> = await apiClient.get(url, { params });
+    console.log(`GET ${url} response:`, res.data); // Debug log
     return { success: true, data: res.data.data };
   } catch (error: any) {
     return handleApiError(error);
