@@ -20,7 +20,7 @@ function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userD
     });
   }
 
-  if (authContext?.userData.languageCode) {
+  if (authContext?.userData?.languageCode) {
     i18next.changeLanguage(authContext.userData.languageCode);
   }
 
