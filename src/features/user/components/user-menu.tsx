@@ -8,13 +8,18 @@ import { Avatar, Button, Text } from "@/components/atoms";
 import { useAuth } from "@/hooks/contexts/use-auth";
 import { useGetUserAvatar, useGetUserProfile } from "@/features/hooks/use-user-profile";
 
+interface UserMenuProps {
+  menuClassName?: string;
+  menuStyle?: any;
+}
+
 /**
  * ProfileMenu component displays a profile menu with options for the user.
  * It includes the user's avatar, full name, and options to navigate to their personal page,
  * settings, and logout.
  * @returns {JSX.Element} The rendered ProfileMenu component.
  */
-const UserMenu: React.FC = () => {
+const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
   // const [avatar, setAvatar] = useState<string>("");
   // const [fullName, setFullName] = useState<string>("");
   const [isOpenMenu, setIsOpenMenu] = useState<boolean>(false);
@@ -79,7 +84,9 @@ const UserMenu: React.FC = () => {
           className={clsx(
             "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
             "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
+            menuClassName,
           )}
+          style={menuStyle}
           ref={menuRef}
         >
           <List className={clsx("flex flex-col gap-2 w-full")}>

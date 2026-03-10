@@ -72,7 +72,12 @@ const DefaultLayout = () => {
             isAuthenticated ? (
               <div className={clsx("flex items-center gap-2")}>
                 <NotificationBadge />
-                <UserMenu />
+                <UserMenu
+                  menuClassName="w-screen h-screen sm:h-auto sm:max-w-[300px] !rounded-none sm:!rounded-xl"
+                  menuStyle={{
+                    top: headerSize?.height,
+                  }}
+                />
               </div>
             ) : (
               <div className={clsx("flex items-center gap-2")}>
