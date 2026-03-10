@@ -95,7 +95,7 @@
     --border-second: 209 213 219;
     --border-focus: 20 184 166;
 
-    --login-image: url("/src/assets/images/auth_image_light.jpg");
+    --login-image: url("/images/auth_image_light.jpg");
   }
 
   /* Dark Theme - Pure Black */
@@ -162,7 +162,7 @@
     --border-second: 48 48 48; /* slightly lighter border */
     --border-focus: 20 184 166; /* primary color for focus */
 
-    --login-image: url("/src/assets/images/auth_image_dark.jpg");
+    --login-image: url("/images/auth_image_dark.jpg");
   }
 
   /* Universe Theme - Cosmic Purple & Deep Blue 🌌 */
@@ -229,7 +229,7 @@
     --border-second: 100 116 139; /* lighter border */
     --border-focus: 168 85 247; /* cosmic purple for focus */
 
-    --login-image: url("/src/assets/images/auth_image_dark.jpg");
+    --login-image: url("/images/auth_image_dark.jpg");
   }
 
   /* Neon Theme */
@@ -296,7 +296,7 @@
     --border-second: 82 82 82;
     --border-focus: 34 197 94;
 
-    --login-image: url("/src/assets/images/auth_image_neon.jpg");
+    --login-image: url("/images/auth_image_neon.jpg");
   }
 
   /* Dark Sea Theme */
@@ -363,7 +363,7 @@
     --border-second: 15 118 110;
     --border-focus: 6 182 212;
 
-    --login-image: url("/src/assets/images/auth_image_sea.jpg");
+    --login-image: url("/images/auth_image_sea.jpg");
   }
 
   /* Dark Yellow Theme */
@@ -430,7 +430,7 @@
     --border-second: 120 113 108;
     --border-focus: 234 179 8;
 
-    --login-image: url("/src/assets/images/auth_image_yellow.jpg");
+    --login-image: url("/images/auth_image_yellow.jpg");
   }
 
   /* Light Yellow Pink Theme */
@@ -497,6 +497,6 @@
     --border-second: 252 211 77;
     --border-focus: 236 72 153;
 
-    --login-image: url("/src/assets/images/auth_image_pink.jpg");
+    --login-image: url("/images/auth_image_pink.jpg");
   }
 }

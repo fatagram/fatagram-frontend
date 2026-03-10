@@ -1,5 +1,5 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, forwardRef, useRef, useContext, useLayoutEffect, StrictMode } from "react";
+import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, useContext, forwardRef, useRef, useLayoutEffect, StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 import { useNavigate, Link as Link$1, useResolvedPath, useMatch, Outlet, useParams, useLocation, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
 import i18next from "i18next";
@@ -10,8 +10,8 @@ import clsx, { clsx as clsx$1 } from "clsx";
 import { useNavigate as useNavigate$1 } from "react-router";
 import * as signalR from "@microsoft/signalr";
 import { ArrowLeft } from "lucide-react";
-import * as Yup from "yup";
 import { useFormik } from "formik";
+import * as Yup from "yup";
 const login$1 = { "title": "Login", "username": "Username", "password": "Password", "rememberMe": "Remember me", "forgotPassword": "Forgot password?", "loginButton": "Login", "dontHaveAccount": "Don't have an account?", "registerButton": "Register", "errors": { "usernameOrEmail": { "required": "Username or email is required", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)", "notFound": "Username or email not found" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)", "incorrect": "Incorrect password" }, "account": { "locked": "Account is locked", "disabled": "Account is disabled" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const register$2 = { "title": "Register", "username": "Username", "password": "Password", "confirmPassword": "Confirm password", "email": "Email", "phoneNumber": "Phone number", "registerButton": "Register", "backToLogin": "Back to login", "agree": "I agree to the", "termsOfService": "Terms of Service", "and": " and ", "privacyPolicy": "Privacy Policy", "loginButton": "Login", "errors": { "username": { "required": "Username is required", "alreadyExists": "Username already exists", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)" }, "email": { "required": "Email is required", "alreadyExists": "Email already exists", "invalidFormat": "Invalid email format" }, "phoneNumber": { "alreadyExists": "Phone number already exists", "invalidFormat": "Invalid phone number format" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)" }, "confirmPassword": { "required": "Please confirm your password", "doNotMatch": "Passwords do not match" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const auth$1 = {
@@ -327,7 +327,6 @@ const buildApiPath = (prefix) => {
 const apiGet = async (url, params) => {
   try {
     const res = await apiClient.get(url, { params });
-    console.log(`GET ${url} response:`, res.data);
     return { success: true, data: res.data.data };
   } catch (error) {
     return handleApiError(error);
@@ -674,6 +673,13 @@ const AuthProvider = ({
   );
   return /* @__PURE__ */ jsx(AuthContext.Provider, { value: contextValue, children });
 };
+function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === void 0) {
+    throw new Error("useAuth must be used within an AuthProvider");
+  }
+  return context;
+}
 const buttonSizes = {
   xs: "px-2 py-1 text-xs",
   "sm-1": "px-4 py-2 text-sm ",
@@ -875,12 +881,7 @@ const Checkbox = ({
 const style = {
   "user-bg-image": "_user-bg-image_1szjy_1"
 };
-function BackgroundImage({
-  src,
-  alt,
-  className,
-  children
-}) {
+function BackgroundImage({ src, alt, className, children }) {
   useEffect(() => {
     document.documentElement.style.setProperty("--bg-image", `url(${src})`);
   }, [src]);
@@ -1733,7 +1734,7 @@ const ToastManager = React.memo(function ToastManager2({
   children
 }) {
   const [toast, setToast] = React.useState(null);
-  const [timer, setTimer] = React.useState(null);
+  const [_timer, setTimer] = React.useState(null);
   const navigate = useNavigate();
   const pushToast = React.useCallback((item) => {
     setTimer((prevTimer) => {
@@ -1788,6 +1789,13 @@ const ToastProvider = React.memo(function ToastProvider2({
 }) {
   return /* @__PURE__ */ jsx(ToastManager, { children });
 });
+function useToast() {
+  const context = React.useContext(ToastContext);
+  if (context === void 0) {
+    throw new Error("useToast must be used within a ToastProvider");
+  }
+  return context;
+}
 const DialogContext = createContext({
   isOpen: false,
   dialogProps: null,
@@ -1820,16 +1828,15 @@ const DialogProvider = React.memo(function DialogProvider2({
   );
   return /* @__PURE__ */ jsx(DialogContext.Provider, { value, children });
 });
+function useDialog() {
+  const context = React.useContext(DialogContext);
+  if (context === void 0) {
+    throw new Error("useDialog must be used within a DialogProvider");
+  }
+  return context;
+}
 const LoadingPage = () => {
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      className: clsx(
-        "fixed inset-0 z-[9999] flex justify-center items-center bg-bg-main"
-      ),
-      children: /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col items-center"), children: /* @__PURE__ */ jsx(Logo, { sz: "lg-1", hasSlogan: false }) })
-    }
-  );
+  return /* @__PURE__ */ jsx("div", { className: clsx("fixed inset-0 z-[9999] flex justify-center items-center bg-bg-main"), children: /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col items-center"), children: /* @__PURE__ */ jsx(Logo, { sz: "lg-1", hasSlogan: false }) }) });
 };
 const LoadingContext = React.createContext({
   count: 0,
@@ -1969,6 +1976,13 @@ const SnackbarProvider = React.memo(function SnackbarProvider2({
     )
   ] });
 });
+function useSnackbar() {
+  const context = React.useContext(SnackbarContext);
+  if (context === void 0) {
+    throw new Error("useSnackbar must be used within a SnackbarProvider");
+  }
+  return context;
+}
 function ContextTree({ children, authContext }) {
   return /* @__PURE__ */ jsx(ThemeProvider, { children: /* @__PURE__ */ jsx(
     AuthProvider,
@@ -1979,292 +1993,6 @@ function ContextTree({ children, authContext }) {
     }
   ) });
 }
-const useActiveRoute = (to, end = false) => {
-  const resolved = useResolvedPath(to);
-  const match = useMatch({ path: resolved.pathname, end });
-  return !!match;
-};
-const NavbarItem = ({
-  children,
-  path,
-  activeRoute = true,
-  className = "",
-  onClick
-}) => {
-  const isFocused = useActiveRoute(path, activeRoute);
-  return /* @__PURE__ */ jsxs(
-    Link,
-    {
-      className: clsx(
-        className,
-        "relative flex items-center justify-center !text-[15px] whitespace-nowrap",
-        isFocused ? "!text-primary-500" : "!text-text-main",
-        "cursor-pointer",
-        "p-4 px-6 rounded-lg overflow-hidden",
-        {
-          "hover:bg-bg-third": !isFocused,
-          "active:bg-bg-third active:scale-95 transition-all duration-200 ease-in-out": !isFocused
-        }
-      ),
-      to: path,
-      onClick,
-      children: [
-        children,
-        isFocused && /* @__PURE__ */ jsx("div", { className: "absolute bg-primary-500 h-[2px] rounded-full w-full bottom-0 left-0" })
-      ]
-    }
-  );
-};
-const Navbar = ({
-  className,
-  isAuthenticated,
-  options,
-  items,
-  logo
-}) => {
-  const navItems = items || [];
-  return /* @__PURE__ */ jsxs(
-    "nav",
-    {
-      className: clsx(
-        "flex items-center justify-between",
-        "bg-bg-main p-[2px] shadow-md sm:px-8",
-        className
-      ),
-      children: [
-        logo,
-        /* @__PURE__ */ jsxs("div", { className: "flex flex-row gap-3 flex-1", children: [
-          /* @__PURE__ */ jsx("div", { className: clsx("flex w-full sm:justify-center flex-row"), children: navItems.map((item, index) => /* @__PURE__ */ jsx(NavbarItem, { path: item.path, className: "!px-10", activeRoute: item.isIndex, children: item.icon }, index)) }),
-          /* @__PURE__ */ jsx("div", { className: clsx("flex flex-row gap-2 flex-1 justify-end sm:flex-none"), children: options })
-        ] })
-      ]
-    }
-  );
-};
-const PageNavbarItem = ({
-  icon,
-  title: title2,
-  description: description2,
-  path,
-  className = "",
-  onClick
-}) => {
-  const navigate = useNavigate();
-  const isFocused = useActiveRoute(path, true);
-  return /* @__PURE__ */ jsxs(
-    "button",
-    {
-      onClick: () => {
-        navigate(path);
-        onClick?.();
-      },
-      className: clsx(
-        "w-full text-left px-3 py-3 rounded-xl",
-        "transition-all duration-300 ease-out",
-        "relative overflow-hidden group",
-        {
-          "bg-bg-fourth border-l-4 border-l-primary-500 shadow-sm": isFocused,
-          "hover:bg-bg-third hover:shadow-sm hover:translate-x-1": !isFocused
-        },
-        className
-      ),
-      children: [
-        isFocused && /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 to-transparent pointer-events-none" }),
-        /* @__PURE__ */ jsxs("div", { className: clsx("grid grid-cols-10 relative z-10"), children: [
-          /* @__PURE__ */ jsx(
-            Text,
-            {
-              sz: "md-3",
-              className: clsx(
-                "flex justify-center items-center h-full col-span-2",
-                "transition-all duration-300",
-                isFocused ? "text-primary-500 scale-110" : "text-text-second group-hover:text-primary-500 group-hover:scale-105"
-              ),
-              children: icon
-            }
-          ),
-          /* @__PURE__ */ jsxs("div", { className: "col-span-8 flex flex-col justify-center", children: [
-            /* @__PURE__ */ jsx(
-              Text,
-              {
-                sz: "md-1",
-                className: clsx(
-                  "transition-colors duration-300",
-                  isFocused ? "text-primary-600 font-semibold" : "text-text-main group-hover:text-primary-600"
-                ),
-                children: title2
-              }
-            ),
-            description2 && /* @__PURE__ */ jsx(Text, { sz: "sm-2", weight: "light", className: "text-text-second mt-0.5", children: description2 })
-          ] })
-        ] })
-      ]
-    }
-  );
-};
-function HeightTransition({
-  show,
-  children,
-  duration = 150,
-  fade = true
-}) {
-  const mainRef = useRef(null);
-  const [maxHeight, setMaxHeight] = useState(show ? "none" : "0px");
-  const [isVisible, setIsVisible] = useState(show);
-  useEffect(() => {
-    if (!mainRef.current) {
-      return;
-    }
-    const element = mainRef.current;
-    const measuredHeight = element.scrollHeight;
-    if (show) {
-      setIsVisible(true);
-      setMaxHeight(measuredHeight + "px");
-    } else {
-      setIsVisible(false);
-      setMaxHeight("0px");
-    }
-  }, [show]);
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      ref: mainRef,
-      style: {
-        overflow: "hidden",
-        maxHeight,
-        transitionDuration: duration + "ms",
-        opacity: fade ? show ? 1 : 0.5 : 1,
-        transform: fade ? show ? "translateY(0)" : "translateY(-10px)" : "none",
-        transitionProperty: fade ? `max-height, opacity, transform` : `max-height`
-      },
-      "aria-hidden": !isVisible,
-      children
-    }
-  );
-}
-const PageNavbarSection = ({
-  title: title2,
-  className,
-  titleClassName,
-  children
-}) => {
-  const [showChildren, setShowChildren] = useState(true);
-  return /* @__PURE__ */ jsxs("div", { className: clsx("w-full", className), children: [
-    title2 && /* @__PURE__ */ jsxs(
-      "div",
-      {
-        className: clsx(
-          "group flex items-center justify-between",
-          "p-2 pl-5 pr-3 cursor-pointer select-none",
-          "hover:bg-bg-third/50 rounded-lg",
-          "transition-all duration-200"
-        ),
-        onClick: () => setShowChildren(!showChildren),
-        children: [
-          /* @__PURE__ */ jsx(
-            Text,
-            {
-              sz: "lg-1",
-              weight: "bold",
-              className: clsx(
-                "text-text-third group-hover:text-text-main transition-colors duration-200",
-                titleClassName
-              ),
-              children: title2
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            "i",
-            {
-              className: clsx(
-                "fas fa-chevron-down text-text-third text-sm",
-                "transition-transform duration-300",
-                "group-hover:text-primary-500",
-                showChildren ? "rotate-180" : "rotate-0"
-              )
-            }
-          )
-        ]
-      }
-    ),
-    /* @__PURE__ */ jsx(HeightTransition, { show: showChildren, children: /* @__PURE__ */ jsx("div", { className: clsx("w-full mt-1 space-y-1"), children }) })
-  ] });
-};
-const PageNavbar = ({ title: title2, className, children }) => {
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "flex flex-col gap-3",
-        "bg-bg-main shadow-md rounded-b-2xl",
-        "overflow-hidden",
-        className
-      ),
-      children: [
-        title2 && /* @__PURE__ */ jsxs("div", { className: "relative bg-bg-second mt-2", children: [
-          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-secondary-500/5 pointer-events-none" }),
-          /* @__PURE__ */ jsx(Text, { sz: "xl-1", weight: "bold", className: "relative pt-4 pb-4 px-6 text-gradient-main", children: title2 })
-        ] }),
-        /* @__PURE__ */ jsx("div", { className: "px-2 pb-3 space-y-1", children })
-      ]
-    }
-  );
-};
-PageNavbar.Section = PageNavbarSection;
-PageNavbar.Item = PageNavbarItem;
-const SubNavbarSection = ({
-  title: title2,
-  className,
-  children
-}) => {
-  const [showChildren, setShowChildren] = useState(true);
-  return /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col gap-2", className), children: [
-    title2 && /* @__PURE__ */ jsx(
-      Text,
-      {
-        sz: "lg-1",
-        weight: "bold",
-        className: clsx("p-2 pl-5 text-gradient-main"),
-        onClick: () => setShowChildren(!showChildren),
-        children: title2
-      }
-    ),
-    showChildren && /* @__PURE__ */ jsx("div", { className: "animate-dropdown-slide", children })
-  ] });
-};
-const SubNavbarItem = ({ title: title2, path, onClick }) => {
-  const navigate = useNavigate();
-  const isFocused = useActiveRoute(path, true);
-  return /* @__PURE__ */ jsx(
-    "button",
-    {
-      onClick: () => {
-        navigate(path);
-        onClick?.();
-      },
-      className: clsx(
-        "w-full text-left py-2 px-3 rounded-lg",
-        { "bg-primary-500/15": isFocused },
-        "hover:bg-primary-500/15 cursor-pointer"
-      ),
-      children: /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-1"), children: /* @__PURE__ */ jsx(
-        Text,
-        {
-          sz: "sm-3",
-          className: clsx({
-            "!text-primary-500 !font-bold": isFocused
-          }),
-          children: title2
-        }
-      ) })
-    }
-  );
-};
-const SubNavbar = ({ className, children }) => {
-  return /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-1", className), children });
-};
-SubNavbar.Item = SubNavbarItem;
-SubNavbar.Section = SubNavbarSection;
 const Dialog = ({
   title: title2,
   content,
@@ -2306,13 +2034,6 @@ const Dialog = ({
     }
   );
 };
-function useDialog() {
-  const context = useContext(DialogContext);
-  if (!context) {
-    throw new Error("useDialog must be used within a DialogProvider");
-  }
-  return context;
-}
 const GlobalDialog = () => {
   const { isOpen, dialogProps, closeDialog } = useDialog();
   if (!isOpen) return null;
@@ -2321,30 +2042,6 @@ const GlobalDialog = () => {
     {
       className: clsx("fixed z-[9998] inset-0 flex items-center justify-center", "bg-bg-overlay"),
       children: /* @__PURE__ */ jsx(Dialog, { ...dialogProps, onClose: closeDialog })
-    }
-  );
-};
-const styles = {
-  "overlay-loading-bg-color": "_overlay-loading-bg-color_snybu_4"
-};
-const OverlayLoading = () => {
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      className: clsx(
-        "absolute inset-0 flex items-center justify-center z-50",
-        styles["overlay-loading-bg-color"]
-      ),
-      children: /* @__PURE__ */ jsx(
-        "div",
-        {
-          className: clsx(
-            "absolute top-1/2 w-12 h-12 border-4 border-transparent",
-            "border-t-primary-700 border-r-primary-700",
-            "rounded-full animate-spin"
-          )
-        }
-      )
     }
   );
 };
@@ -2360,9 +2057,6 @@ const createSignalRConnection = () => {
     throw error;
   }
 };
-function useAuth() {
-  return useContext(AuthContext);
-}
 function useNotificationHub(onReceiveNotification) {
   const connectionRef = useRef(null);
   const { isAuthenticated } = useAuth();
@@ -2403,13 +2097,6 @@ function useNotificationHub(onReceiveNotification) {
     };
   }, [isAuthenticated]);
 }
-const useToast = () => {
-  const context = useContext(ToastContext);
-  if (!context) {
-    throw new Error("useToast must be used within a ToastProvider");
-  }
-  return context;
-};
 function useSafeQueryResult(params) {
   const wrappedOptions = {
     ...params,
@@ -2469,9 +2156,7 @@ class NotificationService {
     return await apiPost(`${PREFIX$1}/read-all`);
   }
   async getUnreadCount() {
-    const result = await apiGet(`${PREFIX$1}/unread-count`);
-    console.log("getUnreadCount response:", result);
-    return result;
+    return await apiGet(`${PREFIX$1}/unread-count`);
   }
   async delete(notificationId) {
     return await apiDelete(`${PREFIX$1}/${notificationId}`);
@@ -3037,189 +2722,31 @@ function NotFoundPage() {
 const HomePage = () => {
   return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("h1", { children: "Home Page" }) });
 };
-const SettingsNavbar = ({ className, onSelect }) => {
-  const { t } = useTranslation();
-  const authSettings = [
-    {
-      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user" }),
-      name: t("settings:navbar.privacy.account"),
-      path: "/settings"
-    },
-    {
-      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-shield-halved" }),
-      name: t("settings:navbar.privacy.privacy"),
-      path: "/settings/privacy"
-    }
-  ];
-  const generalSettings = [
-    {
-      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-language" }),
-      name: t("settings:navbar.general.language"),
-      path: "/settings/language"
-    },
-    {
-      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" }),
-      name: t("settings:navbar.general.notifications"),
-      path: "/settings/notifications"
-    },
-    {
-      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-info" }),
-      name: t("settings:navbar.general.about"),
-      path: "/settings/about"
-    },
-    {
-      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-palette" }),
-      name: t("settings:navbar.general.theme"),
-      path: "/settings/theme"
-    }
-  ];
-  return /* @__PURE__ */ jsxs(PageNavbar, { title: t("settings:navbar.title"), className: clsx("bg-bg-second", className), children: [
-    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t("settings:navbar.privacy.title"), children: authSettings.map((item, index) => /* @__PURE__ */ jsx(
-      PageNavbar.Item,
-      {
-        path: item.path,
-        icon: item.icon,
-        title: item.name,
-        onClick: onSelect
-      },
-      index
-    )) }),
-    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t("settings:navbar.general.title"), children: generalSettings.map((item, index) => /* @__PURE__ */ jsx(
-      PageNavbar.Item,
-      {
-        path: item.path,
-        icon: item.icon,
-        title: item.name,
-        onClick: onSelect
-      },
-      index
-    )) })
-  ] });
+const registerInitialValues = {
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  isRememberMe: true
 };
-const SettingPage = () => {
-  const { t } = useTranslation();
-  useEffect(() => {
-    document.title = t("settings:title");
-  }, [t]);
-  const [isShowNavbar, setIsShowNavbar] = React.useState(true);
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col sm:flex-row w-full h-full bg-[var(--second-bg-color)] sm:gap-4"
-      ),
-      children: [
-        /* @__PURE__ */ jsx("div", { className: clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2"), children: /* @__PURE__ */ jsx(Text, { sz: "lg-3", children: /* @__PURE__ */ jsx(
-          "i",
-          {
-            className: "fa-solid fa-list text-gradient-main",
-            onClick: () => setIsShowNavbar(!isShowNavbar)
-          }
-        ) }) }),
-        isShowNavbar && /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: clsx("sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"),
-            onClick: () => setIsShowNavbar(false)
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          SettingsNavbar,
-          {
-            className: clsx(
-              "sm:flex sm:w-[300px] sm:fixed absolute h-full sm:animate-none animate-left-to-right w-[60%] shadow-lg bg-[var(--main-bg-color)] p-2",
-              {
-                "absolute z-30": isShowNavbar,
-                hidden: !isShowNavbar
-              }
-            ),
-            onSelect: () => setIsShowNavbar(false)
-          }
-        ),
-        /* @__PURE__ */ jsx("div", { className: clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]"), children: /* @__PURE__ */ jsx("div", { className: clsx("w-full max-w-[700px] p-2"), children: /* @__PURE__ */ jsx(Outlet, {}) }) })
-      ]
-    }
-  );
-};
-const EditableField = ({
-  editableMode = "none",
-  title: title2,
-  value,
-  placeholder,
-  valueClassName,
-  btnChildren,
-  isEdit,
-  isError = false,
-  errorMessage,
-  noDataValue,
-  canEdit = true,
-  onChangeClick,
-  onSaveClick,
-  onCancelClick
-}) => {
-  const [inputValue, setInputValue] = React.useState(value);
-  const { t } = useTranslation();
-  useEffect(() => {
-    setInputValue(value);
-  }, [value]);
-  return /* @__PURE__ */ jsxs("div", { className: "flex justify-between items-center w-full", children: [
-    /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: "font-light m-2", children: title2 }),
-    /* @__PURE__ */ jsxs("div", { className: "flex sm:items-center items-end gap-4 sm:flex-row flex-col", children: [
-      editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxs("div", { className: "relative flex flex-col gap-1", children: [
-        /* @__PURE__ */ jsx(
-          Textbox,
-          {
-            className: clsx("animate-fade-in px-2 py-1", {
-              "mt-[5px]": isError
-            }),
-            placeholder,
-            value: inputValue,
-            isWrong: isError,
-            onChange: (e) => setInputValue(e.target.value)
-          }
-        ),
-        isError && /* @__PURE__ */ jsx(Text, { sz: "sm-1", className: "text-red-500 ml-2 h-[5px]", children: errorMessage })
-      ] }) : /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: clsx(valueClassName), children: value ?? noDataValue }),
-      canEdit && /* @__PURE__ */ jsx(Fragment, { children: editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxs("div", { className: "animate-fade-in gap-1 flex", children: [
-        /* @__PURE__ */ jsxs(
-          Button,
-          {
-            disabled: value === inputValue,
-            sz: "sm-1",
-            variant: "primary",
-            onClick: () => {
-              onSaveClick?.(inputValue);
-            },
-            children: [
-              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-floppy-disk mr-2" }),
-              t("settings:editableField.saveButton")
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          Button,
-          {
-            sz: "sm-1",
-            variant: "fourth",
-            onClick: () => {
-              onCancelClick?.();
-            },
-            children: t("settings:editableField.cancelButton")
-          }
-        )
-      ] }) : /* @__PURE__ */ jsx(
-        Button,
-        {
-          sz: "sm-1",
-          variant: "fourth",
-          onClick: () => {
-            onChangeClick?.();
-          },
-          children: btnChildren
-        }
-      ) })
-    ] })
-  ] });
+const registerValidationSchema = Yup.object().shape({
+  username: Yup.string().required("auth:register.errors.username.required").min(3, "auth:register.errors.username.tooShort").max(30, "auth:register.errors.username.tooLong").matches(/^[a-zA-Z0-9_]+$/, "auth:register.errors.username.notCorrectFormat"),
+  email: Yup.string().required("auth:register.errors.email.required").email("auth:register.errors.email.notCorrectFormat"),
+  password: Yup.string().required("auth:register.errors.password.required").min(8, "auth:register.errors.password.tooShort").max(100, "auth:register.errors.password.tooLong"),
+  confirmPassword: Yup.string().required("auth:register.errors.confirmPassword.required").oneOf([Yup.ref("password")], "auth:register.errors.passwords.doNotMatch")
+});
+const registerErrorCodeMap = {
+  USERNAME_EXISTED: {
+    message: "auth:register.errors.username.alreadyExists",
+    type: "username"
+  },
+  EMAIL_EXISTED: { message: "auth:register.errors.email.alreadyExists", type: "email" },
+  PHONE_NUMBER_EXISTED: {
+    message: "auth:register.errors.phoneNumber.alreadyExists",
+    type: "phoneNumber"
+  },
+  PASSWORD_TOO_WEAK: { message: "auth:register.errors.password.tooWeak", type: "password" },
+  UNKNOWN_ERROR: { message: "auth:register.errors.unknown", type: "username" }
 };
 const Card = ({ className, children, title: title2, titleClassName }) => {
   return /* @__PURE__ */ jsxs(
@@ -3236,615 +2763,346 @@ const Card = ({ className, children, title: title2, titleClassName }) => {
     }
   );
 };
-function useLanguage$1() {
-  const { t } = useTranslation();
-  return t;
-}
-const profileQueryKey = (userId) => ["user", "profile", userId];
-const avatarQueryKey = (userId) => ["user", "avatar", userId];
-const backgroundQueryKey = (userId) => ["user", "background", userId];
-const profileDetailsQueryKey = (userId) => ["user", "profile", "details", userId];
-const useGetUserProfile = (userId) => {
-  return useSafeQueryResult({
-    queryKey: profileQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(
-      userId,
-      "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName"
-    ),
-    enabled: !!userId
-  });
-};
-const useGetUserAvatar = (userId) => {
-  return useSafeQueryResult({
-    queryKey: avatarQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(userId, "avatar"),
-    enabled: !!userId
-  });
-};
-const useGetUserBackground = (userId) => {
-  return useSafeQueryResult({
-    queryKey: backgroundQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(userId, "background"),
-    enabled: !!userId
-  });
-};
-const useGetUserProfileDetails = (userId) => {
-  return useSafeQueryResult({
-    queryKey: profileDetailsQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(userId, "bio,description"),
-    enabled: !!userId
-  });
-};
-const useUpdateName = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(
-    ({
-      firstName,
-      middleName,
-      lastName
-    }) => userProfileService.updateName({
-      firstName,
-      middleName,
-      lastName
-    }),
-    {
-      onSuccess: () => {
-        qc.invalidateQueries({
-          queryKey: profileQueryKey(userId)
-        });
-      }
-    }
-  );
-};
-const useUpdateUrlName = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(
-    ({ urlName }) => userProfileService.updateUrlName({
-      urlName
-    }),
-    {
-      onSuccess: () => {
-        qc.invalidateQueries({
-          queryKey: profileQueryKey(userId)
-        });
-      }
-    }
-  );
-};
-const useUpdateNickname = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(
-    ({ nickname }) => userProfileService.updateNickname({
-      nickname
-    }),
-    {
-      onSuccess: () => {
-        qc.invalidateQueries({
-          queryKey: profileQueryKey(userId)
-        });
-      }
-    }
-  );
-};
-const useUpdateProfile = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher((data) => userProfileService.updateProfile(data), {
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: profileQueryKey(userId)
-      });
-      qc.invalidateQueries({
-        queryKey: profileDetailsQueryKey(userId)
-      });
-    }
-  });
-};
-const useSelectBackground = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(userProfileService.uploadBackground, {
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: backgroundQueryKey(userId)
-      });
-    }
-  });
-};
-const useSelectAvatar = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(userProfileService.uploadAvatar, {
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: avatarQueryKey(userId)
-      });
-    }
-  });
-};
-const ErrorCodes$3 = {
-  USER_NOT_FOUND: "settings:account.personalInfo.errorMessages.changeUrlName.userNotFound",
-  URLNAME_EXIST: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameAlreadyExist",
-  URL_NAME_TOO_SHORT: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooShort",
-  URL_NAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooLong",
-  URL_NAME_EMPTY: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameEmpty",
-  URL_NAME_CONTAINS_SPACE: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameContainsSpace",
-  UNKNOWN_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.unknownError",
-  INTERNAL_SERVER_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.internalServerError"
-};
-const ChangeUrlName = ({ userId }) => {
-  const t = useLanguage$1();
-  const { setUrlName: _setUrlName } = useAuth();
-  const [isEditUrlName, setIsEditUrlName] = useState(false);
-  const [isEditUrlNameFailed, setIsEditUrlNameFailed] = useState(false);
-  const [editUrlFailedMessage, setEditUrlFailedMessage] = useState("");
-  const { data: userProfile, isLoading } = useGetUserProfile(userId);
-  const updateUrlNameMutation = useUpdateUrlName(userId);
-  const handleSaveUrlName = (newUrlName) => {
-    if (!newUrlName) return;
-    updateUrlNameMutation.fetch(
-      { urlName: newUrlName },
-      {
-        onSuccess: () => {
-          setIsEditUrlName(false);
-          setIsEditUrlNameFailed(false);
-          _setUrlName?.(newUrlName);
-        },
-        onError: (error) => {
-          const errorCode = error?.code;
-          if (errorCode && ErrorCodes$3[errorCode]) {
-            setEditUrlFailedMessage(t(ErrorCodes$3[errorCode]));
-          } else {
-            setEditUrlFailedMessage(t(ErrorCodes$3["UNKNOWN_ERROR"]));
-          }
-          setIsEditUrlNameFailed(true);
-        }
-      }
-    );
-  };
-  if (isLoading) {
-    return /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" });
+const LayoutHeader = forwardRef(
+  ({ children, className }, ref) => {
+    return /* @__PURE__ */ jsx("header", { ref, className: clsx("fixed z-40 w-full", className), children });
   }
-  return /* @__PURE__ */ jsx(
-    EditableField,
-    {
-      title: t("settings:account.personalInfo.urlName"),
-      value: userProfile?.infos.urlName,
-      noDataValue: t("settings:account.personalInfo.noUrlName"),
-      placeholder: t("settings:account.personalInfo.urlNamePlaceholder"),
-      valueClassName: clsx(!userProfile?.infos.urlName && "!opacity-50"),
-      btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
-        /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
-        t("settings:account.personalInfo.changeButton")
-      ] }),
-      editableMode: "inline",
-      isEdit: isEditUrlName,
-      isError: isEditUrlNameFailed,
-      errorMessage: editUrlFailedMessage,
-      onChangeClick: () => {
-        setIsEditUrlName(true);
-      },
-      onCancelClick: () => {
-        setIsEditUrlName(false);
-        setIsEditUrlNameFailed(false);
-      },
-      onSaveClick: handleSaveUrlName
-    }
-  );
-};
-const ErrorCodes$2 = {
-  NICKNAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeNickname.nicknameTooLong"
-};
-const ChangeNickname = ({ userId }) => {
-  const t = useLanguage$1();
-  const [isEditNickname, setIsEditNickname] = useState(false);
-  const [isEditNicknameFailed, setIsEditNicknameFailed] = useState(false);
-  const [editNicknameFailedMessage, setEditNicknameFailedMessage] = useState("");
-  const { data: userProfile, isLoading } = useGetUserProfile(userId);
-  const updateNicknameMutation = useUpdateNickname(userId);
-  const handleSaveNickname = (newNickname) => {
-    if (!newNickname) return;
-    updateNicknameMutation.fetch(
-      { nickname: newNickname },
-      {
-        onSuccess: () => {
-          setIsEditNickname(false);
-          setIsEditNicknameFailed(false);
-        },
-        onError: (error) => {
-          const errorCode = error?.code;
-          if (errorCode && ErrorCodes$2[errorCode]) {
-            setEditNicknameFailedMessage(t(ErrorCodes$2[errorCode]));
-          } else {
-            setEditNicknameFailedMessage(
-              t("settings:account.personalInfo.errorMessages.changeNickname.unknownError")
-            );
-          }
-          setIsEditNicknameFailed(true);
-        }
-      }
-    );
-  };
-  if (isLoading) {
-    return /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" });
-  }
-  return /* @__PURE__ */ jsx(
-    EditableField,
-    {
-      title: t("settings:account.personalInfo.nickname"),
-      value: userProfile?.infos.nickname,
-      noDataValue: t("settings:account.personalInfo.noNickname"),
-      placeholder: t("settings:account.personalInfo.nicknamePlaceholder"),
-      valueClassName: clsx(!userProfile?.infos.nickname && "!opacity-50"),
-      btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
-        /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
-        t("settings:account.personalInfo.changeButton")
-      ] }),
-      editableMode: "inline",
-      isEdit: isEditNickname,
-      isError: isEditNicknameFailed,
-      errorMessage: editNicknameFailedMessage,
-      onChangeClick: () => {
-        setIsEditNickname(true);
-      },
-      onCancelClick: () => {
-        setIsEditNickname(false);
-        setIsEditNicknameFailed(false);
-      },
-      onSaveClick: handleSaveNickname
-    }
-  );
-};
-const AccountSetting = ({ className }) => {
-  const t = useLanguage$1();
-  const { userId } = useAuth();
-  const { data: userProfile, isLoading } = useGetUserProfile(userId);
-  const navigate = useNavigate();
-  const handleChangeName = () => navigate("name");
-  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsxs(Card, { title: t("settings:account.personalInfo.title"), className: "mb-0 gap-5", children: [
-    isLoading ? /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" }) : /* @__PURE__ */ jsx(
-      EditableField,
-      {
-        title: t("settings:account.personalInfo.yourName"),
-        value: userProfile?.fullName,
-        btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
-          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
-          " ",
-          t("settings:account.personalInfo.changeButton")
-        ] }),
-        onChangeClick: handleChangeName
-      }
-    ),
-    /* @__PURE__ */ jsx(ChangeUrlName, { userId }),
-    /* @__PURE__ */ jsx(ChangeNickname, { userId })
-  ] }) });
-};
-const AccountSettingPage = () => {
-  return /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-center w-full"), children: [
-    /* @__PURE__ */ jsx(AccountSetting, { className: clsx("w-full") }),
-    /* @__PURE__ */ jsx(Outlet, {})
-  ] });
-};
-const SelectBoxSetting = ({
-  options = [],
-  selectedOption = "",
-  onOptionChange = () => {
-  },
-  title: title2,
+);
+LayoutHeader.displayName = "Layout.Header";
+const LayoutMain = ({
+  children,
   className,
-  selectBox
+  style: style2
 }) => {
-  return /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-between items-center w-full", className), children: [
-    /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: "m-2", children: title2 }),
-    selectBox ? selectBox : /* @__PURE__ */ jsx(
-      SelectBox,
-      {
-        className: "!min-w-[170px]",
-        selectedOption,
-        options,
-        onSelect: (e) => onOptionChange(e)
-      }
-    )
-  ] });
+  return /* @__PURE__ */ jsx("main", { className: clsx("relative h-full", className), style: style2, children });
 };
-function useSnackbar() {
-  const context = useContext(SnackbarContext);
-  if (!context) {
-    throw new Error("useSnackbar must be used within a SnackbarProvider");
-  }
-  return context;
-}
-const ThemeSettings = ({ className }) => {
-  const { availableThemes, theme: theme2, setTheme } = useTheme();
-  const [themeOptions, setThemeOptions] = useState([]);
-  const { t } = useTranslation();
-  const { showSnackbar } = useSnackbar();
-  const selectTheme = (opt) => {
-    setTheme(opt);
-    showSnackbar(t("settings:theme.themeChanged"), "info");
-  };
-  useEffect(() => {
-    const options = availableThemes.map((theme22) => ({
-      key: theme22.key,
-      value: t(theme22.label)
-    }));
-    setThemeOptions(options);
-  }, [availableThemes, t]);
-  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsx(Card, { title: t("settings:theme.title"), children: /* @__PURE__ */ jsx(
-    SelectBoxSetting,
+const LayoutFooter = ({ children, className }) => {
+  return /* @__PURE__ */ jsx(
+    "footer",
     {
-      title: t("settings:theme.selectTheme"),
-      selectedOption: theme2,
-      options: themeOptions,
-      onOptionChange: selectTheme
+      className: clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className),
+      children
     }
-  ) }) });
+  );
 };
-const ThemeSettingPage = () => {
-  return /* @__PURE__ */ jsx("div", { className: clsx("flex justify-center w-full"), children: /* @__PURE__ */ jsx(ThemeSettings, { className: clsx("w-full") }) });
-};
-const ErrorCodes$1 = {
-  FIRSTNAME_NOT_CORRECT_FORMAT: {
-    message: "settings:account.personalInfo.errorMessages.changeName.firstNameNotCorrectFormat",
-    type: "FirstName"
-  },
-  LASTNAME_NOT_CORRECT_FORMAT: {
-    message: "settings:account.personalInfo.errorMessages.changeName.lastNameNotCorrectFormat",
-    type: "LastName"
-  },
-  UNKNOWN_ERROR: {
-    message: "settings:account.personalInfo.errorMessages.changeName.unknownError",
-    type: "UnknownError"
-  },
-  INTERNAL_SERVER_ERROR: {
-    message: "settings:account.personalInfo.errorMessages.changeName.internalServerError",
-    type: "InternalServerError"
-  }
-};
-const ChangeNameForm = ({ className }) => {
-  const [firstNameFailed, setFirstNameFailed] = React.useState(false);
-  const [middleNameFailed, setMiddleNameFailed] = React.useState(false);
-  const [lastNameFailed, setLastNameFailed] = React.useState(false);
-  const [errorMessage, setErrorMessage] = React.useState("");
-  const [isSubmitting, setIsSubmitting] = React.useState(false);
-  const navigate = useNavigate();
-  const { t } = useTranslation();
-  const { userId } = useAuth();
-  const { data: userProfile, isLoading } = useGetUserProfile(userId);
-  const updateNameMutation = useUpdateName(userId);
-  const [newFirstName, setNewFirstName] = React.useState("");
-  const [newMiddleName, setNewMiddleName] = React.useState("");
-  const [newLastName, setNewLastName] = React.useState("");
-  useEffect(() => {
-    setNewFirstName(userProfile?.infos.firstName || "");
-    setNewMiddleName(userProfile?.infos.middleName || "");
-    setNewLastName(userProfile?.infos.lastName || "");
-  }, [userProfile]);
-  const handleClose = () => {
-    navigate("/settings");
-  };
-  const handleSubmit = async () => {
-    setErrorMessage("");
-    setFirstNameFailed(false);
-    setMiddleNameFailed(false);
-    setLastNameFailed(false);
-    setIsSubmitting(true);
-    await updateNameMutation.fetch(
-      {
-        firstName: newFirstName,
-        middleName: newMiddleName || null,
-        lastName: newLastName
-      },
-      {
-        onSuccess: () => {
-          setIsSubmitting(false);
-          navigate("/settings");
-        },
-        onError: (error) => {
-          const errorCode = error?.code;
-          if (errorCode && ErrorCodes$1[errorCode]) {
-            setErrorMessage(t(ErrorCodes$1[errorCode].message));
-            setFirstNameFailed(ErrorCodes$1[errorCode].type === "FirstName");
-            setLastNameFailed(ErrorCodes$1[errorCode].type === "LastName");
-          } else {
-            setErrorMessage(t(ErrorCodes$1["UNKNOWN_ERROR"].message));
-          }
-          setIsSubmitting(false);
-        }
-      }
-    );
-  };
+const Layout = ({ children, className }) => {
   return /* @__PURE__ */ jsx(
     "div",
     {
       className: clsx(
-        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50 lg:pt-0 pt-10",
+        "relative flex flex-col bg-bg-eighth min-h-screen",
         className
       ),
-      children: /* @__PURE__ */ jsxs(
-        "div",
+      children
+    }
+  );
+};
+Layout.Header = LayoutHeader;
+Layout.Main = LayoutMain;
+Layout.Footer = LayoutFooter;
+const useActiveRoute = (to, end = false) => {
+  const resolved = useResolvedPath(to);
+  const match = useMatch({ path: resolved.pathname, end });
+  return !!match;
+};
+const NavbarItem = ({
+  children,
+  path,
+  activeRoute = true,
+  className = "",
+  onClick
+}) => {
+  const isFocused = useActiveRoute(path, activeRoute);
+  return /* @__PURE__ */ jsxs(
+    Link,
+    {
+      className: clsx(
+        className,
+        "relative flex items-center justify-center !text-[15px] whitespace-nowrap",
+        isFocused ? "!text-primary-500" : "!text-text-main",
+        "cursor-pointer",
+        "p-4 px-6 rounded-lg overflow-hidden",
         {
-          className: clsx(
-            "animate-fade-in relative flex flex-col justify-center bg-bg-second rounded-2xl shadow-lg px-10 py-8"
-          ),
-          children: [
-            /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("pb-6 px-2 text-gradient-main !font-bold"), children: t("settings:account.personalInfo.changeNameForm.title") }),
-            isLoading ? /* @__PURE__ */ jsx(Skeleton, {}) : /* @__PURE__ */ jsxs("div", { children: [
-              /* @__PURE__ */ jsxs(
-                "div",
-                {
-                  className: clsx(
-                    "animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-bg-main p-5"
-                  ),
-                  children: [
-                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
-                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.firstName") }),
-                      /* @__PURE__ */ jsx(
-                        Textbox,
-                        {
-                          isWrong: firstNameFailed,
-                          value: newFirstName,
-                          onChange: (e) => setNewFirstName(e.target.value),
-                          placeholder: "First name",
-                          className: clsx("py-1 px-2 lg:max-w-[200px]")
-                        }
-                      )
-                    ] }),
-                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
-                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.middleName") }),
-                      /* @__PURE__ */ jsx(
-                        Textbox,
-                        {
-                          isWrong: middleNameFailed,
-                          value: newMiddleName,
-                          onChange: (e) => setNewMiddleName(e.target.value),
-                          placeholder: "Middle name",
-                          className: clsx("py-1 px-2 lg:max-w-[200px]")
-                        }
-                      )
-                    ] }),
-                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
-                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.lastName") }),
-                      /* @__PURE__ */ jsx(
-                        Textbox,
-                        {
-                          isWrong: lastNameFailed,
-                          value: newLastName,
-                          onChange: (e) => setNewLastName(e.target.value),
-                          placeholder: "Last name",
-                          className: clsx("py-1 px-2 lg:max-w-[200px]")
-                        }
-                      )
-                    ] })
-                  ]
-                }
+          "hover:bg-bg-third": !isFocused,
+          "active:bg-bg-third active:scale-95 transition-all duration-200 ease-in-out": !isFocused
+        }
+      ),
+      to: path,
+      onClick,
+      children: [
+        children,
+        isFocused && /* @__PURE__ */ jsx("div", { className: "absolute bg-primary-500 h-[2px] rounded-full w-full bottom-0 left-0" })
+      ]
+    }
+  );
+};
+const Navbar = ({ className, options, items, logo }) => {
+  const navItems = items || [];
+  return /* @__PURE__ */ jsxs(
+    "nav",
+    {
+      className: clsx(
+        "flex items-center justify-between",
+        "bg-bg-main p-[2px] shadow-md sm:px-8",
+        className
+      ),
+      children: [
+        logo,
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-row gap-3 flex-1", children: [
+          /* @__PURE__ */ jsx("div", { className: clsx("flex w-full sm:justify-center flex-row"), children: navItems.map((item, index) => /* @__PURE__ */ jsx(NavbarItem, { path: item.path, className: "!px-10", activeRoute: item.isIndex, children: item.icon }, index)) }),
+          /* @__PURE__ */ jsx("div", { className: clsx("flex flex-row gap-2 flex-1 justify-end sm:flex-none"), children: options })
+        ] })
+      ]
+    }
+  );
+};
+const PageNavbarItem = ({
+  icon,
+  title: title2,
+  description: description2,
+  path,
+  className = "",
+  onClick
+}) => {
+  const navigate = useNavigate();
+  const isFocused = useActiveRoute(path, true);
+  return /* @__PURE__ */ jsxs(
+    "button",
+    {
+      onClick: () => {
+        navigate(path);
+        onClick?.();
+      },
+      className: clsx(
+        "w-full text-left px-3 py-3 rounded-xl",
+        "transition-all duration-300 ease-out",
+        "relative overflow-hidden group",
+        {
+          "bg-bg-fourth border-l-4 border-l-primary-500 shadow-sm": isFocused,
+          "hover:bg-bg-third hover:shadow-sm hover:translate-x-1": !isFocused
+        },
+        className
+      ),
+      children: [
+        isFocused && /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 to-transparent pointer-events-none" }),
+        /* @__PURE__ */ jsxs("div", { className: clsx("grid grid-cols-10 relative z-10"), children: [
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "md-3",
+              className: clsx(
+                "flex justify-center items-center h-full col-span-2",
+                "transition-all duration-300",
+                isFocused ? "text-primary-500 scale-110" : "text-text-second group-hover:text-primary-500 group-hover:scale-105"
               ),
-              errorMessage && /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "danger", className: clsx("mt-2 mx-4"), children: errorMessage })
-            ] }),
-            /* @__PURE__ */ jsx(Text, { className: clsx("mx-8 mt-8 mb-4 h-[0.5px] bg-primary-500") }),
-            /* @__PURE__ */ jsxs(Text, { sz: "sm-2", className: clsx("font-light px-2 mb-4 flex flex-col gap-1"), children: [
-              /* @__PURE__ */ jsxs(Text, { weight: "bold", className: clsx("text-single-second"), children: [
-                "* ",
-                t("settings:account.personalInfo.changeNameForm.note"),
-                ":"
-              ] }),
-              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
-                "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText1"),
-                "  ",
-                /* @__PURE__ */ jsxs(Text, { weight: "bold", className: clsx("text-single-main"), children: [
-                  "7 ",
-                  t("settings:account.personalInfo.changeNameForm.day")
-                ] }),
-                "."
-              ] }),
-              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
-                "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText2")
-              ] }),
-              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
-                "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText3"),
-                "  ",
-                /* @__PURE__ */ jsx(Text, { sz: "md-1", children: "!, #, $, @, ..." }),
-                "."
-              ] })
-            ] }),
-            /* @__PURE__ */ jsx(
-              Button,
-              {
-                disabled: isSubmitting || newFirstName === userProfile?.infos.firstName && newMiddleName === (userProfile?.infos.middleName || "") && newLastName === userProfile?.infos.lastName,
-                sz: "md-1",
-                className: clsx("mt-2"),
-                onClick: handleSubmit,
-                children: isSubmitting ? t("settings:account.personalInfo.changeNameForm.submitting") : t("settings:account.personalInfo.changeNameForm.acceptButton")
-              }
-            ),
+              children: icon
+            }
+          ),
+          /* @__PURE__ */ jsxs("div", { className: "col-span-8 flex flex-col justify-center", children: [
             /* @__PURE__ */ jsx(
               Text,
               {
-                sz: "lg-2",
-                className: clsx("absolute top-5 right-8 hover:text-primary-500 cursor-pointer"),
-                onClick: handleClose,
-                children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+                sz: "md-1",
+                className: clsx(
+                  "transition-colors duration-300",
+                  isFocused ? "text-primary-600 font-semibold" : "text-text-main group-hover:text-primary-600"
+                ),
+                children: title2
               }
-            )
-          ]
+            ),
+            description2 && /* @__PURE__ */ jsx(Text, { sz: "sm-2", weight: "light", className: "text-text-second mt-0.5", children: description2 })
+          ] })
+        ] })
+      ]
+    }
+  );
+};
+function HeightTransition({
+  show,
+  children,
+  duration = 150,
+  fade = true
+}) {
+  const mainRef = useRef(null);
+  const [maxHeight, setMaxHeight] = useState(show ? "none" : "0px");
+  const [isVisible, setIsVisible] = useState(show);
+  useEffect(() => {
+    if (!mainRef.current) {
+      return;
+    }
+    const element = mainRef.current;
+    const measuredHeight = element.scrollHeight;
+    if (show) {
+      setIsVisible(true);
+      setMaxHeight(measuredHeight + "px");
+    } else {
+      setIsVisible(false);
+      setMaxHeight("0px");
+    }
+  }, [show]);
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      ref: mainRef,
+      style: {
+        overflow: "hidden",
+        maxHeight,
+        transitionDuration: duration + "ms",
+        opacity: fade ? show ? 1 : 0.5 : 1,
+        transform: fade ? show ? "translateY(0)" : "translateY(-10px)" : "none",
+        transitionProperty: fade ? `max-height, opacity, transform` : `max-height`
+      },
+      "aria-hidden": !isVisible,
+      children
+    }
+  );
+}
+const PageNavbarSection = ({
+  title: title2,
+  className,
+  titleClassName,
+  children
+}) => {
+  const [showChildren, setShowChildren] = useState(true);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("w-full", className), children: [
+    title2 && /* @__PURE__ */ jsxs(
+      "div",
+      {
+        className: clsx(
+          "group flex items-center justify-between",
+          "p-2 pl-5 pr-3 cursor-pointer select-none",
+          "hover:bg-bg-third/50 rounded-lg",
+          "transition-all duration-200"
+        ),
+        onClick: () => setShowChildren(!showChildren),
+        children: [
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "lg-1",
+              weight: "bold",
+              className: clsx(
+                "text-text-third group-hover:text-text-main transition-colors duration-200",
+                titleClassName
+              ),
+              children: title2
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            "i",
+            {
+              className: clsx(
+                "fas fa-chevron-down text-text-third text-sm",
+                "transition-transform duration-300",
+                "group-hover:text-primary-500",
+                showChildren ? "rotate-180" : "rotate-0"
+              )
+            }
+          )
+        ]
+      }
+    ),
+    /* @__PURE__ */ jsx(HeightTransition, { show: showChildren, children: /* @__PURE__ */ jsx("div", { className: clsx("w-full mt-1 space-y-1"), children }) })
+  ] });
+};
+const PageNavbar = ({ title: title2, className, children }) => {
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "flex flex-col gap-3",
+        "bg-bg-main shadow-md rounded-b-2xl",
+        "overflow-hidden",
+        className
+      ),
+      children: [
+        title2 && /* @__PURE__ */ jsxs("div", { className: "relative bg-bg-second mt-2", children: [
+          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-secondary-500/5 pointer-events-none" }),
+          /* @__PURE__ */ jsx(Text, { sz: "xl-1", weight: "bold", className: "relative pt-4 pb-4 px-6 text-gradient-main", children: title2 })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "px-2 pb-3 space-y-1", children })
+      ]
+    }
+  );
+};
+PageNavbar.Section = PageNavbarSection;
+PageNavbar.Item = PageNavbarItem;
+const SubNavbarSection = ({
+  title: title2,
+  className,
+  children
+}) => {
+  const [showChildren, setShowChildren] = useState(true);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col gap-2", className), children: [
+    title2 && /* @__PURE__ */ jsx(
+      Text,
+      {
+        sz: "lg-1",
+        weight: "bold",
+        className: clsx("p-2 pl-5 text-gradient-main"),
+        onClick: () => setShowChildren(!showChildren),
+        children: title2
+      }
+    ),
+    showChildren && /* @__PURE__ */ jsx("div", { className: "animate-dropdown-slide", children })
+  ] });
+};
+const SubNavbarItem = ({ title: title2, path, onClick }) => {
+  const navigate = useNavigate();
+  const isFocused = useActiveRoute(path, true);
+  return /* @__PURE__ */ jsx(
+    "button",
+    {
+      onClick: () => {
+        navigate(path);
+        onClick?.();
+      },
+      className: clsx(
+        "w-full text-left py-2 px-3 rounded-lg",
+        { "bg-primary-500/15": isFocused },
+        "hover:bg-primary-500/15 cursor-pointer"
+      ),
+      children: /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-1"), children: /* @__PURE__ */ jsx(
+        Text,
+        {
+          sz: "sm-3",
+          className: clsx({
+            "!text-primary-500 !font-bold": isFocused
+          }),
+          children: title2
+        }
+      ) })
+    }
+  );
+};
+const SubNavbar = ({ className, children }) => {
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-1", className), children });
+};
+SubNavbar.Item = SubNavbarItem;
+SubNavbar.Section = SubNavbarSection;
+const styles = {
+  "overlay-loading-bg-color": "_overlay-loading-bg-color_snybu_4"
+};
+const OverlayLoading = () => {
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx(
+        "absolute inset-0 flex items-center justify-center z-50",
+        styles["overlay-loading-bg-color"]
+      ),
+      children: /* @__PURE__ */ jsx(
+        "div",
+        {
+          className: clsx(
+            "absolute top-1/2 w-12 h-12 border-4 border-transparent",
+            "border-t-primary-700 border-r-primary-700",
+            "rounded-full animate-spin"
+          )
         }
       )
     }
   );
-};
-const useLanguage = () => {
-  const changeLanguage = (lng) => {
-    console.log("Changing language to:", lng);
-    i18next.changeLanguage(lng);
-  };
-  const lang = i18next.language;
-  const currentLanguage = lang ? lang.split("-")[0] : void 0;
-  const availableLanguages = Object.keys(resources);
-  return { changeLanguage, availableLanguages, currentLanguage };
-};
-const PREFIX = buildApiPath("/userconfig");
-class UserConfigService {
-  async changeLanguage(languageCode) {
-    return apiPut(`${PREFIX}/language`, { languageCode });
-  }
-}
-const userConfigService = new UserConfigService();
-const useChangeLanguage = () => {
-  return useResultFetcher(
-    (languageCode) => userConfigService.changeLanguage(languageCode)
-  );
-};
-const SelectLanguage = ({ className }) => {
-  const { t } = useTranslation();
-  const { changeLanguage, availableLanguages, currentLanguage } = useLanguage();
-  const { fetch: changeLanguageFetch } = useChangeLanguage();
-  const options = availableLanguages.map((lang) => ({
-    key: lang,
-    value: t(`common:language.${lang}`)
-  }));
-  const _changeLanguage = (key) => {
-    changeLanguageFetch(key, {
-      onSuccess: () => {
-        changeLanguage(key);
-      }
-    });
-  };
-  return /* @__PURE__ */ jsx(
-    SelectBox,
-    {
-      className: clsx(className),
-      options,
-      selectedOption: currentLanguage ?? "en",
-      onSelect: _changeLanguage
-    }
-  );
-};
-const LanguageSettings = ({ className }) => {
-  const { t } = useTranslation();
-  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsx(Card, { title: t("settings:language.title"), children: /* @__PURE__ */ jsx(
-    SelectBoxSetting,
-    {
-      title: t("settings:language.yourLanguage"),
-      selectBox: /* @__PURE__ */ jsx(SelectLanguage, { className: "!min-w-[180px]" })
-    }
-  ) }) });
-};
-const LanguageSettingPage = () => {
-  return /* @__PURE__ */ jsx("div", { className: clsx("flex justify-center w-full"), children: /* @__PURE__ */ jsx(LanguageSettings, { className: clsx("w-full !min-w-[200px]") }) });
-};
-const settingRoutes = {
-  path: "/settings",
-  element: /* @__PURE__ */ jsx(SettingPage, {}),
-  type: "private",
-  children: [
-    {
-      path: "",
-      element: /* @__PURE__ */ jsx(AccountSettingPage, {}),
-      children: [{ path: "name", element: /* @__PURE__ */ jsx(ChangeNameForm, {}) }]
-    },
-    { path: "theme", element: /* @__PURE__ */ jsx(ThemeSettingPage, {}) },
-    { path: "language", element: /* @__PURE__ */ jsx(LanguageSettingPage, {}) }
-  ]
 };
 const SocialButton = ({ icon, name, onClick }) => {
   return /* @__PURE__ */ jsxs(
@@ -3873,198 +3131,6 @@ const SocialButtons = () => {
     ),
     /* @__PURE__ */ jsx(SocialButton, { name: "Facebook", icon: "src/assets/svgs/facebook-icon.svg" })
   ] });
-};
-const loginInitialValues = {
-  usernameOrEmail: "",
-  password: "",
-  isRememberMe: true
-};
-const loginValidationSchema = Yup.object().shape({
-  usernameOrEmail: Yup.string().required("auth:login.errors.usernameOrEmail.required").test(
-    "IS_VALID_USERNAME_OR_EMAIL",
-    "auth:login.errors.usernameOrEmail.invalidFormat",
-    function(value) {
-      if (!value) return false;
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-      return emailRegex.test(value) || usernameRegex.test(value);
-    }
-  ),
-  password: Yup.string().required("auth:login.errors.password.required").min(6, "auth:login.errors.password.tooShort")
-});
-const errorCodeMap = {
-  PASSWORD_INCORRECT: { message: "auth:login.errors.password.incorrect", type: "password" },
-  ACCOUNT_NOT_FOUND: {
-    message: "auth:login.errors.usernameOrEmail.notFound",
-    type: "username"
-  }
-};
-const LoginForm = ({
-  switchForgotPassword,
-  showLogo = true,
-  showClose = false,
-  onClose,
-  className
-}) => {
-  const { t } = useTranslation();
-  const [passwordError, setPasswordError] = useState("");
-  const [usernameOrEmailError, setUsernameOrEmailError] = useState("");
-  const [isShowClose] = React.useState(showClose);
-  const [isShowLogo] = React.useState(showLogo);
-  const { logIn } = useAuth();
-  const formik = useFormik({
-    initialValues: loginInitialValues,
-    validationSchema: loginValidationSchema,
-    onSubmit: async (values) => {
-      setUsernameOrEmailError("");
-      setPasswordError("");
-      await logIn(
-        {
-          usernameOrEmail: values.usernameOrEmail,
-          password: values.password
-        },
-        {
-          onError: (err, _errs) => {
-            const errMap = errorCodeMap[err.code] ?? errorCodeMap["UNKNOWN_ERROR"];
-            if (errMap) {
-              errMap.type === "username" ? setUsernameOrEmailError(errMap.message) : errMap.type == "password" ? setPasswordError(errMap.message) : null;
-            }
-          }
-        }
-      );
-    }
-  });
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
-        "bg-bg-second rounded-2xl",
-        "p-12 animate-fade-in overflow-hidden",
-        className
-      ),
-      children: [
-        formik.isSubmitting && /* @__PURE__ */ jsx(OverlayLoading, {}),
-        isShowLogo && /* @__PURE__ */ jsx(Logo, { sz: "md-1" }),
-        /* @__PURE__ */ jsx(
-          Text,
-          {
-            sz: "xl-1",
-            weight: "extrabold",
-            className: clsx("uppercase !text-primary-500", "font-bold font-inter select-none"),
-            children: t("auth:login.title")
-          }
-        ),
-        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              className: clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm"),
-              autoComplete: "username",
-              placeholder: t("auth:login.username"),
-              onChange: (e) => formik.setFieldValue("usernameOrEmail", e.target.value),
-              isWrong: formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail) || Boolean(usernameOrEmailError),
-              wrongMessage: t(usernameOrEmailError || formik.errors.usernameOrEmail || "")
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              type: "password",
-              className: clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm"),
-              placeholder: t("auth:login.password"),
-              onChange: (e) => formik.setFieldValue("password", e.target.value),
-              isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
-              wrongMessage: t(passwordError || formik.errors.password || ""),
-              autoComplete: "current-password"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex justify-between w-[98%] items-center gap-[50px]", children: [
-          /* @__PURE__ */ jsx(
-            Checkbox,
-            {
-              label: t("auth:login.rememberMe"),
-              onChange: (e) => {
-                formik.setFieldValue("rememberMe", e.target.checked);
-              }
-            }
-          ),
-          switchForgotPassword && /* @__PURE__ */ jsx(
-            Text,
-            {
-              sz: "sm-3",
-              className: clsx(
-                "!text-primary-500 hover:!text-primary-600",
-                "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
-              ),
-              onClick: switchForgotPassword,
-              children: t("auth:login.forgotPassword")
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsx(
-          Button,
-          {
-            type: "button",
-            className: "w-full font-montserrat",
-            onClick: formik.submitForm,
-            sz: "md-1",
-            children: t("auth:login.loginButton")
-          }
-        ),
-        /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center gap-3", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center w-full gap-3", children: [
-            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" }),
-            /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: "text-text-third", children: "OR" }),
-            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" })
-          ] }),
-          /* @__PURE__ */ jsx(SocialButtons, {})
-        ] }),
-        /* @__PURE__ */ jsxs(Text, { children: [
-          t("auth:login.dontHaveAccount"),
-          " ",
-          /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/register", children: t("auth:login.registerButton") })
-        ] }),
-        isShowClose && /* @__PURE__ */ jsx(
-          Text,
-          {
-            className: clsx(
-              "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
-            ),
-            onClick: onClose,
-            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
-          }
-        )
-      ]
-    }
-  );
-};
-const registerInitialValues = {
-  username: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  isRememberMe: true
-};
-const registerValidationSchema = Yup.object().shape({
-  username: Yup.string().required("auth:register.errors.username.required").min(3, "auth:register.errors.username.tooShort").max(30, "auth:register.errors.username.tooLong").matches(/^[a-zA-Z0-9_]+$/, "auth:register.errors.username.notCorrectFormat"),
-  email: Yup.string().required("auth:register.errors.email.required").email("auth:register.errors.email.notCorrectFormat"),
-  password: Yup.string().required("auth:register.errors.password.required").min(8, "auth:register.errors.password.tooShort").max(100, "auth:register.errors.password.tooLong"),
-  confirmPassword: Yup.string().required("auth:register.errors.confirmPassword.required").oneOf([Yup.ref("password")], "auth:register.errors.passwords.doNotMatch")
-});
-const registerErrorCodeMap = {
-  USERNAME_EXISTED: {
-    message: "auth:register.errors.username.alreadyExists",
-    type: "username"
-  },
-  EMAIL_EXISTED: { message: "auth:register.errors.email.alreadyExists", type: "email" },
-  PHONE_NUMBER_EXISTED: {
-    message: "auth:register.errors.phoneNumber.alreadyExists",
-    type: "phoneNumber"
-  },
-  PASSWORD_TOO_WEAK: { message: "auth:register.errors.password.tooWeak", type: "password" },
-  UNKNOWN_ERROR: { message: "auth:register.errors.unknown", type: "username" }
 };
 const RegisterForm = ({
   className,
@@ -4275,6 +3341,172 @@ function RegisterPage() {
     }
   );
 }
+const loginInitialValues = {
+  usernameOrEmail: "",
+  password: "",
+  isRememberMe: true
+};
+const loginValidationSchema = Yup.object().shape({
+  usernameOrEmail: Yup.string().required("auth:login.errors.usernameOrEmail.required").test(
+    "IS_VALID_USERNAME_OR_EMAIL",
+    "auth:login.errors.usernameOrEmail.invalidFormat",
+    function(value) {
+      if (!value) return false;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+      return emailRegex.test(value) || usernameRegex.test(value);
+    }
+  ),
+  password: Yup.string().required("auth:login.errors.password.required").min(6, "auth:login.errors.password.tooShort")
+});
+const errorCodeMap = {
+  PASSWORD_INCORRECT: { message: "auth:login.errors.password.incorrect", type: "password" },
+  ACCOUNT_NOT_FOUND: {
+    message: "auth:login.errors.usernameOrEmail.notFound",
+    type: "username"
+  }
+};
+const LoginForm = ({
+  switchForgotPassword,
+  showLogo = true,
+  showClose = false,
+  onClose,
+  className
+}) => {
+  const { t } = useTranslation();
+  const [passwordError, setPasswordError] = useState("");
+  const [usernameOrEmailError, setUsernameOrEmailError] = useState("");
+  const [isShowClose] = React.useState(showClose);
+  const [isShowLogo] = React.useState(showLogo);
+  const { logIn } = useAuth();
+  const formik = useFormik({
+    initialValues: loginInitialValues,
+    validationSchema: loginValidationSchema,
+    onSubmit: async (values) => {
+      setUsernameOrEmailError("");
+      setPasswordError("");
+      await logIn(
+        {
+          usernameOrEmail: values.usernameOrEmail,
+          password: values.password
+        },
+        {
+          onError: (err, _errs) => {
+            const errMap = errorCodeMap[err.code] ?? errorCodeMap["UNKNOWN_ERROR"];
+            if (errMap) {
+              errMap.type === "username" ? setUsernameOrEmailError(errMap.message) : errMap.type == "password" ? setPasswordError(errMap.message) : null;
+            }
+          }
+        }
+      );
+    }
+  });
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
+        "bg-bg-second rounded-2xl",
+        "p-12 animate-fade-in overflow-hidden",
+        className
+      ),
+      children: [
+        formik.isSubmitting && /* @__PURE__ */ jsx(OverlayLoading, {}),
+        isShowLogo && /* @__PURE__ */ jsx(Logo, { sz: "md-1" }),
+        /* @__PURE__ */ jsx(
+          Text,
+          {
+            sz: "xl-1",
+            weight: "extrabold",
+            className: clsx("uppercase !text-primary-500", "font-bold font-inter select-none"),
+            children: t("auth:login.title")
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              className: clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm"),
+              autoComplete: "username",
+              placeholder: t("auth:login.username"),
+              onChange: (e) => formik.setFieldValue("usernameOrEmail", e.target.value),
+              isWrong: formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail) || Boolean(usernameOrEmailError),
+              wrongMessage: t(usernameOrEmailError || formik.errors.usernameOrEmail || "")
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              type: "password",
+              className: clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm"),
+              placeholder: t("auth:login.password"),
+              onChange: (e) => formik.setFieldValue("password", e.target.value),
+              isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
+              wrongMessage: t(passwordError || formik.errors.password || ""),
+              autoComplete: "current-password"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex justify-between w-[98%] items-center gap-[50px]", children: [
+          /* @__PURE__ */ jsx(
+            Checkbox,
+            {
+              label: t("auth:login.rememberMe"),
+              onChange: (e) => {
+                formik.setFieldValue("rememberMe", e.target.checked);
+              }
+            }
+          ),
+          switchForgotPassword && /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "sm-3",
+              className: clsx(
+                "!text-primary-500 hover:!text-primary-600",
+                "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
+              ),
+              onClick: switchForgotPassword,
+              children: t("auth:login.forgotPassword")
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsx(
+          Button,
+          {
+            type: "button",
+            className: "w-full font-montserrat",
+            onClick: formik.submitForm,
+            sz: "md-1",
+            children: t("auth:login.loginButton")
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center gap-3", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center w-full gap-3", children: [
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" }),
+            /* @__PURE__ */ jsx(Text, { sz: "sm-2", className: "text-text-third", children: "OR" }),
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" })
+          ] }),
+          /* @__PURE__ */ jsx(SocialButtons, {})
+        ] }),
+        /* @__PURE__ */ jsxs(Text, { children: [
+          t("auth:login.dontHaveAccount"),
+          " ",
+          /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/register", children: t("auth:login.registerButton") })
+        ] }),
+        isShowClose && /* @__PURE__ */ jsx(
+          Text,
+          {
+            className: clsx(
+              "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
+            ),
+            onClick: onClose,
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+          }
+        )
+      ]
+    }
+  );
+};
 function LoginPage() {
   const [forgotPassword, setForgotPassword] = React.useState(false);
   useEffect(() => {
@@ -4283,35 +3515,16 @@ function LoginPage() {
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: clsx(
-        "relative flex h-screen w-screen bg-bg-main",
-        "justify-center items-center"
-      ),
+      className: clsx("relative flex h-screen w-screen bg-bg-main", "justify-center items-center"),
       children: [
         /* @__PURE__ */ jsx("div", { className: "absolute inset-0 filter blur-lg opacity-80 background-image" }),
         /* @__PURE__ */ jsxs(
           "div",
           {
-            className: clsx(
-              "relative flex items-center bg-bg-second",
-              "rounded-3xl overflow-hidden"
-            ),
+            className: clsx("relative flex items-center bg-bg-second", "rounded-3xl overflow-hidden"),
             children: [
-              /* @__PURE__ */ jsx("div", { className: "relative hidden sm:block flex-1 login-bg w-[1000px] h-[800px]", children: /* @__PURE__ */ jsx(
-                Text,
-                {
-                  sz: "xl-3",
-                  className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2",
-                  children: "Feeling"
-                }
-              ) }),
-              /* @__PURE__ */ jsx(
-                LoginForm,
-                {
-                  className: "min-h-[700px]",
-                  switchForgotPassword: () => setForgotPassword(true)
-                }
-              )
+              /* @__PURE__ */ jsx("div", { className: "relative hidden sm:block flex-1 login-bg w-[1000px] h-[800px]", children: /* @__PURE__ */ jsx(Text, { sz: "xl-3", className: "absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2", children: "Feeling" }) }),
+              /* @__PURE__ */ jsx(LoginForm, { className: "min-h-[700px]", switchForgotPassword: () => setForgotPassword(true) })
             ]
           }
         )
@@ -4567,6 +3780,125 @@ function useProfilePage() {
   }
   return context;
 }
+const profileQueryKey = (userId) => ["user", "profile", userId];
+const avatarQueryKey = (userId) => ["user", "avatar", userId];
+const backgroundQueryKey = (userId) => ["user", "background", userId];
+const profileDetailsQueryKey = (userId) => ["user", "profile", "details", userId];
+const useGetUserProfile = (userId) => {
+  return useSafeQueryResult({
+    queryKey: profileQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(
+      userId,
+      "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName"
+    ),
+    enabled: !!userId
+  });
+};
+const useGetUserAvatar = (userId) => {
+  return useSafeQueryResult({
+    queryKey: avatarQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "avatar"),
+    enabled: !!userId
+  });
+};
+const useGetUserBackground = (userId) => {
+  return useSafeQueryResult({
+    queryKey: backgroundQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "background"),
+    enabled: !!userId
+  });
+};
+const useGetUserProfileDetails = (userId) => {
+  return useSafeQueryResult({
+    queryKey: profileDetailsQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "bio,description"),
+    enabled: !!userId
+  });
+};
+const useUpdateName = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({
+      firstName,
+      middleName,
+      lastName
+    }) => userProfileService.updateName({
+      firstName,
+      middleName,
+      lastName
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateUrlName = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({ urlName }) => userProfileService.updateUrlName({
+      urlName
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateNickname = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({ nickname }) => userProfileService.updateNickname({
+      nickname
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateProfile = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher((data) => userProfileService.updateProfile(data), {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: profileQueryKey(userId)
+      });
+      qc.invalidateQueries({
+        queryKey: profileDetailsQueryKey(userId)
+      });
+    }
+  });
+};
+const useSelectBackground = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(userProfileService.uploadBackground, {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: backgroundQueryKey(userId)
+      });
+    }
+  });
+};
+const useSelectAvatar = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(userProfileService.uploadAvatar, {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: avatarQueryKey(userId)
+      });
+    }
+  });
+};
 const ProfileBackground = ({}) => {
   const { t } = useTranslation();
   const { targetId, isOwner } = useProfilePage();
@@ -4830,6 +4162,10 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
     )
   ] }) });
 };
+function useLanguage$1() {
+  const { t } = useTranslation();
+  return t;
+}
 const ProfileHeader = ({ className }) => {
   const t = useLanguage$1();
   const navigate = useNavigate();
@@ -4918,7 +4254,9 @@ const ProfileNavbar = ({ className = "" }) => {
   const { userParam, isOwner } = useProfilePage();
   const [containerRef, containerSize] = useSize();
   const showMoreRef = useRef(null);
+  const showMoreMeasureRef = useRef(null);
   const itemRefs = useRef([]);
+  const allItemsWidth = useRef(0);
   const [showDropdown, setShowDropdown] = useState(false);
   const [visibleItems, setVisibleItems] = useState([]);
   const [hiddenItems, setHiddenItems] = useState([]);
@@ -4967,13 +4305,23 @@ const ProfileNavbar = ({ className = "" }) => {
   useEffect(() => {
     const handleResize = () => {
       if (containerSize.width === 0) return;
-      let total = showMoreRef.current?.offsetWidth ?? 0;
+      if (allItemsWidth.current === 0) {
+        allItemsWidth.current = navbarItems.reduce((total2, item, index) => {
+          if (item.isOwnerOnly && !isOwner) return total2;
+          const itemWidth = itemRefs.current[index]?.offsetWidth;
+          return total2 + itemWidth;
+        }, 0);
+      }
+      let total = 0;
       const newVisibleItems = [];
       const newHiddenItems = [];
+      if (allItemsWidth.current > containerSize.width) {
+        total += showMoreMeasureRef.current?.offsetWidth ?? 0;
+      }
       navbarItems.forEach((item, index) => {
         if (item.isOwnerOnly && !isOwner) return;
         const itemWidth = itemRefs.current[index]?.offsetWidth ?? 0;
-        if (total + itemWidth < containerSize.width + 32) {
+        if (total + itemWidth < containerSize.width) {
           newVisibleItems.push(item);
           total += itemWidth;
         } else {
@@ -4991,45 +4339,14 @@ const ProfileNavbar = ({ className = "" }) => {
     const foundInHidden = hiddenItems.some((item) => item.href === currentPath);
     setIsChooseHiddenItem(foundInHidden);
   }, [location.pathname, hiddenItems]);
-  return /* @__PURE__ */ jsxs("div", { className: clsx("relative flex py-2", className), ref: containerRef, children: [
-    /* @__PURE__ */ jsx("div", { className: "absolute invisible", children: navbarItems.map((item, index) => {
-      if (item.isOwnerOnly && !isOwner) return null;
-      return /* @__PURE__ */ jsx(
-        "div",
-        {
-          ref: (el) => {
-            if (el) itemRefs.current[index] = el;
-          },
-          children: /* @__PURE__ */ jsx(
-            NavbarItem,
-            {
-              path: item.href ?? "",
-              children: item.name,
-              onClick: () => setShowDropdown(false),
-              activeRoute: item.isIndex ?? true
-            }
-          )
-        },
-        index
-      );
-    }) }),
-    /* @__PURE__ */ jsx("div", { className: "flex", children: visibleItems.map((item) => /* @__PURE__ */ jsx(
-      NavbarItem,
-      {
-        path: item.href ?? "",
-        children: item.name,
-        onClick: () => setShowDropdown(false),
-        activeRoute: item.isIndex ?? true
-      },
-      item.name
-    )) }),
-    hiddenItems.length > 0 && /* @__PURE__ */ jsxs(
+  const ShowMoreButton = ({ ref }) => {
+    return /* @__PURE__ */ jsxs(
       Button,
       {
         variant: "secondary",
         className: clsx("relative bg-transparent hover:bg-[var(--main-bg-color)]"),
         onClick: () => setShowDropdown(!showDropdown),
-        ref: showMoreRef,
+        ref,
         children: [
           /* @__PURE__ */ jsxs(
             Text,
@@ -5055,7 +4372,44 @@ const ProfileNavbar = ({ className = "" }) => {
           )
         ]
       }
-    ),
+    );
+  };
+  return /* @__PURE__ */ jsxs("div", { className: clsx("relative flex py-2", className), ref: containerRef, children: [
+    /* @__PURE__ */ jsxs("div", { className: "fixed invisible flex", children: [
+      navbarItems.map((item, index) => {
+        if (item.isOwnerOnly && !isOwner) return null;
+        return /* @__PURE__ */ jsx(
+          "div",
+          {
+            ref: (el) => {
+              if (el) itemRefs.current[index] = el;
+            },
+            children: /* @__PURE__ */ jsx(
+              NavbarItem,
+              {
+                path: item.href ?? "",
+                children: item.name,
+                onClick: () => setShowDropdown(false),
+                activeRoute: item.isIndex ?? true
+              }
+            )
+          },
+          index
+        );
+      }),
+      /* @__PURE__ */ jsx(ShowMoreButton, { ref: showMoreMeasureRef })
+    ] }),
+    /* @__PURE__ */ jsx("div", { className: "flex", children: visibleItems.map((item) => /* @__PURE__ */ jsx(
+      NavbarItem,
+      {
+        path: item.href ?? "",
+        children: item.name,
+        onClick: () => setShowDropdown(false),
+        activeRoute: item.isIndex ?? true
+      },
+      item.name
+    )) }),
+    hiddenItems.length > 0 && /* @__PURE__ */ jsx(ShowMoreButton, { ref: showMoreRef }),
     showDropdown && /* @__PURE__ */ jsx(
       Dropdown,
       {
@@ -5281,7 +4635,7 @@ const ProfileIntroduction = ({ className }) => {
   );
 };
 const PostsPage = () => {
-  return /* @__PURE__ */ jsxs("div", { className: clsx("grid grid-cols-golden gap-2 w-full"), children: [
+  return /* @__PURE__ */ jsxs("div", { className: clsx("sm:grid sm:grid-cols-golden flex flex-col gap-2 w-full"), children: [
     /* @__PURE__ */ jsx(ProfileIntroduction, { className: clsx("bg-bg-main rounded-md rounded-l-2xl mt-2") }),
     /* @__PURE__ */ jsx(Card, { className: clsx("bg-bg-main rounded-md rounded-r-2xl mt-2") })
   ] });
@@ -5557,44 +4911,7 @@ const userRoute = {
     }
   ]
 };
-const LayoutHeader = forwardRef(
-  ({ children, className }, ref) => {
-    return /* @__PURE__ */ jsx("header", { ref, className: clsx("fixed z-40 w-full", className), children });
-  }
-);
-LayoutHeader.displayName = "Layout.Header";
-const LayoutMain = ({
-  children,
-  className,
-  style: style2
-}) => {
-  return /* @__PURE__ */ jsx("main", { className: clsx("relative h-full", className), style: style2, children });
-};
-const LayoutFooter = ({ children, className }) => {
-  return /* @__PURE__ */ jsx(
-    "footer",
-    {
-      className: clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className),
-      children
-    }
-  );
-};
-const Layout = ({ children, className }) => {
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col bg-bg-eighth min-h-screen",
-        className
-      ),
-      children
-    }
-  );
-};
-Layout.Header = LayoutHeader;
-Layout.Main = LayoutMain;
-Layout.Footer = LayoutFooter;
-const UserMenu = () => {
+const UserMenu = ({ menuClassName, menuStyle }) => {
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const { userId, urlName, logOut } = useAuth();
   const { t } = useTranslation();
@@ -5649,8 +4966,10 @@ const UserMenu = () => {
       {
         className: clsx(
           "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
-          "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]"
+          "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
+          menuClassName
         ),
+        style: menuStyle,
         ref: menuRef,
         children: /* @__PURE__ */ jsxs(List, { className: clsx("flex flex-col gap-2 w-full"), children: [
           /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsxs(
@@ -5806,7 +5125,7 @@ const onboardingInitialValues = {
   birthday: "",
   gender: ""
 };
-const ErrorCodes = {
+const ErrorCodes$3 = {
   FIRSTNAME_REQUIRED: {
     message: "onboarding:errorMessages.firstNameRequired",
     type: "FirstName"
@@ -5865,8 +5184,8 @@ const OnboardingForm = () => {
         navigate("/");
       } else {
         const errorCode = result.error?.code;
-        if (errorCode && ErrorCodes[errorCode]) {
-          const errorInfo = ErrorCodes[errorCode];
+        if (errorCode && ErrorCodes$3[errorCode]) {
+          const errorInfo = ErrorCodes$3[errorCode];
           setErrors({ [errorInfo.type]: errorInfo.message });
         }
       }
@@ -6016,6 +5335,670 @@ function OnboardingPage() {
     }
   ) });
 }
+const SettingsNavbar = ({ className, onSelect }) => {
+  const { t } = useTranslation();
+  const authSettings = [
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user" }),
+      name: t("settings:navbar.privacy.account"),
+      path: "/settings"
+    },
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-shield-halved" }),
+      name: t("settings:navbar.privacy.privacy"),
+      path: "/settings/privacy"
+    }
+  ];
+  const generalSettings = [
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-language" }),
+      name: t("settings:navbar.general.language"),
+      path: "/settings/language"
+    },
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" }),
+      name: t("settings:navbar.general.notifications"),
+      path: "/settings/notifications"
+    },
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-info" }),
+      name: t("settings:navbar.general.about"),
+      path: "/settings/about"
+    },
+    {
+      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-palette" }),
+      name: t("settings:navbar.general.theme"),
+      path: "/settings/theme"
+    }
+  ];
+  return /* @__PURE__ */ jsxs(PageNavbar, { title: t("settings:navbar.title"), className: clsx("bg-bg-second", className), children: [
+    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t("settings:navbar.privacy.title"), children: authSettings.map((item, index) => /* @__PURE__ */ jsx(
+      PageNavbar.Item,
+      {
+        path: item.path,
+        icon: item.icon,
+        title: item.name,
+        onClick: onSelect
+      },
+      index
+    )) }),
+    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t("settings:navbar.general.title"), children: generalSettings.map((item, index) => /* @__PURE__ */ jsx(
+      PageNavbar.Item,
+      {
+        path: item.path,
+        icon: item.icon,
+        title: item.name,
+        onClick: onSelect
+      },
+      index
+    )) })
+  ] });
+};
+const SettingPage = () => {
+  const { t } = useTranslation();
+  useEffect(() => {
+    document.title = t("settings:title");
+  }, [t]);
+  const [isShowNavbar, setIsShowNavbar] = React.useState(true);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex flex-col sm:flex-row w-full h-full bg-[var(--second-bg-color)] sm:gap-4"
+      ),
+      children: [
+        /* @__PURE__ */ jsx("div", { className: clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2"), children: /* @__PURE__ */ jsx(Text, { sz: "lg-3", children: /* @__PURE__ */ jsx(
+          "i",
+          {
+            className: "fa-solid fa-list text-gradient-main",
+            onClick: () => setIsShowNavbar(!isShowNavbar)
+          }
+        ) }) }),
+        isShowNavbar && /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: clsx("sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"),
+            onClick: () => setIsShowNavbar(false)
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          SettingsNavbar,
+          {
+            className: clsx(
+              "sm:flex sm:w-[300px] sm:fixed absolute h-full sm:animate-none animate-left-to-right w-[60%] shadow-lg bg-[var(--main-bg-color)] p-2",
+              {
+                "absolute z-30": isShowNavbar,
+                hidden: !isShowNavbar
+              }
+            ),
+            onSelect: () => setIsShowNavbar(false)
+          }
+        ),
+        /* @__PURE__ */ jsx("div", { className: clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]"), children: /* @__PURE__ */ jsx("div", { className: clsx("w-full max-w-[700px] p-2"), children: /* @__PURE__ */ jsx(Outlet, {}) }) })
+      ]
+    }
+  );
+};
+const EditableField = ({
+  editableMode = "none",
+  title: title2,
+  value,
+  placeholder,
+  valueClassName,
+  btnChildren,
+  isEdit,
+  isError = false,
+  errorMessage,
+  noDataValue,
+  canEdit = true,
+  onChangeClick,
+  onSaveClick,
+  onCancelClick
+}) => {
+  const [inputValue, setInputValue] = React.useState(value);
+  const { t } = useTranslation();
+  useEffect(() => {
+    setInputValue(value);
+  }, [value]);
+  return /* @__PURE__ */ jsxs("div", { className: "flex justify-between items-center w-full", children: [
+    /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: "font-light m-2", children: title2 }),
+    /* @__PURE__ */ jsxs("div", { className: "flex sm:items-center items-end gap-4 sm:flex-row flex-col", children: [
+      editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxs("div", { className: "relative flex flex-col gap-1", children: [
+        /* @__PURE__ */ jsx(
+          Textbox,
+          {
+            className: clsx("animate-fade-in px-2 py-1", {
+              "mt-[5px]": isError
+            }),
+            placeholder,
+            value: inputValue,
+            isWrong: isError,
+            onChange: (e) => setInputValue(e.target.value)
+          }
+        ),
+        isError && /* @__PURE__ */ jsx(Text, { sz: "sm-1", className: "text-red-500 ml-2 h-[5px]", children: errorMessage })
+      ] }) : /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: clsx(valueClassName), children: value ?? noDataValue }),
+      canEdit && /* @__PURE__ */ jsx(Fragment, { children: editableMode === "inline" && isEdit ? /* @__PURE__ */ jsxs("div", { className: "animate-fade-in gap-1 flex", children: [
+        /* @__PURE__ */ jsxs(
+          Button,
+          {
+            disabled: value === inputValue,
+            sz: "sm-1",
+            variant: "primary",
+            onClick: () => {
+              onSaveClick?.(inputValue);
+            },
+            children: [
+              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-floppy-disk mr-2" }),
+              t("settings:editableField.saveButton")
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          Button,
+          {
+            sz: "sm-1",
+            variant: "fourth",
+            onClick: () => {
+              onCancelClick?.();
+            },
+            children: t("settings:editableField.cancelButton")
+          }
+        )
+      ] }) : /* @__PURE__ */ jsx(
+        Button,
+        {
+          sz: "sm-1",
+          variant: "fourth",
+          onClick: () => {
+            onChangeClick?.();
+          },
+          children: btnChildren
+        }
+      ) })
+    ] })
+  ] });
+};
+const ErrorCodes$2 = {
+  USER_NOT_FOUND: "settings:account.personalInfo.errorMessages.changeUrlName.userNotFound",
+  URLNAME_EXIST: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameAlreadyExist",
+  URL_NAME_TOO_SHORT: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooShort",
+  URL_NAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooLong",
+  URL_NAME_EMPTY: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameEmpty",
+  URL_NAME_CONTAINS_SPACE: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameContainsSpace",
+  UNKNOWN_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.unknownError",
+  INTERNAL_SERVER_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.internalServerError"
+};
+const ChangeUrlName = ({ userId }) => {
+  const t = useLanguage$1();
+  const { setUrlName: _setUrlName } = useAuth();
+  const [isEditUrlName, setIsEditUrlName] = useState(false);
+  const [isEditUrlNameFailed, setIsEditUrlNameFailed] = useState(false);
+  const [editUrlFailedMessage, setEditUrlFailedMessage] = useState("");
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
+  const updateUrlNameMutation = useUpdateUrlName(userId);
+  const handleSaveUrlName = (newUrlName) => {
+    if (!newUrlName) return;
+    updateUrlNameMutation.fetch(
+      { urlName: newUrlName },
+      {
+        onSuccess: () => {
+          setIsEditUrlName(false);
+          setIsEditUrlNameFailed(false);
+          _setUrlName?.(newUrlName);
+        },
+        onError: (error) => {
+          const errorCode = error?.code;
+          if (errorCode && ErrorCodes$2[errorCode]) {
+            setEditUrlFailedMessage(t(ErrorCodes$2[errorCode]));
+          } else {
+            setEditUrlFailedMessage(t(ErrorCodes$2["UNKNOWN_ERROR"]));
+          }
+          setIsEditUrlNameFailed(true);
+        }
+      }
+    );
+  };
+  if (isLoading) {
+    return /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" });
+  }
+  return /* @__PURE__ */ jsx(
+    EditableField,
+    {
+      title: t("settings:account.personalInfo.urlName"),
+      value: userProfile?.infos.urlName,
+      noDataValue: t("settings:account.personalInfo.noUrlName"),
+      placeholder: t("settings:account.personalInfo.urlNamePlaceholder"),
+      valueClassName: clsx(!userProfile?.infos.urlName && "!opacity-50"),
+      btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
+        /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
+        t("settings:account.personalInfo.changeButton")
+      ] }),
+      editableMode: "inline",
+      isEdit: isEditUrlName,
+      isError: isEditUrlNameFailed,
+      errorMessage: editUrlFailedMessage,
+      onChangeClick: () => {
+        setIsEditUrlName(true);
+      },
+      onCancelClick: () => {
+        setIsEditUrlName(false);
+        setIsEditUrlNameFailed(false);
+      },
+      onSaveClick: handleSaveUrlName
+    }
+  );
+};
+const ErrorCodes$1 = {
+  NICKNAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeNickname.nicknameTooLong"
+};
+const ChangeNickname = ({ userId }) => {
+  const t = useLanguage$1();
+  const [isEditNickname, setIsEditNickname] = useState(false);
+  const [isEditNicknameFailed, setIsEditNicknameFailed] = useState(false);
+  const [editNicknameFailedMessage, setEditNicknameFailedMessage] = useState("");
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
+  const updateNicknameMutation = useUpdateNickname(userId);
+  const handleSaveNickname = (newNickname) => {
+    if (!newNickname) return;
+    updateNicknameMutation.fetch(
+      { nickname: newNickname },
+      {
+        onSuccess: () => {
+          setIsEditNickname(false);
+          setIsEditNicknameFailed(false);
+        },
+        onError: (error) => {
+          const errorCode = error?.code;
+          if (errorCode && ErrorCodes$1[errorCode]) {
+            setEditNicknameFailedMessage(t(ErrorCodes$1[errorCode]));
+          } else {
+            setEditNicknameFailedMessage(
+              t("settings:account.personalInfo.errorMessages.changeNickname.unknownError")
+            );
+          }
+          setIsEditNicknameFailed(true);
+        }
+      }
+    );
+  };
+  if (isLoading) {
+    return /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" });
+  }
+  return /* @__PURE__ */ jsx(
+    EditableField,
+    {
+      title: t("settings:account.personalInfo.nickname"),
+      value: userProfile?.infos.nickname,
+      noDataValue: t("settings:account.personalInfo.noNickname"),
+      placeholder: t("settings:account.personalInfo.nicknamePlaceholder"),
+      valueClassName: clsx(!userProfile?.infos.nickname && "!opacity-50"),
+      btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
+        /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
+        t("settings:account.personalInfo.changeButton")
+      ] }),
+      editableMode: "inline",
+      isEdit: isEditNickname,
+      isError: isEditNicknameFailed,
+      errorMessage: editNicknameFailedMessage,
+      onChangeClick: () => {
+        setIsEditNickname(true);
+      },
+      onCancelClick: () => {
+        setIsEditNickname(false);
+        setIsEditNicknameFailed(false);
+      },
+      onSaveClick: handleSaveNickname
+    }
+  );
+};
+const AccountSetting = ({ className }) => {
+  const t = useLanguage$1();
+  const { userId } = useAuth();
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
+  const navigate = useNavigate();
+  const handleChangeName = () => navigate("name");
+  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsxs(Card, { title: t("settings:account.personalInfo.title"), className: "mb-0 gap-5", children: [
+    isLoading ? /* @__PURE__ */ jsx(Skeleton, { sz: "md-1", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" }) : /* @__PURE__ */ jsx(
+      EditableField,
+      {
+        title: t("settings:account.personalInfo.yourName"),
+        value: userProfile?.infos.fullName,
+        btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
+          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
+          " ",
+          t("settings:account.personalInfo.changeButton")
+        ] }),
+        onChangeClick: handleChangeName
+      }
+    ),
+    /* @__PURE__ */ jsx(ChangeUrlName, { userId }),
+    /* @__PURE__ */ jsx(ChangeNickname, { userId })
+  ] }) });
+};
+const AccountSettingPage = () => {
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-center w-full"), children: [
+    /* @__PURE__ */ jsx(AccountSetting, { className: clsx("w-full") }),
+    /* @__PURE__ */ jsx(Outlet, {})
+  ] });
+};
+const SelectBoxSetting = ({
+  options = [],
+  selectedOption = "",
+  onOptionChange = () => {
+  },
+  title: title2,
+  className,
+  selectBox
+}) => {
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-between items-center w-full", className), children: [
+    /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: "m-2", children: title2 }),
+    selectBox ? selectBox : /* @__PURE__ */ jsx(
+      SelectBox,
+      {
+        className: "!min-w-[170px]",
+        selectedOption,
+        options,
+        onSelect: (e) => onOptionChange(e)
+      }
+    )
+  ] });
+};
+const ThemeSettings = ({ className }) => {
+  const { availableThemes, theme: theme2, setTheme } = useTheme();
+  const [themeOptions, setThemeOptions] = useState([]);
+  const { t } = useTranslation();
+  const { showSnackbar } = useSnackbar();
+  const selectTheme = (opt) => {
+    setTheme(opt);
+    showSnackbar(t("settings:theme.themeChanged"), "info");
+  };
+  useEffect(() => {
+    const options = availableThemes.map((theme22) => ({
+      key: theme22.key,
+      value: t(theme22.label)
+    }));
+    setThemeOptions(options);
+  }, [availableThemes, t]);
+  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsx(Card, { title: t("settings:theme.title"), children: /* @__PURE__ */ jsx(
+    SelectBoxSetting,
+    {
+      title: t("settings:theme.selectTheme"),
+      selectedOption: theme2,
+      options: themeOptions,
+      onOptionChange: selectTheme
+    }
+  ) }) });
+};
+const ThemeSettingPage = () => {
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex justify-center w-full"), children: /* @__PURE__ */ jsx(ThemeSettings, { className: clsx("w-full") }) });
+};
+const ErrorCodes = {
+  FIRSTNAME_NOT_CORRECT_FORMAT: {
+    message: "settings:account.personalInfo.errorMessages.changeName.firstNameNotCorrectFormat",
+    type: "FirstName"
+  },
+  LASTNAME_NOT_CORRECT_FORMAT: {
+    message: "settings:account.personalInfo.errorMessages.changeName.lastNameNotCorrectFormat",
+    type: "LastName"
+  },
+  UNKNOWN_ERROR: {
+    message: "settings:account.personalInfo.errorMessages.changeName.unknownError",
+    type: "UnknownError"
+  },
+  INTERNAL_SERVER_ERROR: {
+    message: "settings:account.personalInfo.errorMessages.changeName.internalServerError",
+    type: "InternalServerError"
+  }
+};
+const ChangeNameForm = ({ className }) => {
+  const [firstNameFailed, setFirstNameFailed] = React.useState(false);
+  const [middleNameFailed, setMiddleNameFailed] = React.useState(false);
+  const [lastNameFailed, setLastNameFailed] = React.useState(false);
+  const [errorMessage, setErrorMessage] = React.useState("");
+  const [isSubmitting, setIsSubmitting] = React.useState(false);
+  const navigate = useNavigate();
+  const { t } = useTranslation();
+  const { userId } = useAuth();
+  const { data: userProfile, isLoading } = useGetUserProfile(userId);
+  const updateNameMutation = useUpdateName(userId);
+  const [newFirstName, setNewFirstName] = React.useState("");
+  const [newMiddleName, setNewMiddleName] = React.useState("");
+  const [newLastName, setNewLastName] = React.useState("");
+  useEffect(() => {
+    setNewFirstName(userProfile?.infos.firstName || "");
+    setNewMiddleName(userProfile?.infos.middleName || "");
+    setNewLastName(userProfile?.infos.lastName || "");
+  }, [userProfile]);
+  const handleClose = () => {
+    navigate("/settings");
+  };
+  const handleSubmit = async () => {
+    setErrorMessage("");
+    setFirstNameFailed(false);
+    setMiddleNameFailed(false);
+    setLastNameFailed(false);
+    setIsSubmitting(true);
+    await updateNameMutation.fetch(
+      {
+        firstName: newFirstName,
+        middleName: newMiddleName || null,
+        lastName: newLastName
+      },
+      {
+        onSuccess: () => {
+          setIsSubmitting(false);
+          navigate("/settings");
+        },
+        onError: (error) => {
+          const errorCode = error?.code;
+          if (errorCode && ErrorCodes[errorCode]) {
+            setErrorMessage(t(ErrorCodes[errorCode].message));
+            setFirstNameFailed(ErrorCodes[errorCode].type === "FirstName");
+            setLastNameFailed(ErrorCodes[errorCode].type === "LastName");
+          } else {
+            setErrorMessage(t(ErrorCodes["UNKNOWN_ERROR"].message));
+          }
+          setIsSubmitting(false);
+        }
+      }
+    );
+  };
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx(
+        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50 lg:pt-0 pt-10",
+        className
+      ),
+      children: /* @__PURE__ */ jsxs(
+        "div",
+        {
+          className: clsx(
+            "animate-fade-in relative flex flex-col justify-center bg-bg-second rounded-2xl shadow-lg px-10 py-8"
+          ),
+          children: [
+            /* @__PURE__ */ jsx(Text, { sz: "lg-3", className: clsx("pb-6 px-2 text-gradient-main !font-bold"), children: t("settings:account.personalInfo.changeNameForm.title") }),
+            isLoading ? /* @__PURE__ */ jsx(Skeleton, {}) : /* @__PURE__ */ jsxs("div", { children: [
+              /* @__PURE__ */ jsxs(
+                "div",
+                {
+                  className: clsx(
+                    "animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-bg-main p-5"
+                  ),
+                  children: [
+                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
+                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.firstName") }),
+                      /* @__PURE__ */ jsx(
+                        Textbox,
+                        {
+                          isWrong: firstNameFailed,
+                          value: newFirstName,
+                          onChange: (e) => setNewFirstName(e.target.value),
+                          placeholder: "First name",
+                          className: clsx("py-1 px-2 lg:max-w-[200px]")
+                        }
+                      )
+                    ] }),
+                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
+                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.middleName") }),
+                      /* @__PURE__ */ jsx(
+                        Textbox,
+                        {
+                          isWrong: middleNameFailed,
+                          value: newMiddleName,
+                          onChange: (e) => setNewMiddleName(e.target.value),
+                          placeholder: "Middle name",
+                          className: clsx("py-1 px-2 lg:max-w-[200px]")
+                        }
+                      )
+                    ] }),
+                    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
+                      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.lastName") }),
+                      /* @__PURE__ */ jsx(
+                        Textbox,
+                        {
+                          isWrong: lastNameFailed,
+                          value: newLastName,
+                          onChange: (e) => setNewLastName(e.target.value),
+                          placeholder: "Last name",
+                          className: clsx("py-1 px-2 lg:max-w-[200px]")
+                        }
+                      )
+                    ] })
+                  ]
+                }
+              ),
+              errorMessage && /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "danger", className: clsx("mt-2 mx-4"), children: errorMessage })
+            ] }),
+            /* @__PURE__ */ jsx(Text, { className: clsx("mx-8 mt-8 mb-4 h-[0.5px] bg-primary-500") }),
+            /* @__PURE__ */ jsxs(Text, { sz: "sm-2", className: clsx("font-light px-2 mb-4 flex flex-col gap-1"), children: [
+              /* @__PURE__ */ jsxs(Text, { weight: "bold", className: clsx("text-single-second"), children: [
+                "* ",
+                t("settings:account.personalInfo.changeNameForm.note"),
+                ":"
+              ] }),
+              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
+                "- ",
+                t("settings:account.personalInfo.changeNameForm.noteText1"),
+                "  ",
+                /* @__PURE__ */ jsxs(Text, { weight: "bold", className: clsx("text-single-main"), children: [
+                  "7 ",
+                  t("settings:account.personalInfo.changeNameForm.day")
+                ] }),
+                "."
+              ] }),
+              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
+                "- ",
+                t("settings:account.personalInfo.changeNameForm.noteText2")
+              ] }),
+              /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), children: [
+                "- ",
+                t("settings:account.personalInfo.changeNameForm.noteText3"),
+                "  ",
+                /* @__PURE__ */ jsx(Text, { sz: "md-1", children: "!, #, $, @, ..." }),
+                "."
+              ] })
+            ] }),
+            /* @__PURE__ */ jsx(
+              Button,
+              {
+                disabled: isSubmitting || newFirstName === userProfile?.infos.firstName && newMiddleName === (userProfile?.infos.middleName || "") && newLastName === userProfile?.infos.lastName,
+                sz: "md-1",
+                className: clsx("mt-2"),
+                onClick: handleSubmit,
+                children: isSubmitting ? t("settings:account.personalInfo.changeNameForm.submitting") : t("settings:account.personalInfo.changeNameForm.acceptButton")
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              Text,
+              {
+                sz: "lg-2",
+                className: clsx("absolute top-5 right-8 hover:text-primary-500 cursor-pointer"),
+                onClick: handleClose,
+                children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+              }
+            )
+          ]
+        }
+      )
+    }
+  );
+};
+const useLanguage = () => {
+  const changeLanguage = (lng) => {
+    console.log("Changing language to:", lng);
+    i18next.changeLanguage(lng);
+  };
+  const lang = i18next.language;
+  const currentLanguage = lang ? lang.split("-")[0] : void 0;
+  const availableLanguages = Object.keys(resources);
+  return { changeLanguage, availableLanguages, currentLanguage };
+};
+const PREFIX = buildApiPath("/userconfig");
+class UserConfigService {
+  async changeLanguage(languageCode) {
+    return apiPut(`${PREFIX}/language`, { languageCode });
+  }
+}
+const userConfigService = new UserConfigService();
+const useChangeLanguage = () => {
+  return useResultFetcher(
+    (languageCode) => userConfigService.changeLanguage(languageCode)
+  );
+};
+const SelectLanguage = ({ className }) => {
+  const { t } = useTranslation();
+  const { changeLanguage, availableLanguages, currentLanguage } = useLanguage();
+  const { fetch: changeLanguageFetch } = useChangeLanguage();
+  const options = availableLanguages.map((lang) => ({
+    key: lang,
+    value: t(`common:language.${lang}`)
+  }));
+  const _changeLanguage = (key) => {
+    changeLanguageFetch(key, {
+      onSuccess: () => {
+        changeLanguage(key);
+      }
+    });
+  };
+  return /* @__PURE__ */ jsx(
+    SelectBox,
+    {
+      className: clsx(className),
+      options,
+      selectedOption: currentLanguage ?? "en",
+      onSelect: _changeLanguage
+    }
+  );
+};
+const LanguageSettings = ({ className }) => {
+  const { t } = useTranslation();
+  return /* @__PURE__ */ jsx("div", { className: clsx(className), children: /* @__PURE__ */ jsx(Card, { title: t("settings:language.title"), children: /* @__PURE__ */ jsx(
+    SelectBoxSetting,
+    {
+      title: t("settings:language.yourLanguage"),
+      selectBox: /* @__PURE__ */ jsx(SelectLanguage, { className: "!min-w-[180px]" })
+    }
+  ) }) });
+};
+const LanguageSettingPage = () => {
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex justify-center w-full"), children: /* @__PURE__ */ jsx(LanguageSettings, { className: clsx("w-full !min-w-[200px]") }) });
+};
+const settingRoutes = {
+  path: "/settings",
+  element: /* @__PURE__ */ jsx(SettingPage, {}),
+  type: "private",
+  children: [
+    {
+      path: "",
+      element: /* @__PURE__ */ jsx(AccountSettingPage, {}),
+      children: [{ path: "name", element: /* @__PURE__ */ jsx(ChangeNameForm, {}) }]
+    },
+    { path: "theme", element: /* @__PURE__ */ jsx(ThemeSettingPage, {}) },
+    { path: "language", element: /* @__PURE__ */ jsx(LanguageSettingPage, {}) }
+  ]
+};
 const mainRoutes = [
   {
     element: /* @__PURE__ */ jsx(DefaultLayout, {}),

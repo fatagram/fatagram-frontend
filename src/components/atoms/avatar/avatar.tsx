@@ -1,5 +1,5 @@
 import React, { useEffect } from "react";
-import emptyAvatar from "@/assets/images/empty_avatar.png";
+import emptyAvatar from "/images/empty_avatar.png";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { shapeClasses, sizeClasses } from "./types";
