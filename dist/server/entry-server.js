@@ -201,7 +201,8 @@ i18next.use(initReactI18next).init({
 });
 const appConfig = {
   apiUrl: "http://localhost:5002",
-  googleClientId: "981986901169-54kebahp4jeu71vra4s377i0uda22guc.apps.googleusercontent.com"
+  googleClientId: "981986901169-54kebahp4jeu71vra4s377i0uda22guc.apps.googleusercontent.com",
+  googleRedirectUri: "http://localhost:3000/auth/google/callback"
 };
 class AuthEventEmitter {
   listeners = /* @__PURE__ */ new Map();
@@ -508,7 +509,7 @@ function useResultFetcher(fn, options) {
 }
 function useGoogleLogin() {
   const redirectToGoogle = useCallback(async () => {
-    const url = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + appConfig.googleClientId + "&redirect_uri=http://localhost:3000/auth/google/callback&response_type=code&scope=openid%20profile%20email";
+    const url = "https://accounts.google.com/o/oauth2/v2/auth?client_id=" + appConfig.googleClientId + "&redirect_uri=" + appConfig.googleRedirectUri + "&response_type=code&scope=openid%20profile%20email";
     window.location.href = url;
   }, []);
   const fetcher = useResultFetcher(authService.loginWithGoogle);
@@ -631,6 +632,25 @@ const AuthProvider = ({
       authEvents.off("redirectToOnboarding", handleRedirectToOnboarding);
     };
   }, [navigate]);
+  useEffect(() => {
+    if (state.isAuthenticated === null) {
+      me({
+        onSuccess: (data) => {
+          dispatch({
+            type: "LOGIN",
+            payload: {
+              userId: data?.infos.id,
+              urlName: data?.infos.urlName,
+              lang: data?.infos.languageCode || "en"
+            }
+          });
+        },
+        onError: () => {
+          dispatch({ type: "LOGOUT" });
+        }
+      });
+    }
+  }, []);
   useEffect(() => {
     if (state.isAuthenticated && !state.userId) {
       me({
