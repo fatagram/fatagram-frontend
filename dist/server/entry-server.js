@@ -1,5 +1,5 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, forwardRef, useRef, useContext, StrictMode } from "react";
+import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, forwardRef, useRef, useContext, useLayoutEffect, StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 import { useNavigate, Link as Link$1, useResolvedPath, useMatch, Outlet, useParams, useLocation, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
 import i18next from "i18next";
@@ -632,25 +632,6 @@ const AuthProvider = ({
       authEvents.off("redirectToOnboarding", handleRedirectToOnboarding);
     };
   }, [navigate]);
-  useEffect(() => {
-    if (state.isAuthenticated === null) {
-      me({
-        onSuccess: (data) => {
-          dispatch({
-            type: "LOGIN",
-            payload: {
-              userId: data?.infos.id,
-              urlName: data?.infos.urlName,
-              lang: data?.infos.languageCode || "en"
-            }
-          });
-        },
-        onError: () => {
-          dispatch({ type: "LOGOUT" });
-        }
-      });
-    }
-  }, []);
   useEffect(() => {
     if (state.isAuthenticated && !state.userId) {
       me({
@@ -1998,790 +1979,6 @@ function ContextTree({ children, authContext }) {
     }
   ) });
 }
-function useAuth() {
-  return useContext(AuthContext);
-}
-function useSafeQueryResult(params) {
-  const wrappedOptions = {
-    ...params,
-    queryFn: async () => {
-      if (typeof params.fn !== "function") {
-        throw new Error("queryFn is not a function");
-      }
-      var result = await params.fn();
-      if (result.success) {
-        params.options?.onSuccess?.(result.data);
-        return result.data;
-      } else {
-        const error = new Error(result.error?.toString() || "Query failed");
-        params.options?.onError?.(error, result.errors);
-        throw error;
-      }
-    }
-  };
-  return useQuery(wrappedOptions);
-}
-function useSafeInfiniteQueryResult({
-  fn,
-  options,
-  ...params
-}) {
-  return useInfiniteQuery({
-    ...params,
-    queryFn: async (context) => {
-      if (typeof fn !== "function") {
-        throw new Error("fn is not a function");
-      }
-      const result = await fn(context.pageParam);
-      if (result.success) {
-        options?.onSuccess?.(result.data);
-        return result.data;
-      } else {
-        const error = new Error(result.error?.toString() || "Query failed");
-        options?.onError?.(error, result.errors);
-        throw error;
-      }
-    },
-    initialPageParam: void 0,
-    getNextPageParam: (lastPage) => {
-      return lastPage.hasNext ? lastPage.nextCursor : void 0;
-    }
-  });
-}
-const profileQueryKey = (userId) => ["user", "profile", userId];
-const avatarQueryKey = (userId) => ["user", "avatar", userId];
-const backgroundQueryKey = (userId) => ["user", "background", userId];
-const profileDetailsQueryKey = (userId) => ["user", "profile", "details", userId];
-const useGetUserProfile = (userId) => {
-  return useSafeQueryResult({
-    queryKey: profileQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(
-      userId,
-      "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName"
-    ),
-    enabled: !!userId
-  });
-};
-const useGetUserAvatar = (userId) => {
-  return useSafeQueryResult({
-    queryKey: avatarQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(userId, "avatar"),
-    enabled: !!userId
-  });
-};
-const useGetUserBackground = (userId) => {
-  return useSafeQueryResult({
-    queryKey: backgroundQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(userId, "background"),
-    enabled: !!userId
-  });
-};
-const useGetUserProfileDetails = (userId) => {
-  return useSafeQueryResult({
-    queryKey: profileDetailsQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(userId, "bio,description"),
-    enabled: !!userId
-  });
-};
-const useUpdateName = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(
-    ({
-      firstName,
-      middleName,
-      lastName
-    }) => userProfileService.updateName({
-      firstName,
-      middleName,
-      lastName
-    }),
-    {
-      onSuccess: () => {
-        qc.invalidateQueries({
-          queryKey: profileQueryKey(userId)
-        });
-      }
-    }
-  );
-};
-const useUpdateUrlName = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(
-    ({ urlName }) => userProfileService.updateUrlName({
-      urlName
-    }),
-    {
-      onSuccess: () => {
-        qc.invalidateQueries({
-          queryKey: profileQueryKey(userId)
-        });
-      }
-    }
-  );
-};
-const useUpdateNickname = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(
-    ({ nickname }) => userProfileService.updateNickname({
-      nickname
-    }),
-    {
-      onSuccess: () => {
-        qc.invalidateQueries({
-          queryKey: profileQueryKey(userId)
-        });
-      }
-    }
-  );
-};
-const useUpdateProfile = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher((data) => userProfileService.updateProfile(data), {
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: profileQueryKey(userId)
-      });
-      qc.invalidateQueries({
-        queryKey: profileDetailsQueryKey(userId)
-      });
-    }
-  });
-};
-const useSelectBackground = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(userProfileService.uploadBackground, {
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: backgroundQueryKey(userId)
-      });
-    }
-  });
-};
-const useSelectAvatar = (userId) => {
-  const qc = useQueryClient();
-  return useResultFetcher(userProfileService.uploadAvatar, {
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: avatarQueryKey(userId)
-      });
-    }
-  });
-};
-const UserMenu = () => {
-  const [isOpenMenu, setIsOpenMenu] = useState(false);
-  const { userId, urlName, logOut } = useAuth();
-  const { t } = useTranslation();
-  const navigate = useNavigate();
-  const { data: userProfile } = useGetUserProfile(userId);
-  const { data: avatarProfile } = useGetUserAvatar(userId);
-  const menuRef = useRef(null);
-  const btnRef = useRef(null);
-  const handleClickOutside = () => {
-    if (isOpenMenu) setIsOpenMenu(false);
-  };
-  useClickOutside(
-    menuRef,
-    btnRef,
-    handleClickOutside
-  );
-  const handlePersonalPage = useCallback(() => {
-    const user2 = urlName || userId;
-    navigate(`/${user2}`);
-    setIsOpenMenu(false);
-  }, [navigate, urlName, userId]);
-  const handleSettings = useCallback(() => {
-    navigate("/settings");
-    setIsOpenMenu(false);
-  }, [navigate]);
-  const handleLogout = useCallback(async () => {
-    await logOut?.();
-    navigate("/login", { replace: true });
-  }, [logOut, navigate]);
-  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center justify-center relative"), ref: btnRef, children: [
-    /* @__PURE__ */ jsx(
-      Button,
-      {
-        variant: "secondary",
-        className: clsx("!rounded-full !p-0"),
-        onClick: () => {
-          setIsOpenMenu(!isOpenMenu);
-        },
-        children: /* @__PURE__ */ jsx(
-          Avatar,
-          {
-            src: avatarProfile?.infos.avatar ?? "",
-            alt: "Profile",
-            sz: "sm-1",
-            className: "border-4 border-bg-third"
-          }
-        )
-      }
-    ),
-    isOpenMenu && /* @__PURE__ */ jsx(
-      "div",
-      {
-        className: clsx(
-          "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
-          "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
-          "animate-dropdown-slide origin-top-right"
-        ),
-        ref: menuRef,
-        children: /* @__PURE__ */ jsxs(List, { className: clsx("flex flex-col gap-2 w-full"), children: [
-          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsxs(
-            Button,
-            {
-              sz: "md-1",
-              variant: "secondary",
-              className: clsx(
-                "flex items-center justify-start gap-3 w-full !pl-3 py-3",
-                "hover:!bg-bg-fourth transition-all duration-200",
-                "hover:scale-[1.02] active:scale-[0.98]"
-              ),
-              onClick: handlePersonalPage,
-              children: [
-                /* @__PURE__ */ jsx(Avatar, { src: avatarProfile?.infos.avatar ?? "", alt: "avatar", sz: "sm-1" }),
-                /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: userProfile?.infos.fullName ?? "" })
-              ]
-            }
-          ) }),
-          /* @__PURE__ */ jsx(
-            List.Item,
-            {
-              className: clsx("items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full")
-            }
-          ),
-          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsx(
-            Button,
-            {
-              sz: "md-1",
-              variant: "secondary",
-              className: clsx(
-                "flex items-center justify-start w-full gap-3",
-                "hover:!bg-bg-fourth transition-all duration-200",
-                "hover:scale-[1.02] active:scale-[0.98]"
-              ),
-              onClick: handleSettings,
-              children: /* @__PURE__ */ jsxs(Text, { className: clsx("flex items-center gap-3"), sz: "md-1", children: [
-                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-gear" }),
-                t("navbar.profileMenu.settings")
-              ] })
-            }
-          ) }),
-          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsx(
-            Button,
-            {
-              sz: "md-1",
-              variant: "secondary",
-              className: clsx(
-                "flex items-center justify-start w-full gap-3 text-red-400",
-                "hover:!bg-bg-fourth transition-all duration-200",
-                "hover:scale-[1.02] active:scale-[0.98]"
-              ),
-              onClick: handleLogout,
-              children: /* @__PURE__ */ jsxs(Text, { sz: "md-1", className: clsx("flex items-center gap-3"), color: "danger", children: [
-                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-right-from-bracket" }),
-                t("navbar.profileMenu.logout")
-              ] })
-            }
-          ) })
-        ] })
-      }
-    )
-  ] });
-};
-const PREFIX$1 = buildApiPath("/notification");
-class NotificationService {
-  async getNotifications(query) {
-    return await apiGet(`${PREFIX$1}`, query);
-  }
-  async markAsRead(notificationId) {
-    return await apiPost(`${PREFIX$1}/${notificationId}/read`);
-  }
-  async markAllAsRead() {
-    return await apiPost(`${PREFIX$1}/read-all`);
-  }
-  async getUnreadCount() {
-    const result = await apiGet(`${PREFIX$1}/unread-count`);
-    console.log("getUnreadCount response:", result);
-    return result;
-  }
-  async delete(notificationId) {
-    return await apiDelete(`${PREFIX$1}/${notificationId}`);
-  }
-  async deleteAll() {
-    return await apiDelete(`${PREFIX$1}`);
-  }
-}
-const notificationService = new NotificationService();
-const NotificationSkeleton = () => {
-  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center"), children: [
-    /* @__PURE__ */ jsx(Skeleton, { sz: "md-2", variant: "circle" }),
-    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col w-full flex-1 gap-2 ml-2"), children: [
-      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-full"), sz: "sm-2" }),
-      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-[50%]"), sz: "sm-2" })
-    ] })
-  ] });
-};
-const notificationQueryKey = (userId, queryParams) => ["notifications", userId, queryParams];
-const useNotifications = (queryParams) => {
-  const { userId } = useAuth();
-  return useSafeInfiniteQueryResult({
-    queryKey: notificationQueryKey(userId, queryParams),
-    fn: async (cursor) => await notificationService.getNotifications({ ...queryParams, cursor }),
-    enabled: !!userId
-  });
-};
-const useMarkNotificationAsRead = () => {
-  return useResultFetcher(
-    (notificationId) => notificationService.markAsRead(notificationId)
-  );
-};
-const useDeleteAllNotifications = () => {
-  const qc = useQueryClient();
-  return useResultFetcher(notificationService.deleteAll, {
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["notifications"] });
-    }
-  });
-};
-function InfiniteScroll({
-  itemInRow = 1,
-  items,
-  loadingSkeleton,
-  numberOfSkeletons = 4,
-  className,
-  hasMore = true,
-  isLoading = false,
-  itemTemplate,
-  onLoadMore,
-  isShowLastSeen = false
-}) {
-  const sentinelRef = useRef(null);
-  const loadingRef = useRef(false);
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(async ([entry]) => {
-      if (entry.isIntersecting) {
-        await onLoadMore();
-      }
-    });
-    observer.observe(sentinel);
-    return () => {
-      observer.disconnect();
-    };
-  }, [sentinelRef, hasMore]);
-  useEffect(() => {
-    if (!isLoading) {
-      loadingRef.current = false;
-    }
-  }, [isLoading]);
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className,
-      style: {
-        display: "grid",
-        gridTemplateColumns: `repeat(${itemInRow}, 1fr)`,
-        gap: "0.5rem"
-      },
-      children: [
-        items.map((item, index) => itemTemplate ? itemTemplate(item, index) : item),
-        hasMore && /* @__PURE__ */ jsx("div", { ref: sentinelRef, className: "absolute bottom-1/2 h-[20px] w-[20px]" }),
-        isLoading && /* @__PURE__ */ jsx(Fragment, { children: Array.from({ length: numberOfSkeletons }).map((_, index) => /* @__PURE__ */ jsx(
-          "div",
-          {
-            style: {
-              textAlign: "center",
-              padding: "1rem 0"
-            },
-            children: loadingSkeleton ?? "Loading..."
-          },
-          index
-        )) }),
-        !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx(
-          "div",
-          {
-            style: {
-              gridColumn: "1 / -1",
-              textAlign: "center",
-              padding: "1rem 0",
-              color: "var(--text-third-color)"
-            },
-            children: "Đã xem hết kết quả."
-          }
-        )
-      ]
-    }
-  );
-}
-const notificationKeys = {
-  list: (userId, params) => ["notifications", userId, params],
-  unreadCount: (userId) => ["notifications-unread-count", userId],
-  uiState: () => ["notifications-ui-state"]
-};
-const DEFAULT_UI_STATE = {
-  isShowNotification: false,
-  isInNotificationPage: false
-};
-function useNotificationUiState() {
-  const queryClient = useQueryClient();
-  const { data: uiState = DEFAULT_UI_STATE } = useQuery({
-    queryKey: notificationKeys.uiState(),
-    queryFn: () => DEFAULT_UI_STATE,
-    staleTime: Infinity,
-    gcTime: Infinity,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false
-  });
-  const setShowNotification = useCallback(
-    (value) => {
-      queryClient.setQueryData(notificationKeys.uiState(), (old) => ({
-        ...old ?? DEFAULT_UI_STATE,
-        isShowNotification: value
-      }));
-    },
-    [queryClient]
-  );
-  const setInNotificationPage = useCallback(
-    (value) => {
-      queryClient.setQueryData(notificationKeys.uiState(), (old) => ({
-        ...old ?? DEFAULT_UI_STATE,
-        isInNotificationPage: value
-      }));
-    },
-    [queryClient]
-  );
-  return {
-    isShowNotification: uiState.isShowNotification,
-    isInNotificationPage: uiState.isInNotificationPage,
-    setShowNotification,
-    setInNotificationPage
-  };
-}
-function useUnreadCount() {
-  const { userId } = useAuth();
-  const queryClient = useQueryClient();
-  const { data: unreadCount = 0 } = useSafeQueryResult({
-    queryKey: notificationKeys.unreadCount(userId),
-    fn: async () => await notificationService.getUnreadCount(),
-    staleTime: Infinity,
-    gcTime: Infinity,
-    refetchOnMount: false,
-    refetchOnWindowFocus: false,
-    refetchOnReconnect: false,
-    enabled: !!userId
-  });
-  const setUnreadCount = useCallback(
-    (value) => {
-      queryClient.setQueryData(
-        notificationKeys.unreadCount(userId),
-        (old = 0) => typeof value === "function" ? value(old) : value
-      );
-    },
-    [queryClient, userId]
-  );
-  const incrementUnread = useCallback(
-    (by = 1) => setUnreadCount((prev) => prev + by),
-    [setUnreadCount]
-  );
-  const decrementUnread = useCallback(
-    (by = 1) => setUnreadCount((prev) => Math.max(prev - by, 0)),
-    [setUnreadCount]
-  );
-  return { unreadCount, setUnreadCount, incrementUnread, decrementUnread };
-}
-function useNotificationCacheMutations() {
-  const queryClient = useQueryClient();
-  const { userId } = useAuth();
-  const addNotificationToCache = useCallback(
-    (notification) => {
-      queryClient.setQueriesData(
-        { queryKey: ["notifications", userId] },
-        (oldData) => {
-          if (!oldData?.pages?.length) {
-            return {
-              pages: [{ items: [notification], nextCursor: void 0, hasNext: false }],
-              pageParams: [void 0]
-            };
-          }
-          const firstPage = oldData.pages[0];
-          if (firstPage.items.some((n) => n.id === notification.id)) return oldData;
-          return {
-            ...oldData,
-            pages: [
-              { ...firstPage, items: [notification, ...firstPage.items] },
-              ...oldData.pages.slice(1)
-            ]
-          };
-        }
-      );
-    },
-    [queryClient, userId]
-  );
-  const removeNotificationFromCache = useCallback(
-    (notificationId) => {
-      console.log("Removing notification from cache with ID:", notificationId);
-      queryClient.setQueriesData(
-        { queryKey: ["notifications", userId] },
-        (oldData) => {
-          console.log("Current cache data before removal:", oldData);
-          if (!oldData?.pages) return oldData;
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) => ({
-              ...page,
-              items: page.items.filter((n) => n.id !== notificationId)
-            }))
-          };
-        }
-      );
-    },
-    [queryClient, userId]
-  );
-  const markAsReadInCache = useCallback(
-    (notificationId) => {
-      queryClient.setQueriesData(
-        { queryKey: ["notifications", userId] },
-        (oldData) => {
-          if (!oldData?.pages) return oldData;
-          return {
-            ...oldData,
-            pages: oldData.pages.map((page) => ({
-              ...page,
-              items: page.items.map((n) => n.id === notificationId ? { ...n, isRead: true } : n)
-            }))
-          };
-        }
-      );
-    },
-    [queryClient, userId]
-  );
-  const markAllAsReadInCache = useCallback(() => {
-    queryClient.setQueriesData(
-      { queryKey: ["notifications", userId] },
-      (oldData) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) => ({
-            ...page,
-            items: page.items.map((n) => ({ ...n, isRead: true }))
-          }))
-        };
-      }
-    );
-  }, [queryClient, userId]);
-  const clearAllFromCache = useCallback(() => {
-    queryClient.setQueriesData(
-      { queryKey: ["notifications", userId] },
-      (oldData) => {
-        if (!oldData?.pages) return oldData;
-        return {
-          ...oldData,
-          pages: oldData.pages.map((page) => ({
-            ...page,
-            items: []
-          }))
-        };
-      }
-    );
-  }, [queryClient, userId]);
-  const invalidateNotifications = useCallback(() => {
-    queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
-  }, [queryClient, userId]);
-  return {
-    addNotificationToCache,
-    removeNotificationFromCache,
-    markAsReadInCache,
-    markAllAsReadInCache,
-    clearAllFromCache,
-    invalidateNotifications
-  };
-}
-const NotificationMenu = ({ className, ref }) => {
-  const { t } = useTranslation();
-  const navigate = useNavigate$1();
-  const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
-    limit: 20
-  });
-  const { fetch: deleteAll } = useDeleteAllNotifications();
-  const { isInNotificationPage } = useNotificationUiState();
-  const { unreadCount, setUnreadCount } = useUnreadCount();
-  const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } = useNotificationCacheMutations();
-  const { fetch: markAsRead } = useMarkNotificationAsRead();
-  const notifications2 = React.useMemo(() => {
-    return data?.pages.flatMap((page) => page.items) || [];
-  }, [data]);
-  const handleMarkAllAsRead = async () => {
-    markAllAsReadInCache();
-    setUnreadCount(0);
-    await notificationService.markAllAsRead();
-    invalidateNotifications();
-  };
-  const handleDeleteAll = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await deleteAll({
-      onSuccess: () => {
-        clearAllFromCache();
-        setUnreadCount(0);
-        invalidateNotifications();
-      },
-      onError: () => {
-        console.error("Failed to delete all notifications");
-      }
-    });
-  };
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
-        "animate-dropdown-slide origin-top scrollbar-hide",
-        className
-      ),
-      ref,
-      children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-2 pt-2", children: [
-          /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: t("notifications:notifications.title") }),
-          notifications2.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-            unreadCount > 0 && /* @__PURE__ */ jsx(
-              "button",
-              {
-                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
-                onClick: handleMarkAllAsRead,
-                title: t("notifications:notifications.mark-all-read"),
-                children: /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-check-double" }) })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "button",
-              {
-                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
-                onClick: handleDeleteAll,
-                title: t("notifications:notifications.delete-all"),
-                children: /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-trash-can" }) })
-              }
-            )
-          ] })
-        ] }),
-        notifications2.length > 0 ? /* @__PURE__ */ jsx("div", { className: "relative py-1 overflow-y-scroll max-h-[500px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", children: /* @__PURE__ */ jsx(
-          InfiniteScroll,
-          {
-            itemInRow: 1,
-            items: notifications2,
-            onLoadMore: fetchNextPage,
-            className: "gap-0",
-            itemTemplate: (item) => {
-              const notification = item;
-              return /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: clsx(
-                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
-                    "transition-all duration-200 hover:scale-[1.01]",
-                    "active:scale-[0.99]"
-                  ),
-                  children: /* @__PURE__ */ jsx(
-                    NotificationFactory,
-                    {
-                      notificationDto: notification,
-                      onClick: async () => {
-                        markAsRead(notification.id, {
-                          onSuccess: () => {
-                            markAsReadInCache(notification.id);
-                            setUnreadCount((prev) => Math.max(prev - 1, 0));
-                          }
-                        });
-                      }
-                    }
-                  )
-                },
-                notification.id
-              );
-            },
-            hasMore: !!hasNextPage,
-            isLoading: isFetching,
-            loadingSkeleton: /* @__PURE__ */ jsx(NotificationSkeleton, {}),
-            numberOfSkeletons: 2
-          }
-        ) }) : /* @__PURE__ */ jsx(Fragment, { children: !isFetching ? /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center h-40", children: t("notifications:notifications.no-notifications") }) : /* @__PURE__ */ jsxs("div", { className: "flex flex-col px-2 py-2 gap-3", children: [
-          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
-          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
-          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
-          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
-          /* @__PURE__ */ jsx(NotificationSkeleton, {})
-        ] }) }),
-        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2", children: /* @__PURE__ */ jsxs(
-          "button",
-          {
-            className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2",
-            onClick: () => navigate("/notifications"),
-            title: t("notifications:notifications.open-notifications"),
-            children: [
-              /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", children: t("notifications:notifications.open-notifications") }),
-              /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-up-right-from-square" }) })
-            ]
-          }
-        ) })
-      ]
-    }
-  );
-};
-const NotificationBadge = ({}) => {
-  const navigate = useNavigate();
-  const { unreadCount } = useUnreadCount();
-  const { isShowNotification, isInNotificationPage, setShowNotification } = useNotificationUiState();
-  const menuRef = React.useRef(null);
-  const btnRef = React.useRef(null);
-  useClickOutside(menuRef, btnRef, () => {
-    if (isShowNotification) setShowNotification(false);
-  });
-  const handleToggleNotifications = () => {
-    if (window.innerWidth < 640 && !isShowNotification) {
-      navigate("/notifications");
-      return;
-    }
-    setShowNotification(!isShowNotification);
-  };
-  const isActive = isShowNotification || isInNotificationPage;
-  return /* @__PURE__ */ jsxs("div", { className: "relative flex items-center justify-center", children: [
-    /* @__PURE__ */ jsx(
-      Badge,
-      {
-        count: unreadCount,
-        onClick: handleToggleNotifications,
-        ref: btnRef,
-        className: clsx({
-          "!bg-primary-500/30": isActive
-        }),
-        children: /* @__PURE__ */ jsx(
-          Text,
-          {
-            className: clsx({
-              "!text-primary-500": isActive
-            }),
-            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" })
-          }
-        )
-      }
-    ),
-    isShowNotification && !isInNotificationPage && /* @__PURE__ */ jsx("div", { onClick: () => setShowNotification(false), children: /* @__PURE__ */ jsx(
-      NotificationMenu,
-      {
-        className: clsx(
-          "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
-          "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
-          "top-[108%] -right-[70px] w-screen h-screen p-6"
-        ),
-        onClick: () => setShowNotification(!isShowNotification),
-        ref: menuRef
-      }
-    ) })
-  ] });
-};
 const useActiveRoute = (to, end = false) => {
   const resolved = useResolvedPath(to);
   const match = useMatch({ path: resolved.pathname, end });
@@ -2821,21 +2018,11 @@ const NavbarItem = ({
 const Navbar = ({
   className,
   isAuthenticated,
-  onLogin,
-  onSignup
+  options,
+  items,
+  logo
 }) => {
-  const navItems = [
-    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-house" }), path: "/", isIndex: true },
-    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-group" }), path: "/friends", isIndex: false }
-  ];
-  const navigate = useNavigate();
-  const handleGoToHome = useCallback(() => {
-    if (isAuthenticated) {
-      navigate("/");
-    } else {
-      onLogin?.();
-    }
-  }, [isAuthenticated, navigate]);
+  const navItems = items || [];
   return /* @__PURE__ */ jsxs(
     "nav",
     {
@@ -2845,36 +2032,14 @@ const Navbar = ({
         className
       ),
       children: [
-        /* @__PURE__ */ jsx("div", { onClick: handleGoToHome, className: "cursor-pointer items-center gap-2", children: /* @__PURE__ */ jsx(Logo, { hasSlogan: false, sz: "sm-3" }) }),
-        isAuthenticated ? /* @__PURE__ */ jsxs("div", { className: "flex flex-row gap-3 flex-1", children: [
-          /* @__PURE__ */ jsx("div", { className: clsx("hidden w-full justify-center flex-row", "sm:flex sm:flex-1"), children: navItems.map((item, index) => /* @__PURE__ */ jsx(
-            NavbarItem,
-            {
-              path: item.path,
-              className: "!px-10",
-              activeRoute: item.isIndex,
-              children: item.icon
-            },
-            index
-          )) }),
-          /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-row gap-2 flex-1 justify-end sm:flex-none"), children: [
-            /* @__PURE__ */ jsx(NotificationBadge, {}),
-            /* @__PURE__ */ jsx(UserMenu, {})
-          ] })
-        ] }) : /* @__PURE__ */ jsxs("div", { className: "flex flex-row gap-2", children: [
-          /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "secondary", onClick: () => onLogin?.(), children: "Sign in" }),
-          /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "primary", onClick: () => onSignup?.(), children: "Sign up" })
+        logo,
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-row gap-3 flex-1", children: [
+          /* @__PURE__ */ jsx("div", { className: clsx("flex w-full sm:justify-center flex-row"), children: navItems.map((item, index) => /* @__PURE__ */ jsx(NavbarItem, { path: item.path, className: "!px-10", activeRoute: item.isIndex, children: item.icon }, index)) }),
+          /* @__PURE__ */ jsx("div", { className: clsx("flex flex-row gap-2 flex-1 justify-end sm:flex-none"), children: options })
         ] })
       ]
     }
   );
-};
-const NavbarFooter = ({ className, isAuthenticated }) => {
-  const navItems = [
-    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-house" }), path: "/", isIndex: true },
-    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-group" }), path: "/friends", isIndex: false }
-  ];
-  return /* @__PURE__ */ jsx("div", { className: clsx("bg-[var(--third-bg-color)] w-full py-1", className), children: isAuthenticated && /* @__PURE__ */ jsx("div", { className: "flex flex-1 items-center justify-center py-1", children: navItems.map((item, index) => /* @__PURE__ */ jsx(NavbarItem, { path: item.path, activeRoute: item.isIndex, children: item.icon }, index)) }) });
 };
 const PageNavbarItem = ({
   icon,
@@ -3195,6 +2360,9 @@ const createSignalRConnection = () => {
     throw error;
   }
 };
+function useAuth() {
+  return useContext(AuthContext);
+}
 function useNotificationHub(onReceiveNotification) {
   const connectionRef = useRef(null);
   const { isAuthenticated } = useAuth();
@@ -3242,6 +2410,262 @@ const useToast = () => {
   }
   return context;
 };
+function useSafeQueryResult(params) {
+  const wrappedOptions = {
+    ...params,
+    queryFn: async () => {
+      if (typeof params.fn !== "function") {
+        throw new Error("queryFn is not a function");
+      }
+      var result = await params.fn();
+      if (result.success) {
+        params.options?.onSuccess?.(result.data);
+        return result.data;
+      } else {
+        const error = new Error(result.error?.toString() || "Query failed");
+        params.options?.onError?.(error, result.errors);
+        throw error;
+      }
+    }
+  };
+  return useQuery(wrappedOptions);
+}
+function useSafeInfiniteQueryResult({
+  fn,
+  options,
+  ...params
+}) {
+  return useInfiniteQuery({
+    ...params,
+    queryFn: async (context) => {
+      if (typeof fn !== "function") {
+        throw new Error("fn is not a function");
+      }
+      const result = await fn(context.pageParam);
+      if (result.success) {
+        options?.onSuccess?.(result.data);
+        return result.data;
+      } else {
+        const error = new Error(result.error?.toString() || "Query failed");
+        options?.onError?.(error, result.errors);
+        throw error;
+      }
+    },
+    initialPageParam: void 0,
+    getNextPageParam: (lastPage) => {
+      return lastPage.hasNext ? lastPage.nextCursor : void 0;
+    }
+  });
+}
+const PREFIX$1 = buildApiPath("/notification");
+class NotificationService {
+  async getNotifications(query) {
+    return await apiGet(`${PREFIX$1}`, query);
+  }
+  async markAsRead(notificationId) {
+    return await apiPost(`${PREFIX$1}/${notificationId}/read`);
+  }
+  async markAllAsRead() {
+    return await apiPost(`${PREFIX$1}/read-all`);
+  }
+  async getUnreadCount() {
+    const result = await apiGet(`${PREFIX$1}/unread-count`);
+    console.log("getUnreadCount response:", result);
+    return result;
+  }
+  async delete(notificationId) {
+    return await apiDelete(`${PREFIX$1}/${notificationId}`);
+  }
+  async deleteAll() {
+    return await apiDelete(`${PREFIX$1}`);
+  }
+}
+const notificationService = new NotificationService();
+const notificationKeys = {
+  list: (userId, params) => ["notifications", userId, params],
+  unreadCount: (userId) => ["notifications-unread-count", userId],
+  uiState: () => ["notifications-ui-state"]
+};
+const DEFAULT_UI_STATE = {
+  isShowNotification: false,
+  isInNotificationPage: false
+};
+function useNotificationUiState() {
+  const queryClient = useQueryClient();
+  const { data: uiState = DEFAULT_UI_STATE } = useQuery({
+    queryKey: notificationKeys.uiState(),
+    queryFn: () => DEFAULT_UI_STATE,
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false
+  });
+  const setShowNotification = useCallback(
+    (value) => {
+      queryClient.setQueryData(notificationKeys.uiState(), (old) => ({
+        ...old ?? DEFAULT_UI_STATE,
+        isShowNotification: value
+      }));
+    },
+    [queryClient]
+  );
+  const setInNotificationPage = useCallback(
+    (value) => {
+      queryClient.setQueryData(notificationKeys.uiState(), (old) => ({
+        ...old ?? DEFAULT_UI_STATE,
+        isInNotificationPage: value
+      }));
+    },
+    [queryClient]
+  );
+  return {
+    isShowNotification: uiState.isShowNotification,
+    isInNotificationPage: uiState.isInNotificationPage,
+    setShowNotification,
+    setInNotificationPage
+  };
+}
+function useUnreadCount() {
+  const { userId } = useAuth();
+  const queryClient = useQueryClient();
+  const { data: unreadCount = 0 } = useSafeQueryResult({
+    queryKey: notificationKeys.unreadCount(userId),
+    fn: async () => await notificationService.getUnreadCount(),
+    staleTime: Infinity,
+    gcTime: Infinity,
+    refetchOnMount: false,
+    refetchOnWindowFocus: false,
+    refetchOnReconnect: false,
+    enabled: !!userId
+  });
+  const setUnreadCount = useCallback(
+    (value) => {
+      queryClient.setQueryData(
+        notificationKeys.unreadCount(userId),
+        (old = 0) => typeof value === "function" ? value(old) : value
+      );
+    },
+    [queryClient, userId]
+  );
+  const incrementUnread = useCallback(
+    (by = 1) => setUnreadCount((prev) => prev + by),
+    [setUnreadCount]
+  );
+  const decrementUnread = useCallback(
+    (by = 1) => setUnreadCount((prev) => Math.max(prev - by, 0)),
+    [setUnreadCount]
+  );
+  return { unreadCount, setUnreadCount, incrementUnread, decrementUnread };
+}
+function useNotificationCacheMutations() {
+  const queryClient = useQueryClient();
+  const { userId } = useAuth();
+  const addNotificationToCache = useCallback(
+    (notification) => {
+      queryClient.setQueriesData(
+        { queryKey: ["notifications", userId] },
+        (oldData) => {
+          if (!oldData?.pages?.length) {
+            return {
+              pages: [{ items: [notification], nextCursor: void 0, hasNext: false }],
+              pageParams: [void 0]
+            };
+          }
+          const firstPage = oldData.pages[0];
+          if (firstPage.items.some((n) => n.id === notification.id)) return oldData;
+          return {
+            ...oldData,
+            pages: [
+              { ...firstPage, items: [notification, ...firstPage.items] },
+              ...oldData.pages.slice(1)
+            ]
+          };
+        }
+      );
+    },
+    [queryClient, userId]
+  );
+  const removeNotificationFromCache = useCallback(
+    (notificationId) => {
+      console.log("Removing notification from cache with ID:", notificationId);
+      queryClient.setQueriesData(
+        { queryKey: ["notifications", userId] },
+        (oldData) => {
+          console.log("Current cache data before removal:", oldData);
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              items: page.items.filter((n) => n.id !== notificationId)
+            }))
+          };
+        }
+      );
+    },
+    [queryClient, userId]
+  );
+  const markAsReadInCache = useCallback(
+    (notificationId) => {
+      queryClient.setQueriesData(
+        { queryKey: ["notifications", userId] },
+        (oldData) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              items: page.items.map((n) => n.id === notificationId ? { ...n, isRead: true } : n)
+            }))
+          };
+        }
+      );
+    },
+    [queryClient, userId]
+  );
+  const markAllAsReadInCache = useCallback(() => {
+    queryClient.setQueriesData(
+      { queryKey: ["notifications", userId] },
+      (oldData) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            items: page.items.map((n) => ({ ...n, isRead: true }))
+          }))
+        };
+      }
+    );
+  }, [queryClient, userId]);
+  const clearAllFromCache = useCallback(() => {
+    queryClient.setQueriesData(
+      { queryKey: ["notifications", userId] },
+      (oldData) => {
+        if (!oldData?.pages) return oldData;
+        return {
+          ...oldData,
+          pages: oldData.pages.map((page) => ({
+            ...page,
+            items: []
+          }))
+        };
+      }
+    );
+  }, [queryClient, userId]);
+  const invalidateNotifications = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["notifications", userId] });
+  }, [queryClient, userId]);
+  return {
+    addNotificationToCache,
+    removeNotificationFromCache,
+    markAsReadInCache,
+    markAllAsReadInCache,
+    clearAllFromCache,
+    invalidateNotifications
+  };
+}
 function NotificationListener() {
   const { pushToast } = useToast();
   const { incrementUnread, decrementUnread } = useUnreadCount();
@@ -3278,6 +2702,291 @@ function NotificationListener() {
   useNotificationHub(handleNewNotification);
   return null;
 }
+const NotificationSkeleton = () => {
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center"), children: [
+    /* @__PURE__ */ jsx(Skeleton, { sz: "md-2", variant: "circle" }),
+    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col w-full flex-1 gap-2 ml-2"), children: [
+      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-full"), sz: "sm-2" }),
+      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-[50%]"), sz: "sm-2" })
+    ] })
+  ] });
+};
+const notificationQueryKey = (userId, queryParams) => ["notifications", userId, queryParams];
+const useNotifications = (queryParams) => {
+  const { userId } = useAuth();
+  return useSafeInfiniteQueryResult({
+    queryKey: notificationQueryKey(userId, queryParams),
+    fn: async (cursor) => await notificationService.getNotifications({ ...queryParams, cursor }),
+    enabled: !!userId
+  });
+};
+const useMarkNotificationAsRead = () => {
+  return useResultFetcher(
+    (notificationId) => notificationService.markAsRead(notificationId)
+  );
+};
+const useDeleteAllNotifications = () => {
+  const qc = useQueryClient();
+  return useResultFetcher(notificationService.deleteAll, {
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+    }
+  });
+};
+function InfiniteScroll({
+  itemInRow = 1,
+  items,
+  loadingSkeleton,
+  numberOfSkeletons = 4,
+  className,
+  hasMore = true,
+  isLoading = false,
+  itemTemplate,
+  onLoadMore,
+  isShowLastSeen = false
+}) {
+  const sentinelRef = useRef(null);
+  const loadingRef = useRef(false);
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(async ([entry]) => {
+      if (entry.isIntersecting) {
+        await onLoadMore();
+      }
+    });
+    observer.observe(sentinel);
+    return () => {
+      observer.disconnect();
+    };
+  }, [sentinelRef, hasMore]);
+  useEffect(() => {
+    if (!isLoading) {
+      loadingRef.current = false;
+    }
+  }, [isLoading]);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className,
+      style: {
+        display: "grid",
+        gridTemplateColumns: `repeat(${itemInRow}, 1fr)`,
+        gap: "0.5rem"
+      },
+      children: [
+        items.map((item, index) => itemTemplate ? itemTemplate(item, index) : item),
+        hasMore && /* @__PURE__ */ jsx("div", { ref: sentinelRef, className: "absolute bottom-1/2 h-[20px] w-[20px]" }),
+        isLoading && /* @__PURE__ */ jsx(Fragment, { children: Array.from({ length: numberOfSkeletons }).map((_, index) => /* @__PURE__ */ jsx(
+          "div",
+          {
+            style: {
+              textAlign: "center",
+              padding: "1rem 0"
+            },
+            children: loadingSkeleton ?? "Loading..."
+          },
+          index
+        )) }),
+        !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx(
+          "div",
+          {
+            style: {
+              gridColumn: "1 / -1",
+              textAlign: "center",
+              padding: "1rem 0",
+              color: "var(--text-third-color)"
+            },
+            children: "Đã xem hết kết quả."
+          }
+        )
+      ]
+    }
+  );
+}
+const NotificationMenu = ({ className, ref }) => {
+  const { t } = useTranslation();
+  const navigate = useNavigate$1();
+  const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
+    limit: 20
+  });
+  const { fetch: deleteAll } = useDeleteAllNotifications();
+  const { isInNotificationPage } = useNotificationUiState();
+  const { unreadCount, setUnreadCount } = useUnreadCount();
+  const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } = useNotificationCacheMutations();
+  const { fetch: markAsRead } = useMarkNotificationAsRead();
+  const notifications2 = React.useMemo(() => {
+    return data?.pages.flatMap((page) => page.items) || [];
+  }, [data]);
+  const handleMarkAllAsRead = async () => {
+    markAllAsReadInCache();
+    setUnreadCount(0);
+    await notificationService.markAllAsRead();
+    invalidateNotifications();
+  };
+  const handleDeleteAll = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await deleteAll({
+      onSuccess: () => {
+        clearAllFromCache();
+        setUnreadCount(0);
+        invalidateNotifications();
+      },
+      onError: () => {
+        console.error("Failed to delete all notifications");
+      }
+    });
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
+        "animate-dropdown-slide origin-top scrollbar-hide",
+        className
+      ),
+      ref,
+      children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-2 pt-2", children: [
+          /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: t("notifications:notifications.title") }),
+          notifications2.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+            unreadCount > 0 && /* @__PURE__ */ jsx(
+              "button",
+              {
+                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
+                onClick: handleMarkAllAsRead,
+                title: t("notifications:notifications.mark-all-read"),
+                children: /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-check-double" }) })
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              "button",
+              {
+                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
+                onClick: handleDeleteAll,
+                title: t("notifications:notifications.delete-all"),
+                children: /* @__PURE__ */ jsx(Text, { sz: "md-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-trash-can" }) })
+              }
+            )
+          ] })
+        ] }),
+        notifications2.length > 0 ? /* @__PURE__ */ jsx("div", { className: "relative py-1 overflow-y-scroll max-h-[500px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden", children: /* @__PURE__ */ jsx(
+          InfiniteScroll,
+          {
+            itemInRow: 1,
+            items: notifications2,
+            onLoadMore: fetchNextPage,
+            className: "gap-0",
+            itemTemplate: (item) => {
+              const notification = item;
+              return /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: clsx(
+                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
+                    "transition-all duration-200 hover:scale-[1.01]",
+                    "active:scale-[0.99]"
+                  ),
+                  children: /* @__PURE__ */ jsx(
+                    NotificationFactory,
+                    {
+                      notificationDto: notification,
+                      onClick: async () => {
+                        markAsRead(notification.id, {
+                          onSuccess: () => {
+                            markAsReadInCache(notification.id);
+                            setUnreadCount((prev) => Math.max(prev - 1, 0));
+                          }
+                        });
+                      }
+                    }
+                  )
+                },
+                notification.id
+              );
+            },
+            hasMore: !!hasNextPage,
+            isLoading: isFetching,
+            loadingSkeleton: /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+            numberOfSkeletons: 2
+          }
+        ) }) : /* @__PURE__ */ jsx(Fragment, { children: !isFetching ? /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center h-40", children: t("notifications:notifications.no-notifications") }) : /* @__PURE__ */ jsxs("div", { className: "flex flex-col px-2 py-2 gap-3", children: [
+          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+          /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+          /* @__PURE__ */ jsx(NotificationSkeleton, {})
+        ] }) }),
+        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2", children: /* @__PURE__ */ jsxs(
+          "button",
+          {
+            className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2",
+            onClick: () => navigate("/notifications"),
+            title: t("notifications:notifications.open-notifications"),
+            children: [
+              /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", children: t("notifications:notifications.open-notifications") }),
+              /* @__PURE__ */ jsx(Text, { sz: "sm-1", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-up-right-from-square" }) })
+            ]
+          }
+        ) })
+      ]
+    }
+  );
+};
+const NotificationBadge = ({}) => {
+  const navigate = useNavigate();
+  const { unreadCount } = useUnreadCount();
+  const { isShowNotification, isInNotificationPage, setShowNotification } = useNotificationUiState();
+  console.debug("NotificationBadge render - isShowNotification:", isShowNotification, "isInNotificationPage:", isInNotificationPage, "unreadCount:", unreadCount);
+  const menuRef = React.useRef(null);
+  const btnRef = React.useRef(null);
+  useClickOutside(menuRef, btnRef, () => {
+    if (isShowNotification) setShowNotification(false);
+  });
+  const handleToggleNotifications = () => {
+    if (window.innerWidth < 640 && !isShowNotification) {
+      navigate("/notifications");
+      return;
+    }
+    setShowNotification(!isShowNotification);
+  };
+  const isActive = isShowNotification || isInNotificationPage;
+  return /* @__PURE__ */ jsxs("div", { className: "relative flex items-center justify-center", children: [
+    /* @__PURE__ */ jsx(
+      Badge,
+      {
+        count: unreadCount,
+        onClick: handleToggleNotifications,
+        ref: btnRef,
+        className: clsx({
+          "!bg-primary-500/30": isActive
+        }),
+        children: /* @__PURE__ */ jsx(
+          Text,
+          {
+            className: clsx({
+              "!text-primary-500": isActive
+            }),
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" })
+          }
+        )
+      }
+    ),
+    isShowNotification && !isInNotificationPage && /* @__PURE__ */ jsx("div", { onClick: () => setShowNotification(false), children: /* @__PURE__ */ jsx(
+      NotificationMenu,
+      {
+        className: clsx(
+          "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
+          "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
+          "top-[108%] -right-[70px] w-screen h-screen p-6"
+        ),
+        onClick: () => setShowNotification(!isShowNotification),
+        ref: menuRef
+      }
+    ) })
+  ] });
+};
 function NotFoundPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -3531,6 +3240,125 @@ function useLanguage$1() {
   const { t } = useTranslation();
   return t;
 }
+const profileQueryKey = (userId) => ["user", "profile", userId];
+const avatarQueryKey = (userId) => ["user", "avatar", userId];
+const backgroundQueryKey = (userId) => ["user", "background", userId];
+const profileDetailsQueryKey = (userId) => ["user", "profile", "details", userId];
+const useGetUserProfile = (userId) => {
+  return useSafeQueryResult({
+    queryKey: profileQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(
+      userId,
+      "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName"
+    ),
+    enabled: !!userId
+  });
+};
+const useGetUserAvatar = (userId) => {
+  return useSafeQueryResult({
+    queryKey: avatarQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "avatar"),
+    enabled: !!userId
+  });
+};
+const useGetUserBackground = (userId) => {
+  return useSafeQueryResult({
+    queryKey: backgroundQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "background"),
+    enabled: !!userId
+  });
+};
+const useGetUserProfileDetails = (userId) => {
+  return useSafeQueryResult({
+    queryKey: profileDetailsQueryKey(userId),
+    fn: async () => await userProfileService.getProfile(userId, "bio,description"),
+    enabled: !!userId
+  });
+};
+const useUpdateName = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({
+      firstName,
+      middleName,
+      lastName
+    }) => userProfileService.updateName({
+      firstName,
+      middleName,
+      lastName
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateUrlName = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({ urlName }) => userProfileService.updateUrlName({
+      urlName
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateNickname = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    ({ nickname }) => userProfileService.updateNickname({
+      nickname
+    }),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: profileQueryKey(userId)
+        });
+      }
+    }
+  );
+};
+const useUpdateProfile = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher((data) => userProfileService.updateProfile(data), {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: profileQueryKey(userId)
+      });
+      qc.invalidateQueries({
+        queryKey: profileDetailsQueryKey(userId)
+      });
+    }
+  });
+};
+const useSelectBackground = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(userProfileService.uploadBackground, {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: backgroundQueryKey(userId)
+      });
+    }
+  });
+};
+const useSelectAvatar = (userId) => {
+  const qc = useQueryClient();
+  return useResultFetcher(userProfileService.uploadAvatar, {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: avatarQueryKey(userId)
+      });
+    }
+  });
+};
 const ErrorCodes$3 = {
   USER_NOT_FOUND: "settings:account.personalInfo.errorMessages.changeUrlName.userNotFound",
   URLNAME_EXIST: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameAlreadyExist",
@@ -4683,7 +4511,7 @@ const friendsRoutes = {
 };
 const NotificationsPage = () => {
   const { setInNotificationPage, setShowNotification } = useNotificationUiState();
-  useEffect(() => {
+  useLayoutEffect(() => {
     setInNotificationPage(true);
     return () => {
       setInNotificationPage(false);
@@ -5766,10 +5594,136 @@ const Layout = ({ children, className }) => {
 Layout.Header = LayoutHeader;
 Layout.Main = LayoutMain;
 Layout.Footer = LayoutFooter;
+const UserMenu = () => {
+  const [isOpenMenu, setIsOpenMenu] = useState(false);
+  const { userId, urlName, logOut } = useAuth();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
+  const { data: userProfile } = useGetUserProfile(userId);
+  const { data: avatarProfile } = useGetUserAvatar(userId);
+  const menuRef = useRef(null);
+  const btnRef = useRef(null);
+  const handleClickOutside = () => {
+    if (isOpenMenu) setIsOpenMenu(false);
+  };
+  useClickOutside(
+    menuRef,
+    btnRef,
+    handleClickOutside
+  );
+  const handlePersonalPage = useCallback(() => {
+    const user2 = urlName || userId;
+    navigate(`/${user2}`);
+    setIsOpenMenu(false);
+  }, [navigate, urlName, userId]);
+  const handleSettings = useCallback(() => {
+    navigate("/settings");
+    setIsOpenMenu(false);
+  }, [navigate]);
+  const handleLogout = useCallback(async () => {
+    await logOut?.();
+    navigate("/login", { replace: true });
+  }, [logOut, navigate]);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center justify-center relative"), ref: btnRef, children: [
+    /* @__PURE__ */ jsx(
+      Button,
+      {
+        variant: "secondary",
+        className: clsx("!rounded-full !p-0"),
+        onClick: () => {
+          setIsOpenMenu(!isOpenMenu);
+        },
+        children: /* @__PURE__ */ jsx(
+          Avatar,
+          {
+            src: avatarProfile?.infos.avatar ?? "",
+            alt: "Profile",
+            sz: "sm-1",
+            className: "border-4 border-bg-third"
+          }
+        )
+      }
+    ),
+    isOpenMenu && /* @__PURE__ */ jsx(
+      "div",
+      {
+        className: clsx(
+          "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
+          "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]"
+        ),
+        ref: menuRef,
+        children: /* @__PURE__ */ jsxs(List, { className: clsx("flex flex-col gap-2 w-full"), children: [
+          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsxs(
+            Button,
+            {
+              sz: "md-1",
+              variant: "secondary",
+              className: clsx(
+                "flex items-center justify-start gap-3 w-full !pl-3 py-3",
+                "hover:!bg-bg-fourth transition-all duration-200",
+                "hover:scale-[1.02] active:scale-[0.98]"
+              ),
+              onClick: handlePersonalPage,
+              children: [
+                /* @__PURE__ */ jsx(Avatar, { src: avatarProfile?.infos.avatar ?? "", alt: "avatar", sz: "sm-1" }),
+                /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", children: userProfile?.infos.fullName ?? "" })
+              ]
+            }
+          ) }),
+          /* @__PURE__ */ jsx(
+            List.Item,
+            {
+              className: clsx("items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full")
+            }
+          ),
+          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsx(
+            Button,
+            {
+              sz: "md-1",
+              variant: "secondary",
+              className: clsx(
+                "flex items-center justify-start w-full gap-3",
+                "hover:!bg-bg-fourth transition-all duration-200",
+                "hover:scale-[1.02] active:scale-[0.98]"
+              ),
+              onClick: handleSettings,
+              children: /* @__PURE__ */ jsxs(Text, { className: clsx("flex items-center gap-3"), sz: "md-1", children: [
+                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-gear" }),
+                t("navbar.profileMenu.settings")
+              ] })
+            }
+          ) }),
+          /* @__PURE__ */ jsx(List.Item, { children: /* @__PURE__ */ jsx(
+            Button,
+            {
+              sz: "md-1",
+              variant: "secondary",
+              className: clsx(
+                "flex items-center justify-start w-full gap-3 text-red-400",
+                "hover:!bg-bg-fourth transition-all duration-200",
+                "hover:scale-[1.02] active:scale-[0.98]"
+              ),
+              onClick: handleLogout,
+              children: /* @__PURE__ */ jsxs(Text, { sz: "md-1", className: clsx("flex items-center gap-3"), color: "danger", children: [
+                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-right-from-bracket" }),
+                t("navbar.profileMenu.logout")
+              ] })
+            }
+          ) })
+        ] })
+      }
+    )
+  ] });
+};
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
   const { openDialog, closeDialog } = useDialog();
+  const navigate = useNavigate();
   const [headerRef, headerSize] = useSize();
+  const items = [
+    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-house" }), path: "/", isIndex: true },
+    { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-group" }), path: "/friends", isIndex: false }
+  ];
   const openLoginOverlay = useCallback(() => {
     openDialog({
       content: /* @__PURE__ */ jsx(LoginForm, { showLogo: false })
@@ -5788,17 +5742,37 @@ const DefaultLayout = () => {
     }
     return () => closeDialog();
   }, [isAuthenticated, closeDialog, openLoginOverlay]);
+  const handleGoToHome = useCallback(() => {
+    if (isAuthenticated) {
+      navigate("/");
+    } else {
+      openLoginOverlay();
+    }
+  }, [isAuthenticated, openLoginOverlay]);
   return /* @__PURE__ */ jsxs(Layout, { children: [
     /* @__PURE__ */ jsx(Layout.Header, { ref: headerRef, children: /* @__PURE__ */ jsx(
       Navbar,
       {
         isAuthenticated,
-        onLogin: openLoginOverlay,
-        onSignup: openRegisterOverlay
+        items,
+        logo: /* @__PURE__ */ jsx(
+          "div",
+          {
+            onClick: handleGoToHome,
+            className: "sm:block hidden cursor-pointer items-center gap-2",
+            children: /* @__PURE__ */ jsx(Logo, { hasSlogan: false, sz: "sm-3" })
+          }
+        ),
+        options: isAuthenticated ? /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center gap-2"), children: [
+          /* @__PURE__ */ jsx(NotificationBadge, {}),
+          /* @__PURE__ */ jsx(UserMenu, {})
+        ] }) : /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center gap-2"), children: [
+          /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "secondary", onClick: openLoginOverlay, children: "Sign in" }),
+          /* @__PURE__ */ jsx(Button, { sz: "sm-1", variant: "primary", onClick: openRegisterOverlay, children: "Sign up" })
+        ] })
       }
     ) }),
-    /* @__PURE__ */ jsx(Layout.Main, { style: { paddingTop: headerSize?.height }, children: /* @__PURE__ */ jsx(Outlet, {}) }),
-    /* @__PURE__ */ jsx(Layout.Footer, { children: /* @__PURE__ */ jsx(NavbarFooter, { isAuthenticated }) })
+    /* @__PURE__ */ jsx(Layout.Main, { style: { paddingTop: headerSize?.height }, children: /* @__PURE__ */ jsx(Outlet, {}) })
   ] });
 };
 const SecondLayout = () => {
@@ -6163,6 +6137,7 @@ function App({ authContext }) {
       }
     });
   }
+  console.log("App authContext:", authContext);
   if (authContext?.userData?.languageCode) {
     i18next.changeLanguage(authContext.userData.languageCode);
   }

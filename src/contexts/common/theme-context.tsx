@@ -30,16 +30,16 @@ interface ThemeProviderProps {
 }
 
 // Get initial theme from DOM (set by SSR script) to prevent flash
-function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
+// function getInitialTheme(): Theme {
+//   if (typeof window === "undefined") return "light";
 
-  const currentTheme = document.documentElement.getAttribute("data-theme");
-  if (ThemeList.some((t) => t === currentTheme)) {
-    return currentTheme as Theme;
-  }
+//   const currentTheme = document.documentElement.getAttribute("data-theme");
+//   if (ThemeList.some((t) => t === currentTheme)) {
+//     return currentTheme as Theme;
+//   }
 
-  return "light";
-}
+//   return "light";
+// }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
   // Initialize from a safe default "light" to match server render
