@@ -155,7 +155,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
 
   return (
     <div className={clsx("relative flex py-2", className)} ref={containerRef}>
-      <div className="absolute invisible flex">
+      <div className="fixed invisible flex">
         {navbarItems.map((item, index) => {
           if (item.isOwnerOnly && !isOwner) return null;
           return (

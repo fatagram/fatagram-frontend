@@ -1,6 +1,5 @@
 import React from "react";
 import clsx from "clsx";
-import { Button } from "@/components/atoms";
 import { NavbarItem } from "./navbar-item";
 
 interface NavbarProps {
@@ -11,13 +10,7 @@ interface NavbarProps {
   logo?: React.ReactNode;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({
-  className,
-  isAuthenticated,
-  options,
-  items,
-  logo,
-}) => {
+export const Navbar: React.FC<NavbarProps> = ({ className, options, items, logo }) => {
   const navItems = items || [];
 
   return (
