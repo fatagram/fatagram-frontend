@@ -1,5 +1,5 @@
-import { ComponentProps } from "@/components/common/types/component-type";
-import { Size } from "@/components/common/types/size";
+import { ComponentProps } from "@/components/common/component-type";
+import { Size } from "@/components/common/size";
 import clsx from "clsx";
 import { FC, JSX } from "react";
 

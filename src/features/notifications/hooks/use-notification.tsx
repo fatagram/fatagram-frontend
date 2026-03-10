@@ -1,9 +1,9 @@
 import { notificationService } from "@/api/notification/notification.api";
 import { useSafeInfiniteQueryResult } from "@/hooks/use-safe-query";
 import { CursorQuery } from "@/types/query";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useQueryClient } from "@tanstack/react-query";
+import { useAuth } from "@/contexts";
 
 const notificationQueryKey = (userId: string, queryParams?: Omit<CursorQuery<string>, "cursor">) =>
   ["notifications", userId, queryParams] as const;

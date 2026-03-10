@@ -1,11 +1,10 @@
 import React, { useEffect, useState } from "react";
 import clsx from "clsx";
-import SettingCard from "@/components/molecules/card";
+import SettingCard from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 import { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
 import SelectBoxSetting from "../../components/selectbox-setting";
-import { Theme, useTheme } from "@/contexts/common/theme-context";
-import { useSnackbar } from "@/hooks/contexts/use-snackbar";
+import { Theme, useSnackbar, useTheme } from "@/contexts";
 
 interface ThemeSettingsProps {
   className?: string;

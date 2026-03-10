@@ -1,4 +1,4 @@
-import { useAuth } from "@/hooks/contexts/use-auth";
+import { useAuth } from "@/contexts/auth-context";
 import { SocialButton } from "./social-button";
 
 export const SocialButtons: React.FC = () => {

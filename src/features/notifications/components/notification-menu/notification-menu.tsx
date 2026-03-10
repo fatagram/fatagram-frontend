@@ -12,7 +12,7 @@ import {
   useMarkNotificationAsRead,
   useNotifications,
 } from "../../hooks/use-notification";
-import InfiniteScroll from "@/components/utils/infinite-scroll";
+import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
 import {
   useNotificationCacheMutations,
   useNotificationUiState,

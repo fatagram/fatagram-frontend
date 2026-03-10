@@ -1,6 +1,5 @@
-import { GlobalDialog } from "./components/organisms";
+import { GlobalDialog } from "./features/components/global-dialog";
 import { NotificationListener } from "./features/notifications/components";
-// import { useAuth } from "./hooks/contexts/use-auth";
 import AppRoutes from "./routes";
 
 export default function Main() {

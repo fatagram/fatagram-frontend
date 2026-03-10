@@ -4,7 +4,7 @@ import { renderContent } from "../../helper/render-content";
 import { getNotificationContent } from "../../helper/get-notification-content";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { timeDistance } from "@/helpers/time-distance";
+import { timeDistance } from "@/utils/time-distance";
 
 interface BaseNotificationProps {
   notificationDto: NotificationDto;

@@ -1,4 +1,4 @@
-import { timeDistance } from "@/helpers/time-distance";
+import { timeDistance } from "@/utils/time-distance";
 import { TFunction } from "i18next";
 
 /**

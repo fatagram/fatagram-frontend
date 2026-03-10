@@ -1,8 +1,8 @@
 import { useNotificationHub } from "../hubs/use-notification-hub";
 import { NotificationDto, NotificationType } from "@/api/notification/dto/notification.dto";
 import { useCallback } from "react";
-import { useToast } from "@/hooks/contexts/use-toast";
 import { useNotificationCacheMutations, useUnreadCount } from "../hooks/use-notification-store";
+import { useToast } from "@/contexts";
 
 export function NotificationListener() {
   const { pushToast } = useToast();

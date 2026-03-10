@@ -4,7 +4,7 @@ import { renderContent } from "../../helper/render-content";
 import { getNotificationContent } from "../../helper/get-notification-content";
 import { Avatar, Text } from "@/components/atoms";
 import clsx from "clsx";
-import { timeDistance } from "@/helpers/time-distance";
+import { timeDistance } from "@/utils/time-distance";
 
 interface AcceptedFriendRequestProps {
   notificationDto: NotificationDto;

@@ -4,12 +4,12 @@ import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import { useProfilePage } from "../hooks/use-profile-page";
 import useLanguage from "@/utils/i18n";
 import { Button, Text, Skeleton } from "@/components/atoms";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useGetNumberOfFriends } from "@/features/hooks/use-friend";
+import { useAuth } from "@/contexts";
 
 export type ProfileHeaderProps = {
   className?: string;

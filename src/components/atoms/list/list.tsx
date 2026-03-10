@@ -1,4 +1,4 @@
-import { ComponentProps } from "@/components/common/types/component-type";
+import { ComponentProps } from "@/components/common/component-type";
 
 interface ListItemProps extends ComponentProps {
   key?: string | number;

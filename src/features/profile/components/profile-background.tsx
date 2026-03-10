@@ -7,7 +7,7 @@ import { Skeleton } from "@/components/atoms";
 import BackgroundImage from "@/components/atoms/background-image/background-image";
 import { Text } from "@/components/atoms";
 import { useGetUserBackground, useSelectBackground } from "@/features/hooks/use-user-profile";
-import { useSnackbar } from "@/hooks/contexts/use-snackbar";
+import { useSnackbar } from "@/contexts";
 
 type ProfileBackgroundProps = {};
 

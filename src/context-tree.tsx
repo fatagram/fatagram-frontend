@@ -1,9 +1,9 @@
-import { AuthProvider } from "./contexts/auth/auth-context";
-import { ToastProvider } from "./contexts/common/toast-context";
-import { DialogProvider } from "./contexts/common/dialog-context";
-import { LoadingProvider } from "./contexts/common/loading-context";
-import { ThemeProvider } from "./contexts/common/theme-context";
-import { SnackbarProvider } from "./contexts/common/snackbar-context";
+import { AuthProvider } from "./contexts/auth-context";
+import { ToastProvider } from "./contexts/toast-context";
+import { DialogProvider } from "./contexts/dialog-context";
+import { LoadingProvider } from "./contexts/loading-context";
+import { ThemeProvider } from "./contexts/theme-context";
+import { SnackbarProvider } from "./contexts/snackbar-context";
 
 interface ContextTreeProps {
   children: React.ReactNode;

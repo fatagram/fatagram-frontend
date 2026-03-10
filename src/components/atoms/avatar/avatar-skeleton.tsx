@@ -1,7 +1,7 @@
 import clsx from "clsx";
 import React from "react";
 import { shapeClasses, sizeClasses } from "./types";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { ComponentProps } from "@/components/common/component-type";
 
 type Shape = keyof typeof shapeClasses;
 

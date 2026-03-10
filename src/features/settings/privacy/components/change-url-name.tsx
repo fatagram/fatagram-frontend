@@ -3,9 +3,9 @@ import EditableField from "../../components/editable-field";
 import useLanguage from "@/utils/i18n";
 import clsx from "clsx";
 import { useState } from "react";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import { useGetUserProfile, useUpdateUrlName } from "@/features/hooks/use-user-profile";
 import { ErrorCodes } from "@/api/user/dto/change-url-name.dto";
+import { useAuth } from "@/contexts";
 
 interface ChangeUrlNameProps {
   userId: string;

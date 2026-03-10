@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import PageNavbar from "@/components/organisms/navigation/page-navbar/page-navbar";
+import PageNavbar from "@/components/ui/navigation/page-navbar/page-navbar";
 
 type SettingsNavbarProps = {
   className?: string;

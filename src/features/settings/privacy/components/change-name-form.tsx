@@ -3,9 +3,9 @@ import React, { useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import clsx from "clsx";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import { useGetUserProfile, useUpdateName } from "@/features/hooks/use-user-profile";
 import { ErrorCodes } from "@/api/user/dto/change-name.dto";
+import { useAuth } from "@/contexts";
 
 type ChangeNameFormProps = {
   className?: string;

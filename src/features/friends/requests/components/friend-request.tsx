@@ -1,4 +1,4 @@
-import Card from "@/components/molecules/card";
+import Card from "@/components/ui/card";
 import FriendRequestItem from "@/features/friends/components/friend-request-item";
 import React from "react";
 import clsx from "clsx";
@@ -7,7 +7,7 @@ import {
   useDeclineFriendRequest,
   useListFriendRequests,
 } from "@/features/hooks/use-friend";
-import InfiniteScroll from "@/components/utils/infinite-scroll";
+import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
 
 type FriendRequestsProps = {
   className?: string;

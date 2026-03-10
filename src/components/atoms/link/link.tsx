@@ -1,4 +1,4 @@
-import { ComponentProps } from "@/components/common/types/component-type";
+import { ComponentProps } from "@/components/common/component-type";
 import React from "react";
 import { Link as RouterLink } from "react-router-dom";
 import clsx from "clsx";

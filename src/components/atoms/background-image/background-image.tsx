@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import style from "./background-image.module.css";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 
 interface BackgroundImageProps extends ComponentProps {
@@ -8,12 +8,7 @@ interface BackgroundImageProps extends ComponentProps {
   alt: string;
 }
 
-export default function BackgroundImage({
-  src,
-  alt,
-  className,
-  children,
-}: BackgroundImageProps) {
+export default function BackgroundImage({ src, alt, className, children }: BackgroundImageProps) {
   useEffect(() => {
     document.documentElement.style.setProperty("--bg-image", `url(${src})`);
   }, [src]);
@@ -24,7 +19,7 @@ export default function BackgroundImage({
         "rounded-2xl",
         style["user-bg-image"],
         src ? "" : "h-[200px] bg-bg-fourth",
-        className
+        className,
       )}
       aria-label={alt}
     >

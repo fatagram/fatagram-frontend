@@ -1,6 +1,6 @@
 import React from "react";
 import clsx from "clsx";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { ComponentProps } from "@/components/common/component-type";
 
 interface SelectDayProps extends Omit<ComponentProps<HTMLInputElement>, "type"> {
   title?: string;

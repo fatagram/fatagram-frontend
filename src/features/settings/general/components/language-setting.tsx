@@ -1,4 +1,4 @@
-import SettingCard from "@/components/molecules/card";
+import SettingCard from "@/components/ui/card";
 import React from "react";
 import { useTranslation } from "react-i18next";
 import SelectBoxSetting from "../../components/selectbox-setting";

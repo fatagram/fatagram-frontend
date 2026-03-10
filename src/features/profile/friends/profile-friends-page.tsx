@@ -1,4 +1,4 @@
-import Card from "@/components/molecules/card";
+import Card from "@/components/ui/card";
 import ProfileFriends from "@/features/profile/friends/components/profile-friend";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";

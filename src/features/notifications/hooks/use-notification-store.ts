@@ -1,9 +1,9 @@
 import { useQueryClient, useQuery } from "@tanstack/react-query";
 import { useCallback } from "react";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { useSafeQueryResult } from "@/hooks/use-safe-query";
 import { notificationService } from "@/api/notification/notification.api";
+import { useAuth } from "@/contexts";
 
 export const notificationKeys = {
   list: (userId?: string, params?: any) => ["notifications", userId, params] as const,

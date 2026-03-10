@@ -4,7 +4,7 @@ import { useProfilePage } from "../hooks/use-profile-page";
 import { Avatar, Skeleton } from "@/components/atoms";
 import SelectFile from "@/components/atoms/select-file";
 import { useGetUserAvatar, useSelectAvatar } from "@/features/hooks/use-user-profile";
-import { useSnackbar } from "@/hooks/contexts/use-snackbar";
+import { useSnackbar } from "@/contexts";
 
 interface ProfileAvatarProps {
   className?: string;

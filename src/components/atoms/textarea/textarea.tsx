@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 import styles from "./textarea.module.css";
-import { Size } from "../../common/types/size";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { Size } from "../../common/size";
+import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 
 const sizeClasses: Record<Size, string> = {

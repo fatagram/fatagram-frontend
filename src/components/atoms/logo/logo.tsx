@@ -1,5 +1,5 @@
-import { ComponentProps } from "@/components/common/types/component-type";
-import { Size } from "@/components/common/types/size";
+import { ComponentProps } from "@/components/common/component-type";
+import { Size } from "@/components/common/size";
 import React from "react";
 import clsx from "clsx";
 
@@ -79,7 +79,7 @@ export const Logo: React.FC<LogoProps> = ({
           "font-bagel_fat_one",
           sizeClasses[sz].logo,
           "text-gradient-main select-none",
-          className
+          className,
         )}
       >
         Fatagram
@@ -88,7 +88,7 @@ export const Logo: React.FC<LogoProps> = ({
         <h2
           className={clsx(
             sizeClasses[sz].slogan,
-            "text-gradient-second font-light font-bagel_fat_one select-none whitespace-nowrap"
+            "text-gradient-second font-light font-bagel_fat_one select-none whitespace-nowrap",
           )}
         >
           Share your fun moments with the world!

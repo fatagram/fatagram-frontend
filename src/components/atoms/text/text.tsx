@@ -1,6 +1,6 @@
 import { ElementType, forwardRef } from "react";
-import { Size } from "../../common/types/size";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { Size } from "../../common/size";
+import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 
 // Define a mapping of text sizes

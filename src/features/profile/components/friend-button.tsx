@@ -1,12 +1,12 @@
 import { friendshipService } from "@/api/user/friendship.api";
 import { Button } from "@/components/atoms";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { ComponentProps } from "@/components/common/component-type";
 import Dropdown from "@/components/atoms/dropdown";
 import useClickOutside from "@/hooks/use-click-outside";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import clsx from "clsx";
 import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useAuth } from "@/contexts";
 
 interface FriendButtonProps extends ComponentProps {
   uid?: string;

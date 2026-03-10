@@ -8,7 +8,7 @@ import {
   onboardingInitialValues,
   onboardingValidationSchema,
 } from "../validation/onboarding.validation";
-import { OverlayLoading } from "@/components/organisms/overlay-loading";
+import { OverlayLoading } from "@/components/ui/overlay-loading";
 import { ErrorCodes } from "@/api/user/dto/onboarding.dto";
 import { useNavigate } from "react-router-dom";
 

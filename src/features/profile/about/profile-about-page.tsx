@@ -1,4 +1,4 @@
-import Card from "@/components/molecules/card";
+import Card from "@/components/ui/card";
 import ProfileAboutNavbar from "./components/profile-about-navbar";
 import { Outlet } from "react-router-dom";
 import clsx from "clsx";

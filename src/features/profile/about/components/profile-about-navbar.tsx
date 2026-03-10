@@ -1,7 +1,7 @@
-import Card from "@/components/molecules/card";
-import { SubNavbar } from "@/components/organisms";
+import Card from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
+import { SubNavbar } from "@/components/ui";
 
 type ProfileAboutNavbarProps = {
   className?: string;

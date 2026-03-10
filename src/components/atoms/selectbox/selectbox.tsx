@@ -1,9 +1,9 @@
 import React, { RefObject } from "react";
 import useClickOutside from "@/hooks/use-click-outside";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { ComponentProps } from "@/components/common/component-type";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
-import Transition, { AnimationLib } from "@/components/utils/transition";
+import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 
 export type OptionKey = string | number | boolean;
 

@@ -1,12 +1,12 @@
 import { useGetUserProfileDetails, useUpdateProfile } from "@/features/hooks/use-user-profile";
-import Card from "@/components/molecules/card";
+import Card from "@/components/ui/card";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import EditableTextArea from "@/features/settings/components/editable-textarea";
 import clsx from "clsx";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import { useProfilePage } from "../../hooks/use-profile-page";
 import { Text } from "@/components/atoms";
+import { useAuth } from "@/contexts";
 
 interface ProfileIntroductionProps {
   className?: string;

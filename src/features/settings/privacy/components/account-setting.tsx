@@ -3,12 +3,12 @@ import EditableField from "@/features/settings/components/editable-field";
 import { Skeleton, Text } from "@/components/atoms";
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import Card from "@/components/molecules/card";
+import Card from "@/components/ui/card";
 import useLanguage from "@/utils/i18n";
-import { useAuth } from "@/hooks/contexts/use-auth";
 import { ChangeUrlName } from "./change-url-name";
 import { ChangeNickname } from "./change-nickname";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
+import { useAuth } from "@/contexts";
 
 type AccountSettingProps = {
   className?: string;
@@ -35,7 +35,7 @@ const AccountSetting: React.FC<AccountSettingProps> = ({ className }) => {
         ) : (
           <EditableField
             title={t("settings:account.personalInfo.yourName")}
-            value={userProfile?.fullName}
+            value={userProfile?.infos.fullName}
             btnChildren={
               <Text>
                 <i className="fa-solid fa-pen mr-2" />{" "}

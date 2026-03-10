@@ -1,6 +1,6 @@
 import { Button, Text } from "@/components/atoms";
 import Dropdown from "@/components/atoms/dropdown";
-import { NavbarItem } from "@/components/organisms/navigation/navbar";
+import { NavbarItem } from "@/components/ui/navigation/navbar";
 import { useSize } from "@/hooks/use-size";
 import { debounce } from "@/utils/debounce";
 import clsx from "clsx";

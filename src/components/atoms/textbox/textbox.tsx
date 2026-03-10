@@ -1,8 +1,8 @@
 import React from "react";
 import clsx from "clsx";
 import styles from "./textbox.module.css";
-import { Size } from "../../common/types/size";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { Size } from "../../common/size";
+import { ComponentProps } from "@/components/common/component-type";
 
 const sizeClasses: Record<Size, { mainText: string; titleText: string }> = {
   xs: { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
@@ -52,12 +52,12 @@ export const Textbox = React.forwardRef<HTMLInputElement, TextboxProps>(
       type === "text"
         ? "text"
         : type === "password"
-        ? showPassword
-          ? "text"
-          : "password"
-        : type === "search"
-        ? "search"
-        : type;
+          ? showPassword
+            ? "text"
+            : "password"
+          : type === "search"
+            ? "search"
+            : type;
     return (
       <div className={clsx(wrapperClassName)}>
         <div className={clsx("relative")}>

@@ -1,6 +1,6 @@
 import React from "react";
 import styles from "./checkbox.module.css";
-import { ComponentProps } from "@/components/common/types/component-type";
+import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 
 // CheckboxProps interface
