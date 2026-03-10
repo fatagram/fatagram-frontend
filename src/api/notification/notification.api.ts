@@ -21,11 +21,7 @@ export class NotificationService {
   }
 
   public async getUnreadCount(): Promise<Result<number>> {
-    const result = await apiGet(`${PREFIX}/unread-count`);
-
-    console.log("getUnreadCount response:", result); // Debug log
-
-    return result;
+    return await apiGet(`${PREFIX}/unread-count`);
   }
 
   public async delete(notificationId: string): Promise<Result<any>> {

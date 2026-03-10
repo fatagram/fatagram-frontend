@@ -4,7 +4,7 @@ import { NavbarItem } from "@/components/organisms/navigation/navbar";
 import { useSize } from "@/hooks/use-size";
 import { debounce } from "@/utils/debounce";
 import clsx from "clsx";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProfilePage } from "../hooks/use-profile-page";
@@ -28,7 +28,9 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
 
   const [containerRef, containerSize] = useSize<HTMLDivElement>();
   const showMoreRef = useRef<HTMLButtonElement>(null);
+  const showMoreMeasureRef = useRef<HTMLButtonElement>(null);
   const itemRefs = useRef<HTMLDivElement[]>([]);
+  const allItemsWidth = useRef<number>(0);
 
   const [showDropdown, setShowDropdown] = useState<boolean>(false);
   const [visibleItems, setVisibleItems] = useState<NavbarItem[]>([]);
@@ -82,22 +84,32 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
     const handleResize = () => {
       if (containerSize.width === 0) return; // Check inside function instead
 
-      let total = showMoreRef.current?.offsetWidth ?? 0;
+      if (allItemsWidth.current === 0) {
+        allItemsWidth.current = navbarItems.reduce((total, item, index) => {
+          if (item.isOwnerOnly && !isOwner) return total;
+          const itemWidth = itemRefs.current[index]?.offsetWidth;
+          return total + itemWidth;
+        }, 0);
+      }
+
+      let total = 0;
       const newVisibleItems: NavbarItem[] = [];
       const newHiddenItems: NavbarItem[] = [];
+
+      if (allItemsWidth.current > containerSize.width) {
+        total += showMoreMeasureRef.current?.offsetWidth ?? 0;
+      }
 
       navbarItems.forEach((item, index) => {
         if (item.isOwnerOnly && !isOwner) return;
         const itemWidth = itemRefs.current[index]?.offsetWidth ?? 0;
-        if (total + itemWidth < containerSize.width + 32) {
+        if (total + itemWidth < containerSize.width) {
           newVisibleItems.push(item);
           total += itemWidth;
         } else {
           newHiddenItems.push(item);
         }
       });
-
-      // console.log(total, containerSize.width);
 
       setVisibleItems(newVisibleItems);
       setHiddenItems(newHiddenItems);
@@ -113,9 +125,37 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
     setIsChooseHiddenItem(foundInHidden);
   }, [location.pathname, hiddenItems]);
 
+  const ShowMoreButton: React.FC<{ ref: RefObject<HTMLButtonElement | null> }> = ({ ref }) => {
+    return (
+      <Button
+        variant="secondary"
+        className={clsx("relative bg-transparent hover:bg-[var(--main-bg-color)]")}
+        onClick={() => setShowDropdown(!showDropdown)}
+        ref={ref}
+      >
+        <Text
+          className={clsx(
+            "whitespace-nowrap",
+            isChooseHiddenItem ? "!text-single-main" : "text-[var(--text-color)]",
+          )}
+        >
+          More <i className="fa-solid fa-caret-down ml-1"></i>
+        </Text>
+        {isChooseHiddenItem && (
+          <div
+            className={clsx(
+              "absolute bg-primary-500 h-[2px] rounded-full",
+              "w-full bottom-0 left-0",
+            )}
+          />
+        )}
+      </Button>
+    );
+  };
+
   return (
     <div className={clsx("relative flex py-2", className)} ref={containerRef}>
-      <div className="absolute invisible">
+      <div className="absolute invisible flex">
         {navbarItems.map((item, index) => {
           if (item.isOwnerOnly && !isOwner) return null;
           return (
@@ -134,6 +174,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
             </div>
           );
         })}
+        <ShowMoreButton ref={showMoreMeasureRef} />
       </div>
       <div className="flex">
         {visibleItems.map((item) => (
@@ -146,31 +187,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
           />
         ))}
       </div>
-      {hiddenItems.length > 0 && (
-        <Button
-          variant="secondary"
-          className={clsx("relative bg-transparent hover:bg-[var(--main-bg-color)]")}
-          onClick={() => setShowDropdown(!showDropdown)}
-          ref={showMoreRef}
-        >
-          <Text
-            className={clsx(
-              "whitespace-nowrap",
-              isChooseHiddenItem ? "!text-single-main" : "text-[var(--text-color)]",
-            )}
-          >
-            More <i className="fa-solid fa-caret-down ml-1"></i>
-          </Text>
-          {isChooseHiddenItem && (
-            <div
-              className={clsx(
-                "absolute bg-primary-500 h-[2px] rounded-full",
-                "w-full bottom-0 left-0",
-              )}
-            />
-          )}
-        </Button>
-      )}
+      {hiddenItems.length > 0 && <ShowMoreButton ref={showMoreRef} />}
       {showDropdown && (
         <Dropdown
           className={clsx(
