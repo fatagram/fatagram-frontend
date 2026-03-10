@@ -79,7 +79,6 @@ const UserMenu: React.FC = () => {
           className={clsx(
             "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
             "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
-            "animate-dropdown-slide origin-top-right",
           )}
           ref={menuRef}
         >

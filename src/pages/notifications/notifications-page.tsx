@@ -1,6 +1,6 @@
 import NotificationMenu from "@/features/notifications/components/notification-menu/notification-menu";
 import { useNotificationUiState } from "@/features/notifications/hooks/use-notification-store";
-import React, { useEffect } from "react";
+import React, { useLayoutEffect } from "react";
 import clsx from "clsx";
 
 type NotificationsPageProps = {};
@@ -8,7 +8,7 @@ type NotificationsPageProps = {};
 const NotificationsPage: React.FC<NotificationsPageProps> = () => {
   const { setInNotificationPage, setShowNotification } = useNotificationUiState();
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setInNotificationPage(true);
     return () => {
       setInNotificationPage(false);
