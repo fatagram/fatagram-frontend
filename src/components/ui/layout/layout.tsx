@@ -10,11 +10,17 @@ interface LayoutHeaderProps {
 const LayoutHeader = forwardRef<HTMLHeadElement, LayoutHeaderProps>(
   ({ children, className }, ref) => {
     return (
-      <header ref={ref} className={clsx("fixed z-40 w-full", className)}>
+      <header
+        ref={ref}
+        className={clsx("fixed z-40 w-full", className)}
+        style={{
+          height: "var(--header-height)",
+        }}
+      >
         {children}
       </header>
     );
-  }
+  },
 );
 LayoutHeader.displayName = "Layout.Header";
 
@@ -24,15 +30,11 @@ interface LayoutMainProps {
   children?: React.ReactNode;
   className?: string;
 }
-const LayoutMain: React.FC<LayoutMainProps> = ({
-  children,
-  className,
-  style,
-}) => {
+const LayoutMain: React.FC<LayoutMainProps> = ({ children, className, style }) => {
   return (
-    <main className={clsx("relative h-full", className)} style={style}>
+    <div className={clsx("relative h-full", className)} style={style}>
       {children}
-    </main>
+    </div>
   );
 };
 
@@ -43,9 +45,7 @@ interface LayoutFooterProps {
 }
 const LayoutFooter: React.FC<LayoutFooterProps> = ({ children, className }) => {
   return (
-    <footer
-      className={clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className)}
-    >
+    <footer className={clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className)}>
       {children}
     </footer>
   );
@@ -66,12 +66,7 @@ interface LayoutComponent extends React.FC<LayoutProps> {
 
 const Layout: LayoutComponent = ({ children, className }) => {
   return (
-    <div
-      className={clsx(
-        "relative flex flex-col bg-bg-eighth min-h-screen",
-        className
-      )}
-    >
+    <div className={clsx("relative flex flex-col bg-bg-eighth min-h-screen", className)}>
       {children}
     </div>
   );

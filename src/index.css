@@ -6,6 +6,10 @@
 @tailwind components;
 @tailwind utilities;
 
+:root {
+  --header-height: 56px;
+}
+
 html {
   background-color: rgb(var(--bg-main));
 }
@@ -83,4 +87,3 @@ body {
 *::-webkit-scrollbar-thumb:hover {
   background-color: #888;
 }
-

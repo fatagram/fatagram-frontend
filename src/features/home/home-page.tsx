@@ -1,11 +1,8 @@
+import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
 import React from "react";
 
 const HomePage: React.FC = () => {
-  return (
-    <div>
-      <h1>Home Page</h1>
-    </div>
-  );
+  return <div className="h-full"></div>;
 };
 
 export default HomePage;

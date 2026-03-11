@@ -1,5 +1,4 @@
 import Layout from "@/components/ui/layout";
-import { useSize } from "@/hooks/use-size";
 import { useCallback, useEffect } from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { Logo } from "@/components/atoms/logo/logo";
@@ -17,7 +16,7 @@ const DefaultLayout = () => {
   const { openDialog, closeDialog } = useDialog();
   const navigate = useNavigate();
 
-  const [headerRef, headerSize] = useSize<HTMLHeadElement>();
+  // const [headerRef, headerSize] = useSize<HTMLHeadElement>();
 
   const items = [
     { icon: <i className="fa-solid fa-house"></i>, path: "/", isIndex: true },
@@ -56,7 +55,7 @@ const DefaultLayout = () => {
 
   return (
     <Layout>
-      <Layout.Header ref={headerRef}>
+      <Layout.Header>
         <Navbar
           isAuthenticated={isAuthenticated}
           items={items}
@@ -87,7 +86,12 @@ const DefaultLayout = () => {
           }
         />
       </Layout.Header>
-      <Layout.Main style={{ paddingTop: headerSize?.height }}>
+      <Layout.Main
+        className="flex flex-1"
+        style={{
+          paddingTop: "var(--header-height)",
+        }}
+      >
         <Outlet />
       </Layout.Main>
     </Layout>

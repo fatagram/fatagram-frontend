@@ -18,15 +18,13 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
       className={clsx(
         "flex flex-col gap-3",
         "bg-bg-main shadow-md rounded-b-2xl",
-        "overflow-hidden",
+        "overflow-y-auto",
         className,
       )}
     >
       {title && (
-        <div className="relative bg-bg-second mt-2">
-          {/* Subtle gradient overlay */}
-          <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-secondary-500/5 pointer-events-none" />
-          <Text sz="xl-1" weight="bold" className="relative pt-4 pb-4 px-6 text-gradient-main">
+        <div className="relative bg-bg-second mt-4 mb-2">
+          <Text sz="xl-1" weight="bold" className="relative px-6 text-gradient-main">
             {title}
           </Text>
         </div>
