@@ -24,7 +24,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ className, navbar,
       </aside>
 
       <Transition
-        animation={AnimationLib.SlideLeftToRight}
+        animation={AnimationLib.Opacity}
         show={isShowSidebar}
         className="fixed inset-0 z-20 lg:hidden"
         duration={300}
@@ -33,15 +33,19 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ className, navbar,
           className="absolute inset-0 bg-black opacity-50"
           onClick={() => setIsShowSidebar(false)}
         />
-        <aside
-          className="absolute left-0 w-[70%] max-w-[300px] overflow-y-auto bg-bg-main"
-          style={{
-            top: "var(--header-height, 0px)",
-            height: "calc(100vh - var(--header-height, 0px))",
-          }}
-        >
-          {navbar}
-        </aside>
+      </Transition>
+
+      <Transition
+        animation={AnimationLib.SlideSnappy}
+        show={isShowSidebar}
+        className="fixed z-30 lg:hidden"
+        style={{
+          top: "var(--header-height, 0px)",
+          height: "calc(100vh - var(--header-height, 0px))",
+        }}
+        duration={300}
+      >
+        <aside className="w-[70vw] max-w-[300px] h-full overflow-y-auto">{navbar}</aside>
       </Transition>
 
       <main className={clsx("flex-1")}>

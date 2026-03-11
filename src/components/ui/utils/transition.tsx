@@ -28,6 +28,16 @@ export const AnimationLib: Record<string, AnimationType> = {
     out: "animate-dropdown-slide-out",
     duration: 200,
   },
+  Opacity: {
+    in: "animate-opacity-in",
+    out: "animate-opacity-out",
+    duration: 300,
+  },
+  SlideSnappy: {
+    in: "animate-slide-in-right",
+    out: "animate-slide-out-left",
+    duration: 250,
+  },
   None: {
     in: "",
     out: "",
@@ -42,6 +52,7 @@ type TransitionProps = {
   timeout?: number;
   className?: string;
   duration?: number;
+  style?: React.CSSProperties;
 };
 
 export default function Transition({
@@ -50,6 +61,7 @@ export default function Transition({
   children,
   className = "",
   duration,
+  style,
 }: TransitionProps) {
   const [render, setRender] = useState<boolean>(show);
   const timeoutRef = useRef<NodeJS.Timeout | null>(null);
@@ -81,7 +93,7 @@ export default function Transition({
     <div
       className={clsx(className, show ? animation.in : animation.out)}
       onAnimationEnd={onAnimationEnd}
-      style={{ animationDuration: animDuration + "ms" }}
+      style={{ animationDuration: animDuration + "ms", ...style }}
     >
       {children}
     </div>

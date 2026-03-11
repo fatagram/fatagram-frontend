@@ -87,7 +87,6 @@ const DefaultLayout = () => {
         />
       </Layout.Header>
       <Layout.Main
-        className="flex flex-1"
         style={{
           paddingTop: "var(--header-height)",
         }}

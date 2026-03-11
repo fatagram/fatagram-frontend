@@ -17,7 +17,10 @@ const SettingPage: React.FC<SettingPageProps> = () => {
   }, [t]);
 
   return (
-    <SidebarLayout className="flex-1" navbar={<SettingsNavbar className="h-full !rounded-none" />}>
+    <SidebarLayout
+      className="flex-1"
+      navbar={<SettingsNavbar className="h-full lg:!rounded-none !rounded-r-xl" />}
+    >
       <div className={clsx("w-full max-w-[700px]")}>
         <Outlet />
       </div>
