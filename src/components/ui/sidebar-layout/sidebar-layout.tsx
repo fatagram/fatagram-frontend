@@ -14,7 +14,11 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ className, navbar,
   return (
     <div className={clsx("flex items-start", className)}>
       <aside
-        className="z-10 w-[50%] max-w-[300px] shrink-0 overflow-y-auto sticky hidden lg:block"
+        className={clsx(
+          "z-30 w-[70vw] max-w-[300px] shrink-0 overflow-y-auto",
+          "fixed lg:sticky transition-transform duration-300",
+          isShowSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+        )}
         style={{
           top: "var(--header-height, 0px)",
           height: "calc(100vh - var(--header-height, 0px))",
@@ -35,20 +39,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ className, navbar,
         />
       </Transition>
 
-      <Transition
-        animation={AnimationLib.SlideSnappy}
-        show={isShowSidebar}
-        className="fixed z-30 lg:hidden"
-        style={{
-          top: "var(--header-height, 0px)",
-          height: "calc(100vh - var(--header-height, 0px))",
-        }}
-        duration={300}
-      >
-        <aside className="w-[70vw] max-w-[300px] h-full overflow-y-auto">{navbar}</aside>
-      </Transition>
-
-      <main className={clsx("flex-1")}>
+      <main className={clsx("flex-1 lg:ml-0")}>
         <div className="w-full flex flex-col items-center">
           <button
             className="self-start ml-2 text-xl block lg:hidden"
