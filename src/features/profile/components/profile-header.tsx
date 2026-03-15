@@ -45,11 +45,11 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
 
       <div className="-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3">
         <ProfileAvatar />
-        <div className="flex flex-col gap-2 items-start flex-1 mb-3 ml-4">
+        <div className="flex flex-col gap-2 items-start flex-1 lg:mb-3 lg:ml-4">
           {isLoading || isFetching ? (
             <Skeleton sz="sm-3" className="w-56" />
           ) : (
-            <Text sz="xl-1" weight="bold" className="lg:text-left text-center break-words">
+            <Text sz="xl-1" weight="bold" className="text-center break-words w-full lg:w-auto">
               {userProfile?.fullName}
               {userProfile?.nickname && (
                 <Text sz="lg-3" weight="light" className="lg:text-left text-center lg:ml-2">
