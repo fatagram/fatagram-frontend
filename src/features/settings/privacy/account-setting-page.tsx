@@ -5,7 +5,7 @@ import clsx from "clsx";
 
 const AccountSettingPage: React.FC = () => {
   return (
-    <div className={clsx("flex justify-center w-full")}>
+    <div className={clsx("flex justify-center w-full m-1")}>
       <AccountSetting className={clsx("w-full")} />
       <Outlet />
     </div>

@@ -6,9 +6,15 @@ import Transition, { AnimationLib } from "../utils/transition";
 interface SidebarLayoutProps extends ComponentProps {
   navbar?: React.ReactNode;
   children: React.ReactNode;
+  title?: string;
 }
 
-export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ className, navbar, children }) => {
+export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
+  className,
+  navbar,
+  title,
+  children,
+}) => {
   const [isShowSidebar, setIsShowSidebar] = useState<boolean>(false);
 
   return (
@@ -42,10 +48,11 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({ className, navbar,
       <main className={clsx("flex-1 lg:ml-0")}>
         <div className="w-full flex flex-col items-center">
           <button
-            className="self-start ml-2 text-xl block lg:hidden"
+            className="self-start ml-3 my-3 text-2xl font-bold lg:hidden"
             onClick={() => setIsShowSidebar((prev) => !prev)}
           >
-            <i className="fa-solid fa-bars"></i>
+            <i className="fa-solid fa-bars mr-2" />
+            <span>{title}</span>
           </button>
           {children}
         </div>

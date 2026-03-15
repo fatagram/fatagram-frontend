@@ -19,6 +19,7 @@ const SettingPage: React.FC<SettingPageProps> = () => {
   return (
     <SidebarLayout
       className="flex-1"
+      title="Cài đặt"
       navbar={<SettingsNavbar className="h-full lg:!rounded-none !rounded-r-xl" />}
     >
       <div className={clsx("w-full max-w-[700px]")}>

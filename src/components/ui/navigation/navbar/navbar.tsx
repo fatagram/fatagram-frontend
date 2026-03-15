@@ -8,9 +8,10 @@ interface NavbarProps {
   options?: React.ReactNode;
   items?: { icon: React.ReactNode; path: string; isIndex: boolean }[];
   logo?: React.ReactNode;
+  style?: any;
 }
 
-export const Navbar: React.FC<NavbarProps> = ({ className, options, items, logo }) => {
+export const Navbar: React.FC<NavbarProps> = ({ className, options, items, logo, style }) => {
   const navItems = items || [];
 
   return (
@@ -20,6 +21,7 @@ export const Navbar: React.FC<NavbarProps> = ({ className, options, items, logo 
         "bg-bg-main p-[2px] shadow-md sm:px-8",
         className,
       )}
+      style={style}
     >
       {/* <div onClick={handleGoToHome} className="cursor-pointer items-center gap-2">
         <Logo hasSlogan={false} sz="sm-3" />

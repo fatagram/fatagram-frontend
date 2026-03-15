@@ -57,6 +57,9 @@ const DefaultLayout = () => {
     <Layout>
       <Layout.Header>
         <Navbar
+          style={{
+            height: "var(--header-height)",
+          }}
           isAuthenticated={isAuthenticated}
           items={items}
           logo={
