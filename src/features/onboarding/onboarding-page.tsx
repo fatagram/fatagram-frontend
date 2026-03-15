@@ -1,24 +1,8 @@
 import { Logo, Text } from "@/components/atoms";
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form";
 import clsx from "clsx";
-import { useNavigate } from "react-router-dom";
-import { useEffect } from "react";
-import LoadingPage from "../components/loading-page";
-import { useAuth } from "@/contexts";
 
 export default function OnboardingPage() {
-  const navigate = useNavigate();
-  const { isOnBoarding } = useAuth();
-  useEffect(() => {
-    if (isOnBoarding) {
-      navigate("/", { replace: true });
-    }
-  }, [isOnBoarding]);
-
-  if (isOnBoarding) {
-    return <LoadingPage />;
-  }
-
   return (
     <div className="min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-primary-500/10 via-bg-main to-primary-600/10 p-6">
       <div

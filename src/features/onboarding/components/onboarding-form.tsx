@@ -11,6 +11,7 @@ import {
 import { OverlayLoading } from "@/components/ui/overlay-loading";
 import { ErrorCodes } from "@/api/user/dto/onboarding.dto";
 import { useNavigate } from "react-router-dom";
+import { useOnboarding } from "@/features/hooks/use-user-profile";
 
 const genderOptions: Option[] = [
   { key: "male", value: "Nam" },
@@ -22,29 +23,35 @@ export const OnboardingForm: React.FC = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [errors, setErrors] = useState<Record<string, string>>({});
+  const { fetch: completeOnboarding } = useOnboarding();
 
   const formik = useFormik({
     initialValues: { ...onboardingInitialValues, gender: genderOptions[0].key },
     validationSchema: onboardingValidationSchema,
     onSubmit: async (values) => {
       setErrors({});
-      const result = await userProfileService.completeOnboarding({
-        firstName: values.firstName,
-        middleName: values.middleName,
-        lastName: values.lastName,
-        birthday: values.birthday,
-        gender: values.gender.toString(),
-      });
-
-      if (result.success) {
-        navigate("/");
-      } else {
-        const errorCode = result.error?.code;
-        if (errorCode && ErrorCodes[errorCode]) {
-          const errorInfo = ErrorCodes[errorCode];
-          setErrors({ [errorInfo.type]: errorInfo.message });
-        }
-      }
+      await completeOnboarding(
+        {
+          firstName: values.firstName,
+          middleName: values.middleName,
+          lastName: values.lastName,
+          birthday: values.birthday,
+          gender: values.gender.toString(),
+        },
+        {
+          onSuccess: () => {
+            navigate("/");
+          },
+          onError: (err) => {
+            console.error("Error completing onboarding:", err);
+            const errorCode = err?.code;
+            if (errorCode && ErrorCodes[errorCode]) {
+              const errorInfo = ErrorCodes[errorCode];
+              setErrors({ [errorInfo.type]: errorInfo.message });
+            }
+          },
+        },
+      );
     },
   });
 

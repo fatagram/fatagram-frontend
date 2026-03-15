@@ -27,6 +27,7 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto): Promise<Result<void>> {
+    console.log("Registering user: ", dto);
     return apiPost(`${PREFIX}/register`, {
       username: dto.username,
       password: dto.password,

@@ -8,6 +8,17 @@ const avatarQueryKey = (userId: string) => ["user", "avatar", userId];
 const backgroundQueryKey = (userId: string) => ["user", "background", userId];
 const profileDetailsQueryKey = (userId: string) => ["user", "profile", "details", userId];
 
+export const useOnboarding = () => {
+  const queryClient = useQueryClient();
+  return useResultFetcher(userProfileService.completeOnboarding, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["user", "profile"],
+      });
+    },
+  });
+};
+
 export const useGetUserProfile = (userId: string) => {
   return useSafeQueryResult({
     queryKey: profileQueryKey(userId),
