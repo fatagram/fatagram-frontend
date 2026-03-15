@@ -6,6 +6,7 @@ import {
 import NewFriendRequestCard from "./notification-items/new-friend-request";
 import CanceledFriendRequest from "./notification-items/canceled-friend-request";
 import BaseNotification from "./notification-items/base-notification";
+import { FriendRequestAccepted } from "./notification-items";
 
 // NotificationFactoryProps defines the props for the NotificationFactory component
 export type NotificationFactoryProps = {
@@ -23,7 +24,7 @@ const NotificationFactory: React.FC<NotificationFactoryProps> = ({
       return <NewFriendRequestCard notificationDto={notificationDto} onClick={onClick} />;
 
     case NotificationType.FriendRequestAccepted:
-      return <BaseNotification notificationDto={notificationDto} onClick={onClick} />;
+      return <FriendRequestAccepted notificationDto={notificationDto} onClick={onClick} />;
 
     case NotificationType.FriendRequestCanceled:
       return <CanceledFriendRequest notificationDto={notificationDto} onClick={onClick} />;
