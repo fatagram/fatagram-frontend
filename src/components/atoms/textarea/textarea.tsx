@@ -5,7 +5,9 @@ import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 
 const sizeClasses: Record<Size, string> = {
-  xs: "px-2 py-1 text-xs min-h-16",
+  "xs-1": "px-2 py-1 text-xs min-h-16",
+  "xs-2": "px-2 py-1 text-xs min-h-16",
+  "xs-3": "px-2 py-1 text-xs min-h-16",
   "sm-1": "px-3 py-1 text-[16px] min-h-24",
   "sm-2": "px-4 py-2 text-[13px] min-h-24",
   "sm-3": "px-5 py-2 text-[13px] min-h-24",

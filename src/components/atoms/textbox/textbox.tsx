@@ -5,7 +5,9 @@ import { Size } from "../../common/size";
 import { ComponentProps } from "@/components/common/component-type";
 
 const sizeClasses: Record<Size, { mainText: string; titleText: string }> = {
-  xs: { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
+  "xs-1": { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
+  "xs-2": { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
+  "xs-3": { mainText: "px-2 py-1 text-sm", titleText: "text-sm" },
   "sm-1": { mainText: "px-3 py-1 text-[13px] ", titleText: "text-sm" },
   "sm-2": { mainText: "px-4 py-2 text-[13px] ", titleText: "text-sm" },
   "sm-3": { mainText: "px-5 py-2 text-[13px] ", titleText: "text-sm" },

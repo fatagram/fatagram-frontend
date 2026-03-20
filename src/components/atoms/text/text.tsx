@@ -5,8 +5,10 @@ import clsx from "clsx";
 
 // Define a mapping of text sizes
 const textSizes: Record<Size, string> = {
-  xs: "text-xs",
-  "sm-1": "text-xs",
+  "xs-1": "text-xs",
+  "xs-2": "text-xs",
+  "xs-3": "text-xs",
+  "sm-1": "text-sm",
   "sm-2": "text-sm",
   "sm-3": "text-[15px]",
   "md-1": "text-md",

@@ -1,4 +1,3 @@
-import { StrictMode } from "react";
 // Don't import CSS in SSR - it's inlined by server.js
 // import "./index.css";
 import { renderToString } from "react-dom/server";
@@ -11,11 +10,9 @@ export function render(_url: string, context?: { isAuthenticated?: boolean; user
 
   try {
     const html = renderToString(
-      <StrictMode>
-        <StaticRouter location={url}>
-          <App authContext={context} />
-        </StaticRouter>
-      </StrictMode>,
+      <StaticRouter location={url}>
+        <App authContext={context} />
+      </StaticRouter>,
     );
 
     return html;

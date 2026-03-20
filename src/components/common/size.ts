@@ -1,5 +1,7 @@
 export type Size =
-  | "xs"
+  | "xs-1"
+  | "xs-2"
+  | "xs-3"
   | "sm-1"
   | "sm-2"
   | "sm-3"

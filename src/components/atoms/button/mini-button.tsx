@@ -5,28 +5,26 @@ import clsx from "clsx";
 
 // Define a mapping of button sizes
 const buttonSizes: Record<Size, string> = {
-  "xs-1": "px-2 py-1 text-xs",
-  "xs-2": "px-2 py-1 text-xs",
-  "xs-3": "px-2 py-1 text-xs",
-  "sm-1": "px-4 py-2 text-sm ",
-  "sm-2": "px-5 py-2 text-sm ",
-  "sm-3": "px-6 py-2 text-sm ",
-  "md-1": "px-6 py-3 text-base ",
-  "md-2": "px-8 py-3 text-base ",
-  "md-3": "px-10 py-3 text-base ",
-  "lg-1": "px-8 py-4 text-base ",
-  "lg-2": "px-10 py-4 text-base ",
-  "lg-3": "px-12 py-4 text-base ",
-  "xl-1": "px-10 py-5 text-xl ",
-  "xl-2": "px-12 py-6 text-2xl ",
-  "xl-3": "px-14 py-7 text-3xl ",
+  "xs-1": "w-[24px] h-[24px] px-2 py-1 text-xs",
+  "xs-2": "w-[28px] h-[28px] px-2 py-2 text-xs",
+  "xs-3": "w-[32px] h-[32px] px-2 py-2 text-sm",
+  "sm-1": "w-[36px] h-[36px] px-4 py-4 text-sm ",
+  "sm-2": "w-[40px] h-[40px] px-5 py-5 text-sm ",
+  "sm-3": "w-[44px] h-[44px] px-6 py-6 text-sm ",
+  "md-1": "w-[48px] h-[48px] px-6 py-6 text-base ",
+  "md-2": "w-[56px] h-[56px] px-8 py-8 text-base ",
+  "md-3": "w-[64px] h-[64px] px-10 py-10 text-base ",
+  "lg-1": "w-[56px] h-[56px] px-8 py-8 text-base ",
+  "lg-2": "w-[64px] h-[64px] px-10 py-10 text-base ",
+  "lg-3": "w-[72px] h-[72px] px-12 py-12 text-base ",
+  "xl-1": "w-[64px] h-[64px] px-10 py-10 text-xl ",
+  "xl-2": "w-[72px] h-[72px] px-12 py-12 text-2xl ",
+  "xl-3": "w-[80px] h-[80px] px-14 py-14 text-3xl ",
 };
 
 const buttonVariants = {
-  primary: "bg-gradient-main text-white hover:bg-gradient-main-move",
+  primary: "text-white hover:bg-gray-700/30",
   secondary: "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70",
-  third: "bg-bg-third transition-all duration-200 ease text-text-main hover:bg-bg-third/70",
-  fourth: "bg-bg-fourth transition-all duration-200 ease text-text-main hover:bg-bg-fourth/70",
 };
 
 type Variant = keyof typeof buttonVariants;
@@ -39,7 +37,7 @@ interface ButtonProps extends ComponentProps<HTMLButtonElement> {
 // Button component
 // This component is a button component that can be used in the application.
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
+const MiniButton = forwardRef<HTMLButtonElement, ButtonProps>(
   (
     { onClick, variant = "primary", sz = "lg-1", className, children, disabled = false, ...props },
     ref,
@@ -51,7 +49,7 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         onClick={onClick}
         className={clsx(
           buttonSizes[sz],
-          "font-normal rounded-xl select-none",
+          "font-normal rounded-full select-none flex items-center justify-center transition-all duration-300 ease-out",
           {
             "bg-bg-disabled text-text-fourth": disabled,
             [buttonVariants[variant]]: !disabled,
@@ -68,5 +66,5 @@ const Button = forwardRef<HTMLButtonElement, ButtonProps>(
   },
 );
 
-Button.displayName = "Button";
-export { Button };
+MiniButton.displayName = "MiniButton";
+export { MiniButton };

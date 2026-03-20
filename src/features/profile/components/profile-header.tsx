@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback } from "react";
 import ProfileBackground from "./profile-background";
 import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
@@ -10,6 +10,8 @@ import { Button, Text, Skeleton } from "@/components/atoms";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useGetNumberOfFriends } from "@/features/hooks/use-friend";
 import { useAuth } from "@/contexts";
+import { useGetConversationWith } from "@/features/hooks/use-conversation";
+import { useChatStore } from "@/features/hooks/use-chat-store";
 
 export type ProfileHeaderProps = {
   className?: string;
@@ -33,9 +35,32 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
 
   const { data, isLoading, isFetching } = useGetUserProfile(targetId);
   const userProfile = data?.infos;
+  const { openChat, replaceChat } = useChatStore();
 
   const { data: numberOfFriends, isFetching: numberOfFriendsFetching } =
     useGetNumberOfFriends(targetId);
+
+  const handleConversationSuccess = useCallback(
+    (data: any) => {
+      replaceChat(targetId, data.id);
+    },
+    [targetId, replaceChat],
+  );
+
+  const { data: conversationData, refetch: refetchConversation } = useGetConversationWith(
+    targetId,
+    {
+      onSuccess: handleConversationSuccess,
+    },
+  );
+
+  const handleMessageClick = async () => {
+    if (!targetId) return;
+    if (!conversationData) {
+      openChat(targetId, { type: "temp", targetId: targetId });
+      await refetchConversation();
+    }
+  };
 
   return (
     <div className={clsx("relative w-full flex flex-col items-center", className)}>
@@ -90,7 +115,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
                 )}
 
                 {!isOwner && isAuthenticated && (
-                  <Button sz="sm-1" variant="secondary">
+                  <Button sz="sm-1" variant="secondary" onClick={handleMessageClick}>
                     <i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}
                   </Button>
                 )}

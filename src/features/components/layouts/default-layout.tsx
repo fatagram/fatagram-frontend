@@ -10,6 +10,7 @@ import { LoginForm } from "@/features/auth/login/components/login-form";
 import { RegisterForm } from "@/features/auth/register/components/register-form";
 import { Navbar } from "@/components/ui";
 import UserMenu from "../user-menu";
+import { ChatLayer } from "@/features/chat/chat-layer";
 
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
@@ -95,6 +96,9 @@ const DefaultLayout = () => {
         }}
       >
         <Outlet />
+        <div className="fixed inset-0 pointer-events-none z-50">
+          <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
+        </div>
       </Layout.Main>
     </Layout>
   );

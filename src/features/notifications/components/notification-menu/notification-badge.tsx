@@ -15,8 +15,6 @@ const NotificationBadge: React.FC<NotificationButtonProps> = ({}) => {
   const { isShowNotification, isInNotificationPage, setShowNotification } =
     useNotificationUiState();
 
-  console.debug("NotificationBadge render - isShowNotification:", isShowNotification, "isInNotificationPage:", isInNotificationPage, "unreadCount:", unreadCount);
-
   // Refs for the menu and button
   const menuRef = React.useRef<HTMLDivElement>(null);
   const btnRef = React.useRef<HTMLDivElement>(null);

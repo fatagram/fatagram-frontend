@@ -1,10 +1,10 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, useContext, forwardRef, useRef, useLayoutEffect, StrictMode } from "react";
 import { renderToString } from "react-dom/server";
 import { useNavigate, Link as Link$1, useResolvedPath, useMatch, Outlet, useParams, useLocation, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
 import i18next from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
+import React, { useState, useCallback, createContext, useReducer, useEffect, useMemo, useContext, forwardRef, useRef, useLayoutEffect } from "react";
 import { useQueryClient, useInfiniteQuery, useQuery, QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import clsx, { clsx as clsx$1 } from "clsx";
 import { useNavigate as useNavigate$1 } from "react-router";
@@ -12,6 +12,7 @@ import * as signalR from "@microsoft/signalr";
 import { ArrowLeft } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { create } from "zustand";
 const login$1 = { "title": "Login", "username": "Username", "password": "Password", "rememberMe": "Remember me", "forgotPassword": "Forgot password?", "loginButton": "Login", "dontHaveAccount": "Don't have an account?", "registerButton": "Register", "errors": { "usernameOrEmail": { "required": "Username or email is required", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)", "notFound": "Username or email not found" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)", "incorrect": "Incorrect password" }, "account": { "locked": "Account is locked", "disabled": "Account is disabled" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const register$2 = { "title": "Register", "username": "Username", "password": "Password", "confirmPassword": "Confirm password", "email": "Email", "phoneNumber": "Phone number", "registerButton": "Register", "backToLogin": "Back to login", "agree": "I agree to the", "termsOfService": "Terms of Service", "and": " and ", "privacyPolicy": "Privacy Policy", "loginButton": "Login", "errors": { "username": { "required": "Username is required", "alreadyExists": "Username already exists", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)" }, "email": { "required": "Email is required", "alreadyExists": "Email already exists", "invalidFormat": "Invalid email format" }, "phoneNumber": { "alreadyExists": "Phone number already exists", "invalidFormat": "Invalid phone number format" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)" }, "confirmPassword": { "required": "Please confirm your password", "doNotMatch": "Passwords do not match" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const auth$1 = {
@@ -374,11 +375,11 @@ const apiPatchFormData = async (url, formData, params) => {
     return handleApiError(error);
   }
 };
-const PREFIX$4 = buildApiPath("/auth");
+const PREFIX$6 = buildApiPath("/auth");
 class AuthService {
   // login method
   async login(dto) {
-    return apiPost(`${PREFIX$4}/login`, {
+    return apiPost(`${PREFIX$6}/login`, {
       usernameOrEmail: dto.usernameOrEmail,
       password: dto.password,
       isRememberMe: dto.isRememberMe
@@ -386,14 +387,15 @@ class AuthService {
   }
   async loginWithGoogle(code) {
     console.log("Login with Google, code: ", code);
-    return apiPost(`${PREFIX$4}/oauth/google/callback`, { code });
+    return apiPost(`${PREFIX$6}/oauth/google/callback`, { code });
   }
   // logout method
   async logout() {
-    return apiPost(`${PREFIX$4}/logout`);
+    return apiPost(`${PREFIX$6}/logout`);
   }
   async register(dto) {
-    return apiPost(`${PREFIX$4}/register`, {
+    console.log("Registering user: ", dto);
+    return apiPost(`${PREFIX$6}/register`, {
       username: dto.username,
       password: dto.password,
       email: dto.email,
@@ -404,60 +406,60 @@ class AuthService {
   // This method is responsible for sending a ping request to the server.
   // The method returns a promise of void.
   async ping() {
-    return apiGet(`${PREFIX$4}/ping`);
+    return apiGet(`${PREFIX$6}/ping`);
   }
 }
 const authService = new AuthService();
-const PREFIX$3 = buildApiPath("/userprofile");
+const PREFIX$5 = buildApiPath("/userprofile");
 class UserProfileService {
   // Check if user exists by id or urlName
   async checkUserExist(key) {
-    return await apiGet(`${PREFIX$3}/exist?key=${key}`);
+    return await apiGet(`${PREFIX$5}/exist?key=${key}`);
   }
   async getProfile(target, fields) {
-    return await apiGet(`${PREFIX$3}/${target}`, { fields });
+    return await apiGet(`${PREFIX$5}/${target}`, { fields });
   }
   async getUserId(target) {
-    return await apiGet(`${PREFIX$3}/${target}`, { fields: "id" });
+    return await apiGet(`${PREFIX$5}/${target}`, { fields: "id" });
   }
   // Get current user profile
   async getMe() {
-    return await apiGet(`${PREFIX$3}/me`);
+    return await apiGet(`${PREFIX$5}/me`);
   }
   // Upload avatar
   async uploadAvatar(file) {
     const formData = new FormData();
     formData.append("file", file);
-    return await apiPatchFormData(`${PREFIX$3}/avatar`, formData);
+    return await apiPatchFormData(`${PREFIX$5}/avatar`, formData);
   }
   // Upload background image
   async uploadBackground(file) {
     const formData = new FormData();
     formData.append("file", file);
-    return await apiPatchFormData(`${PREFIX$3}/background`, formData);
+    return await apiPatchFormData(`${PREFIX$5}/background`, formData);
   }
   // Update simple profile fields such as bio, description, etc.
   async updateProfile(data) {
-    return apiPut(`${PREFIX$3}`, data);
+    return apiPut(`${PREFIX$5}`, data);
   }
   // Update user's URL name
   async updateUrlName(changeUrlNameDto) {
-    return apiPatch(`${PREFIX$3}/urlName`, changeUrlNameDto);
+    return apiPatch(`${PREFIX$5}/urlName`, changeUrlNameDto);
   }
   // Complete onboarding
   async completeOnboarding(onboardingDto) {
-    return apiPost(`${PREFIX$3}/onboarding`, onboardingDto);
+    return apiPost(`${PREFIX$5}/onboarding`, onboardingDto);
   }
   // Update user's name
   async updateName(changeNameDto) {
-    return apiPatch(`${PREFIX$3}/name`, changeNameDto);
+    return apiPatch(`${PREFIX$5}/name`, changeNameDto);
   }
   async updateNickname(changeNicknameDto) {
-    return apiPatch(`${PREFIX$3}/nickname`, changeNicknameDto);
+    return apiPatch(`${PREFIX$5}/nickname`, changeNicknameDto);
   }
   // Get onboarding default data
   async getOnboardingDefaults() {
-    return apiGet(`${PREFIX$3}/onboarding/defaults`);
+    return apiGet(`${PREFIX$5}/onboarding/defaults`);
   }
 }
 const userProfileService = new UserProfileService();
@@ -473,8 +475,23 @@ function useResultFetcher(fn, options) {
   const [isFetching, setIsFetching] = useState(false);
   const fetch = useCallback(
     async (...args) => {
-      const params = args.length === 2 ? args[0] : void 0;
-      const opts = args.length === 2 ? args[1] : args[0];
+      let params;
+      let opts;
+      if (fn.length === 0) {
+        params = void 0;
+        if (args.length >= 1) {
+          opts = args[0];
+        }
+      } else {
+        if (args.length === 0) {
+          params = void 0;
+        } else if (args.length === 1) {
+          params = args[0];
+        } else {
+          params = args[0];
+          opts = args[1];
+        }
+      }
       setIsFetching(true);
       setError(void 0);
       setErrors(void 0);
@@ -680,8 +697,10 @@ function useAuth() {
   }
   return context;
 }
-const buttonSizes = {
-  xs: "px-2 py-1 text-xs",
+const buttonSizes$1 = {
+  "xs-1": "px-2 py-1 text-xs",
+  "xs-2": "px-2 py-1 text-xs",
+  "xs-3": "px-2 py-1 text-xs",
   "sm-1": "px-4 py-2 text-sm ",
   "sm-2": "px-5 py-2 text-sm ",
   "sm-3": "px-6 py-2 text-sm ",
@@ -695,7 +714,7 @@ const buttonSizes = {
   "xl-2": "px-12 py-6 text-2xl ",
   "xl-3": "px-14 py-7 text-3xl "
 };
-const buttonVariants = {
+const buttonVariants$1 = {
   primary: "bg-gradient-main text-white hover:bg-gradient-main-move",
   secondary: "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70",
   third: "bg-bg-third transition-all duration-200 ease text-text-main hover:bg-bg-third/70",
@@ -710,8 +729,55 @@ const Button = forwardRef(
         disabled,
         onClick,
         className: clsx(
-          buttonSizes[sz],
+          buttonSizes$1[sz],
           "font-normal rounded-xl select-none",
+          {
+            "bg-bg-disabled text-text-fourth": disabled,
+            [buttonVariants$1[variant]]: !disabled,
+            "active:scale-[0.98] active:opacity-80": !disabled
+          },
+          className
+        ),
+        ref,
+        ...props,
+        children
+      }
+    );
+  }
+);
+Button.displayName = "Button";
+const buttonSizes = {
+  "xs-1": "w-[24px] h-[24px] px-2 py-1 text-xs",
+  "xs-2": "w-[28px] h-[28px] px-2 py-2 text-xs",
+  "xs-3": "w-[32px] h-[32px] px-2 py-2 text-sm",
+  "sm-1": "w-[36px] h-[36px] px-4 py-4 text-sm ",
+  "sm-2": "w-[40px] h-[40px] px-5 py-5 text-sm ",
+  "sm-3": "w-[44px] h-[44px] px-6 py-6 text-sm ",
+  "md-1": "w-[48px] h-[48px] px-6 py-6 text-base ",
+  "md-2": "w-[56px] h-[56px] px-8 py-8 text-base ",
+  "md-3": "w-[64px] h-[64px] px-10 py-10 text-base ",
+  "lg-1": "w-[56px] h-[56px] px-8 py-8 text-base ",
+  "lg-2": "w-[64px] h-[64px] px-10 py-10 text-base ",
+  "lg-3": "w-[72px] h-[72px] px-12 py-12 text-base ",
+  "xl-1": "w-[64px] h-[64px] px-10 py-10 text-xl ",
+  "xl-2": "w-[72px] h-[72px] px-12 py-12 text-2xl ",
+  "xl-3": "w-[80px] h-[80px] px-14 py-14 text-3xl "
+};
+const buttonVariants = {
+  primary: "text-white hover:bg-gray-700/30",
+  secondary: "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70"
+};
+const MiniButton = forwardRef(
+  ({ onClick, variant = "primary", sz = "lg-1", className, children, disabled = false, ...props }, ref) => {
+    return /* @__PURE__ */ jsx(
+      "button",
+      {
+        type: "button",
+        disabled,
+        onClick,
+        className: clsx(
+          buttonSizes[sz],
+          "font-normal rounded-full select-none flex items-center justify-center transition-all duration-300 ease-out",
           {
             "bg-bg-disabled text-text-fourth": disabled,
             [buttonVariants[variant]]: !disabled,
@@ -726,11 +792,13 @@ const Button = forwardRef(
     );
   }
 );
-Button.displayName = "Button";
-const emptyAvatar = "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAOEAAADhCAMAAAAJbSJIAAAAYFBMVEX///9+fX12dHTd3d17enp4d3d0c3Pp6emIh4f4+Pj8/PyLiorDw8Px8fF/fn6WlZWysrLQ0NDJycnj4+Ogn5+rqqrt7e2amZnY19e+vb20s7OsrKzPzs6mpaWKiIienZ1v5QZqAAAGLUlEQVR4nO2d2XbqMAxFG2M7zkwSZsjl///yOowJBMggYbVL+6l9KMunljV4ED8/DMMwDMMwDMMwDMMwDMMwDMMwDMMwDDOKIEiCwPUgcPA3cZVFxqRpakyUVfHGdz0kQJJiIZVQUkrvjP2p/n1RJK6HBkESR1pdpbWRSkfxyvUAJ5Kv5Qt5V5Fynbse5AQK81beVaQpXA90JAdPfNZ30ii836ixzHQveWdEVroe8EDCfQ/7bNvq8lfFyTJVg/TVqPQXTWPccwE+TKOIXQ+8L4shK7CJWLgeei/CbLiFXlFZ6Hr4n0nMGAu9Ig35RC5Jpwi0ElPiEoNomkArMaIdNbKpAq3EzLWId0xwMncUYYlzASDQBo25ayGv2IyNg4/ojWsp3SQpkEDPI+pQ19O9zBW5di2mCzAbraFopyGcjdak9NK3OUSguKPI+dMEVqCVSM3Z7MEV7l1LarOC86NXJK2d1B30FNpJ3LkW1SQA11dDqcjIYRLSNoLSZjhgOnOHUmITQKYzdzQdMy3g/UyNorPXv8AwUmumZDYXgVPSO2SS0xLHSK2ZUtnnj9EUUtnmX+IsQ7sQl66lXQDYQnyhkMiuW2CQBHqeoRERE6wptJNIo0j0cTKaGk3jWtEMUeHMtbgTG4zC4oygseWWY4VDGxBpFFBIefdJIY3c+4Co8OBa3Im/b6V/39P8/WixQlRIY880QRPoeTSytnDy/YtXyIhIkY+yl3hSSGU/cY+mkMrpDFrIJxLwbfmENoc0iicLVpFvXAu7USHtCFeuhd0AvYZxh9KFDJzMVLiW1QDFTAkZKVLyTSTtvoCQuMnItagWCEcXZA4tzgTwB2wpjf3uG+CTSGwKEU5JyZyO3ohhYyLFF0Kg7pSYIz1TQk6ioHK+3QLwhim926Un4PZryOzPPJJA2amgscXWQQ6Tnmoae/mdbCFmUWxdy3jHfrpEQWWD7QXVVIeqKFWFnVTTZlGQF/jzs5wiUVC5BfWW3XiPqkndXn9NPrCfwhVJ5Mi3B+W/Mf5G/SOZjDbI7wMM58MtVc/vqVpJcTL9TDRP3Tdy2DQq2fxjITIyRxYXgqW2a083rr+EuwEaldw1cu3CGoDUtHqd5JdeJq2Ea1WJfhqVqJrn9ZfUT6V0TDVZ30Kgal2v95f6s0ally2LXNz+RKyJ1BiFbAQHZVrDDbZGvYkdUimzbVmjbxr/Eykp3PoKK/0w6IdRlfPIinxWKa28aP4QIIqHf4eunNfCpXmywyc/GPpFFWld67yglNZRVfgPw7f++MmGjeMgGXeZoOzYZgkD/7DdV8csyo7Vfnvwg+fJmXd/mFNL3b8I7MrLh1pXmHsvvJJ2VzAG69eeUptiiMawMK9LEnV0FBqT5yXYtC5h4r4DC2LztneWctN5aOV9qCCkkos+J/GbxfveivVHeQ6u8JUdAeB5ZNrbzd7NZDDbebrPB8mvu9RZH4E1SnvrbZk8L8owKbdrr0fSc5H45TPvckiRa8NfarJ9vJmV/ipY+eVsE+8zk77Ldjo+5Kuz6A+vcOsw36CvCTRQXyyo/E9OBgXpfU3itKZzEyR+LWig3Qn+KPFL56YLvPcVn1Bfed0Ncvoylm+c2mzczWCNQr+viPhgtB/oz0qdeZmbQmRvA9zvagy4nXlm7gXidlrAex0zBMybGgjdoMaAZ6eIz9KHgfaIHa07xFCwukkcXCYzbQTKc6HAUUXRhURpmLGl4WbOKIT81Hm61gYheSMSKa7AR4yAjps5I6BXIrEphJ9EnNaP04CdRLR2XuOBfZBBI+VuA5uAIzaGGA/o2za0F/dTgHytD3ZFHRbAC+8E/UwNoK8h6Gdq4DalfJpGas0UqhImVVU0AaswyNT2j0DV+gj91qEA6ttOaPfiEaDdDKSuFxDANCUI8dqTTsdA5KaIrbymA9IMDKVnPhQgvffJVfdNQCp9oinbGZDEjfIytAtxukDSjgbE1SB2toQAoDsm0drwCkCNSDijqQHIao7EFR4nK0T7WgAYAL5cAKkXGxQQPd1AvlsUC5DvLA0iuvFCAH217jZVQgtqaKFSuJNgf0YRag9pGYZhGIZhGIZhGIZhGIZhGIZhGIZhGIZh/j7/AaG2YuXGH+4jAAAAAElFTkSuQmCC";
+MiniButton.displayName = "MiniButton";
+const emptyAvatar = "/images/empty_avatar.png";
 const sizeClasses$4 = {
   // Mini sizes
-  xs: "w-[24px]",
+  "xs-1": "w-[24px]",
+  "xs-2": "w-[32px]",
+  "xs-3": "w-[40px]",
   // Small sizes
   "sm-1": "w-[48px]",
   "sm-2": "w-[56px]",
@@ -1043,6 +1111,11 @@ const AnimationLib = {
     out: "animate-dropdown-slide-out",
     duration: 200
   },
+  Opacity: {
+    in: "animate-opacity-in",
+    out: "animate-opacity-out",
+    duration: 300
+  },
   None: {
     in: "",
     out: "",
@@ -1054,7 +1127,8 @@ function Transition({
   show,
   children,
   className = "",
-  duration
+  duration,
+  style: style2
 }) {
   const [render2, setRender] = useState(show);
   const timeoutRef = useRef(null);
@@ -1082,7 +1156,7 @@ function Transition({
     {
       className: clsx(className, show ? animation.in : animation.out),
       onAnimationEnd,
-      style: { animationDuration: animDuration + "ms" },
+      style: { animationDuration: animDuration + "ms", ...style2 },
       children
     }
   );
@@ -1193,7 +1267,9 @@ const styles$2 = {
   "primary-textbox-wrong": "_primary-textbox-wrong_13edf_25"
 };
 const sizeClasses$1 = {
-  xs: { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
+  "xs-1": { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
+  "xs-2": { mainText: "px-2 py-1 text-xs", titleText: "text-xs" },
+  "xs-3": { mainText: "px-2 py-1 text-sm", titleText: "text-sm" },
   "sm-1": { mainText: "px-3 py-1 text-[13px] ", titleText: "text-sm" },
   "sm-2": { mainText: "px-4 py-2 text-[13px] ", titleText: "text-sm" },
   "sm-3": { mainText: "px-5 py-2 text-[13px] ", titleText: "text-sm" },
@@ -1281,7 +1357,9 @@ const styles$1 = {
   "my-textarea-wrong": "_my-textarea-wrong_jp58s_30"
 };
 const sizeClasses = {
-  xs: "px-2 py-1 text-xs min-h-16",
+  "xs-1": "px-2 py-1 text-xs min-h-16",
+  "xs-2": "px-2 py-1 text-xs min-h-16",
+  "xs-3": "px-2 py-1 text-xs min-h-16",
   "sm-1": "px-3 py-1 text-[16px] min-h-24",
   "sm-2": "px-4 py-2 text-[13px] min-h-24",
   "sm-3": "px-5 py-2 text-[13px] min-h-24",
@@ -1334,8 +1412,10 @@ const TextArea = forwardRef(
 );
 TextArea.displayName = "TextArea";
 const textSizes = {
-  xs: "text-xs",
-  "sm-1": "text-xs",
+  "xs-1": "text-xs",
+  "xs-2": "text-xs",
+  "xs-3": "text-xs",
+  "sm-1": "text-sm",
   "sm-2": "text-sm",
   "sm-3": "text-[15px]",
   "md-1": "text-md",
@@ -1531,34 +1611,34 @@ const NotificationDefault = {
   isRead: true,
   createdAt: (/* @__PURE__ */ new Date()).toISOString()
 };
-const PREFIX$2 = buildApiPath("/friendship");
+const PREFIX$4 = buildApiPath("/friendship");
 class FriendshipService {
   async GetFriendshipStatus(targetId) {
-    return apiGet(`${PREFIX$2}/status/${targetId}`);
+    return apiGet(`${PREFIX$4}/status/${targetId}`);
   }
   async SendAddFriendRequest(receiverId) {
-    return apiPost(`${PREFIX$2}/add/${receiverId}`);
+    return apiPost(`${PREFIX$4}/add/${receiverId}`);
   }
   async CancelAddFriendRequest(senderId) {
-    return apiDelete(`${PREFIX$2}/cancel/${senderId}`);
+    return apiDelete(`${PREFIX$4}/cancel/${senderId}`);
   }
   async AcceptAddFriendRequest(senderId) {
-    return apiPost(`${PREFIX$2}/accept/${senderId}`);
+    return apiPost(`${PREFIX$4}/accept/${senderId}`);
   }
   async DeclineAddFriendRequest(requesterId) {
-    return apiDelete(`${PREFIX$2}/decline/${requesterId}`);
+    return apiDelete(`${PREFIX$4}/decline/${requesterId}`);
   }
   async Unfriend(friendId) {
-    return apiDelete(`${PREFIX$2}/unfriend/${friendId}`);
+    return apiDelete(`${PREFIX$4}/unfriend/${friendId}`);
   }
   async GetNumberOfFriends(targetId) {
-    return apiGet(`${PREFIX$2}/count/${targetId}`);
+    return apiGet(`${PREFIX$4}/count/${targetId}`);
   }
   async GetFriendRequests(query) {
-    return await apiGet(`${PREFIX$2}/requests`, query);
+    return await apiGet(`${PREFIX$4}/requests`, query);
   }
   async GetFriends(userId, page, pageSize, keyword) {
-    return await apiGet(`${PREFIX$2}/list/${userId}`, { params: { page, pageSize, keyword } });
+    return await apiGet(`${PREFIX$4}/list/${userId}`, { params: { page, pageSize, keyword } });
   }
 }
 const friendshipService = new FriendshipService();
@@ -1707,6 +1787,26 @@ const CanceledFriendRequest = ({
 }) => {
   return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick });
 };
+const FriendRequestAccepted = ({
+  notificationDto,
+  onClick
+}) => {
+  const navigate = useNavigate();
+  const handleClick = useCallback(() => {
+    onClick?.();
+    navigate(notificationDto.actorId);
+  }, [navigate, onClick, notificationDto.actorId]);
+  return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick: handleClick });
+};
+const NotificationSkeleton = () => {
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center"), children: [
+    /* @__PURE__ */ jsx(Skeleton, { sz: "md-2", variant: "circle" }),
+    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col w-full flex-1 gap-2 ml-2"), children: [
+      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-full"), sz: "sm-2" }),
+      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-[50%]"), sz: "sm-2" })
+    ] })
+  ] });
+};
 const NotificationFactory = ({
   notificationDto,
   onClick = () => {
@@ -1716,7 +1816,7 @@ const NotificationFactory = ({
     case NotificationType.NewFriendRequest:
       return /* @__PURE__ */ jsx(NewFriendRequest, { notificationDto, onClick });
     case NotificationType.FriendRequestAccepted:
-      return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick });
+      return /* @__PURE__ */ jsx(FriendRequestAccepted, { notificationDto, onClick });
     case NotificationType.FriendRequestCanceled:
       return /* @__PURE__ */ jsx(CanceledFriendRequest, { notificationDto, onClick });
     case NotificationType.System:
@@ -2098,71 +2198,92 @@ function useNotificationHub(onReceiveNotification) {
   }, [isAuthenticated]);
 }
 function useSafeQueryResult(params) {
-  const wrappedOptions = {
-    ...params,
+  const { fn, options, ...queryOptions } = params;
+  const callbacksCalledRef = useRef(false);
+  const prevStatusRef = useRef(void 0);
+  const query = useQuery({
+    ...queryOptions,
+    retry: 0,
     queryFn: async () => {
-      if (typeof params.fn !== "function") {
-        throw new Error("queryFn is not a function");
+      const result = await fn();
+      if (!result.success) {
+        throw result;
       }
-      var result = await params.fn();
-      if (result.success) {
-        params.options?.onSuccess?.(result.data);
-        return result.data;
-      } else {
-        const error = new Error(result.error?.toString() || "Query failed");
-        params.options?.onError?.(error, result.errors);
-        throw error;
-      }
+      return result.data;
     }
-  };
-  return useQuery(wrappedOptions);
+  });
+  useEffect(() => {
+    if (prevStatusRef.current === query.status) {
+      return;
+    }
+    prevStatusRef.current = query.status;
+    if (query.isSuccess && query.data) {
+      if (!callbacksCalledRef.current) {
+        options?.onSuccess?.(query.data);
+        callbacksCalledRef.current = true;
+      }
+    } else if (query.isError) {
+      if (!callbacksCalledRef.current) {
+        const errorResult = query.error;
+        options?.onError?.(errorResult.error, errorResult.errors);
+        callbacksCalledRef.current = true;
+      }
+    } else if (query.isPending) {
+      callbacksCalledRef.current = false;
+    }
+  }, [query.status]);
+  return query;
 }
-function useSafeInfiniteQueryResult({
-  fn,
-  options,
-  ...params
-}) {
-  return useInfiniteQuery({
-    ...params,
-    queryFn: async (context) => {
-      if (typeof fn !== "function") {
-        throw new Error("fn is not a function");
+function useSafeInfiniteQueryResult(params) {
+  const { fn, options, ...queryOptions } = params;
+  const query = useInfiniteQuery({
+    ...queryOptions,
+    queryFn: async ({ pageParam }) => {
+      const result = await fn(pageParam);
+      if (!result.success) {
+        throw result;
       }
-      const result = await fn(context.pageParam);
-      if (result.success) {
-        options?.onSuccess?.(result.data);
-        return result.data;
-      } else {
-        const error = new Error(result.error?.toString() || "Query failed");
-        options?.onError?.(error, result.errors);
-        throw error;
-      }
+      return result.data;
     },
     initialPageParam: void 0,
     getNextPageParam: (lastPage) => {
       return lastPage.hasNext ? lastPage.nextCursor : void 0;
     }
   });
+  useEffect(() => {
+    if (query.isSuccess && query.data) {
+      const pages = query.data.pages;
+      const lastPage = pages[pages.length - 1];
+      if (lastPage) {
+        options?.onSuccess?.(lastPage);
+      }
+    }
+    if (query.isError && query.error) {
+      const errRes = query.error;
+      options?.onError?.(errRes.error, errRes.errors);
+    }
+  }, [query.status]);
+  return query;
 }
-const PREFIX$1 = buildApiPath("/notification");
+const PREFIX$3 = buildApiPath("/notification");
 class NotificationService {
   async getNotifications(query) {
-    return await apiGet(`${PREFIX$1}`, query);
+    return await apiGet(`${PREFIX$3}`, query);
   }
   async markAsRead(notificationId) {
-    return await apiPost(`${PREFIX$1}/${notificationId}/read`);
+    return await apiPost(`${PREFIX$3}/${notificationId}/read`);
   }
   async markAllAsRead() {
-    return await apiPost(`${PREFIX$1}/read-all`);
+    return await apiPost(`${PREFIX$3}/read-all`);
   }
   async getUnreadCount() {
-    return await apiGet(`${PREFIX$1}/unread-count`);
+    return await apiGet(`${PREFIX$3}/unread-count`);
   }
   async delete(notificationId) {
-    return await apiDelete(`${PREFIX$1}/${notificationId}`);
+    return await apiDelete(`${PREFIX$3}/${notificationId}`);
   }
   async deleteAll() {
-    return await apiDelete(`${PREFIX$1}`);
+    return await apiDelete(`${PREFIX$3}`);
   }
 }
 const notificationService = new NotificationService();
@@ -2387,21 +2508,14 @@ function NotificationListener() {
   useNotificationHub(handleNewNotification);
   return null;
 }
-const NotificationSkeleton = () => {
-  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center"), children: [
-    /* @__PURE__ */ jsx(Skeleton, { sz: "md-2", variant: "circle" }),
-    /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col w-full flex-1 gap-2 ml-2"), children: [
-      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-full"), sz: "sm-2" }),
-      /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-[50%]"), sz: "sm-2" })
-    ] })
-  ] });
-};
 const notificationQueryKey = (userId, queryParams) => ["notifications", userId, queryParams];
 const useNotifications = (queryParams) => {
   const { userId } = useAuth();
   return useSafeInfiniteQueryResult({
     queryKey: notificationQueryKey(userId, queryParams),
-    fn: async (cursor) => await notificationService.getNotifications({ ...queryParams, cursor }),
+    fn: async (cursor) => {
+      return await notificationService.getNotifications({ ...queryParams, cursor });
+    },
     enabled: !!userId
   });
 };
@@ -2623,7 +2737,6 @@ const NotificationBadge = ({}) => {
   const navigate = useNavigate();
   const { unreadCount } = useUnreadCount();
   const { isShowNotification, isInNotificationPage, setShowNotification } = useNotificationUiState();
-  console.debug("NotificationBadge render - isShowNotification:", isShowNotification, "isInNotificationPage:", isInNotificationPage, "unreadCount:", unreadCount);
   const menuRef = React.useRef(null);
   const btnRef = React.useRef(null);
   useClickOutside(menuRef, btnRef, () => {
@@ -2720,7 +2833,7 @@ function NotFoundPage() {
   );
 }
 const HomePage = () => {
-  return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx("h1", { children: "Home Page" }) });
+  return /* @__PURE__ */ jsx("div", { className: "h-full" });
 };
 const registerInitialValues = {
   username: "",
@@ -2765,37 +2878,28 @@ const Card = ({ className, children, title: title2, titleClassName }) => {
 };
 const LayoutHeader = forwardRef(
   ({ children, className }, ref) => {
-    return /* @__PURE__ */ jsx("header", { ref, className: clsx("fixed z-40 w-full", className), children });
+    return /* @__PURE__ */ jsx(
+      "header",
+      {
+        ref,
+        className: clsx("fixed z-40 w-full", className),
+        style: {
+          height: "var(--header-height)"
+        },
+        children
+      }
+    );
   }
 );
 LayoutHeader.displayName = "Layout.Header";
-const LayoutMain = ({
-  children,
-  className,
-  style: style2
-}) => {
-  return /* @__PURE__ */ jsx("main", { className: clsx("relative h-full", className), style: style2, children });
+const LayoutMain = ({ children, className, style: style2 }) => {
+  return /* @__PURE__ */ jsx("div", { className: clsx("relative h-full", className), style: style2, children });
 };
 const LayoutFooter = ({ children, className }) => {
-  return /* @__PURE__ */ jsx(
-    "footer",
-    {
-      className: clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className),
-      children
-    }
-  );
+  return /* @__PURE__ */ jsx("footer", { className: clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className), children });
 };
 const Layout = ({ children, className }) => {
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col bg-bg-eighth min-h-screen",
-        className
-      ),
-      children
-    }
-  );
+  return /* @__PURE__ */ jsx("div", { className: clsx("relative flex flex-col bg-bg-eighth min-h-screen", className), children });
 };
 Layout.Header = LayoutHeader;
 Layout.Main = LayoutMain;
@@ -2836,7 +2940,7 @@ const NavbarItem = ({
     }
   );
 };
-const Navbar = ({ className, options, items, logo }) => {
+const Navbar = ({ className, options, items, logo, style: style2 }) => {
   const navItems = items || [];
   return /* @__PURE__ */ jsxs(
     "nav",
@@ -2846,6 +2950,7 @@ const Navbar = ({ className, options, items, logo }) => {
         "bg-bg-main p-[2px] shadow-md sm:px-8",
         className
       ),
+      style: style2,
       children: [
         logo,
         /* @__PURE__ */ jsxs("div", { className: "flex flex-row gap-3 flex-1", children: [
@@ -3012,14 +3117,11 @@ const PageNavbar = ({ title: title2, className, children }) => {
       className: clsx(
         "flex flex-col gap-3",
         "bg-bg-main shadow-md rounded-b-2xl",
-        "overflow-hidden",
+        "overflow-y-auto",
         className
       ),
       children: [
-        title2 && /* @__PURE__ */ jsxs("div", { className: "relative bg-bg-second mt-2", children: [
-          /* @__PURE__ */ jsx("div", { className: "absolute inset-0 bg-gradient-to-r from-primary-500/5 via-transparent to-secondary-500/5 pointer-events-none" }),
-          /* @__PURE__ */ jsx(Text, { sz: "xl-1", weight: "bold", className: "relative pt-4 pb-4 px-6 text-gradient-main", children: title2 })
-        ] }),
+        title2 && /* @__PURE__ */ jsx("div", { className: "relative bg-bg-second mt-4 mb-2", children: /* @__PURE__ */ jsx(Text, { sz: "xl-1", weight: "bold", className: "relative px-6 text-gradient-main", children: title2 }) }),
         /* @__PURE__ */ jsx("div", { className: "px-2 pb-3 space-y-1", children })
       ]
     }
@@ -3121,15 +3223,8 @@ const SocialButton = ({ icon, name, onClick }) => {
 const SocialButtons = () => {
   const { redirectToGoogle } = useAuth();
   return /* @__PURE__ */ jsxs("div", { className: "flex gap-3 w-full", children: [
-    /* @__PURE__ */ jsx(
-      SocialButton,
-      {
-        name: "Google",
-        icon: "src/assets/svgs/google-icon.svg",
-        onClick: redirectToGoogle
-      }
-    ),
-    /* @__PURE__ */ jsx(SocialButton, { name: "Facebook", icon: "src/assets/svgs/facebook-icon.svg" })
+    /* @__PURE__ */ jsx(SocialButton, { name: "Google", icon: "/svgs/google-icon.svg", onClick: redirectToGoogle }),
+    /* @__PURE__ */ jsx(SocialButton, { name: "Facebook", icon: "/svgs/facebook-icon.svg" })
   ] });
 };
 const RegisterForm = ({
@@ -3178,6 +3273,7 @@ const RegisterForm = ({
     initialValues: registerInitialValues,
     validationSchema: registerValidationSchema,
     onSubmit: async (values) => {
+      console.log("Submitting registration form with values: ", values);
       setUsernameError("");
       setEmailError("");
       setPhoneNumberError("");
@@ -3557,51 +3653,73 @@ const FriendsNavbar = ({ className, onSelect }) => {
     index
   )) }) });
 };
+const SidebarLayout = ({
+  className,
+  navbar: navbar2,
+  title: title2,
+  children
+}) => {
+  const [isShowSidebar, setIsShowSidebar] = useState(false);
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-start", className), children: [
+    /* @__PURE__ */ jsx(
+      "aside",
+      {
+        className: clsx(
+          "z-30 w-[70vw] max-w-[300px] shrink-0 overflow-y-auto",
+          "fixed lg:sticky transition-transform duration-300",
+          isShowSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
+        ),
+        style: {
+          top: "var(--header-height, 0px)",
+          height: "calc(100vh - var(--header-height, 0px))"
+        },
+        children: navbar2
+      }
+    ),
+    /* @__PURE__ */ jsx(
+      Transition,
+      {
+        animation: AnimationLib.Opacity,
+        show: isShowSidebar,
+        className: "fixed inset-0 z-20 lg:hidden",
+        duration: 300,
+        children: /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: "absolute inset-0 bg-black opacity-50",
+            onClick: () => setIsShowSidebar(false)
+          }
+        )
+      }
+    ),
+    /* @__PURE__ */ jsx("main", { className: clsx("flex-1 lg:ml-0"), children: /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center", children: [
+      /* @__PURE__ */ jsxs(
+        "button",
+        {
+          className: "self-start ml-3 my-3 text-2xl font-bold lg:hidden",
+          onClick: () => setIsShowSidebar((prev) => !prev),
+          children: [
+            /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bars mr-2" }),
+            /* @__PURE__ */ jsx("span", { children: title2 })
+          ]
+        }
+      ),
+      children
+    ] }) })
+  ] });
+};
 const FriendPage = () => {
   const { t } = useTranslation();
-  const [isShowNavbar, setIsShowNavbar] = React.useState(true);
   useEffect(() => {
     document.title = t("friends:title");
   }, [t]);
-  return /* @__PURE__ */ jsxs(
-    "div",
+  return /* @__PURE__ */ jsx(
+    SidebarLayout,
     {
-      className: clsx(
-        "relative flex flex-col sm:flex-row w-full h-full",
-        "bg-[var(--second-bg-color)] sm:gap-4"
-      ),
-      children: [
-        /* @__PURE__ */ jsx("div", { className: clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2"), children: /* @__PURE__ */ jsx(Text, { sz: "lg-3", children: /* @__PURE__ */ jsx(
-          "i",
-          {
-            className: "fa-solid fa-list text-gradient-main",
-            onClick: () => setIsShowNavbar(!isShowNavbar)
-          }
-        ) }) }),
-        isShowNavbar && /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: clsx("sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"),
-            onClick: () => setIsShowNavbar(false)
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          FriendsNavbar,
-          {
-            className: clsx(
-              "sm:flex sm:w-[300px] sm:fixed absolute sm:animate-none",
-              "animate-left-to-right w-[60%]",
-              "shadow-lg h-full bg-[var(--main-bg-color)] p-2",
-              {
-                "absolute z-30": isShowNavbar,
-                hidden: !isShowNavbar
-              }
-            ),
-            onSelect: () => setIsShowNavbar(false)
-          }
-        ),
-        /* @__PURE__ */ jsx("div", { className: clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]"), children: /* @__PURE__ */ jsx("div", { className: clsx("max-w-[1000px] w-full p-2"), children: /* @__PURE__ */ jsx(Outlet, {}) }) })
-      ]
+      title: "Bạn bè",
+      className: "flex-1",
+      navbar: /* @__PURE__ */ jsx(FriendsNavbar, { className: "h-full !rounded-none" }),
+      children: /* @__PURE__ */ jsx("div", { className: clsx("w-full max-w-[700px]"), children: /* @__PURE__ */ jsx(Outlet, {}) })
     }
   );
 };
@@ -3784,6 +3902,16 @@ const profileQueryKey = (userId) => ["user", "profile", userId];
 const avatarQueryKey = (userId) => ["user", "avatar", userId];
 const backgroundQueryKey = (userId) => ["user", "background", userId];
 const profileDetailsQueryKey = (userId) => ["user", "profile", "details", userId];
+const useOnboarding = () => {
+  const queryClient = useQueryClient();
+  return useResultFetcher(userProfileService.completeOnboarding, {
+    onSuccess: () => {
+      queryClient.invalidateQueries({
+        queryKey: ["user", "profile"]
+      });
+    }
+  });
+};
 const useGetUserProfile = (userId) => {
   return useSafeQueryResult({
     queryKey: profileQueryKey(userId),
@@ -4166,6 +4294,96 @@ function useLanguage$1() {
   const { t } = useTranslation();
   return t;
 }
+const PREFIX$2 = buildApiPath("/conversation");
+class ConversationService {
+  async getConversations(query) {
+    return await apiGet(`${PREFIX$2}`, query);
+  }
+  async getConversation(conversationId) {
+    return await apiGet(`${PREFIX$2}/${conversationId}`);
+  }
+  async getConversationWith(targetUserId) {
+    return await apiGet(`${PREFIX$2}/with/${targetUserId}`);
+  }
+  async getMessages(conversationId, query) {
+    return await apiGet(`${PREFIX$2}/${conversationId}/messages`, query);
+  }
+}
+const conversationService = new ConversationService();
+const conversationQueryKey = (targetId) => ["conversation", "with", targetId];
+const useGetConversationWith = (targetId, config) => {
+  return useSafeQueryResult({
+    queryKey: conversationQueryKey(targetId),
+    fn: async () => await conversationService.getConversationWith(targetId),
+    enabled: false,
+    options: config
+  });
+};
+const useGetConversation = (conversationId) => {
+  return useSafeQueryResult({
+    queryKey: ["conversation", conversationId],
+    fn: async () => {
+      const res = await conversationService.getConversation(conversationId);
+      console.log("Fetched conversation data:", res);
+      return res;
+    },
+    enabled: !!conversationId
+  });
+};
+const useChatStore = create((set) => ({
+  activeIds: [],
+  minimizedIds: [],
+  registry: {},
+  openChat: (id, meta) => set((state) => {
+    if (state.activeIds.includes(id)) return state;
+    if (state.minimizedIds.includes(id)) {
+      return {
+        activeIds: [...state.activeIds, id],
+        minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
+      };
+    }
+    const newRegistry = { ...state.registry };
+    if (meta) {
+      newRegistry[id] = meta;
+    }
+    return {
+      activeIds: [...state.activeIds, id],
+      minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
+      registry: newRegistry
+    };
+  }),
+  closeChat: (id) => set((state) => ({
+    activeIds: state.activeIds.filter((activeId) => activeId !== id),
+    minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
+  })),
+  toggleMinimize: (id) => set((state) => {
+    console.log("CCC");
+    if (state.activeIds.includes(id)) {
+      return {
+        activeIds: state.activeIds.filter((activeId) => activeId !== id),
+        minimizedIds: [...state.minimizedIds, id]
+      };
+    }
+    return {
+      activeIds: [...state.activeIds, id],
+      minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
+    };
+  }),
+  replaceChat: (oldId, newId) => {
+    set((state) => {
+      console.log("Replacing chat ID:", oldId, "with new ID:", newId);
+      const { [oldId]: _, ...restRegistry } = state.registry;
+      return {
+        activeIds: state.activeIds.map((id) => id === oldId ? newId : id),
+        minimizedIds: state.minimizedIds.map((id) => id === oldId ? newId : id),
+        registry: {
+          ...restRegistry,
+          [newId]: { type: "conversation", conversationId: newId }
+        }
+      };
+    });
+  }
+}));
 const ProfileHeader = ({ className }) => {
   const t = useLanguage$1();
   const navigate = useNavigate();
@@ -4173,13 +4391,33 @@ const ProfileHeader = ({ className }) => {
   const { isAuthenticated } = useAuth();
   const { data, isLoading, isFetching } = useGetUserProfile(targetId);
   const userProfile = data?.infos;
+  const { openChat, replaceChat } = useChatStore();
   const { data: numberOfFriends, isFetching: numberOfFriendsFetching } = useGetNumberOfFriends(targetId);
+  const handleConversationSuccess = useCallback(
+    (data2) => {
+      replaceChat(targetId, data2.id);
+    },
+    [targetId, replaceChat]
+  );
+  const { data: conversationData, refetch: refetchConversation } = useGetConversationWith(
+    targetId,
+    {
+      onSuccess: handleConversationSuccess
+    }
+  );
+  const handleMessageClick = async () => {
+    if (!targetId) return;
+    if (!conversationData) {
+      openChat(targetId, { type: "temp", targetId });
+      await refetchConversation();
+    }
+  };
   return /* @__PURE__ */ jsxs("div", { className: clsx("relative w-full flex flex-col items-center", className), children: [
     /* @__PURE__ */ jsx("div", { className: "relative w-full mt-2", children: /* @__PURE__ */ jsx(ProfileBackground, {}) }),
     /* @__PURE__ */ jsxs("div", { className: "-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3", children: [
       /* @__PURE__ */ jsx(ProfileAvatar, {}),
-      /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 items-start flex-1 mb-3 ml-4", children: [
-        isLoading || isFetching ? /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-56" }) : /* @__PURE__ */ jsxs(Text, { sz: "xl-1", weight: "bold", className: "lg:text-left text-center break-words", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 items-start flex-1 lg:mb-3 lg:ml-4", children: [
+        isLoading || isFetching ? /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "w-56" }) : /* @__PURE__ */ jsxs(Text, { sz: "xl-1", weight: "bold", className: "text-center break-words w-full lg:w-auto", children: [
           userProfile?.fullName,
           userProfile?.nickname && /* @__PURE__ */ jsxs(Text, { sz: "lg-3", weight: "light", className: "lg:text-left text-center lg:ml-2", children: [
             "(",
@@ -4204,7 +4442,7 @@ const ProfileHeader = ({ className }) => {
                 ]
               }
             ) : /* @__PURE__ */ jsx(FriendButton, { sz: "sm-1", uid: targetId }) }),
-            !isOwner && isAuthenticated && /* @__PURE__ */ jsxs(Button, { sz: "sm-1", variant: "secondary", children: [
+            !isOwner && isAuthenticated && /* @__PURE__ */ jsxs(Button, { sz: "sm-1", variant: "secondary", onClick: handleMessageClick, children: [
               /* @__PURE__ */ jsx("i", { className: "fa-solid fa-comment" }),
               " ",
               t("user:profileHeader.messageButton")
@@ -5034,11 +5272,267 @@ const UserMenu = ({ menuClassName, menuStyle }) => {
     )
   ] });
 };
+const MessageRow = ({
+  content,
+  name,
+  isShowName = false,
+  avatarUrl,
+  hasAvatar,
+  isMyMessage,
+  className,
+  messageClassName
+}) => {
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "flex gap-2 w-full",
+        isMyMessage ? "justify-end" : "justify-start",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsx(
+          Avatar,
+          {
+            className: clsx(
+              "flex-shrink-0 self-end",
+              isMyMessage && "order-2",
+              !hasAvatar && "invisible"
+            ),
+            src: avatarUrl,
+            alt: "Avatar",
+            sz: "xs-2"
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col max-w-[75%] ", children: [
+          isShowName && /* @__PURE__ */ jsx(Text, { sz: "xs-1", className: clsx("mb-1 ml-3", isMyMessage ? "text-right" : "text-left"), children: name }),
+          /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: clsx(
+                "px-3 py-1 break-words rounded-2xl shadow-sm",
+                isMyMessage ? "bg-blue-500 text-white" : "bg-gray-600 text-white",
+                messageClassName
+              ),
+              children: /* @__PURE__ */ jsx(Text, { sz: "sm-1", className: "", children: content })
+            }
+          )
+        ] })
+      ]
+    }
+  );
+};
+const MessageList = ({ messages, className }) => {
+  const { userId } = useAuth();
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-[0.1rem]", className), children: messages.map((message, index) => {
+    const isFirstMessageInGroup = index === messages.length - 1 || messages[index + 1].senderId !== message.senderId;
+    const isLastMessageInGroup = index === 0 || messages[index - 1].senderId !== message.senderId;
+    const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
+    const isMyMessage = message.senderId === userId;
+    return /* @__PURE__ */ jsx(
+      MessageRow,
+      {
+        content: message.content,
+        name: message.senderId,
+        isShowName: isLastMessageInGroup && !isMyMessage,
+        isMyMessage,
+        avatarUrl: message.senderId === "user1" ? "/avatar1.png" : "/avatar2.png",
+        hasAvatar: isFirstMessageInGroup,
+        className: clsx(isLastMessageInGroup ? "mt-[0.5rem]" : "mt-0"),
+        messageClassName: clsx(
+          isLastMessageInGroup ? isMyMessage ? "rounded-br-none" : "rounded-bl-none" : "",
+          isFirstMessageInGroup ? isMyMessage ? "rounded-tr-none" : "rounded-tl-none" : "",
+          !isFirstMessageInGroup && !isLastMessageInGroup ? isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none" : "",
+          isOnlyMessageInGroup ? "!rounded-2xl" : ""
+        )
+      },
+      message.id
+    );
+  }) });
+};
+const PREFIX$1 = buildApiPath("/message");
+class MessageService {
+  async sendMessage(request) {
+    console.log("Sending message with request:", request);
+    return await apiPost(`${PREFIX$1}`, request);
+  }
+}
+const messageService = new MessageService();
+const messagesQueryKey = (conversationId, queryParams) => ["messages", conversationId, queryParams];
+const useMessages = (conversationId, queryParams) => {
+  return useSafeInfiniteQueryResult({
+    queryKey: messagesQueryKey(conversationId, queryParams),
+    fn: async (cursor) => {
+      return await conversationService.getMessages(conversationId, { ...queryParams, cursor });
+    },
+    enabled: !!conversationId
+  });
+};
+const useSendMessage = () => {
+  return useResultFetcher(
+    (data) => messageService.sendMessage({
+      conversationId: data.conversationId,
+      content: data.content,
+      receiverId: data.receiverId
+    })
+  );
+};
+const ChatWindow = ({ className, conversationId }) => {
+  const [message, setMessage] = useState("");
+  const [chatTitle, setChatTitle] = useState("Cuộc trò chuyện");
+  const [chatAvatar, setChatAvatar] = useState("/default-avatar.png");
+  const { toggleMinimize, closeChat, replaceChat, registry } = useChatStore();
+  const chat = registry[conversationId];
+  const tempTargetId = chat?.type === "temp" ? chat.targetId : void 0;
+  const { data: tempUser } = useGetUserProfile(tempTargetId);
+  const { data: conversationData } = useGetConversation(conversationId);
+  console.log("ChatWindow rendered with conversationId:", conversationData);
+  useEffect(() => {
+    if (tempUser) {
+      setChatTitle(tempUser.infos.fullName);
+      setChatAvatar(tempUser.infos.avatar);
+    }
+    if (conversationData) {
+      setChatTitle(conversationData.name || "Cuộc trò chuyện");
+      setChatAvatar(conversationData.avatarUrl || "/default-avatar.png");
+    }
+  }, [conversationData, tempUser]);
+  const { data: messages } = useMessages(conversationId, { limit: 20 });
+  const { fetch: send, isFetching } = useSendMessage();
+  const displayedMessages = messages ? messages.pages.flatMap((page) => page.items) : [];
+  const handleOnClose = () => {
+    closeChat(conversationId);
+  };
+  const handleOnMinimum = () => {
+    toggleMinimize(conversationId);
+  };
+  const handleSendMessage = () => {
+    send(
+      {
+        conversationId: tempTargetId === void 0 ? conversationId : void 0,
+        content: message,
+        receiverId: tempTargetId
+      },
+      {
+        onSuccess: (data) => {
+          replaceChat(conversationId, data.conversationId);
+        }
+      }
+    );
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "w-[330px] h-[450px] bg-black rounded-xl shadow-lg overflow-hidden flex flex-col",
+        "border border-gray-700 shadow-xl",
+        className
+      ),
+      children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center px-4 h-[13%] bg-bg-fourth", children: [
+          /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "xs-3" }),
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "sm-1",
+              weight: "bold",
+              className: clsx(
+                "ml-2 text-white flex-1 rounded-md px-2 py-3",
+                "hover:bg-gray-700/30 cursor-pointer transition-all duration-200",
+                "active:scale-[0.98] active:opacity-80"
+              ),
+              children: chatTitle
+            }
+          ),
+          /* @__PURE__ */ jsx(MiniButton, { sz: "xs-3", onClick: handleOnMinimum, children: /* @__PURE__ */ jsx("i", { className: "fas fa-minus" }) }),
+          /* @__PURE__ */ jsx(MiniButton, { sz: "xs-3", onClick: handleOnClose, children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" }) })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col p-2 flex-1 overflow-y-auto", children: [
+          tempTargetId ? /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
+            /* @__PURE__ */ jsxs("div", { className: "relative mb-3", children: [
+              /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "sm-2" }),
+              /* @__PURE__ */ jsx("span", { className: "absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black" })
+            ] }),
+            /* @__PURE__ */ jsx(Text, { sz: "sm-1", weight: "bold", className: "text-white", children: chatTitle }),
+            /* @__PURE__ */ jsx(Text, { sz: "xs-1", className: "text-gray-400 mt-1", children: "Hai bạn chưa có tin nhắn nào" }),
+            /* @__PURE__ */ jsx("div", { className: "mt-4 px-3 py-2 bg-gray-700/30 rounded-full", children: /* @__PURE__ */ jsx(Text, { sz: "xs-1", className: "text-gray-300", children: "Gửi lời chào đầu tiên 👋" }) })
+          ] }) : null,
+          /* @__PURE__ */ jsx(MessageList, { messages: displayedMessages })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "px-2 h-[15%] self-end bg-bg-fourth w-full flex items-center", children: [
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              sz: "xs-3",
+              className: "!rounded-full w-full",
+              wrapperClassName: "flex-1",
+              placeholder: "Tin nhắn của bạn",
+              value: message,
+              onChange: (e) => setMessage(e.target.value)
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            MiniButton,
+            {
+              sz: "xs-3",
+              className: "ml-2",
+              onClick: handleSendMessage,
+              disabled: !message.trim() || isFetching,
+              children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-paper-plane" })
+            }
+          )
+        ] })
+      ]
+    }
+  );
+};
+const GroupChatWindow = ({ className }) => {
+  const { activeIds } = useChatStore();
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex gap-3", className), children: activeIds.map((id) => {
+    console.log("Rendering ChatWindow for conversationId:", id);
+    return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(ChatWindow, { className: "rounded-b-none", conversationId: id }) }, id);
+  }) });
+};
+const BubbleChat = ({ className, conversationId }) => {
+  const { toggleMinimize, closeChat, registry } = useChatStore();
+  const chat = registry[conversationId];
+  const tempTargetId = chat?.type === "temp" ? chat.targetId : void 0;
+  const { data: tempUser } = useGetUserProfile(tempTargetId);
+  const chatAvatar = tempUser ? tempUser.infos.avatar : "";
+  const handleOnClick = () => {
+    toggleMinimize(conversationId);
+  };
+  const handleOnClose = (e) => {
+    e.stopPropagation();
+    closeChat(conversationId);
+  };
+  return /* @__PURE__ */ jsxs("div", { className: clsx("relative flex gap-4 group", className), onClick: handleOnClick, children: [
+    /* @__PURE__ */ jsx(Avatar, { sz: "sm-2", alt: "Avatar", src: chatAvatar }),
+    /* @__PURE__ */ jsx(
+      MiniButton,
+      {
+        sz: "xs-2",
+        className: "absolute opacity-0 group-hover:opacity-100 bg-gray-500 hover:bg-gray-500 !duration-100 top-[-20%] right-[-20%]",
+        onClick: handleOnClose,
+        children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+      }
+    )
+  ] });
+};
+const BubbleChatList = ({ className }) => {
+  const { minimizedIds } = useChatStore();
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex gap-4 flex-col", className), children: minimizedIds.map((id) => /* @__PURE__ */ jsx(BubbleChat, { conversationId: id }, id)) });
+};
+const ChatLayer = ({ className }) => {
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex items-end gap-4", className), children: [
+    /* @__PURE__ */ jsx(GroupChatWindow, {}),
+    /* @__PURE__ */ jsx(BubbleChatList, { className: "mb-5" })
+  ] });
+};
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
   const { openDialog, closeDialog } = useDialog();
   const navigate = useNavigate();
-  const [headerRef, headerSize] = useSize();
   const items = [
     { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-house" }), path: "/", isIndex: true },
     { icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-group" }), path: "/friends", isIndex: false }
@@ -5069,9 +5563,12 @@ const DefaultLayout = () => {
     }
   }, [isAuthenticated, openLoginOverlay]);
   return /* @__PURE__ */ jsxs(Layout, { children: [
-    /* @__PURE__ */ jsx(Layout.Header, { ref: headerRef, children: /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsx(Layout.Header, { children: /* @__PURE__ */ jsx(
       Navbar,
       {
+        style: {
+          height: "var(--header-height)"
+        },
         isAuthenticated,
         items,
         logo: /* @__PURE__ */ jsx(
@@ -5091,7 +5588,18 @@ const DefaultLayout = () => {
         ] })
       }
     ) }),
-    /* @__PURE__ */ jsx(Layout.Main, { style: { paddingTop: headerSize?.height }, children: /* @__PURE__ */ jsx(Outlet, {}) })
+    /* @__PURE__ */ jsxs(
+      Layout.Main,
+      {
+        style: {
+          paddingTop: "var(--header-height)"
+        },
+        children: [
+          /* @__PURE__ */ jsx(Outlet, {}),
+          /* @__PURE__ */ jsx("div", { className: "fixed inset-0 pointer-events-none z-50", children: /* @__PURE__ */ jsx(ChatLayer, { className: "absolute bottom-0 right-4 pointer-events-auto" }) })
+        ]
+      }
+    )
   ] });
 };
 const SecondLayout = () => {
@@ -5168,27 +5676,34 @@ const OnboardingForm = () => {
   const { t } = useTranslation();
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
+  const { fetch: completeOnboarding } = useOnboarding();
   const formik = useFormik({
     initialValues: { ...onboardingInitialValues, gender: genderOptions[0].key },
     validationSchema: onboardingValidationSchema,
     onSubmit: async (values) => {
       setErrors({});
-      const result = await userProfileService.completeOnboarding({
-        firstName: values.firstName,
-        middleName: values.middleName,
-        lastName: values.lastName,
-        birthday: values.birthday,
-        gender: values.gender.toString()
-      });
-      if (result.success) {
-        navigate("/");
-      } else {
-        const errorCode = result.error?.code;
-        if (errorCode && ErrorCodes$3[errorCode]) {
-          const errorInfo = ErrorCodes$3[errorCode];
-          setErrors({ [errorInfo.type]: errorInfo.message });
+      await completeOnboarding(
+        {
+          firstName: values.firstName,
+          middleName: values.middleName,
+          lastName: values.lastName,
+          birthday: values.birthday,
+          gender: values.gender.toString()
+        },
+        {
+          onSuccess: () => {
+            navigate("/");
+          },
+          onError: (err) => {
+            console.error("Error completing onboarding:", err);
+            const errorCode = err?.code;
+            if (errorCode && ErrorCodes$3[errorCode]) {
+              const errorInfo = ErrorCodes$3[errorCode];
+              setErrors({ [errorInfo.type]: errorInfo.message });
+            }
+          }
         }
-      }
+      );
     }
   });
   React.useEffect(() => {
@@ -5291,16 +5806,6 @@ const OnboardingForm = () => {
   ] });
 };
 function OnboardingPage() {
-  const navigate = useNavigate();
-  const { isOnBoarding } = useAuth();
-  useEffect(() => {
-    if (isOnBoarding) {
-      navigate("/", { replace: true });
-    }
-  }, [isOnBoarding]);
-  if (isOnBoarding) {
-    return /* @__PURE__ */ jsx(LoadingPage, {});
-  }
   return /* @__PURE__ */ jsx("div", { className: "min-h-screen w-full flex items-center justify-center bg-gradient-to-br from-primary-500/10 via-bg-main to-primary-600/10 p-6", children: /* @__PURE__ */ jsxs(
     "div",
     {
@@ -5399,43 +5904,13 @@ const SettingPage = () => {
   useEffect(() => {
     document.title = t("settings:title");
   }, [t]);
-  const [isShowNavbar, setIsShowNavbar] = React.useState(true);
-  return /* @__PURE__ */ jsxs(
-    "div",
+  return /* @__PURE__ */ jsx(
+    SidebarLayout,
     {
-      className: clsx(
-        "relative flex flex-col sm:flex-row w-full h-full bg-[var(--second-bg-color)] sm:gap-4"
-      ),
-      children: [
-        /* @__PURE__ */ jsx("div", { className: clsx("w-full inset-0 z-10 h-[50px] flex sm:hidden px-2"), children: /* @__PURE__ */ jsx(Text, { sz: "lg-3", children: /* @__PURE__ */ jsx(
-          "i",
-          {
-            className: "fa-solid fa-list text-gradient-main",
-            onClick: () => setIsShowNavbar(!isShowNavbar)
-          }
-        ) }) }),
-        isShowNavbar && /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: clsx("sm:hidden z-9998 block fixed bg-black/50 w-screen h-screen"),
-            onClick: () => setIsShowNavbar(false)
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          SettingsNavbar,
-          {
-            className: clsx(
-              "sm:flex sm:w-[300px] sm:fixed absolute h-full sm:animate-none animate-left-to-right w-[60%] shadow-lg bg-[var(--main-bg-color)] p-2",
-              {
-                "absolute z-30": isShowNavbar,
-                hidden: !isShowNavbar
-              }
-            ),
-            onSelect: () => setIsShowNavbar(false)
-          }
-        ),
-        /* @__PURE__ */ jsx("div", { className: clsx("sm:col-span-8 flex justify-center flex-1 ml-[300px]"), children: /* @__PURE__ */ jsx("div", { className: clsx("w-full max-w-[700px] p-2"), children: /* @__PURE__ */ jsx(Outlet, {}) }) })
-      ]
+      className: "flex-1",
+      title: "Cài đặt",
+      navbar: /* @__PURE__ */ jsx(SettingsNavbar, { className: "h-full lg:!rounded-none !rounded-r-xl" }),
+      children: /* @__PURE__ */ jsx("div", { className: clsx("w-full max-w-[700px]"), children: /* @__PURE__ */ jsx(Outlet, {}) })
     }
   );
 };
@@ -5677,7 +6152,7 @@ const AccountSetting = ({ className }) => {
   ] }) });
 };
 const AccountSettingPage = () => {
-  return /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-center w-full"), children: [
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex justify-center w-full m-1"), children: [
     /* @__PURE__ */ jsx(AccountSetting, { className: clsx("w-full") }),
     /* @__PURE__ */ jsx(Outlet, {})
   ] });
@@ -6120,7 +6595,6 @@ function App({ authContext }) {
       }
     });
   }
-  console.log("App authContext:", authContext);
   if (authContext?.userData?.languageCode) {
     i18next.changeLanguage(authContext.userData.languageCode);
   }
@@ -6130,7 +6604,7 @@ function render(_url, context) {
   const url = _url.startsWith("/") ? _url : "/" + _url;
   try {
     const html = renderToString(
-      /* @__PURE__ */ jsx(StrictMode, { children: /* @__PURE__ */ jsx(StaticRouter, { location: url, children: /* @__PURE__ */ jsx(App, { authContext: context }) }) })
+      /* @__PURE__ */ jsx(StaticRouter, { location: url, children: /* @__PURE__ */ jsx(App, { authContext: context }) })
     );
     return html;
   } catch (error) {

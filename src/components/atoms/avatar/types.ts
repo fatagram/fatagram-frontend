@@ -1,6 +1,8 @@
 export const sizeClasses = {
   // Mini sizes
-  xs: "w-[24px]",
+  "xs-1": "w-[24px]",
+  "xs-2": "w-[32px]",
+  "xs-3": "w-[40px]",
 
   // Small sizes
   "sm-1": "w-[48px]",

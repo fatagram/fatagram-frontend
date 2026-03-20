@@ -1,14 +1,16 @@
-import { CursorResult, Result } from "@/api/common/result";
+import { CursorResult, Error as Err, Result } from "@/api/common/result";
 import {
   InfiniteData,
+  QueryKey,
   useInfiniteQuery,
   UseInfiniteQueryOptions,
   useQuery,
   UseQueryOptions,
   UseQueryResult,
 } from "@tanstack/react-query";
+import { useEffect, useRef } from "react";
 
-type SafeQueryOptions<TData = unknown> = UseQueryOptions<TData> & {
+export type SafeQueryOptions<TData = unknown> = UseQueryOptions<TData> & {
   onSuccess: (data: TData) => void;
   onError: () => void;
 };
@@ -30,9 +32,9 @@ export function useSafeQuery<TData>(options: SafeQueryOptions<TData>): UseQueryR
   return useQuery<TData>(wrappedOptions);
 }
 
-type SafeQueryResultOptions<TData> = {
+export type SafeQueryResultOptions<TData> = {
   onSuccess?: (data: TData) => void;
-  onError?: (err: Error, errs?: Error[]) => void;
+  onError?: (err?: Err, errs?: Err[]) => void;
   errorMessage?: string;
 };
 
@@ -42,37 +44,54 @@ type SafeQueryResult<TData> = Omit<UseQueryOptions<TData>, "queryFn"> & {
 };
 
 export function useSafeQueryResult<TData>(params: SafeQueryResult<TData>) {
-  const wrappedOptions = {
-    ...params,
+  const { fn, options, ...queryOptions } = params;
+  const callbacksCalledRef = useRef(false);
+
+  const query = useQuery<TData, Result<TData>>({
+    ...queryOptions,
+    retry: 0,
     queryFn: async () => {
-      if (typeof params.fn !== "function") {
-        throw new Error("queryFn is not a function");
+      const result = await fn();
+      if (!result.success) {
+        throw result;
       }
-      var result = (await params.fn()) as Result<TData>;
-      if (result.success) {
-        params.options?.onSuccess?.(result.data as TData);
-        return result.data as TData;
-      } else {
-        const error = new Error(result.error?.toString() || "Query failed");
-        params.options?.onError?.(error, result.errors as any);
-        throw error;
-      }
+      return result.data;
     },
-  };
-  return useQuery<TData>(wrappedOptions);
+  } as any);
+
+  useEffect(() => {
+    if (query.isSuccess && query.data) {
+      if (!callbacksCalledRef.current) {
+        options?.onSuccess?.(query.data);
+        callbacksCalledRef.current = true;
+      }
+    } else if (query.isError) {
+      if (!callbacksCalledRef.current) {
+        const errorResult = query.error as Result<TData>;
+        options?.onError?.(errorResult.error, errorResult.errors);
+        callbacksCalledRef.current = true;
+      }
+    } else if (query.isPending) {
+      callbacksCalledRef.current = false;
+    }
+  }, [query.status]);
+
+  return query;
 }
 
-type SafeInfiniteQueryResultOptions<TData> = {
+export type SafeInfiniteQueryResultOptions<TData> = {
   onSuccess?: (data: TData) => void;
-  onError?: (err: Error, errs?: Error[]) => void;
+  onError?: (err?: Err, errs?: Err[]) => void;
   errorMessage?: string;
 };
 
 type SafeInfiniteQueryResult<TData, TCursor> = Omit<
   UseInfiniteQueryOptions<
     CursorResult<TData, TCursor>,
-    Error,
-    InfiniteData<CursorResult<TData, TCursor>>
+    Result<CursorResult<TData, TCursor>>,
+    InfiniteData<CursorResult<TData, TCursor>>,
+    readonly unknown[],
+    TCursor | undefined
   >,
   "queryFn" | "getNextPageParam" | "initialPageParam"
 > & {
@@ -80,34 +99,46 @@ type SafeInfiniteQueryResult<TData, TCursor> = Omit<
   options?: SafeInfiniteQueryResultOptions<CursorResult<TData, TCursor>>;
 };
 
-export function useSafeInfiniteQueryResult<TData, TCursor = string>({
-  fn,
-  options,
-  ...params
-}: SafeInfiniteQueryResult<TData, TCursor>) {
-  return useInfiniteQuery<
+export function useSafeInfiniteQueryResult<TData, TCursor = string>(
+  params: SafeInfiniteQueryResult<TData, TCursor>,
+) {
+  const { fn, options, ...queryOptions } = params;
+
+  const query = useInfiniteQuery<
     CursorResult<TData, TCursor>,
-    Error,
-    InfiniteData<CursorResult<TData, TCursor>>
+    Result<CursorResult<TData, TCursor>>,
+    InfiniteData<CursorResult<TData, TCursor>>,
+    QueryKey,
+    TCursor | undefined
   >({
-    ...params,
-    queryFn: async (context) => {
-      if (typeof fn !== "function") {
-        throw new Error("fn is not a function");
+    ...queryOptions,
+    queryFn: async ({ pageParam }) => {
+      const result = await fn(pageParam as TCursor | undefined);
+      if (!result.success) {
+        throw result;
       }
-      const result = await fn(context.pageParam as TCursor | undefined);
-      if (result.success) {
-        options?.onSuccess?.(result.data as CursorResult<TData, TCursor>);
-        return result.data as CursorResult<TData, TCursor>;
-      } else {
-        const error = new Error(result.error?.toString() || "Query failed");
-        options?.onError?.(error, result.errors as any);
-        throw error;
-      }
+      return result.data!;
     },
     initialPageParam: undefined,
-    getNextPageParam: (lastPage) => {
+    getNextPageParam: (lastPage: CursorResult<TData, TCursor>) => {
       return lastPage.hasNext ? lastPage.nextCursor : undefined;
     },
   });
+
+  useEffect(() => {
+    if (query.isSuccess && query.data) {
+      const pages = query.data.pages;
+      const lastPage = pages[pages.length - 1];
+      if (lastPage) {
+        options?.onSuccess?.(lastPage as any);
+      }
+    }
+
+    if (query.isError && query.error) {
+      const errRes = query.error as unknown as unknown as Result<CursorResult<TData, TCursor>>;
+      options?.onError?.(errRes.error, errRes.errors);
+    }
+  }, [query.status]);
+
+  return query;
 }

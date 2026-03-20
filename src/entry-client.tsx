@@ -1,5 +1,4 @@
 import "./index.css";
-import { StrictMode } from "react";
 import { hydrateRoot, createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
@@ -18,11 +17,9 @@ const hasSSRContent =
   rootElement.innerHTML.replace(/<!--.*?-->/g, "").trim().length > 0;
 
 const app = (
-  <StrictMode>
-    <BrowserRouter>
-      <App authContext={initialData} />
-    </BrowserRouter>
-  </StrictMode>
+  <BrowserRouter>
+    <App authContext={initialData} />
+  </BrowserRouter>
 );
 
 if (hasSSRContent) {
