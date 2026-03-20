@@ -7,6 +7,7 @@ export interface MessageDto {
 export interface MessageResponseDto {
   id: string;
   conversationId: string;
+  isGroup: boolean;
   senderId: string;
   content: string;
   createdAt: Date;

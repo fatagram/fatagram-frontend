@@ -59,6 +59,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
     if (!conversationData) {
       openChat(targetId, { type: "temp", targetId: targetId });
       await refetchConversation();
+    } else {
+      openChat(conversationData.id, { type: "conversation", conversationId: conversationData.id });
     }
   };
 

@@ -24,10 +24,15 @@ export const useChatStore = create<ChatWindowState>((set) => ({
           minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
         };
       }
+
       const newRegistry = { ...state.registry };
+      console.log("1. Opening chat with ID:", id, "and meta:", meta);
       if (meta) {
+        console.log("2. Opening chat with ID:", id, "and meta:", meta);
         newRegistry[id] = meta;
       }
+
+      console.log("3. Updated registry after opening chat:", newRegistry[id]);
 
       return {
         activeIds: [...state.activeIds, id],
