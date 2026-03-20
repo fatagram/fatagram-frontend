@@ -23,7 +23,7 @@ const buttonSizes: Record<Size, string> = {
 };
 
 const buttonVariants = {
-  primary: "text-white hover:bg-gray-700/30",
+  primary: "text-white hover:bg-gray-600",
   secondary: "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70",
 };
 

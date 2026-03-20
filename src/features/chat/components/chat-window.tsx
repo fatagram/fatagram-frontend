@@ -65,7 +65,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
       },
       {
         onSuccess: (data) => {
-          replaceChat(conversationId, data!.conversationId);
+          if (tempTargetId) replaceChat(conversationId, data!.conversationId);
+          setMessage("");
         },
       },
     );
