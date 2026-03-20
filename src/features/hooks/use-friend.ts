@@ -38,3 +38,14 @@ export const useGetNumberOfFriends = (userId: string) => {
     enabled: !!userId,
   });
 };
+
+export const useGetFriends = (
+  userId: string,
+  queryParams?: Omit<CursorQuery<string> & { keyword?: string }, "cursor">,
+) => {
+  return useSafeInfiniteQueryResult({
+    queryKey: ["friendship", "friends", userId, queryParams],
+    fn: (cursor?: string) => friendshipService.GetFriends(userId, { ...queryParams, cursor }),
+    enabled: !!userId,
+  });
+};

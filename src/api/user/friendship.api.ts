@@ -1,4 +1,4 @@
-import { FriendsDto } from "./dto/friend.dto";
+import { FriendDto } from "./dto/friend.dto";
 import { CursorResult, Result } from "../common/result";
 import { FriendRequest } from "@/types/entities/friend-request.type";
 import { CursorQuery } from "@/types/query";
@@ -43,11 +43,11 @@ export class FriendshipService {
 
   async GetFriends(
     userId: string,
-    page: number,
-    pageSize: number,
-    keyword?: string,
-  ): Promise<Result<FriendsDto>> {
-    return await apiGet(`${PREFIX}/list/${userId}`, { params: { page, pageSize, keyword } });
+    query: CursorQuery<string> & { keyword?: string },
+  ): Promise<Result<CursorResult<FriendDto, string>>> {
+    const res = await apiGet(`${PREFIX}/friends/${userId}`, query);
+    console.log(res);
+    return res;
   }
 }
 

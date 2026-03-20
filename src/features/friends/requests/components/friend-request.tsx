@@ -20,7 +20,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
     limit: 20,
   });
   console.log(hasNextPage);
-  const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.data) || [], [data]);
+  const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
 
   const { fetch: acceptFriendRequest } = useAcceptFriendRequest();
   const { fetch: rejectFriendRequest } = useDeclineFriendRequest();

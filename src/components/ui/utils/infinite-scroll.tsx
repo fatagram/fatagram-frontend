@@ -44,6 +44,8 @@ export default function InfiniteScroll({
   const lastItemRef = useRef<HTMLDivElement>(null);
   // const loadingRef = useRef(false);
 
+  const isGrid = itemInRow > 1;
+
   const isAtBottomRef = useRef(true);
 
   useEffect(() => {
@@ -94,17 +96,34 @@ export default function InfiniteScroll({
 
   return (
     <div
-      className={clsx("flex  overflow-y-auto", desc ? "flex-col-reverse" : "flex-col", className)}
-      style={{
-        gap: gap ?? "0.5rem",
-      }}
+      className={clsx(
+        "overflow-y-auto",
+        isGrid ? "grid" : desc ? "flex flex-col-reverse" : "flex flex-col",
+        className,
+      )}
+      style={
+        isGrid
+          ? {
+              gridTemplateColumns: `repeat(${itemInRow}, 1fr)`,
+              gap: gap ?? "0.5rem",
+            }
+          : {
+              gap: gap ?? "0.5rem",
+            }
+      }
       ref={containerRef}
     >
-      {items.map((item, index) =>
-        itemTemplate
-          ? itemTemplate(item, index, index === (desc ? 0 : items.length - 1) ? lastItemRef : null)
-          : item,
-      )}
+      {items.map((item, index) => (
+        <div>
+          {itemTemplate
+            ? itemTemplate(
+                item,
+                index,
+                index === (desc ? 0 : items.length - 1) ? lastItemRef : null,
+              )
+            : item}
+        </div>
+      ))}
       {hasMore && (
         <div
           ref={sentinelRef}

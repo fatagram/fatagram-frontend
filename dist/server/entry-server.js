@@ -9,10 +9,10 @@ import { useQueryClient, useInfiniteQuery, useQuery, QueryClient, QueryClientPro
 import clsx, { clsx as clsx$1 } from "clsx";
 import { useNavigate as useNavigate$1 } from "react-router";
 import * as signalR from "@microsoft/signalr";
+import { create } from "zustand";
 import { ArrowLeft } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
-import { create } from "zustand";
 const login$1 = { "title": "Login", "username": "Username", "password": "Password", "rememberMe": "Remember me", "forgotPassword": "Forgot password?", "loginButton": "Login", "dontHaveAccount": "Don't have an account?", "registerButton": "Register", "errors": { "usernameOrEmail": { "required": "Username or email is required", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)", "notFound": "Username or email not found" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)", "incorrect": "Incorrect password" }, "account": { "locked": "Account is locked", "disabled": "Account is disabled" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const register$2 = { "title": "Register", "username": "Username", "password": "Password", "confirmPassword": "Confirm password", "email": "Email", "phoneNumber": "Phone number", "registerButton": "Register", "backToLogin": "Back to login", "agree": "I agree to the", "termsOfService": "Terms of Service", "and": " and ", "privacyPolicy": "Privacy Policy", "loginButton": "Login", "errors": { "username": { "required": "Username is required", "alreadyExists": "Username already exists", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)" }, "email": { "required": "Email is required", "alreadyExists": "Email already exists", "invalidFormat": "Invalid email format" }, "phoneNumber": { "alreadyExists": "Phone number already exists", "invalidFormat": "Invalid phone number format" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)" }, "confirmPassword": { "required": "Please confirm your password", "doNotMatch": "Passwords do not match" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const auth$1 = {
@@ -764,7 +764,7 @@ const buttonSizes = {
   "xl-3": "w-[80px] h-[80px] px-14 py-14 text-3xl "
 };
 const buttonVariants = {
-  primary: "text-white hover:bg-gray-700/30",
+  primary: "text-white hover:bg-gray-600",
   secondary: "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70"
 };
 const MiniButton = forwardRef(
@@ -1637,8 +1637,8 @@ class FriendshipService {
   async GetFriendRequests(query) {
     return await apiGet(`${PREFIX$4}/requests`, query);
   }
-  async GetFriends(userId, page, pageSize, keyword) {
-    return await apiGet(`${PREFIX$4}/list/${userId}`, { params: { page, pageSize, keyword } });
+  async GetFriends(userId, query) {
+    return await apiGet(`${PREFIX$4}/friends/${userId}`, query);
   }
 }
 const friendshipService = new FriendshipService();
@@ -2145,13 +2145,13 @@ const GlobalDialog = () => {
     }
   );
 };
-let connection = null;
-const createSignalRConnection = () => {
+let connection$1 = null;
+const createSignalRConnection$1 = () => {
   try {
-    connection = new signalR.HubConnectionBuilder().withUrl(`${appConfig.apiUrl}/hubs/notification`, {
+    connection$1 = new signalR.HubConnectionBuilder().withUrl(`${appConfig.apiUrl}/hubs/notification`, {
       withCredentials: true
     }).withAutomaticReconnect().configureLogging(signalR.LogLevel.Error).build();
-    return connection;
+    return connection$1;
   } catch (error) {
     console.error("Error creating SignalR connection: ", error);
     throw error;
@@ -2164,7 +2164,7 @@ function useNotificationHub(onReceiveNotification) {
     if (!isAuthenticated) return;
     let isMounted = true;
     const startConnection = async () => {
-      const conn = createSignalRConnection();
+      const conn = createSignalRConnection$1();
       connectionRef.current = conn;
       const tryConnect = async (retry = 0) => {
         try {
@@ -2200,7 +2200,6 @@ function useNotificationHub(onReceiveNotification) {
 function useSafeQueryResult(params) {
   const { fn, options, ...queryOptions } = params;
   const callbacksCalledRef = useRef(false);
-  const prevStatusRef = useRef(void 0);
   const query = useQuery({
     ...queryOptions,
     retry: 0,
@@ -2213,10 +2212,6 @@ function useSafeQueryResult(params) {
     }
   });
   useEffect(() => {
-    if (prevStatusRef.current === query.status) {
-      return;
-    }
-    prevStatusRef.current = query.status;
     if (query.isSuccess && query.data) {
       if (!callbacksCalledRef.current) {
         options?.onSuccess?.(query.data);
@@ -2542,15 +2537,38 @@ function InfiniteScroll({
   isLoading = false,
   itemTemplate,
   onLoadMore,
-  isShowLastSeen = false
+  isShowLastSeen = false,
+  gap,
+  desc = false,
+  parentRef
 }) {
+  const isInitialLoad = useRef(true);
+  const containerRef = useRef(null);
   const sentinelRef = useRef(null);
-  const loadingRef = useRef(false);
+  const lastItemRef = useRef(null);
+  const isAtBottomRef = useRef(true);
+  useEffect(() => {
+    const target = lastItemRef.current;
+    if (!target || !desc) return;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        isAtBottomRef.current = entry.isIntersecting;
+        console.log("Is at bottom:", isAtBottomRef.current);
+      },
+      {
+        root: parentRef?.current || containerRef.current,
+        threshold: 0.1
+      }
+    );
+    observer.observe(target);
+    return () => observer.disconnect();
+  }, [items[0], desc]);
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
     const observer = new IntersectionObserver(async ([entry]) => {
       if (entry.isIntersecting) {
+        console.log("Load more items...");
         await onLoadMore();
       }
     });
@@ -2560,22 +2578,32 @@ function InfiniteScroll({
     };
   }, [sentinelRef, hasMore]);
   useEffect(() => {
-    if (!isLoading) {
-      loadingRef.current = false;
+    if (isAtBottomRef.current && lastItemRef.current) {
+      lastItemRef.current.scrollIntoView({
+        behavior: isInitialLoad.current ? "auto" : "smooth"
+      });
+      isInitialLoad.current = false;
     }
-  }, [isLoading]);
+  }, [items.length]);
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className,
+      className: clsx("flex  overflow-y-auto", desc ? "flex-col-reverse" : "flex-col", className),
       style: {
-        display: "grid",
-        gridTemplateColumns: `repeat(${itemInRow}, 1fr)`,
-        gap: "0.5rem"
+        gap: gap ?? "0.5rem"
       },
+      ref: containerRef,
       children: [
-        items.map((item, index) => itemTemplate ? itemTemplate(item, index) : item),
-        hasMore && /* @__PURE__ */ jsx("div", { ref: sentinelRef, className: "absolute bottom-1/2 h-[20px] w-[20px]" }),
+        items.map(
+          (item, index) => itemTemplate ? itemTemplate(item, index, index === (desc ? 0 : items.length - 1) ? lastItemRef : null) : item
+        ),
+        hasMore && /* @__PURE__ */ jsx(
+          "div",
+          {
+            ref: sentinelRef,
+            className: clsx("absolute h-[20px] w-[20px]", desc ? "top-[50px]" : "bottom-0")
+          }
+        ),
         isLoading && /* @__PURE__ */ jsx(Fragment, { children: Array.from({ length: numberOfSkeletons }).map((_, index) => /* @__PURE__ */ jsx(
           "div",
           {
@@ -2785,6 +2813,202 @@ const NotificationBadge = ({}) => {
     ) })
   ] });
 };
+function useMessageCacheMutations() {
+  const queryClient = useQueryClient();
+  const addMessageToCache = useCallback(
+    (conversationId, message, isDescending = true) => {
+      queryClient.setQueriesData(
+        { queryKey: ["messages", conversationId] },
+        (old) => {
+          if (!old?.pages?.length) {
+            return {
+              pages: [
+                {
+                  items: [message],
+                  nextCursor: void 0,
+                  hasNext: false
+                }
+              ],
+              pageParams: [void 0]
+            };
+          }
+          const targetPageIndex = isDescending ? 0 : old.pages.length - 1;
+          const targetPage = old.pages[targetPageIndex];
+          if (targetPage.items.some((m) => m.id === message.id)) return old;
+          const newPages = [...old.pages];
+          newPages[targetPageIndex] = {
+            ...targetPage,
+            items: isDescending ? [message, ...targetPage.items] : [...targetPage.items, message]
+          };
+          return {
+            ...old,
+            pages: newPages
+          };
+        }
+      );
+    },
+    [queryClient]
+  );
+  const updateMessageInCache = useCallback(
+    (conversationId, messageId, updater) => {
+      queryClient.setQueriesData(
+        { queryKey: ["messages", conversationId] },
+        (old) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((m) => m.id === messageId ? updater(m) : m)
+            }))
+          };
+        }
+      );
+    },
+    [queryClient]
+  );
+  const removeMessageFromCache = useCallback(
+    (conversationId, messageId) => {
+      queryClient.setQueriesData(
+        { queryKey: ["messages", conversationId] },
+        (old) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.filter((m) => m.id !== messageId)
+            }))
+          };
+        }
+      );
+    },
+    [queryClient]
+  );
+  return { addMessageToCache, updateMessageInCache, removeMessageFromCache };
+}
+let connection = null;
+const createSignalRConnection = () => {
+  try {
+    connection = new signalR.HubConnectionBuilder().withUrl(`${appConfig.apiUrl}/hubs/message`, {
+      withCredentials: true
+    }).withAutomaticReconnect().configureLogging(signalR.LogLevel.Error).build();
+    return connection;
+  } catch (error) {
+    console.error("Error creating SignalR connection: ", error);
+    throw error;
+  }
+};
+function useMessageHub(onReceiveMessage) {
+  const connectionRef = useRef(null);
+  const { isAuthenticated } = useAuth();
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let isMounted = true;
+    const startConnection = async () => {
+      const conn = createSignalRConnection();
+      connectionRef.current = conn;
+      const tryConnect = async (retry = 0) => {
+        try {
+          await conn.start();
+          conn.on("ReceiveMessage", (data) => {
+            if (isMounted) {
+              onReceiveMessage(data);
+            }
+          });
+        } catch (err) {
+          if (err?.message?.includes("ONBOARDING_NOT_COMPLETED")) {
+            authEvents.emit("redirectToOnboarding");
+            return;
+          }
+          console.error("SignalR connection error: ", err);
+          if (retry < 5) {
+            setTimeout(() => tryConnect(retry + 1), 500);
+          }
+        }
+      };
+      tryConnect();
+    };
+    startConnection();
+    return () => {
+      isMounted = false;
+      if (connectionRef.current) {
+        connectionRef.current.stop();
+        connectionRef.current = null;
+      }
+    };
+  }, [isAuthenticated]);
+}
+const useChatStore = create((set) => ({
+  activeIds: [],
+  minimizedIds: [],
+  registry: {},
+  openChat: (id, meta) => set((state) => {
+    if (state.activeIds.includes(id)) return state;
+    if (state.minimizedIds.includes(id)) {
+      return {
+        activeIds: [...state.activeIds, id],
+        minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
+      };
+    }
+    const newRegistry = { ...state.registry };
+    console.log("1. Opening chat with ID:", id, "and meta:", meta);
+    if (meta) {
+      console.log("2. Opening chat with ID:", id, "and meta:", meta);
+      newRegistry[id] = meta;
+    }
+    console.log("3. Updated registry after opening chat:", newRegistry[id]);
+    return {
+      activeIds: [...state.activeIds, id],
+      minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
+      registry: newRegistry
+    };
+  }),
+  closeChat: (id) => set((state) => ({
+    activeIds: state.activeIds.filter((activeId) => activeId !== id),
+    minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
+  })),
+  toggleMinimize: (id) => set((state) => {
+    console.log("CCC");
+    if (state.activeIds.includes(id)) {
+      return {
+        activeIds: state.activeIds.filter((activeId) => activeId !== id),
+        minimizedIds: [...state.minimizedIds, id]
+      };
+    }
+    return {
+      activeIds: [...state.activeIds, id],
+      minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
+    };
+  }),
+  replaceChat: (oldId, newId) => {
+    set((state) => {
+      console.log("Replacing chat ID:", oldId, "with new ID:", newId);
+      const { [oldId]: _, ...restRegistry } = state.registry;
+      return {
+        activeIds: state.activeIds.map((id) => id === oldId ? newId : id),
+        minimizedIds: state.minimizedIds.map((id) => id === oldId ? newId : id),
+        registry: {
+          ...restRegistry,
+          [newId]: { type: "conversation", conversationId: newId }
+        }
+      };
+    });
+  }
+}));
+function MessageListener() {
+  const { addMessageToCache } = useMessageCacheMutations();
+  useMessageHub((data) => {
+    console.log("Received new message via MessageHub with data:", data);
+    const conversationId = data.conversationId;
+    addMessageToCache(conversationId, data, true);
+    console.log("Current chat registry:", useChatStore.getState().registry[data.senderId]);
+    if (useChatStore.getState().registry[data.senderId]?.type === "temp") {
+      useChatStore.getState().replaceChat(data.senderId, conversationId);
+    }
+  });
+  return null;
+}
 function NotFoundPage() {
   const navigate = useNavigate();
   const { t } = useTranslation();
@@ -3790,6 +4014,13 @@ const useGetNumberOfFriends = (userId) => {
     enabled: !!userId
   });
 };
+const useGetFriends = (userId, queryParams) => {
+  return useSafeInfiniteQueryResult({
+    queryKey: ["friendship", "friends", userId, queryParams],
+    fn: (cursor) => friendshipService.GetFriends(userId, { ...queryParams, cursor }),
+    enabled: !!userId
+  });
+};
 const FriendRequests = ({ className }) => {
   const [total, setTotal] = React.useState(0);
   const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
@@ -4330,60 +4561,6 @@ const useGetConversation = (conversationId) => {
     enabled: !!conversationId
   });
 };
-const useChatStore = create((set) => ({
-  activeIds: [],
-  minimizedIds: [],
-  registry: {},
-  openChat: (id, meta) => set((state) => {
-    if (state.activeIds.includes(id)) return state;
-    if (state.minimizedIds.includes(id)) {
-      return {
-        activeIds: [...state.activeIds, id],
-        minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
-      };
-    }
-    const newRegistry = { ...state.registry };
-    if (meta) {
-      newRegistry[id] = meta;
-    }
-    return {
-      activeIds: [...state.activeIds, id],
-      minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
-      registry: newRegistry
-    };
-  }),
-  closeChat: (id) => set((state) => ({
-    activeIds: state.activeIds.filter((activeId) => activeId !== id),
-    minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
-  })),
-  toggleMinimize: (id) => set((state) => {
-    console.log("CCC");
-    if (state.activeIds.includes(id)) {
-      return {
-        activeIds: state.activeIds.filter((activeId) => activeId !== id),
-        minimizedIds: [...state.minimizedIds, id]
-      };
-    }
-    return {
-      activeIds: [...state.activeIds, id],
-      minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
-    };
-  }),
-  replaceChat: (oldId, newId) => {
-    set((state) => {
-      console.log("Replacing chat ID:", oldId, "with new ID:", newId);
-      const { [oldId]: _, ...restRegistry } = state.registry;
-      return {
-        activeIds: state.activeIds.map((id) => id === oldId ? newId : id),
-        minimizedIds: state.minimizedIds.map((id) => id === oldId ? newId : id),
-        registry: {
-          ...restRegistry,
-          [newId]: { type: "conversation", conversationId: newId }
-        }
-      };
-    });
-  }
-}));
 const ProfileHeader = ({ className }) => {
   const t = useLanguage$1();
   const navigate = useNavigate();
@@ -4410,6 +4587,8 @@ const ProfileHeader = ({ className }) => {
     if (!conversationData) {
       openChat(targetId, { type: "temp", targetId });
       await refetchConversation();
+    } else {
+      openChat(conversationData.id, { type: "conversation", conversationId: conversationData.id });
     }
   };
   return /* @__PURE__ */ jsxs("div", { className: clsx("relative w-full flex flex-col items-center", className), children: [
@@ -4878,17 +5057,6 @@ const PostsPage = () => {
     /* @__PURE__ */ jsx(Card, { className: clsx("bg-bg-main rounded-md rounded-r-2xl mt-2") })
   ] });
 };
-const useFriends = ({ userId = "", keyword, page = 1, pageSize = 10 }) => {
-  return useQuery({
-    queryKey: ["friends", userId, keyword, page, pageSize],
-    queryFn: async () => {
-      const res = await friendshipService.GetFriends(userId, page, pageSize, keyword);
-      return res.data;
-    },
-    staleTime: 1e3 * 60 * 5,
-    enabled: true
-  });
-};
 const FriendItem = ({ className = "", friendDto }) => {
   const [isShowDrowdown, setIsShowDropdown] = React.useState(false);
   const [isFriend, setIsFriend] = React.useState(friendDto.isFriend);
@@ -4979,37 +5147,19 @@ const FriendItem = ({ className = "", friendDto }) => {
 };
 const ProfileFriends = ({ className = "" }) => {
   const { t } = useTranslation();
-  const [friends2, setFriends] = React.useState([]);
-  const [page, setPage] = React.useState(1);
-  const [pageSize] = React.useState(12);
-  const [isFull, setIsFull] = React.useState(false);
   const [keyword, setKeyword] = React.useState("");
   const { targetId } = useProfilePage();
-  const { isLoading, refetch } = useFriends({
-    userId: targetId,
-    keyword,
-    page,
-    pageSize
-  });
+  const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useGetFriends(
+    targetId,
+    { keyword, limit: 12 }
+  );
+  const friends2 = useMemo(
+    () => data?.pages.flatMap((page) => page.items) ?? [],
+    [data]
+  );
   const handleOnChange = (e) => {
     setKeyword(e.target.value);
-    setPage(1);
-    setIsFull(false);
   };
-  useEffect(() => {
-    const fetchFriends = async () => {
-      const result = await refetch();
-      if (page === 1) {
-        setFriends(result.data?.friends || []);
-      } else {
-        setFriends((prev) => [...prev, ...result.data?.friends || []]);
-      }
-      if ((result.data?.friends || []).length < pageSize) {
-        setIsFull(true);
-      }
-    };
-    fetchFriends();
-  }, [page, keyword, targetId]);
   return /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-1 justify-end flex-col w-full", className), children: [
     /* @__PURE__ */ jsx(
       Textbox,
@@ -5020,13 +5170,30 @@ const ProfileFriends = ({ className = "" }) => {
         onChange: handleOnChange
       }
     ),
-    !isLoading ? /* @__PURE__ */ jsxs("div", { className: "relative flex flex-wrap gap-2 w-full mt-2", children: [
-      friends2.map((friend, index) => /* @__PURE__ */ jsx(FriendItem, { className: "w-[calc(50%-4px)]", friendDto: friend }, index)),
-      friends2.length === 0 && /* @__PURE__ */ jsx("div", { className: "flex w-full justify-center mb-10 mt-10", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center text-[var(--text-color)] opacity-30", children: [
-        /* @__PURE__ */ jsx(Text, { sz: "xl-3", weight: "bold", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-xmark" }) }),
-        /* @__PURE__ */ jsx(Text, { sz: "md-2", className: "mt-2", children: t("user:profileFriends.noFriends") })
-      ] }) })
-    ] }) : /* @__PURE__ */ jsx("div", { className: "relative flex flex-wrap gap-2 w-full mt-4 items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "fa-solid fa-spinner animate-spin text-2xl text-single-main" }) })
+    friends2.length === 0 && !isLoading ? /* @__PURE__ */ jsx("div", { className: "flex w-full justify-center mb-10 mt-10", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center text-[var(--text-color)] opacity-30", children: [
+      /* @__PURE__ */ jsx(Text, { sz: "xl-3", weight: "bold", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-xmark" }) }),
+      /* @__PURE__ */ jsx(Text, { sz: "md-2", className: "mt-2", children: t("user:profileFriends.noFriends") })
+    ] }) }) : /* @__PURE__ */ jsx(
+      InfiniteScroll,
+      {
+        itemInRow: 2,
+        items: friends2,
+        isLoading: isLoading || isFetchingNextPage,
+        hasMore: hasNextPage,
+        onLoadMore: fetchNextPage,
+        className: "relative flex flex-wrap gap-2 w-full mt-2",
+        loadingSkeleton: /* @__PURE__ */ jsx("div", { className: "fa-solid fa-spinner animate-spin text-2xl text-single-main" }),
+        numberOfSkeletons: 1,
+        itemTemplate: (item, index) => /* @__PURE__ */ jsx(
+          FriendItem,
+          {
+            className: "w-[calc(50%-4px)]",
+            friendDto: item
+          },
+          item.id ?? index
+        )
+      }
+    )
   ] });
 };
 const ProfileFriendsPage = () => {
@@ -5274,14 +5441,15 @@ const UserMenu = ({ menuClassName, menuStyle }) => {
 };
 const MessageRow = ({
   content,
-  name,
+  senderId,
   isShowName = false,
-  avatarUrl,
   hasAvatar,
   isMyMessage,
   className,
-  messageClassName
+  messageClassName,
+  ref
 }) => {
+  const { data: userInfo } = useGetUserProfile(senderId);
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -5290,8 +5458,9 @@ const MessageRow = ({
         isMyMessage ? "justify-end" : "justify-start",
         className
       ),
+      ref,
       children: [
-        /* @__PURE__ */ jsx(
+        !isMyMessage && /* @__PURE__ */ jsx(
           Avatar,
           {
             className: clsx(
@@ -5299,18 +5468,18 @@ const MessageRow = ({
               isMyMessage && "order-2",
               !hasAvatar && "invisible"
             ),
-            src: avatarUrl,
+            src: userInfo?.infos.avatar,
             alt: "Avatar",
             sz: "xs-2"
           }
         ),
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col max-w-[75%] ", children: [
-          isShowName && /* @__PURE__ */ jsx(Text, { sz: "xs-1", className: clsx("mb-1 ml-3", isMyMessage ? "text-right" : "text-left"), children: name }),
+          isShowName && /* @__PURE__ */ jsx(Text, { sz: "xs-1", className: clsx("mb-1 ml-3", isMyMessage ? "text-right" : "text-left"), children: userInfo?.infos.fullName }),
           /* @__PURE__ */ jsx(
             "div",
             {
               className: clsx(
-                "px-3 py-1 break-words rounded-2xl shadow-sm",
+                "px-3 py-1 break-words rounded-2xl shadow-sm self-start",
                 isMyMessage ? "bg-blue-500 text-white" : "bg-gray-600 text-white",
                 messageClassName
               ),
@@ -5322,33 +5491,71 @@ const MessageRow = ({
     }
   );
 };
-const MessageList = ({ messages, className }) => {
+const MessageList = ({
+  conversationType,
+  messages,
+  className,
+  hasNextPage = false,
+  isFetchingNextPage = false,
+  fetchNextPage = () => {
+  }
+}) => {
   const { userId } = useAuth();
-  return /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-[0.1rem]", className), children: messages.map((message, index) => {
-    const isFirstMessageInGroup = index === messages.length - 1 || messages[index + 1].senderId !== message.senderId;
-    const isLastMessageInGroup = index === 0 || messages[index - 1].senderId !== message.senderId;
-    const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
-    const isMyMessage = message.senderId === userId;
-    return /* @__PURE__ */ jsx(
-      MessageRow,
-      {
-        content: message.content,
-        name: message.senderId,
-        isShowName: isLastMessageInGroup && !isMyMessage,
-        isMyMessage,
-        avatarUrl: message.senderId === "user1" ? "/avatar1.png" : "/avatar2.png",
-        hasAvatar: isFirstMessageInGroup,
-        className: clsx(isLastMessageInGroup ? "mt-[0.5rem]" : "mt-0"),
-        messageClassName: clsx(
-          isLastMessageInGroup ? isMyMessage ? "rounded-br-none" : "rounded-bl-none" : "",
-          isFirstMessageInGroup ? isMyMessage ? "rounded-tr-none" : "rounded-tl-none" : "",
-          !isFirstMessageInGroup && !isLastMessageInGroup ? isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none" : "",
-          isOnlyMessageInGroup ? "!rounded-2xl" : ""
-        )
-      },
-      message.id
-    );
-  }) });
+  const containerRef = useRef(null);
+  console.log("has next page:", hasNextPage, "is fetching next page:", isFetchingNextPage);
+  const messageSkeleton = /* @__PURE__ */ jsxs("div", { className: "flex gap-2 w-full animate-pulse", children: [
+    /* @__PURE__ */ jsx("div", { className: "w-8 h-8 bg-gray-700 rounded-full flex-shrink-0" }),
+    /* @__PURE__ */ jsx("div", { className: "flex-1", children: /* @__PURE__ */ jsx("div", { className: "h-4 bg-gray-700 rounded w-3/4" }) })
+  ] });
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx("flex flex-col gap-[0.1rem] overflow-y-auto", className),
+      ref: containerRef,
+      children: /* @__PURE__ */ jsx("div", { className: "relative", children: /* @__PURE__ */ jsx(
+        InfiniteScroll,
+        {
+          itemInRow: 1,
+          items: messages,
+          onLoadMore: fetchNextPage,
+          className: "flex flex-col gap-[0.1rem]",
+          itemTemplate: (item, _index, ref) => {
+            const message = item;
+            const isLastMessageInGroup = messages.indexOf(message) === messages.length - 1 || messages[messages.indexOf(message) + 1]?.senderId !== message.senderId;
+            const isFirstMessageInGroup = messages.indexOf(message) === 0 || messages[messages.indexOf(message) - 1]?.senderId !== message.senderId;
+            const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
+            const isMyMessage = message.senderId === userId;
+            return /* @__PURE__ */ jsx(
+              MessageRow,
+              {
+                ref,
+                content: message.content,
+                senderId: message.senderId,
+                isShowName: isLastMessageInGroup && !isMyMessage && conversationType === "group",
+                isMyMessage,
+                hasAvatar: isFirstMessageInGroup,
+                className: clsx(isLastMessageInGroup ? "mt-[0.5rem]" : "mt-0"),
+                messageClassName: clsx(
+                  isLastMessageInGroup ? isMyMessage ? "rounded-br-none" : "rounded-bl-none" : "",
+                  isFirstMessageInGroup ? isMyMessage ? "rounded-tr-none" : "rounded-tl-none" : "",
+                  !isFirstMessageInGroup && !isLastMessageInGroup ? isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none" : "",
+                  isOnlyMessageInGroup ? "!rounded-2xl" : ""
+                )
+              },
+              message.id
+            );
+          },
+          hasMore: !!hasNextPage,
+          isLoading: isFetchingNextPage,
+          loadingSkeleton: messageSkeleton,
+          numberOfSkeletons: 2,
+          gap: 2,
+          desc: true,
+          parentRef: containerRef
+        }
+      ) })
+    }
+  );
 };
 const PREFIX$1 = buildApiPath("/message");
 class MessageService {
@@ -5379,25 +5586,28 @@ const useSendMessage = () => {
 };
 const ChatWindow = ({ className, conversationId }) => {
   const [message, setMessage] = useState("");
-  const [chatTitle, setChatTitle] = useState("Cuộc trò chuyện");
-  const [chatAvatar, setChatAvatar] = useState("/default-avatar.png");
   const { toggleMinimize, closeChat, replaceChat, registry } = useChatStore();
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : void 0;
-  const { data: tempUser } = useGetUserProfile(tempTargetId);
-  const { data: conversationData } = useGetConversation(conversationId);
-  console.log("ChatWindow rendered with conversationId:", conversationData);
-  useEffect(() => {
-    if (tempUser) {
-      setChatTitle(tempUser.infos.fullName);
-      setChatAvatar(tempUser.infos.avatar);
-    }
-    if (conversationData) {
-      setChatTitle(conversationData.name || "Cuộc trò chuyện");
-      setChatAvatar(conversationData.avatarUrl || "/default-avatar.png");
-    }
-  }, [conversationData, tempUser]);
-  const { data: messages } = useMessages(conversationId, { limit: 20 });
+  const {
+    data: tempUser,
+    isLoading: isLoadingTempUser,
+    isFetching: isFetchingTempUser
+  } = useGetUserProfile(tempTargetId);
+  const {
+    data: conversationData,
+    isLoading: isLoadingConversation,
+    isFetching: isFetchingConversation
+  } = useGetConversation(conversationId);
+  const isLoadingHeader = isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
+  const chatTitle = tempUser ? tempUser.infos.fullName : conversationData?.name || "Cuộc trò chuyện";
+  const chatAvatar = tempUser ? tempUser.infos.avatar : conversationData?.avatarUrl;
+  const {
+    data: messages,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage
+  } = useMessages(conversationId, { sortDesc: true, limit: 20 });
   const { fetch: send, isFetching } = useSendMessage();
   const displayedMessages = messages ? messages.pages.flatMap((page) => page.items) : [];
   const handleOnClose = () => {
@@ -5415,10 +5625,17 @@ const ChatWindow = ({ className, conversationId }) => {
       },
       {
         onSuccess: (data) => {
-          replaceChat(conversationId, data.conversationId);
+          if (tempTargetId) replaceChat(conversationId, data.conversationId);
+          setMessage("");
         }
       }
     );
+  };
+  const handleKeyDown = (e) => {
+    if (e.key === "Enter" && message.trim() !== "") {
+      handleSendMessage();
+      setMessage("");
+    }
   };
   return /* @__PURE__ */ jsxs(
     "div",
@@ -5430,20 +5647,25 @@ const ChatWindow = ({ className, conversationId }) => {
       ),
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center px-4 h-[13%] bg-bg-fourth", children: [
-          /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "xs-3" }),
-          /* @__PURE__ */ jsx(
-            Text,
-            {
-              sz: "sm-1",
-              weight: "bold",
-              className: clsx(
-                "ml-2 text-white flex-1 rounded-md px-2 py-3",
-                "hover:bg-gray-700/30 cursor-pointer transition-all duration-200",
-                "active:scale-[0.98] active:opacity-80"
-              ),
-              children: chatTitle
-            }
-          ),
+          isLoadingHeader ? /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", variant: "circle", className: "w-8" }),
+            /* @__PURE__ */ jsx(Skeleton, { sz: "sm-3", className: "ml-2 flex-1" })
+          ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+            /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "xs-3" }),
+            /* @__PURE__ */ jsx(
+              Text,
+              {
+                sz: "sm-1",
+                weight: "bold",
+                className: clsx(
+                  "ml-2 text-white flex-1 rounded-md px-2 py-3",
+                  "hover:bg-gray-700/30 cursor-pointer transition-all duration-200",
+                  "active:scale-[0.98] active:opacity-80"
+                ),
+                children: chatTitle
+              }
+            )
+          ] }),
           /* @__PURE__ */ jsx(MiniButton, { sz: "xs-3", onClick: handleOnMinimum, children: /* @__PURE__ */ jsx("i", { className: "fas fa-minus" }) }),
           /* @__PURE__ */ jsx(MiniButton, { sz: "xs-3", onClick: handleOnClose, children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" }) })
         ] }),
@@ -5457,7 +5679,15 @@ const ChatWindow = ({ className, conversationId }) => {
             /* @__PURE__ */ jsx(Text, { sz: "xs-1", className: "text-gray-400 mt-1", children: "Hai bạn chưa có tin nhắn nào" }),
             /* @__PURE__ */ jsx("div", { className: "mt-4 px-3 py-2 bg-gray-700/30 rounded-full", children: /* @__PURE__ */ jsx(Text, { sz: "xs-1", className: "text-gray-300", children: "Gửi lời chào đầu tiên 👋" }) })
           ] }) : null,
-          /* @__PURE__ */ jsx(MessageList, { messages: displayedMessages })
+          /* @__PURE__ */ jsx(
+            MessageList,
+            {
+              messages: displayedMessages,
+              hasNextPage,
+              isFetchingNextPage,
+              fetchNextPage
+            }
+          )
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "px-2 h-[15%] self-end bg-bg-fourth w-full flex items-center", children: [
           /* @__PURE__ */ jsx(
@@ -5468,7 +5698,8 @@ const ChatWindow = ({ className, conversationId }) => {
               wrapperClassName: "flex-1",
               placeholder: "Tin nhắn của bạn",
               value: message,
-              onChange: (e) => setMessage(e.target.value)
+              onChange: (e) => setMessage(e.target.value),
+              onKeyDown: handleKeyDown
             }
           ),
           /* @__PURE__ */ jsx(
@@ -5498,7 +5729,8 @@ const BubbleChat = ({ className, conversationId }) => {
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : void 0;
   const { data: tempUser } = useGetUserProfile(tempTargetId);
-  const chatAvatar = tempUser ? tempUser.infos.avatar : "";
+  const { data: conversationData } = useGetConversation(conversationId);
+  const chatAvatar = tempUser ? tempUser.infos.avatar : conversationData?.avatarUrl || "";
   const handleOnClick = () => {
     toggleMinimize(conversationId);
   };
@@ -5507,12 +5739,25 @@ const BubbleChat = ({ className, conversationId }) => {
     closeChat(conversationId);
   };
   return /* @__PURE__ */ jsxs("div", { className: clsx("relative flex gap-4 group", className), onClick: handleOnClick, children: [
-    /* @__PURE__ */ jsx(Avatar, { sz: "sm-2", alt: "Avatar", src: chatAvatar }),
+    /* @__PURE__ */ jsx(
+      Avatar,
+      {
+        sz: "sm-2",
+        alt: "Avatar",
+        src: chatAvatar,
+        className: clsx(
+          "shadow-lg shadow-bg-second hover:shadow-bg-fourth",
+          "hover:scale-105 cursor-pointer hover:brightness-95 transition-all duration-200",
+          "border-2 border-bg-ninth",
+          "active:scale-95"
+        )
+      }
+    ),
     /* @__PURE__ */ jsx(
       MiniButton,
       {
         sz: "xs-2",
-        className: "absolute opacity-0 group-hover:opacity-100 bg-gray-500 hover:bg-gray-500 !duration-100 top-[-20%] right-[-20%]",
+        className: "absolute opacity-0 group-hover:opacity-100 bg-gray-500 !duration-100 top-[-20%] right-[-20%]",
         onClick: handleOnClose,
         children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
       }
@@ -6578,7 +6823,8 @@ function Main() {
   return /* @__PURE__ */ jsxs("main", { children: [
     /* @__PURE__ */ jsx(AppRoutes, {}),
     /* @__PURE__ */ jsx(GlobalDialog, {}),
-    /* @__PURE__ */ jsx(NotificationListener, {})
+    /* @__PURE__ */ jsx(NotificationListener, {}),
+    /* @__PURE__ */ jsx(MessageListener, {})
   ] });
 }
 function App({ authContext }) {
