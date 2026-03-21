@@ -45,9 +45,7 @@ export class FriendshipService {
     userId: string,
     query: CursorQuery<string> & { keyword?: string },
   ): Promise<Result<CursorResult<FriendDto, string>>> {
-    const res = await apiGet(`${PREFIX}/friends/${userId}`, query);
-    console.log(res);
-    return res;
+    return await apiGet(`${PREFIX}/friends/${userId}`, query);
   }
 }
 
