@@ -15,7 +15,7 @@ export const FriendRequestAccepted: React.FC<FriendRequestAcceptedProps> = ({
   const navigate = useNavigate();
   const handleClick = useCallback(() => {
     onClick?.();
-    navigate(notificationDto.actorId);
+    navigate("/" + notificationDto.actorId);
   }, [navigate, onClick, notificationDto.actorId]);
 
   return <BaseNotification notificationDto={notificationDto} onClick={handleClick} />;
