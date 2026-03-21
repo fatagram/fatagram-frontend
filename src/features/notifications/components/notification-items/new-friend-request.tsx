@@ -27,7 +27,7 @@ const NewFriendRequest: React.FC<NewFriendRequestProps> = ({
 
   const handleClick = useCallback(() => {
     onClick();
-    navigate(notificationDto.actorId);
+    navigate("/" + notificationDto.actorId);
   }, [onClick, navigate, notificationDto.actorId]);
 
   const handleAccept = (e: any) => {

@@ -105,12 +105,12 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
         )}
       </div>
       {notifications.length > 0 ? (
-        <div className="relative py-1 overflow-y-scroll max-h-[500px] [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+        <div className="relative py-1 max-h-[500px]">
           <InfiniteScroll
             itemInRow={1}
             items={notifications}
             onLoadMore={fetchNextPage}
-            className="gap-0"
+            className="gap-0 scrollbar-hide"
             itemTemplate={(item: any) => {
               const notification = item as NotificationDto;
               return (
