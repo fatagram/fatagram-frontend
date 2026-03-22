@@ -151,7 +151,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
     queryClient.clear();
   }, [queryClient]);
 
-  const setUrlName = useCallback((urlName: string | undefined) => {
+  const setUrlName = useCallback((urlName?: string) => {
     dispatch({
       type: "UPDATE_URL_NAME",
       payload: urlName,

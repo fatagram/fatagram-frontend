@@ -22,5 +22,10 @@
     "darkSea": "Biển đêm",
     "darkYellow": "Vàng tối",
     "lightYellowPink": "Vàng hồng"
+  },
+  "conversations": {
+    "title": "Cuộc trò chuyện",
+    "search": "Tìm kiếm cuộc trò chuyện...",
+    "you": "Bạn"
   }
 }

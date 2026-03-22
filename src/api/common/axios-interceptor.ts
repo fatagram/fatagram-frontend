@@ -45,7 +45,7 @@ apiClient.interceptors.response.use(
           return await apiClient.request(error.config);
         }
       } catch (error) {
-        // authEvents.emit("openLoginOverlay");
+        window.location.href = "/login";
       }
     } else if (
       error.response?.status === 403 &&

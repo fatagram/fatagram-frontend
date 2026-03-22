@@ -4,7 +4,8 @@
   border-color: transparent;
 
   /* Gradient border */
-  background: linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
+  background:
+    linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
     var(--gradient-main) border-box;
   background-size: 200% 100%;
   background-position: 0 100%;
@@ -18,7 +19,9 @@
 
 .primary-textbox:focus {
   background-position: 100% 100%;
-  box-shadow: 0 0 0 3px rgba(43, 212, 139, 0.15), 0 4px 20px rgba(43, 212, 139, 0.25);
+  box-shadow:
+    0 0 0 3px rgba(43, 212, 139, 0.15),
+    0 4px 20px rgba(43, 212, 139, 0.25);
   transform: scale(1.01);
 }
 
@@ -28,7 +31,8 @@
   border-color: transparent;
 
   /* Gradient border with error color */
-  background: linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
+  background:
+    linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
     linear-gradient(135deg, rgb(var(--error)), #ff6b6b) border-box;
   background-size: 200% 100%;
   background-position: 0 100%;
@@ -42,6 +46,8 @@
 
 .primary-textbox-wrong:focus {
   background-position: 100% 100%;
-  box-shadow: 0 0 0 3px rgba(255, 75, 75, 0.2), 0 4px 20px rgba(255, 75, 75, 0.3);
+  box-shadow:
+    0 0 0 3px rgba(255, 75, 75, 0.2),
+    0 4px 20px rgba(255, 75, 75, 0.3);
   transform: scale(1.01);
 }

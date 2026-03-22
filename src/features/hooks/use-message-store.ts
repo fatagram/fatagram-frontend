@@ -31,7 +31,7 @@ export function useMessageCacheMutations() {
                 },
               ],
               pageParams: [undefined],
-            } as MessagePages;
+            };
           }
 
           // Với DESC: pages[0] = newest, pages[n] = oldest

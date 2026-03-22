@@ -4,7 +4,7 @@ import { renderContent } from "../../helper/render-content";
 import { getNotificationContent } from "../../helper/get-notification-content";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { timeDistance } from "@/utils/time-distance";
+import { useFormatTime } from "../../../../utils/format-time";
 
 interface BaseNotificationProps {
   notificationDto: NotificationDto;
@@ -20,7 +20,7 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
 
   const content = getNotificationContent(notificationDto.type, notificationDto.content, t);
-  const time = timeDistance(new Date(notificationDto.createdAt));
+  const formatTime = useFormatTime();
 
   return (
     <div className="flex gap-2 select-none" onClick={onClick}>
@@ -42,7 +42,7 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
           color={notificationDto.isRead ? "primary" : "secondary"}
           className={clsx({ "opacity-70": notificationDto.isRead })}
         >
-          {time.count ? t(time.unit, { count: time.count }) + " " + t(time.text) : t(time.text)}
+          {formatTime(notificationDto.createdAt)}
         </Text>
         {children}
       </div>

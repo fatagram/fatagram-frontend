@@ -45,7 +45,7 @@ interface TextProps extends ComponentProps {
   as?: ElementType;
   color?: Color;
   weight?: Weight;
-  wrap?: "whitespace-pre-wrap" | "whitespace-normal";
+  wrap?: "whitespace-pre-wrap" | "whitespace-normal" | "whitespace-nowrap";
 }
 
 export const Text = forwardRef<HTMLElement, TextProps>(
@@ -55,7 +55,7 @@ export const Text = forwardRef<HTMLElement, TextProps>(
       sz = "md-1",
       weight = "regular",
       color = "primary",
-      wrap = "whitespace-normal",
+      wrap = "whitespace-nowrap",
       className = "",
       children,
       ...props

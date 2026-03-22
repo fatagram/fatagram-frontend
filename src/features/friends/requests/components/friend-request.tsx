@@ -19,7 +19,6 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
   const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
     limit: 20,
   });
-  console.log(hasNextPage);
   const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
 
   const { fetch: acceptFriendRequest } = useAcceptFriendRequest();

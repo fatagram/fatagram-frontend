@@ -29,21 +29,24 @@ interface ThemeProviderProps {
   children: React.ReactNode;
 }
 
-// Get initial theme from DOM (set by SSR script) to prevent flash
-// function getInitialTheme(): Theme {
-//   if (typeof window === "undefined") return "light";
+function getInitialTheme(): Theme {
+  if (typeof window === "undefined") return "light";
 
-//   const currentTheme = document.documentElement.getAttribute("data-theme");
-//   if (ThemeList.some((t) => t === currentTheme)) {
-//     return currentTheme as Theme;
-//   }
+  const stored = localStorage.getItem("theme");
+  if (stored && ThemeList.some((t) => t === stored)) {
+    return stored as Theme;
+  }
 
-//   return "light";
-// }
+  const domTheme = document.documentElement.getAttribute("data-theme");
+  if (domTheme && ThemeList.some((t) => t === domTheme)) {
+    return domTheme as Theme;
+  }
+
+  return "light";
+}
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
-  // Initialize from a safe default "light" to match server render
-  const [theme, setTheme] = useState<Theme>("light");
+  const [theme, setTheme] = useState<Theme>(getInitialTheme);
   const t = useTranslation().t;
 
   const availableThemes: { key: Theme; label: string }[] = [
@@ -56,21 +59,6 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     { key: "light-yellow-pink", label: t("common:themes:lightYellowPink") },
   ];
 
-  // Sync theme on mount
-  useEffect(() => {
-    // 1. Check DOM (set by SSR script)
-    const domTheme = document.documentElement.getAttribute("data-theme") as Theme | null;
-    // 2. Check LocalStorage
-    const storedTheme = localStorage.getItem("theme") as Theme | null;
-
-    const initialTheme = storedTheme || domTheme || "light";
-
-    if (ThemeList.some((t) => t === initialTheme)) {
-      setTheme(initialTheme as Theme);
-    }
-  }, []);
-
-  // Update DOM when theme changes
   useEffect(() => {
     const root = window.document.documentElement;
     root.setAttribute("data-theme", theme);

@@ -22,5 +22,10 @@
     "darkSea": "Dark Sea",
     "darkYellow": "Dark Yellow",
     "lightYellowPink": "Light Yellow Pink"
+  },
+  "conversations": {
+    "title": "Conversations",
+    "search": "Search conversations...",
+    "you": "You"
   }
 }

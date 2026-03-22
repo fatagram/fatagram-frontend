@@ -63,7 +63,7 @@ export async function handleSSR(req, res, vite, templateHtml) {
       const themeScript = getThemeScript();
       const htmlWithStyles = htmlStart.replace(
         "</head>",
-        `${themeScript}${initialDataScript}<style>${css}</style></head>`,
+        `<style>${css}</style>${themeScript}${initialDataScript}</head>`,
       );
 
       res.status(200);

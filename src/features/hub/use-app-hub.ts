@@ -1,11 +1,11 @@
-import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { HubConnection } from "@microsoft/signalr";
 import { useEffect, useRef } from "react";
-import { createSignalRConnection } from "./notification-hub-client";
 import { authEvents } from "@/events/auth-event";
 import { useAuth } from "@/contexts";
+import { createSignalRConnection } from "../../api/socket/app-hub-client";
+import { SocketMessage } from "@/api/common/socket-message";
 
-export function useNotificationHub(onReceiveNotification: (data: NotificationDto) => void) {
+export function useAppHub<T>(onReceiveMessage: (message: SocketMessage<T>) => void) {
   const connectionRef = useRef<HubConnection | null>(null);
   const { isAuthenticated } = useAuth();
 
@@ -20,9 +20,9 @@ export function useNotificationHub(onReceiveNotification: (data: NotificationDto
       const tryConnect = async (retry: number = 0) => {
         try {
           await conn.start();
-          conn.on("ReceiveNotification", (data: NotificationDto) => {
+          conn.on("ReceiveMessage", (message: SocketMessage<T>) => {
             if (isMounted) {
-              onReceiveNotification(data);
+              onReceiveMessage(message);
             }
           });
         } catch (err: any) {

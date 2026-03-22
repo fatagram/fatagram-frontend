@@ -11,6 +11,7 @@ import { RegisterForm } from "@/features/auth/register/components/register-form"
 import { Navbar } from "@/components/ui";
 import UserMenu from "../user-menu";
 import { ChatLayer } from "@/features/chat/chat-layer";
+import { ChatBadge } from "@/features/chat/components/chat-badge";
 
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
@@ -74,6 +75,7 @@ const DefaultLayout = () => {
           options={
             isAuthenticated ? (
               <div className={clsx("flex items-center gap-2")}>
+                <ChatBadge />
                 <NotificationBadge />
                 <UserMenu />
               </div>

@@ -6,7 +6,7 @@ let connection: signalR.HubConnection | null = null;
 export const createSignalRConnection = () => {
   try {
     connection = new signalR.HubConnectionBuilder()
-      .withUrl(`${appConfig.apiUrl}/hubs/message`, {
+      .withUrl(`${appConfig.apiUrl}/hubs/app`, {
         withCredentials: true,
       })
       .withAutomaticReconnect()
