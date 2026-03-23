@@ -26,6 +26,7 @@
   "conversations": {
     "title": "Cuộc trò chuyện",
     "search": "Tìm kiếm cuộc trò chuyện...",
-    "you": "Bạn"
+    "you": "Bạn",
+    "no-conversations": "Không có cuộc trò chuyện"
   }
 }

@@ -15,7 +15,7 @@ interface ChatWindowProps extends ComponentProps {
 export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationId }) => {
   const [message, setMessage] = useState("");
 
-  const { toggleMinimize, closeChat, replaceChat, registry } = useChatStore();
+  const { toggleMinimize, closeChat, registry } = useChatStore();
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
@@ -60,13 +60,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const handleSendMessage = () => {
     send(
       {
-        conversationId: tempTargetId === undefined ? conversationId : undefined,
+        conversationId: !tempTargetId ? conversationId : undefined,
+        correlationId: tempTargetId ? conversationId : undefined,
         content: message,
         receiverId: tempTargetId,
       },
       {
-        onSuccess: (data) => {
-          if (tempTargetId) replaceChat(tempTargetId, data!.conversationId);
+        onSuccess: () => {
           setMessage("");
         },
       },
@@ -76,7 +76,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && message.trim() !== "") {
       handleSendMessage();
-      setMessage("");
     }
   };
 

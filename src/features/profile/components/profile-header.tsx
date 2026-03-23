@@ -56,7 +56,8 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
     if (result.data) {
       openChat(result.data.id, { type: "conversation", conversationId: result.data.id });
     } else {
-      openChat(targetId, { type: "temp", targetId: targetId });
+      const randomUuid = crypto.randomUUID();
+      openChat(randomUuid, { type: "temp", targetId: targetId });
     }
   };
 

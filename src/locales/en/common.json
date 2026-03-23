@@ -26,6 +26,7 @@
   "conversations": {
     "title": "Conversations",
     "search": "Search conversations...",
-    "you": "You"
+    "you": "You",
+    "no-conversations": "No conversations"
   }
 }

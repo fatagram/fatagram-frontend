@@ -24,11 +24,7 @@ export const useMessages = (
 };
 
 export const useSendMessage = () => {
-  return useResultFetcher((data: MessageDto) =>
-    messageService.sendMessage({
-      conversationId: data.conversationId,
-      content: data.content,
-      receiverId: data.receiverId,
-    }),
-  );
+  return useResultFetcher(async (data: MessageDto) => {
+    return await messageService.sendMessage(data);
+  });
 };

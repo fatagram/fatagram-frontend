@@ -14,8 +14,12 @@ export function MessageListener() {
     const data = message.payload;
     const conversationId = data.conversationId;
 
-    if (useChatStore.getState().registry[data.senderId]?.type === "temp") {
-      useChatStore.getState().replaceChat(data.senderId, conversationId);
+    if (data.correlationId && useChatStore.getState().registry[data.correlationId]) {
+      useChatStore.getState().replaceChat(data.correlationId, conversationId);
+    } else {
+      useChatStore
+        .getState()
+        .openChat(conversationId, { type: "conversation", conversationId: conversationId });
     }
 
     addMessageToCache(conversationId, data, true);
