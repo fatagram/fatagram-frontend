@@ -12,6 +12,7 @@ const FatalkPage = () => {
       title="Fatalk"
       navbar={<FatalkSidebar />}
       className="h-[calc(100vh-var(--header-height))] overflow-hidden"
+      sidebarClassName="w-[400px] max-w-full"
     >
       <div className="flex flex-col w-full h-full overflow-hidden">
         {conversationId ? (

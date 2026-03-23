@@ -5,6 +5,7 @@ import Transition, { AnimationLib } from "../utils/transition";
 
 interface SidebarLayoutProps extends ComponentProps {
   navbar?: React.ReactNode;
+  sidebarClassName?: string;
   children: React.ReactNode;
   title?: string;
 }
@@ -12,6 +13,7 @@ interface SidebarLayoutProps extends ComponentProps {
 export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   className,
   navbar,
+  sidebarClassName,
   title,
   children,
 }) => {
@@ -24,6 +26,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
           "z-30 w-[70vw] max-w-[300px] shrink-0 overflow-y-auto",
           "fixed lg:sticky transition-transform duration-300",
           isShowSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          sidebarClassName,
         )}
         style={{
           top: "var(--header-height, 0px)",

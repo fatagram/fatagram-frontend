@@ -9,6 +9,7 @@ interface ChatWindowState {
   closeChat: (id: string) => void;
   toggleMinimize: (id: string) => void;
   replaceChat: (oldId: string, newId: string) => void;
+  reset?: () => void;
 }
 
 export const useChatStore = create<ChatWindowState>((set) => ({
@@ -66,4 +67,10 @@ export const useChatStore = create<ChatWindowState>((set) => ({
       };
     });
   },
+  reset: () =>
+    set(() => ({
+      activeIds: [],
+      minimizedIds: [],
+      registry: {},
+    })),
 }));

@@ -58,19 +58,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   };
 
   const handleSendMessage = () => {
-    send(
-      {
-        conversationId: !tempTargetId ? conversationId : undefined,
-        correlationId: tempTargetId ? conversationId : undefined,
-        content: message,
-        receiverId: tempTargetId,
-      },
-      {
-        onSuccess: () => {
-          setMessage("");
-        },
-      },
-    );
+    send({
+      conversationId: !tempTargetId ? conversationId : undefined,
+      correlationId: tempTargetId ? conversationId : undefined,
+      content: message,
+      receiverId: tempTargetId,
+    });
+    setMessage("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {

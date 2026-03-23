@@ -10,6 +10,7 @@ import React, {
   useReducer,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
+import { useChatStore } from "@/features/hooks/use-chat-store";
 import { AuthState, initialAuthStatus } from "@/types/auth-state";
 import { LocaleKeys } from "@/hooks/use-trans";
 import { useResultFetcher } from "@/hooks/use-fetcher";
@@ -149,6 +150,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
 
   const clearUserData = useCallback(() => {
     queryClient.clear();
+    useChatStore.getState().reset?.();
   }, [queryClient]);
 
   const setUrlName = useCallback((urlName?: string) => {

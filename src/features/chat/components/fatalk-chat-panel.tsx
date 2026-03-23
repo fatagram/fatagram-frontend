@@ -3,6 +3,7 @@ import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
+import { useRef } from "react";
 import { useMessages, useSendMessage } from "@/features/hooks/use-message";
 import { useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
@@ -14,7 +15,7 @@ interface FatalkChatPanelProps extends ComponentProps {
 
 export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({ className, conversationId }) => {
   const [message, setMessage] = useState("");
-  const { registry, replaceChat } = useChatStore();
+  const { registry } = useChatStore();
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
@@ -49,22 +50,16 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({ className, con
 
   const { fetch: send, isFetching } = useSendMessage();
   const displayedMessages = messages ? messages.pages.flatMap((page) => page.items) : [];
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
-    send(
-      {
-        conversationId: tempTargetId === undefined ? conversationId : undefined,
-        content: message,
-        receiverId: tempTargetId,
-      },
-      {
-        onSuccess: (data) => {
-          if (tempTargetId) replaceChat(tempTargetId, data!.conversationId);
-          setMessage("");
-        },
-      },
-    );
+    send({
+      conversationId: tempTargetId === undefined ? conversationId : undefined,
+      content: message,
+      receiverId: tempTargetId,
+    });
+    setMessage("");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -102,7 +97,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({ className, con
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh">
+      <div className="flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh" ref={scrollRef}>
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-4">
@@ -127,6 +122,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({ className, con
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
           fetchNextPage={fetchNextPage}
+          parentRef={scrollRef}
         />
       </div>
 

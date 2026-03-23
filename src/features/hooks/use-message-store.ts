@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { CursorResult } from "@/api/common/result";
-import { MessageDto, MessageResponseDto } from "@/api/message/dto/message.dto";
+import { Message } from "@/api/message/dto/message.dto";
 
 // Message query keys helper (kept in sync with useMessages)
 export const messageKeys = {
@@ -9,7 +9,7 @@ export const messageKeys = {
 };
 
 type MessagePages<TCursor = string> = {
-  pages: Array<CursorResult<MessageResponseDto, TCursor>>;
+  pages: Array<CursorResult<Message, TCursor>>;
   pageParams: unknown[];
 };
 
@@ -17,7 +17,7 @@ export function useMessageCacheMutations() {
   const queryClient = useQueryClient();
 
   const addMessageToCache = useCallback(
-    (conversationId: string, message: MessageResponseDto, isDescending: boolean = true) => {
+    (conversationId: string, message: Message, isDescending: boolean = true) => {
       queryClient.setQueriesData<MessagePages>(
         { queryKey: ["messages", conversationId] },
         (old) => {
@@ -40,7 +40,21 @@ export function useMessageCacheMutations() {
           const targetPage = old.pages[targetPageIndex];
 
           // Avoid duplicates
-          if (targetPage.items.some((m) => m.id === message.id)) return old;
+          for (const item of targetPage.items) {
+            if (item.id === message.id) return old;
+            if (item.clientTempId && item.clientTempId === message.clientTempId) {
+              const newPages = {
+                ...targetPage,
+                items: targetPage.items.map((m) =>
+                  m.clientTempId === message.clientTempId ? message : m,
+                ),
+              };
+              return {
+                ...old,
+                pages: [newPages, ...old.pages.slice(1)],
+              };
+            }
+          }
 
           const newPages = [...old.pages];
           newPages[targetPageIndex] = {
@@ -59,7 +73,7 @@ export function useMessageCacheMutations() {
   );
 
   const updateMessageInCache = useCallback(
-    (conversationId: string, messageId: string, updater: (old: MessageDto) => MessageDto) => {
+    (conversationId: string, messageId: string, updater: (old: Message) => Message) => {
       queryClient.setQueriesData<MessagePages>(
         { queryKey: ["messages", conversationId] },
         (old) => {
