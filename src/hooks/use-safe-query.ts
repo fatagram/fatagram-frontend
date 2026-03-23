@@ -41,7 +41,6 @@ export type SafeQueryResultOptions<TData> = {
 export type SafeQueryOptionsParams<TData> = {
   queryKey: QueryKey;
   fn: () => Promise<Result<TData>>;
-  enabled?: boolean;
 };
 
 export function createSafeQueryOptions<TData>(params: SafeQueryOptionsParams<TData>) {
@@ -52,7 +51,6 @@ export function createSafeQueryOptions<TData>(params: SafeQueryOptionsParams<TDa
       if (!result.success) throw result;
       return result.data!;
     },
-    enabled: params.enabled,
   };
 }
 

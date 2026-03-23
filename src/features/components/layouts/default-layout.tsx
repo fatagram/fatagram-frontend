@@ -1,6 +1,6 @@
 import Layout from "@/components/ui/layout";
 import { useCallback, useEffect } from "react";
-import { Outlet, useNavigate } from "react-router-dom";
+import { Outlet, useNavigate, useLocation } from "react-router-dom";
 import { Logo } from "@/components/atoms/logo/logo";
 import { NotificationBadge } from "@/features/notifications/components/notification-menu";
 import clsx from "clsx";
@@ -17,12 +17,14 @@ const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
   const { openDialog, closeDialog } = useDialog();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
 
-  // const [headerRef, headerSize] = useSize<HTMLHeadElement>();
+  const isFatalkPage = pathname.startsWith("/fatalk");
 
   const items = [
-    { icon: <i className="fa-solid fa-house"></i>, path: "/", isIndex: true },
-    { icon: <i className="fa-solid fa-user-group"></i>, path: "/friends", isIndex: false },
+    { icon: <i className="fa-solid fa-house" />, path: "/", isIndex: true },
+    { icon: <i className="fa-solid fa-user-group" />, path: "/friends", isIndex: false },
+    { icon: <i className="fa-solid fa-message" />, path: "/fatalk", isIndex: false },
   ];
 
   const openLoginOverlay = useCallback(() => {
@@ -75,7 +77,7 @@ const DefaultLayout = () => {
           options={
             isAuthenticated ? (
               <div className={clsx("flex items-center gap-2")}>
-                <ChatBadge />
+                {!isFatalkPage && <ChatBadge />}
                 <NotificationBadge />
                 <UserMenu />
               </div>

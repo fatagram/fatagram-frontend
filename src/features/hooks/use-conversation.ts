@@ -37,11 +37,12 @@ export const useGetConversationWith = (targetId: string, config?: SafeQueryResul
 export const useGetConversation = (
   conversationId: string,
   config?: SafeQueryResultOptions<any>,
+  enabled?: boolean,
 ) => {
   return useSafeQueryResult({
     queryKey: conversationKeys.detail(conversationId),
     fn: async () => await conversationService.getConversation(conversationId),
-    enabled: false,
+    enabled: enabled ?? false,
     options: config,
   });
 };

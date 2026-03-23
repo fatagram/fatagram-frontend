@@ -1,4 +1,4 @@
-import React, { useCallback } from "react";
+import React from "react";
 import ProfileBackground from "./profile-background";
 import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
@@ -35,32 +35,28 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
 
   const { data, isLoading, isFetching } = useGetUserProfile(targetId);
   const userProfile = data?.infos;
-  const { openChat, replaceChat } = useChatStore();
+  const { openChat } = useChatStore();
 
   const { data: numberOfFriends, isFetching: numberOfFriendsFetching } =
     useGetNumberOfFriends(targetId);
 
-  const handleConversationSuccess = useCallback(
-    (data: any) => {
-      replaceChat(targetId, data.id);
-    },
-    [targetId, replaceChat],
-  );
-
-  const { data: conversationData, refetch: refetchConversation } = useGetConversationWith(
-    targetId,
-    {
-      onSuccess: handleConversationSuccess,
-    },
-  );
+  const {
+    data: conversationData,
+    refetch: refetchConversation,
+    isFetching: isCheckingConversation,
+  } = useGetConversationWith(targetId);
 
   const handleMessageClick = async () => {
     if (!targetId) return;
-    if (!conversationData) {
-      openChat(targetId, { type: "temp", targetId: targetId });
-      await refetchConversation();
-    } else {
+    if (conversationData) {
       openChat(conversationData.id, { type: "conversation", conversationId: conversationData.id });
+      return;
+    }
+    const result = await refetchConversation();
+    if (result.data) {
+      openChat(result.data.id, { type: "conversation", conversationId: result.data.id });
+    } else {
+      openChat(targetId, { type: "temp", targetId: targetId });
     }
   };
 
@@ -117,8 +113,20 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
                 )}
 
                 {!isOwner && isAuthenticated && (
-                  <Button sz="sm-1" variant="secondary" onClick={handleMessageClick}>
-                    <i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}
+                  <Button
+                    sz="sm-1"
+                    variant="secondary"
+                    onClick={handleMessageClick}
+                    disabled={isCheckingConversation}
+                  >
+                    <i
+                      className={
+                        isCheckingConversation
+                          ? "fa-solid fa-spinner fa-spin"
+                          : "fa-solid fa-comment"
+                      }
+                    />{" "}
+                    {t("user:profileHeader.messageButton")}
                   </Button>
                 )}
                 <Button sz="sm-1" variant="secondary">

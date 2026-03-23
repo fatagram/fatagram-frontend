@@ -19,12 +19,12 @@ export const useOnboarding = () => {
   });
 };
 
-export const useGetUserProfile = (userId: string) => {
+export const useGetUserProfile = (userId?: string) => {
   return useSafeQueryResult({
-    queryKey: profileQueryKey(userId),
+    queryKey: profileQueryKey(userId ?? ""),
     fn: async () =>
       await userProfileService.getProfile(
-        userId,
+        userId!,
         "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName",
       ),
     enabled: !!userId,

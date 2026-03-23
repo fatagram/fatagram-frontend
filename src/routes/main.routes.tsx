@@ -13,6 +13,7 @@ import SecondLayout from "../features/components/layouts/second-layout";
 import GoogleCallbackPage from "@/features/auth/google-callback/google-callback-page";
 import OnboardingPage from "@/features/onboarding/onboarding-page";
 import { settingRoutes } from "./setting.routes";
+import FatalkPage from "@/features/chat/fatalk-page";
 
 export const mainRoutes: RouteType[] = [
   {
@@ -32,6 +33,16 @@ export const mainRoutes: RouteType[] = [
       {
         path: "/notifications",
         element: <NotificationPage />,
+        type: "private",
+      },
+      {
+        path: "/fatalk",
+        element: <FatalkPage />,
+        type: "private",
+      },
+      {
+        path: "/fatalk/:conversationId",
+        element: <FatalkPage />,
         type: "private",
       },
       { path: "/loading", type: "public", element: <LoadingPage /> },

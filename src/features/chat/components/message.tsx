@@ -2,16 +2,16 @@ import { Text, Avatar } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import { useAuth } from "@/contexts";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
-import { Message } from "@/types/entities/message.type";
 import clsx from "clsx";
 import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
 import { useRef } from "react";
+import { MessageResponseDto } from "@/api/message/dto/message.dto";
+import { useFormatTime } from "@/utils/format-time";
 
 interface MessageProps extends ComponentProps {
-  content: string;
-  type?: any;
-  senderId?: string;
+  message: MessageResponseDto;
   isShowName?: boolean;
+  isShowTime?: boolean;
   hasAvatar?: boolean;
   isMyMessage?: boolean;
   messageClassName?: string;
@@ -19,56 +19,61 @@ interface MessageProps extends ComponentProps {
 }
 
 const MessageRow: React.FC<MessageProps> = ({
-  content,
-  senderId,
+  message,
   isShowName = false,
+  isShowTime = true,
   hasAvatar,
   isMyMessage,
   className,
   messageClassName,
   ref,
 }) => {
-  const { data: userInfo } = useGetUserProfile(senderId!);
+  const { data: userInfo } = useGetUserProfile(message.senderId!);
+  const { formatSmartTimestamp } = useFormatTime();
   return (
-    <div
-      className={clsx("flex gap-2", isMyMessage ? "justify-end" : "justify-start", className)}
-      ref={ref}
-    >
-      {!isMyMessage && (
-        <Avatar
-          className={clsx(
-            "flex-shrink-0 self-start",
-            isMyMessage && "order-2",
-            !hasAvatar && "invisible",
-          )}
-          src={userInfo?.infos.avatar}
-          alt="Avatar"
-          sz="xs-2"
-        />
+    <div className={clsx("flex flex-col", className)} ref={ref}>
+      {isShowTime && (
+        <Text sz="xs-1" className="text-center my-2">
+          {formatSmartTimestamp(message.createdAt)}
+        </Text>
       )}
-      <div className="flex flex-col max-w-[75%]">
-        {isShowName && (
-          <Text
-            sz="xs-1"
-            className={clsx("mb-1", isMyMessage ? "text-right mr-3" : "text-left ml-3")}
-          >
-            {userInfo?.infos.fullName}
-          </Text>
+      <div className={clsx("flex gap-2 w-full", isMyMessage ? "flex-row-reverse" : "flex-row")}>
+        {!isMyMessage && (
+          <Avatar
+            className={clsx(
+              "flex-shrink-0 self-start",
+              isMyMessage && "order-2",
+              !hasAvatar && "invisible",
+            )}
+            src={userInfo?.infos.avatar}
+            alt="Avatar"
+            sz="xs-2"
+          />
         )}
-        <div
-          className={clsx(
-            "px-3 py-1 break-all rounded-2xl shadow-sm",
-            isMyMessage ? "bg-primary-600" : "bg-bg-fourth",
-            messageClassName,
+        <div className="flex flex-col max-w-[75%]">
+          {isShowName && (
+            <Text
+              sz="xs-1"
+              className={clsx("mb-1", isMyMessage ? "text-right mr-3" : "text-left ml-3")}
+            >
+              {userInfo?.infos.fullName}
+            </Text>
           )}
-        >
-          <Text
-            sz="sm-1"
-            wrap="whitespace-normal"
-            className={clsx(isMyMessage ? "text-text-message" : "text-text-main")}
+          <div
+            className={clsx(
+              "px-3 py-1 break-all rounded-2xl shadow-sm",
+              isMyMessage ? "bg-primary-600" : "bg-bg-fourth",
+              messageClassName,
+            )}
           >
-            {content}
-          </Text>
+            <Text
+              sz="sm-1"
+              wrap="whitespace-normal"
+              className={clsx(isMyMessage ? "text-text-message" : "text-text-main")}
+            >
+              {message.content}
+            </Text>
+          </div>
         </div>
       </div>
     </div>
@@ -77,7 +82,7 @@ const MessageRow: React.FC<MessageProps> = ({
 
 interface MessageListProps extends ComponentProps {
   conversationType?: any;
-  messages: Message[];
+  messages: MessageResponseDto[];
   hasNextPage?: boolean;
   isFetchingNextPage?: boolean;
   fetchNextPage?: () => void;
@@ -93,6 +98,7 @@ export const MessageList: React.FC<MessageListProps> = ({
 }) => {
   const { userId } = useAuth();
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const { getDiffBetween } = useFormatTime();
 
   const messageSkeleton = (
     <div className="flex gap-2 w-full animate-pulse">
@@ -116,10 +122,10 @@ export const MessageList: React.FC<MessageListProps> = ({
           className="flex flex-col gap-[0.1rem]"
           itemTemplate={(
             item: any,
-            _index: number,
+            index: number,
             ref: React.RefObject<HTMLDivElement | null> | null,
           ) => {
-            const message = item as Message;
+            const message = item;
             const isLastMessageInGroup =
               messages.indexOf(message) === messages.length - 1 ||
               messages[messages.indexOf(message) + 1]?.senderId !== message.senderId;
@@ -132,8 +138,7 @@ export const MessageList: React.FC<MessageListProps> = ({
             return (
               <MessageRow
                 ref={ref}
-                content={message.content}
-                senderId={message.senderId}
+                message={message}
                 isShowName={isLastMessageInGroup && !isMyMessage && conversationType === "group"}
                 isMyMessage={isMyMessage}
                 hasAvatar={isFirstMessageInGroup}
@@ -152,6 +157,10 @@ export const MessageList: React.FC<MessageListProps> = ({
                     : "",
                   isOnlyMessageInGroup ? "!rounded-2xl" : "",
                 )}
+                isShowTime={
+                  index === messages.length - 1 ||
+                  getDiffBetween(message.createdAt, messages[index + 1].createdAt, "minute") > 30
+                }
               />
             );
           }}

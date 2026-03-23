@@ -45,8 +45,8 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
         />
       </Transition>
 
-      <main className={clsx("flex-1 lg:ml-0")}>
-        <div className="w-full flex flex-col items-center">
+      <main className={clsx("flex-1 lg:ml-0 h-full")}>
+        <div className="w-full h-full flex flex-col items-center">
           <button
             className="self-start ml-3 my-3 text-2xl font-bold lg:hidden"
             onClick={() => setIsShowSidebar((prev) => !prev)}

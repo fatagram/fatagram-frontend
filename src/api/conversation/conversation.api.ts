@@ -2,6 +2,7 @@ import { CursorResult, Result } from "@/api/common/result";
 import { buildApiPath, apiGet } from "../common/api-helpers";
 import { CursorQuery } from "@/types/query";
 import { ConversationDto } from "./dto/conversation.dto";
+import { MessageResponseDto } from "../message/dto/message.dto";
 
 const PREFIX = buildApiPath("/conversation");
 
@@ -23,7 +24,7 @@ export class ConversationService {
   public async getMessages(
     conversationId: string,
     query: CursorQuery<string>,
-  ): Promise<Result<CursorResult<any, string>>> {
+  ): Promise<Result<CursorResult<MessageResponseDto, string>>> {
     return await apiGet(`${PREFIX}/${conversationId}/messages`, query);
   }
 }
