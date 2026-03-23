@@ -28,6 +28,8 @@
     --warning: 234 179 8;
     --error: 239 68 68;
     --info: 59 130 246;
+
+    --text-message: 229 229 229;
   }
 
   /* Light Theme */
@@ -59,7 +61,6 @@
     --text-second: 55 65 81; /* gray-700 */
     --text-third: 107 114 128; /* gray-500 */
     --text-fourth: 156 163 175; /* gray-400 */
-
     /* Background colors */
     --bg-main: 255 255 255; /* white */
     --bg-second: 249 250 251; /* gray-50 */

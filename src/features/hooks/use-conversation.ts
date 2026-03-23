@@ -1,13 +1,16 @@
 import { CursorResult } from "@/api/common/result";
+import { MessageResponseDto } from "@/api/message/dto/message.dto";
 import { conversationService } from "@/api/conversation/conversation.api";
 import { useAuth } from "@/contexts/auth-context";
 import {
+  createSafeQueryOptions,
   SafeQueryResultOptions,
   useSafeInfiniteQueryResult,
   useSafeQueryResult,
 } from "@/hooks/use-safe-query";
 import { CursorQuery } from "@/types/query";
 import { useQueryClient } from "@tanstack/react-query";
+import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 
 const conversationKeys = {
   list: (queryParams?: Omit<CursorQuery<string>, "cursor">) =>
@@ -15,6 +18,12 @@ const conversationKeys = {
   detail: (conversationId: string) => ["conversation", conversationId] as const,
   withUser: (targetId: string) => ["conversation", "with", targetId] as const,
 };
+
+const conversationDetailQueryOptions = (conversationId: string) =>
+  createSafeQueryOptions<ConversationDto>({
+    queryKey: conversationKeys.detail(conversationId),
+    fn: () => conversationService.getConversation(conversationId),
+  });
 
 export const useGetConversationWith = (targetId: string, config?: SafeQueryResultOptions<any>) => {
   return useSafeQueryResult({
@@ -25,15 +34,15 @@ export const useGetConversationWith = (targetId: string, config?: SafeQueryResul
   });
 };
 
-export const useGetConversation = (conversationId: string) => {
+export const useGetConversation = (
+  conversationId: string,
+  config?: SafeQueryResultOptions<any>,
+) => {
   return useSafeQueryResult({
     queryKey: conversationKeys.detail(conversationId),
-    fn: async () => {
-      const res = await conversationService.getConversation(conversationId);
-      console.log("Fetched conversation data:", res);
-      return res;
-    },
-    enabled: !!conversationId,
+    fn: async () => await conversationService.getConversation(conversationId),
+    enabled: false,
+    options: config,
   });
 };
 
@@ -57,36 +66,50 @@ type ConversationPage<TCursor = string> = {
 export const useConversationCacheMutations = () => {
   const queryClient = useQueryClient();
 
-  const pushConversationToTop = (conversationId: string) => {
-    queryClient.setQueriesData<ConversationPage>({ queryKey: conversationKeys.list() }, (old) => {
-      if (!old?.pages?.length) {
-        return {
-          pages: [
-            {
-              items: [{ id: conversationId }],
-              nextCursor: undefined,
-              hasNext: false,
-            },
-          ],
-          pageParams: [undefined],
-        };
-      }
+  const pushConversationToTop = async (
+    conversationId: string,
+    lastMessage?: MessageResponseDto,
+  ) => {
+    const listKey = conversationKeys.list();
+    const currentData = queryClient.getQueryData<ConversationPage>(listKey);
+    let existedConv: ConversationDto | null = null;
 
-      // Delete the conversatiom from its current conversation
-      const newPages = old.pages.map((page) => ({
+    if (currentData) {
+      for (const page of currentData.pages) {
+        existedConv = page.items.find((item) => item.id === conversationId);
+        if (existedConv) break;
+      }
+    }
+
+    if (existedConv) {
+      existedConv = {
+        ...existedConv,
+        lastMessage: lastMessage,
+      };
+    } else {
+      existedConv = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
+      if (!existedConv) return;
+    }
+
+    queryClient.setQueryData(listKey, (oldData: ConversationPage) => {
+      if (!oldData || !oldData.pages.length) return oldData;
+
+      const newPages = oldData.pages.map((page) => ({
         ...page,
-        items: page.items.filter((c) => c.id !== conversationId),
+        items: page.items.filter((item) => item.id !== conversationId),
       }));
-      // Add the conversation to the top of the first page
+
       newPages[0] = {
         ...newPages[0],
-        items: [{ id: conversationId }, ...newPages[0].items],
+        items: [existedConv, ...newPages[0].items],
       };
-      return { ...old, pages: newPages };
+
+      return {
+        ...oldData,
+        pages: newPages,
+      };
     });
   };
 
-  return {
-    pushConversationToTop,
-  };
+  return { pushConversationToTop };
 };

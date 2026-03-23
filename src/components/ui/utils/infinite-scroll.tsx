@@ -21,6 +21,7 @@ interface InfiniteScrollProps {
   desc?: boolean;
   autoScrollToLastItem?: boolean;
   parentRef?: RefObject<HTMLDivElement | null>;
+  itemKey: (item: any, index: number) => string | number;
 }
 
 export default function InfiniteScroll({
@@ -37,6 +38,7 @@ export default function InfiniteScroll({
   gap,
   desc = false,
   parentRef,
+  itemKey,
 }: InfiniteScrollProps) {
   const isInitialLoad = useRef(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -72,8 +74,7 @@ export default function InfiniteScroll({
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(async ([entry]) => {
-      if (entry.isIntersecting) {
-        console.log("Load more items...");
+      if (entry.isIntersecting && hasMore) {
         await onLoadMore();
       }
     });
@@ -114,7 +115,7 @@ export default function InfiniteScroll({
       ref={containerRef}
     >
       {items.map((item, index) => (
-        <div>
+        <div key={itemKey(item, index)}>
           {itemTemplate
             ? itemTemplate(
                 item,

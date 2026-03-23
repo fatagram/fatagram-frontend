@@ -5,7 +5,7 @@ import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { Message } from "@/types/entities/message.type";
 import clsx from "clsx";
 import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 
 interface MessageProps extends ComponentProps {
   content: string;
@@ -18,7 +18,7 @@ interface MessageProps extends ComponentProps {
   ref: React.RefObject<HTMLDivElement | null> | null;
 }
 
-export const MessageRow: React.FC<MessageProps> = ({
+const MessageRow: React.FC<MessageProps> = ({
   content,
   senderId,
   isShowName = false,
@@ -31,17 +31,13 @@ export const MessageRow: React.FC<MessageProps> = ({
   const { data: userInfo } = useGetUserProfile(senderId!);
   return (
     <div
-      className={clsx(
-        "flex gap-2 w-full",
-        isMyMessage ? "justify-end" : "justify-start",
-        className,
-      )}
+      className={clsx("flex gap-2", isMyMessage ? "justify-end" : "justify-start", className)}
       ref={ref}
     >
       {!isMyMessage && (
         <Avatar
           className={clsx(
-            "flex-shrink-0 self-end",
+            "flex-shrink-0 self-start",
             isMyMessage && "order-2",
             !hasAvatar && "invisible",
           )}
@@ -50,20 +46,27 @@ export const MessageRow: React.FC<MessageProps> = ({
           sz="xs-2"
         />
       )}
-      <div className="flex flex-col max-w-[75%] ">
+      <div className="flex flex-col max-w-[75%]">
         {isShowName && (
-          <Text sz="xs-1" className={clsx("mb-1 ml-3", isMyMessage ? "text-right" : "text-left")}>
+          <Text
+            sz="xs-1"
+            className={clsx("mb-1", isMyMessage ? "text-right mr-3" : "text-left ml-3")}
+          >
             {userInfo?.infos.fullName}
           </Text>
         )}
         <div
           className={clsx(
-            "px-3 py-1 break-words rounded-2xl shadow-sm self-start",
-            isMyMessage ? "bg-blue-500 text-white" : "bg-gray-600 text-white",
+            "px-3 py-1 break-all rounded-2xl shadow-sm",
+            isMyMessage ? "bg-primary-600" : "bg-bg-fourth",
             messageClassName,
           )}
         >
-          <Text sz="sm-1" className="">
+          <Text
+            sz="sm-1"
+            wrap="whitespace-normal"
+            className={clsx(isMyMessage ? "text-text-message" : "text-text-main")}
+          >
             {content}
           </Text>
         </div>
@@ -90,7 +93,6 @@ export const MessageList: React.FC<MessageListProps> = ({
 }) => {
   const { userId } = useAuth();
   const containerRef = useRef<HTMLDivElement | null>(null);
-  console.log("has next page:", hasNextPage, "is fetching next page:", isFetchingNextPage);
 
   const messageSkeleton = (
     <div className="flex gap-2 w-full animate-pulse">
@@ -129,7 +131,6 @@ export const MessageList: React.FC<MessageListProps> = ({
 
             return (
               <MessageRow
-                key={message.id}
                 ref={ref}
                 content={message.content}
                 senderId={message.senderId}
@@ -161,6 +162,7 @@ export const MessageList: React.FC<MessageListProps> = ({
           gap={2}
           desc={true}
           parentRef={containerRef}
+          itemKey={(item) => item.id}
         />
       </div>
     </div>

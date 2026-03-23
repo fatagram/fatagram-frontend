@@ -44,9 +44,7 @@ apiClient.interceptors.response.use(
         if (refreshResult.status === 200) {
           return await apiClient.request(error.config);
         }
-      } catch (error) {
-        window.location.href = "/login";
-      }
+      } catch (error) {}
     } else if (
       error.response?.status === 403 &&
       error.response?.data?.error?.code === "ONBOARDING_NOT_COMPLETED"

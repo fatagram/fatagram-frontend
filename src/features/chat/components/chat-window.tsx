@@ -65,7 +65,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
       },
       {
         onSuccess: (data) => {
-          if (tempTargetId) replaceChat(conversationId, data!.conversationId);
+          if (tempTargetId) replaceChat(tempTargetId, data!.conversationId);
           setMessage("");
         },
       },
@@ -82,12 +82,12 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   return (
     <div
       className={clsx(
-        "w-[330px] h-[450px] bg-black rounded-xl shadow-lg overflow-hidden flex flex-col",
+        "w-[330px] h-[450px] bg-bg-main rounded-xl shadow-lg overflow-hidden flex flex-col",
         "border border-gray-700 shadow-xl",
         className,
       )}
     >
-      <div className="flex items-center px-4 h-[13%] bg-bg-fourth">
+      <div className="flex items-center px-4 h-[13%] bg-bg-third">
         {isLoadingHeader ? (
           <>
             <Skeleton sz="sm-3" variant="circle" className="w-8" />
@@ -100,8 +100,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
               sz="sm-1"
               weight="bold"
               className={clsx(
-                "ml-2 text-white flex-1 rounded-md px-2 py-3",
-                "hover:bg-gray-700/30 cursor-pointer transition-all duration-200",
+                "ml-2 text-text-main flex-1 rounded-md px-2 py-3",
+                "hover:bg-bg-fourth cursor-pointer transition-all duration-200",
                 "active:scale-[0.98] active:opacity-80",
               )}
             >
@@ -116,7 +116,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           <i className="fa-solid fa-xmark"></i>
         </MiniButton>
       </div>
-      <div className="flex flex-col p-2 flex-1 overflow-y-auto">
+      <div className="flex flex-col px-2 flex-1 overflow-y-auto bg-bg-seventh">
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-3">
@@ -144,9 +144,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           hasNextPage={hasNextPage}
           isFetchingNextPage={isFetchingNextPage}
           fetchNextPage={fetchNextPage}
+          className={clsx()}
         />
       </div>
-      <div className="px-2 h-[15%] self-end bg-bg-fourth w-full flex items-center">
+      <div className="px-2 h-[15%] self-end bg-bg-third w-full flex items-center">
         <Textbox
           sz="xs-3"
           className="!rounded-full w-full"
@@ -162,7 +163,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           onClick={handleSendMessage}
           disabled={!message.trim() || isFetching}
         >
-          <i className="fa-solid fa-paper-plane"></i>
+          <i className="fa-solid fa-paper-plane text-primary-500"></i>
         </MiniButton>
       </div>
     </div>

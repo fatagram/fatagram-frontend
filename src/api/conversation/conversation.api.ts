@@ -9,9 +9,7 @@ export class ConversationService {
   public async getConversations(
     query: CursorQuery<string>,
   ): Promise<Result<CursorResult<ConversationDto, string>>> {
-    const res = await apiGet(`${PREFIX}`, query);
-    console.log("Fetched conversations data:", res);
-    return res;
+    return await apiGet(`${PREFIX}`, query);
   }
 
   public async getConversation(conversationId: string): Promise<Result<ConversationDto>> {

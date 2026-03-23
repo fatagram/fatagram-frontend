@@ -26,13 +26,12 @@ export const useChatStore = create<ChatWindowState>((set) => ({
       }
 
       const newRegistry = { ...state.registry };
-      console.log("1. Opening chat with ID:", id, "and meta:", meta);
       if (meta) {
-        console.log("2. Opening chat with ID:", id, "and meta:", meta);
+        // console.log("2. Opening chat with ID:", id, "and meta:", meta);
         newRegistry[id] = meta;
       }
 
-      console.log("3. Updated registry after opening chat:", newRegistry[id]);
+      // console.log("3. Updated registry after opening chat:", newRegistry[id]);
 
       return {
         activeIds: [...state.activeIds, id],
@@ -47,7 +46,6 @@ export const useChatStore = create<ChatWindowState>((set) => ({
     })),
   toggleMinimize: (id: string) =>
     set((state) => {
-      console.log("CCC");
       if (state.activeIds.includes(id)) {
         return {
           activeIds: state.activeIds.filter((activeId) => activeId !== id),
@@ -61,7 +59,6 @@ export const useChatStore = create<ChatWindowState>((set) => ({
     }),
   replaceChat: (oldId: string, newId: string) => {
     set((state) => {
-      console.log("Replacing chat ID:", oldId, "with new ID:", newId);
       const { [oldId]: _, ...restRegistry } = state.registry;
       return {
         activeIds: state.activeIds.map((id) => (id === oldId ? newId : id)),

@@ -26,6 +26,7 @@ const textSizes: Record<Size, string> = {
 const weightClasses: Record<string, string> = {
   light: "font-light",
   regular: "font-normal",
+  medium: "font-medium",
   bold: "font-bold",
   extrabold: "font-extrabold",
 };

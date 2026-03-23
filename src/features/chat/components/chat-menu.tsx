@@ -15,10 +15,11 @@ interface ChatMenuProps extends ComponentProps {
 }
 
 export const ChatMenu: React.FC<ChatMenuProps> = ({ onConversationClick, className, ref }) => {
-  const { data, fetchNextPage, isLoading, isFetching } = useConversations();
+  const { data, fetchNextPage, isLoading: _, isFetching: _f } = useConversations();
   const { userId } = useAuth();
   const { t } = useTranslation();
   const { openChat } = useChatStore();
+  const formatTime = useFormatTime();
 
   const conversations = data?.pages.flatMap((page) => page.items) || [];
   const unreadCount = 1;
@@ -70,10 +71,9 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ onConversationClick, classNa
             itemInRow={1}
             items={conversations}
             onLoadMore={fetchNextPage}
-            className="mt-2 min-w-[300px]"
+            className="mt-2"
             itemTemplate={(item: any) => {
               const conversation = item as ConversationDto;
-              const formatTime = useFormatTime();
               return (
                 <div
                   key={conversation.id}
@@ -85,17 +85,21 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ onConversationClick, classNa
                   onClick={() => handleConversationClick(conversation.id)}
                 >
                   <Avatar src={conversation.avatarUrl ?? ""} alt="Conversation Avatar" sz="sm-1" />
-                  <div className="flex flex-col gap-1">
-                    <Text sz="sm-2" weight="bold" className="line-clamp-1">
+                  <div className="flex flex-col gap-1 min-w-0">
+                    <Text
+                      sz="sm-2"
+                      weight="bold"
+                      className={clsx("line-clamp-1 truncate max-w-full")}
+                    >
                       {conversation.name}
                     </Text>
-                    <div className="flex items-center opacity-80 min-w-0">
-                      <Text sz="xs-3" className="truncate flex-1 min-w-0">
+                    <div className="flex items-center opacity-80">
+                      <Text sz="xs-3" className="truncate flex-1 max-w-full">
                         {userId === conversation.lastMessage?.senderId
                           ? t("common:conversations.you") + ": " + conversation.lastMessage?.content
                           : (conversation.isGroup ? "" : conversation.name) +
                             ": " +
-                            conversation.lastMessage?.content}
+                            conversation.lastMessage?.content}{" "}
                       </Text>
                       <Text sz="xs-3" className="mx-2 shrink-0">
                         •
@@ -108,6 +112,7 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ onConversationClick, classNa
                 </div>
               );
             }}
+            itemKey={(item) => item.id}
           />
         ) : (
           <div className="flex flex-col items-center justify-center gap-2 mt-4 min-h-[200px]">

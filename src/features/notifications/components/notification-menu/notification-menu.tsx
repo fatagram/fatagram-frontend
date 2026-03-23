@@ -115,7 +115,6 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
               const notification = item as NotificationDto;
               return (
                 <div
-                  key={notification.id}
                   className={clsx(
                     "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
                     "transition-all duration-200 hover:scale-[1.01]",
@@ -136,6 +135,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
                 </div>
               );
             }}
+            itemKey={(item: any, index: number) => (item as NotificationDto).id + "-" + index}
             hasMore={!!hasNextPage}
             isLoading={isFetching}
             loadingSkeleton={<NotificationSkeletonLoading />}

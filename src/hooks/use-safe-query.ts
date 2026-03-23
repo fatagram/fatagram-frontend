@@ -38,6 +38,24 @@ export type SafeQueryResultOptions<TData> = {
   errorMessage?: string;
 };
 
+export type SafeQueryOptionsParams<TData> = {
+  queryKey: QueryKey;
+  fn: () => Promise<Result<TData>>;
+  enabled?: boolean;
+};
+
+export function createSafeQueryOptions<TData>(params: SafeQueryOptionsParams<TData>) {
+  return {
+    queryKey: params.queryKey,
+    queryFn: async (): Promise<TData> => {
+      const result = await params.fn();
+      if (!result.success) throw result;
+      return result.data!;
+    },
+    enabled: params.enabled,
+  };
+}
+
 type SafeQueryResult<TData> = Omit<UseQueryOptions<TData>, "queryFn"> & {
   fn: () => Promise<Result<TData>>;
   options?: SafeQueryResultOptions<TData>;
@@ -47,16 +65,12 @@ export function useSafeQueryResult<TData>(params: SafeQueryResult<TData>) {
   const { fn, options, ...queryOptions } = params;
   const callbacksCalledRef = useRef(false);
 
+  const safeOptions = createSafeQueryOptions({ queryKey: queryOptions.queryKey!, fn });
+
   const query = useQuery<TData, Result<TData>>({
     ...queryOptions,
+    ...safeOptions,
     retry: 0,
-    queryFn: async () => {
-      const result = await fn();
-      if (!result.success) {
-        throw result;
-      }
-      return result.data;
-    },
   } as any);
 
   useEffect(() => {

@@ -25,6 +25,7 @@ export const colorsConfig = {
     second: "rgb(var(--text-second) / <alpha-value>)",
     third: "rgb(var(--text-third) / <alpha-value>)",
     fourth: "rgb(var(--text-fourth) / <alpha-value>)",
+    message: "rgb(var(--text-message) / <alpha-value>)",
   },
   bg: {
     main: "rgb(var(--bg-main) / <alpha-value>)",

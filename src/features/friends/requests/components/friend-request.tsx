@@ -32,9 +32,8 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         items={requestsData}
         onLoadMore={fetchNextPage}
         className={clsx("gap-2 h-full w-full")}
-        itemTemplate={(item: any, index: number) => (
+        itemTemplate={(item: any) => (
           <FriendRequestItem
-            key={index}
             name={item.senderName}
             avatar={item.senderAvatar}
             path={`/${item.senderUrlName || item.senderId}`}
@@ -45,6 +44,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         )}
         hasMore={!!hasNextPage}
         isLoading={isFetching}
+        itemKey={(item: any) => item.senderId}
       />
     </Card>
   );

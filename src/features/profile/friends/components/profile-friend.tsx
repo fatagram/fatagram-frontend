@@ -64,13 +64,10 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
             <div className="fa-solid fa-spinner animate-spin text-2xl text-single-main" />
           }
           numberOfSkeletons={1}
-          itemTemplate={(item: any, index: number) => (
-            <FriendItem
-              key={(item as FriendDto).id ?? index}
-              className="w-full"
-              friendDto={item as FriendDto}
-            />
+          itemTemplate={(item: any) => (
+            <FriendItem className="w-full" friendDto={item as FriendDto} />
           )}
+          itemKey={(item: any) => item.id}
         />
       )}
     </div>
