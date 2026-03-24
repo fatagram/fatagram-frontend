@@ -25,7 +25,7 @@ const SettingPage: React.FC<SettingPageProps> = () => {
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
     >
-      <div className={clsx("w-full max-w-[700px]")}>
+      <div className={clsx("overflow-hidden w-full max-w-[700px]")}>
         <Outlet />
       </div>
     </SidebarLayout>

@@ -22,6 +22,7 @@ interface EditableFieldProps {
 }
 
 const EditableField: React.FC<EditableFieldProps> = ({
+  className,
   editableMode = "none",
   title,
   value,
@@ -45,11 +46,16 @@ const EditableField: React.FC<EditableFieldProps> = ({
   }, [value]);
 
   return (
-    <div className="flex justify-between items-center w-full">
-      <Text sz="lg-1" className="font-light m-2">
+    <div
+      className={clsx(
+        "flex flex-col sm:flex-row sm:justify-between sm:items-center w-full",
+        className,
+      )}
+    >
+      <Text sz="lg-1" className="font-light">
         {title}
       </Text>
-      <div className="flex sm:items-center items-end gap-4 sm:flex-row flex-col">
+      <div className="flex sm:items-center items-end gap-4 justify-between">
         {editableMode === "inline" && isEdit ? (
           <div className="relative flex flex-col gap-1">
             <Textbox

@@ -23,12 +23,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   children,
 }) => {
   return (
-    <div
-      className={clsx("flex items-start", className)}
-      style={{
-        height: "calc(100dvh - var(--header-height, 0px))",
-      }}
-    >
+    <div className={clsx("flex items-start h-full", className)}>
       <aside
         className={clsx(
           "z-30 max-w-[300px] shrink-0 overflow-y-auto h-full",

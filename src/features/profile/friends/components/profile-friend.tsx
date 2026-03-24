@@ -38,38 +38,37 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
       <Textbox
         type="search"
         placeholder={t("user:profileFriends.searchFriends")}
-        className="p-1"
+        className="p-1 w-full sm:max-w-xs"
         onChange={handleOnChange}
       />
-      {friends.length === 0 && !isLoading ? (
-        <div className="flex w-full justify-center mb-10 mt-10">
-          <div className="flex flex-col items-center text-[var(--text-color)] opacity-30">
-            <Text sz="xl-3" weight="bold">
-              <i className="fa-solid fa-user-xmark"></i>
-            </Text>
-            <Text sz="md-2" className="mt-2">
-              {t("user:profileFriends.noFriends")}
-            </Text>
+      <InfiniteScroll
+        itemInRow={2}
+        items={friends}
+        isLoading={isLoading || isFetchingNextPage}
+        hasMore={hasNextPage}
+        onLoadMore={fetchNextPage}
+        className="relative flex flex-wrap gap-2 w-full mt-2"
+        loadingSkeleton={
+          <div className="fa-solid fa-spinner animate-spin text-2xl text-single-main" />
+        }
+        numberOfSkeletons={1}
+        itemTemplate={(item: any) => (
+          <FriendItem className="w-full" friendDto={item as FriendDto} />
+        )}
+        itemKey={(item: any) => item.id}
+        emptyComponent={
+          <div className="flex w-full justify-center mb-10 mt-10">
+            <div className="flex flex-col items-center text-[var(--text-color)] opacity-30">
+              <Text sz="xl-3" weight="bold">
+                <i className="fa-solid fa-user-xmark"></i>
+              </Text>
+              <Text sz="md-2" className="mt-2">
+                {t("user:profileFriends.noFriends")}
+              </Text>
+            </div>
           </div>
-        </div>
-      ) : (
-        <InfiniteScroll
-          itemInRow={2}
-          items={friends}
-          isLoading={isLoading || isFetchingNextPage}
-          hasMore={hasNextPage}
-          onLoadMore={fetchNextPage}
-          className="relative flex flex-wrap gap-2 w-full mt-2"
-          loadingSkeleton={
-            <div className="fa-solid fa-spinner animate-spin text-2xl text-single-main" />
-          }
-          numberOfSkeletons={1}
-          itemTemplate={(item: any) => (
-            <FriendItem className="w-full" friendDto={item as FriendDto} />
-          )}
-          itemKey={(item: any) => item.id}
-        />
-      )}
+        }
+      />
     </div>
   );
 };

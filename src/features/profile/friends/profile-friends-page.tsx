@@ -7,7 +7,10 @@ const ProfileFriendsPage = () => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   return (
-    <Card title={t("user:profileFriends.friends")} className={clsx("rounded-2xl mt-2")}>
+    <Card
+      title={t("user:profileFriends.friends")}
+      className={clsx("sm:rounded-2xl rounded-none sm:mt-2")}
+    >
       <ProfileFriends />
     </Card>
   );

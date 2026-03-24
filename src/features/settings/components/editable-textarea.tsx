@@ -51,7 +51,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   return (
     <div className="flex justify-between items-center w-full">
       {title && (
-        <Text sz="lg-1" className="font-light m-2">
+        <Text sz="lg-1" className="font-light">
           {title}
         </Text>
       )}

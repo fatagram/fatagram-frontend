@@ -3,7 +3,7 @@ import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
-import { useRef, useEffect } from "react";
+import { useRef } from "react";
 import { useMessages, useSendMessage } from "@/features/hooks/use-message";
 import { useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
