@@ -14,9 +14,9 @@ const FatalkPage = () => {
     <SidebarLayout
       title="Fatalk"
       navbar={<FatalkSidebar onConversationClick={() => setShowSidebar(false)} />}
-      className="h-[calc(100vh-var(--header-height))] overflow-hidden"
+      className="overflow-hidden"
       showMenuButton={false}
-      sidebarClassName={clsx("lg:w-[400px] w-full", "max-w-full")}
+      sidebarClassName={clsx("lg:w-[400px] w-full", "max-w-full h-full")}
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
     >

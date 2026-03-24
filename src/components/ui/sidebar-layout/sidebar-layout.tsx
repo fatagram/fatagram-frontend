@@ -23,17 +23,19 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className={clsx("flex items-start", className)}>
+    <div
+      className={clsx("flex items-start", className)}
+      style={{
+        height: "calc(100dvh - var(--header-height, 0px))",
+      }}
+    >
       <aside
         className={clsx(
-          "z-30 max-w-[300px] shrink-0 overflow-y-auto",
+          "z-30 max-w-[300px] shrink-0 overflow-y-auto h-full",
           "fixed lg:sticky transition-transform duration-300",
           showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           sidebarClassName,
         )}
-        style={{
-          height: "calc(100vh - var(--header-height, 0px))",
-        }}
       >
         {navbar}
       </aside>
@@ -50,7 +52,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
         />
       </Transition>
 
-      <main className={clsx("flex-1 lg:ml-0 h-full")}>
+      <main className={clsx("flex-1 lg:ml-0 h-full overflow-y-auto")}>
         <div className="w-full h-full flex flex-col items-center">
           {showMenuButton && (
             <button

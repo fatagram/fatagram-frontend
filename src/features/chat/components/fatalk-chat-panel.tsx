@@ -136,7 +136,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         />
       </div>
 
-      <div className="px-4 py-3 bg-bg-second border-t border-gray-700/50 flex items-center gap-2 shrink-0">
+      <div className="px-4 py-3 bg-bg-second border-t border-gray-700/50 flex items-center gap-2">
         <MiniButton sz="xs-3">
           <i className="fa-solid fa-circle-plus text-primary-400" />
         </MiniButton>

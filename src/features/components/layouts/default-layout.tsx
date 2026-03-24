@@ -79,7 +79,7 @@ const DefaultLayout = () => {
 
   return (
     <Layout className="">
-      <Layout.Header>
+      <Layout.Header className="sticky top-0">
         {pathHasTopBar && (
           <div className="flex items-center px-4 h-[25px] bg-bg-main sm:hidden block">
             <Logo sz="sm-2" hasSlogan={false} />
@@ -100,7 +100,7 @@ const DefaultLayout = () => {
           options={
             isAuthenticated ? (
               <div className={clsx("flex items-center gap-2 ")}>
-                <div className="hidden sm:flex">
+                <div className="hidden sm:flex gap-2">
                   {!isFatalkPage && <ChatBadge />}
                   <NotificationBadge />
                 </div>
@@ -119,7 +119,7 @@ const DefaultLayout = () => {
           }
         />
       </Layout.Header>
-      <Layout.Main className="flex-1 overflow-y-auto">
+      <Layout.Main className="flex-1">
         <Outlet />
         <div className="fixed inset-0 pointer-events-none z-50">
           <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
