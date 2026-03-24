@@ -135,9 +135,11 @@ const DefaultLayout = () => {
       )}
       <Layout.Main className="h-full overflow-y-auto ">
         <Outlet />
-        <div className="fixed inset-0 pointer-events-none z-50">
-          <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
-        </div>
+        {!isMobile && (
+          <div className="fixed inset-0 pointer-events-none z-50">
+            <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
+          </div>
+        )}
       </Layout.Main>
     </Layout>
   );
