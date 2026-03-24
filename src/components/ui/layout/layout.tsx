@@ -60,9 +60,7 @@ interface LayoutComponent extends React.FC<LayoutProps> {
 
 const Layout: LayoutComponent = ({ children, className }) => {
   return (
-    <div className={clsx("relative flex flex-col bg-bg-eighth min-h-screen", className)}>
-      {children}
-    </div>
+    <div className={clsx("relative flex flex-col bg-bg-eighth h-dvh", className)}>{children}</div>
   );
 };
 
