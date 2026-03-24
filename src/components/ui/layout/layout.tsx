@@ -38,11 +38,7 @@ interface LayoutFooterProps {
   className?: string;
 }
 const LayoutFooter: React.FC<LayoutFooterProps> = ({ children, className }) => {
-  return (
-    <footer className={clsx("sm:hidden flex fixed z-40 bottom-0 w-full", className)}>
-      {children}
-    </footer>
-  );
+  return <footer className={clsx(className)}>{children}</footer>;
 };
 
 // === Layout Props === //
