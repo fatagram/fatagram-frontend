@@ -78,8 +78,8 @@ const DefaultLayout = () => {
   }, [isAuthenticated, openLoginOverlay]);
 
   return (
-    <Layout>
-      <Layout.Header className="sticky top-0">
+    <Layout className="">
+      <Layout.Header>
         {pathHasTopBar && (
           <div className="flex items-center px-4 h-[25px] bg-bg-main sm:hidden block">
             <Logo sz="sm-2" hasSlogan={false} />
@@ -119,7 +119,7 @@ const DefaultLayout = () => {
           }
         />
       </Layout.Header>
-      <Layout.Main>
+      <Layout.Main className="flex-1 overflow-y-auto">
         <Outlet />
         <div className="fixed inset-0 pointer-events-none z-50">
           <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
