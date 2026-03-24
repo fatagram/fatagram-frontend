@@ -1,12 +1,11 @@
+import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { RefObject, useEffect, useRef } from "react";
 
-interface InfiniteScrollProps {
-  itemInRow: number;
+interface InfiniteScrollFlexProps extends ComponentProps {
   items: any[];
   loadingSkeleton?: React.ReactNode;
   numberOfSkeletons?: number;
-  className?: string;
   hasMore?: boolean;
   isLoading?: boolean;
   itemTemplate?: (
@@ -19,14 +18,12 @@ interface InfiniteScrollProps {
   isShowLastSeen?: boolean;
   gap?: string | number;
   desc?: boolean;
-  autoScrollToLastItem?: boolean;
   parentRef?: RefObject<HTMLDivElement | null>;
   itemKey: (item: any, index: number) => string | number;
   emptyComponent?: React.ReactNode;
 }
 
-export default function InfiniteScroll({
-  itemInRow = 1,
+export default function InfiniteScrollFlex({
   items,
   loadingSkeleton,
   numberOfSkeletons = 4,
@@ -41,14 +38,11 @@ export default function InfiniteScroll({
   parentRef,
   itemKey,
   emptyComponent,
-}: InfiniteScrollProps) {
+}: InfiniteScrollFlexProps) {
   const isInitialLoad = useRef(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const lastItemRef = useRef<HTMLDivElement>(null);
-  // const loadingRef = useRef(false);
-
-  const isGrid = itemInRow > 1;
 
   const isAtBottomRef = useRef(true);
 
@@ -101,19 +95,12 @@ export default function InfiniteScroll({
     <div
       className={clsx(
         "overflow-y-auto",
-        isGrid ? "grid" : desc ? "flex flex-col-reverse" : "flex flex-col",
+        desc ? "flex flex-col-reverse" : "flex flex-col",
         className,
       )}
-      style={
-        isGrid
-          ? {
-              gridTemplateColumns: `repeat(${itemInRow}, 1fr)`,
-              gap: gap ?? "0.5rem",
-            }
-          : {
-              gap: gap ?? "0.5rem",
-            }
-      }
+      style={{
+        gap: gap ?? "0.5rem",
+      }}
       ref={containerRef}
     >
       {items.map((item, index) => (

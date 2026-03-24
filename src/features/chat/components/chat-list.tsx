@@ -1,7 +1,7 @@
 import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { Text, Avatar, Textbox, Skeleton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
-import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
+import InfiniteScroll from "@/components/ui/utils/infinite-scroll-flex";
 import { useAuth } from "@/contexts";
 import { useConversations } from "@/features/hooks/use-conversation";
 import { useFormatTime } from "@/utils/format-time";

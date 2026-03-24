@@ -7,14 +7,14 @@ import {
   useDeclineFriendRequest,
   useListFriendRequests,
 } from "@/features/hooks/use-friend";
-import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
+import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 
 type FriendRequestsProps = {
   className?: string;
 };
 
 const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
-  const [total, setTotal] = React.useState(0);
+  const [total, _setTotal] = React.useState(0);
 
   const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
     limit: 20,
@@ -27,8 +27,8 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
   // render
   return (
     <Card title={`Danh sách lời mời (${total})`} className={className}>
-      <InfiniteScroll
-        itemInRow={4}
+      <InfiniteScrollGrid
+        itemMinWidth="200px"
         items={requestsData}
         onLoadMore={fetchNextPage}
         className={clsx("gap-2 h-full w-full")}

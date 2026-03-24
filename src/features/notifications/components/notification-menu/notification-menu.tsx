@@ -12,12 +12,12 @@ import {
   useMarkNotificationAsRead,
   useNotifications,
 } from "../../hooks/use-notification";
-import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
 import {
   useNotificationCacheMutations,
   useNotificationUiState,
   useUnreadCount,
 } from "../../hooks/use-notification-store";
+import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 
 type NotificationMenuProps = {
   className?: string;
@@ -43,6 +43,12 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
   const notifications = React.useMemo(() => {
     return data?.pages.flatMap((page) => page.items) || [];
   }, [data]);
+
+  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
+  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
+  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
+  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
+  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
 
   const handleMarkAllAsRead = async () => {
     markAllAsReadInCache();
@@ -104,12 +110,12 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
           </div>
         )}
       </div>
-      <div className="relative py-1 max-h-[500px]">
-        <InfiniteScroll
-          itemInRow={1}
+      <div className="relative py-1 max-h-[500px] overflow-y-auto scrollbar-hide">
+        <InfiniteScrollGrid
+          itemMinWidth={"300px"}
           items={notifications}
           onLoadMore={fetchNextPage}
-          className="gap-0 scrollbar-hide"
+          className="gap-0 scrollbar-hide w-full"
           itemTemplate={(item: any) => {
             const notification = item as NotificationDto;
             return (

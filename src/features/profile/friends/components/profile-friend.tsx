@@ -6,7 +6,7 @@ import FriendItem from "./friend-item";
 import clsx from "clsx";
 import { useProfilePage } from "../../hooks/use-profile-page";
 import { Text, Textbox } from "@/components/atoms";
-import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
+import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 
 interface ProfileFriendsProps {
   className?: string;
@@ -41,8 +41,8 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
         className="p-1 w-full sm:max-w-xs"
         onChange={handleOnChange}
       />
-      <InfiniteScroll
-        itemInRow={2}
+      <InfiniteScrollGrid
+        itemMinWidth="300px"
         items={friends}
         isLoading={isLoading || isFetchingNextPage}
         hasMore={hasNextPage}

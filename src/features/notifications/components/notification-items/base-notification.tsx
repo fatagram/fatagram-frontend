@@ -28,7 +28,11 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
         <Avatar border={0} src={notificationDto.actorImageUrl} alt="Avatar" sz="sm-1" />
       </div>
       <div className="flex flex-col gap-1 flex-1">
-        <Text sz="sm-2" className={clsx({ "opacity-60": notificationDto.isRead })}>
+        <Text
+          sz="sm-2"
+          className={clsx({ "opacity-60": notificationDto.isRead })}
+          wrap="whitespace-normal"
+        >
           {renderContent(content, {
             actorName: (
               <Text key={notificationDto.actorId} sz="sm-2" weight="bold">

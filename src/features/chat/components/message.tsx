@@ -3,7 +3,7 @@ import { ComponentProps } from "@/components/common/component-type";
 import { useAuth } from "@/contexts";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import clsx from "clsx";
-import InfiniteScroll from "@/components/ui/utils/infinite-scroll";
+import InfiniteScroll from "@/components/ui/utils/infinite-scroll-flex";
 import { useEffect, useRef, useState } from "react";
 import { Message } from "@/api/message/dto/message.dto";
 import { useFormatTime } from "@/utils/format-time";
@@ -83,7 +83,7 @@ const MessageRow: React.FC<MessageProps> = ({
             className={clsx(
               "px-3 py-1 break-all rounded-2xl shadow-sm relative self-end",
               isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
-              isFailed && "border border-red-500 border-2 opacity-50",
+              isFailed && "border-red-500 border-2 opacity-50",
               messageClassName,
             )}
           >
@@ -164,7 +164,6 @@ export const MessageList: React.FC<MessageListProps> = ({
     >
       <div className="relative">
         <InfiniteScroll
-          itemInRow={1}
           items={messages}
           onLoadMore={fetchNextPage}
           className="flex flex-col gap-[0.1rem]"

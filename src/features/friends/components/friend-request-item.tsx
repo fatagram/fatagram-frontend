@@ -35,9 +35,7 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
     <div
       className={clsx(
         "flex flex-col items-start bg-bg-main",
-        "sm:w-[calc(25%-6px)]",
-        "w-[calc(50%-4px)]",
-        "sm:min-w-[220px] h-auto",
+        "h-auto",
         "rounded-2xl shadow-lg p-4 gap-1",
       )}
     >
