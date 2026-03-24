@@ -3,7 +3,7 @@ import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
-import { useRef } from "react";
+import { useRef, useEffect } from "react";
 import { useMessages, useSendMessage } from "@/features/hooks/use-message";
 import { useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
@@ -56,6 +56,17 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const { fetch: send, isFetching } = useSendMessage();
   const displayedMessages = messages ? messages.pages.flatMap((page) => page.items) : [];
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    const raf = requestAnimationFrame(() => {
+      try {
+        el.scrollTop = el.scrollHeight;
+      } catch (e) {}
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [conversationId, displayedMessages.length]);
 
   const handleSendMessage = () => {
     if (!message.trim()) return;
