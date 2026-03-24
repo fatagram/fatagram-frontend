@@ -10,13 +10,7 @@ interface LayoutHeaderProps {
 const LayoutHeader = forwardRef<HTMLHeadElement, LayoutHeaderProps>(
   ({ children, className }, ref) => {
     return (
-      <header
-        ref={ref}
-        className={clsx("fixed z-40 w-full", className)}
-        style={{
-          height: "var(--header-height)",
-        }}
-      >
+      <header ref={ref} className={clsx("z-40 w-full", className)} style={{}}>
         {children}
       </header>
     );

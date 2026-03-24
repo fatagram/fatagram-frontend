@@ -22,10 +22,30 @@ const DefaultLayout = () => {
   const isFatalkPage = pathname.startsWith("/fatalk");
 
   const items = [
-    { icon: <i className="fa-solid fa-house" />, path: "/", isIndex: true },
-    { icon: <i className="fa-solid fa-user-group" />, path: "/friends", isIndex: false },
-    { icon: <i className="fa-solid fa-message" />, path: "/fatalk", isIndex: false },
+    { icon: <i className="fa-solid fa-house" />, path: "/", isIndex: true, showOnDesktop: true },
+    {
+      icon: <i className="fa-solid fa-user-group" />,
+      path: "/friends",
+      isIndex: false,
+      showOnDesktop: true,
+    },
+    {
+      icon: <i className="fa-solid fa-message" />,
+      path: "/fatalk",
+      isIndex: false,
+      showOnDesktop: false,
+    },
+    {
+      icon: <i className="fa-solid fa-bell" />,
+      path: "/notifications",
+      isIndex: false,
+      showOnDesktop: false,
+    },
   ];
+
+  const pathHasTopBar = ["/", "/friends"].some(
+    (path) => pathname === path || pathname.startsWith(path + "/"),
+  );
 
   const openLoginOverlay = useCallback(() => {
     openDialog({
@@ -59,11 +79,14 @@ const DefaultLayout = () => {
 
   return (
     <Layout>
-      <Layout.Header>
+      <Layout.Header className="sticky top-0">
+        {pathHasTopBar && (
+          <div className="flex items-center px-4 h-[25px] bg-bg-main sm:hidden block">
+            <Logo sz="sm-2" hasSlogan={false} />
+          </div>
+        )}
         <Navbar
-          style={{
-            height: "var(--header-height)",
-          }}
+          style={{}}
           isAuthenticated={isAuthenticated}
           items={items}
           logo={
@@ -76,9 +99,11 @@ const DefaultLayout = () => {
           }
           options={
             isAuthenticated ? (
-              <div className={clsx("flex items-center gap-2")}>
-                {!isFatalkPage && <ChatBadge />}
-                <NotificationBadge />
+              <div className={clsx("flex items-center gap-2 ")}>
+                <div className="hidden sm:flex">
+                  {!isFatalkPage && <ChatBadge />}
+                  <NotificationBadge />
+                </div>
                 <UserMenu />
               </div>
             ) : (
@@ -94,11 +119,7 @@ const DefaultLayout = () => {
           }
         />
       </Layout.Header>
-      <Layout.Main
-        style={{
-          paddingTop: "var(--header-height)",
-        }}
-      >
+      <Layout.Main>
         <Outlet />
         <div className="fixed inset-0 pointer-events-none z-50">
           <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />

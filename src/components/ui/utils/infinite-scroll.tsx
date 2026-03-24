@@ -22,6 +22,7 @@ interface InfiniteScrollProps {
   autoScrollToLastItem?: boolean;
   parentRef?: RefObject<HTMLDivElement | null>;
   itemKey: (item: any, index: number) => string | number;
+  emptyComponent?: React.ReactNode;
 }
 
 export default function InfiniteScroll({
@@ -39,6 +40,7 @@ export default function InfiniteScroll({
   desc = false,
   parentRef,
   itemKey,
+  emptyComponent,
 }: InfiniteScrollProps) {
   const isInitialLoad = useRef(true);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -146,7 +148,7 @@ export default function InfiniteScroll({
           ))}
         </>
       )}
-      {!hasMore && !isLoading && isShowLastSeen && (
+      {items.length > 0 && !hasMore && !isLoading && isShowLastSeen && (
         <div
           style={{
             gridColumn: "1 / -1",
@@ -158,6 +160,7 @@ export default function InfiniteScroll({
           Đã xem hết kết quả.
         </div>
       )}
+      {items.length === 0 && !isLoading && emptyComponent}
     </div>
   );
 }

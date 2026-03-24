@@ -6,7 +6,7 @@ interface NavbarProps {
   className?: string;
   isAuthenticated: boolean | null;
   options?: React.ReactNode;
-  items?: { icon: React.ReactNode; path: string; isIndex: boolean }[];
+  items?: { icon: React.ReactNode; path: string; isIndex: boolean; showOnDesktop?: boolean }[];
   logo?: React.ReactNode;
   style?: any;
 }
@@ -30,7 +30,15 @@ export const Navbar: React.FC<NavbarProps> = ({ className, options, items, logo,
       <div className="flex flex-row gap-3 flex-1">
         <div className={clsx("flex w-full sm:justify-center flex-row")}>
           {navItems.map((item, index) => (
-            <NavbarItem path={item.path} key={index} className="!px-10" activeRoute={item.isIndex}>
+            <NavbarItem
+              path={item.path}
+              key={index}
+              className={clsx(
+                "flex-1 sm:flex-none sm:px-10",
+                item.showOnDesktop ? "block" : "sm:hidden",
+              )}
+              activeRoute={item.isIndex}
+            >
               {item.icon}
             </NavbarItem>
           ))}

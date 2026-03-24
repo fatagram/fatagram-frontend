@@ -17,7 +17,7 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
     <div
       className={clsx(
         "flex flex-col gap-3",
-        "bg-bg-main shadow-md rounded-b-2xl",
+        "bg-bg-main shadow-md border-r-2 border-seventh",
         "overflow-y-auto",
         className,
       )}
@@ -29,7 +29,7 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
           </Text>
         </div>
       )}
-      <div className="px-2 pb-3 space-y-1">{children}</div>
+      {children}
     </div>
   );
 };

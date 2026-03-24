@@ -104,61 +104,48 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
           </div>
         )}
       </div>
-      {notifications.length > 0 ? (
-        <div className="relative py-1 max-h-[500px]">
-          <InfiniteScroll
-            itemInRow={1}
-            items={notifications}
-            onLoadMore={fetchNextPage}
-            className="gap-0 scrollbar-hide"
-            itemTemplate={(item: any) => {
-              const notification = item as NotificationDto;
-              return (
-                <div
-                  className={clsx(
-                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
-                    "transition-all duration-200 hover:scale-[1.01]",
-                    "active:scale-[0.99]",
-                  )}
-                >
-                  <NotificationFactory
-                    notificationDto={notification}
-                    onClick={async () => {
-                      markAsRead(notification.id, {
-                        onSuccess: () => {
-                          markAsReadInCache(notification.id);
-                          setUnreadCount((prev: number) => Math.max(prev - 1, 0));
-                        },
-                      });
-                    }}
-                  />
-                </div>
-              );
-            }}
-            itemKey={(item: any, index: number) => (item as NotificationDto).id + "-" + index}
-            hasMore={!!hasNextPage}
-            isLoading={isFetching}
-            loadingSkeleton={<NotificationSkeletonLoading />}
-            numberOfSkeletons={2}
-          />
-        </div>
-      ) : (
-        <>
-          {!isFetching ? (
+      <div className="relative py-1 max-h-[500px]">
+        <InfiniteScroll
+          itemInRow={1}
+          items={notifications}
+          onLoadMore={fetchNextPage}
+          className="gap-0 scrollbar-hide"
+          itemTemplate={(item: any) => {
+            const notification = item as NotificationDto;
+            return (
+              <div
+                className={clsx(
+                  "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
+                  "transition-all duration-200 hover:scale-[1.01]",
+                  "active:scale-[0.99]",
+                )}
+              >
+                <NotificationFactory
+                  notificationDto={notification}
+                  onClick={async () => {
+                    markAsRead(notification.id, {
+                      onSuccess: () => {
+                        markAsReadInCache(notification.id);
+                        setUnreadCount((prev: number) => Math.max(prev - 1, 0));
+                      },
+                    });
+                  }}
+                />
+              </div>
+            );
+          }}
+          itemKey={(item: any, index: number) => (item as NotificationDto).id + "-" + index}
+          hasMore={!!hasNextPage}
+          isLoading={isFetching}
+          loadingSkeleton={<NotificationSkeletonLoading />}
+          numberOfSkeletons={2}
+          emptyComponent={
             <div className="flex items-center justify-center h-40">
               {t("notifications:notifications.no-notifications")}
             </div>
-          ) : (
-            <div className="flex flex-col px-2 py-2 gap-3">
-              <NotificationSkeletonLoading />
-              <NotificationSkeletonLoading />
-              <NotificationSkeletonLoading />
-              <NotificationSkeletonLoading />
-              <NotificationSkeletonLoading />
-            </div>
-          )}
-        </>
-      )}
+          }
+        />
+      </div>
 
       {!isInNotificationPage && (
         <div className="flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2">

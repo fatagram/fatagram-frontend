@@ -11,9 +11,14 @@ import { useChatStore } from "@/features/hooks/use-chat-store";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
+  onTurnback?: () => void;
 }
 
-export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({ className, conversationId }) => {
+export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
+  className,
+  conversationId,
+  onTurnback,
+}) => {
   const [message, setMessage] = useState("");
   const { registry } = useChatStore();
 
@@ -78,6 +83,11 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({ className, con
           </>
         ) : (
           <>
+            {onTurnback && (
+              <MiniButton sz="xs-3" onClick={onTurnback} className="block lg:hidden">
+                <i className="fa-solid fa-arrow-left text-primary-400" />
+              </MiniButton>
+            )}
             <Avatar src={chatAvatar} alt="Avatar" sz="xs-2" />
             <Text sz="md-1" weight="bold" className="flex-1 text-text-main">
               {chatTitle}

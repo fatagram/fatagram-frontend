@@ -4,7 +4,15 @@ import React from "react";
 import clsx from "clsx";
 
 const sizeClasses: Record<Size, { logo: string; slogan: string }> = {
-  xs: {
+  "xs-1": {
+    logo: "sm:text-[15px] text-[10px]",
+    slogan: "sm:text-[10px] text-[15px]",
+  },
+  "xs-2": {
+    logo: "sm:text-[20px] text-[15px]",
+    slogan: "sm:text-[10px] text-[15px]",
+  },
+  "xs-3": {
     logo: "sm:text-[20px] text-[10px]",
     slogan: "sm:text-[10px] text-[15px]",
   },

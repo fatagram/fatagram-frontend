@@ -58,7 +58,7 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({ className, onSelect }) 
 
   return (
     <PageNavbar title={t("settings:navbar.title")} className={clsx("bg-bg-second", className)}>
-      <PageNavbar.Section title={t("settings:navbar.privacy.title")}>
+      <PageNavbar.Section title={t("settings:navbar.privacy.title")} className="px-2 space-y-1">
         {authSettings.map((item, index) => (
           <PageNavbar.Item
             key={index}
@@ -69,7 +69,7 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({ className, onSelect }) 
           />
         ))}
       </PageNavbar.Section>
-      <PageNavbar.Section title={t("settings:navbar.general.title")}>
+      <PageNavbar.Section title={t("settings:navbar.general.title")} className="px-2 space-y-1">
         {generalSettings.map((item, index) => (
           <PageNavbar.Item
             key={index}

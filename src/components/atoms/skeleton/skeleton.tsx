@@ -10,7 +10,9 @@ interface SkeletonProps extends ComponentProps {
 }
 
 const sizeClasses: Record<Size, string> = {
-  xs: "h-2",
+  "xs-1": "h-1",
+  "xs-2": "h-1.5",
+  "xs-3": "h-2",
   "sm-1": "h-4",
   "sm-2": "h-6",
   "sm-3": "h-8",
@@ -29,7 +31,7 @@ export const Skeleton: FC<SkeletonProps> = ({ className = "", sz = "md-1", varia
   return (
     <div
       className={clsx(
-        `animate-pulse rounded-xl bg-bg-seventh`,
+        `animate-pulse rounded-xl bg-bg-third`,
         { "aspect-square !rounded-full": variant === "circle" },
         sizeClasses[sz],
         className,

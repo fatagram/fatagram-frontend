@@ -3,20 +3,30 @@ import { FatalkSidebar } from "./components/fatalk-sidebar";
 import { FatalkChatPanel } from "./components/fatalk-chat-panel";
 import { Text } from "@/components/atoms";
 import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
+import clsx from "clsx";
+import { useState } from "react";
 
 const FatalkPage = () => {
+  const [showSidebar, setShowSidebar] = useState(true);
   const { conversationId } = useParams<{ conversationId: string }>();
 
   return (
     <SidebarLayout
       title="Fatalk"
-      navbar={<FatalkSidebar />}
+      navbar={<FatalkSidebar onConversationClick={() => setShowSidebar(false)} />}
       className="h-[calc(100vh-var(--header-height))] overflow-hidden"
-      sidebarClassName="w-[400px] max-w-full"
+      showMenuButton={false}
+      sidebarClassName={clsx("lg:w-[400px] w-full", "max-w-full")}
+      showSidebar={showSidebar}
+      setShowSidebar={setShowSidebar}
     >
       <div className="flex flex-col w-full h-full overflow-hidden">
         {conversationId ? (
-          <FatalkChatPanel conversationId={conversationId} className="h-full" />
+          <FatalkChatPanel
+            conversationId={conversationId}
+            className="h-full"
+            onTurnback={() => setShowSidebar(true)}
+          />
         ) : (
           <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
             <div className="w-20 h-20 rounded-full bg-bg-fourth flex items-center justify-center">

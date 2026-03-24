@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import SettingsNavbar from "./components/settings-navbar";
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -11,6 +11,7 @@ type SettingPageProps = {
 
 const SettingPage: React.FC<SettingPageProps> = () => {
   const { t } = useTranslation() as { t: (key: string) => string };
+  const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
   useEffect(() => {
     document.title = t("settings:title");
@@ -20,7 +21,9 @@ const SettingPage: React.FC<SettingPageProps> = () => {
     <SidebarLayout
       className="flex-1"
       title="Cài đặt"
-      navbar={<SettingsNavbar className="h-full lg:!rounded-none !rounded-r-xl" />}
+      navbar={<SettingsNavbar className="h-full" onSelect={() => setShowSidebar(false)} />}
+      showSidebar={showSidebar}
+      setShowSidebar={setShowSidebar}
     >
       <div className={clsx("w-full max-w-[700px]")}>
         <Outlet />
