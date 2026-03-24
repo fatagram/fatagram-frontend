@@ -174,12 +174,20 @@ export const MessageList: React.FC<MessageListProps> = ({
             ref: React.RefObject<HTMLDivElement | null> | null,
           ) => {
             const message = item;
+            const isShowTime =
+              index === messages.length - 1 ||
+              getDiffBetween(message.createdAt, messages[index + 1].createdAt, "minute") > 30;
+            const isPrevMessageShowTime =
+              index === 0 ||
+              getDiffBetween(message.createdAt, messages[index - 1].createdAt, "minute") > 30;
             const isLastMessageInGroup =
               messages.indexOf(message) === messages.length - 1 ||
-              messages[messages.indexOf(message) + 1]?.senderId !== message.senderId;
+              messages[messages.indexOf(message) + 1]?.senderId !== message.senderId ||
+              isShowTime;
             const isFirstMessageInGroup =
               messages.indexOf(message) === 0 ||
-              messages[messages.indexOf(message) - 1]?.senderId !== message.senderId;
+              messages[messages.indexOf(message) - 1]?.senderId !== message.senderId ||
+              isPrevMessageShowTime;
             const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
             const isMyMessage = message.senderId === userId;
 
@@ -208,10 +216,7 @@ export const MessageList: React.FC<MessageListProps> = ({
                     : "",
                   isOnlyMessageInGroup ? "!rounded-2xl" : "",
                 )}
-                isShowTime={
-                  index === messages.length - 1 ||
-                  getDiffBetween(message.createdAt, messages[index + 1].createdAt, "minute") > 30
-                }
+                isShowTime={isShowTime}
                 isFooterVisible={index === 0 && !(!message.isGroup && !isMyMessage)}
               />
             );
