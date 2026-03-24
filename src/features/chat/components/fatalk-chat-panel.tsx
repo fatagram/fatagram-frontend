@@ -57,17 +57,6 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const displayedMessages = messages ? messages.pages.flatMap((page) => page.items) : [];
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    const raf = requestAnimationFrame(() => {
-      try {
-        el.scrollTop = el.scrollHeight;
-      } catch (e) {}
-    });
-    return () => cancelAnimationFrame(raf);
-  }, [conversationId, displayedMessages.length]);
-
   const handleSendMessage = () => {
     if (!message.trim()) return;
     send({
