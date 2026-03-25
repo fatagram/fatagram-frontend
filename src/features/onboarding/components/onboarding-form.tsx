@@ -83,7 +83,7 @@ export const OnboardingForm: React.FC = () => {
       {formik.isSubmitting && <OverlayLoading />}
 
       <div className="flex flex-col gap-4 w-full">
-        <div className="flex gap-2 w-full">
+        <div className="flex sm:flex-row flex-col gap-2 w-full">
           <Textbox
             title="Họ"
             className="w-full"

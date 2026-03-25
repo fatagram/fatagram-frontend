@@ -3,8 +3,8 @@ import { Outlet } from "react-router-dom";
 
 const SecondLayout = () => {
   return (
-    <Layout className="bg-red-500">
-      <Layout.Main className="flex-1 bg-blue-500">
+    <Layout>
+      <Layout.Main className="flex-1">
         <Outlet />
       </Layout.Main>
       <Layout.Footer>
