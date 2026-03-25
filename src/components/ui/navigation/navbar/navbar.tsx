@@ -3,7 +3,7 @@ import clsx from "clsx";
 import { NavbarItem } from "./navbar-item";
 
 interface NavbarProps {
-  isAuthenticated?: boolean;
+  isAuthenticated?: boolean | null;
   className?: string;
   optionClassName?: string;
   options?: React.ReactNode;

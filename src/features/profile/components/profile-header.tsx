@@ -66,6 +66,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
     const result = await refetchConversation();
     if (result.data) {
       openChat(result.data.id, { type: "conversation", conversationId: result.data.id });
+      if (isMobile) navigate(`/fatalk/${result.data.id}`);
     } else {
       const randomUuid = crypto.randomUUID();
       openChat(randomUuid, { type: "temp", targetId: targetId });

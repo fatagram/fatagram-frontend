@@ -114,6 +114,7 @@ const DefaultLayout = () => {
             </div>
           )}
           <Navbar
+            isAuthenticated={isAuthenticated}
             items={items}
             logo={
               !isMobile && (
