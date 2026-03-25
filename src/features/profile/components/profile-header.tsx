@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import ProfileBackground from "./profile-background";
 import ProfileAvatar from "./profile-avatar";
 import AddFriendButton from "./friend-button";
@@ -36,6 +36,17 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
   const { data, isLoading, isFetching } = useGetUserProfile(targetId);
   const userProfile = data?.infos;
   const { openChat } = useChatStore();
+  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+
+  useEffect(() => {
+    const handleResize = () => {
+      setIsMobile(window.innerWidth < 1024);
+    };
+    window.addEventListener("resize", handleResize);
+    return () => {
+      window.removeEventListener("resize", handleResize);
+    };
+  }, []);
 
   const { data: numberOfFriends, isFetching: numberOfFriendsFetching } =
     useGetNumberOfFriends(targetId);
@@ -46,7 +57,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
     isFetching: isCheckingConversation,
   } = useGetConversationWith(targetId);
 
-  const handleMessageClick = async () => {
+  const handleMessageClick = useCallback(async () => {
     if (!targetId) return;
     if (conversationData) {
       openChat(conversationData.id, { type: "conversation", conversationId: conversationData.id });
@@ -58,8 +69,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
     } else {
       const randomUuid = crypto.randomUUID();
       openChat(randomUuid, { type: "temp", targetId: targetId });
+      if (isMobile)
+        navigate(`/fatalk/temp?tempId=${targetId}`, { state: { correlationId: randomUuid } });
     }
-  };
+  }, [isMobile, targetId, refetchConversation, openChat]);
 
   return (
     <div className={clsx("relative w-full flex flex-col items-center", className)}>

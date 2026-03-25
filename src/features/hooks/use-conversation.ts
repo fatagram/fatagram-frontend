@@ -25,11 +25,15 @@ const conversationDetailQueryOptions = (conversationId: string) =>
     fn: () => conversationService.getConversation(conversationId),
   });
 
-export const useGetConversationWith = (targetId: string, config?: SafeQueryResultOptions<any>) => {
+export const useGetConversationWith = (
+  targetId: string,
+  config?: SafeQueryResultOptions<any>,
+  enabled: boolean = true,
+) => {
   return useSafeQueryResult({
     queryKey: conversationKeys.withUser(targetId),
     fn: async () => await conversationService.getConversationWith(targetId),
-    enabled: false,
+    enabled: enabled,
     options: config,
   });
 };

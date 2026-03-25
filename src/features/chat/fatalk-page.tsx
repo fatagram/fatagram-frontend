@@ -1,16 +1,12 @@
-import { useNavigate, useParams } from "react-router-dom";
-import { FatalkSidebar } from "./components/fatalk-sidebar";
-import { FatalkChatPanel } from "./components/fatalk-chat-panel";
+import { Outlet, useLocation } from "react-router-dom";
 import { Text } from "@/components/atoms";
+import { FatalkSidebar } from "./components/fatalk-sidebar";
 import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
 import clsx from "clsx";
 
 const FatalkPage = () => {
-  const { conversationId } = useParams<{ conversationId: string }>();
-  const navigate = useNavigate();
-
-  // Check if the current path is the main fatalk page (not a specific conversation)
-  const isMainFatalkPage = !conversationId;
+  const { pathname } = useLocation();
+  const isExactPath = pathname === "/fatalk" || pathname === "/fatalk/";
 
   return (
     <SidebarLayout
@@ -18,17 +14,13 @@ const FatalkPage = () => {
       navbar={<FatalkSidebar />}
       className="overflow-hidden"
       showMenuButton={false}
-      sidebarClassName={clsx("lg:w-[400px] w-full", "max-w-full transition-none")}
-      showSidebar={isMainFatalkPage}
+      sidebarClassName={clsx("lg:w-[400px] w-full", "max-w-full !transition-none")}
+      showSidebar={isExactPath}
+      showOverlay={false}
     >
-      <div className="flex flex-col w-full h-full overflow-">
-        {conversationId ? (
-          <FatalkChatPanel
-            conversationId={conversationId}
-            className=""
-            onTurnback={() => navigate("/fatalk")}
-          />
-        ) : (
+      <div className="flex flex-col w-full h-full">
+        <Outlet />
+        {isExactPath && (
           <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
             <div className="w-20 h-20 rounded-full bg-bg-fourth flex items-center justify-center">
               <i className="fa-solid fa-message text-4xl text-primary-400" />

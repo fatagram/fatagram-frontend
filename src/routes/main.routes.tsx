@@ -14,6 +14,8 @@ import GoogleCallbackPage from "@/features/auth/google-callback/google-callback-
 import OnboardingPage from "@/features/onboarding/onboarding-page";
 import { settingRoutes } from "./setting.routes";
 import FatalkPage from "@/features/chat/fatalk-page";
+import { ConversationPage } from "@/features/chat/conversation/conversation-page";
+import { TempConversation } from "@/features/chat/temp/temp-conversation";
 
 export const mainRoutes: RouteType[] = [
   {
@@ -39,11 +41,18 @@ export const mainRoutes: RouteType[] = [
         path: "/fatalk",
         element: <FatalkPage />,
         type: "private",
-      },
-      {
-        path: "/fatalk/:conversationId",
-        element: <FatalkPage />,
-        type: "private",
+        children: [
+          {
+            path: ":conversationId",
+            element: <ConversationPage />,
+            type: "private",
+          },
+          {
+            path: "temp",
+            element: <TempConversation />,
+            type: "private",
+          },
+        ],
       },
       { path: "/loading", type: "public", element: <LoadingPage /> },
       { path: "*", type: "public", element: <NotFoundPage /> },

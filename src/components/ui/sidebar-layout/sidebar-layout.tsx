@@ -7,6 +7,7 @@ interface SidebarLayoutProps extends ComponentProps {
   sidebarClassName?: string;
   children: React.ReactNode;
   title?: string;
+  showOverlay?: boolean;
   showMenuButton?: boolean;
   showSidebar?: boolean;
   setShowSidebar?: (show: boolean) => void;
@@ -20,6 +21,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   showMenuButton = true,
   showSidebar = false,
   setShowSidebar,
+  showOverlay = true,
   children,
 }) => {
   return (
@@ -35,17 +37,19 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
         {navbar}
       </aside>
 
-      <Transition
-        animation={AnimationLib.Opacity}
-        show={showSidebar}
-        className="fixed inset-0 z-20 lg:hidden"
-        duration={300}
-      >
-        <div
-          className="absolute inset-0 bg-black opacity-50"
-          onClick={() => setShowSidebar?.(false)}
-        />
-      </Transition>
+      {showOverlay && (
+        <Transition
+          animation={AnimationLib.Opacity}
+          show={showSidebar}
+          className="fixed inset-0 z-20 lg:hidden"
+          duration={300}
+        >
+          <div
+            className="absolute inset-0 bg-black opacity-50"
+            onClick={() => setShowSidebar?.(false)}
+          />
+        </Transition>
+      )}
 
       <main className={clsx("flex-1 lg:ml-0 h-full overflow-y-auto")}>
         <div className="w-full h-full flex flex-col items-center">
