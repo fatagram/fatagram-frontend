@@ -26,7 +26,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   const checkmarkClass = styles["checkmark"];
 
   return (
-    <label className={clsx("relative inline-flex items-center gap-1 select-none", className)}>
+    <label className={clsx("relative inline-flex items-start gap-1 select-none", className)}>
       <input
         {...props}
         disabled={disabled}

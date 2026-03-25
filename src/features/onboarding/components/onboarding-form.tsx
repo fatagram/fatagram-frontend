@@ -147,12 +147,7 @@ export const OnboardingForm: React.FC = () => {
           </div>
         </div>
 
-        <Button
-          type="button"
-          className="w-full mt-4 font-montserrat"
-          onClick={formik.submitForm}
-          sz="md-1"
-        >
+        <Button type="button" className="w-full" onClick={formik.submitForm} sz="sm-1">
           Hoàn tất
         </Button>
       </div>

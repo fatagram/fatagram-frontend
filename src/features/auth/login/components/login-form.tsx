@@ -83,7 +83,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       </Text>
       <div className="flex flex-col gap-3 w-full">
         <Textbox
-          className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
+          sz="sm-1"
+          className="w-full"
           autoComplete="username"
           placeholder={t("auth:login.username")}
           onChange={(e) => formik.setFieldValue("usernameOrEmail", e.target.value)}
@@ -95,7 +96,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         />
         <Textbox
           type="password"
-          className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[7px] py-[10px] shadow-sm")}
+          sz="sm-1"
+          className="w-full"
           placeholder={t("auth:login.password")}
           onChange={(e) => formik.setFieldValue("password", e.target.value)}
           isWrong={
@@ -111,6 +113,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           onChange={(e) => {
             formik.setFieldValue("rememberMe", e.target.checked);
           }}
+          className="items-center"
         />
         {switchForgotPassword && (
           <Text
@@ -125,12 +128,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </Text>
         )}
       </div>
-      <Button
-        type="button"
-        className="w-full font-montserrat"
-        onClick={formik.submitForm}
-        sz="md-1"
-      >
+      <Button type="button" onClick={formik.submitForm} sz="sm-3" className="w-full">
         {t("auth:login.loginButton")}
       </Button>
       <div className="w-full flex flex-col items-center gap-3">

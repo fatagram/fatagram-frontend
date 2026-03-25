@@ -97,10 +97,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       )}
       onSubmit={formik.submitForm}
     >
-      {/* Overlay Loading */}
       {(formik.isSubmitting || isFetching) && <OverlayLoading />}
-      {/* Logo Fatagram */}
-      {isShowLogo && <Logo />}
+      {isShowLogo && <Logo sz="sm-1" />}
 
       <Text
         sz="xl-1"
@@ -113,7 +111,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <Textbox
           value={formik.values.username}
           autoComplete="username"
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          sz="sm-1"
+          className="w-full"
           placeholder={t("auth:register.username")}
           onChange={(e) => formik.setFieldValue("username", e.target.value)}
           isWrong={
@@ -124,7 +123,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <Textbox
           value={formik.values.email}
           autoComplete="email"
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          sz="sm-1"
+          className="w-full"
           placeholder={t("auth:register.email")}
           onChange={(e) => formik.setFieldValue("email", e.target.value)}
           isWrong={(formik.touched.email && Boolean(formik.errors.email)) || Boolean(emailError)}
@@ -133,7 +133,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <Textbox
           value={formik.values.phoneNumber}
           autoComplete="tel"
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          sz="sm-1"
+          className="w-full"
           placeholder={t("auth:register.phoneNumber")}
           onChange={(e) => formik.setFieldValue("phoneNumber", e.target.value)}
           isWrong={
@@ -145,7 +146,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <Textbox
           type="password"
           value={formik.values.password}
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          sz="sm-1"
+          className="w-full"
           placeholder={t("auth:register.password")}
           onChange={(e) => formik.setFieldValue("password", e.target.value)}
           isWrong={
@@ -156,7 +158,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <Textbox
           type="password"
           value={formik.values.confirmPassword}
-          className="text-[14px] sm:text-[20px] w-[100%] px-[20px] sm:py-[5px] py-[10px] shadow-sm"
+          sz="sm-1"
+          className="w-full"
           placeholder={t("auth:register.confirmPassword")}
           onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
           isWrong={
@@ -183,7 +186,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </Text>
         }
       />
-      <Button type="button" sz="md-1" className="w-full" onClick={formik.submitForm}>
+      <Button type="button" sz="sm-3" className="w-full" onClick={formik.submitForm}>
         <Text>{t("auth:register.registerButton")}</Text>
       </Button>
       <div className="w-full flex flex-col items-center gap-3">

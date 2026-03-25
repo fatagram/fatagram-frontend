@@ -1,7 +1,7 @@
 import Layout from "@/components/ui/layout";
 import { useCallback, useEffect, useState } from "react";
 import { Outlet, useNavigate, useLocation, useParams } from "react-router-dom";
-import { Logo } from "@/components/atoms/logo/logo";
+import { Text, Logo } from "@/components/atoms";
 import { NotificationBadge } from "@/features/notifications/components/notification-menu";
 import clsx from "clsx";
 import { Button } from "@/components/atoms";
@@ -60,59 +60,75 @@ const DefaultLayout = () => {
   }, []);
 
   const openLoginOverlay = useCallback(() => {
+    if (isMobile) {
+      navigate("/login");
+      return;
+    }
     openDialog({
       content: <LoginForm showLogo={false} />,
     });
-  }, [openDialog]);
+  }, [isMobile, openDialog]);
 
   const openRegisterOverlay = useCallback(() => {
+    if (isMobile) {
+      navigate("/register");
+      return;
+    }
     openDialog({
       content: <RegisterForm showLogo={false} />,
     });
-  }, [openDialog]);
+  }, [isMobile, openDialog]);
 
   useEffect(() => {
     if (isAuthenticated) {
       closeDialog();
     } else {
+      if (isMobile) return;
       openLoginOverlay();
     }
 
     return () => closeDialog();
-  }, [isAuthenticated, closeDialog, openLoginOverlay]);
+  }, [isMobile, isAuthenticated, closeDialog, openLoginOverlay]);
 
   const handleGoToHome = useCallback(() => {
     if (isAuthenticated) {
       navigate("/");
     } else {
+      if (!isMobile) {
+        navigate("/login");
+        return;
+      }
       openLoginOverlay();
     }
-  }, [isAuthenticated, openLoginOverlay]);
+  }, [isMobile, isAuthenticated, openLoginOverlay]);
 
   return (
     <Layout>
-      {(!isMobile || !conversationId) && (
+      {!(isMobile && conversationId) && (
         <Layout.Header>
-          {isMobile && pathHasTopBar && (
+          {isMobile && (pathHasTopBar || !isAuthenticated) && (
             <div className="flex items-center px-4 h-[25px] bg-bg-main">
-              <Logo sz="sm-2" hasSlogan={false} />
+              <div onClick={handleGoToHome}>
+                <Logo sz="sm-2" hasSlogan={false} />
+              </div>
             </div>
           )}
           <Navbar
-            style={{}}
-            isAuthenticated={isAuthenticated}
             items={items}
             logo={
-              <div
-                onClick={handleGoToHome}
-                className="sm:block hidden cursor-pointer items-center gap-2"
-              >
-                <Logo hasSlogan={false} sz="sm-3" />
-              </div>
+              !isMobile && (
+                <div
+                  onClick={handleGoToHome}
+                  className="sm:block hidden cursor-pointer items-center gap-2"
+                >
+                  <Logo hasSlogan={false} sz="sm-3" />
+                </div>
+              )
             }
+            optionClassName="!justify-end"
             options={
               isAuthenticated ? (
-                <div className={clsx("flex items-center gap-2 ")}>
+                <div className={clsx("flex items-center gap-2")}>
                   <div className="hidden sm:flex gap-2">
                     {!isFatalkPage && <ChatBadge />}
                     <NotificationBadge />
@@ -120,20 +136,32 @@ const DefaultLayout = () => {
                   <UserMenu />
                 </div>
               ) : (
-                <div className={clsx("flex items-center gap-2")}>
-                  <Button sz="sm-1" variant="secondary" onClick={openLoginOverlay}>
-                    Sign in
-                  </Button>
-                  <Button sz="sm-1" variant="primary" onClick={openRegisterOverlay}>
-                    Sign up
-                  </Button>
-                </div>
+                !isMobile && (
+                  <div className={clsx("flex items-center gap-2")}>
+                    <Button
+                      sz="sm-1"
+                      variant="secondary"
+                      className="whitespace-nowrap inline-flex"
+                      onClick={openLoginOverlay}
+                    >
+                      Sign in
+                    </Button>
+                    <Button
+                      sz="sm-1"
+                      variant="primary"
+                      className="whitespace-nowrap inline-flex"
+                      onClick={openRegisterOverlay}
+                    >
+                      Sign up
+                    </Button>
+                  </div>
+                )
               )
             }
           />
         </Layout.Header>
       )}
-      <Layout.Main className="h-full overflow-y-auto ">
+      <Layout.Main className="h-full overflow-y-auto scrollbar-hide sm:scrollbar-default">
         <Outlet />
         {!isMobile && (
           <div className="fixed inset-0 pointer-events-none z-50">
@@ -141,6 +169,36 @@ const DefaultLayout = () => {
           </div>
         )}
       </Layout.Main>
+      {isMobile && !isAuthenticated && (
+        <div
+          className={clsx(
+            "flex flex-col fixed bottom-0 left-0 right-0 bg-bg-sixth/80 backdrop-blur-sm py-12 px-6",
+            "gap-6 border-t-2 border-primary-500/50 rounded-t-2xl shadow-lg",
+          )}
+        >
+          <Text sz="sm-2" className="text-center" wrap="whitespace-normal">
+            Join Fatagram to connect with your friends and the world around you!
+          </Text>
+          <div className="flex items-center justify-center h-full">
+            <Button
+              sz="sm-1"
+              variant="primary"
+              className="whitespace-nowrap inline-flex flex-1 justify-center"
+              onClick={openLoginOverlay}
+            >
+              Sign in
+            </Button>
+            <Button
+              sz="sm-1"
+              variant="secondary"
+              className="whitespace-nowrap inline-flex ml-4 flex-1 justify-center"
+              onClick={openRegisterOverlay}
+            >
+              Sign up
+            </Button>
+          </div>
+        </div>
+      )}
     </Layout>
   );
 };

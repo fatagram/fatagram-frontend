@@ -7,20 +7,20 @@ export default function OnboardingPage() {
     <div
       className={clsx(
         "w-full h-full flex items-center justify-center bg-gradient-to-br",
-        "from-primary-500/10 via-bg-main to-primary-600/10 sm:p-6",
+        "from-primary-500/10 via-bg-main to-primary-600/10",
       )}
     >
       <div
         className={clsx(
-          "relative flex flex-col items-center gap-8 w-full sm:max-w-[700px]",
-          "bg-bg-second/80 backdrop-blur-xl sm:rounded-3xl shadow-2xl",
-          "p-10 animate-fade-in border border-border-main/50",
+          "relative flex flex-col items-center justify-center gap-8 w-full h-full sm:h-auto sm:max-w-[700px]",
+          "bg-bg-second/80 sm:rounded-3xl shadow-2xl",
+          "sm:p-10 px-4 border border-border-main/50",
         )}
       >
         <div className="absolute -top-20 -left-20 w-40 h-40 bg-primary-500/20 rounded-full blur-3xl" />
 
         <div className="flex flex-col items-center gap-3 z-10">
-          <Logo sz="lg-1" />
+          <Logo sz="md-1" hasSlogan={false} />
           <Text
             sz="xl-2"
             weight="extrabold"

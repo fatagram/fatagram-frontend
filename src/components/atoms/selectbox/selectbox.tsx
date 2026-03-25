@@ -1,4 +1,4 @@
-import React, { RefObject } from "react";
+import React, { RefObject, useEffect } from "react";
 import useClickOutside from "@/hooks/use-click-outside";
 import { ComponentProps } from "@/components/common/component-type";
 import { Text } from "@/components/atoms";
@@ -39,6 +39,18 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
   const selectBoxRef = React.useRef<HTMLDivElement>(null);
   const btnRef = React.useRef<HTMLButtonElement>(null);
 
+  // prevent background scroll when mobile sheet is open
+  useEffect(() => {
+    if (isOpen) {
+      const prev = document.body.style.overflow;
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.overflow = prev;
+      };
+    }
+    return;
+  }, [isOpen]);
+
   useClickOutside(
     selectBoxRef as RefObject<HTMLDivElement>,
     btnRef as RefObject<HTMLButtonElement>,
@@ -69,10 +81,15 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
         </div>
       </button>
 
-      <Transition animation={AnimationLib.DropdownSlide} show={isOpen} duration={100}>
+      <Transition
+        animation={AnimationLib.DropdownSlide}
+        show={isOpen}
+        duration={100}
+        className="hidden sm:block"
+      >
         <div
           className={clsx(
-            "absolute w-full",
+            "absolute w-full ",
             "bg-bg-card rounded-lg shadow-md mt-1 z-50 border border-border-main",
             dropdownClassName,
           )}
@@ -98,6 +115,62 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
               </li>
             ))}
           </ul>
+        </div>
+      </Transition>
+
+      {/* Mobile: overlay + bottom sheet */}
+      <Transition animation={AnimationLib.Fade} show={isOpen} duration={100} className="sm:hidden">
+        <div className="fixed inset-0 bg-bg-fourth/60 z-[9998]" onClick={() => setIsOpen(false)} />
+      </Transition>
+
+      {isOpen && <div className="sm:hidden fixed inset-0 z-[9998] bg-black/50" />}
+
+      <Transition
+        animation={AnimationLib.SlideUp}
+        show={isOpen}
+        duration={200}
+        className="sm:hidden fixed left-0 right-0 bottom-0 z-[9999]"
+      >
+        <div
+          ref={selectBoxRef}
+          onClick={(e) => e.stopPropagation()}
+          className={clsx(
+            "bg-bg-card rounded-t-2xl shadow-md border border-border-main",
+            "max-h-[72vh] overflow-auto",
+            dropdownClassName,
+          )}
+        >
+          <div className="w-14 h-1.5 bg-border-main/30 rounded-full mx-auto mt-3 mb-2" />
+
+          <div className="px-6 pb-2 pt-1">
+            <div className="text-center text-base font-medium text-text-primary">
+              {title ? `${title}` : "Select"}
+            </div>
+          </div>
+
+          <ul className="py-2">
+            {options.map((item, index) => (
+              <li
+                key={index}
+                className={clsx(
+                  "px-6 py-4 hover:bg-bg-hover/60",
+                  "cursor-pointer transition-colors",
+                  optionClassName,
+                  selected === item.key &&
+                    (optionActiveClassName ?? "bg-bg-hover/80 text-text-primary"),
+                )}
+                onClick={() => {
+                  setSelected(item.key);
+                  onSelect(item.key);
+                  setIsOpen(false);
+                }}
+              >
+                <div className="text-base">{item.value}</div>
+              </li>
+            ))}
+          </ul>
+
+          <div className="h-6" />
         </div>
       </Transition>
     </div>

@@ -28,6 +28,11 @@ export const AnimationLib: Record<string, AnimationType> = {
     out: "animate-dropdown-slide-out",
     duration: 200,
   },
+  SlideUp: {
+    in: "animate-slide-up-in",
+    out: "animate-slide-up-out",
+    duration: 200,
+  },
   Opacity: {
     in: "animate-opacity-in",
     out: "animate-opacity-out",

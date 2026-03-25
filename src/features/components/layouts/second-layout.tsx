@@ -7,7 +7,7 @@ const SecondLayout = () => {
       <Layout.Main className="flex-1">
         <Outlet />
       </Layout.Main>
-      <Layout.Footer>
+      <Layout.Footer className="relative">
         <div className="bg-bg-second text-center py-4">
           <p className="text-sm text-text-secondary">&copy; 2026 Fatagram. All rights reserved.</p>
         </div>
