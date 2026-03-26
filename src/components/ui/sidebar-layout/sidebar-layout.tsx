@@ -56,7 +56,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
       <div className={clsx("flex-1 flex flex-col min-w-0 h-full", childrenWrapperCalssName)}>
         {showMenuButton && (
           <button
-            className="self-start ml-3 my-3 text-2xl font-bold lg:hidden"
+            className="self-start m-3 text-2xl font-bold lg:hidden"
             onClick={() => setShowSidebar?.(!showSidebar)}
           >
             <i className="fa-solid fa-bars mr-2" />
