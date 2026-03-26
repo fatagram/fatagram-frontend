@@ -27,8 +27,8 @@ export const SidebarPageLayout: React.FC<SidebarPageLayoutProps> = ({
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
     >
-      <div className={clsx("flex items-center justify-center flex-1  mt-1")}>
-        <div className="w-full sm:max-w-[750px]">{children}</div>
+      <div className={clsx("flex items-center bg-red-500 justify-center flex-1  mt-1")}>
+        <div className="w-full sm:max-w-[750px] px-3">{children}</div>
       </div>
     </SidebarLayout>
   );
