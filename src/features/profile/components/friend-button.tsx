@@ -7,6 +7,7 @@ import clsx from "clsx";
 import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts";
+import { useFriendshipStatus } from "../hooks/use-friendship-status";
 
 interface FriendButtonProps extends ComponentProps {
   uid?: string;
@@ -17,9 +18,16 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
 
   if (!useAuth().isAuthenticated) return null;
 
-  const [friendshipStatus, setFriendshipStatus] = useState<string>("None");
   const [isShowFriendOptions, setIsShowFriendOptions] = useState<boolean>(false);
   const [isShowRequestOptions, setIsShowRequestOptions] = useState<boolean>(false);
+  const { data: friendshipStatus, isLoading, isFetching } = useFriendshipStatus(uid ? uid : "");
+  const [currentFriendshipStatus, setFriendshipStatus] = useState<string>("None");
+
+  useEffect(() => {
+    if (friendshipStatus) {
+      setFriendshipStatus(friendshipStatus.status);
+    }
+  }, [friendshipStatus]);
 
   const btnFriendRef = useRef<HTMLButtonElement>(null);
   const btnRequestRef = useRef<HTMLButtonElement>(null);
@@ -41,16 +49,6 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
       if (isShowRequestOptions) setIsShowRequestOptions(false);
     },
   );
-
-  useEffect(() => {
-    const fetchFriendshipStatus = async () => {
-      const response = await friendshipService.GetFriendshipStatus(uid ? uid : "");
-      if (response.success) {
-        setFriendshipStatus(response.data?.status ?? "None");
-      }
-    };
-    fetchFriendshipStatus();
-  }, [uid, friendshipService, setFriendshipStatus]);
 
   const handleSentAddFriendRequest = useCallback(async () => {
     const response = await friendshipService.SendAddFriendRequest(uid ? uid : "");
@@ -143,18 +141,26 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
     [uid, handleAcceptAddFriendRequest, handleDeclineAddFriendRequest, t],
   );
 
+  if (isLoading || isFetching) {
+    return (
+      <Button sz={sz} disabled>
+        <i className={clsx("fa-solid", "fa-spinner", "fa-spin")}></i>
+      </Button>
+    );
+  }
+
   return (
     <div>
-      {friendshipStatus === "None" ? (
+      {currentFriendshipStatus === "None" ? (
         <Button sz={sz} onClick={handleSentAddFriendRequest}>
           <i className={clsx("fa-solid", "fa-plus")}></i> {t("user:profileHeader.addFriendButton")}
         </Button>
-      ) : friendshipStatus === "SentByMe" ? (
+      ) : currentFriendshipStatus === "SentByMe" ? (
         <Button sz={sz} onClick={handleCancelAddFriendRequest}>
           <i className={clsx("fa-solid", "fa-xmark")}></i>{" "}
           {t("user:profileHeader.cancelRequestButton")}
         </Button>
-      ) : friendshipStatus === "SentByThem" ? (
+      ) : currentFriendshipStatus === "SentByThem" ? (
         <div className={clsx("sm:relative", "z-50")}>
           <Button
             sz={sz}

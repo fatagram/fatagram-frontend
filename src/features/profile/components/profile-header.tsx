@@ -61,6 +61,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
     if (!targetId) return;
     if (conversationData) {
       openChat(conversationData.id, { type: "conversation", conversationId: conversationData.id });
+      if (isMobile) navigate(`/fatalk/${conversationData.id}`);
       return;
     }
     const result = await refetchConversation();
@@ -107,7 +108,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
             ) : (
               <Skeleton sz="sm-3" className="w-36" />
             )}
-            {!isLoading || isFetching ? (
+            {!isLoading || !isFetching ? (
               <div className="flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0">
                 {isAuthenticated && (
                   <>
