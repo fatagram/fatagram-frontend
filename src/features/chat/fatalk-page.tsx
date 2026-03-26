@@ -12,14 +12,14 @@ const FatalkPage = () => {
     <SidebarLayout
       title="Fatalk"
       navbar={<FatalkSidebar />}
-      className="overflow-hidden"
       showMenuButton={false}
       sidebarClassName={clsx("lg:w-[400px] w-full", "max-w-full !transition-none")}
       showSidebar={isExactPath}
       showOverlay={false}
     >
-      <div className="flex flex-col w-full h-full">
+      <div className="flex flex-col flex-1 w-full h-full bg-red-500">
         <Outlet />
+
         {isExactPath && (
           <div className="flex flex-col items-center justify-center h-full gap-4 opacity-50">
             <div className="w-20 h-20 rounded-full bg-bg-fourth flex items-center justify-center">

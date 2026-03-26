@@ -65,15 +65,14 @@ export const LoginForm: React.FC<LoginFormProps> = ({
   return (
     <div
       className={clsx(
-        "relative flex flex-col items-center justify-center gap-5 w-[450px] h-[550px]",
-        "bg-bg-second rounded-2xl",
-        "p-12 animate-fade-in overflow-hidden",
+        "relative flex flex-col items-center justify-center gap-5",
+        "animate-fade-in overflow-hidden",
         className,
       )}
     >
       {formik.isSubmitting && <OverlayLoading />}
 
-      {isShowLogo && <Logo sz="md-1" />}
+      {isShowLogo && <Logo sz="sm-3" />}
       <Text
         sz="xl-1"
         weight="extrabold"
@@ -107,7 +106,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           autoComplete="current-password"
         />
       </div>
-      <div className="flex justify-between w-[98%] items-center gap-[50px]">
+      <div className="flex justify-between w-full items-center gap-[50px]">
         <Checkbox
           label={t("auth:login.rememberMe")}
           onChange={(e) => {

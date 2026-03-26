@@ -4,7 +4,7 @@ import { Outlet } from "react-router-dom";
 const SecondLayout = () => {
   return (
     <Layout>
-      <Layout.Main className="flex-1">
+      <Layout.Main className="flex-1 flex flex-col">
         <Outlet />
       </Layout.Main>
       <Layout.Footer className="relative">

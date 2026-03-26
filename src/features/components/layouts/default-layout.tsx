@@ -1,5 +1,5 @@
 import Layout from "@/components/ui/layout";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { Outlet, useNavigate, useLocation, useParams } from "react-router-dom";
 import { Text, Logo } from "@/components/atoms";
 import { NotificationBadge } from "@/features/notifications/components/notification-menu";
@@ -20,6 +20,8 @@ const DefaultLayout = () => {
   const { pathname } = useLocation();
 
   const isFatalkPage = pathname.startsWith("/fatalk");
+
+  const headerRef = useRef<HTMLDivElement>(null);
 
   const items = [
     { icon: <i className="fa-solid fa-house" />, path: "/", isIndex: true, showOnDesktop: true },
@@ -57,6 +59,19 @@ const DefaultLayout = () => {
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
+  }, []);
+
+  useEffect(() => {
+    if (!headerRef.current) return;
+
+    const resizeObserver = new ResizeObserver((entries) => {
+      for (const entry of entries) {
+        const height = entry.contentRect.height;
+        document.documentElement.style.setProperty("--header-height", `${height}px`);
+      }
+    });
+    resizeObserver.observe(headerRef.current);
+    return () => resizeObserver.disconnect();
   }, []);
 
   const openLoginOverlay = useCallback(() => {
@@ -104,65 +119,69 @@ const DefaultLayout = () => {
 
   return (
     <Layout>
-      {!(isMobile && conversationId) && (
-        <Layout.Header>
-          {isMobile && (pathHasTopBar || !isAuthenticated) && (
-            <div className="flex items-center px-4 h-[25px] bg-bg-main">
-              <div onClick={handleGoToHome}>
-                <Logo sz="sm-2" hasSlogan={false} />
-              </div>
-            </div>
+      <Layout.Header
+        className={clsx(isMobile && conversationId && "hidden", "sticky top-0 z-40")}
+        ref={headerRef}
+      >
+        <div
+          className={clsx(
+            "flex items-center px-4 h-[25px] bg-bg-main",
+            isMobile && (pathHasTopBar || !isAuthenticated) ? "block" : "hidden",
           )}
-          <Navbar
-            isAuthenticated={isAuthenticated}
-            items={items}
-            logo={
+        >
+          <div onClick={handleGoToHome}>
+            <Logo sz="sm-2" hasSlogan={false} />
+          </div>
+        </div>
+        <Navbar
+          isAuthenticated={isAuthenticated}
+          items={items}
+          logo={
+            !isMobile && (
+              <div
+                onClick={handleGoToHome}
+                className="sm:block hidden cursor-pointer items-center gap-2"
+              >
+                <Logo hasSlogan={false} sz="sm-3" />
+              </div>
+            )
+          }
+          optionClassName="!justify-end"
+          options={
+            isAuthenticated ? (
+              <div className={clsx("flex items-center gap-2")}>
+                <div className="hidden sm:flex gap-2">
+                  {!isFatalkPage && <ChatBadge />}
+                  <NotificationBadge />
+                </div>
+                <UserMenu />
+              </div>
+            ) : (
               !isMobile && (
-                <div
-                  onClick={handleGoToHome}
-                  className="sm:block hidden cursor-pointer items-center gap-2"
-                >
-                  <Logo hasSlogan={false} sz="sm-3" />
-                </div>
-              )
-            }
-            optionClassName="!justify-end"
-            options={
-              isAuthenticated ? (
                 <div className={clsx("flex items-center gap-2")}>
-                  <div className="hidden sm:flex gap-2">
-                    {!isFatalkPage && <ChatBadge />}
-                    <NotificationBadge />
-                  </div>
-                  <UserMenu />
+                  <Button
+                    sz="sm-1"
+                    variant="secondary"
+                    className="whitespace-nowrap inline-flex"
+                    onClick={openLoginOverlay}
+                  >
+                    Sign in
+                  </Button>
+                  <Button
+                    sz="sm-1"
+                    variant="primary"
+                    className="whitespace-nowrap inline-flex"
+                    onClick={openRegisterOverlay}
+                  >
+                    Sign up
+                  </Button>
                 </div>
-              ) : (
-                !isMobile && (
-                  <div className={clsx("flex items-center gap-2")}>
-                    <Button
-                      sz="sm-1"
-                      variant="secondary"
-                      className="whitespace-nowrap inline-flex"
-                      onClick={openLoginOverlay}
-                    >
-                      Sign in
-                    </Button>
-                    <Button
-                      sz="sm-1"
-                      variant="primary"
-                      className="whitespace-nowrap inline-flex"
-                      onClick={openRegisterOverlay}
-                    >
-                      Sign up
-                    </Button>
-                  </div>
-                )
               )
-            }
-          />
-        </Layout.Header>
-      )}
-      <Layout.Main className="h-full overflow-y-auto scrollbar-hide sm:scrollbar-default">
+            )
+          }
+        />
+      </Layout.Header>
+      <Layout.Main className="flex-1 flex flex-col scrollbar-hide sm:scrollbar-default">
         <Outlet />
         {!isMobile && (
           <div className="fixed inset-0 pointer-events-none z-50">

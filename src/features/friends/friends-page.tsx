@@ -18,7 +18,6 @@ const FriendPage: React.FC<FriendsPageProps> = () => {
   return (
     <SidebarLayout
       title="Bạn bè"
-      className=""
       navbar={
         <FriendsNavbar
           className="h-full !rounded-none"
@@ -30,8 +29,10 @@ const FriendPage: React.FC<FriendsPageProps> = () => {
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
     >
-      <div className={clsx("w-full max-w-[700px] mt-1")}>
-        <Outlet />
+      <div className={clsx("flex items-center justify-center flex-1  mt-1")}>
+        <div className="w-full max-w-[750px]">
+          <Outlet />
+        </div>
       </div>
     </SidebarLayout>
   );

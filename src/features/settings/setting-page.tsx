@@ -19,14 +19,15 @@ const SettingPage: React.FC<SettingPageProps> = () => {
 
   return (
     <SidebarLayout
-      className="flex-1"
       title="Cài đặt"
       navbar={<SettingsNavbar className="h-full" onSelect={() => setShowSidebar(false)} />}
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
     >
-      <div className={clsx("overflow-hidden w-full max-w-[700px]")}>
-        <Outlet />
+      <div className={clsx("flex items-start justify-center flex-1")}>
+        <div className={clsx("w-full mt-1 max-w-[750px]")}>
+          <Outlet />
+        </div>
       </div>
     </SidebarLayout>
   );

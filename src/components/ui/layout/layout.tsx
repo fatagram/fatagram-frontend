@@ -26,9 +26,9 @@ interface LayoutMainProps {
 }
 const LayoutMain: React.FC<LayoutMainProps> = ({ children, className, style }) => {
   return (
-    <div className={clsx("relative", className)} style={style}>
+    <main className={clsx("relative", className)} style={style}>
       {children}
-    </div>
+    </main>
   );
 };
 
@@ -56,7 +56,9 @@ interface LayoutComponent extends React.FC<LayoutProps> {
 
 const Layout: LayoutComponent = ({ children, className }) => {
   return (
-    <main className={clsx("relative flex flex-col bg-bg-eighth h-dvh", className)}>{children}</main>
+    <div className={clsx("relative flex flex-col bg-bg-eighth min-h-dvh", className)}>
+      {children}
+    </div>
   );
 };
 

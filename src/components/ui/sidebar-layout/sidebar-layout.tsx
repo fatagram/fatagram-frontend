@@ -25,11 +25,11 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className={clsx("flex items-start h-full", className)}>
+    <div className={clsx("flex flex-1 items-stretch", className)}>
       <aside
         className={clsx(
-          "z-30 max-w-[300px] shrink-0 overflow-y-auto h-full",
-          "fixed lg:sticky transition-transform duration-300",
+          "z-30 max-w-[300px] shrink-0 overflow-y-auto ",
+          "fixed lg:sticky top-[var(--header-height)] h-[calc(100dvh-var(--header-height))] transition-transform duration-300",
           showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           sidebarClassName,
         )}
@@ -51,20 +51,24 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
         </Transition>
       )}
 
-      <main className={clsx("flex-1 lg:ml-0 h-full overflow-y-auto")}>
-        <div className="w-full h-full flex flex-col items-center">
-          {showMenuButton && (
-            <button
-              className="self-start ml-3 my-3 text-2xl font-bold lg:hidden"
-              onClick={() => setShowSidebar?.(!showSidebar)}
-            >
-              <i className="fa-solid fa-bars mr-2" />
-              <span>{title}</span>
-            </button>
-          )}
-          {children}
-        </div>
-      </main>
+      <div className="flex-1 flex flex-col min-w-0 h-full">
+        {showMenuButton && (
+          <button
+            className="self-start ml-3 my-3 text-2xl font-bold lg:hidden"
+            onClick={() => setShowSidebar?.(!showSidebar)}
+          >
+            <i className="fa-solid fa-bars mr-2" />
+            <span>{title}</span>
+          </button>
+        )}
+        {children}
+        {children}
+        {children}
+        {children}
+        {children}
+        {children}
+        {children}
+      </div>
     </div>
   );
 };

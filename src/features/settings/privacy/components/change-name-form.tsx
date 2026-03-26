@@ -75,16 +75,17 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   return (
     <div
       className={clsx(
-        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50 lg:pt-0 pt-10",
+        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50",
         className,
       )}
     >
       <div
         className={clsx(
-          "animate-fade-in relative flex flex-col justify-center bg-bg-second rounded-2xl shadow-lg px-10 py-8",
+          "animate-fade-in relative flex flex-col justify-center bg-bg-second rounded-2xl shadow-lg px-10 py-10",
+          "w-full h-full sm:h-fit sm:w-fit",
         )}
       >
-        <Text sz="lg-3" className={clsx("pb-6 px-2 text-gradient-main !font-bold")}>
+        <Text sz="lg-3" className={clsx("sm:mb-4 text-gradient-main !font-bold")}>
           {t("settings:account.personalInfo.changeNameForm.title")}
         </Text>
         {isLoading ? (
@@ -93,7 +94,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
           <div>
             <div
               className={clsx(
-                "animate-fade-in flex flex-wrap gap-7 justify-center w-full rounded-2xl bg-bg-main p-5",
+                "animate-fade-in flex flex-col sm:flex-row gap-7 justify-center w-full rounded-2xl sm:bg-bg-main sm:px-5 py-5",
               )}
             >
               <div className={clsx("flex flex-col")}>
@@ -105,7 +106,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                   value={newFirstName}
                   onChange={(e) => setNewFirstName(e.target.value)}
                   placeholder="First name"
-                  className={clsx("py-1 px-2 lg:max-w-[200px]")}
+                  className={clsx("w-full py-1 px-2 lg:max-w-[200px]")}
                 />
               </div>
               <div className={clsx("flex flex-col")}>
@@ -117,7 +118,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                   value={newMiddleName}
                   onChange={(e) => setNewMiddleName(e.target.value)}
                   placeholder="Middle name"
-                  className={clsx("py-1 px-2 lg:max-w-[200px]")}
+                  className={clsx("w-full py-1 px-2 lg:max-w-[200px]")}
                 />
               </div>
               <div className={clsx("flex flex-col")}>
@@ -129,7 +130,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
                   value={newLastName}
                   onChange={(e) => setNewLastName(e.target.value)}
                   placeholder="Last name"
-                  className={clsx("py-1 px-2 lg:max-w-[200px]")}
+                  className={clsx("w-full py-1 px-2 lg:max-w-[200px]")}
                 />
               </div>
             </div>
@@ -140,22 +141,22 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
             )}
           </div>
         )}
-        <Text className={clsx("mx-8 mt-8 mb-4 h-[0.5px] bg-primary-500")}></Text>
+        <span className={clsx("mx-8 mt-4 mb-4 h-[0.5px] bg-primary-500")}></span>
         <Text sz="sm-2" className={clsx("font-light px-2 mb-4 flex flex-col gap-1")}>
           <Text weight="bold" className={clsx("text-single-second")}>
             * {t("settings:account.personalInfo.changeNameForm.note")}:
           </Text>
-          <Text className={clsx("opacity-80")}>
+          <Text className={clsx("opacity-80")} wrap="whitespace-normal">
             - {t("settings:account.personalInfo.changeNameForm.noteText1")} &nbsp;
             <Text weight="bold" className={clsx("text-single-main")}>
               7 {t("settings:account.personalInfo.changeNameForm.day")}
             </Text>
             .
           </Text>
-          <Text className={clsx("opacity-80")}>
+          <Text className={clsx("opacity-80")} wrap="whitespace-normal">
             - {t("settings:account.personalInfo.changeNameForm.noteText2")}
           </Text>
-          <Text className={clsx("opacity-80")}>
+          <Text className={clsx("opacity-80")} wrap="whitespace-normal">
             - {t("settings:account.personalInfo.changeNameForm.noteText3")} &nbsp;
             <Text sz="md-1">!, #, $, @, ...</Text>.
           </Text>

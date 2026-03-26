@@ -11,7 +11,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   return (
     <FatalkChatPanel
       conversationId={conversationId!}
-      className=""
+      className="h-[calc(100dvh-var(--header-height))]"
       onTurnback={() => navigate("/fatalk")}
     />
   );

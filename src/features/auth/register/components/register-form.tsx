@@ -90,9 +90,9 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   return (
     <div
       className={clsx(
-        "relative flex flex-col items-center justify-center gap-3 w-[450px]",
-        "bg-bg-second rounded-2xl",
-        "p-12 animate-fade-in overflow-hidden",
+        "relative flex flex-col items-center justify-center gap-3",
+        "rounded-2xl",
+        "animate-fade-in overflow-hidden",
         className,
       )}
       onSubmit={formik.submitForm}
@@ -170,7 +170,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         />
       </div>
       <Checkbox
-        className="text-[15px] text-single-third gap-[8px]"
+        className="text-[15px] text-single-third gap-[8px] w-full"
         label={
           <Text className="flex items-center flex-wrap">
             {t("auth:register.agree")}&nbsp;
