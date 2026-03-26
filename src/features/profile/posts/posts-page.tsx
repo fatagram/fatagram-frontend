@@ -8,9 +8,7 @@ const PostsPage = () => {
       <ProfileIntroduction
         className={clsx("bg-bg-main sm:rounded-md sm:rounded-l-2xl rounded-none sm:mt-2")}
       />
-      <Card
-        className={clsx("bg-bg-main sm:rounded-md sm:rounded-r-2xl rounded-none sm:mt-2")}
-      ></Card>
+      <Card className={clsx("bg-bg-main sm:rounded-md sm:rounded-r-2xl rounded-none sm:mt-2")} />
     </div>
   );
 };

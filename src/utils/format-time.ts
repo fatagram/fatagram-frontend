@@ -41,17 +41,17 @@ export const useFormatTime = () => {
         minute: "2-digit",
         hour12: false,
       });
-      return `Hôm qua ${time}`;
+      return `${t("times:yesterday")} ${time}`;
     }
 
     if (diffInDays < 7) {
-      const weekday = _date.toLocaleDateString("vi-VN", { weekday: "long" });
+      // const weekday = _date.toLocaleDateString("vi-VN", { weekday: "long" });
       const time = _date.toLocaleTimeString("vi-VN", {
         hour: "2-digit",
         minute: "2-digit",
         hour12: false,
       });
-      return `${weekday} ${time}`;
+      return `${t(`times:weekday:${_date.getDay()}`)} ${time}`;
     }
 
     return _date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });

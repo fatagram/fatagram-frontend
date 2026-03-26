@@ -2,8 +2,7 @@ import React, { useEffect, useState } from "react";
 import SettingsNavbar from "./components/settings-navbar";
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import clsx from "clsx";
-import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
+import { SidebarPageLayout } from "../components/sidebar-page-layout";
 
 type SettingPageProps = {
   // Define any props if needed
@@ -18,18 +17,14 @@ const SettingPage: React.FC<SettingPageProps> = () => {
   }, [t]);
 
   return (
-    <SidebarLayout
+    <SidebarPageLayout
       title="Cài đặt"
-      navbar={<SettingsNavbar className="h-full" onSelect={() => setShowSidebar(false)} />}
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
+      navbar={<SettingsNavbar className="h-full" onSelect={() => setShowSidebar(false)} />}
     >
-      <div className={clsx("flex items-start justify-center flex-1")}>
-        <div className={clsx("w-full mt-1 max-w-[750px]")}>
-          <Outlet />
-        </div>
-      </div>
-    </SidebarLayout>
+      <Outlet />
+    </SidebarPageLayout>
   );
 };
 

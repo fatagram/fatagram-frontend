@@ -1,16 +1,13 @@
 import React, { useEffect, useState } from "react";
-import clsx from "clsx";
-import SettingCard from "@/components/ui/card";
 import { useTranslation } from "react-i18next";
 import { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
 import SelectBoxSetting from "../../components/selectbox-setting";
 import { Theme, useSnackbar, useTheme } from "@/contexts";
+import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
 
-interface ThemeSettingsProps {
-  className?: string;
-}
+interface ThemeSettingsProps {}
 
-const ThemeSettings: React.FC<ThemeSettingsProps> = ({ className }) => {
+const ThemeSettings: React.FC<ThemeSettingsProps> = () => {
   const { availableThemes, theme, setTheme } = useTheme();
   const [themeOptions, setThemeOptions] = useState<Option[]>([]);
   const { t } = useTranslation() as { t: (key: string) => string };
@@ -30,16 +27,14 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = ({ className }) => {
   }, [availableThemes, t]);
 
   return (
-    <div className={clsx(className)}>
-      <SettingCard title={t("settings:theme.title")}>
-        <SelectBoxSetting
-          title={t("settings:theme.selectTheme")}
-          selectedOption={theme}
-          options={themeOptions}
-          onOptionChange={selectTheme}
-        />
-      </SettingCard>
-    </div>
+    <SidebarPageCard title={t("settings:theme.title")}>
+      <SelectBoxSetting
+        title={t("settings:theme.selectTheme")}
+        selectedOption={theme}
+        options={themeOptions}
+        onOptionChange={selectTheme}
+      />
+    </SidebarPageCard>
   );
 };
 

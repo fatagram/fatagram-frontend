@@ -52,7 +52,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
         className,
       )}
     >
-      <Text sz="lg-1" className="font-light">
+      <Text sz="lg-1" className="font-semibold mb-0">
         {title}
       </Text>
       <div className="flex sm:items-center items-end gap-4 justify-between">

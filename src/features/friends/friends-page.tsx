@@ -1,9 +1,8 @@
 import React, { useEffect, useState } from "react";
 import { Outlet } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import clsx from "clsx";
 import FriendsNavbar from "@/features/friends/components/friends-navbar";
-import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
+import { SidebarPageLayout } from "../components/sidebar-page-layout";
 
 interface FriendsPageProps {}
 
@@ -16,25 +15,14 @@ const FriendPage: React.FC<FriendsPageProps> = () => {
   }, [t]);
 
   return (
-    <SidebarLayout
-      title="Bạn bè"
-      navbar={
-        <FriendsNavbar
-          className="h-full !rounded-none"
-          onSelect={() => {
-            setShowSidebar(false);
-          }}
-        />
-      }
+    <SidebarPageLayout
+      title={t("friends:title")}
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
+      navbar={<FriendsNavbar className="h-full" onSelect={() => setShowSidebar(false)} />}
     >
-      <div className={clsx("flex items-center justify-center flex-1  mt-1")}>
-        <div className="w-full max-w-[750px]">
-          <Outlet />
-        </div>
-      </div>
-    </SidebarLayout>
+      <Outlet />
+    </SidebarPageLayout>
   );
 };
 

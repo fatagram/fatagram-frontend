@@ -30,5 +30,16 @@
     }
   },
   "ago": "ago",
-  "just_now": "Just now"
+  "just_now": "Just now",
+  "yesterday": "Yesterday",
+  "tomorrow": "Tomorrow",
+  "weekday": {
+    "2": "Monday",
+    "3": "Tuesday",
+    "4": "Wednesday",
+    "5": "Thursday",
+    "6": "Friday",
+    "7": "Saturday",
+    "1": "Sunday"
+  }
 }

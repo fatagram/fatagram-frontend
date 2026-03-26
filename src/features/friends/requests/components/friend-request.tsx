@@ -1,4 +1,3 @@
-import Card from "@/components/ui/card";
 import FriendRequestItem from "@/features/friends/components/friend-request-item";
 import React from "react";
 import clsx from "clsx";
@@ -8,13 +7,14 @@ import {
   useListFriendRequests,
 } from "@/features/hooks/use-friend";
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
+import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
 
 type FriendRequestsProps = {
   className?: string;
 };
 
-const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
-  const [total, _setTotal] = React.useState(0);
+const FriendRequests: React.FC<FriendRequestsProps> = () => {
+  const [_total, _setTotal] = React.useState(0);
 
   const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
     limit: 20,
@@ -26,7 +26,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
 
   // render
   return (
-    <Card title={`Danh sách lời mời (${total})`} className={className}>
+    <SidebarPageCard title="Lời mời kết bạn">
       <InfiniteScrollGrid
         itemMinWidth="200px"
         items={requestsData}
@@ -46,7 +46,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = ({ className }) => {
         isLoading={isFetching}
         itemKey={(item: any) => item.senderId}
       />
-    </Card>
+    </SidebarPageCard>
   );
 };
 

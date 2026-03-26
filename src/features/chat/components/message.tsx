@@ -7,6 +7,7 @@ import InfiniteScroll from "@/components/ui/utils/infinite-scroll-flex";
 import { useEffect, useRef, useState } from "react";
 import { Message } from "@/api/message/dto/message.dto";
 import { useFormatTime } from "@/utils/format-time";
+import { useTranslation } from "react-i18next";
 
 interface MessageProps extends ComponentProps {
   message: Message;
@@ -30,6 +31,7 @@ const MessageRow: React.FC<MessageProps> = ({
   messageClassName,
   ref,
 }) => {
+  const { t } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
   const { data: userInfo } = useGetUserProfile(message.senderId!);
   const { getDiffBetween, formatTime, formatSmartTimestamp } = useFormatTime();
@@ -108,7 +110,7 @@ const MessageRow: React.FC<MessageProps> = ({
           >
             {isFooterVisible && isMyMessage && !isPending && !isFailed && (
               <Text sz="xs-1">
-                Đã gửi{" "}
+                {t("conversations.sent")}{" "}
                 {getDiffBetween(message.createdAt, new Date(), "second") > 60 && (
                   <Text sz="xs-1">{formatTime(message.createdAt)}</Text>
                 )}

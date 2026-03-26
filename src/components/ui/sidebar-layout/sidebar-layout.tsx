@@ -5,6 +5,7 @@ import Transition, { AnimationLib } from "../utils/transition";
 interface SidebarLayoutProps extends ComponentProps {
   navbar?: React.ReactNode;
   sidebarClassName?: string;
+  childrenWrapperCalssName?: string;
   children: React.ReactNode;
   title?: string;
   showOverlay?: boolean;
@@ -17,6 +18,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   className,
   navbar,
   sidebarClassName,
+  childrenWrapperCalssName,
   title,
   showMenuButton = true,
   showSidebar = false,
@@ -51,7 +53,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
         </Transition>
       )}
 
-      <div className="flex-1 flex flex-col min-w-0 h-full">
+      <div className={clsx("flex-1 flex flex-col min-w-0 h-full", childrenWrapperCalssName)}>
         {showMenuButton && (
           <button
             className="self-start ml-3 my-3 text-2xl font-bold lg:hidden"
@@ -61,12 +63,6 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
             <span>{title}</span>
           </button>
         )}
-        {children}
-        {children}
-        {children}
-        {children}
-        {children}
-        {children}
         {children}
       </div>
     </div>

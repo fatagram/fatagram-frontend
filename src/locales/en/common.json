@@ -27,6 +27,7 @@
     "title": "Conversations",
     "search": "Search conversations...",
     "you": "You",
-    "no-conversations": "No conversations"
+    "no-conversations": "No conversations",
+    "sent": "Sent"
   }
 }

@@ -5,11 +5,18 @@ import clsx from "clsx";
 interface CardProps {
   className?: string;
   titleClassName?: string;
+  childrenClassName?: string;
   children?: React.ReactNode;
   title?: string;
 }
 
-const Card: React.FC<CardProps> = ({ className, children, title, titleClassName }) => {
+const Card: React.FC<CardProps> = ({
+  className,
+  children,
+  title,
+  titleClassName,
+  childrenClassName,
+}) => {
   return (
     <div
       className={clsx(
@@ -17,10 +24,10 @@ const Card: React.FC<CardProps> = ({ className, children, title, titleClassName 
         className,
       )}
     >
-      <Text sz="lg-2" weight="bold" className={clsx("mb-5", titleClassName)}>
+      <Text sz="lg-2" weight="bold" className={clsx(titleClassName)}>
         {title}
       </Text>
-      {children}
+      <div className={clsx("w-full", childrenClassName)}>{children}</div>
     </div>
   );
 };

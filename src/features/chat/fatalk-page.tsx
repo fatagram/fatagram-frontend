@@ -17,7 +17,7 @@ const FatalkPage = () => {
       showSidebar={isExactPath}
       showOverlay={false}
     >
-      <div className="flex flex-col flex-1 w-full h-full bg-red-500">
+      <div className="flex flex-col flex-1 w-full h-full">
         <Outlet />
 
         {isExactPath && (

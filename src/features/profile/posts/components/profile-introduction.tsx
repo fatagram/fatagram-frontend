@@ -3,7 +3,6 @@ import Card from "@/components/ui/card";
 import React, { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import EditableTextArea from "@/features/settings/components/editable-textarea";
-import clsx from "clsx";
 import { useProfilePage } from "../../hooks/use-profile-page";
 import { Text } from "@/components/atoms";
 import { useAuth } from "@/contexts";
@@ -12,7 +11,7 @@ interface ProfileIntroductionProps {
   className?: string;
 }
 
-const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) => {
+const ProfileIntroduction: React.FC<ProfileIntroductionProps> = () => {
   const [isEditBio, setIsEditBio] = React.useState<boolean>(false);
   const [isEditDescription, setIsEditDescription] = React.useState<boolean>(false);
 
@@ -61,8 +60,8 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
   return (
     <Card
       title={t("user:profilePosts.overview")}
-      className={clsx("flex-col gap-4", className)}
       titleClassName="text-2xl font-bold !mb-0"
+      childrenClassName="flex flex-col gap-4"
     >
       {(userProfile?.bio || canEdit) && (
         <EditableTextArea
@@ -112,21 +111,6 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
       {(userProfile?.bio || userProfile?.description) && (
         <hr className="border-[var(--border-color)] w-full opacity-10" />
       )}
-
-      {/* {userProfile?.email && (
-        <div>
-          <Text className="hover:text-primary-500">
-            <i className="fas fa-envelope" /> &nbsp; {userProfile?.email}
-          </Text>
-        </div>
-      )}
-      {userProfile?.phone && (
-        <div>
-          <Text className="hover:text-primary-500">
-            <i className="fas fa-phone"></i> &nbsp; {phone}
-          </Text>
-        </div>
-      )} */}
     </Card>
   );
 };
