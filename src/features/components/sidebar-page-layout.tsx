@@ -47,7 +47,7 @@ export const SidebarPageCard: React.FC<SidebarPageCardProps> = ({ title, childre
   return (
     <Card
       title={title}
-      className={clsx("w-full p-0 sm:p-8 shadow-none sm:shadow-lg", className)}
+      className={clsx("w-full p-0 shadow-none sm:shadow-lg", className)}
       titleClassName="mb-5"
       childrenClassName="flex flex-col gap-7"
     >
