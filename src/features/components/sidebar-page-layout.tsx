@@ -28,7 +28,7 @@ export const SidebarPageLayout: React.FC<SidebarPageLayoutProps> = ({
       setShowSidebar={setShowSidebar}
     >
       <div className={clsx("flex items-center justify-center flex-1  mt-1")}>
-        <div className="w-full max-w-[750px] px-3">{children}</div>
+        <div className="w-full sm:max-w-[750px] px-3">{children}</div>
       </div>
     </SidebarLayout>
   );
@@ -37,13 +37,7 @@ export const SidebarPageLayout: React.FC<SidebarPageLayoutProps> = ({
 interface SidebarPageProps extends ComponentProps {}
 
 export const SidebarPage: React.FC<SidebarPageProps> = ({ children }) => {
-  return (
-    <div className="flex justify-center w-full">
-      {/* <AccountSetting className="w-full p-0 sm:p-8 shadow-none sm:shadow-lg" />
-      <Outlet /> */}
-      {children}
-    </div>
-  );
+  return <div className="flex justify-center w-full">{children}</div>;
 };
 
 interface SidebarPageCardProps extends ComponentProps {
