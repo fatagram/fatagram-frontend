@@ -28,6 +28,9 @@
     "search": "Tìm kiếm cuộc trò chuyện...",
     "you": "Bạn",
     "no-conversations": "Không có cuộc trò chuyện",
-    "sent": "Đã gửi"
+    "sent": "Đã gửi",
+    "systemMessage": {
+      "createGroup": "{{creatorName}} đã tạo nhóm"
+    }
   }
 }

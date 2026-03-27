@@ -11,6 +11,8 @@ import {
 import { CursorQuery } from "@/types/query";
 import { useQueryClient } from "@tanstack/react-query";
 import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
+import { useResultFetcher } from "@/hooks/use-fetcher";
+import { useSnackbar } from "@/contexts";
 
 const conversationKeys = {
   list: (queryParams?: Omit<CursorQuery<string>, "cursor">) =>
@@ -22,7 +24,7 @@ const conversationKeys = {
 const conversationDetailQueryOptions = (conversationId: string) =>
   createSafeQueryOptions<ConversationDto>({
     queryKey: conversationKeys.detail(conversationId),
-    fn: () => conversationService.getConversation(conversationId),
+    fn: async () => await conversationService.getConversation(conversationId),
   });
 
 export const useGetConversationWith = (
@@ -49,6 +51,19 @@ export const useGetConversation = (
     enabled: enabled ?? false,
     options: config,
   });
+};
+
+export const useCreateGroupConversation = () => {
+  const { showSnackbar } = useSnackbar();
+  return useResultFetcher(
+    async (participantIds: string[]) =>
+      await conversationService.createGroupConversation(participantIds),
+    {
+      onError: (_error) => {
+        showSnackbar("Tạo cuộc trò chuyện nhóm thất bại", "error");
+      },
+    },
+  );
 };
 
 export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor">) => {

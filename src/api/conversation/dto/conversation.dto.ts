@@ -8,4 +8,6 @@ export interface ConversationDto {
   unreadMessageCount: number;
   lastActiveAt: string;
   isGroup: boolean;
+  topParticipantNames: string[];
+  participantCount: number;
 }

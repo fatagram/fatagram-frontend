@@ -9,7 +9,7 @@ interface InfiniteScrollFlexProps extends ComponentProps {
   hasMore?: boolean;
   isLoading?: boolean;
   itemTemplate?: (
-    item: React.ReactNode,
+    item: any,
     index: number,
     ref: RefObject<HTMLDivElement | null> | null,
   ) => React.ReactNode;
@@ -53,7 +53,6 @@ export default function InfiniteScrollFlex({
     const observer = new IntersectionObserver(
       ([entry]) => {
         isAtBottomRef.current = entry.isIntersecting;
-        console.log("Is at bottom:", isAtBottomRef.current);
       },
       {
         root: parentRef?.current || containerRef.current,

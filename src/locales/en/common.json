@@ -28,6 +28,9 @@
     "search": "Search conversations...",
     "you": "You",
     "no-conversations": "No conversations",
-    "sent": "Sent"
+    "sent": "Sent",
+    "systemMessage": {
+      "createGroup": "{{creatorName}} created the group"
+    }
   }
 }

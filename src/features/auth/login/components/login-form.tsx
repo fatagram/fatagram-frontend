@@ -1,7 +1,6 @@
 import React, { useState } from "react";
 import { Button, Logo, Textbox, Text, Checkbox, Link } from "@/components/atoms";
 import clsx from "clsx";
-import { OverlayLoading } from "@/components/ui/overlay-loading";
 import { useFormik } from "formik";
 import { useTranslation } from "react-i18next";
 import { ComponentProps } from "@/components/common/component-type";
@@ -66,12 +65,10 @@ export const LoginForm: React.FC<LoginFormProps> = ({
     <div
       className={clsx(
         "relative flex flex-col items-center justify-center gap-5",
-        "animate-fade-in overflow-hidden",
+        "animate-fade-in",
         className,
       )}
     >
-      {formik.isSubmitting && <OverlayLoading />}
-
       {isShowLogo && <Logo sz="sm-3" />}
       <Text
         sz="xl-1"
@@ -92,6 +89,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             Boolean(usernameOrEmailError)
           }
           wrongMessage={t(usernameOrEmailError || formik.errors.usernameOrEmail || "")}
+          disabled={formik.isSubmitting}
         />
         <Textbox
           type="password"
@@ -104,6 +102,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           }
           wrongMessage={t(passwordError || formik.errors.password || "")}
           autoComplete="current-password"
+          disabled={formik.isSubmitting}
         />
       </div>
       <div className="flex justify-between w-full items-center gap-[50px]">
@@ -113,6 +112,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             formik.setFieldValue("rememberMe", e.target.checked);
           }}
           className="items-center"
+          disabled={formik.isSubmitting}
         />
         {switchForgotPassword && (
           <Text
@@ -127,7 +127,18 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </Text>
         )}
       </div>
-      <Button type="button" onClick={formik.submitForm} sz="sm-3" className="w-full">
+      <Button
+        type="button"
+        onClick={formik.submitForm}
+        sz="sm-3"
+        className="w-full flex items-center justify-center"
+        disabled={formik.isSubmitting}
+      >
+        {formik.isSubmitting && (
+          <div className="flex items-center justify-center mr-2">
+            <div className="w-3 h-3 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent"></div>
+          </div>
+        )}
         {t("auth:login.loginButton")}
       </Button>
       <div className="w-full flex flex-col items-center gap-3">
@@ -138,7 +149,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           </Text>
           <div className="h-[1px] bg-border-main flex-1" />
         </div>
-        <SocialButtons />
+        <SocialButtons disabled={formik.isSubmitting} />
       </div>
       <Text>
         {t("auth:login.dontHaveAccount")}

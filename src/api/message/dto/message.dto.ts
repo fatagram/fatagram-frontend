@@ -1,3 +1,5 @@
+import { MessageType } from "@/types/entities/message.type";
+
 export interface MessageDto {
   conversationId?: string;
   receiverId?: string;
@@ -12,11 +14,12 @@ export interface MessageResponseDto {
   correlationId?: string;
   clientTempId?: string;
   isGroup: boolean;
-  senderId: string;
+  senderId?: string;
+  senderFullName?: string;
+  senderNickname?: string;
+  senderAvatarUrl?: string;
   content: string;
+  type: MessageType;
+  metadata?: any;
   createdAt: Date;
-}
-
-export interface Message extends MessageResponseDto {
-  status?: "success" | "pending" | "failed";
 }

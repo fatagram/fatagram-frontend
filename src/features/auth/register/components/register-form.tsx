@@ -11,7 +11,6 @@ import {
   registerInitialValues,
   registerValidationSchema,
 } from "../validations/register.validation";
-import { OverlayLoading } from "@/components/ui";
 import { SocialButtons } from "../../components/social-buttons";
 
 type RegisterFormProps = {
@@ -28,8 +27,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   onClose,
 }) => {
   const { t } = useTranslation();
-  const [isShowClose] = React.useState<boolean>(showClose);
-  const [isShowLogo] = React.useState<boolean>(showLogo);
+  const [isShowClose] = useState<boolean>(showClose);
+  const [isShowLogo] = useState<boolean>(showLogo);
   const navigate = useNavigate();
 
   const [usernameError, setUsernameError] = useState<string>("");
@@ -38,7 +37,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   const [passwordError, setPasswordError] = useState<string>("");
   const [confirmPasswordError, setConfirmPasswordError] = useState<string>("");
 
-  const { fetch: register, isFetching } = useResultFetcher(authService.register, {
+  const { fetch: register } = useResultFetcher(authService.register, {
     onSuccess: () => {
       navigate("/login");
     },
@@ -92,13 +91,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       className={clsx(
         "relative flex flex-col items-center justify-center gap-3",
         "rounded-2xl",
-        "animate-fade-in overflow-hidden",
+        "animate-fade-in ",
         className,
       )}
       onSubmit={formik.submitForm}
     >
-      {(formik.isSubmitting || isFetching) && <OverlayLoading />}
-      {isShowLogo && <Logo sz="sm-1" />}
+      {isShowLogo && <Logo sz="sm-1" hasSlogan={false} />}
 
       <Text
         sz="xl-1"
@@ -119,6 +117,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             (formik.touched.username && Boolean(formik.errors.username)) || Boolean(usernameError)
           }
           wrongMessage={t(usernameError || formik.errors.username || "")}
+          disabled={formik.isSubmitting}
         />
         <Textbox
           value={formik.values.email}
@@ -129,6 +128,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           onChange={(e) => formik.setFieldValue("email", e.target.value)}
           isWrong={(formik.touched.email && Boolean(formik.errors.email)) || Boolean(emailError)}
           wrongMessage={t(emailError || formik.errors.email || "")}
+          disabled={formik.isSubmitting}
         />
         <Textbox
           value={formik.values.phoneNumber}
@@ -142,6 +142,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             Boolean(phoneNumberError)
           }
           wrongMessage={t(phoneNumberError || formik.errors.phoneNumber || "")}
+          disabled={formik.isSubmitting}
         />
         <Textbox
           type="password"
@@ -154,6 +155,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             (formik.touched.password && Boolean(formik.errors.password)) || Boolean(passwordError)
           }
           wrongMessage={t(passwordError || formik.errors.password || "")}
+          disabled={formik.isSubmitting}
         />
         <Textbox
           type="password"
@@ -167,6 +169,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
             Boolean(confirmPasswordError)
           }
           wrongMessage={t(confirmPasswordError || formik.errors.confirmPassword || "")}
+          disabled={formik.isSubmitting}
         />
       </div>
       <Checkbox
@@ -186,7 +189,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </Text>
         }
       />
-      <Button type="button" sz="sm-3" className="w-full" onClick={formik.submitForm}>
+      <Button
+        type="button"
+        sz="sm-3"
+        className="flex justify-center w-full"
+        onClick={formik.submitForm}
+        disabled={formik.isSubmitting}
+      >
+        {formik.isSubmitting && (
+          <div className="flex items-center justify-center mr-2">
+            <div className="w-3 h-3 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent"></div>
+          </div>
+        )}
         <Text>{t("auth:register.registerButton")}</Text>
       </Button>
       <div className="w-full flex flex-col items-center gap-3">
@@ -197,7 +211,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           </Text>
           <div className="h-[1px] bg-border-main flex-1" />
         </div>
-        <SocialButtons />
+        <SocialButtons disabled={formik.isSubmitting} />
       </div>
       <Link className="font-bold" to="/login">
         {t("auth:register.loginButton")}

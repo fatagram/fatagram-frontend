@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
 import { useConversations } from "@/features/hooks/use-conversation";
-import { Text } from "@/components/atoms";
+import { MiniButton, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
@@ -23,16 +23,23 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
     onConversationClick?.(conversationId);
   };
 
+  const handleCreateConversation = async () => {};
+
   return (
     <div
       className={clsx(
-        "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
+        "relative bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
         "animate-dropdown-slide origin-top scrollbar-hide !w-[380px]",
         "max-h-[500px]",
         className,
       )}
       ref={ref}
     >
+      <div className="absolute top-0 right-0 flex mt-3 mr-3 gap-2">
+        <MiniButton sz="sm-2" className="bg-bg-fifth" onClick={handleCreateConversation}>
+          <i className="fa-regular fa-pen-to-square" />
+        </MiniButton>
+      </div>
       <div className="flex items-center justify-between px-2 pt-2">
         <Text sz="lg-1" weight="bold">
           {t("common:conversations.title")}

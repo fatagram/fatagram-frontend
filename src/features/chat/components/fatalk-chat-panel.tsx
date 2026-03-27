@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
 import { useRef } from "react";
-import { useMessages, useSendMessage } from "@/features/hooks/use-message";
+import { useSendMessage } from "@/features/hooks/use-message";
 import { useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
 import { useChatStore } from "@/features/hooks/use-chat-store";
@@ -46,15 +46,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
 
   const chatAvatar = tempUser ? tempUser.infos.avatar : conversationData?.avatarUrl;
 
-  const {
-    data: messages,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useMessages(conversationId, { sortDesc: true, limit: 30 });
-
   const { fetch: send, isFetching } = useSendMessage();
-  const displayedMessages = messages ? messages.pages.flatMap((page) => page.items) : [];
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
   const handleSendMessage = () => {
@@ -127,13 +119,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
             </div>
           </div>
         ) : null}
-        <MessageList
-          messages={displayedMessages}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          fetchNextPage={fetchNextPage}
-          parentRef={scrollRef}
-        />
+        <MessageList conversationId={conversationId} parentRef={scrollRef} />
       </div>
 
       <div className="px-4 py-3 bg-bg-second border-t border-gray-700/50 flex items-center gap-2">

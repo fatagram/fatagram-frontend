@@ -1,5 +1,5 @@
 import { CursorResult, Result } from "@/api/common/result";
-import { buildApiPath, apiGet } from "../common/api-helpers";
+import { buildApiPath, apiGet, apiPost } from "../common/api-helpers";
 import { CursorQuery } from "@/types/query";
 import { ConversationDto } from "./dto/conversation.dto";
 import { MessageResponseDto } from "../message/dto/message.dto";
@@ -26,6 +26,10 @@ export class ConversationService {
     query: CursorQuery<string>,
   ): Promise<Result<CursorResult<MessageResponseDto, string>>> {
     return await apiGet(`${PREFIX}/${conversationId}/messages`, query);
+  }
+
+  public async createGroupConversation(participantIds: string[]): Promise<Result<object>> {
+    return await apiPost(`${PREFIX}`, { participantIds });
   }
 }
 

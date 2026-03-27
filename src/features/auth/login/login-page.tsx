@@ -38,8 +38,8 @@ function LoginPage(): React.ReactElement {
           </Text>
         </div>
 
-        <div className="bg-bg-second px-[10%] py-[3rem] flex-1 m-auto max-w-[500px] z-10 rounded-3xl lg:rounded-none">
-          <LoginForm />
+        <div className="bg-bg-second px-[3rem] py-[1rem] flex-1 m-auto max-w-[500px] z-10 rounded-3xl lg:rounded-none">
+          <LoginForm className="m-auto" />
         </div>
       </div>
     </div>

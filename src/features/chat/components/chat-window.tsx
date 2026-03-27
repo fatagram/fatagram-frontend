@@ -1,21 +1,25 @@
-import { Text, Avatar, MiniButton, Textbox, Skeleton } from "@/components/atoms";
+import { Text, Avatar, MiniButton, Skeleton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
-import { useMessages, useSendMessage } from "@/features/hooks/use-message";
-import { useState } from "react";
+import { useSendMessage } from "@/features/hooks/use-message";
+import { useEffect, useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
+import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
+import { ChatInput } from "./chat-input";
 
 interface ChatWindowProps extends ComponentProps {
   conversationId: string;
 }
 
 export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationId }) => {
-  const [message, setMessage] = useState("");
+  const [chatTitle, setChatTitle] = useState("");
+  const [chatAvatar, setChatAvatar] = useState("");
 
   const { toggleMinimize, closeChat, registry } = useChatStore();
+  const { renderConversationName } = useRenderConversationContent();
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
@@ -34,20 +38,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const isLoadingHeader =
     isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
 
-  const chatTitle = tempUser
-    ? tempUser.infos.fullName
-    : conversationData?.name || "Cuộc trò chuyện";
+  const { fetch: send } = useSendMessage();
 
-  const chatAvatar = tempUser ? tempUser.infos.avatar : conversationData?.avatarUrl;
-
-  const {
-    data: messages,
-    fetchNextPage,
-    hasNextPage,
-    isFetchingNextPage,
-  } = useMessages(conversationId, { sortDesc: true, limit: 20 });
-  const { fetch: send, isFetching } = useSendMessage();
-  const displayedMessages = messages ? messages.pages.flatMap((page) => page.items) : [];
+  useEffect(() => {
+    if (tempUser) {
+      setChatTitle(tempUser.infos.fullName);
+      setChatAvatar(tempUser.infos.avatar);
+    } else if (conversationData) {
+      console.log("Rendering chat header for conversation:", conversationData);
+      setChatTitle(renderConversationName(conversationData));
+      setChatAvatar(conversationData.avatarUrl || "");
+    }
+  }, [tempUser, conversationData, renderConversationName]);
 
   const handleOnClose = () => {
     closeChat(conversationId);
@@ -57,20 +59,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
     toggleMinimize(conversationId);
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = (content: string) => {
     send({
       conversationId: !tempTargetId ? conversationId : undefined,
       correlationId: tempTargetId ? conversationId : undefined,
-      content: message,
+      content: content,
       receiverId: tempTargetId,
     });
-    setMessage("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && message.trim() !== "") {
-      handleSendMessage();
-    }
   };
 
   return (
@@ -96,7 +91,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
               className={clsx(
                 "ml-2 text-text-main flex-1 rounded-md px-2 py-3",
                 "hover:bg-bg-fourth cursor-pointer transition-all duration-200",
-                "active:scale-[0.98] active:opacity-80",
+                "active:scale-[0.98] active:opacity-80 truncate",
               )}
             >
               {chatTitle}
@@ -134,32 +129,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           </div>
         ) : null}
         <MessageList
-          messages={displayedMessages}
-          hasNextPage={hasNextPage}
-          isFetchingNextPage={isFetchingNextPage}
-          fetchNextPage={fetchNextPage}
-          className={clsx()}
+          conversationId={conversationId}
+          conversationType={conversationData?.isGroup ? "group" : "private"}
         />
       </div>
-      <div className="px-2 h-[15%] self-end bg-bg-third w-full flex items-center">
-        <Textbox
-          sz="xs-3"
-          className="!rounded-full w-full"
-          wrapperClassName="flex-1"
-          placeholder="Tin nhắn của bạn"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-        <MiniButton
-          sz="xs-3"
-          className="ml-2"
-          onClick={handleSendMessage}
-          disabled={!message.trim() || isFetching}
-        >
-          <i className="fa-solid fa-paper-plane text-primary-500"></i>
-        </MiniButton>
-      </div>
+      <ChatInput onSend={handleSendMessage} />
     </div>
   );
 };
