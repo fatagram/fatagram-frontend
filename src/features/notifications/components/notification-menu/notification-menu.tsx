@@ -44,12 +44,6 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
     return data?.pages.flatMap((page) => page.items) || [];
   }, [data]);
 
-  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
-  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
-  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
-  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
-  notifications.push(...(data?.pages.flatMap((page) => page.items) || []));
-
   const handleMarkAllAsRead = async () => {
     markAllAsReadInCache();
     setUnreadCount(0);
