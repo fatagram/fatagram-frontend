@@ -85,9 +85,8 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
         <div className="flex flex-col justify-center items-center h-full text-center px-4">
           <div className="relative mb-4">
             <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="md-1" />
-            <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black" />
           </div>
-          <Text sz="md-1" weight="bold" className="text-white">
+          <Text sz="md-1" weight="bold">
             {tempUser?.infos.fullName}
           </Text>
           <Text sz="sm-1" className="text-gray-400 mt-1">
