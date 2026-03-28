@@ -30,7 +30,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
     <PageNavbar
       title="Fatalk"
       className={clsx(
-        "flex flex-col relative !h-[calc(100vh-var(--header-height))] !overflow-hidden bg-bg-second !rounded-none",
+        "flex flex-col relative !h-[calc(100dvh-var(--header-height))] !overflow-hidden bg-bg-second !rounded-none",
         className,
       )}
       header={
