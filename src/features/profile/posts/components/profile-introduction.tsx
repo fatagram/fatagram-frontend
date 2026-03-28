@@ -11,7 +11,7 @@ interface ProfileIntroductionProps {
   className?: string;
 }
 
-const ProfileIntroduction: React.FC<ProfileIntroductionProps> = () => {
+const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) => {
   const [isEditBio, setIsEditBio] = React.useState<boolean>(false);
   const [isEditDescription, setIsEditDescription] = React.useState<boolean>(false);
 
@@ -62,6 +62,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = () => {
       title={t("user:profilePosts.overview")}
       titleClassName="text-2xl font-bold !mb-0"
       childrenClassName="flex flex-col gap-4"
+      className={className}
     >
       {(userProfile?.bio || canEdit) && (
         <EditableTextArea

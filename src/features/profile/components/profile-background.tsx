@@ -34,7 +34,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
         <BackgroundImage
           src={data?.infos.background}
           alt="Background Image"
-          className={clsx("relative h-full w-full")}
+          className={clsx("relative h-full w-full sm:rounded-xl rounded-none")}
         >
           {isOwner && (
             <SelectFile

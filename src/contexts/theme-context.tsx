@@ -30,8 +30,6 @@ interface ThemeProviderProps {
 }
 
 function getInitialTheme(): Theme {
-  if (typeof window === "undefined") return "light";
-
   const stored = localStorage.getItem("theme");
   if (stored && ThemeList.some((t) => t === stored)) {
     return stored as Theme;

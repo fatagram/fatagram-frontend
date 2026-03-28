@@ -116,10 +116,7 @@ export default function InfiniteScrollFlex({
       {hasMore && (
         <div
           ref={sentinelRef}
-          className={clsx(
-            "absolute bg-red-500 h-[20px] w-[20px]",
-            desc ? "top-[50px]" : "bottom-0",
-          )}
+          className={clsx("absolute h-[20px] w-[20px]", desc ? "top-[50px]" : "bottom-0")}
         />
       )}
       {isLoading && (

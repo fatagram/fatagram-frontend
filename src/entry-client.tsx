@@ -11,7 +11,6 @@ if (!rootElement) {
   throw new Error("Root element #root not found in DOM");
 }
 
-// Check if server rendered actual HTML content (not just whitespace/comments)
 const hasSSRContent =
   rootElement.childNodes.length > 0 &&
   rootElement.innerHTML.replace(/<!--.*?-->/g, "").trim().length > 0;
@@ -39,21 +38,14 @@ if (hasSSRContent) {
   createRoot(rootElement).render(app);
 }
 
-// Register service worker for PWA (safe, non-blocking)
 if (typeof window !== "undefined" && "serviceWorker" in navigator) {
-  window.addEventListener("load", () => {
-    const swUrl = "/sw.js";
-    navigator.serviceWorker
-      .register(swUrl, { scope: "/" })
-      .then((reg) => {
-        console.log("Service worker registered successfully.", reg);
-        // Check for updates periodically
-        setInterval(() => {
-          reg.update();
-        }, 60000); // Check every 60 seconds
-      })
-      .catch((err) => {
-        console.warn("Service worker registration failed:", err);
-      });
-  });
+  if (window.location.hostname !== "localhost") {
+    navigator.serviceWorker.register("/sw.js");
+  } else {
+    navigator.serviceWorker.getRegistrations().then((registrations) => {
+      for (let registration of registrations) {
+        registration.unregister();
+      }
+    });
+  }
 }

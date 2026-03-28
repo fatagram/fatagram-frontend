@@ -50,7 +50,9 @@ const DefaultLayout = () => {
   );
 
   const { conversationId } = useParams();
-  const [isMobile, setIsMobile] = useState(false);
+  const [isMobile, setIsMobile] = useState(() =>
+    typeof window !== "undefined" ? window.innerWidth < 640 : false,
+  );
 
   useEffect(() => {
     const handleResize = () => {
@@ -183,6 +185,7 @@ const DefaultLayout = () => {
       </Layout.Header>
       <Layout.Main className="flex-1 flex flex-col scrollbar-hide sm:scrollbar-default">
         <Outlet />
+
         {!isMobile && (
           <div className="fixed inset-0 pointer-events-none z-50">
             <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
