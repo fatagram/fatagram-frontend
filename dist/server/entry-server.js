@@ -483,19 +483,21 @@ const useChatStore = create((set) => ({
   registry: {},
   openChat: (id, meta) => set((state) => {
     if (state.activeIds.includes(id)) return state;
-    if (state.minimizedIds.includes(id)) {
-      return {
-        activeIds: [...state.activeIds, id],
-        minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id)
-      };
+    let newActiveIds = [id, ...state.activeIds];
+    let newMinimizedIds = state.minimizedIds.filter((mid) => mid !== id);
+    if (newActiveIds.length > 3) {
+      const lastId = newActiveIds.pop();
+      if (lastId && !newMinimizedIds.includes(lastId)) {
+        newMinimizedIds = [lastId, ...newMinimizedIds];
+      }
     }
     const newRegistry = { ...state.registry };
     if (meta) {
       newRegistry[id] = meta;
     }
     return {
-      activeIds: [...state.activeIds, id],
-      minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
+      activeIds: newActiveIds,
+      minimizedIds: newMinimizedIds,
       registry: newRegistry
     };
   }),
@@ -2842,11 +2844,6 @@ const NotificationMenu = ({ className, ref }) => {
   const notifications2 = React.useMemo(() => {
     return data?.pages.flatMap((page) => page.items) || [];
   }, [data]);
-  notifications2.push(...data?.pages.flatMap((page) => page.items) || []);
-  notifications2.push(...data?.pages.flatMap((page) => page.items) || []);
-  notifications2.push(...data?.pages.flatMap((page) => page.items) || []);
-  notifications2.push(...data?.pages.flatMap((page) => page.items) || []);
-  notifications2.push(...data?.pages.flatMap((page) => page.items) || []);
   const handleMarkAllAsRead = async () => {
     markAllAsReadInCache();
     setUnreadCount(0);
@@ -3172,15 +3169,18 @@ const useConversationCacheMutations = () => {
     let existedConv = null;
     if (currentData) {
       for (const page of currentData.pages) {
-        existedConv = page.items.find((item) => item.id === conversationId);
-        if (existedConv) break;
+        const found = page.items.find((item) => item.id === conversationId);
+        if (found) {
+          existedConv = { ...found, lastMessage: lastMessage || found.lastMessage };
+          break;
+        }
       }
     }
     if (!existedConv) {
-      existedConv = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
-      if (!existedConv) return;
+      const fetched = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
+      if (!fetched) return;
+      existedConv = { ...fetched, lastMessage: lastMessage || fetched.lastMessage };
     }
-    existedConv.lastMessage = lastMessage || existedConv.lastMessage;
     queryClient.setQueryData(listKey, (oldData) => {
       if (!oldData || !oldData.pages.length) return oldData;
       const newPages = oldData.pages.map((page) => ({
@@ -3246,7 +3246,7 @@ function NotFoundPage() {
           }
         ),
         /* @__PURE__ */ jsx(Text, { weight: "extrabold", sz: "lg-3", className: clsx("uppercase text-primary-600"), children: t("notFound.title") }),
-        /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: clsx("flex justify-center text-center"), children: t("notFound.description") }),
+        /* @__PURE__ */ jsx(Text, { sz: "lg-1", className: clsx("flex justify-center text-center"), wrap: "whitespace-normal", children: t("notFound.description") }),
         /* @__PURE__ */ jsx("div", { className: clsx("flex gap-[10px]"), children: /* @__PURE__ */ jsxs(
           Button,
           {
@@ -6571,7 +6571,11 @@ const useGetInfiniteUsers = (queryParams) => {
     enabled: true
   });
 };
-const CreateGroupChat = ({ className, onTurnBack }) => {
+const CreateGroupChat = ({
+  className,
+  onTurnBack,
+  onCreateSuccess
+}) => {
   const { userId } = useAuth();
   const { data: me } = useGetUserProfile(userId);
   const { data: users, fetchNextPage, hasNextPage } = useGetInfiniteUsers();
@@ -6592,7 +6596,14 @@ const CreateGroupChat = ({ className, onTurnBack }) => {
   const handleCreateGroupChat = useCallback(
     async (selectedValues) => {
       const name = textboxRef.current?.value;
-      await createGroupChat({ participantIds: selectedValues, name: name || null });
+      await createGroupChat(
+        { participantIds: selectedValues, name: name || null },
+        {
+          onSuccess: (data) => {
+            if (data) onCreateSuccess?.(data);
+          }
+        }
+      );
     },
     [createGroupChat]
   );
@@ -6692,7 +6703,8 @@ const ChatMenu = ({ className, onConversationClick, ref }) => {
           CreateGroupChat,
           {
             className: "overflow-hidden h-full max-h-[90%] w-full",
-            onTurnBack: () => setTab("list")
+            onTurnBack: () => setTab("list"),
+            onCreateSuccess: () => setTab("list")
           }
         ),
         tab === "list" && /* @__PURE__ */ jsx("div", { className: "flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2 mt-auto", children: /* @__PURE__ */ jsxs(
@@ -7842,7 +7854,17 @@ const FatalkSidebar = ({ className, onConversationClick }) => {
       headerClassName: "justify-between !flex-row pr-3",
       children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col px-2 h-full overflow-hidden", children: [
         tab === "list" && /* @__PURE__ */ jsx(ChatList, { className: "h-full", onConversationClick: handleSelectConversation }),
-        tab === "create" && /* @__PURE__ */ jsx(CreateGroupChat, { className: "h-full max-h-[90%]" })
+        tab === "create" && /* @__PURE__ */ jsx(
+          CreateGroupChat,
+          {
+            className: "h-full max-h-[90%]",
+            onCreateSuccess: (conversationId) => {
+              navigate(`/fatalk/${conversationId}`);
+              setTab("list");
+            },
+            onTurnBack: () => setTab("list")
+          }
+        )
       ] })
     }
   );
@@ -7882,15 +7904,30 @@ const FatalkChatPanel = ({
     data: conversationData,
     isLoading: isLoadingConversation,
     isFetching: isFetchingConversation
-  } = useGetConversation(conversationId, void 0);
+  } = useGetConversation(conversationId, void 0, true);
   useEffect(() => {
-    setChatTitle(renderConversationName(conversationData));
-    setChatAvatar(conversationData.avatarUrl || "");
+    if (conversationData) {
+      setChatTitle(renderConversationName(conversationData));
+      setChatAvatar(conversationData.avatarUrl || "");
+    }
   }, [conversationData, renderConversationName]);
   const isLoadingHeader = isLoadingConversation || isFetchingConversation;
   const scrollRef = useRef(null);
   if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
-    return /* @__PURE__ */ jsx("div", { className: clsx("flex-1 flex items-center justify-center", className), children: /* @__PURE__ */ jsx(Text, { sz: "lg-1", weight: "bold", className: "text-text-main", children: "Cuộc trò chuyện không tồn tại" }) });
+    return /* @__PURE__ */ jsxs(
+      "div",
+      {
+        className: clsx(
+          "relative flex flex-col items-center justify-center text-center px-6 py-10",
+          className
+        ),
+        children: [
+          /* @__PURE__ */ jsx("div", { className: "w-12 h-12 mb-3 rounded-full bg-bg-third flex items-center justify-center", children: /* @__PURE__ */ jsx("i", { className: "fa-regular fa-comments text-text-main/60 text-lg" }) }),
+          /* @__PURE__ */ jsx(Text, { sz: "md-1", weight: "bold", className: "text-text-main", children: "Conversation not found" }),
+          /* @__PURE__ */ jsx(Text, { sz: "sm-1", className: "text-text-main/60 mt-1", children: "Hãy chọn một đoạn chat hoặc bắt đầu cuộc trò chuyện mới" })
+        ]
+      }
+    );
   }
   return /* @__PURE__ */ jsxs("div", { className: clsx("relative flex flex-col bg-bg-main overflow-hidden", className), children: [
     /* @__PURE__ */ jsx("div", { className: "flex items-center gap-3 px-4 h-[60px] bg-bg-second border-b border-gray-700/50 shrink-0", children: isLoadingHeader ? /* @__PURE__ */ jsxs(Fragment, { children: [
@@ -7899,12 +7936,7 @@ const FatalkChatPanel = ({
     ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
       onTurnback && /* @__PURE__ */ jsx(MiniButton, { sz: "xs-3", onClick: onTurnback, className: "block lg:hidden", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-left text-primary-400" }) }),
       /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "xs-2" }),
-      /* @__PURE__ */ jsx(Text, { sz: "md-1", weight: "bold", className: "flex-1 text-text-main", children: chatTitle }),
-      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-1", children: [
-        /* @__PURE__ */ jsx(MiniButton, { sz: "xs-3", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-phone text-primary-400" }) }),
-        /* @__PURE__ */ jsx(MiniButton, { sz: "xs-3", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-video text-primary-400" }) }),
-        /* @__PURE__ */ jsx(MiniButton, { sz: "xs-3", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-info text-primary-400" }) })
-      ] })
+      /* @__PURE__ */ jsx(Text, { sz: "md-1", weight: "bold", className: "flex-1 text-text-main truncate", children: chatTitle })
     ] }) }),
     /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh", ref: scrollRef, children: /* @__PURE__ */ jsx(
       MessageList,
@@ -7987,11 +8019,8 @@ const TempConversation = ({ className }) => {
           /* @__PURE__ */ jsx(Text, { sz: "md-1", weight: "bold", className: "flex-1 text-text-main", children: tempUser?.infos.fullName })
         ] }) }),
         /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
-          /* @__PURE__ */ jsxs("div", { className: "relative mb-4", children: [
-            /* @__PURE__ */ jsx(Avatar, { src: tempUser?.infos.avatar, alt: "Avatar", sz: "md-1" }),
-            /* @__PURE__ */ jsx("span", { className: "absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black" })
-          ] }),
-          /* @__PURE__ */ jsx(Text, { sz: "md-1", weight: "bold", className: "text-white", children: tempUser?.infos.fullName }),
+          /* @__PURE__ */ jsx("div", { className: "relative mb-4", children: /* @__PURE__ */ jsx(Avatar, { src: tempUser?.infos.avatar, alt: "Avatar", sz: "md-1" }) }),
+          /* @__PURE__ */ jsx(Text, { sz: "md-1", weight: "bold", children: tempUser?.infos.fullName }),
           /* @__PURE__ */ jsx(Text, { sz: "sm-1", className: "text-gray-400 mt-1", children: "Hai bạn chưa có tin nhắn nào" }),
           /* @__PURE__ */ jsx("div", { className: "mt-5 px-4 py-2 bg-gray-700/30 rounded-full", children: /* @__PURE__ */ jsx(Text, { sz: "sm-1", className: "text-gray-300", children: "Gửi lời chào đầu tiên 👋" }) })
         ] }) }),

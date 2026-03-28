@@ -38,3 +38,18 @@ if (hasSSRContent) {
 } else {
   createRoot(rootElement).render(app);
 }
+
+// Register service worker for PWA (safe, non-blocking)
+if (typeof window !== "undefined" && "serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    const swUrl = "/sw.js";
+    navigator.serviceWorker
+      .register(swUrl)
+      .then((reg) => {
+        console.log("Service worker registered.", reg);
+      })
+      .catch((err) => {
+        console.warn("Service worker registration failed:", err);
+      });
+  });
+}
