@@ -1,11 +1,9 @@
 import { Text, Avatar, Skeleton, MiniButton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
 import { useEffect, useRef, useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
-import { useChatStore } from "@/features/hooks/use-chat-store";
 import { ChatInput } from "./chat-input";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 
@@ -21,38 +19,47 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
 }) => {
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
-  const { registry } = useChatStore();
   const { renderConversationName } = useRenderConversationContent();
-
-  const chat = registry[conversationId];
-  const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
-
-  const {
-    data: tempUser,
-    isLoading: isLoadingTempUser,
-    isFetching: isFetchingTempUser,
-  } = useGetUserProfile(tempTargetId);
 
   const {
     data: conversationData,
     isLoading: isLoadingConversation,
     isFetching: isFetchingConversation,
-  } = useGetConversation(conversationId, undefined, !tempTargetId);
+  } = useGetConversation(conversationId, undefined, true);
 
   useEffect(() => {
-    if (tempUser) {
-      setChatTitle(tempUser.infos.fullName);
-      setChatAvatar(tempUser.infos.avatar);
-    } else if (conversationData) {
+    if (conversationData) {
       setChatTitle(renderConversationName(conversationData));
       setChatAvatar(conversationData.avatarUrl || "");
     }
-  }, [tempUser, conversationData, renderConversationName]);
+  }, [conversationData, renderConversationName]);
 
-  const isLoadingHeader =
-    isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
+  const isLoadingHeader = isLoadingConversation || isFetchingConversation;
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
+    return (
+      <div
+        className={clsx(
+          "relative flex flex-col items-center justify-center text-center px-6 py-10",
+          className,
+        )}
+      >
+        <div className="w-12 h-12 mb-3 rounded-full bg-bg-third flex items-center justify-center">
+          <i className="fa-regular fa-comments text-text-main/60 text-lg"></i>
+        </div>
+
+        <Text sz="md-1" weight="bold" className="text-text-main">
+          Conversation not found
+        </Text>
+
+        <Text sz="sm-1" className="text-text-main/60 mt-1">
+          Hãy chọn một đoạn chat hoặc bắt đầu cuộc trò chuyện mới
+        </Text>
+      </div>
+    );
+  }
 
   return (
     <div className={clsx("relative flex flex-col bg-bg-main overflow-hidden", className)}>
@@ -70,10 +77,10 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
               </MiniButton>
             )}
             <Avatar src={chatAvatar} alt="Avatar" sz="xs-2" />
-            <Text sz="md-1" weight="bold" className="flex-1 text-text-main">
+            <Text sz="md-1" weight="bold" className="flex-1 text-text-main truncate">
               {chatTitle}
             </Text>
-            <div className="flex items-center gap-1">
+            {/* <div className="flex items-center gap-1">
               <MiniButton sz="xs-3">
                 <i className="fa-solid fa-phone text-primary-400" />
               </MiniButton>
@@ -83,31 +90,12 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
               <MiniButton sz="xs-3">
                 <i className="fa-solid fa-circle-info text-primary-400" />
               </MiniButton>
-            </div>
+            </div> */}
           </>
         )}
       </div>
 
       <div className="flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh" ref={scrollRef}>
-        {tempTargetId ? (
-          <div className="flex flex-col justify-center items-center h-full text-center px-4">
-            <div className="relative mb-4">
-              <Avatar src={chatAvatar} alt="Avatar" sz="md-1" />
-              <span className="absolute bottom-0 right-0 w-3.5 h-3.5 bg-green-500 rounded-full border-2 border-black" />
-            </div>
-            <Text sz="md-1" weight="bold" className="text-white">
-              {chatTitle}
-            </Text>
-            <Text sz="sm-1" className="text-gray-400 mt-1">
-              Hai bạn chưa có tin nhắn nào
-            </Text>
-            <div className="mt-5 px-4 py-2 bg-gray-700/30 rounded-full">
-              <Text sz="sm-1" className="text-gray-300">
-                Gửi lời chào đầu tiên 👋
-              </Text>
-            </div>
-          </div>
-        ) : null}
         <MessageList
           conversationId={conversationId}
           parentRef={scrollRef}
@@ -115,7 +103,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         />
       </div>
 
-      <ChatInput className="h-auto p-4" conversationId={conversationId} receiverId={tempTargetId} />
+      <ChatInput className="h-auto p-4" conversationId={conversationId} />
     </div>
   );
 };

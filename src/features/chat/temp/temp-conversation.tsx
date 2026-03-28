@@ -32,6 +32,7 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
 
   const handleSendMessage = async () => {
     if (!tempId) return;
+    console.log("Sending message to temp user:", { tempId, message, correlationId });
     await sendMessage(
       {
         correlationId: correlationId,
@@ -56,7 +57,7 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
   return (
     <div
       className={clsx(
-        "relative flex flex-col h-full bg-bg-main overflow-hidden",
+        "relative flex flex-col bg-bg-main overflow-hidden",
         "h-[calc(100dvh-var(--header-height))]",
         className,
       )}
@@ -76,17 +77,6 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
             <Text sz="md-1" weight="bold" className="flex-1 text-text-main">
               {tempUser?.infos.fullName}
             </Text>
-            <div className="flex items-center gap-1">
-              <MiniButton sz="xs-3">
-                <i className="fa-solid fa-phone text-primary-400" />
-              </MiniButton>
-              <MiniButton sz="xs-3">
-                <i className="fa-solid fa-video text-primary-400" />
-              </MiniButton>
-              <MiniButton sz="xs-3">
-                <i className="fa-solid fa-circle-info text-primary-400" />
-              </MiniButton>
-            </div>
           </>
         )}
       </div>
@@ -112,12 +102,12 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
       </div>
 
       <div className="px-4 py-3 bg-bg-second border-t border-gray-700/50 flex items-center gap-2">
-        <MiniButton sz="xs-3">
+        {/* <MiniButton sz="xs-3">
           <i className="fa-solid fa-circle-plus text-primary-400" />
         </MiniButton>
         <MiniButton sz="xs-3">
           <i className="fa-solid fa-image text-primary-400" />
-        </MiniButton>
+        </MiniButton> */}
         <Textbox
           sz="xs-3"
           className="!rounded-full w-full"
