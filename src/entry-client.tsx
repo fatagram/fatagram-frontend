@@ -44,9 +44,13 @@ if (typeof window !== "undefined" && "serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     const swUrl = "/sw.js";
     navigator.serviceWorker
-      .register(swUrl)
+      .register(swUrl, { scope: "/" })
       .then((reg) => {
-        console.log("Service worker registered.", reg);
+        console.log("Service worker registered successfully.", reg);
+        // Check for updates periodically
+        setInterval(() => {
+          reg.update();
+        }, 60000); // Check every 60 seconds
       })
       .catch((err) => {
         console.warn("Service worker registration failed:", err);
