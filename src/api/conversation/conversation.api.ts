@@ -31,7 +31,7 @@ export class ConversationService {
   public async createGroupConversation(
     participantIds: string[],
     name?: string | null,
-  ): Promise<Result<object>> {
+  ): Promise<Result<string>> {
     return await apiPost(`${PREFIX}`, { participantIds, name });
   }
 }

@@ -97,17 +97,19 @@ export const useConversationCacheMutations = () => {
 
     if (currentData) {
       for (const page of currentData.pages) {
-        existedConv = page.items.find((item) => item.id === conversationId);
-        if (existedConv) break;
+        const found = page.items.find((item) => item.id === conversationId);
+        if (found) {
+          existedConv = { ...found, lastMessage: lastMessage || found.lastMessage };
+          break;
+        }
       }
     }
 
     if (!existedConv) {
-      existedConv = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
-      if (!existedConv) return;
+      const fetched = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
+      if (!fetched) return;
+      existedConv = { ...fetched, lastMessage: lastMessage || fetched.lastMessage };
     }
-
-    existedConv.lastMessage = lastMessage || existedConv.lastMessage;
 
     queryClient.setQueryData(listKey, (oldData: ConversationPage) => {
       if (!oldData || !oldData.pages.length) return oldData;
@@ -119,7 +121,7 @@ export const useConversationCacheMutations = () => {
 
       newPages[0] = {
         ...newPages[0],
-        items: [existedConv, ...newPages[0].items],
+        items: [existedConv!, ...newPages[0].items],
       };
 
       return {

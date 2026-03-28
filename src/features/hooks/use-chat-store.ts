@@ -19,20 +19,24 @@ export const useChatStore = create<ChatWindowState>((set) => ({
   openChat: (id: string, meta: ChatMeta) =>
     set((state) => {
       if (state.activeIds.includes(id)) return state;
-      if (state.minimizedIds.includes(id)) {
-        return {
-          activeIds: [...state.activeIds, id],
-          minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
-        };
+      let newActiveIds = [id, ...state.activeIds];
+      let newMinimizedIds = state.minimizedIds.filter((mid) => mid !== id);
+
+      if (newActiveIds.length > 3) {
+        const lastId = newActiveIds.pop();
+        if (lastId && !newMinimizedIds.includes(lastId)) {
+          newMinimizedIds = [lastId, ...newMinimizedIds];
+        }
       }
 
       const newRegistry = { ...state.registry };
       if (meta) {
         newRegistry[id] = meta;
       }
+
       return {
-        activeIds: [...state.activeIds, id],
-        minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
+        activeIds: newActiveIds,
+        minimizedIds: newMinimizedIds,
         registry: newRegistry,
       };
     }),

@@ -46,7 +46,16 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
         {tab === "list" && (
           <ChatList className="h-full" onConversationClick={handleSelectConversation} />
         )}
-        {tab === "create" && <CreateGroupChat className="h-full max-h-[90%]" />}
+        {tab === "create" && (
+          <CreateGroupChat
+            className="h-full max-h-[90%]"
+            onCreateSuccess={(conversationId) => {
+              navigate(`/fatalk/${conversationId}`);
+              setTab("list");
+            }}
+            onTurnBack={() => setTab("list")}
+          />
+        )}
       </div>
     </PageNavbar>
   );

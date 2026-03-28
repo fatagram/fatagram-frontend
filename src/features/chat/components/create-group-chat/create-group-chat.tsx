@@ -10,9 +10,14 @@ import { useCallback, useRef } from "react";
 
 interface CreateGroupChatProps extends ComponentProps {
   onTurnBack?: () => void;
+  onCreateSuccess?: (conversationId: string) => void;
 }
 
-export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({ className, onTurnBack }) => {
+export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
+  className,
+  onTurnBack,
+  onCreateSuccess,
+}) => {
   const { userId } = useAuth();
   const { data: me } = useGetUserProfile(userId!);
   const { data: users, fetchNextPage, hasNextPage } = useGetInfiniteUsers();
@@ -40,7 +45,14 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({ className, onT
   const handleCreateGroupChat = useCallback(
     async (selectedValues: any[]) => {
       const name = textboxRef.current?.value;
-      await createGroupChat({ participantIds: selectedValues, name: name || null });
+      await createGroupChat(
+        { participantIds: selectedValues, name: name || null },
+        {
+          onSuccess: (data) => {
+            if (data) onCreateSuccess?.(data);
+          },
+        },
+      );
     },
     [createGroupChat],
   );

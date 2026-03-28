@@ -57,6 +57,7 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
         <CreateGroupChat
           className="overflow-hidden h-full max-h-[90%] w-full"
           onTurnBack={() => setTab("list")}
+          onCreateSuccess={() => setTab("list")}
         />
       )}
 
