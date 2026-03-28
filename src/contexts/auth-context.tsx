@@ -97,8 +97,6 @@ export const AuthProvider: FC<AuthProviderProps> = ({
     lang: userData?.languageCode as LocaleKeys,
     isOnBoarding: userData?.isOnBoarding,
   });
-  // console.log("AuthContext", userData);
-  // const { changeLanguage } = useLanguage();
   const queryClient = useQueryClient();
   const navigate = useNavigate();
 

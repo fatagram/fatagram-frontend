@@ -10,4 +10,6 @@ export type User = {
   urlName?: string;
   bio?: string;
   description?: string;
+  createdAt?: string;
+  updatedAt?: string;
 };

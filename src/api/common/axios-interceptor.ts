@@ -83,7 +83,6 @@ apiClientFormData.interceptors.response.use(
       err.name = "LARGE_FILE_ERROR";
       return Promise.reject(err);
     }
-    // console.log(error);
     return Promise.reject(error);
   },
 );

@@ -139,11 +139,9 @@ export function useNotificationCacheMutations() {
 
   const removeNotificationFromCache = useCallback(
     (notificationId: string) => {
-      console.log("Removing notification from cache with ID:", notificationId);
       queryClient.setQueriesData<NotificationPages>(
         { queryKey: ["notifications", userId] },
         (oldData) => {
-          console.log("Current cache data before removal:", oldData);
           if (!oldData?.pages) return oldData;
           return {
             ...oldData,

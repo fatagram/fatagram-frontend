@@ -3,7 +3,7 @@ import { Message } from "@/types/entities/message.type";
 import { Avatar, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState } from "react";
+import { useEffect, useState, memo } from "react";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useFormatTime } from "@/utils/format-time";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
@@ -11,24 +11,21 @@ import { isSystemMessage } from "../helpers/conversation-helpers";
 
 interface MessageProps extends ComponentProps {
   message: Message;
-  isShowName?: boolean;
-  isShowTime?: boolean;
-  isFooterVisible?: boolean;
-  hasAvatar?: boolean;
   isMyMessage?: boolean;
-  messageClassName?: string;
+  messages: Message[];
+  userId?: string;
+  index: number;
+  isGroup?: boolean;
   ref: React.RefObject<HTMLDivElement | null> | null;
 }
 
-export const MessageRow: React.FC<MessageProps> = ({
+const MessageRowComponent: React.FC<MessageProps> = ({
   message,
-  isShowName = false,
-  isShowTime = true,
-  isFooterVisible = true,
-  hasAvatar,
-  isMyMessage,
+  index,
+  userId,
+  messages,
+  isGroup,
   className,
-  messageClassName,
   ref,
 }) => {
   const { t } = useTranslation();
@@ -39,6 +36,25 @@ export const MessageRow: React.FC<MessageProps> = ({
   const isPending = message.status === "pending";
   const isFailed = message.status === "failed";
   const isSystem = isSystemMessage(message.type);
+
+  const isShowTime =
+    index === messages.length - 1 ||
+    getDiffBetween(message.createdAt, messages[index + 1].createdAt, "minute") > 30;
+  const isPrevMessageShowTime =
+    index === 0 || getDiffBetween(message.createdAt, messages[index - 1].createdAt, "minute") > 30;
+  const isLastMessageInGroup =
+    index === messages.length - 1 ||
+    messages[index + 1]?.senderId !== message.senderId ||
+    isShowTime;
+  const isFirstMessageInGroup =
+    index === 0 || messages[index - 1]?.senderId !== message.senderId || isPrevMessageShowTime;
+  const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
+  const isMyMessage = message.senderId === userId;
+
+  const isShowName = isLastMessageInGroup && !isMyMessage && isGroup;
+  const hasAvatar = isFirstMessageInGroup;
+
+  const isFooterVisible = index === 0 && isMyMessage;
 
   useEffect(() => {
     if (isPending) {
@@ -59,7 +75,15 @@ export const MessageRow: React.FC<MessageProps> = ({
   }
 
   return (
-    <div className={clsx("flex flex-col", className)} ref={ref}>
+    <div
+      className={clsx(
+        "flex flex-col",
+        isLastMessageInGroup ? "mt-[0.5rem]" : "mt-0",
+        index === 0 ? "mb-[0.5rem]" : "mb-0",
+        className,
+      )}
+      ref={ref}
+    >
       {isShowTime && (
         <Text sz="xs-1" className="text-center my-2">
           {formatSmartTimestamp(message.createdAt)}
@@ -75,7 +99,7 @@ export const MessageRow: React.FC<MessageProps> = ({
         {!isMyMessage && (
           <Avatar
             className={clsx(
-              "flex-shrink-0 self-start",
+              "flex-shrink-0 self-end",
               isMyMessage && "order-2",
               !hasAvatar && "invisible",
             )}
@@ -88,17 +112,25 @@ export const MessageRow: React.FC<MessageProps> = ({
           {isShowName && (
             <Text
               sz="xs-1"
-              className={clsx("mb-1", isMyMessage ? "text-right mr-3" : "text-left ml-3")}
+              className={clsx("mb-1", isMyMessage ? "text-right mr-1" : "text-left ml-1")}
             >
               {userInfo?.infos.fullName}
             </Text>
           )}
           <div
             className={clsx(
-              "px-3 py-1 break-all rounded-2xl shadow-sm relative self-end",
+              "px-3 py-1 break-all rounded-xl shadow-sm relative",
               isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
               isFailed && "border-red-500 border-2 opacity-50",
-              messageClassName,
+              isMyMessage ? "rounded-l-2xl self-end" : "rounded-r-2xl self-start",
+              isOnlyMessageInGroup && "!rounded-2xl",
+              isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
+              isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
+              !isFirstMessageInGroup &&
+                !isLastMessageInGroup &&
+                (isMyMessage
+                  ? "rounded-tr-none rounded-br-none"
+                  : "rounded-tl-none rounded-bl-none"),
             )}
           >
             <Text
@@ -107,7 +139,7 @@ export const MessageRow: React.FC<MessageProps> = ({
               className={clsx(isMyMessage ? "text-text-message" : "text-text-main")}
             >
               {message.content}
-            </Text>{" "}
+            </Text>
             {hasDelayed && (
               <div className="absolute -left-4 top-1/2 -translate-y-1/2 flex items-center justify-center">
                 <div className="w-2 h-2 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent"></div>
@@ -120,7 +152,7 @@ export const MessageRow: React.FC<MessageProps> = ({
               isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0",
             )}
           >
-            {isFooterVisible && isMyMessage && !isPending && !isFailed && (
+            {isFooterVisible && !isFailed && !isPending && (
               <Text sz="xs-1">
                 {t("conversations.sent")}{" "}
                 {getDiffBetween(message.createdAt, new Date(), "second") > 60 && (
@@ -139,3 +171,5 @@ export const MessageRow: React.FC<MessageProps> = ({
     </div>
   );
 };
+
+export const MessageRow = memo(MessageRowComponent);

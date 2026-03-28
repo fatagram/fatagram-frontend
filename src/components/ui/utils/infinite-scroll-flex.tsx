@@ -93,7 +93,7 @@ export default function InfiniteScrollFlex({
   return (
     <div
       className={clsx(
-        "overflow-y-auto",
+        "relative overflow-y-auto",
         desc ? "flex flex-col-reverse" : "flex flex-col",
         className,
       )}
@@ -116,7 +116,10 @@ export default function InfiniteScrollFlex({
       {hasMore && (
         <div
           ref={sentinelRef}
-          className={clsx("absolute h-[20px] w-[20px]", desc ? "top-[50px]" : "bottom-0")}
+          className={clsx(
+            "absolute bg-red-500 h-[20px] w-[20px]",
+            desc ? "top-[50px]" : "bottom-0",
+          )}
         />
       )}
       {isLoading && (

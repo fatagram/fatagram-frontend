@@ -28,8 +28,11 @@ export class ConversationService {
     return await apiGet(`${PREFIX}/${conversationId}/messages`, query);
   }
 
-  public async createGroupConversation(participantIds: string[]): Promise<Result<object>> {
-    return await apiPost(`${PREFIX}`, { participantIds });
+  public async createGroupConversation(
+    participantIds: string[],
+    name?: string | null,
+  ): Promise<Result<object>> {
+    return await apiPost(`${PREFIX}`, { participantIds, name });
   }
 }
 

@@ -1,15 +1,24 @@
 import { MiniButton, Textbox } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
+import { useSendMessage } from "@/features/hooks/use-message";
 import clsx from "clsx";
 import { useRef, useState } from "react";
 
 interface ChatInputProps extends ComponentProps {
-  onSend?: (content: string) => void;
+  conversationId?: string;
+  correlationId?: string;
+  receiverId?: string;
 }
 
-export const ChatInput: React.FC<ChatInputProps> = ({ className, onSend }) => {
+export const ChatInput: React.FC<ChatInputProps> = ({
+  conversationId,
+  correlationId,
+  receiverId,
+  className,
+}) => {
   const [hasInput, setHasInput] = useState(false);
   const textboxRef = useRef<HTMLInputElement | null>(null);
+  const { fetch: send } = useSendMessage();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const isNotEmpty = e.target.value.trim() !== "";
@@ -21,18 +30,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({ className, onSend }) => {
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
-      const content = textboxRef.current?.value.trim() || "";
-      if (content) {
-        handleSendMessage(content);
-      }
+      handleSendMessage();
     }
   };
 
-  const handleSendMessage = (content: string) => {
-    onSend?.(content);
+  const handleSendMessage = () => {
+    send({
+      conversationId,
+      correlationId,
+      content: textboxRef.current?.value.trim() || "",
+      receiverId,
+    });
     if (textboxRef.current) {
       textboxRef.current.value = "";
     }
+    setHasInput(false);
   };
 
   return (
@@ -46,12 +58,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({ className, onSend }) => {
         ref={textboxRef}
         onChange={handleInputChange}
       />
-      <MiniButton
-        sz="xs-3"
-        className="ml-2"
-        onClick={() => handleSendMessage(textboxRef.current?.value?.trim() || "")}
-        disabled={!hasInput}
-      >
+      <MiniButton sz="xs-3" className="ml-2" onClick={handleSendMessage} disabled={!hasInput}>
         <i className="fa-solid fa-paper-plane text-primary-500"></i>
       </MiniButton>
     </div>

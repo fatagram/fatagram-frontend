@@ -69,7 +69,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     initialValues: registerInitialValues,
     validationSchema: registerValidationSchema,
     onSubmit: async (values) => {
-      console.log("Submitting registration form with values: ", values);
       setUsernameError("");
       setEmailError("");
       setPhoneNumberError("");

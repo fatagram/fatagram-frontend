@@ -56,11 +56,13 @@ export const useGetConversation = (
 export const useCreateGroupConversation = () => {
   const { showSnackbar } = useSnackbar();
   return useResultFetcher(
-    async (participantIds: string[]) =>
-      await conversationService.createGroupConversation(participantIds),
+    async ({ participantIds, name }: { participantIds: string[]; name?: string | null }) => {
+      return await conversationService.createGroupConversation(participantIds, name);
+    },
     {
-      onError: (_error) => {
-        showSnackbar("Tạo cuộc trò chuyện nhóm thất bại", "error");
+      onError: (error) => {
+        console.log("Failed to create group conversation:", error);
+        showSnackbar(error?.code ?? "Tạo cuộc trò chuyện nhóm thất bại", "error");
       },
     },
   );
@@ -100,15 +102,12 @@ export const useConversationCacheMutations = () => {
       }
     }
 
-    if (existedConv) {
-      existedConv = {
-        ...existedConv,
-        lastMessage: lastMessage,
-      };
-    } else {
+    if (!existedConv) {
       existedConv = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
       if (!existedConv) return;
     }
+
+    existedConv.lastMessage = lastMessage || existedConv.lastMessage;
 
     queryClient.setQueryData(listKey, (oldData: ConversationPage) => {
       if (!oldData || !oldData.pages.length) return oldData;

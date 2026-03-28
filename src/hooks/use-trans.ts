@@ -5,7 +5,6 @@ export type LocaleKeys = keyof typeof resources;
 
 export const useLanguage = () => {
   const changeLanguage = (lng: LocaleKeys) => {
-    console.log("Changing language to:", lng);
     i18next.changeLanguage(lng);
   };
 

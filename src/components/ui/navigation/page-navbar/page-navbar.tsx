@@ -6,13 +6,15 @@ import { Text } from "@/components/atoms/text/text";
 
 type PageNavbarProps = {
   title?: string;
+  header?: React.ReactNode;
+  headerClassName?: string;
   className?: string;
   children?: React.ReactNode;
 };
 
 const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSection } & {
   Item: typeof PageNavbarItem;
-} = ({ title, className, children }) => {
+} = ({ title, header, headerClassName, className, children }) => {
   return (
     <div
       className={clsx(
@@ -22,13 +24,14 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
         className,
       )}
     >
-      {title && (
-        <div className="relative bg-bg-second mt-4 mb-2">
+      <div className={clsx("flex flex-col relative bg-bg-second mt-4 mb-2", headerClassName)}>
+        {title && (
           <Text sz="xl-1" weight="bold" className="relative px-6 text-gradient-main">
             {title}
           </Text>
-        </div>
-      )}
+        )}
+        {header}
+      </div>
       {children}
     </div>
   );

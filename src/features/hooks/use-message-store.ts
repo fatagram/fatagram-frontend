@@ -1,7 +1,7 @@
 import { useQueryClient } from "@tanstack/react-query";
 import { useCallback } from "react";
 import { CursorResult } from "@/api/common/result";
-import { Message } from "@/api/message/dto/message.dto";
+import { Message } from "@/types/entities/message.type";
 
 // Message query keys helper (kept in sync with useMessages)
 export const messageKeys = {

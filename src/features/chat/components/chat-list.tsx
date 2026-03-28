@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts";
 import { useConversations } from "@/features/hooks/use-conversation";
 import { useFormatTime } from "@/utils/format-time";
 import clsx from "clsx";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { isSystemMessage } from "../helpers/conversation-helpers";
@@ -20,9 +20,9 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   const { t } = useTranslation();
   const { userId } = useAuth();
   const { formatTime } = useFormatTime();
-  const { data, fetchNextPage, isLoading, isFetching } = useConversations();
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
   const { renderConversationName, renderSystemMessage } = useRenderConversationContent();
-  const conversations = data?.pages.flatMap((page) => page.items) || [];
+  const conversations = useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
 
   const handleConversationClick = useCallback(
     (conversationId: string) => {
@@ -32,7 +32,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   );
 
   return (
-    <div className={clsx("flex flex-col p-2 overflow-hidden h-full", className)}>
+    <div className={clsx("flex flex-col p-2", className)}>
       <Textbox
         placeholder={t("common:conversations.search")}
         sz="xs-3"
@@ -42,6 +42,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
         <InfiniteScrollFlex
           items={conversations}
           onLoadMore={fetchNextPage}
+          hasMore={hasNextPage}
           itemTemplate={(item: any) => {
             const conversation = item as ConversationDto;
             const lastMessage = conversation.lastMessage;
@@ -51,7 +52,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
                 className={clsx(
                   "flex gap-2 px-1 py-2",
                   "hover:bg-bg-fourth rounded-lg transition-colors",
-                  "cursor-pointer flex-1",
+                  "cursor-pointer",
                 )}
                 onClick={() => handleConversationClick(conversation.id)}
               >

@@ -1,13 +1,13 @@
-import { Text, Avatar, Textbox, Skeleton, MiniButton } from "@/components/atoms";
+import { Text, Avatar, Skeleton, MiniButton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
-import { useRef } from "react";
-import { useSendMessage } from "@/features/hooks/use-message";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
 import { useChatStore } from "@/features/hooks/use-chat-store";
+import { ChatInput } from "./chat-input";
+import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
@@ -19,8 +19,10 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   conversationId,
   onTurnback,
 }) => {
-  const [message, setMessage] = useState("");
+  const [chatTitle, setChatTitle] = useState("");
+  const [chatAvatar, setChatAvatar] = useState("");
   const { registry } = useChatStore();
+  const { renderConversationName } = useRenderConversationContent();
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
@@ -37,33 +39,20 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     isFetching: isFetchingConversation,
   } = useGetConversation(conversationId, undefined, !tempTargetId);
 
+  useEffect(() => {
+    if (tempUser) {
+      setChatTitle(tempUser.infos.fullName);
+      setChatAvatar(tempUser.infos.avatar);
+    } else if (conversationData) {
+      setChatTitle(renderConversationName(conversationData));
+      setChatAvatar(conversationData.avatarUrl || "");
+    }
+  }, [tempUser, conversationData, renderConversationName]);
+
   const isLoadingHeader =
     isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
 
-  const chatTitle = tempUser
-    ? tempUser.infos.fullName
-    : conversationData?.name || "Cuộc trò chuyện";
-
-  const chatAvatar = tempUser ? tempUser.infos.avatar : conversationData?.avatarUrl;
-
-  const { fetch: send, isFetching } = useSendMessage();
   const scrollRef = useRef<HTMLDivElement | null>(null);
-
-  const handleSendMessage = () => {
-    if (!message.trim()) return;
-    send({
-      conversationId: tempTargetId === undefined ? conversationId : undefined,
-      content: message,
-      receiverId: tempTargetId,
-    });
-    setMessage("");
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-    if (e.key === "Enter" && message.trim() !== "") {
-      handleSendMessage();
-    }
-  };
 
   return (
     <div className={clsx("relative flex flex-col bg-bg-main overflow-hidden", className)}>
@@ -119,34 +108,14 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
             </div>
           </div>
         ) : null}
-        <MessageList conversationId={conversationId} parentRef={scrollRef} />
+        <MessageList
+          conversationId={conversationId}
+          parentRef={scrollRef}
+          isGroup={conversationData?.isGroup}
+        />
       </div>
 
-      <div className="px-4 py-3 bg-bg-second border-t border-gray-700/50 flex items-center gap-2">
-        <MiniButton sz="xs-3">
-          <i className="fa-solid fa-circle-plus text-primary-400" />
-        </MiniButton>
-        <MiniButton sz="xs-3">
-          <i className="fa-solid fa-image text-primary-400" />
-        </MiniButton>
-        <Textbox
-          sz="xs-3"
-          className="!rounded-full w-full"
-          wrapperClassName="flex-1"
-          placeholder="Aa"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-        />
-        <MiniButton sz="xs-3" onClick={handleSendMessage} disabled={!message.trim() || isFetching}>
-          <i
-            className={clsx(
-              "fa-solid",
-              message.trim() ? "fa-paper-plane text-primary-500" : "fa-thumbs-up text-primary-400",
-            )}
-          />
-        </MiniButton>
-      </div>
+      <ChatInput className="h-auto p-4" conversationId={conversationId} receiverId={tempTargetId} />
     </div>
   );
 };

@@ -17,7 +17,6 @@ export class AuthService {
   }
 
   async loginWithGoogle(code: string): Promise<Result<void>> {
-    console.log("Login with Google, code: ", code);
     return apiPost(`${PREFIX}/oauth/google/callback`, { code });
   }
 
@@ -27,7 +26,6 @@ export class AuthService {
   }
 
   async register(dto: RegisterDto): Promise<Result<void>> {
-    console.log("Registering user: ", dto);
     return apiPost(`${PREFIX}/register`, {
       username: dto.username,
       password: dto.password,

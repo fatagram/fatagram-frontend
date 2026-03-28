@@ -14,13 +14,10 @@ export function NotificationListener() {
     (message: SocketMessage<NotificationDto>) => {
       if (message.event !== "NewNotification") return;
       const data: NotificationDto = message.payload;
-      console.log("Received CancelNotification with data:", data);
 
       if (data.type === NotificationType.CancelNotification) {
         const notificationIdToCancel = data.data.notificationId;
-        console.log("Canceling notification with ID:", notificationIdToCancel);
 
-        // Remove from notification list AND decrement unread count
         removeNotificationFromCache(notificationIdToCancel);
         decrementUnread();
         return;

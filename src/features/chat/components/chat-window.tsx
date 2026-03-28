@@ -4,8 +4,7 @@ import clsx from "clsx";
 import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
-import { useSendMessage } from "@/features/hooks/use-message";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { ChatInput } from "./chat-input";
@@ -38,35 +37,23 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const isLoadingHeader =
     isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
 
-  const { fetch: send } = useSendMessage();
-
   useEffect(() => {
     if (tempUser) {
       setChatTitle(tempUser.infos.fullName);
       setChatAvatar(tempUser.infos.avatar);
     } else if (conversationData) {
-      console.log("Rendering chat header for conversation:", conversationData);
       setChatTitle(renderConversationName(conversationData));
       setChatAvatar(conversationData.avatarUrl || "");
     }
   }, [tempUser, conversationData, renderConversationName]);
 
-  const handleOnClose = () => {
+  const handleOnClose = useCallback(() => {
     closeChat(conversationId);
-  };
+  }, [conversationId]);
 
-  const handleOnMinimum = () => {
+  const handleOnMinimum = useCallback(() => {
     toggleMinimize(conversationId);
-  };
-
-  const handleSendMessage = (content: string) => {
-    send({
-      conversationId: !tempTargetId ? conversationId : undefined,
-      correlationId: tempTargetId ? conversationId : undefined,
-      content: content,
-      receiverId: tempTargetId,
-    });
-  };
+  }, [conversationId]);
 
   return (
     <div
@@ -128,12 +115,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
             </div>
           </div>
         ) : null}
-        <MessageList
-          conversationId={conversationId}
-          conversationType={conversationData?.isGroup ? "group" : "private"}
-        />
+        <MessageList conversationId={conversationId} isGroup={conversationData?.isGroup} />
       </div>
-      <ChatInput onSend={handleSendMessage} />
+      <ChatInput
+        conversationId={!tempTargetId ? conversationId : undefined}
+        correlationId={tempTargetId ? conversationId : undefined}
+        receiverId={tempTargetId}
+      />
     </div>
   );
 };

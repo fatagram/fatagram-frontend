@@ -27,8 +27,6 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
     [data],
   );
 
-  console.log(friends);
-
   const handleOnChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     setKeyword(e.target.value);
   };

@@ -14,6 +14,9 @@ export function MessageListener() {
     const data = message.payload;
     const conversationId = data.conversationId;
 
+    console.log("Received new message via hub:", data);
+    console.log("Conversation ID:", conversationId);
+
     if (data.correlationId && useChatStore.getState().registry[data.correlationId]) {
       useChatStore.getState().replaceChat(data.correlationId, conversationId);
     } else {

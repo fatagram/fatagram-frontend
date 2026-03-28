@@ -46,7 +46,6 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
   // Navigation to personal page
   const handlePersonalPage = useCallback(() => {
     const user = urlName || userId;
-    // console.log("Navigate to personal page: ", user);
     navigate(`/${user}`);
     setIsOpenMenu(false);
   }, [navigate, urlName, userId]);

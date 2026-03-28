@@ -6,6 +6,7 @@ import { useSafeInfiniteQueryResult } from "@/hooks/use-safe-query";
 import { CursorQuery } from "@/types/query";
 import { useMessageCacheMutations } from "./use-message-store";
 import { useAuth } from "@/contexts";
+import { MessageType } from "@/types/entities/message.type";
 
 const messagesQueryKey = (
   conversationId: string,
@@ -41,6 +42,7 @@ export const useSendMessage = () => {
         createdAt: new Date(),
         status: "pending",
         isGroup: false,
+        type: MessageType.Text,
       },
       true,
     );

@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChatList } from "./chat-list";
 import { useChatStore } from "@/features/hooks/use-chat-store";
+import { useState } from "react";
+import { CreateGroupChat } from "./create-group-chat/create-group-chat";
 
 interface ChatMenuProps extends ComponentProps {
   ref?: React.RefObject<HTMLDivElement | null>;
@@ -13,6 +15,7 @@ interface ChatMenuProps extends ComponentProps {
 }
 
 export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationClick, ref }) => {
+  const [tab, setTab] = useState<"list" | "create">("list");
   const { data } = useConversations();
   const { openChat } = useChatStore();
   const { t } = useTranslation();
@@ -23,7 +26,9 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
     onConversationClick?.(conversationId);
   };
 
-  const handleCreateConversation = async () => {};
+  const handleCreateConversation = async () => {
+    setTab("create");
+  };
 
   return (
     <div
@@ -45,25 +50,35 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
           {t("common:conversations.title")}
         </Text>
       </div>
-      <ChatList onConversationClick={handleSelectConversation} />
+      {tab === "list" && (
+        <ChatList className="overflow-hidden" onConversationClick={handleSelectConversation} />
+      )}
+      {tab === "create" && (
+        <CreateGroupChat
+          className="overflow-hidden h-full max-h-[90%] w-full"
+          onTurnBack={() => setTab("list")}
+        />
+      )}
 
-      <div className="flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2 mt-auto">
-        <button
-          className="p-2 w-full rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center justify-center gap-2"
-          onClick={() => {
-            const firstId = data?.pages[0]?.items[0]?.id || "";
-            navigate(`/fatalk/${firstId}`);
-          }}
-          title="Mở Fatalk"
-        >
-          <Text sz="sm-1" color="secondary">
-            Mở Fatalk
-          </Text>
-          <Text sz="sm-1" color="secondary">
-            <i className="fa-solid fa-arrow-up-right-from-square" />
-          </Text>
-        </button>
-      </div>
+      {tab === "list" && (
+        <div className="flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2 mt-auto">
+          <button
+            className="p-2 w-full rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center justify-center gap-2"
+            onClick={() => {
+              const firstId = data?.pages[0]?.items[0]?.id || "";
+              navigate(`/fatalk/${firstId}`);
+            }}
+            title="Mở Fatalk"
+          >
+            <Text sz="sm-1" color="secondary">
+              Mở Fatalk
+            </Text>
+            <Text sz="sm-1" color="secondary">
+              <i className="fa-solid fa-arrow-up-right-from-square" />
+            </Text>
+          </button>
+        </div>
+      )}
     </div>
   );
 };

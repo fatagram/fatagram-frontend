@@ -10,7 +10,6 @@ export const GroupChatWindow: React.FC<GroupChatWindowProps> = ({ className }) =
   return (
     <div className={clsx("flex gap-3", className)}>
       {activeIds.map((id) => {
-        console.log("Rendering ChatWindow for conversationId:", id);
         return (
           <div key={id}>
             <ChatWindow className="rounded-b-none" conversationId={id} />
