@@ -48,7 +48,7 @@ export const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
 
       <div className={clsx("grid grid-cols-10 relative z-10")}>
         <Text
-          sz="md-3"
+          sz="md"
           className={clsx(
             "flex justify-center items-center h-full col-span-2",
             "transition-all duration-300",
@@ -61,7 +61,7 @@ export const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
         </Text>
         <div className="col-span-8 flex flex-col justify-center">
           <Text
-            sz="md-1"
+            sz="md"
             className={clsx(
               "transition-colors duration-300",
               isFocused
@@ -72,7 +72,7 @@ export const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
             {title}
           </Text>
           {description && (
-            <Text sz="sm-2" weight="light" className="text-text-second mt-0.5">
+            <Text sz="sm" weight="light" className="text-text-second mt-0.5">
               {description}
             </Text>
           )}

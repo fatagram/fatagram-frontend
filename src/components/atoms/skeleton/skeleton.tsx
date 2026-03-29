@@ -1,41 +1,41 @@
+import { FC } from "react";
 import { ComponentProps } from "@/components/common/component-type";
-import { Size } from "@/components/common/size";
 import clsx from "clsx";
-import { FC, JSX } from "react";
 
-type SkeletonVariant = "text" | "rect" | "circle";
+export type Size = "sm" | "md" | "lg" | "xl";
+export type SkeletonVariant = "text" | "rect" | "circle";
 
-interface SkeletonProps extends ComponentProps {
+export interface SkeletonProps extends ComponentProps<HTMLDivElement> {
   variant?: SkeletonVariant;
+  sz?: Size;
 }
 
 const sizeClasses: Record<Size, string> = {
-  "xs-1": "h-1",
-  "xs-2": "h-1.5",
-  "xs-3": "h-2",
-  "sm-1": "h-4",
-  "sm-2": "h-6",
-  "sm-3": "h-8",
-  "md-1": "h-10",
-  "md-2": "h-12",
-  "md-3": "h-16",
-  "lg-1": "h-20",
-  "lg-2": "h-24",
-  "lg-3": "h-32",
-  "xl-1": "h-40",
-  "xl-2": "h-56",
-  "xl-3": "h-72",
+  sm: "h-4",
+  md: "h-8",
+  lg: "h-16",
+  xl: "h-32",
 };
 
-export const Skeleton: FC<SkeletonProps> = ({ className = "", sz = "md-1", variant = "text" }) => {
+export const Skeleton: FC<SkeletonProps> = ({
+  className,
+  sz = "md",
+  variant = "text",
+  ...props
+}) => {
   return (
     <div
       className={clsx(
-        `animate-pulse rounded-xl bg-bg-third`,
-        { "aspect-square !rounded-full": variant === "circle" },
+        "w-full animate-pulse bg-bg-third",
         sizeClasses[sz],
+        {
+          "rounded-md": variant === "text",
+          "rounded-xl": variant === "rect",
+          "aspect-square !w-auto !rounded-full": variant === "circle",
+        },
         className,
       )}
+      {...props}
     />
   );
 };

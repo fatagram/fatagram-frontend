@@ -50,11 +50,11 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
           <i className="fa-regular fa-comments text-text-main/60 text-lg"></i>
         </div>
 
-        <Text sz="md-1" weight="bold" className="text-text-main">
+        <Text sz="md" weight="bold" className="text-text-main">
           Conversation not found
         </Text>
 
-        <Text sz="sm-1" className="text-text-main/60 mt-1">
+        <Text sz="sm" className="text-text-main/60 mt-1">
           Hãy chọn một đoạn chat hoặc bắt đầu cuộc trò chuyện mới
         </Text>
       </div>
@@ -66,28 +66,28 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       <div className="flex items-center gap-3 px-4 h-[60px] bg-bg-second border-b border-gray-700/50 shrink-0">
         {isLoadingHeader ? (
           <>
-            <Skeleton sz="sm-3" variant="circle" className="w-10" />
-            <Skeleton sz="sm-3" className="flex-1 max-w-[160px]" />
+            <Skeleton sz="md" variant="circle" className="w-10" />
+            <Skeleton sz="md" className="flex-1 max-w-[160px]" />
           </>
         ) : (
           <>
             {onTurnback && (
-              <MiniButton sz="xs-3" onClick={onTurnback} className="block lg:hidden">
+              <MiniButton sz="sm" onClick={onTurnback} className="block lg:hidden">
                 <i className="fa-solid fa-arrow-left text-primary-400" />
               </MiniButton>
             )}
-            <Avatar src={chatAvatar} alt="Avatar" sz="xs-2" />
-            <Text sz="md-1" weight="bold" className="flex-1 text-text-main truncate">
+            <Avatar src={chatAvatar} alt="Avatar" sz="sm" />
+            <Text sz="md" weight="bold" className="flex-1 text-text-main truncate">
               {chatTitle}
             </Text>
             {/* <div className="flex items-center gap-1">
-              <MiniButton sz="xs-3">
+              <MiniButton sz="sm">
                 <i className="fa-solid fa-phone text-primary-400" />
               </MiniButton>
-              <MiniButton sz="xs-3">
+              <MiniButton sz="sm">
                 <i className="fa-solid fa-video text-primary-400" />
               </MiniButton>
-              <MiniButton sz="xs-3">
+              <MiniButton sz="sm">
                 <i className="fa-solid fa-circle-info text-primary-400" />
               </MiniButton>
             </div> */}

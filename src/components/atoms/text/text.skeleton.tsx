@@ -1,37 +1,34 @@
 import React from "react";
-import { Size } from "../../common/size";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 
+export type Size = "sm" | "md" | "lg" | "xl";
+
+// Sử dụng các lớp chiều cao chuẩn của thư viện thay vì giá trị cứng
 const skeletonSizeClasses: Record<Size, string> = {
-  xs: "h-[16px]",
-  "sm-1": "h-[20px]",
-  "sm-2": "h-[24px]",
-  "sm-3": "h-[28px]",
-  "md-1": "h-[40px]",
-  "md-2": "h-[48px]",
-  "md-3": "h-[56px]",
-  "lg-1": "h-[50px]",
-  "lg-2": "h-[60px]",
-  "lg-3": "h-[70px]",
-  "xl-1": "h-[80px]",
-  "xl-2": "h-[90px]",
-  "xl-3": "h-[100px]",
+  sm: "h-5", // 20px
+  md: "h-8", // 32px
+  lg: "h-12", // 48px
+  xl: "h-16", // 64px
 };
 
-interface TextSkeletonLoadingProps extends ComponentProps {}
+export interface TextSkeletonLoadingProps extends ComponentProps<HTMLDivElement> {
+  sz?: Size;
+}
 
 export const TextSkeletonLoading: React.FC<TextSkeletonLoadingProps> = ({
-  className = "",
-  sz = "md-1",
+  className,
+  sz = "md",
+  ...props
 }) => {
   return (
     <div
       className={clsx(
-        "animate-pulse select-none rounded-lg bg-bg-fourth shadow-lg",
+        "w-full animate-pulse select-none rounded-lg bg-bg-fourth",
         skeletonSizeClasses[sz],
         className,
       )}
+      {...props}
     />
   );
 };

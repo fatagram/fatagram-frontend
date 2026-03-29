@@ -33,7 +33,7 @@ export const Navbar: React.FC<NavbarProps> = ({
       style={style}
     >
       {/* <div onClick={handleGoToHome} className="cursor-pointer items-center gap-2">
-        <Logo hasSlogan={false} sz="sm-3" />
+        <Logo hasSlogan={false} sz="md" />
       </div> */}
       {logo}
       <div className="flex flex-row gap-3 flex-1">

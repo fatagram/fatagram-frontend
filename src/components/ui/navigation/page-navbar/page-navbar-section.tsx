@@ -31,7 +31,7 @@ export const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({
           onClick={() => setShowChildren(!showChildren)}
         >
           <Text
-            sz="lg-1"
+            sz="lg"
             weight="bold"
             className={clsx(
               "text-text-third group-hover:text-text-main transition-colors duration-200",

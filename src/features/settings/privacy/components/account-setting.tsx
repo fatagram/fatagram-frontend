@@ -22,7 +22,7 @@ const AccountSetting: React.FC<AccountSettingProps> = () => {
   return (
     <SidebarPageCard title={t("settings:account.personalInfo.title")}>
       {isLoading ? (
-        <Skeleton sz="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
+        <Skeleton sz="md" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
       ) : (
         <EditableField
           title={t("settings:account.personalInfo.yourName")}

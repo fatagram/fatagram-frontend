@@ -36,24 +36,24 @@ export const Dialog: React.FC<DialogBoxProps> = ({
       )}
     >
       {title && (
-        <Text weight="bold" sz="lg-2">
+        <Text weight="bold" sz="lg">
           {title}
         </Text>
       )}
       {content && <div>{content}</div>}
       <div className="flex justify-end space-x-2">
         {tertiaryButton && (
-          <Button onClick={tertiaryButton.onClick} variant="secondary" sz="sm-1">
+          <Button onClick={tertiaryButton.onClick} variant="secondary" sz="sm">
             {tertiaryButton.text}
           </Button>
         )}
         {secondaryButton && (
-          <Button onClick={secondaryButton.onClick} variant="secondary" sz="sm-1">
+          <Button onClick={secondaryButton.onClick} variant="secondary" sz="sm">
             {secondaryButton.text}
           </Button>
         )}
         {primaryButton && (
-          <Button onClick={primaryButton.onClick} variant="primary" sz="sm-1">
+          <Button onClick={primaryButton.onClick} variant="primary" sz="sm">
             {primaryButton.text}
           </Button>
         )}

@@ -69,19 +69,20 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         className,
       )}
     >
-      {isShowLogo && <Logo sz="sm-3" />}
+      {isShowLogo && <Logo sz="md" />}
       <Text
-        sz="xl-1"
         weight="extrabold"
-        className={clsx("uppercase !text-primary-500", "font-bold font-inter select-none")}
+        className={clsx(
+          "uppercase !text-primary-500",
+          "font-bold font-inter select-none !text-3xl",
+        )}
       >
         {t("auth:login.title")}
       </Text>
       <div className="flex flex-col gap-3 w-full">
         <Textbox
-          sz="sm-1"
+          sz="sm"
           className="w-full"
-          autoComplete="username"
           placeholder={t("auth:login.username")}
           onChange={(e) => formik.setFieldValue("usernameOrEmail", e.target.value)}
           isWrong={
@@ -90,10 +91,11 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           }
           wrongMessage={t(usernameOrEmailError || formik.errors.usernameOrEmail || "")}
           disabled={formik.isSubmitting}
+          type={"password"}
         />
         <Textbox
           type="password"
-          sz="sm-1"
+          sz="sm"
           className="w-full"
           placeholder={t("auth:login.password")}
           onChange={(e) => formik.setFieldValue("password", e.target.value)}
@@ -101,7 +103,6 @@ export const LoginForm: React.FC<LoginFormProps> = ({
             (formik.touched.password && Boolean(formik.errors.password)) || Boolean(passwordError)
           }
           wrongMessage={t(passwordError || formik.errors.password || "")}
-          autoComplete="current-password"
           disabled={formik.isSubmitting}
         />
       </div>
@@ -116,7 +117,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         />
         {switchForgotPassword && (
           <Text
-            sz="sm-3"
+            sz="md"
             className={clsx(
               "!text-primary-500 hover:!text-primary-600",
               "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none",
@@ -130,7 +131,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <Button
         type="button"
         onClick={formik.submitForm}
-        sz="sm-3"
+        sz="md"
         className="w-full flex items-center justify-center"
         disabled={formik.isSubmitting}
       >
@@ -144,7 +145,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
       <div className="w-full flex flex-col items-center gap-3">
         <div className="flex items-center w-full gap-3">
           <div className="h-[1px] bg-border-main flex-1" />
-          <Text sz="sm-2" className="text-text-third">
+          <Text sz="sm" className="text-text-third">
             OR
           </Text>
           <div className="h-[1px] bg-border-main flex-1" />

@@ -1,67 +1,64 @@
-import React, { useEffect } from "react";
+import React, { useState } from "react";
 import emptyAvatar from "/images/empty_avatar.png";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { shapeClasses, sizeClasses } from "./types";
 
-type Shape = keyof typeof shapeClasses;
+export type Size = "sm" | "md" | "lg" | "xl";
+export type Shape = "circle" | "square" | "rounded";
 
-interface AvatarProps extends ComponentProps {
-  border?: number;
+export const sizeClasses: Record<Size, string> = {
+  sm: "w-8 h-8",
+  md: "w-12 h-12",
+  lg: "w-16 h-16",
+  xl: "w-24 h-24",
+};
+
+export const shapeClasses: Record<Shape, string> = {
+  circle: "rounded-full",
+  rounded: "rounded-xl",
+  square: "rounded-none",
+};
+
+export interface AvatarProps extends ComponentProps<HTMLDivElement> {
   src?: string;
   alt: string;
   shape?: Shape;
-  isCanEdit?: boolean;
+  sz?: Size;
 }
 
 export const Avatar: React.FC<AvatarProps> = ({
   src,
   alt,
-  sz = "md-1",
+  sz = "md",
   shape = "circle",
   className,
   children,
+  ...props
 }) => {
-  const sizeClass = sizeClasses[sz];
-  const shapeClass = shapeClasses[shape];
+  const [hasError, setHasError] = useState<boolean>(false);
 
-  const [imgSrc, setImgSrc] = React.useState<string>(src || emptyAvatar);
-
-  useEffect(() => {
-    setImgSrc(src || emptyAvatar);
-  }, [src]);
+  const imageSource = hasError || !src ? emptyAvatar : src;
 
   return (
     <div
       className={clsx(
-        "relative aspect-square object-contain select-none flex-shrink-0",
-        "overflow-hidden",
-        sizeClass,
-        shapeClass,
+        "relative flex-shrink-0 select-none overflow-hidden",
+        "aspect-square object-contain bg-bg-main",
+        sizeClasses[sz],
+        shapeClasses[shape],
         className,
       )}
+      {...props}
     >
-      {/* {isCanEdit ? (
-        <SelectFile
-          onChange={onChange}
-          accept="image/*"
-          className="absolute z-10 inset-0 cursor-pointer bg-black bg-opacity-50
-                flex justify-center items-center opacity-0 hover:opacity-90 hover:bg-black hover:bg-opacity-50 active:opacity-100
-                translate-all duration-75 ease"
-        >
-          <i className="fa-solid fa-camera text-white text-2xl"></i>
-        </SelectFile>
-      ) : null} */}
-
-      <div className={clsx("absolute inset-0 bg-bg-main overflow-hidden")}>
-        <img
-          src={imgSrc || emptyAvatar}
-          alt={alt}
-          className={clsx("relative z-0 w-full h-full object-cover")}
-          onError={() => setImgSrc(emptyAvatar)}
-        />
-        {children}
-      </div>
+      <img
+        src={imageSource}
+        alt={alt}
+        className="w-full h-full object-cover relative z-0"
+        onError={() => setHasError(true)}
+      />
+      {children}
     </div>
   );
 };
+
+Avatar.displayName = "Avatar";

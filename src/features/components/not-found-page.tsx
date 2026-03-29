@@ -25,19 +25,19 @@ function NotFoundPage() {
         "flex flex-col items-center sm:justify-center h-full w-full gap-[20px] pt-10",
       )}
     >
-      <Logo hasSlogan={false} sz="md-2" />
+      <Logo hasSlogan={false} sz="md" />
       <Text
-        sz="xl-3"
         className={clsx(
           "font-jua bg-primary-500/70 text-primary-600 w-[200px] h-[200px] flex justify-center items-center rounded-full",
+          "!text-6xl",
         )}
       >
         404
       </Text>
-      <Text weight="extrabold" sz="lg-3" className={clsx("uppercase text-primary-600")}>
+      <Text weight="extrabold" sz="xl" className={clsx("uppercase text-primary-600")}>
         {t("notFound.title")}
       </Text>
-      <Text sz="lg-1" className={clsx("flex justify-center text-center")} wrap="whitespace-normal">
+      <Text sz="lg" className={clsx("flex justify-center text-center")} wrap="whitespace-normal">
         {t("notFound.description")}
       </Text>
       <div className={clsx("flex gap-[10px]")}>

@@ -51,7 +51,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   return (
     <div className="flex justify-between items-center w-full">
       {title && (
-        <Text sz="lg-1" className="font-light">
+        <Text sz="lg" className="font-light">
           {title}
         </Text>
       )}
@@ -66,17 +66,13 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
               onChange={(e) => setInputValue(e.target.value)}
             />
             {isError && (
-              <Text sz="sm-1" className="text-red-500 ml-2 h-[5px]">
+              <Text sz="sm" className="text-red-500 ml-2 h-[5px]">
                 {errorMessage}
               </Text>
             )}
           </div>
         ) : (
-          <Text
-            sz="lg-1"
-            className={clsx(valueClassName, "select-auto")}
-            wrap="whitespace-pre-wrap"
-          >
+          <Text sz="lg" className={clsx(valueClassName, "select-auto")} wrap="whitespace-pre-wrap">
             {value ?? noDataValue}
           </Text>
         )}
@@ -86,7 +82,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
               <div className="animate-fade-in gap-1 flex w-full">
                 <Button
                   disabled={value === inputValue || isLoading}
-                  sz="sm-1"
+                  sz="sm"
                   variant="primary"
                   onClick={() => {
                     onSaveClick?.(inputValue);
@@ -97,7 +93,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
                   {t("settings:editableField.saveButton")}
                 </Button>
                 <Button
-                  sz="sm-1"
+                  sz="sm"
                   variant="fourth"
                   onClick={() => {
                     onCancelClick?.();
@@ -109,7 +105,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
               </div>
             ) : (
               <Button
-                sz="sm-1"
+                sz="sm"
                 variant="fourth"
                 onClick={() => {
                   onChangeClick?.();

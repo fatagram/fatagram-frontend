@@ -35,7 +35,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
       )}
       header={
         <div className="flex">
-          <MiniButton sz="sm-2" className="bg-bg-fifth" onClick={handleCreateConversation}>
+          <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
             <i className="fa-regular fa-pen-to-square" />
           </MiniButton>
         </div>

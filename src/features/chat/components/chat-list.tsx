@@ -35,14 +35,16 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
     <div className={clsx("flex flex-col p-2", className)}>
       <Textbox
         placeholder={t("common:conversations.search")}
-        sz="xs-3"
+        sz="sm"
         className="border-0 w-full"
+        type="search"
       />
       <div className="flex-1 overflow-y-auto mt-2">
         <InfiniteScrollFlex
           items={conversations}
           onLoadMore={fetchNextPage}
           hasMore={hasNextPage}
+          gap={10}
           itemTemplate={(item: any) => {
             const conversation = item as ConversationDto;
             const lastMessage = conversation.lastMessage;
@@ -56,17 +58,13 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
                 )}
                 onClick={() => handleConversationClick(conversation.id)}
               >
-                <Avatar src={conversation.avatarUrl ?? ""} alt="Conversation Avatar" sz="sm-1" />
-                <div className="flex flex-col gap-1 min-w-0">
-                  <Text
-                    sz="sm-2"
-                    weight="bold"
-                    className={clsx("line-clamp-1 truncate max-w-full")}
-                  >
+                <Avatar src={conversation.avatarUrl ?? ""} alt="Conversation Avatar" sz="md" />
+                <div className="flex flex-col gap-1 min-w-0 justify-center">
+                  <Text sz="sm" weight="bold" className={clsx("line-clamp-1 truncate max-w-full")}>
                     {renderConversationName(conversation)}
                   </Text>
                   <div className="flex items-center opacity-80">
-                    <Text sz="xs-3" className="truncate max-w-full">
+                    <Text sz="xs" className="truncate max-w-full">
                       {lastMessage
                         ? isSystemMessage(lastMessage?.type || MessageType.System)
                           ? renderSystemMessage(lastMessage)
@@ -75,10 +73,10 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
                             : lastMessage?.senderFullName + ": " + lastMessage?.content
                         : "Unknown"}
                     </Text>
-                    <Text sz="xs-3" className="mx-2 shrink-0">
+                    <Text sz="xs" className="mx-2 shrink-0">
                       •
                     </Text>
-                    <Text sz="xs-3" className="shrink-0">
+                    <Text sz="xs" className="shrink-0">
                       {formatTime(conversation.lastMessage?.createdAt ?? "")}
                     </Text>
                   </div>
@@ -90,10 +88,10 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
           isLoading={isLoading || isFetching}
           loadingSkeleton={
             <div className={clsx("flex items-center")}>
-              <Skeleton sz="md-2" variant="circle" />
+              <Skeleton sz="md" variant="circle" />
               <div className={clsx("flex flex-col w-full flex-1 gap-2 ml-2")}>
-                <Skeleton className={clsx("w-full")} sz="sm-2" />
-                <Skeleton className={clsx("w-[50%]")} sz="sm-2" />
+                <Skeleton className={clsx("w-full")} sz="sm" />
+                <Skeleton className={clsx("w-[50%]")} sz="sm" />
               </div>
             </div>
           }
@@ -101,7 +99,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
           emptyComponent={
             <div className="flex flex-col items-center justify-center gap-2 mt-4 min-h-[200px]">
               <i className="fa-solid fa-message text-3xl text-gray-400" />
-              <Text sz="md-1" color="secondary">
+              <Text sz="md" color="secondary">
                 {t("common:conversations.no-conversations")}
               </Text>
             </div>

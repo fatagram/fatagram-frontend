@@ -95,20 +95,18 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       )}
       onSubmit={formik.submitForm}
     >
-      {isShowLogo && <Logo sz="sm-1" hasSlogan={false} />}
+      {isShowLogo && <Logo sz="md" />}
 
       <Text
-        sz="xl-1"
         weight="extrabold"
-        className="uppercase !text-primary-500 select-none text-center"
+        className="!text-3xl uppercase !text-primary-500 select-none text-center"
       >
         {t("auth:register.title")}
       </Text>
       <div className="flex flex-col gap-3 w-full">
         <Textbox
           value={formik.values.username}
-          autoComplete="username"
-          sz="sm-1"
+          sz="sm"
           className="w-full"
           placeholder={t("auth:register.username")}
           onChange={(e) => formik.setFieldValue("username", e.target.value)}
@@ -117,22 +115,22 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           }
           wrongMessage={t(usernameError || formik.errors.username || "")}
           disabled={formik.isSubmitting}
+          type={"email"}
         />
         <Textbox
           value={formik.values.email}
-          autoComplete="email"
-          sz="sm-1"
+          sz="sm"
           className="w-full"
           placeholder={t("auth:register.email")}
           onChange={(e) => formik.setFieldValue("email", e.target.value)}
           isWrong={(formik.touched.email && Boolean(formik.errors.email)) || Boolean(emailError)}
           wrongMessage={t(emailError || formik.errors.email || "")}
           disabled={formik.isSubmitting}
+          type={"email"}
         />
         <Textbox
           value={formik.values.phoneNumber}
-          autoComplete="tel"
-          sz="sm-1"
+          sz="sm"
           className="w-full"
           placeholder={t("auth:register.phoneNumber")}
           onChange={(e) => formik.setFieldValue("phoneNumber", e.target.value)}
@@ -142,11 +140,12 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           }
           wrongMessage={t(phoneNumberError || formik.errors.phoneNumber || "")}
           disabled={formik.isSubmitting}
+          type={"text"}
         />
         <Textbox
           type="password"
           value={formik.values.password}
-          sz="sm-1"
+          sz="sm"
           className="w-full"
           placeholder={t("auth:register.password")}
           onChange={(e) => formik.setFieldValue("password", e.target.value)}
@@ -159,7 +158,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
         <Textbox
           type="password"
           value={formik.values.confirmPassword}
-          sz="sm-1"
+          sz="sm"
           className="w-full"
           placeholder={t("auth:register.confirmPassword")}
           onChange={(e) => formik.setFieldValue("confirmPassword", e.target.value)}
@@ -190,7 +189,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       />
       <Button
         type="button"
-        sz="sm-3"
+        sz="md"
         className="flex justify-center w-full"
         onClick={formik.submitForm}
         disabled={formik.isSubmitting}
@@ -205,7 +204,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       <div className="w-full flex flex-col items-center gap-3">
         <div className="flex items-center w-full gap-3">
           <div className="h-[1px] bg-border-main flex-1" />
-          <Text sz="sm-2" className="text-text-third">
+          <Text sz="sm" className="text-text-third">
             OR
           </Text>
           <div className="h-[1px] bg-border-main flex-1" />
@@ -217,7 +216,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       </Link>
       {isShowClose && (
         <Text
-          sz="lg-1"
+          sz="lg"
           className={clsx(
             "absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer",
           )}

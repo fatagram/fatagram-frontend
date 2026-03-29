@@ -17,8 +17,16 @@ const NotificationsPage: React.FC<NotificationsPageProps> = () => {
   }, []);
 
   return (
-    <div className={clsx("relative flex items-start justify-center w-full mt-1")}>
-      <NotificationMenu className={clsx("max-w-[600px] w-full px-2 py-2 mx-4")} />
+    <div
+      className={clsx(
+        "relative flex items-start justify-center w-full h-[calc(100dvh-var(--header-height))] sm:mt-1",
+      )}
+    >
+      <NotificationMenu
+        className={clsx(
+          "sm:max-w-[600px] w-full px-2 py-2 sm:mx-4 sm:!rounded-lg h-full sm:h-auto !rounded-none",
+        )}
+      />
     </div>
   );
 };

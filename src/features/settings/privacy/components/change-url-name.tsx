@@ -46,7 +46,7 @@ export const ChangeUrlName: React.FC<ChangeUrlNameProps> = ({ userId }) => {
   };
 
   if (isLoading) {
-    return <Skeleton sz="md-1" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />;
+    return <Skeleton sz="md" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />;
   }
 
   return (

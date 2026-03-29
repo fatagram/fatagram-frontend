@@ -97,7 +97,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
       </div>
       <div className="w-full flex gap-1 mt-1">
         <Button
-          sz="sm-1"
+          sz="sm"
           className="flex-1 flex items-center justify-center"
           onClick={() =>
             onAccept?.(
@@ -115,7 +115,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
           Accept
         </Button>
         <Button
-          sz="sm-1"
+          sz="sm"
           className="flex-1  flex items-center justify-center"
           variant="fourth"
           onClick={onCancel}

@@ -34,6 +34,7 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
   return (
     <div className={clsx("flex flex-1 justify-end flex-col w-full", className)}>
       <Textbox
+        sz="sm"
         type="search"
         placeholder={t("user:profileFriends.searchFriends")}
         className="p-1 w-full sm:max-w-xs"
@@ -57,10 +58,10 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
         emptyComponent={
           <div className="flex w-full justify-center mb-10 mt-10">
             <div className="flex flex-col items-center text-[var(--text-color)] opacity-30">
-              <Text sz="xl-3" weight="bold">
+              <Text sz="xl" weight="bold">
                 <i className="fa-solid fa-user-xmark"></i>
               </Text>
-              <Text sz="md-2" className="mt-2">
+              <Text sz="md" className="mt-2">
                 {t("user:profileFriends.noFriends")}
               </Text>
             </div>

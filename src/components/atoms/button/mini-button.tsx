@@ -1,45 +1,34 @@
 import { forwardRef } from "react";
-import { Size } from "@/components/common/size";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 
-// Define a mapping of button sizes
+// Ép về 4 standard sizes (kích cỡ chuẩn)
+export type Size = "sm" | "md" | "lg" | "xl";
+
+// Dùng class chuẩn của Tailwind, loại bỏ hoàn toàn padding (px, py) vì đã có Flexbox center
 const buttonSizes: Record<Size, string> = {
-  "xs-1": "w-[24px] h-[24px] px-2 py-1 text-xs",
-  "xs-2": "w-[28px] h-[28px] px-2 py-2 text-xs",
-  "xs-3": "w-[32px] h-[32px] px-2 py-2 text-sm",
-  "sm-1": "w-[36px] h-[36px] px-4 py-4 text-sm ",
-  "sm-2": "w-[40px] h-[40px] px-5 py-5 text-sm ",
-  "sm-3": "w-[44px] h-[44px] px-6 py-6 text-sm ",
-  "md-1": "w-[48px] h-[48px] px-6 py-6 text-base ",
-  "md-2": "w-[56px] h-[56px] px-8 py-8 text-base ",
-  "md-3": "w-[64px] h-[64px] px-10 py-10 text-base ",
-  "lg-1": "w-[56px] h-[56px] px-8 py-8 text-base ",
-  "lg-2": "w-[64px] h-[64px] px-10 py-10 text-base ",
-  "lg-3": "w-[72px] h-[72px] px-12 py-12 text-base ",
-  "xl-1": "w-[64px] h-[64px] px-10 py-10 text-xl ",
-  "xl-2": "w-[72px] h-[72px] px-12 py-12 text-2xl ",
-  "xl-3": "w-[80px] h-[80px] px-14 py-14 text-3xl ",
+  sm: "w-8 h-8 text-sm", // 32px
+  md: "w-10 h-10 text-base", // 40px
+  lg: "w-12 h-12 text-lg", // 48px
+  xl: "w-14 h-14 text-xl", // 56px
 };
 
-const buttonVariants = {
+export type ButtonVariant = "primary" | "secondary";
+
+// Gom nhóm các styles (định dạng) không bị trùng lặp
+const buttonVariants: Record<ButtonVariant, string> = {
   primary: "text-text-main hover:bg-bg-fourth",
-  secondary: "bg-bg-second transition-all duration-200 ease text-text-main hover:bg-bg-second/70",
+  secondary: "bg-bg-second text-text-main hover:bg-bg-second/70",
 };
 
-type Variant = keyof typeof buttonVariants;
-
-// ButtonProps interface
-interface ButtonProps extends ComponentProps<HTMLButtonElement> {
-  variant?: Variant;
+export interface MiniButtonProps extends ComponentProps<HTMLButtonElement> {
+  variant?: ButtonVariant;
+  sz?: Size;
 }
 
-// Button component
-// This component is a button component that can be used in the application.
-
-const MiniButton = forwardRef<HTMLButtonElement, ButtonProps>(
+const MiniButton = forwardRef<HTMLButtonElement, MiniButtonProps>(
   (
-    { onClick, variant = "primary", sz = "lg-1", className, children, disabled = false, ...props },
+    { onClick, variant = "primary", sz = "md", className, children, disabled = false, ...props },
     ref,
   ) => {
     return (
@@ -47,17 +36,16 @@ const MiniButton = forwardRef<HTMLButtonElement, ButtonProps>(
         type="button"
         disabled={disabled}
         onClick={onClick}
+        ref={ref}
         className={clsx(
+          "rounded-full select-none flex items-center justify-center font-normal",
+          "transition-all duration-300 ease-out", // Đặt transition ở 1 nơi duy nhất
           buttonSizes[sz],
-          "font-normal rounded-full select-none flex items-center justify-center transition-all duration-300 ease-out",
-          {
-            "bg-bg-disabled text-text-fourth": disabled,
-            [buttonVariants[variant]]: !disabled,
-            "active:scale-[0.98] active:opacity-80": !disabled,
-          },
+          disabled
+            ? "bg-bg-disabled text-text-fourth cursor-not-allowed opacity-60"
+            : [buttonVariants[variant], "active:scale-[0.98] active:opacity-80 cursor-pointer"],
           className,
         )}
-        ref={ref}
         {...props}
       >
         {children}

@@ -62,15 +62,20 @@ const NewFriendRequest: React.FC<NewFriendRequestProps> = ({
     <BaseNotification notificationDto={notificationDto} onClick={handleClick}>
       {!message ? (
         <div className={clsx("flex", "gap-1", "mt-1", "justify-start")}>
-          <Button sz="sm-1" variant="primary" onClick={handleAccept}>
+          <Button sz="sm" variant="primary" onClick={handleAccept}>
             {t("user:profileHeader.acceptButton")}
           </Button>
-          <Button sz="sm-1" variant="secondary" onClick={handleDelete}>
+          <Button
+            sz="sm"
+            variant="secondary"
+            onClick={handleDelete}
+            className="border-[1.5px] border-primary-500"
+          >
             {t("user:profileHeader.declineButton")}
           </Button>
         </div>
       ) : (
-        <Text sz="sm-2" className={clsx("opacity-70")}>
+        <Text sz="sm" className={clsx("opacity-70")}>
           {message}
         </Text>
       )}

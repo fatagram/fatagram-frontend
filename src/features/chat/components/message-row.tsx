@@ -67,7 +67,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   if (isSystem) {
     return (
       <div className="flex justify-center w-full my-2">
-        <Text sz="sm-1" className="opacity-80">
+        <Text sz="sm" className="opacity-80">
           {renderSystemMessage(message)}
         </Text>
       </div>
@@ -85,7 +85,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       ref={ref}
     >
       {isShowTime && (
-        <Text sz="xs-1" className="text-center my-2">
+        <Text sz="sm" className="text-center my-2">
           {formatSmartTimestamp(message.createdAt)}
         </Text>
       )}
@@ -105,13 +105,13 @@ const MessageRowComponent: React.FC<MessageProps> = ({
             )}
             src={userInfo?.infos.avatar}
             alt="Avatar"
-            sz="xs-2"
+            sz="sm"
           />
         )}
         <div className={clsx("flex flex-col", "max-w-[75%]")}>
           {isShowName && (
             <Text
-              sz="xs-1"
+              sz="xs"
               className={clsx("mb-1", isMyMessage ? "text-right mr-1" : "text-left ml-1")}
             >
               {userInfo?.infos.fullName}
@@ -134,9 +134,10 @@ const MessageRowComponent: React.FC<MessageProps> = ({
             )}
           >
             <Text
-              sz="sm-1"
+              sz="sm"
               wrap="whitespace-normal"
               className={clsx(isMyMessage ? "text-text-message" : "text-text-main")}
+              weight="regular"
             >
               {message.content}
             </Text>
@@ -153,10 +154,10 @@ const MessageRowComponent: React.FC<MessageProps> = ({
             )}
           >
             {isFooterVisible && !isFailed && !isPending && (
-              <Text sz="xs-1">
+              <Text sz="xs">
                 {t("conversations.sent")}{" "}
                 {getDiffBetween(message.createdAt, new Date(), "second") > 60 && (
-                  <Text sz="xs-1">{formatTime(message.createdAt)}</Text>
+                  <Text sz="xs">{formatTime(message.createdAt)}</Text>
                 )}
               </Text>
             )}

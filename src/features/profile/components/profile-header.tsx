@@ -86,12 +86,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
         <ProfileAvatar />
         <div className="flex flex-col gap-2 items-start flex-1 lg:mb-3 lg:ml-4">
           {isLoading || isFetching ? (
-            <Skeleton sz="sm-3" className="w-56" />
+            <Skeleton sz="md" className="!w-56" />
           ) : (
-            <Text sz="xl-1" weight="bold" className="text-center break-words w-full lg:w-auto">
+            <Text weight="bold" className="text-[1.6rem] text-center break-words w-full lg:w-auto">
               {userProfile?.fullName}
               {userProfile?.nickname && (
-                <Text sz="lg-3" weight="light" className="lg:text-left text-center lg:ml-2">
+                <Text sz="lg" weight="light" className="lg:text-left text-center lg:ml-2">
                   ({userProfile?.nickname})
                 </Text>
               )}
@@ -100,13 +100,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
 
           <div className="flex flex-col items-center w-full lg:flex-row">
             {!numberOfFriendsFetching ? (
-              <Text sz="md-2" weight="semibold" className="text-[var(--text-color)] opacity-70">
+              <Text sz="md" weight="medium" className="text-[var(--text-color)] opacity-70">
                 {numberOfFriends && numberOfFriends > 0
                   ? numberOfFriends + " " + t("user:profileHeader.friendsCount")
                   : t("user:profileHeader.noFriendsCount")}
               </Text>
             ) : (
-              <Skeleton sz="sm-3" className="w-36" />
+              <Skeleton sz="md" className="!w-36" />
             )}
             {!isLoading || !isFetching ? (
               <div className="flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0">
@@ -114,7 +114,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
                   <>
                     {isOwner ? (
                       <Button
-                        sz="sm-1"
+                        sz="sm"
                         onClick={() => {
                           navigate(`/settings`);
                         }}
@@ -123,14 +123,14 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
                         {t("user:profileHeader.editButton")}
                       </Button>
                     ) : (
-                      <AddFriendButton sz="sm-1" uid={targetId} />
+                      <AddFriendButton sz="sm" uid={targetId} />
                     )}
                   </>
                 )}
 
                 {!isOwner && isAuthenticated && (
                   <Button
-                    sz="sm-1"
+                    sz="sm"
                     variant="secondary"
                     onClick={handleMessageClick}
                     disabled={isCheckingConversation}
@@ -145,12 +145,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
                     {t("user:profileHeader.messageButton")}
                   </Button>
                 )}
-                <Button sz="sm-1" variant="secondary">
+                <Button sz="sm" variant="secondary">
                   <i className="fa-solid fa-circle-info"></i>
                 </Button>
               </div>
             ) : (
-              <Skeleton sz="md-1" className="w-[250px] lg:ml-auto mb-1" />
+              <Skeleton sz="md" className="!w-[250px] lg:ml-auto mb-1" />
             )}
           </div>
         </div>

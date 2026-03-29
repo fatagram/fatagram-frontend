@@ -43,20 +43,20 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
         <Avatar src={avatar} alt="avatar" shape="rounded" className="w-full" />
       </div>
       <Text
-        sz="md-2"
+        sz="md"
         weight="bold"
         onClick={handleNavigate}
         className={clsx("truncate overflow-hidden w-full")}
       >
         {name}
       </Text>
-      <Text sz="sm-1" weight="light">
+      <Text sz="sm" weight="light">
         {timeDist.count && t(timeDist.unit || "", { count: timeDist.count })} {t(timeDist.text)}
       </Text>
-      <Button variant="primary" sz="sm-1" className={clsx("w-full mt-2 mb-1")} onClick={onAccept}>
+      <Button variant="primary" sz="sm" className={clsx("w-full mt-2 mb-1")} onClick={onAccept}>
         {t("user:profileHeader:acceptButton")}
       </Button>
-      <Button variant="fourth" sz="sm-1" className={clsx("w-full mt-2r")} onClick={onCancel}>
+      <Button variant="fourth" sz="sm" className={clsx("w-full mt-2r")} onClick={onCancel}>
         {t("user:profileHeader:declineButton")}
       </Button>
     </div>

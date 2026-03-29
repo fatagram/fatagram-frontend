@@ -41,12 +41,12 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
       ref={ref}
     >
       <div className="absolute top-0 right-0 flex mt-3 mr-3 gap-2">
-        <MiniButton sz="sm-2" className="bg-bg-fifth" onClick={handleCreateConversation}>
+        <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
           <i className="fa-regular fa-pen-to-square" />
         </MiniButton>
       </div>
       <div className="flex items-center justify-between px-2 pt-2">
-        <Text sz="lg-1" weight="bold">
+        <Text sz="lg" weight="bold">
           {t("common:conversations.title")}
         </Text>
       </div>
@@ -71,10 +71,10 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
             }}
             title="Mở Fatalk"
           >
-            <Text sz="sm-1" color="secondary">
+            <Text sz="sm" color="secondary">
               Mở Fatalk
             </Text>
-            <Text sz="sm-1" color="secondary">
+            <Text sz="sm" color="secondary">
               <i className="fa-solid fa-arrow-up-right-from-square" />
             </Text>
           </button>

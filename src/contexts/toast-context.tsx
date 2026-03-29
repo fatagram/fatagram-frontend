@@ -78,7 +78,7 @@ const ToastManager: React.FC<ToastManagerProps> = React.memo(function ToastManag
             <div>More</div>
           )}
           <Button
-            sz="sm-1"
+            sz="sm"
             variant="third"
             className="absolute top-2 right-2"
             onClick={() => setToast(null)}

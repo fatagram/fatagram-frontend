@@ -132,7 +132,7 @@ const DefaultLayout = () => {
           )}
         >
           <div onClick={handleGoToHome}>
-            <Logo sz="sm-2" hasSlogan={false} />
+            <Logo sz="sm" hasSlogan={false} />
           </div>
         </div>
         <Navbar
@@ -144,7 +144,7 @@ const DefaultLayout = () => {
                 onClick={handleGoToHome}
                 className="sm:block hidden cursor-pointer items-center gap-2"
               >
-                <Logo hasSlogan={false} sz="sm-3" />
+                <Logo hasSlogan={false} sz="md" />
               </div>
             )
           }
@@ -162,7 +162,7 @@ const DefaultLayout = () => {
               !isMobile && (
                 <div className={clsx("flex items-center gap-2")}>
                   <Button
-                    sz="sm-1"
+                    sz="sm"
                     variant="secondary"
                     className="whitespace-nowrap inline-flex"
                     onClick={openLoginOverlay}
@@ -170,7 +170,7 @@ const DefaultLayout = () => {
                     Sign in
                   </Button>
                   <Button
-                    sz="sm-1"
+                    sz="sm"
                     variant="primary"
                     className="whitespace-nowrap inline-flex"
                     onClick={openRegisterOverlay}
@@ -199,12 +199,12 @@ const DefaultLayout = () => {
             "gap-6 border-t-2 border-primary-500/50 rounded-t-2xl shadow-lg",
           )}
         >
-          <Text sz="sm-2" className="text-center" wrap="whitespace-normal">
+          <Text sz="sm" className="text-center" wrap="whitespace-normal">
             Join Fatagram to connect with your friends and the world around you!
           </Text>
           <div className="flex items-center justify-center h-full">
             <Button
-              sz="sm-1"
+              sz="sm"
               variant="primary"
               className="whitespace-nowrap inline-flex flex-1 justify-center"
               onClick={openLoginOverlay}
@@ -212,7 +212,7 @@ const DefaultLayout = () => {
               Sign in
             </Button>
             <Button
-              sz="sm-1"
+              sz="sm"
               variant="secondary"
               className="whitespace-nowrap inline-flex ml-4 flex-1 justify-center"
               onClick={openRegisterOverlay}

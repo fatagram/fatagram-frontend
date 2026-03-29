@@ -1,4 +1,4 @@
-import { Avatar, MiniButton } from "@/components/atoms";
+import { Avatar } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useChatStore } from "../../hooks/use-chat-store";
@@ -31,7 +31,7 @@ export const BubbleChat: React.FC<BubbleChatProps> = ({ className, conversationI
   return (
     <div className={clsx("relative flex gap-4 group", className)} onClick={handleOnClick}>
       <Avatar
-        sz="sm-2"
+        sz="md"
         alt="Avatar"
         src={chatAvatar}
         className={clsx(
@@ -41,13 +41,16 @@ export const BubbleChat: React.FC<BubbleChatProps> = ({ className, conversationI
           "active:scale-95",
         )}
       />
-      <MiniButton
-        sz="xs-2"
-        className="absolute opacity-0 group-hover:opacity-100 bg-gray-500 !duration-100 top-[-20%] right-[-20%]"
+      <button
+        className={clsx(
+          "absolute opacity-0 group-hover:opacity-100 bg-gray-500 !duration-100 top-[-20%] right-[-20%]",
+          "w-7 h-7 rounded-full flex items-center justify-center text-white",
+          "hover:bg-gray-600 transition-colors",
+        )}
         onClick={handleOnClose}
       >
         <i className="fa-solid fa-xmark" />
-      </MiniButton>
+      </button>
     </div>
   );
 };

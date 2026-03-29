@@ -71,10 +71,10 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
         onClick={() => navigate(`/${friendDto.id}`)}
       >
         <div>
-          <Avatar alt="Avatar" src={friendDto.avatar ?? undefined} sz="sm-1" />
+          <Avatar alt="Avatar" src={friendDto.avatar ?? undefined} sz="sm" />
         </div>
         <div className="flex flex-col h-full justify-center flex-1">
-          <Text sz="md-2" weight="bold">
+          <Text sz="md" weight="bold">
             {friendDto.name}
           </Text>
         </div>
@@ -104,7 +104,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
             />
           </>
         ) : (
-          <AddFriendButton sz="sm-1" uid={friendDto.id} />
+          <AddFriendButton sz="sm" uid={friendDto.id} />
         )}
       </div>
     </div>

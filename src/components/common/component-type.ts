@@ -4,6 +4,7 @@ import React from "react";
 interface BaseProps {
   sz?: Size;
   className?: string;
+  disabled?: boolean;
   children?: React.ReactNode;
 }
 

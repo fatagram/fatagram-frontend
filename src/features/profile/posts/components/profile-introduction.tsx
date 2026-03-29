@@ -77,7 +77,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           isLoading={updateProfileMutation.isFetching}
           onCancelClick={() => setIsEditBio(false)}
           btnChildren={
-            <Text sz="sm-2">
+            <Text sz="sm">
               <i className="fas fa-pencil-alt"></i> &nbsp; {t("user:profilePosts.bioBtn")}
             </Text>
           }
@@ -85,7 +85,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
       )}
 
       {userProfile?.description && (
-        <Text sz="lg-1" weight="bold">
+        <Text sz="lg" weight="bold">
           {t("user:profilePosts.description")}
         </Text>
       )}
@@ -102,7 +102,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           onSaveClick={(value) => handleSaveDescription(value)}
           onCancelClick={() => setIsEditDescription(false)}
           btnChildren={
-            <Text sz="sm-2">
+            <Text sz="sm">
               <i className="fas fa-pencil-alt"></i> &nbsp; {t("user:profilePosts.descriptionBtn")}
             </Text>
           }

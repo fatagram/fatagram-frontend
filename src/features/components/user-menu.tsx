@@ -74,7 +74,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
         <Avatar
           src={avatarProfile?.infos.avatar ?? ""}
           alt="Profile"
-          sz="sm-1"
+          sz="md"
           className="border-4 border-bg-third"
         />
       </Button>
@@ -82,7 +82,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
         <div
           className={clsx(
             "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
-            "p-2 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
+            "p-3 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
             menuClassName,
           )}
           style={menuStyle}
@@ -91,7 +91,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
           <List className={clsx("flex flex-col gap-2 w-full")}>
             <List.Item>
               <Button
-                sz="md-1"
+                sz="md"
                 variant="secondary"
                 className={clsx(
                   "flex items-center justify-start gap-3 w-full !pl-3 py-3",
@@ -100,8 +100,8 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
                 )}
                 onClick={handlePersonalPage}
               >
-                <Avatar src={avatarProfile?.infos.avatar ?? ""} alt="avatar" sz="sm-1"></Avatar>
-                <Text sz="lg-1" weight="bold">
+                <Avatar src={avatarProfile?.infos.avatar ?? ""} alt="avatar" sz="md"></Avatar>
+                <Text sz="lg" weight="bold">
                   {userProfile?.infos.fullName ?? ""}
                 </Text>
               </Button>
@@ -111,7 +111,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
             />
             <List.Item>
               <Button
-                sz="md-1"
+                sz="md"
                 variant="secondary"
                 className={clsx(
                   "flex items-center justify-start w-full gap-3",
@@ -120,7 +120,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
                 )}
                 onClick={handleSettings}
               >
-                <Text className={clsx("flex items-center gap-3")} sz="md-1">
+                <Text className={clsx("flex items-center gap-3")} sz="md">
                   <i className="fa-solid fa-gear"></i>
                   {t("navbar.profileMenu.settings")}
                 </Text>
@@ -128,7 +128,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
             </List.Item>
             <List.Item>
               <Button
-                sz="md-1"
+                sz="md"
                 variant="secondary"
                 className={clsx(
                   "flex items-center justify-start w-full gap-3 text-red-400",
@@ -137,7 +137,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
                 )}
                 onClick={handleLogout}
               >
-                <Text sz="md-1" className={clsx("flex items-center gap-3")} color="danger">
+                <Text sz="md" className={clsx("flex items-center gap-3")} color="danger">
                   <i className="fa-solid fa-right-from-bracket"></i>
                   {t("navbar.profileMenu.logout")}
                 </Text>

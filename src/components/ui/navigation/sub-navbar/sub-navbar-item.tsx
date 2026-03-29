@@ -28,7 +28,7 @@ export const SubNavbarItem: React.FC<SubNavbarItemProps> = ({ title, path, onCli
     >
       <div className={clsx("flex flex-col gap-1")}>
         <Text
-          sz="sm-3"
+          sz="md"
           className={clsx({
             "!text-primary-500 !font-bold": isFocused,
           })}

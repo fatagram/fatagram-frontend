@@ -34,8 +34,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ className }) => {
         <Avatar
           src={data?.infos.avatar}
           alt="Avatar"
-          sz="lg-2"
-          className="border-4 border-bg-main flex-shrink-0"
+          className="w-[192px] h-[192px] border-4 border-bg-main flex-shrink-0"
         >
           {isOwner && (
             <SelectFile

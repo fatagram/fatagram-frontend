@@ -25,24 +25,24 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
   return (
     <div className="flex gap-2 select-none" onClick={onClick}>
       <div className="flex items-start">
-        <Avatar border={0} src={notificationDto.actorImageUrl} alt="Avatar" sz="sm-1" />
+        <Avatar src={notificationDto.actorImageUrl} alt="Avatar" sz="md" />
       </div>
       <div className="flex flex-col gap-1 flex-1">
         <Text
-          sz="sm-2"
+          sz="sm"
           className={clsx({ "opacity-60": notificationDto.isRead })}
           wrap="whitespace-normal"
         >
           {renderContent(content, {
             actorName: (
-              <Text key={notificationDto.actorId} sz="sm-2" weight="bold">
+              <Text key={notificationDto.actorId} sz="sm" weight="bold">
                 {notificationDto.actorName}
               </Text>
             ),
           })}
         </Text>
         <Text
-          sz="sm-1"
+          sz="sm"
           color={notificationDto.isRead ? "primary" : "secondary"}
           className={clsx({ "opacity-70": notificationDto.isRead })}
         >

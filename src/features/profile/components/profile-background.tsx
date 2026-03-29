@@ -47,7 +47,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
               )}
             >
               <i className={clsx("fa-solid fa-camera")}></i>
-              <Text className={clsx("sm:flex hidden")} sz="md-1">
+              <Text className={clsx("sm:flex hidden")} sz="md">
                 {data?.infos.background
                   ? t("user:profileHeader.changeButton")
                   : t("user:profileHeader.addButton")}

@@ -66,14 +66,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
       <div className="flex items-center px-4 h-[13%] bg-bg-third">
         {isLoadingHeader ? (
           <>
-            <Skeleton sz="sm-3" variant="circle" className="w-8" />
-            <Skeleton sz="sm-3" className="ml-2 flex-1" />
+            <Skeleton sz="md" variant="circle" className="w-8" />
+            <Skeleton sz="md" className="ml-2 flex-1" />
           </>
         ) : (
           <>
-            <Avatar src={chatAvatar} alt="Avatar" sz="xs-3" />
+            <Avatar src={chatAvatar} alt="Avatar" sz="sm" />
             <Text
-              sz="sm-1"
+              sz="sm"
               weight="bold"
               className={clsx(
                 "ml-2 text-text-main flex-1 rounded-md px-2 py-3",
@@ -85,10 +85,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
             </Text>
           </>
         )}
-        <MiniButton sz="xs-3" onClick={handleOnMinimum}>
+        <MiniButton sz="sm" onClick={handleOnMinimum}>
           <i className="fas fa-minus"></i>
         </MiniButton>
-        <MiniButton sz="xs-3" onClick={handleOnClose}>
+        <MiniButton sz="sm" onClick={handleOnClose}>
           <i className="fa-solid fa-xmark"></i>
         </MiniButton>
       </div>
@@ -96,20 +96,20 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-3">
-              <Avatar src={chatAvatar} alt="Avatar" sz="sm-2" />
+              <Avatar src={chatAvatar} alt="Avatar" sz="sm" />
               <span className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-black"></span>
             </div>
 
-            <Text sz="sm-1" weight="bold" className="text-white">
+            <Text sz="sm" weight="bold" className="text-white">
               {chatTitle}
             </Text>
 
-            <Text sz="xs-1" className="text-gray-400 mt-1">
+            <Text sz="sm" className="text-gray-400 mt-1">
               Hai bạn chưa có tin nhắn nào
             </Text>
 
             <div className="mt-4 px-3 py-2 bg-gray-700/30 rounded-full">
-              <Text sz="xs-1" className="text-gray-300">
+              <Text sz="sm" className="text-gray-300">
                 Gửi lời chào đầu tiên 👋
               </Text>
             </div>

@@ -25,10 +25,10 @@ const FatalkPage = () => {
             <div className="w-20 h-20 rounded-full bg-bg-fourth flex items-center justify-center">
               <i className="fa-solid fa-message text-4xl text-primary-400" />
             </div>
-            <Text sz="xl-1" weight="bold">
+            <Text sz="lg" weight="bold">
               Tin nhắn của bạn
             </Text>
-            <Text sz="md-1">Chọn một cuộc trò chuyện để bắt đầu nhắn tin</Text>
+            <Text sz="md">Chọn một cuộc trò chuyện để bắt đầu nhắn tin</Text>
           </div>
         )}
       </div>

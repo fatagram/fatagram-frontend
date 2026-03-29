@@ -76,7 +76,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
       ref={ref}
     >
       <div className="flex items-center justify-between px-2 pt-2">
-        <Text sz="lg-1" weight="bold">
+        <Text sz="lg" weight="bold">
           {t("notifications:notifications.title")}
         </Text>
         {notifications.length > 0 && (
@@ -87,7 +87,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
                 onClick={handleMarkAllAsRead}
                 title={t("notifications:notifications.mark-all-read")}
               >
-                <Text sz="md-1" color="secondary">
+                <Text sz="md" color="secondary">
                   <i className="fa-solid fa-check-double"></i>
                 </Text>
               </button>
@@ -97,7 +97,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
               onClick={handleDeleteAll}
               title={t("notifications:notifications.delete-all")}
             >
-              <Text sz="md-1" color="secondary">
+              <Text sz="md" color="secondary">
                 <i className="fa-solid fa-trash-can"></i>
               </Text>
             </button>
@@ -140,8 +140,19 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
           loadingSkeleton={<NotificationSkeletonLoading />}
           numberOfSkeletons={2}
           emptyComponent={
-            <div className="flex items-center justify-center h-40">
-              {t("notifications:notifications.no-notifications")}
+            <div className="flex flex-col items-center justify-center h-56 gap-4 animate-fade-in">
+              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-bg-third/50 text-text-third">
+                <i className="fa-regular fa-bell-slash text-3xl"></i>
+              </div>
+
+              <div className="flex flex-col items-center gap-1">
+                <span className="text-base font-medium text-text-secondary">
+                  {t("notifications:notifications.no-notifications")}
+                </span>
+                <span className="text-sm text-text-fourth">
+                  When you have new updates, they will appear here.
+                </span>
+              </div>
             </div>
           }
         />
@@ -154,10 +165,10 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
             onClick={() => navigate("/notifications")}
             title={t("notifications:notifications.open-notifications")}
           >
-            <Text sz="sm-1" color="secondary">
+            <Text sz="sm" color="secondary">
               {t("notifications:notifications.open-notifications")}
             </Text>
-            <Text sz="sm-1" color="secondary">
+            <Text sz="sm" color="secondary">
               <i className="fa-solid fa-arrow-up-right-from-square"></i>
             </Text>
           </button>

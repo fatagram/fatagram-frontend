@@ -17,7 +17,7 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ switchToLogin }
       )}
     >
       <Logo hasSlogan={false} />
-      <Text sz="lg-3" weight="bold" className="!text-primary-500 uppercase font-bold select-none">
+      <Text sz="lg" weight="bold" className="!text-primary-500 uppercase font-bold select-none">
         Reset Password
       </Text>
       <div className="w-full">
@@ -25,12 +25,12 @@ const ForgotPasswordForm: React.FC<ForgotPasswordFormProps> = ({ switchToLogin }
           className={clsx("text-[14px] w-[100%] px-[20px]", "sm:py-[5px] py-[10px]")}
           placeholder="Your username or email"
         />
-        <Text sz="sm-1" className={clsx("hidden text-[10px] px-[5px] text-red-400")}>
+        <Text sz="sm" className={clsx("hidden text-[10px] px-[5px] text-red-400")}>
           Username does not exist!
         </Text>
       </div>
       <Button
-        sz="md-1"
+        sz="md"
         className={clsx(
           "sm:text-[17px] text-[20px] w-full",
           "sm:py-[5px] py-[7px] font-montserrat",

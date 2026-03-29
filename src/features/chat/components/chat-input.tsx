@@ -50,7 +50,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   return (
     <div className={clsx("px-2 h-[15%] self-end bg-bg-third w-full flex items-center", className)}>
       <Textbox
-        sz="xs-3"
+        sz="sm"
         className="!rounded-full w-full"
         wrapperClassName="flex-1"
         placeholder="Tin nhắn của bạn"
@@ -58,7 +58,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         ref={textboxRef}
         onChange={handleInputChange}
       />
-      <MiniButton sz="xs-3" className="ml-2" onClick={handleSendMessage} disabled={!hasInput}>
+      <MiniButton sz="sm" className="ml-2" onClick={handleSendMessage} disabled={!hasInput}>
         <i className="fa-solid fa-paper-plane text-primary-500"></i>
       </MiniButton>
     </div>

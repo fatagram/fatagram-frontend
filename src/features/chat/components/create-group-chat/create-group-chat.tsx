@@ -60,16 +60,17 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
   return (
     <>
       <div className="ml-1">
-        <Text weight="bold" sz="md-1">
+        <Text weight="bold" sz="md">
           Tạo nhóm chat
         </Text>
       </div>
       <Textbox
-        sz="xs-1"
+        sz="sm"
         placeholder="Nhập tên nhóm chat (Không bắt buộc)"
-        className="w-full !rounded-lg"
+        className="w-full !rounded-lg my-2"
         ref={textboxRef}
         disabled={isFetching}
+        type="text"
       />
       <MultiSelect
         options={options}
@@ -82,7 +83,7 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
             )}
           >
             <div className="relative flex-shrink-0">
-              <Avatar src={item.avatar} alt={item.name} sz="xs-2" />
+              <Avatar src={item.avatar} alt={item.name} sz="md" />
             </div>
 
             <div className="flex-1 min-w-0">
@@ -100,7 +101,11 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
           </div>
         )}
         selectItemTemplate={(item, onRemove) => (
-          <div className="flex items-center gap-1 px-3 py-2 rounded-md  text-primary-500 bg-primary-500/15 text-xs">
+          <div
+            className={clsx(
+              "flex items-center gap-1 px-3 py-2 rounded-md  text-primary-500 bg-primary-500/15 text-xs",
+            )}
+          >
             <span className="truncate max-w-[100px]">{item.name}</span>
             <button
               className="flex items-center justify-center w-4 h-4 rounded-sm hover:bg-primary-500/20 transition-colors"
@@ -117,7 +122,10 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
         )}
         onLoadMore={fetchNextPage}
         hasMore={hasNextPage}
-        selectClassName="flex flex-wrap gap-1 border-2 border-bg-third bg-bg-sixth rounded-lg px-2 py-2"
+        selectClassName={clsx(
+          "flex flex-wrap gap-1 border-2 border-bg-third bg-bg-sixth rounded-lg px-2 py-2",
+          "max-h-[15%] overflow-y-auto scrollbar-hide",
+        )}
         optionClassName="overflow-y-auto pr-1 border-2 rounded-md border-bg-third"
         className={clsx("", className)}
         canRemoveDefaultSelected={false}

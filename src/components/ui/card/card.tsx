@@ -24,7 +24,7 @@ const Card: React.FC<CardProps> = ({
         className,
       )}
     >
-      <Text sz="lg-2" weight="bold" className={clsx(titleClassName)}>
+      <Text sz="lg" weight="bold" className={clsx(titleClassName)}>
         {title}
       </Text>
       <div className={clsx("w-full", childrenClassName)}>{children}</div>

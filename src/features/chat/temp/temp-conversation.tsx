@@ -65,16 +65,16 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
       <div className="flex items-center gap-3 px-4 h-[60px] bg-bg-second border-b border-gray-700/50 shrink-0">
         {isLoading || isFetching ? (
           <>
-            <Skeleton sz="sm-3" variant="circle" className="w-10" />
-            <Skeleton sz="sm-3" className="flex-1 max-w-[160px]" />
+            <Skeleton sz="md" variant="circle" className="w-10" />
+            <Skeleton sz="md" className="flex-1 max-w-[160px]" />
           </>
         ) : (
           <>
-            <MiniButton sz="xs-3" onClick={handleTurnBack} className="block lg:hidden">
+            <MiniButton sz="sm" onClick={handleTurnBack} className="block lg:hidden">
               <i className="fa-solid fa-arrow-left text-primary-400" />
             </MiniButton>
-            <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="xs-2" />
-            <Text sz="md-1" weight="bold" className="flex-1 text-text-main">
+            <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="sm" />
+            <Text sz="md" weight="bold" className="flex-1 text-text-main">
               {tempUser?.infos.fullName}
             </Text>
           </>
@@ -84,16 +84,16 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
       <div className="flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh">
         <div className="flex flex-col justify-center items-center h-full text-center px-4">
           <div className="relative mb-4">
-            <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="md-1" />
+            <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="md" />
           </div>
-          <Text sz="md-1" weight="bold">
+          <Text sz="md" weight="bold">
             {tempUser?.infos.fullName}
           </Text>
-          <Text sz="sm-1" className="text-gray-400 mt-1">
+          <Text sz="sm" className="text-gray-400 mt-1">
             Hai bạn chưa có tin nhắn nào
           </Text>
           <div className="mt-5 px-4 py-2 bg-gray-700/30 rounded-full">
-            <Text sz="sm-1" className="text-gray-300">
+            <Text sz="sm" className="text-gray-300">
               Gửi lời chào đầu tiên 👋
             </Text>
           </div>
@@ -101,14 +101,14 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
       </div>
 
       <div className="px-4 py-3 bg-bg-second border-t border-gray-700/50 flex items-center gap-2">
-        {/* <MiniButton sz="xs-3">
+        {/* <MiniButton sz="sm">
           <i className="fa-solid fa-circle-plus text-primary-400" />
         </MiniButton>
-        <MiniButton sz="xs-3">
+        <MiniButton sz="sm">
           <i className="fa-solid fa-image text-primary-400" />
         </MiniButton> */}
         <Textbox
-          sz="xs-3"
+          sz="sm"
           className="!rounded-full w-full"
           wrapperClassName="flex-1"
           placeholder="Aa"
@@ -116,7 +116,7 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
         />
-        <MiniButton sz="xs-3" onClick={handleSendMessage} disabled={!message.trim() || isFetching}>
+        <MiniButton sz="sm" onClick={handleSendMessage} disabled={!message.trim() || isFetching}>
           <i
             className={clsx(
               "fa-solid",

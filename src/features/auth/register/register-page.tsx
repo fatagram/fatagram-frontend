@@ -30,9 +30,7 @@ function RegisterPage(): React.ReactElement {
             "flex-1 login-bg justify-center items-center z-0",
           )}
         >
-          <Text sz="xl-3" className="select-none hidden lg:block">
-            Feeling
-          </Text>
+          <Text className="text-6xl select-none hidden lg:block">Feeling</Text>
         </div>
 
         <div className="bg-bg-second px-[3rem] py-[1rem] flex-1 m-auto max-w-[500px] z-10 rounded-3xl lg:rounded-none">

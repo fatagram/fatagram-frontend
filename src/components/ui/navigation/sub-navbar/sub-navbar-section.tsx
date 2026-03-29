@@ -19,7 +19,7 @@ export const SubNavbarSection: React.FC<SubNavbarSectionProps> = ({
     <div className={clsx("flex flex-col gap-2", className)}>
       {title && (
         <Text
-          sz="lg-1"
+          sz="lg"
           weight="bold"
           className={clsx("p-2 pl-5 text-gradient-main")}
           onClick={() => setShowChildren(!showChildren)}

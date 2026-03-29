@@ -15,7 +15,7 @@ const ProfileAboutSection: React.FC<ProfileAboutSectionProps> = ({
   return (
     <div className={clsx(className)}>
       {title && (
-        <Text sz="lg-1" weight="bold">
+        <Text sz="lg" weight="bold">
           {title}
         </Text>
       )}

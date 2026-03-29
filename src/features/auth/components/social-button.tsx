@@ -14,7 +14,7 @@ export const SocialButton: React.FC<SocialButtonProps> = ({ icon, name, onClick,
       variant="fourth"
       className="flex gap-2 flex-1 items-center justify-center"
       onClick={onClick}
-      sz="sm-1"
+      sz="sm"
       disabled={disabled}
     >
       <img src={icon} alt={name} className="w-5 h-5" />
