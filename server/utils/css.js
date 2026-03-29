@@ -82,6 +82,24 @@ export function getThemeScript() {
       theme = prefersDark ? 'dark' : 'light';
     }
     document.documentElement.setAttribute('data-theme', theme);
+
+    var themeToColor = {
+      'light': '#ffffff',
+      'dark': '#000000',
+      'universe': '#0f172a',
+      'neon': '#0a0a0a',
+      'dark-sea': '#022c22',
+      'dark-yellow': '#1c1917',
+      'light-yellow-pink': '#ffffff'
+    };
+    var color = themeToColor[theme] || '#ffffff';
+    var meta = document.querySelector('meta[name="theme-color"]');
+    if (!meta) {
+      meta = document.createElement('meta');
+      meta.setAttribute('name', 'theme-color');
+      document.head.appendChild(meta);
+    }
+    meta.setAttribute('content', color);
   } catch (e) {
     document.documentElement.setAttribute('data-theme', 'light');
   }
