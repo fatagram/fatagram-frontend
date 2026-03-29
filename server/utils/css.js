@@ -76,7 +76,7 @@ export function getThemeScript() {
 (function() {
   try {
     var theme = localStorage.getItem('theme');
-    var validThemes = ['light', 'dark', 'universe', 'neon', 'dark-sea', 'dark-yellow', 'light-yellow-pink'];
+    var validThemes = ['light', 'dark', 'universe', 'neon', 'dark-sea', 'dark-yellow', 'light-yellow-pink', 'dark-red', 'emerald'];
     if (!theme || validThemes.indexOf(theme) === -1) {
       var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       theme = prefersDark ? 'dark' : 'light';
@@ -90,7 +90,9 @@ export function getThemeScript() {
       'neon': '#0a0a0a',
       'dark-sea': '#022c22',
       'dark-yellow': '#1c1917',
-      'light-yellow-pink': '#ffffff'
+      'light-yellow-pink': '#ffffff',
+      'dark-red': '#0c0a0a',
+      'emerald': '#022c22'
     };
     var color = themeToColor[theme] || '#ffffff';
     var meta = document.querySelector('meta[name="theme-color"]');

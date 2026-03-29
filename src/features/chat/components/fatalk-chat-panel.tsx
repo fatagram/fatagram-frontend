@@ -63,7 +63,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
 
   return (
     <div className={clsx("relative flex flex-col bg-bg-main overflow-hidden", className)}>
-      <div className="flex items-center gap-3 px-4 h-[60px] bg-bg-second border-b border-gray-700/50 shrink-0">
+      <div className="flex items-center gap-3 px-4 h-[60px] bg-bg-main border-b border-gray-700/50 shrink-0">
         {isLoadingHeader ? (
           <>
             <Skeleton sz="md" variant="circle" className="w-10" />
@@ -95,7 +95,10 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh" ref={scrollRef}>
+      <div
+        className="flex-1 overflow-y-auto px-4 py-2 bg-bg-main scrollbar-hide sm:scrollbar-default"
+        ref={scrollRef}
+      >
         <MessageList
           conversationId={conversationId}
           parentRef={scrollRef}
@@ -103,7 +106,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         />
       </div>
 
-      <ChatInput className="h-auto p-4" conversationId={conversationId} />
+      <ChatInput className="!bg-bg-main h-auto p-4" conversationId={conversationId} />
     </div>
   );
 };

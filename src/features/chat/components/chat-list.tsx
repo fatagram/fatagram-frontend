@@ -39,12 +39,11 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
         className="border-0 w-full"
         type="search"
       />
-      <div className="flex-1 overflow-y-auto mt-2">
+      <div className="flex-1 overflow-y-auto mt-2 scrollbar-hide sm:scrollbar-default">
         <InfiniteScrollFlex
           items={conversations}
           onLoadMore={fetchNextPage}
           hasMore={hasNextPage}
-          gap={10}
           itemTemplate={(item: any) => {
             const conversation = item as ConversationDto;
             const lastMessage = conversation.lastMessage;
@@ -52,7 +51,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
               <div
                 key={conversation.id}
                 className={clsx(
-                  "flex gap-2 px-1 py-2",
+                  "flex gap-2 px-1 py-3",
                   "hover:bg-bg-fourth rounded-lg transition-colors",
                   "cursor-pointer",
                 )}

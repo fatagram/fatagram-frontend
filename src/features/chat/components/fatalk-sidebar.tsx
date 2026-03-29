@@ -30,17 +30,17 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
     <PageNavbar
       title="Fatalk"
       className={clsx(
-        "flex flex-col relative !h-[calc(100dvh-var(--header-height))] !overflow-hidden bg-bg-second !rounded-none",
+        "flex flex-col relative !h-[calc(100dvh-var(--header-height))] !overflow-hidden !rounded-none",
         className,
       )}
       header={
-        <div className="flex">
+        <div className="flex ">
           <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
             <i className="fa-regular fa-pen-to-square" />
           </MiniButton>
         </div>
       }
-      headerClassName="justify-between !flex-row pr-3"
+      headerClassName="justify-between !flex-row pr-3 "
     >
       <div className="flex flex-col px-2 h-full overflow-hidden">
         {tab === "list" && (

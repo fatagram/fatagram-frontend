@@ -69,7 +69,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
   return (
     <div
       className={clsx(
-        "bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
+        "bg-bg-main sm:bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
         "animate-dropdown-slide origin-top scrollbar-hide",
         className,
       )}

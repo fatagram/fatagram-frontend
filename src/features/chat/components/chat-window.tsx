@@ -63,7 +63,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         className,
       )}
     >
-      <div className="flex items-center px-4 h-[13%] bg-bg-third">
+      <div className="flex items-center px-4 h-[13%] bg-bg-second">
         {isLoadingHeader ? (
           <>
             <Skeleton sz="md" variant="circle" className="w-8" />
@@ -92,7 +92,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           <i className="fa-solid fa-xmark"></i>
         </MiniButton>
       </div>
-      <div className="flex flex-col px-2 flex-1 overflow-y-auto bg-bg-seventh">
+      <div className="flex flex-col px-2 flex-1 overflow-y-auto bg-bg-second">
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-3">
@@ -118,6 +118,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         <MessageList conversationId={conversationId} isGroup={conversationData?.isGroup} />
       </div>
       <ChatInput
+        className="!bg-bg-fourth "
         conversationId={!tempTargetId ? conversationId : undefined}
         correlationId={tempTargetId ? conversationId : undefined}
         receiverId={tempTargetId}

@@ -19,12 +19,17 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
     <div
       className={clsx(
         "flex flex-col gap-3",
-        "bg-bg-main shadow-md border-r-0 sm:border-r-2 border-bg-eighth",
+        "bg-bg-main sm:bg-bg-second shadow-md border-r-0 sm:border-r-2 border-bg-eighth",
         "overflow-y-auto",
         className,
       )}
     >
-      <div className={clsx("flex flex-col relative bg-bg-second mt-4 mb-2", headerClassName)}>
+      <div
+        className={clsx(
+          "flex flex-col relative bg-bg-main sm:bg-bg-second mt-4 mb-2",
+          headerClassName,
+        )}
+      >
         {title && (
           <Text weight="bold" className="relative px-6 text-gradient-main !text-2xl">
             {title}

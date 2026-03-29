@@ -45,11 +45,11 @@ export const MessageList: React.FC<MessageListProps> = ({
       className={clsx("flex flex-col gap-[0.1rem] overflow-y-auto", className)}
       ref={containerRef}
     >
-      <div className="relative">
+      <div className="relative ">
         <InfiniteScroll
           items={messages}
           onLoadMore={fetchNextPage}
-          className="flex flex-col gap-[0.1rem]"
+          className="flex flex-col gap-[0.1rem] "
           itemTemplate={(
             item: any,
             index: number,

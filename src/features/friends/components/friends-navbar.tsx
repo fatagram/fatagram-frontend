@@ -33,7 +33,7 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({ className, onSelect }) =>
   ];
 
   return (
-    <PageNavbar title={t("friends:navbar.title")} className={clsx("bg-bg-second", className)}>
+    <PageNavbar title={t("friends:navbar.title")} className={clsx(className)}>
       <PageNavbar.Section className="px-2 pb-3 space-y-1">
         {friendPageItems.map((item, index) => (
           <PageNavbar.Item

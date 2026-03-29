@@ -21,7 +21,9 @@
     "neon": "Neon",
     "darkSea": "Dark Sea",
     "darkYellow": "Dark Yellow",
-    "lightYellowPink": "Light Yellow Pink"
+    "lightYellowPink": "Light Yellow Pink",
+    "darkRed": "Dark Red",
+    "emerald": "Emerald"
   },
   "conversations": {
     "title": "Conversations",

@@ -21,7 +21,9 @@
     "neon": "Neon",
     "darkSea": "Biển đêm",
     "darkYellow": "Vàng tối",
-    "lightYellowPink": "Vàng hồng"
+    "lightYellowPink": "Vàng hồng",
+    "darkRed": "Đỏ tối",
+    "emerald": "Ngọc lục bảo"
   },
   "conversations": {
     "title": "Cuộc trò chuyện",
