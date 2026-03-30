@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts";
 import { useConversations } from "@/features/hooks/use-conversation";
 import { useFormatTime } from "@/utils/format-time";
 import clsx from "clsx";
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { isSystemMessage } from "../helpers/conversation-helpers";
@@ -24,8 +24,12 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   const { renderConversationName, renderSystemMessage } = useRenderConversationContent();
   const conversations = useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
 
+  useEffect(() => {
+    console.log("First conversations page:", conversations[0]);
+  }, [conversations]);
+
   const handleConversationClick = useCallback(
-    (conversationId: string) => {
+    async (conversationId: string) => {
       onConversationClick?.(conversationId);
     },
     [onConversationClick],
@@ -47,6 +51,9 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
           itemTemplate={(item: any) => {
             const conversation = item as ConversationDto;
             const lastMessage = conversation.lastMessage;
+            const isRead = conversation.lastMessage?.id === conversation.myLastSeenMessageId;
+            const isOtherUserRead =
+              conversation.lastMessage?.id === conversation.otherLastSeenMessageId;
             return (
               <div
                 key={conversation.id}
@@ -59,11 +66,19 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
               >
                 <Avatar src={conversation.avatarUrl ?? ""} alt="Conversation Avatar" sz="md" />
                 <div className="flex flex-col gap-1 min-w-0 justify-center">
-                  <Text sz="sm" weight="bold" className={clsx("line-clamp-1 truncate max-w-full")}>
+                  <Text
+                    sz="sm"
+                    weight={isRead ? "regular" : "bold"}
+                    className={clsx("line-clamp-1 truncate max-w-full")}
+                  >
                     {renderConversationName(conversation)}
                   </Text>
                   <div className="flex items-center opacity-80">
-                    <Text sz="xs" className="truncate max-w-full">
+                    <Text
+                      sz="xs"
+                      className="truncate max-w-full"
+                      weight={isRead ? "regular" : "bold"}
+                    >
                       {lastMessage
                         ? isSystemMessage(lastMessage?.type || MessageType.System)
                           ? renderSystemMessage(lastMessage)
@@ -72,13 +87,26 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
                             : lastMessage?.senderFullName + ": " + lastMessage?.content
                         : "Unknown"}
                     </Text>
-                    <Text sz="xs" className="mx-2 shrink-0">
+                    <Text sz="xs" className="mx-2 shrink-0" weight={isRead ? "regular" : "bold"}>
                       •
                     </Text>
-                    <Text sz="xs" className="shrink-0">
+                    <Text sz="xs" className="shrink-0" weight={isRead ? "regular" : "bold"}>
                       {formatTime(conversation.lastMessage?.createdAt ?? "")}
                     </Text>
                   </div>
+                </div>
+                <div className="flex-1 flex">
+                  {!isRead && (
+                    <div className="my-auto ml-auto w-2 h-2 bg-primary-500 rounded-full"></div>
+                  )}
+                  {!conversation.isGroup && isOtherUserRead && (
+                    <Avatar
+                      sz="xs"
+                      src={conversation.avatarUrl || ""}
+                      alt={"seen"}
+                      className="my-auto ml-auto"
+                    />
+                  )}
                 </div>
               </div>
             );

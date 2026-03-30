@@ -34,6 +34,10 @@ export class ConversationService {
   ): Promise<Result<string>> {
     return await apiPost(`${PREFIX}`, { participantIds, name });
   }
+
+  public async markAsRead(conversationId: string, messageId: string): Promise<Result<void>> {
+    return await apiPost(`${PREFIX}/${conversationId}/messages/markRead/${messageId}`);
+  }
 }
 
 export const conversationService = new ConversationService();

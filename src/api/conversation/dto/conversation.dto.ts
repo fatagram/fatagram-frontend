@@ -8,6 +8,14 @@ export interface ConversationDto {
   unreadMessageCount: number;
   lastActiveAt: string;
   isGroup: boolean;
-  topParticipantNames: string[];
-  participantCount: number;
+  topParticipantNames?: string[];
+  participantCount?: number;
+  otherLastSeenMessageId?: string;
+  myLastSeenMessageId?: string;
+}
+
+export interface SeenDto {
+  conversationId: string;
+  messageId: string;
+  userId: string;
 }

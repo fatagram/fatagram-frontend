@@ -88,10 +88,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
           {isLoading || isFetching ? (
             <Skeleton sz="md" className="!w-56" />
           ) : (
-            <Text weight="bold" className="text-[1.6rem] text-center break-words w-full lg:w-auto">
+            <Text weight="bold" className="!text-2xl text-center break-words w-full lg:w-auto">
               {userProfile?.fullName}
               {userProfile?.nickname && (
-                <Text sz="lg" weight="light" className="lg:text-left text-center lg:ml-2">
+                <Text sz="lg" weight="light" className="lg:text-left text-center ml-2">
                   ({userProfile?.nickname})
                 </Text>
               )}

@@ -68,6 +68,14 @@ export const useCreateGroupConversation = () => {
   );
 };
 
+export const useMarkConversationAsRead = () => {
+  return useResultFetcher(
+    async ({ conversationId, messageId }: { conversationId: string; messageId: string }) => {
+      return await conversationService.markAsRead(conversationId, messageId);
+    },
+  );
+};
+
 export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor">) => {
   const { userId } = useAuth();
 
@@ -86,6 +94,39 @@ type ConversationPage<TCursor = string> = {
 
 export const useConversationCacheMutations = () => {
   const queryClient = useQueryClient();
+
+  const updateDetailCache = (
+    conversationId: string,
+    updateFn: (conv: ConversationDto) => ConversationDto,
+  ) => {
+    const detailKey = conversationKeys.detail(conversationId);
+    queryClient.setQueryData(detailKey, (oldDetail: ConversationDto | undefined) => {
+      if (!oldDetail) return oldDetail;
+      return updateFn(oldDetail);
+    });
+  };
+
+  const updateConversationInCache = (
+    conversationId: string,
+    updateFn: (conv: ConversationDto) => ConversationDto,
+  ) => {
+    const listKey = conversationKeys.list();
+    queryClient.setQueryData(listKey, (oldData: ConversationPage) => {
+      if (!oldData || !oldData.pages.length) return oldData;
+
+      const newPages = oldData.pages.map((page) => ({
+        ...page,
+        items: page.items.map((item) => (item.id === conversationId ? updateFn(item) : item)),
+      }));
+
+      return {
+        ...oldData,
+        pages: newPages,
+      };
+    });
+
+    updateDetailCache(conversationId, updateFn);
+  };
 
   const pushConversationToTop = async (
     conversationId: string,
@@ -111,6 +152,9 @@ export const useConversationCacheMutations = () => {
       existedConv = { ...fetched, lastMessage: lastMessage || fetched.lastMessage };
     }
 
+    // Keep the detail cache in sync too. `ChatWindow` reads from `conversationKeys.detail`.
+    queryClient.setQueryData(conversationKeys.detail(conversationId), existedConv);
+
     queryClient.setQueryData(listKey, (oldData: ConversationPage) => {
       if (!oldData || !oldData.pages.length) return oldData;
 
@@ -131,5 +175,5 @@ export const useConversationCacheMutations = () => {
     });
   };
 
-  return { pushConversationToTop };
+  return { pushConversationToTop, updateConversationInCache };
 };

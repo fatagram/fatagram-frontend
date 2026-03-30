@@ -5,7 +5,7 @@ import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useGetConversation } from "@/features/hooks/use-conversation";
+import { useGetConversation, useMarkConversationAsRead } from "@/features/hooks/use-conversation";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { ChatInput } from "./chat-input";
 import { useTranslation } from "react-i18next";
@@ -22,6 +22,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const { renderConversationName } = useRenderConversationContent();
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  const { fetch: markAsRead } = useMarkConversationAsRead();
 
   useEffect(() => {
     if (scrollRef.current) {
@@ -45,6 +47,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
 
   const isLoadingHeader =
     isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
+
+  const handleMarkAsRead = async () => {
+    await markAsRead({
+      conversationId: conversationData.id,
+      messageId: conversationData.lastMessage?.id ?? "",
+    });
+  };
 
   useEffect(() => {
     if (tempUser) {
@@ -149,6 +158,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         conversationId={!tempTargetId ? conversationId : undefined}
         correlationId={tempTargetId ? conversationId : undefined}
         receiverId={tempTargetId}
+        onFocus={handleMarkAsRead}
       />
     </div>
   );

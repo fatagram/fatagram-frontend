@@ -8,12 +8,14 @@ interface ChatInputProps extends ComponentProps {
   conversationId?: string;
   correlationId?: string;
   receiverId?: string;
+  onFocus?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
   conversationId,
   correlationId,
   receiverId,
+  onFocus,
   className,
 }) => {
   const [hasInput, setHasInput] = useState(false);
@@ -47,6 +49,10 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setHasInput(false);
   };
 
+  const handleFocus = () => {
+    onFocus?.();
+  };
+
   return (
     <div className={clsx("px-2 h-[15%] self-end bg-bg-third w-full flex items-center", className)}>
       <TextArea
@@ -58,6 +64,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         ref={textboxRef}
         onChange={handleInputChange}
         rows={1}
+        onFocus={handleFocus}
       />
       <MiniButton sz="sm" className="ml-2" onClick={handleSendMessage} disabled={!hasInput}>
         <i className="fa-solid fa-paper-plane text-primary-500"></i>

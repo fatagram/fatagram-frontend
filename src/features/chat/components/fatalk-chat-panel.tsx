@@ -3,7 +3,7 @@ import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { MessageList } from "./message";
 import { useEffect, useRef, useState } from "react";
-import { useGetConversation } from "@/features/hooks/use-conversation";
+import { useGetConversation, useMarkConversationAsRead } from "@/features/hooks/use-conversation";
 import { ChatInput } from "./chat-input";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { useTranslation } from "react-i18next";
@@ -25,11 +25,19 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const { renderConversationName } = useRenderConversationContent();
   const { t } = useTranslation();
 
+  const { fetch: markAsRead } = useMarkConversationAsRead();
+
   const {
     data: conversationData,
     isLoading: isLoadingConversation,
     isFetching: isFetchingConversation,
   } = useGetConversation(conversationId, undefined, true);
+
+  const navigate = useNavigate();
+
+  const isLoadingHeader = isLoadingConversation || isFetchingConversation;
+
+  const scrollRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (conversationData) {
@@ -38,11 +46,20 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     }
   }, [conversationData, renderConversationName]);
 
-  const navigate = useNavigate();
+  useEffect(() => {
+    const lastMsgId = conversationData?.lastMessage?.id;
 
-  const isLoadingHeader = isLoadingConversation || isFetchingConversation;
+    if (conversationData?.id && lastMsgId) {
+      const handler = setTimeout(() => {
+        markAsRead({
+          conversationId: conversationData.id,
+          messageId: lastMsgId,
+        });
+      }, 500);
 
-  const scrollRef = useRef<HTMLDivElement | null>(null);
+      return () => clearTimeout(handler);
+    }
+  }, [conversationData?.id, conversationData?.lastMessage?.id]);
 
   useEffect(() => {
     if (scrollRef.current) {
