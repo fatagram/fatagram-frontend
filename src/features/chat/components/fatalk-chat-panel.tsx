@@ -1,4 +1,4 @@
-import { Text, Avatar, Skeleton, MiniButton } from "@/components/atoms";
+import { Text, Avatar, Skeleton, MiniButton, Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { MessageList } from "./message";
@@ -8,6 +8,7 @@ import { ChatInput } from "./chat-input";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { useTranslation } from "react-i18next";
 import { NotFound } from "@/features/components/not-found";
+import { useNavigate } from "react-router-dom";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
@@ -37,9 +38,17 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     }
   }, [conversationData, renderConversationName]);
 
+  const navigate = useNavigate();
+
   const isLoadingHeader = isLoadingConversation || isFetchingConversation;
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [conversationId]);
 
   if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
     return (
@@ -55,6 +64,9 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
           title={t("common:conversations:notFound")}
           description={t("common:conversations:notFoundMessage")}
         />
+        <Button className="block sm:hidden" onClick={() => navigate("/fatalk")}>
+          {t("common:conversations:turnBack")}
+        </Button>
       </div>
     );
   }
@@ -98,9 +110,23 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         ref={scrollRef}
       >
         <MessageList
+          key={conversationId}
           conversationId={conversationId}
           parentRef={scrollRef}
           isGroup={conversationData?.isGroup}
+          lastSeen={
+            <div className="flex flex-col justify-center items-center h-full text-center px-4">
+              <div className="relative mb-4">
+                <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
+              </div>
+              <Text sz="sm" weight="bold">
+                {chatTitle}
+              </Text>
+              <Text sz="xs" wrap="whitespace-normal">
+                {t("common:conversations:privacyDescription")}
+              </Text>
+            </div>
+          }
         />
       </div>
 

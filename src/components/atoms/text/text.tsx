@@ -54,7 +54,14 @@ export const Text = forwardRef<HTMLElement, TextProps>(
   ) => {
     return (
       <Component
-        className={clsx(textSizes[sz], weightClasses[weight], colorClasses[color], wrap, className)}
+        className={clsx(
+          textSizes[sz],
+          weightClasses[weight],
+          colorClasses[color],
+          wrap,
+          "break-words",
+          className,
+        )}
         ref={ref}
         {...props}
       >

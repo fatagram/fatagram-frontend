@@ -39,9 +39,10 @@ const MessageRowComponent: React.FC<MessageProps> = ({
 
   const isShowTime =
     index === messages.length - 1 ||
-    getDiffBetween(message.createdAt, messages[index + 1].createdAt, "minute") > 30;
+    isSystemMessage(messages[index + 1]?.type) ||
+    getDiffBetween(message.createdAt, messages[index + 1]?.createdAt, "minute") > 30;
   const isPrevMessageShowTime =
-    index === 0 || getDiffBetween(message.createdAt, messages[index - 1].createdAt, "minute") > 30;
+    index === 0 || getDiffBetween(message.createdAt, messages[index - 1]?.createdAt, "minute") > 30;
   const isLastMessageInGroup =
     index === messages.length - 1 ||
     messages[index + 1]?.senderId !== message.senderId ||
@@ -119,7 +120,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           )}
           <div
             className={clsx(
-              "px-3 py-1 break-all rounded-xl shadow-sm relative",
+              "px-3 py-1 break-words rounded-xl shadow-sm relative max-w-full",
               isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
               isFailed && "border-red-500 border-2 opacity-50",
               isMyMessage ? "rounded-l-2xl self-end" : "rounded-r-2xl self-start",
@@ -135,7 +136,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           >
             <Text
               sz="sm"
-              wrap="whitespace-normal"
+              wrap="whitespace-pre-wrap"
               className={clsx(isMyMessage ? "text-text-message" : "text-text-main")}
               weight="regular"
             >

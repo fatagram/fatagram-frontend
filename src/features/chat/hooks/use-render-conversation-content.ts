@@ -18,7 +18,7 @@ export const useRenderConversationContent = () => {
   };
 
   const renderConversationName = (conversation: ConversationDto) => {
-    if (conversation.isGroup && !conversation.name) {
+    if (conversation?.isGroup && !conversation.name) {
       const topName = conversation.topParticipantNames;
       const total = conversation.participantCount;
       return (

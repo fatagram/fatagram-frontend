@@ -16,6 +16,7 @@ interface InfiniteScrollFlexProps extends ComponentProps {
   onLoadMore: () => void;
   rootMargin?: string;
   isShowLastSeen?: boolean;
+  lastSeen?: React.ReactNode;
   gap?: string | number;
   desc?: boolean;
   parentRef?: RefObject<HTMLDivElement | null>;
@@ -33,6 +34,7 @@ export default function InfiniteScrollFlex({
   itemTemplate,
   onLoadMore,
   isShowLastSeen = false,
+  lastSeen,
   gap,
   desc = false,
   parentRef,
@@ -143,7 +145,7 @@ export default function InfiniteScrollFlex({
             color: "var(--text-third-color)",
           }}
         >
-          Đã xem hết kết quả.
+          {lastSeen || "Đã xem hết kết quả."}
         </div>
       )}
       {items.length === 0 && !isLoading && emptyComponent}

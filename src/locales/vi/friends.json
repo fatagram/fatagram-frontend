@@ -6,7 +6,9 @@
     "suggestedFriends": "Bạn bè được gợi ý",
     "invite": "Lời mời kết bạn"
   },
-  "friendRequest": {
-    "noRequests": "Không có lời mời kết bạn"
+  "requests": {
+    "title": "Lời mời kết bạn",
+    "noRequests": "Không có lời mời kết bạn",
+    "noRequestsDescription": "Bạn đã xử lý hết lời mời. Khi có người muốn kết bạn, họ sẽ xuất hiện ở đây."
   }
 }

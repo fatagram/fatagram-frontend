@@ -27,6 +27,7 @@
   },
   "conversations": {
     "title": "Conversations",
+    "turnBack": "Turn back",
     "search": "Search conversations...",
     "notFound": "No conversations found",
     "notFoundMessage": "Select a conversation or start a new one",
@@ -35,6 +36,7 @@
     "sent": "Sent",
     "systemMessage": {
       "createGroup": "{{creatorName}} created the group"
-    }
+    },
+    "privacyDescription": "Feel free to share your best moments! This conversation is always kept private and completely secure."
   }
 }

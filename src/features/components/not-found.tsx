@@ -12,10 +12,7 @@ interface NotFoundProps extends ComponentProps {
 export const NotFound: React.FC<NotFoundProps> = ({ icon, title, description, className }) => {
   return (
     <div
-      className={clsx(
-        "flex flex-col items-center justify-center h-full gap-4 animate-fade-in",
-        className,
-      )}
+      className={clsx("flex flex-col items-center justify-center gap-4 animate-fade-in", className)}
     >
       <div className="flex items-center justify-center w-16 h-16 rounded-full bg-bg-third/50 text-text-third">
         <i className={icon}></i>
@@ -25,7 +22,11 @@ export const NotFound: React.FC<NotFoundProps> = ({ icon, title, description, cl
         <Text sz="md" weight="bold" className="text-text-main text-base font-medium">
           {title}
         </Text>
-        <Text sz="sm" className="text-text-main/60 text-sm text-text-fourth">
+        <Text
+          sz="sm"
+          wrap="whitespace-pre-wrap"
+          className="text-text-main/60 text-sm text-text-fourth"
+        >
           {description}
         </Text>
       </div>

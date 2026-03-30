@@ -6,7 +6,9 @@
     "suggestedFriends": "Suggested Friends",
     "invite": "Friend Requests"
   },
-  "friendRequest": {
-    "noRequests": "No friend requests"
+  "requests": {
+    "title": "Friend Requests",
+    "noRequests": "No friend requests",
+    "noRequestsDescription": "You're all caught up! When friends send requests, you'll see them here."
   }
 }

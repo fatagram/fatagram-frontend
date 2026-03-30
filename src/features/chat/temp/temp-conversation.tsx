@@ -28,7 +28,10 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
     if (conversationData) {
       navigate(`/fatalk/${conversationData.id}`);
     }
-  }, [conversationData, navigate]);
+    if (!isLoading && !tempUser) {
+      navigate("/fatalk");
+    }
+  }, [conversationData, navigate, tempUser, isLoading]);
 
   const handleSendMessage = async () => {
     if (!tempId) return;
@@ -115,6 +118,7 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
           value={message}
           onChange={(e) => setMessage(e.target.value)}
           onKeyDown={handleKeyDown}
+          type={"text"}
         />
         <MiniButton sz="sm" onClick={handleSendMessage} disabled={!message.trim() || isFetching}>
           <i

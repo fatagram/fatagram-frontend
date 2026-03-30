@@ -124,7 +124,7 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
         hasMore={hasNextPage}
         selectClassName={clsx(
           "flex flex-wrap gap-1 border-2 border-bg-third bg-bg-sixth rounded-lg px-2 py-2",
-          "max-h-[15%] overflow-y-auto scrollbar-hide",
+          "min-h-[50px] max-h-[300px] overflow-y-auto scrollbar-hide",
         )}
         optionClassName="h-full overflow-y-auto pr-1 border-2 rounded-md border-bg-third"
         className="flex-1"

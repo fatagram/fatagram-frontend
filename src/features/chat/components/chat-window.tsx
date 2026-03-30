@@ -4,10 +4,11 @@ import clsx from "clsx";
 import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { ChatInput } from "./chat-input";
+import { useTranslation } from "react-i18next";
 
 interface ChatWindowProps extends ComponentProps {
   conversationId: string;
@@ -19,6 +20,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
 
   const { toggleMinimize, closeChat, registry } = useChatStore();
   const { renderConversationName } = useRenderConversationContent();
+  const { t } = useTranslation();
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+
+  useEffect(() => {
+    if (scrollRef.current) {
+      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
+    }
+  }, [conversationId]);
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
@@ -92,7 +101,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           <i className="fa-solid fa-xmark"></i>
         </MiniButton>
       </div>
-      <div className="flex flex-col px-0 flex-1 overflow-y-auto bg-bg-second">
+      <div ref={scrollRef} className="flex flex-col px-0 flex-1 overflow-y-auto bg-bg-second">
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-3">
@@ -116,13 +125,27 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           </div>
         ) : null}
         <MessageList
+          key={conversationId}
           className="px-2"
           conversationId={conversationId}
           isGroup={conversationData?.isGroup}
+          lastSeen={
+            <div className="flex flex-col justify-center items-center h-full text-center px-4">
+              <div className="relative mb-4">
+                <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
+              </div>
+              <Text sz="sm" weight="bold">
+                {chatTitle}
+              </Text>
+              <Text sz="xs" wrap="whitespace-normal">
+                {t("common:conversations:privacyDescription")}
+              </Text>
+            </div>
+          }
         />
       </div>
       <ChatInput
-        className="!bg-bg-fourth h-fit py-2"
+        className="!bg-bg-main h-fit py-2"
         conversationId={!tempTargetId ? conversationId : undefined}
         correlationId={tempTargetId ? conversationId : undefined}
         receiverId={tempTargetId}

@@ -1,4 +1,8 @@
 import FriendRequestItem from "@/features/friends/components/friend-request-item";
+import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
+import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
+import { NotFound } from "@/features/components/not-found";
+import { useTranslation } from "react-i18next";
 import React from "react";
 import clsx from "clsx";
 import {
@@ -6,14 +10,13 @@ import {
   useDeclineFriendRequest,
   useListFriendRequests,
 } from "@/features/hooks/use-friend";
-import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
-import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
 
 type FriendRequestsProps = {
   className?: string;
 };
 
 const FriendRequests: React.FC<FriendRequestsProps> = () => {
+  const { t } = useTranslation();
   const [_total, _setTotal] = React.useState(0);
 
   const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
@@ -26,7 +29,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = () => {
 
   // render
   return (
-    <SidebarPageCard title="Lời mời kết bạn">
+    <SidebarPageCard title={t("friends:requests.title") || "Lời mời kết bạn"}>
       <InfiniteScrollGrid
         itemMinWidth="200px"
         items={requestsData}
@@ -45,6 +48,16 @@ const FriendRequests: React.FC<FriendRequestsProps> = () => {
         hasMore={!!hasNextPage}
         isLoading={isFetching}
         itemKey={(item: any) => item.senderId}
+        emptyComponent={
+          <NotFound
+            icon="fa-solid fa-user-plus text-3xl"
+            title={t("friends:requests.noRequests") || "Không có lời mời nào"}
+            description={
+              t("friends:requests.noRequestsDescription") ||
+              "Khi có người muốn kết bạn với bạn, họ sẽ xuất hiện ở đây."
+            }
+          />
+        }
       />
     </SidebarPageCard>
   );

@@ -10,6 +10,7 @@ interface MessageListProps extends ComponentProps {
   isGroup?: boolean;
   conversationId: string;
   parentRef?: React.RefObject<HTMLDivElement | null>;
+  lastSeen?: React.ReactNode;
 }
 
 export const MessageList: React.FC<MessageListProps> = ({
@@ -17,6 +18,7 @@ export const MessageList: React.FC<MessageListProps> = ({
   className,
   conversationId,
   parentRef,
+  lastSeen,
 }) => {
   const { userId } = useAuth();
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -72,6 +74,8 @@ export const MessageList: React.FC<MessageListProps> = ({
           desc={true}
           parentRef={parentRef ?? containerRef}
           itemKey={(item) => item.id}
+          isShowLastSeen={true}
+          lastSeen={lastSeen}
         />
       </div>
     </div>
