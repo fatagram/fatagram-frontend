@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import { Button, Textbox, Text } from "@/components/atoms";
@@ -17,7 +17,7 @@ interface EditableFieldProps {
   noDataValue?: string;
   canEdit?: boolean;
   onChangeClick?: () => void;
-  onSaveClick?: (value: string | undefined) => void;
+  onSaveClick?: (value: string) => void;
   onCancelClick?: () => void;
 }
 
@@ -38,11 +38,11 @@ const EditableField: React.FC<EditableFieldProps> = ({
   onSaveClick,
   onCancelClick,
 }) => {
-  const [inputValue, setInputValue] = React.useState<string | undefined>(value);
-  const { t } = useTranslation() as { t: (key: string) => string };
+  const [inputValue, setInputValue] = useState<string>(value ?? "");
+  const { t } = useTranslation();
 
   useEffect(() => {
-    setInputValue(value);
+    setInputValue(value ?? "");
   }, [value]);
 
   return (
@@ -58,9 +58,16 @@ const EditableField: React.FC<EditableFieldProps> = ({
       <div className="flex sm:items-center items-end gap-4 justify-between">
         {editableMode === "inline" && isEdit ? (
           <div className="relative flex flex-col gap-1">
-            <Textbox sz="sm" placeholder={placeholder} isWrong={isError} type={"text"} />
+            <Textbox
+              sz="sm"
+              placeholder={placeholder}
+              isWrong={isError}
+              type={"text"}
+              value={inputValue}
+              onChange={(e) => setInputValue(e.target.value)}
+            />
             {isError && (
-              <Text sz="sm" className="text-red-500 ml-2 h-[5px]">
+              <Text sz="sm" className="!text-red-500 ml-0 h-[5px]">
                 {errorMessage}
               </Text>
             )}

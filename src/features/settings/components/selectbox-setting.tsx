@@ -28,6 +28,7 @@ const SelectBoxSetting: React.FC<SelectBoxSettingProps> = ({
         selectBox
       ) : (
         <SelectBox
+          title={title}
           className="!min-w-[170px]"
           selectedOption={selectedOption}
           options={options}

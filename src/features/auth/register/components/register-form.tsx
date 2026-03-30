@@ -115,7 +115,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           }
           wrongMessage={t(usernameError || formik.errors.username || "")}
           disabled={formik.isSubmitting}
-          type={"email"}
+          type="text"
+          autoComplete="username"
         />
         <Textbox
           value={formik.values.email}
@@ -126,7 +127,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           isWrong={(formik.touched.email && Boolean(formik.errors.email)) || Boolean(emailError)}
           wrongMessage={t(emailError || formik.errors.email || "")}
           disabled={formik.isSubmitting}
-          type={"email"}
+          type="email"
+          autoComplete="email"
         />
         <Textbox
           value={formik.values.phoneNumber}
@@ -140,7 +142,8 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           }
           wrongMessage={t(phoneNumberError || formik.errors.phoneNumber || "")}
           disabled={formik.isSubmitting}
-          type={"text"}
+          type="text"
+          autoComplete="tel"
         />
         <Textbox
           type="password"
@@ -154,6 +157,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           }
           wrongMessage={t(passwordError || formik.errors.password || "")}
           disabled={formik.isSubmitting}
+          autoComplete="new-password"
         />
         <Textbox
           type="password"
@@ -168,6 +172,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           }
           wrongMessage={t(confirmPasswordError || formik.errors.confirmPassword || "")}
           disabled={formik.isSubmitting}
+          autoComplete="new-password"
         />
       </div>
       <Checkbox

@@ -58,7 +58,7 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
   );
 
   return (
-    <>
+    <div className={clsx("flex flex-col h-full overflow-hidden px-2 pb-4", className)}>
       <div className="ml-1">
         <Text weight="bold" sz="md">
           Tạo nhóm chat
@@ -126,13 +126,13 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
           "flex flex-wrap gap-1 border-2 border-bg-third bg-bg-sixth rounded-lg px-2 py-2",
           "max-h-[15%] overflow-y-auto scrollbar-hide",
         )}
-        optionClassName="overflow-y-auto pr-1 border-2 rounded-md border-bg-third"
-        className={clsx("", className)}
+        optionClassName="h-full overflow-y-auto pr-1 border-2 rounded-md border-bg-third"
+        className="flex-1"
         canRemoveDefaultSelected={false}
         onAccept={handleCreateGroupChat}
         onCancel={onTurnBack}
         isLoading={isFetching}
       />
-    </>
+    </div>
   );
 };

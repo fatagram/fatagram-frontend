@@ -19,12 +19,12 @@ export const ChangeUrlName: React.FC<ChangeUrlNameProps> = ({ userId }) => {
   const [editUrlFailedMessage, setEditUrlFailedMessage] = useState<string>("");
 
   const { data: userProfile, isLoading } = useGetUserProfile(userId);
-  const updateUrlNameMutation = useUpdateUrlName(userId);
+  const { fetch: updateUrlNameMutation } = useUpdateUrlName(userId);
 
   const handleSaveUrlName = (newUrlName: string | undefined) => {
     if (!newUrlName) return;
 
-    updateUrlNameMutation.fetch(
+    updateUrlNameMutation(
       { urlName: newUrlName },
       {
         onSuccess: () => {

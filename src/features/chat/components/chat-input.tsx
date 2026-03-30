@@ -57,6 +57,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         onKeyDown={handleKeyDown}
         ref={textboxRef}
         onChange={handleInputChange}
+        type={"text"}
       />
       <MiniButton sz="sm" className="ml-2" onClick={handleSendMessage} disabled={!hasInput}>
         <i className="fa-solid fa-paper-plane text-primary-500"></i>

@@ -3,6 +3,7 @@ import useClickOutside from "@/hooks/use-click-outside";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
+import { useMediaQuery } from "@/hooks/use-media-query";
 
 export type OptionKey = string | number | boolean;
 
@@ -51,6 +52,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
 
   const desktopDropdownRef = useRef<HTMLElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
+  const isMobile = useMediaQuery("(max-width: 640px)");
 
   useEffect(() => {
     if (isOpen) {
@@ -68,13 +70,14 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
     () => {
       if (isOpen) setIsOpen(false);
     },
+    !isMobile,
   );
 
   const selectedItem = options.find((opt) => opt.key === selectedOption);
 
   return (
     <div className="relative">
-      {title && (
+      {/* {title && (
         <label
           htmlFor={selectId}
           className={clsx(
@@ -85,7 +88,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
           {title}
           {isRequired && <span className="text-red-400">*</span>}
         </label>
-      )}
+      )} */}
 
       <button
         id={selectId}
@@ -148,8 +151,13 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
         </div>
       </Transition>
 
-      <Transition animation={AnimationLib.Fade} show={isOpen} duration={100} className="sm:hidden">
-        <div className="fixed inset-0 bg-black/50 z-[9998]" onClick={() => setIsOpen(false)} />
+      <Transition
+        animation={AnimationLib.SoftFade}
+        show={isOpen}
+        duration={200}
+        className="fixed inset-0 sm:hidden"
+      >
+        <div className="fixed inset-0 bg-black/50 z-[9999]" onClick={() => setIsOpen(false)} />
       </Transition>
 
       <Transition

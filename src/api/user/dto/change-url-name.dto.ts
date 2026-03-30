@@ -5,7 +5,8 @@ export default interface ChangeUrlNameDto {
 // Error codes for the RegisterValidator
 export const ErrorCodes: Record<string, string> = {
   USER_NOT_FOUND: "settings:account.personalInfo.errorMessages.changeUrlName.userNotFound",
-  URLNAME_EXIST: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameAlreadyExist",
+  URLNAME_ALREADY_EXISTS:
+    "settings:account.personalInfo.errorMessages.changeUrlName.urlNameAlreadyExist",
   URL_NAME_TOO_SHORT: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooShort",
   URL_NAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameTooLong",
   URL_NAME_EMPTY: "settings:account.personalInfo.errorMessages.changeUrlName.urlNameEmpty",

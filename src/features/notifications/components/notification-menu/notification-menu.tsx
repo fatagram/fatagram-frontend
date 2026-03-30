@@ -18,6 +18,7 @@ import {
   useUnreadCount,
 } from "../../hooks/use-notification-store";
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
+import { NotFound } from "@/features/components/not-found";
 
 type NotificationMenuProps = {
   className?: string;
@@ -140,20 +141,11 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
           loadingSkeleton={<NotificationSkeletonLoading />}
           numberOfSkeletons={2}
           emptyComponent={
-            <div className="flex flex-col items-center justify-center h-56 gap-4 animate-fade-in">
-              <div className="flex items-center justify-center w-16 h-16 rounded-full bg-bg-third/50 text-text-third">
-                <i className="fa-regular fa-bell-slash text-3xl"></i>
-              </div>
-
-              <div className="flex flex-col items-center gap-1">
-                <span className="text-base font-medium text-text-secondary">
-                  {t("notifications:notifications.no-notifications")}
-                </span>
-                <span className="text-sm text-text-fourth">
-                  When you have new updates, they will appear here.
-                </span>
-              </div>
-            </div>
+            <NotFound
+              icon="fa-regular fa-bell-slash text-3xl"
+              title={t("notifications:notifications.no-notifications")}
+              description="When you have new updates, they will appear here."
+            />
           }
         />
       </div>

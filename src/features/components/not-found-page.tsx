@@ -22,19 +22,22 @@ function NotFoundPage() {
   return (
     <div
       className={clsx(
-        "flex flex-col items-center sm:justify-center h-full w-full gap-[20px] pt-10",
+        "flex flex-col items-center sm:justify-start flex-1 w-full gap-[20px] pt-10",
+        "bg-bg-main sm:bg-bg-second",
       )}
     >
       <Logo hasSlogan={false} sz="md" />
-      <Text
+      <span
         className={clsx(
-          "font-jua bg-primary-500/70 text-primary-600 w-[200px] h-[200px] flex justify-center items-center rounded-full",
-          "!text-6xl",
+          "font-bagel_fat_one leading-none tracking-tighter",
+          "text-8xl sm:text-9xl",
+          "text-gradient-main",
+          "drop-shadow-sm",
         )}
       >
         404
-      </Text>
-      <Text weight="extrabold" sz="xl" className={clsx("uppercase text-primary-600")}>
+      </span>
+      <Text weight="extrabold" sz="xl" className={clsx("uppercase text-gradient-second")}>
         {t("notFound.title")}
       </Text>
       <Text sz="lg" className={clsx("flex justify-center text-center")} wrap="whitespace-normal">

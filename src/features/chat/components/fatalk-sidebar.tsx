@@ -42,21 +42,21 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
       }
       headerClassName="justify-between !flex-row pr-3 "
     >
-      <div className="flex flex-col px-2 h-full overflow-hidden">
-        {tab === "list" && (
-          <ChatList className="h-full" onConversationClick={handleSelectConversation} />
-        )}
-        {tab === "create" && (
-          <CreateGroupChat
-            className="h-full max-h-[90%]"
-            onCreateSuccess={(conversationId) => {
-              navigate(`/fatalk/${conversationId}`);
-              setTab("list");
-            }}
-            onTurnBack={() => setTab("list")}
-          />
-        )}
-      </div>
+      {tab === "list" && (
+        <div className="flex flex-col px-2 h-full overflow-hidden">
+          <ChatList className="pt-0 h-full" onConversationClick={handleSelectConversation} />
+        </div>
+      )}
+      {tab === "create" && (
+        <CreateGroupChat
+          className="flex-1 min-h-0"
+          onCreateSuccess={(conversationId) => {
+            navigate(`/fatalk/${conversationId}`);
+            setTab("list");
+          }}
+          onTurnBack={() => setTab("list")}
+        />
+      )}
     </PageNavbar>
   );
 };

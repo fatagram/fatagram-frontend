@@ -51,7 +51,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   return (
     <div
       className={clsx(
-        "flex flex-col gap-1",
+        "flex flex-col gap-1 overflow-hidden",
         isLoading ? "opacity-50 cursor-not-allowed" : "",
         className,
       )}
@@ -68,7 +68,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
           );
         })}
       </div>
-      <div className={clsx("flex flex-col gap-1 overflow-y-auto", optionClassName)}>
+      <div className={clsx("flex flex-col flex-1 gap-1 overflow-y-auto", optionClassName)}>
         <InfiniteScrollFlex
           items={options || []}
           onLoadMore={onLoadMore}
@@ -95,10 +95,10 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
           }}
         />
       </div>
-      <div className="w-full flex gap-1 mt-1">
+      <div className="w-full flex gap-1 mt-2">
         <Button
           sz="sm"
-          className="flex-1 flex items-center justify-center"
+          className="flex flex-1 items-center justify-center"
           onClick={() =>
             onAccept?.(
               selected.map((s) => s.value),
@@ -116,7 +116,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
         </Button>
         <Button
           sz="sm"
-          className="flex-1  flex items-center justify-center"
+          className="flex flex-1 items-center justify-center"
           variant="fourth"
           onClick={onCancel}
           disabled={isLoading}

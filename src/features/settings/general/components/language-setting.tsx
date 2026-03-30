@@ -7,7 +7,7 @@ import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
 interface LanguageSettingsProps {}
 
 const LanguageSettings: React.FC<LanguageSettingsProps> = () => {
-  const { t } = useTranslation() as { t: (key: string) => string };
+  const { t } = useTranslation();
 
   return (
     <SidebarPageCard title={t("settings:language.title")}>

@@ -6,6 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { useGetConversation } from "@/features/hooks/use-conversation";
 import { ChatInput } from "./chat-input";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
+import { useTranslation } from "react-i18next";
+import { NotFound } from "@/features/components/not-found";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
@@ -20,6 +22,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
   const { renderConversationName } = useRenderConversationContent();
+  const { t } = useTranslation();
 
   const {
     data: conversationData,
@@ -42,21 +45,16 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     return (
       <div
         className={clsx(
-          "relative flex flex-col items-center justify-center text-center px-6 py-10",
+          "flex flex-col items-center justify-center h-56 gap-4 animate-fade-in",
+          "bg-bg-main sm:bg-bg-second",
           className,
         )}
       >
-        <div className="w-12 h-12 mb-3 rounded-full bg-bg-third flex items-center justify-center">
-          <i className="fa-regular fa-comments text-text-main/60 text-lg"></i>
-        </div>
-
-        <Text sz="md" weight="bold" className="text-text-main">
-          Conversation not found
-        </Text>
-
-        <Text sz="sm" className="text-text-main/60 mt-1">
-          Hãy chọn một đoạn chat hoặc bắt đầu cuộc trò chuyện mới
-        </Text>
+        <NotFound
+          icon="fa-regular fa-comments text-3xl"
+          title={t("common:conversations:notFound")}
+          description={t("common:conversations:notFoundMessage")}
+        />
       </div>
     );
   }

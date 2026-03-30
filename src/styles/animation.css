@@ -1,3 +1,21 @@
+@keyframes softFadeIn {
+  from {
+    opacity: 0.7;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes softFadeOut {
+  from {
+    opacity: 1;
+  }
+  to {
+    opacity: 0;
+  }
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0.5;
@@ -131,6 +149,14 @@
 }
 
 @layer utilities {
+  .animate-soft-fade-in {
+    animation: softFadeIn ease-out forwards;
+  }
+
+  .animate-soft-fade-out {
+    animation: softFadeOut ease-out forwards;
+  }
+
   .animate-fade-in {
     animation: fadeIn ease-out forwards;
   }

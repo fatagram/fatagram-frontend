@@ -91,7 +91,8 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           }
           wrongMessage={t(usernameOrEmailError || formik.errors.usernameOrEmail || "")}
           disabled={formik.isSubmitting}
-          type={"password"}
+          type="text"
+          autoComplete="username"
         />
         <Textbox
           type="password"
@@ -104,6 +105,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           }
           wrongMessage={t(passwordError || formik.errors.password || "")}
           disabled={formik.isSubmitting}
+          autoComplete="current-password"
         />
       </div>
       <div className="flex justify-between w-full items-center gap-[50px]">

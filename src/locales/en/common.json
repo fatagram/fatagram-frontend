@@ -28,6 +28,8 @@
   "conversations": {
     "title": "Conversations",
     "search": "Search conversations...",
+    "notFound": "No conversations found",
+    "notFoundMessage": "Select a conversation or start a new one",
     "you": "You",
     "no-conversations": "No conversations",
     "sent": "Sent",

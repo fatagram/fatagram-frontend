@@ -86,19 +86,13 @@ export const useUpdateName = (userId: string) => {
 export const useUpdateUrlName = (userId: string) => {
   const qc = useQueryClient();
 
-  return useResultFetcher(
-    ({ urlName }: { urlName: string }) =>
-      userProfileService.updateUrlName({
-        urlName: urlName,
-      }),
-    {
-      onSuccess: () => {
-        qc.invalidateQueries({
-          queryKey: profileQueryKey(userId),
-        });
-      },
+  return useResultFetcher(userProfileService.updateUrlName, {
+    onSuccess: () => {
+      qc.invalidateQueries({
+        queryKey: profileQueryKey(userId),
+      });
     },
-  );
+  });
 };
 
 export const useUpdateNickname = (userId: string) => {

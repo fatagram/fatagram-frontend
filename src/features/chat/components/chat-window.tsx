@@ -92,7 +92,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           <i className="fa-solid fa-xmark"></i>
         </MiniButton>
       </div>
-      <div className="flex flex-col px-2 flex-1 overflow-y-auto bg-bg-second">
+      <div className="flex flex-col px-0 flex-1 overflow-y-auto bg-bg-second">
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-3">
@@ -115,10 +115,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
             </div>
           </div>
         ) : null}
-        <MessageList conversationId={conversationId} isGroup={conversationData?.isGroup} />
+        <MessageList
+          className="px-2"
+          conversationId={conversationId}
+          isGroup={conversationData?.isGroup}
+        />
       </div>
       <ChatInput
-        className="!bg-bg-fourth "
+        className="!bg-bg-fourth h-fit py-2"
         conversationId={!tempTargetId ? conversationId : undefined}
         correlationId={tempTargetId ? conversationId : undefined}
         receiverId={tempTargetId}

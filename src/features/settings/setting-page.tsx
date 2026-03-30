@@ -9,7 +9,7 @@ type SettingPageProps = {
 };
 
 const SettingPage: React.FC<SettingPageProps> = () => {
-  const { t } = useTranslation() as { t: (key: string) => string };
+  const { t } = useTranslation();
   const [showSidebar, setShowSidebar] = useState<boolean>(false);
 
   useEffect(() => {
@@ -18,7 +18,7 @@ const SettingPage: React.FC<SettingPageProps> = () => {
 
   return (
     <SidebarPageLayout
-      title="Cài đặt"
+      title={t("settings:title")}
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
       navbar={<SettingsNavbar className="h-full" onSelect={() => setShowSidebar(false)} />}

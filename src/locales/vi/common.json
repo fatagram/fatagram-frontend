@@ -28,6 +28,8 @@
   "conversations": {
     "title": "Cuộc trò chuyện",
     "search": "Tìm kiếm cuộc trò chuyện...",
+    "notFound": "Không tìm thấy cuộc trò chuyện",
+    "notFoundMessage": "Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới",
     "you": "Bạn",
     "no-conversations": "Không có cuộc trò chuyện",
     "sent": "Đã gửi",

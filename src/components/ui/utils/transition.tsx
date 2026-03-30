@@ -8,6 +8,11 @@ export interface AnimationType {
 }
 
 export const AnimationLib: Record<string, AnimationType> = {
+  SoftFade: {
+    in: "animate-soft-fade-in",
+    out: "animate-soft-fade-out",
+    duration: 100,
+  },
   Fade: {
     in: "animate-fade-in",
     out: "animate-fade-out",

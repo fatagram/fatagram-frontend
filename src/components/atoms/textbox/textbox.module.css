@@ -20,8 +20,8 @@
 .primary-textbox:focus {
   background-position: 100% 100%;
   box-shadow:
-    0 0 0 3px rgba(43, 212, 139, 0.15),
-    0 4px 20px rgba(43, 212, 139, 0.25);
+    0 0 0 3px rgb(var(--primary-500) / 0.2),
+    0 4px 20px rgb(var(--primary-500) / 0.3);
   transform: scale(1.01);
 }
 

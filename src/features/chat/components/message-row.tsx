@@ -85,7 +85,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       ref={ref}
     >
       {isShowTime && (
-        <Text sz="sm" className="text-center my-2">
+        <Text sz="xs" className="text-center my-2">
           {formatSmartTimestamp(message.createdAt)}
         </Text>
       )}

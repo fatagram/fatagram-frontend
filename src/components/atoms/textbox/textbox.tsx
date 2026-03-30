@@ -13,7 +13,7 @@ const sizeClasses: Record<Size, { mainText: string; titleText: string }> = {
   xl: { mainText: "px-4 py-6 text-xl", titleText: "text-xl" },
 };
 
-export interface TextboxProps extends ComponentProps {
+export interface TextboxProps extends ComponentProps<HTMLInputElement> {
   title?: string;
   isRequired?: boolean;
   isWrong?: boolean;
@@ -22,8 +22,6 @@ export interface TextboxProps extends ComponentProps {
   placeholder?: string;
   sz?: Size;
   type: "text" | "password" | "search" | "email" | "number";
-  value?: string | number;
-  onChange?: React.ChangeEventHandler<HTMLInputElement>;
 }
 
 export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
@@ -41,6 +39,7 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
       disabled,
       value,
       onChange,
+      autoComplete = "off",
       ...props
     },
     ref,
@@ -64,7 +63,7 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
 
         <div className="relative w-full">
           {type === "search" && (
-            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-white z-10" />
+            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-primary-500 z-10" />
           )}
 
           <input
@@ -75,6 +74,7 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
             placeholder={placeholder}
             value={value}
             onChange={onChange}
+            autoComplete={autoComplete}
             className={clsx(
               "w-full border-[2px] text-text-main",
               "font-normal rounded-xl outline-none caret-primary-500 selection:!bg-primary-600",
