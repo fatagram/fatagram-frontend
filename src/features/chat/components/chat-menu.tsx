@@ -5,7 +5,6 @@ import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { ChatList } from "./chat-list";
-import { useChatStore } from "@/features/hooks/use-chat-store";
 import { useState } from "react";
 import { CreateGroupChat } from "./create-group-chat/create-group-chat";
 
@@ -17,12 +16,10 @@ interface ChatMenuProps extends ComponentProps {
 export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationClick, ref }) => {
   const [tab, setTab] = useState<"list" | "create">("list");
   const { data } = useConversations();
-  const { openChat } = useChatStore();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
   const handleSelectConversation = (conversationId: string) => {
-    openChat(conversationId, { type: "conversation", conversationId: conversationId });
     onConversationClick?.(conversationId);
   };
 

@@ -1,11 +1,11 @@
 import { Text, Avatar, MiniButton, Skeleton, Textbox } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
-import { useGetConversationWith } from "@/features/hooks/use-conversation";
 import { useSendMessage } from "@/features/hooks/use-message";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
+import { useOpenChat } from "../hooks/use-open-chat";
 
 interface TempConversationProps extends ComponentProps {}
 
@@ -17,7 +17,7 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
   const tempId = searchParams.get("tempId") || undefined;
   const correlationId = location.state?.correlationId;
   const { data: tempUser, isLoading, isFetching } = useGetUserProfile(tempId);
-  const { data: conversationData } = useGetConversationWith(tempId || "", undefined, !!tempId);
+  const { checkConversationWith } = useOpenChat();
   const { fetch: sendMessage } = useSendMessage();
 
   const handleTurnBack = () => {
@@ -25,13 +25,18 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
   };
 
   useEffect(() => {
-    if (conversationData) {
-      navigate(`/fatalk/${conversationData.id}`);
-    }
-    if (!isLoading && !tempUser) {
-      navigate("/fatalk");
-    }
-  }, [conversationData, navigate, tempUser, isLoading]);
+    const checkConversation = async () => {
+      if (!tempId) {
+        navigate("/fatalk");
+        return;
+      }
+      const hasConversation = await checkConversationWith(tempId);
+      if (hasConversation) {
+        navigate(`/fatalk/${hasConversation}`);
+      }
+    };
+    checkConversation();
+  }, [checkConversationWith, navigate, tempUser, isLoading]);
 
   const handleSendMessage = async () => {
     if (!tempId) return;

@@ -12,6 +12,7 @@ import { useRenderConversationContent } from "../hooks/use-render-conversation-c
 import { isSystemMessage } from "../helpers/conversation-helpers";
 import { MessageType } from "@/types/entities/message.type";
 import { useLocation } from "react-router-dom";
+import { useOpenChat } from "../hooks/use-open-chat";
 
 interface ChatListProps extends ComponentProps {
   onConversationClick?: (conversationId: string) => void;
@@ -22,6 +23,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   const { userId } = useAuth();
   const { formatTime } = useFormatTime();
   const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
+  const { openChat } = useOpenChat();
   const { renderConversationName, renderSystemMessage } = useRenderConversationContent();
   const conversations = data?.pages.flatMap((page) => page.items) || [];
   const location = useLocation();
@@ -31,8 +33,9 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   const handleConversationClick = useCallback(
     async (conversationId: string) => {
       onConversationClick?.(conversationId);
+      openChat(conversationId);
     },
-    [onConversationClick],
+    [onConversationClick, openChat],
   );
 
   return (

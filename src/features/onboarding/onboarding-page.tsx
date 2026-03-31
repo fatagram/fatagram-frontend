@@ -6,13 +6,13 @@ export default function OnboardingPage() {
   return (
     <div
       className={clsx(
-        "w-full h-full flex items-center justify-center bg-gradient-to-br",
-        "from-primary-500/10 via-bg-main to-primary-600/10",
+        "relative flex flex-col bg-bg-second flex-1 h-full lg:p-4",
+        "justify-center items-center",
       )}
     >
       <div
         className={clsx(
-          "relative flex flex-col items-center justify-center gap-8 w-full h-full sm:h-auto sm:max-w-[700px]",
+          "relative flex flex-col items-center justify-center gap-8 w-full flex-1 sm:h-auto sm:max-w-[700px]",
           "bg-bg-second/80 sm:rounded-3xl shadow-2xl",
           "sm:p-10 px-4 border border-border-main/50",
         )}

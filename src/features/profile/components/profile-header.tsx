@@ -10,8 +10,8 @@ import { Button, Text, Skeleton } from "@/components/atoms";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useGetNumberOfFriends } from "@/features/hooks/use-friend";
 import { useAuth } from "@/contexts";
-import { useGetConversationWith } from "@/features/hooks/use-conversation";
 import { useChatStore } from "@/features/hooks/use-chat-store";
+import { useOpenChat } from "@/features/chat/hooks/use-open-chat";
 
 export type ProfileHeaderProps = {
   className?: string;
@@ -51,30 +51,12 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
   const { data: numberOfFriends, isFetching: numberOfFriendsFetching } =
     useGetNumberOfFriends(targetId);
 
-  const {
-    data: conversationData,
-    refetch: refetchConversation,
-    isFetching: isCheckingConversation,
-  } = useGetConversationWith(targetId);
+  const { openChatWithTarget } = useOpenChat();
 
   const handleMessageClick = useCallback(async () => {
     if (!targetId) return;
-    if (conversationData) {
-      openChat(conversationData.id, { type: "conversation", conversationId: conversationData.id });
-      if (isMobile) navigate(`/fatalk/${conversationData.id}`);
-      return;
-    }
-    const result = await refetchConversation();
-    if (result.data) {
-      openChat(result.data.id, { type: "conversation", conversationId: result.data.id });
-      if (isMobile) navigate(`/fatalk/${result.data.id}`);
-    } else {
-      const randomUuid = crypto.randomUUID();
-      openChat(randomUuid, { type: "temp", targetId: targetId });
-      if (isMobile)
-        navigate(`/fatalk/temp?tempId=${targetId}`, { state: { correlationId: randomUuid } });
-    }
-  }, [isMobile, targetId, refetchConversation, openChat]);
+    await openChatWithTarget(targetId);
+  }, [isMobile, targetId, openChatWithTarget, openChat]);
 
   return (
     <div className={clsx("relative w-full flex flex-col items-center", className)}>
@@ -129,19 +111,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
                 )}
 
                 {!isOwner && isAuthenticated && (
-                  <Button
-                    sz="sm"
-                    variant="secondary"
-                    onClick={handleMessageClick}
-                    disabled={isCheckingConversation}
-                  >
-                    <i
-                      className={
-                        isCheckingConversation
-                          ? "fa-solid fa-spinner fa-spin"
-                          : "fa-solid fa-comment"
-                      }
-                    />{" "}
+                  <Button sz="sm" variant="secondary" onClick={handleMessageClick}>
                     {t("user:profileHeader.messageButton")}
                   </Button>
                 )}

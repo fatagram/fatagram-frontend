@@ -28,17 +28,23 @@ const conversationDetailQueryOptions = (conversationId: string) =>
     fn: async () => await conversationService.getConversation(conversationId),
   });
 
-export const useGetConversationWith = (
-  targetId: string,
-  config?: SafeQueryResultOptions<any>,
-  enabled: boolean = true,
-) => {
-  return useSafeQueryResult({
-    queryKey: conversationKeys.withUser(targetId),
-    fn: async () => await conversationService.getConversationWith(targetId),
-    enabled: enabled,
-    options: config,
-  });
+// export const useGetConversationWith = (
+//   targetId: string,
+//   config?: SafeQueryResultOptions<any>,
+//   enabled: boolean = true,
+// ) => {
+//   return useSafeQueryResult({
+//     queryKey: conversationKeys.withUser(targetId),
+//     fn: async () => await conversationService.getConversationWith(targetId),
+//     enabled: enabled,
+//     options: config,
+//   });
+// };
+
+export const useFetchConversationWith = () => {
+  return useResultFetcher(
+    async (targetId: string) => await conversationService.getConversationWith(targetId),
+  );
 };
 
 export const useGetConversation = (

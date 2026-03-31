@@ -6,12 +6,15 @@ import { SocketMessage } from "@/api/common/socket-message";
 import { useConversationCacheMutations, useMessageStore } from "@/features/hooks/use-conversation";
 import { SeenDto } from "@/api/conversation/dto/conversation.dto";
 import { useAuth } from "@/contexts";
+import { useLocation, useNavigate } from "react-router-dom";
 
 export function MessageListener() {
   const { addMessageToCache } = useMessageCacheMutations();
   const { pushConversationToTop, updateConversationInCache } = useConversationCacheMutations();
   const { setParticipantsSeen } = useMessageStore();
   const { userId } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
 
   useAppHub<MessageResponseDto>((message: SocketMessage<MessageResponseDto>) => {
     if (message.event !== "NewMessage") return;
@@ -21,6 +24,13 @@ export function MessageListener() {
     if (data.correlationId && useChatStore.getState().registry[data.correlationId]) {
       useChatStore.getState().replaceChat(data.correlationId, conversationId);
     } else {
+      const queryParams = new URLSearchParams(location.search);
+      const currentTempId = queryParams.get("tempId");
+      if (useChatStore.getState().registry["temp-" + data.senderId]) {
+        useChatStore.getState().replaceChat("temp-" + data.senderId, conversationId);
+      } else if (location.pathname === "/fatalk/temp" && currentTempId === data.senderId) {
+        navigate(`/fatalk/${conversationId}`, { replace: true });
+      }
       useChatStore
         .getState()
         .openChat(conversationId, { type: "conversation", conversationId: conversationId });

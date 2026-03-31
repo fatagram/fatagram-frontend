@@ -161,25 +161,27 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
             </div>
           </div>
         ) : null}
-        <MessageList
-          key={conversationId}
-          className="px-2"
-          conversationId={conversationId}
-          isGroup={conversationData?.isGroup}
-          lastSeen={
-            <div className="flex flex-col justify-center items-center h-full text-center px-4">
-              <div className="relative mb-4">
-                <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
+        {!tempTargetId && (
+          <MessageList
+            key={conversationId}
+            className="px-2"
+            conversationId={conversationId}
+            isGroup={conversationData?.isGroup}
+            lastSeen={
+              <div className="flex flex-col justify-center items-center h-full text-center px-4">
+                <div className="relative mb-4">
+                  <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
+                </div>
+                <Text sz="sm" weight="bold">
+                  {chatTitle}
+                </Text>
+                <Text sz="xs" wrap="whitespace-normal">
+                  {t("common:conversations:privacyDescription")}
+                </Text>
               </div>
-              <Text sz="sm" weight="bold">
-                {chatTitle}
-              </Text>
-              <Text sz="xs" wrap="whitespace-normal">
-                {t("common:conversations:privacyDescription")}
-              </Text>
-            </div>
-          }
-        />
+            }
+          />
+        )}
       </div>
       <ChatInput
         className="!bg-bg-main h-fit py-2"
