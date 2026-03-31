@@ -37,10 +37,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleSendMessage = () => {
+    const content = textboxRef.current?.value ?? "";
+    if (content.trim() === "") {
+      return;
+    }
     send({
       conversationId,
       correlationId,
-      content: textboxRef.current?.value.trim() || "",
+      content: content.trim(),
       receiverId,
     });
     if (textboxRef.current) {

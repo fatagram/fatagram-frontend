@@ -1,7 +1,7 @@
 import { userProfileService } from "@/api/user/user-profile.api";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSafeQueryResult } from "@/hooks/use-safe-query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQueries, useQueryClient } from "@tanstack/react-query";
 
 const profileQueryKey = (userId: string) => ["user", "profile", userId];
 const avatarQueryKey = (userId: string) => ["user", "avatar", userId];
@@ -31,12 +31,25 @@ export const useGetUserProfile = (userId?: string) => {
   });
 };
 
-export const useGetUserProfileForChat = (userId?: string) => {
-  return useSafeQueryResult({
-    queryKey: profileQueryKey(userId ?? ""),
-    fn: async () => await userProfileService.getProfile(userId!, "id,fullName,avatar"),
-    enabled: !!userId,
+export const useGetUserProfiles = (userIds: string[]) => {
+  const queries = useQueries({
+    queries: userIds.map((id) => ({
+      queryKey: ["user", "profile", id],
+      queryFn: async () => await userProfileService.getProfile(id, "id,fullName,avatar,urlName"),
+      enabled: !!id,
+      staleTime: 1000 * 60 * 5,
+    })),
   });
+
+  const isLoading = queries.some((q) => q.isLoading);
+
+  const userProfileMap = Object.fromEntries(
+    queries
+      .filter((q) => q.data?.data?.infos)
+      .map((q) => [(q.data?.data?.infos as any).id, q.data?.data?.infos]),
+  );
+
+  return { userProfileMap, isLoading };
 };
 
 export const useGetUserAvatar = (userId: string) => {

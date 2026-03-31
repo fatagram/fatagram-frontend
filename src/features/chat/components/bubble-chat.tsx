@@ -15,8 +15,12 @@ export const BubbleChat: React.FC<BubbleChatProps> = ({ className, conversationI
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
-  const { data: tempUser } = useGetUserProfile(tempTargetId!);
-  const { data: conversationData } = useGetConversation(conversationId);
+  const { data: tempUser } = useGetUserProfile(tempTargetId);
+  const { data: conversationData } = useGetConversation(
+    conversationId,
+    undefined,
+    !!conversationId,
+  );
   const chatAvatar = tempUser ? tempUser.infos.avatar : conversationData?.avatarUrl || "";
 
   const handleOnClick = useCallback(async () => {

@@ -4,11 +4,11 @@ import { Avatar, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState, memo, useMemo } from "react";
-import { useGetUserProfile, useGetUserProfileForChat } from "@/features/hooks/use-user-profile";
 import { useFormatTime } from "@/utils/format-time";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { isSystemMessage } from "../helpers/conversation-helpers";
 import { useMessageStore } from "@/features/hooks/use-conversation";
+import { useGetUserProfiles } from "@/features/hooks/use-user-profile";
 
 interface MessageProps extends ComponentProps {
   message: Message;
@@ -18,6 +18,7 @@ interface MessageProps extends ComponentProps {
   conversationId?: string;
   index: number;
   isGroup?: boolean;
+  userInfo?: any;
   ref: React.RefObject<HTMLDivElement | null> | null;
 }
 
@@ -29,11 +30,11 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   messages,
   isGroup,
   className,
+  userInfo,
   ref,
 }) => {
   const { t } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
-  const { data: userInfo } = useGetUserProfile(message.senderId!);
   const { getDiffBetween, formatTime, formatSmartTimestamp } = useFormatTime();
   const { renderSystemMessage } = useRenderConversationContent();
   const isPending = message.status === "pending";
@@ -112,7 +113,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               isMyMessage && "order-2",
               !hasAvatar && "invisible",
             )}
-            src={userInfo?.infos.avatar}
+            src={userInfo?.avatar}
             alt="Avatar"
             sz="sm"
           />
@@ -121,9 +122,12 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           {isShowName && (
             <Text
               sz="xs"
-              className={clsx("mb-1", isMyMessage ? "text-right mr-1" : "text-left ml-1")}
+              className={clsx(
+                "mb-1 min-h-[1rem]",
+                isMyMessage ? "text-right mr-1" : "text-left ml-1",
+              )}
             >
-              {userInfo?.infos.fullName ?? <span className="invisible">_</span>}
+              {userInfo?.fullName}
             </Text>
           )}
           <div
@@ -184,7 +188,9 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         <div className="flex justify-end gap-1 mt-1">
           {seenBy.map((seenInfo) => {
             if (seenInfo.userId === userId) return null;
-            return <MiniAvatar key={seenInfo.userId} uid={seenInfo.userId} />;
+            return (
+              <MiniAvatar key={seenInfo.userId} uid={seenInfo.userId} seenAt={seenInfo.seenAt} />
+            );
           })}
         </div>
       )}
@@ -192,9 +198,28 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   );
 };
 
-export const MiniAvatar = memo(({ uid }: { uid: string }) => {
-  const { data: userInfo } = useGetUserProfileForChat(uid);
-  return <Avatar sz="xs" src={userInfo?.infos.avatar} alt="mini" />;
+export const MiniAvatar = memo(({ uid, seenAt }: { uid: string; seenAt: string }) => {
+  const [showTooltip, setShowTooltip] = useState(false);
+  const { formatSmartTimestamp } = useFormatTime();
+  const { userProfileMap } = useGetUserProfiles([uid]);
+
+  const userInfo = userProfileMap[uid];
+
+  return (
+    <div
+      className="relative"
+      onMouseEnter={() => setShowTooltip(true)}
+      onMouseLeave={() => setShowTooltip(false)}
+    >
+      <Avatar sz="xs" src={userInfo?.avatar} alt="mini" />
+      {showTooltip && (
+        <div className="absolute right-full mr-2 -top-7 px-2 py-1 bg-bg-main text-text-main text-xs rounded shadow-md z-50 whitespace-nowrap border border-border-main">
+          <div className="font-semibold">{userInfo?.fullName}</div>
+          <div className="text-xs opacity-75">{formatSmartTimestamp(seenAt)}</div>
+        </div>
+      )}
+    </div>
+  );
 });
 
 export const MessageRow = memo(MessageRowComponent);

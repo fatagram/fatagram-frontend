@@ -3,6 +3,8 @@ import { GroupChatWindow } from "./components/group-chat-window";
 import { BubbleChatList } from "./components/bubble-chat";
 import clsx from "clsx";
 import { useLocation } from "react-router-dom";
+import { useEffect } from "react";
+import { useChatStore } from "../hooks/use-chat-store";
 
 interface ChatLayerProps extends ComponentProps {
   // Define any props you want to pass to the ChatLayer component
@@ -10,6 +12,12 @@ interface ChatLayerProps extends ComponentProps {
 
 export const ChatLayer: React.FC<ChatLayerProps> = ({ className }) => {
   const isFatalkPage = useLocation().pathname.startsWith("/fatalk");
+  const { initializeFromStorage } = useChatStore();
+
+  useEffect(() => {
+    initializeFromStorage?.();
+  }, [initializeFromStorage]);
+
   if (isFatalkPage) return null;
 
   return (

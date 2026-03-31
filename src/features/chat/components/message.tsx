@@ -7,6 +7,7 @@ import { useMessages } from "@/features/hooks/use-message";
 import { MessageRow } from "./message-row";
 import { Skeleton } from "@/components/atoms";
 import { useGetPariticipantsSeen } from "@/features/hooks/use-conversation";
+import { useGetUserProfiles } from "@/features/hooks/use-user-profile";
 
 interface MessageListProps extends ComponentProps {
   isGroup?: boolean;
@@ -38,6 +39,12 @@ export const MessageList: React.FC<MessageListProps> = ({
     return _messages ? _messages.pages.flatMap((page) => page.items) : [];
   }, [_messages]);
 
+  const senderIds = useMemo(() => {
+    return [...new Set(messages.map((m) => m.senderId).filter(Boolean))] as string[];
+  }, [messages]);
+
+  const { userProfileMap } = useGetUserProfiles(senderIds);
+
   const messageSkeleton = (
     <div className="flex gap-2 w-full">
       <Skeleton variant="circle" sz="md" />
@@ -63,6 +70,7 @@ export const MessageList: React.FC<MessageListProps> = ({
             index={index}
             isGroup={isGroup}
             conversationId={conversationId}
+            userInfo={userProfileMap[item?.senderId || ""]} // Pass user profile info to MessageRow
           />
         )}
         hasMore={!!hasNextPage}

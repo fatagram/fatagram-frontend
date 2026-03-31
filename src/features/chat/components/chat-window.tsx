@@ -58,10 +58,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
 
       const isPanelFocused = panelRef.current.contains(document.activeElement);
       if (document.hasFocus() && isPanelFocused) {
-        markAsReadLocal(conversationData.id, lastMessageMap[conversationData.id]);
+        const lastMsgId = lastMessageMap[conversationData.id] || conversationData.lastMessage?.id;
+        if (!lastMsgId) return;
+
+        markAsReadLocal(conversationData.id, lastMsgId);
         await markAsRead({
           conversationId: conversationData.id,
-          messageId: lastMessageMap[conversationData.id],
+          messageId: lastMsgId,
         });
       }
     };
@@ -167,6 +170,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
             className="px-2"
             conversationId={conversationId}
             isGroup={conversationData?.isGroup}
+            parentRef={scrollRef}
             lastSeen={
               <div className="flex flex-col justify-center items-center h-full text-center px-4">
                 <div className="relative mb-4">

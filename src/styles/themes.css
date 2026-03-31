@@ -556,6 +556,91 @@
     --login-image: url("/images/auth_image_pink.jpg");
   }
 
+  /* Pastel Yellow-Pink Theme - Cute */
+  [data-theme="pastel-yellow-pink"] {
+    /* Custom Gradients - Darker pastel blend */
+    --gradient-main: repeating-linear-gradient(
+      45deg,
+      #ffc0d4 0%,
+      #ff9ec8 25%,
+      #ffa366 50%,
+      #ffb844 75%,
+      #ffd44d 100%
+    );
+    --gradient-second: repeating-linear-gradient(
+      45deg,
+      #ffd9ad 0%,
+      #ffcc77 25%,
+      #ffb366 50%,
+      #ffb366 75%,
+      #ffca88 100%
+    );
+
+    /* Primary colors - Pastel Yellow (50 → 900) */
+    --primary-50: 255 250 230;
+    --primary-100: 255 244 200;
+    --primary-200: 255 236 160;
+    --primary-300: 255 224 120;
+    --primary-400: 255 208 80;
+    --primary-500: 255 180 40;
+    --primary-600: 240 160 20;
+    --primary-700: 210 130 16;
+    --primary-800: 170 100 12;
+    --primary-900: 130 70 8;
+
+    /* Secondary colors - Pastel Pink (50 → 600) */
+    --secondary-50: 255 235 245;
+    --secondary-100: 255 210 235;
+    --secondary-200: 255 180 220;
+    --secondary-300: 255 150 205;
+    --secondary-400: 255 110 185;
+    --secondary-500: 255 70 160;
+    --secondary-600: 235 40 130;
+
+    /* Text colors */
+    --text-main: 80 32 56;
+    --text-second: 110 48 76;
+    --text-third: 140 70 100;
+    --text-fourth: 170 100 130;
+
+    /* Background colors */
+    --bg-main: 255 240 248;
+    --bg-second: 255 235 245;
+    --bg-third: 255 228 240;
+    --bg-fourth: 255 216 234;
+    --bg-fifth: 255 200 225;
+    --bg-sixth: 255 240 248;
+    --bg-seventh: 255 245 250;
+    --bg-eighth: 255 235 245;
+    --bg-ninth: 255 228 240;
+    --bg-tenth: 255 216 234;
+
+    --bg-overlay: rgba(0, 0, 0, 0.3);
+    --bg-modal: rgba(255, 248, 252, 0.98);
+    --bg-glass: rgba(255, 248, 252, 0.85);
+
+    --bg-card: 255 250 255;
+    --bg-sidebar: 255 240 248;
+    --bg-header: 255 250 255;
+    --bg-footer: 255 240 248;
+    --bg-hover: 255 228 240;
+    --bg-active: 255 216 234;
+    --bg-disabled: 255 216 234;
+
+    /* Button colors */
+    --btn-main: 255 70 160;
+    --btn-second: 255 228 240;
+    --btn-third: 255 216 234;
+    --btn-fourth: 255 200 225;
+
+    /* Border colors */
+    --border-main: 255 216 234;
+    --border-second: 255 200 225;
+    --border-focus: 255 70 160;
+
+    --login-image: url("/images/auth_image_light.jpg");
+  }
+
   /* Crimson Night Theme - Dark Red */
   [data-theme="dark-red"] {
     /* Custom Gradients for Dark Red */
@@ -724,5 +809,90 @@
     --border-focus: 16 185 129;
 
     --login-image: url("/images/auth_image_emerald.jpg");
+  }
+
+  /* Aurora Theme - Cực Quang (Northern Lights) */
+  [data-theme="aurora"] {
+    /* Custom Gradients for Aurora - vibrant greens, cyans, purples */
+    --gradient-main: repeating-linear-gradient(
+      45deg,
+      #4ade80 0%,
+      #22d3ee 25%,
+      #06b6d4 50%,
+      #8b5cf6 75%,
+      #a78bfa 100%
+    );
+    --gradient-second: repeating-linear-gradient(
+      45deg,
+      #10b981 0%,
+      #14b8a6 25%,
+      #0891b2 50%,
+      #6366f1 75%,
+      #7c3aed 100%
+    );
+
+    /* Primary colors - Aurora Green */
+    --primary-50: 236 253 245;
+    --primary-100: 209 250 229;
+    --primary-200: 167 243 208;
+    --primary-300: 110 231 183;
+    --primary-400: 52 211 153;
+    --primary-500: 16 185 129;
+    --primary-600: 5 150 105;
+    --primary-700: 4 120 87;
+    --primary-800: 6 95 70;
+    --primary-900: 6 78 59;
+
+    /* Secondary colors - Aurora Cyan & Purple */
+    --secondary-50: 240 249 255;
+    --secondary-100: 224 242 254;
+    --secondary-200: 186 230 253;
+    --secondary-300: 125 211 252;
+    --secondary-400: 56 189 248;
+    --secondary-500: 14 165 233;
+    --secondary-600: 2 132 199;
+
+    /* Text colors */
+    --text-main: 248 250 252;
+    --text-second: 226 232 240;
+    --text-third: 148 163 184;
+    --text-fourth: 100 116 139;
+
+    /* Background colors - Deep Arctic Blue/Purple */
+    --bg-main: 3 18 32;
+    --bg-second: 15 32 52;
+    --bg-third: 25 48 72;
+    --bg-fourth: 40 68 100;
+    --bg-fifth: 60 100 140;
+    --bg-sixth: 15 32 52;
+    --bg-seventh: 8 25 42;
+    --bg-eighth: 20 42 66;
+    --bg-ninth: 35 60 90;
+    --bg-tenth: 55 90 130;
+
+    --bg-overlay: rgba(3, 18, 32, 0.85);
+    --bg-modal: rgba(15, 32, 52, 0.98);
+    --bg-glass: rgba(15, 32, 52, 0.8);
+
+    --bg-card: 15 32 52;
+    --bg-sidebar: 3 18 32;
+    --bg-header: 15 32 52;
+    --bg-footer: 3 18 32;
+    --bg-hover: 25 48 72;
+    --bg-active: 40 68 100;
+    --bg-disabled: 25 48 72;
+
+    /* Button colors */
+    --btn-main: 16 185 129;
+    --btn-second: 25 48 72;
+    --btn-third: 40 68 100;
+    --btn-fourth: 60 100 140;
+
+    /* Border colors */
+    --border-main: 40 68 100;
+    --border-second: 60 100 140;
+    --border-focus: 16 185 129;
+
+    --login-image: url("/images/auth_image_aurora.jpg");
   }
 }

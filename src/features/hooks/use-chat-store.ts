@@ -1,6 +1,8 @@
 import { ChatMeta } from "@/types/chat-meta";
 import { create } from "zustand";
 
+const CHAT_STORAGE_KEY = "fatagram_open_chats";
+
 interface ChatWindowState {
   activeIds: string[];
   minimizedIds: string[];
@@ -10,12 +12,72 @@ interface ChatWindowState {
   toggleMinimize: (id: string) => void;
   replaceChat: (oldId: string, newId: string) => void;
   reset?: () => void;
+  initializeFromStorage?: () => void;
 }
+
+const saveToStorage = (
+  activeIds: string[],
+  minimizedIds: string[],
+  registry: Record<string, ChatMeta>,
+) => {
+  try {
+    const nonTempChats = activeIds.filter((id) => {
+      const meta = registry[id];
+      return meta?.type !== "temp";
+    });
+
+    const nonTempMinimized = minimizedIds.filter((id) => {
+      const meta = registry[id];
+      return meta?.type !== "temp";
+    });
+
+    const nonTempRegistry: Record<string, ChatMeta> = {};
+    [...nonTempChats, ...nonTempMinimized].forEach((id) => {
+      nonTempRegistry[id] = registry[id];
+    });
+
+    localStorage.setItem(
+      CHAT_STORAGE_KEY,
+      JSON.stringify({
+        activeIds: nonTempChats,
+        minimizedIds: nonTempMinimized,
+        registry: nonTempRegistry,
+      }),
+    );
+  } catch (e) {
+    console.error("Failed to save chats to localStorage:", e);
+  }
+};
+
+const loadFromStorage = () => {
+  try {
+    const stored = localStorage.getItem(CHAT_STORAGE_KEY);
+    if (stored) {
+      const data = JSON.parse(stored);
+      return {
+        activeIds: data.activeIds || [],
+        minimizedIds: data.minimizedIds || [],
+        registry: data.registry || {},
+      };
+    }
+  } catch (e) {
+    console.error("Failed to load chats from localStorage:", e);
+  }
+  return { activeIds: [], minimizedIds: [], registry: {} };
+};
 
 export const useChatStore = create<ChatWindowState>((set) => ({
   activeIds: [],
   minimizedIds: [],
   registry: {},
+  initializeFromStorage: () => {
+    const { activeIds, minimizedIds, registry } = loadFromStorage();
+    set({
+      activeIds,
+      minimizedIds,
+      registry,
+    });
+  },
   openChat: (id: string, meta: ChatMeta) =>
     set((state) => {
       if (state.activeIds.includes(id)) return state;
@@ -34,6 +96,8 @@ export const useChatStore = create<ChatWindowState>((set) => ({
         newRegistry[id] = meta;
       }
 
+      saveToStorage(newActiveIds, newMinimizedIds, newRegistry);
+
       return {
         activeIds: newActiveIds,
         minimizedIds: newMinimizedIds,
@@ -41,40 +105,60 @@ export const useChatStore = create<ChatWindowState>((set) => ({
       };
     }),
   closeChat: (id: string) =>
-    set((state) => ({
-      activeIds: state.activeIds.filter((activeId) => activeId !== id),
-      minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
-    })),
+    set((state) => {
+      const newActiveIds = state.activeIds.filter((activeId) => activeId !== id);
+      const newMinimizedIds = state.minimizedIds.filter((minimizedId) => minimizedId !== id);
+      saveToStorage(newActiveIds, newMinimizedIds, state.registry);
+      return {
+        activeIds: newActiveIds,
+        minimizedIds: newMinimizedIds,
+      };
+    }),
   toggleMinimize: (id: string) =>
     set((state) => {
       if (state.activeIds.includes(id)) {
+        const newActiveIds = state.activeIds.filter((activeId) => activeId !== id);
+        const newMinimizedIds = [...state.minimizedIds, id];
+        saveToStorage(newActiveIds, newMinimizedIds, state.registry);
         return {
-          activeIds: state.activeIds.filter((activeId) => activeId !== id),
-          minimizedIds: [...state.minimizedIds, id],
+          activeIds: newActiveIds,
+          minimizedIds: newMinimizedIds,
         };
       }
+      const newActiveIds = [...state.activeIds, id];
+      const newMinimizedIds = state.minimizedIds.filter((minimizedId) => minimizedId !== id);
+      saveToStorage(newActiveIds, newMinimizedIds, state.registry);
       return {
-        activeIds: [...state.activeIds, id],
-        minimizedIds: state.minimizedIds.filter((minimizedId) => minimizedId !== id),
+        activeIds: newActiveIds,
+        minimizedIds: newMinimizedIds,
       };
     }),
   replaceChat: (oldId: string, newId: string) => {
     set((state) => {
-      const { [oldId]: _, ...restRegistry } = state.registry;
+      const restRegistry = { ...state.registry };
+      delete restRegistry[oldId];
+
+      const newRegistry: Record<string, ChatMeta> = {
+        ...restRegistry,
+        [newId]: { type: "conversation", conversationId: newId },
+      };
+      const newActiveIds = state.activeIds.map((id) => (id === oldId ? newId : id));
+      const newMinimizedIds = state.minimizedIds.map((id) => (id === oldId ? newId : id));
+      saveToStorage(newActiveIds, newMinimizedIds, newRegistry);
       return {
-        activeIds: state.activeIds.map((id) => (id === oldId ? newId : id)),
-        minimizedIds: state.minimizedIds.map((id) => (id === oldId ? newId : id)),
-        registry: {
-          ...restRegistry,
-          [newId]: { type: "conversation", conversationId: newId },
-        },
+        activeIds: newActiveIds,
+        minimizedIds: newMinimizedIds,
+        registry: newRegistry,
       };
     });
   },
   reset: () =>
-    set(() => ({
-      activeIds: [],
-      minimizedIds: [],
-      registry: {},
-    })),
+    set(() => {
+      localStorage.removeItem(CHAT_STORAGE_KEY);
+      return {
+        activeIds: [],
+        minimizedIds: [],
+        registry: {},
+      };
+    }),
 }));

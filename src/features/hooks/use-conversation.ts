@@ -295,20 +295,39 @@ export const useMessageStore = create<MessageState>((set) => ({
   },
   setBulkParticipantsSeen: (conversationId, data) => {
     set((state) => {
-      const newConvMap: Record<string, ViewerInfo[]> = {};
-      if (!data)
-        return {
-          messageUserSeenMap: { ...state.messageUserSeenMap, [conversationId]: {} },
-        };
-      Object.entries(data).forEach(([userId, seenInfo]) => {
-        if (!newConvMap[seenInfo.messageId]) {
-          newConvMap[seenInfo.messageId] = [];
-        }
-        newConvMap[seenInfo.messageId].push({
-          userId,
-          seenAt: seenInfo.seenAt,
+      if (!data) return state;
+
+      const currentConvMap = state.messageUserSeenMap?.[conversationId] || {};
+
+      const toTime = (value: string) => {
+        const t = new Date(value).getTime();
+        return Number.isFinite(t) ? t : 0;
+      };
+
+      const mergedByUser: Record<string, { messageId: string; seenAt: string }> = {};
+
+      Object.entries(currentConvMap).forEach(([messageId, viewers]) => {
+        viewers.forEach((viewer) => {
+          const existing = mergedByUser[viewer.userId];
+          if (!existing || toTime(viewer.seenAt) > toTime(existing.seenAt)) {
+            mergedByUser[viewer.userId] = { messageId, seenAt: viewer.seenAt };
+          }
         });
       });
+
+      Object.entries(data).forEach(([userId, seenInfo]) => {
+        const existing = mergedByUser[userId];
+        if (!existing || toTime(seenInfo.seenAt) > toTime(existing.seenAt)) {
+          mergedByUser[userId] = { messageId: seenInfo.messageId, seenAt: seenInfo.seenAt };
+        }
+      });
+
+      const newConvMap: Record<string, ViewerInfo[]> = {};
+      Object.entries(mergedByUser).forEach(([userId, seenInfo]) => {
+        if (!newConvMap[seenInfo.messageId]) newConvMap[seenInfo.messageId] = [];
+        newConvMap[seenInfo.messageId].push({ userId, seenAt: seenInfo.seenAt });
+      });
+
       return {
         messageUserSeenMap: {
           ...state.messageUserSeenMap,

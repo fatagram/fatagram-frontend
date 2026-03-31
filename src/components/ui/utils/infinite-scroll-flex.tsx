@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { RefObject, useEffect, useLayoutEffect, useRef } from "react";
+import { RefObject, useEffect, useRef } from "react";
 
 interface InfiniteScrollFlexProps extends ComponentProps {
   items: any[];
@@ -41,16 +41,12 @@ export default function InfiniteScrollFlex({
   itemKey,
   emptyComponent,
 }: InfiniteScrollFlexProps) {
-  const isInitialLoad = useRef(true);
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const lastItemRef = useRef<HTMLDivElement>(null);
 
   const isAtBottomRef = useRef(true);
   const isFetchingRef = useRef(false);
-
-  const prevIsLoading = useRef(false);
-  const prevScrollHeightRef = useRef<number | null>(0);
 
   useEffect(() => {
     isFetchingRef.current = isLoading;
@@ -59,32 +55,27 @@ export default function InfiniteScrollFlex({
   useEffect(() => {
     const target = lastItemRef.current;
     if (!target || !desc) return;
-
     const observer = new IntersectionObserver(
       ([entry]) => {
         isAtBottomRef.current = entry.isIntersecting;
+        console.log("isAtBottom:", isAtBottomRef.current);
       },
       {
         root: parentRef?.current || containerRef.current,
-        threshold: 0.1,
       },
     );
 
     observer.observe(target);
     return () => observer.disconnect();
-  }, [items[0], desc]);
+  }, [desc]);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
 
-    const observer = new IntersectionObserver(async ([entry]) => {
+    const observer = new IntersectionObserver(([entry]) => {
       if (entry.isIntersecting && hasMore && !isLoading && !isFetchingRef.current) {
-        const scrollContainer = parentRef?.current || containerRef.current;
-        if (scrollContainer && desc) {
-          prevScrollHeightRef.current = scrollContainer.scrollHeight;
-        }
-        await onLoadMore();
+        onLoadMore();
       }
     });
 
@@ -95,34 +86,18 @@ export default function InfiniteScrollFlex({
     };
   }, [sentinelRef, isLoading, hasMore]);
 
-  useLayoutEffect(() => {
-    const scrollContainer = parentRef?.current || containerRef.current;
-    if (!scrollContainer || !desc) return;
-    if (isLoading && !prevIsLoading.current) {
-      prevScrollHeightRef.current = scrollContainer.scrollHeight;
-    }
-
-    if (!isLoading && prevIsLoading.current) {
-      const newScrollHeight = scrollContainer.scrollHeight;
-      const delta = newScrollHeight - (prevScrollHeightRef.current ?? newScrollHeight);
-      scrollContainer.scrollTop = scrollContainer.scrollTop + delta;
-      prevScrollHeightRef.current = null;
-    }
-
-    isFetchingRef.current = isLoading;
-    prevIsLoading.current = isLoading;
-  }, [isLoading, desc]);
-
   useEffect(() => {
     if (!lastItemRef.current) return;
+    const scrollContainer = parentRef?.current || containerRef.current;
+    if (!scrollContainer) return;
 
     const observer = new ResizeObserver(() => {
       if (isAtBottomRef.current) {
-        lastItemRef.current?.scrollIntoView({ behavior: "auto" });
+        scrollContainer.scrollTop = scrollContainer.scrollHeight;
       }
     });
 
-    observer.observe(lastItemRef.current);
+    observer.observe(scrollContainer);
     return () => observer.disconnect();
   }, [items.length]);
 
@@ -135,21 +110,15 @@ export default function InfiniteScrollFlex({
       )}
       style={{
         gap: gap ?? "0.5rem",
-        overflowAnchor: "none",
       }}
       ref={containerRef}
     >
       {items.map((item, index) => (
         <div key={itemKey(item, index)}>
-          {itemTemplate
-            ? itemTemplate(
-                item,
-                index,
-                index === (desc ? 0 : items.length - 1) ? lastItemRef : null,
-              )
-            : item}
+          {itemTemplate ? itemTemplate(item, index, null) : item}
         </div>
       ))}
+      <div className="h-[1px] w-1 order-first" ref={lastItemRef}></div>
       {hasMore && <div ref={sentinelRef} className={clsx("h-[20px] w-[20px] order-last")} />}
       {isLoading && (
         <>

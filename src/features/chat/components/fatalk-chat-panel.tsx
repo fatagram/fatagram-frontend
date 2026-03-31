@@ -55,13 +55,15 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     if (!conversationData?.id) return;
 
     const checkAndMarkAsRead = async () => {
-      if (document.hasFocus()) {
-        markAsReadLocal(conversationData.id, conversationData.lastMessage?.id || "");
-        await markAsRead({
-          conversationId: conversationData.id,
-          messageId: conversationData.lastMessage?.id || "",
-        });
-      }
+      if (!document.hasFocus()) return;
+      const lastMsgId = conversationData.lastMessage?.id;
+      if (!lastMsgId) return; // nothing to mark
+
+      markAsReadLocal(conversationData.id, lastMsgId);
+      await markAsRead({
+        conversationId: conversationData.id,
+        messageId: lastMsgId,
+      });
     };
     checkAndMarkAsRead();
     window.addEventListener("focus", checkAndMarkAsRead);
