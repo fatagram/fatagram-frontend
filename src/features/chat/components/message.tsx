@@ -49,42 +49,33 @@ export const MessageList: React.FC<MessageListProps> = ({
   );
 
   return (
-    <div
-      className={clsx("flex flex-col gap-[0.1rem] overflow-y-auto", className)}
-      ref={containerRef}
-    >
-      <div className="relative ">
-        <InfiniteScroll
-          items={messages}
-          onLoadMore={fetchNextPage}
-          className="flex flex-col gap-[0.1rem] "
-          itemTemplate={(
-            item: any,
-            index: number,
-            ref: RefObject<HTMLDivElement | null> | null,
-          ) => (
-            <MessageRow
-              ref={ref}
-              message={item}
-              messages={messages}
-              userId={userId}
-              index={index}
-              isGroup={isGroup}
-              conversationId={conversationId}
-            />
-          )}
-          hasMore={!!hasNextPage}
-          isLoading={isFetchingNextPage}
-          loadingSkeleton={messageSkeleton}
-          numberOfSkeletons={2}
-          gap={2}
-          desc={true}
-          parentRef={parentRef ?? containerRef}
-          itemKey={(item) => item.id}
-          isShowLastSeen={true}
-          lastSeen={lastSeen}
-        />
-      </div>
+    <div className={clsx("flex flex-col gap-[0.1rem] ", className)} ref={containerRef}>
+      <InfiniteScroll
+        items={messages}
+        onLoadMore={fetchNextPage}
+        className="flex flex-col gap-[0.1rem] "
+        itemTemplate={(item: any, index: number, ref: RefObject<HTMLDivElement | null> | null) => (
+          <MessageRow
+            ref={ref}
+            message={item}
+            messages={messages}
+            userId={userId}
+            index={index}
+            isGroup={isGroup}
+            conversationId={conversationId}
+          />
+        )}
+        hasMore={!!hasNextPage}
+        isLoading={isFetchingNextPage}
+        loadingSkeleton={messageSkeleton}
+        numberOfSkeletons={2}
+        gap={2}
+        desc={true}
+        parentRef={parentRef}
+        itemKey={(item) => item.id}
+        isShowLastSeen={true}
+        lastSeen={lastSeen}
+      />
     </div>
   );
 };

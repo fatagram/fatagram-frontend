@@ -123,7 +123,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               sz="xs"
               className={clsx("mb-1", isMyMessage ? "text-right mr-1" : "text-left ml-1")}
             >
-              {userInfo?.infos.fullName}
+              {userInfo?.infos.fullName ?? <span className="invisible">_</span>}
             </Text>
           )}
           <div
@@ -180,11 +180,11 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           </div>
         )}
       </div>
-      {seenBy?.length > 0 && (
+      {seenBy?.length > 0 && !(seenBy.length === 1 && seenBy[0].userId === userId) && (
         <div className="flex justify-end gap-1 mt-1">
           {seenBy.map((seenInfo) => {
             if (seenInfo.userId === userId) return null;
-            return <MiniAvatar key={userId} uid={seenInfo.userId} />;
+            return <MiniAvatar key={seenInfo.userId} uid={seenInfo.userId} />;
           })}
         </div>
       )}

@@ -114,12 +114,16 @@ export default function InfiniteScrollFlex({
   }, [isLoading, desc]);
 
   useEffect(() => {
-    if (isAtBottomRef.current && lastItemRef.current) {
-      lastItemRef.current.scrollIntoView({
-        behavior: isInitialLoad.current ? "auto" : "smooth",
-      });
-      isInitialLoad.current = false;
-    }
+    if (!lastItemRef.current) return;
+
+    const observer = new ResizeObserver(() => {
+      if (isAtBottomRef.current) {
+        lastItemRef.current?.scrollIntoView({ behavior: "auto" });
+      }
+    });
+
+    observer.observe(lastItemRef.current);
+    return () => observer.disconnect();
   }, [items.length]);
 
   return (

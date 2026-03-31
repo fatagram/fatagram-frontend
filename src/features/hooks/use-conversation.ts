@@ -257,31 +257,27 @@ export const useMessageStore = create<MessageState>((set) => ({
     })),
   setParticipantsSeen: (conversationId, userId, participantSeen) => {
     set((state) => {
-      const currentConvMap = state.messageUserSeenMap?.[conversationId] || {};
-      console.log(
-        "CCC Updating seen status for conversation:",
-        conversationId,
-        "userId:",
-        userId,
-        "participantSeen:",
-        participantSeen,
-      );
-      Object.entries(currentConvMap).forEach(([messageId, viewers]) => {
-        currentConvMap[messageId] = viewers.filter((v) => v.userId !== userId);
-        if (currentConvMap[messageId].length === 0) {
-          delete currentConvMap[messageId];
+      const rawConvMap = state.messageUserSeenMap?.[conversationId] || {};
+      const currentConvMap = JSON.parse(JSON.stringify(rawConvMap));
+
+      Object.keys(currentConvMap).forEach((mId) => {
+        currentConvMap[mId] = currentConvMap[mId].filter((v: any) => v.userId !== userId);
+        if (currentConvMap[mId].length === 0) {
+          delete currentConvMap[mId];
         }
       });
+
       const newMsgId = participantSeen.messageId;
       if (!currentConvMap[newMsgId]) {
         currentConvMap[newMsgId] = [];
       }
-      currentConvMap[newMsgId].push({
-        userId,
-        seenAt: participantSeen.seenAt,
-      });
 
-      console.log("Current messageUserSeenMap for conversation", conversationId, currentConvMap);
+      if (!currentConvMap[newMsgId].some((v: any) => v.userId === userId)) {
+        currentConvMap[newMsgId].push({
+          userId,
+          seenAt: participantSeen.seenAt,
+        });
+      }
 
       return {
         messageUserSeenMap: {
