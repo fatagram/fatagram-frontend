@@ -3,17 +3,19 @@ import { Message } from "@/types/entities/message.type";
 import { Avatar, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState, memo } from "react";
-import { useGetUserProfile } from "@/features/hooks/use-user-profile";
+import { useEffect, useState, memo, useMemo } from "react";
+import { useGetUserProfile, useGetUserProfileForChat } from "@/features/hooks/use-user-profile";
 import { useFormatTime } from "@/utils/format-time";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { isSystemMessage } from "../helpers/conversation-helpers";
+import { useMessageStore } from "@/features/hooks/use-conversation";
 
 interface MessageProps extends ComponentProps {
   message: Message;
   isMyMessage?: boolean;
   messages: Message[];
   userId?: string;
+  conversationId?: string;
   index: number;
   isGroup?: boolean;
   ref: React.RefObject<HTMLDivElement | null> | null;
@@ -23,6 +25,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   message,
   index,
   userId,
+  conversationId,
   messages,
   isGroup,
   className,
@@ -36,6 +39,11 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const isPending = message.status === "pending";
   const isFailed = message.status === "failed";
   const isSystem = isSystemMessage(message.type);
+  const { messageUserSeenMap } = useMessageStore();
+  const seenBy = useMemo(
+    () => messageUserSeenMap?.[conversationId || ""]?.[message.id || ""] || [],
+    [messageUserSeenMap, conversationId, message.id],
+  );
 
   const isShowTime =
     index === messages.length - 1 ||
@@ -137,8 +145,8 @@ const MessageRowComponent: React.FC<MessageProps> = ({
             <Text
               sz="sm"
               wrap="whitespace-pre-wrap"
-              className={clsx(isMyMessage ? "text-text-message" : "text-text-main")}
               weight="regular"
+              className={clsx(isMyMessage ? "text-white " : "text-text-main")}
             >
               {message.content}
             </Text>
@@ -148,21 +156,23 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               </div>
             )}
           </div>
-          <div
-            className={clsx(
-              "flex items-center justify-end mr-2 overflow-hidden transition-all duration-200",
-              isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0",
-            )}
-          >
-            {isFooterVisible && !isFailed && !isPending && (
-              <Text sz="xs">
-                {t("conversations.sent")}{" "}
-                {getDiffBetween(message.createdAt, new Date(), "second") > 60 && (
-                  <Text sz="xs">{formatTime(message.createdAt)}</Text>
-                )}
-              </Text>
-            )}
-          </div>
+          {(seenBy?.length === 0 || (seenBy.length === 1 && seenBy[0].userId === userId)) && (
+            <div
+              className={clsx(
+                "flex items-center justify-end mr-2 overflow-hidden transition-all duration-200",
+                isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0",
+              )}
+            >
+              {isFooterVisible && !isFailed && !isPending && (
+                <Text sz="xs">
+                  {t("conversations.sent")}{" "}
+                  {getDiffBetween(message.createdAt, new Date(), "second") > 60 && (
+                    <Text sz="xs">{formatTime(message.createdAt)}</Text>
+                  )}
+                </Text>
+              )}
+            </div>
+          )}
         </div>
         {isFailed && (
           <div className="flex items-center justify-center">
@@ -170,8 +180,21 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           </div>
         )}
       </div>
+      {seenBy?.length > 0 && (
+        <div className="flex justify-end gap-1 mt-1">
+          {seenBy.map((seenInfo) => {
+            if (seenInfo.userId === userId) return null;
+            return <MiniAvatar key={userId} uid={seenInfo.userId} />;
+          })}
+        </div>
+      )}
     </div>
   );
 };
+
+export const MiniAvatar = memo(({ uid }: { uid: string }) => {
+  const { data: userInfo } = useGetUserProfileForChat(uid);
+  return <Avatar sz="xs" src={userInfo?.infos.avatar} alt="mini" />;
+});
 
 export const MessageRow = memo(MessageRowComponent);

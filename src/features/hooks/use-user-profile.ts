@@ -31,6 +31,14 @@ export const useGetUserProfile = (userId?: string) => {
   });
 };
 
+export const useGetUserProfileForChat = (userId?: string) => {
+  return useSafeQueryResult({
+    queryKey: profileQueryKey(userId ?? ""),
+    fn: async () => await userProfileService.getProfile(userId!, "id,fullName,avatar"),
+    enabled: !!userId,
+  });
+};
+
 export const useGetUserAvatar = (userId: string) => {
   return useSafeQueryResult({
     queryKey: avatarQueryKey(userId),

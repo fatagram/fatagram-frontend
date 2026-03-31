@@ -13,6 +13,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSnackbar } from "@/contexts";
+import { create } from "zustand";
 
 const conversationKeys = {
   list: (queryParams?: Omit<CursorQuery<string>, "cursor">) =>
@@ -61,7 +62,6 @@ export const useCreateGroupConversation = () => {
     },
     {
       onError: (error) => {
-        console.log("Failed to create group conversation:", error);
         showSnackbar(error?.code ?? "Tạo cuộc trò chuyện nhóm thất bại", "error");
       },
     },
@@ -70,10 +70,31 @@ export const useCreateGroupConversation = () => {
 
 export const useMarkConversationAsRead = () => {
   return useResultFetcher(
-    async ({ conversationId, messageId }: { conversationId: string; messageId: string }) => {
-      return await conversationService.markAsRead(conversationId, messageId);
-    },
+    async ({ conversationId, messageId }: { conversationId: string; messageId: string }) =>
+      await conversationService.markAsRead(conversationId, messageId),
   );
+};
+
+export const useLocalMarkAsRead = () => {
+  const { markAsRead } = useConversationCacheMutations();
+  return (conversationId: string, messageId: string) => {
+    markAsRead(conversationId, messageId);
+  };
+};
+
+export const useGetPariticipantsSeen = (conversationId: string) => {
+  return useSafeQueryResult({
+    queryKey: ["conversation", conversationId, "participantsSeen"],
+    fn: async () => await conversationService.getParticipantsSeen(conversationId),
+    enabled: !!conversationId,
+    options: {
+      onSuccess: (data) => {
+        useMessageStore
+          .getState()
+          .setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
+      },
+    },
+  });
 };
 
 export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor">) => {
@@ -84,6 +105,20 @@ export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor
     fn: async (cursor?: string) =>
       await conversationService.getConversations({ ...queryParams, cursor }),
     enabled: !!userId,
+    options: {
+      onSuccess: (data) => {
+        const conversations = data.items;
+        if (conversations.length > 0) {
+          const lastMessageIds: Record<string, string> = {};
+          conversations.forEach((conv) => {
+            if (conv.lastMessage) {
+              lastMessageIds[conv.id] = conv.lastMessage.id;
+            }
+          });
+          useMessageStore.getState().setBulkLastMessages(lastMessageIds);
+        }
+      },
+    },
   });
 };
 
@@ -126,6 +161,13 @@ export const useConversationCacheMutations = () => {
     });
 
     updateDetailCache(conversationId, updateFn);
+  };
+
+  const markAsRead = async (conversationId: string, messageId: string) => {
+    updateConversationInCache(conversationId, (conv) => ({
+      ...conv,
+      myLastSeenMessageId: messageId,
+    }));
   };
 
   const pushConversationToTop = async (
@@ -175,5 +217,102 @@ export const useConversationCacheMutations = () => {
     });
   };
 
-  return { pushConversationToTop, updateConversationInCache };
+  return { pushConversationToTop, updateConversationInCache, markAsRead };
 };
+
+interface MessageState {
+  lastMessageMap: Record<string, string>;
+  messageUserSeenMap?: Record<string, Record<string, { userId: string; seenAt: string }[]>>;
+  setLastMessage: (conversationId: string, messageId: string) => void;
+  setBulkLastMessages: (data: Record<string, string>) => void;
+  setParticipantsSeen: (
+    conversationId: string,
+    userId: string,
+    participantSeen: { messageId: string; seenAt: string },
+  ) => void;
+  setBulkParticipantsSeen: (
+    conversationId: string,
+    data: Record<string, { messageId: string; seenAt: string }>,
+  ) => void;
+}
+
+interface ViewerInfo {
+  userId: string;
+  seenAt: string;
+}
+
+export const useMessageStore = create<MessageState>((set) => ({
+  lastMessageMap: {},
+  messageUserSeenMap: {},
+  setLastMessage: (conversationId, messageId) =>
+    set((state) => ({
+      lastMessageMap: {
+        ...state.lastMessageMap,
+        [conversationId]: messageId,
+      },
+    })),
+  setBulkLastMessages: (data) =>
+    set(() => ({
+      lastMessageMap: data,
+    })),
+  setParticipantsSeen: (conversationId, userId, participantSeen) => {
+    set((state) => {
+      const currentConvMap = state.messageUserSeenMap?.[conversationId] || {};
+      console.log(
+        "CCC Updating seen status for conversation:",
+        conversationId,
+        "userId:",
+        userId,
+        "participantSeen:",
+        participantSeen,
+      );
+      Object.entries(currentConvMap).forEach(([messageId, viewers]) => {
+        currentConvMap[messageId] = viewers.filter((v) => v.userId !== userId);
+        if (currentConvMap[messageId].length === 0) {
+          delete currentConvMap[messageId];
+        }
+      });
+      const newMsgId = participantSeen.messageId;
+      if (!currentConvMap[newMsgId]) {
+        currentConvMap[newMsgId] = [];
+      }
+      currentConvMap[newMsgId].push({
+        userId,
+        seenAt: participantSeen.seenAt,
+      });
+
+      console.log("Current messageUserSeenMap for conversation", conversationId, currentConvMap);
+
+      return {
+        messageUserSeenMap: {
+          ...state.messageUserSeenMap,
+          [conversationId]: currentConvMap,
+        },
+      };
+    });
+  },
+  setBulkParticipantsSeen: (conversationId, data) => {
+    set((state) => {
+      const newConvMap: Record<string, ViewerInfo[]> = {};
+      if (!data)
+        return {
+          messageUserSeenMap: { ...state.messageUserSeenMap, [conversationId]: {} },
+        };
+      Object.entries(data).forEach(([userId, seenInfo]) => {
+        if (!newConvMap[seenInfo.messageId]) {
+          newConvMap[seenInfo.messageId] = [];
+        }
+        newConvMap[seenInfo.messageId].push({
+          userId,
+          seenAt: seenInfo.seenAt,
+        });
+      });
+      return {
+        messageUserSeenMap: {
+          ...state.messageUserSeenMap,
+          [conversationId]: newConvMap,
+        },
+      };
+    });
+  },
+}));

@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, useEffect, useLayoutEffect, useRef } from "react";
 
 interface InfiniteScrollFlexProps extends ComponentProps {
   items: any[];
@@ -47,6 +47,14 @@ export default function InfiniteScrollFlex({
   const lastItemRef = useRef<HTMLDivElement>(null);
 
   const isAtBottomRef = useRef(true);
+  const isFetchingRef = useRef(false);
+
+  const prevIsLoading = useRef(false);
+  const prevScrollHeightRef = useRef<number | null>(0);
+
+  useEffect(() => {
+    isFetchingRef.current = isLoading;
+  }, [isLoading]);
 
   useEffect(() => {
     const target = lastItemRef.current;
@@ -71,7 +79,11 @@ export default function InfiniteScrollFlex({
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(async ([entry]) => {
-      if (entry.isIntersecting && hasMore) {
+      if (entry.isIntersecting && hasMore && !isLoading && !isFetchingRef.current) {
+        const scrollContainer = parentRef?.current || containerRef.current;
+        if (scrollContainer && desc) {
+          prevScrollHeightRef.current = scrollContainer.scrollHeight;
+        }
         await onLoadMore();
       }
     });
@@ -81,7 +93,25 @@ export default function InfiniteScrollFlex({
     return () => {
       observer.disconnect();
     };
-  }, [sentinelRef, hasMore]);
+  }, [sentinelRef, isLoading, hasMore]);
+
+  useLayoutEffect(() => {
+    const scrollContainer = parentRef?.current || containerRef.current;
+    if (!scrollContainer || !desc) return;
+    if (isLoading && !prevIsLoading.current) {
+      prevScrollHeightRef.current = scrollContainer.scrollHeight;
+    }
+
+    if (!isLoading && prevIsLoading.current) {
+      const newScrollHeight = scrollContainer.scrollHeight;
+      const delta = newScrollHeight - (prevScrollHeightRef.current ?? newScrollHeight);
+      scrollContainer.scrollTop = scrollContainer.scrollTop + delta;
+      prevScrollHeightRef.current = null;
+    }
+
+    isFetchingRef.current = isLoading;
+    prevIsLoading.current = isLoading;
+  }, [isLoading, desc]);
 
   useEffect(() => {
     if (isAtBottomRef.current && lastItemRef.current) {
@@ -101,6 +131,7 @@ export default function InfiniteScrollFlex({
       )}
       style={{
         gap: gap ?? "0.5rem",
+        overflowAnchor: "none",
       }}
       ref={containerRef}
     >
@@ -115,12 +146,7 @@ export default function InfiniteScrollFlex({
             : item}
         </div>
       ))}
-      {hasMore && (
-        <div
-          ref={sentinelRef}
-          className={clsx("absolute h-[20px] w-[20px]", desc ? "top-[50px]" : "bottom-0")}
-        />
-      )}
+      {hasMore && <div ref={sentinelRef} className={clsx("h-[20px] w-[20px] order-last")} />}
       {isLoading && (
         <>
           {Array.from({ length: numberOfSkeletons }).map((_, index) => (

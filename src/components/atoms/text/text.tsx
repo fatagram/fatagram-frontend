@@ -15,7 +15,7 @@ const textSizes: Record<Size, string> = {
 export type TextWeight = "light" | "regular" | "medium" | "bold" | "extrabold";
 const weightClasses: Record<TextWeight, string> = {
   light: "font-light",
-  regular: "font-[450]",
+  regular: "font-[400]",
   medium: "font-medium",
   bold: "font-bold",
   extrabold: "font-extrabold",

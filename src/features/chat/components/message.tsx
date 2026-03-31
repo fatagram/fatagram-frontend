@@ -5,6 +5,8 @@ import InfiniteScroll from "@/components/ui/utils/infinite-scroll-flex";
 import { RefObject, useMemo, useRef } from "react";
 import { useMessages } from "@/features/hooks/use-message";
 import { MessageRow } from "./message-row";
+import { Skeleton } from "@/components/atoms";
+import { useGetPariticipantsSeen } from "@/features/hooks/use-conversation";
 
 interface MessageListProps extends ComponentProps {
   isGroup?: boolean;
@@ -29,15 +31,19 @@ export const MessageList: React.FC<MessageListProps> = ({
     hasNextPage,
     isFetchingNextPage,
   } = useMessages(conversationId, { sortDesc: true, limit: 20 });
+
+  const { data: _ } = useGetPariticipantsSeen(conversationId);
+
   const messages = useMemo(() => {
     return _messages ? _messages.pages.flatMap((page) => page.items) : [];
   }, [_messages]);
 
   const messageSkeleton = (
-    <div className="flex gap-2 w-full animate-pulse">
-      <div className="w-8 h-8 bg-gray-700 rounded-full flex-shrink-0"></div>
-      <div className="flex-1">
-        <div className="h-4 bg-gray-700 rounded w-3/4"></div>
+    <div className="flex gap-2 w-full">
+      <Skeleton variant="circle" sz="md" />
+      <div className="flex flex-col w-[60%] gap-1">
+        <Skeleton variant="text" sz="sm" className="w-[150px]" />
+        <Skeleton variant="text" sz="sm" className="w-[100px]" />
       </div>
     </div>
   );
@@ -64,6 +70,7 @@ export const MessageList: React.FC<MessageListProps> = ({
               userId={userId}
               index={index}
               isGroup={isGroup}
+              conversationId={conversationId}
             />
           )}
           hasMore={!!hasNextPage}

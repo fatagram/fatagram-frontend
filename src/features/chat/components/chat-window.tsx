@@ -5,7 +5,12 @@ import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { useGetConversation, useMarkConversationAsRead } from "@/features/hooks/use-conversation";
+import {
+  useGetConversation,
+  useLocalMarkAsRead,
+  useMarkConversationAsRead,
+  useMessageStore,
+} from "@/features/hooks/use-conversation";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { ChatInput } from "./chat-input";
 import { useTranslation } from "react-i18next";
@@ -22,14 +27,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const { renderConversationName } = useRenderConversationContent();
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   const { fetch: markAsRead } = useMarkConversationAsRead();
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [conversationId]);
+  const markAsReadLocal = useLocalMarkAsRead();
+  const { lastMessageMap } = useMessageStore();
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
@@ -48,12 +50,37 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const isLoadingHeader =
     isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
 
-  const handleMarkAsRead = async () => {
-    await markAsRead({
-      conversationId: conversationData.id,
-      messageId: conversationData.lastMessage?.id ?? "",
-    });
-  };
+  useEffect(() => {
+    if (!conversationData?.id) return;
+
+    const checkAndMarkAsRead = async () => {
+      if (!panelRef.current) return;
+
+      const isPanelFocused = panelRef.current.contains(document.activeElement);
+      if (document.hasFocus() && isPanelFocused) {
+        markAsReadLocal(conversationData.id, lastMessageMap[conversationData.id]);
+        await markAsRead({
+          conversationId: conversationData.id,
+          messageId: lastMessageMap[conversationData.id],
+        });
+      }
+    };
+
+    checkAndMarkAsRead();
+
+    const panel = panelRef.current;
+    if (panel) {
+      panel.addEventListener("focusin", checkAndMarkAsRead);
+      panel.addEventListener("click", checkAndMarkAsRead);
+    }
+
+    return () => {
+      if (panel) {
+        panel.removeEventListener("focusin", checkAndMarkAsRead);
+        panel.removeEventListener("click", checkAndMarkAsRead);
+      }
+    };
+  }, [conversationData?.id, conversationData?.lastMessage?.id]);
 
   useEffect(() => {
     if (tempUser) {
@@ -80,6 +107,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         "border border-gray-700 shadow-xl",
         className,
       )}
+      ref={panelRef}
     >
       <div className="flex items-center px-4 h-[13%] bg-bg-second">
         {isLoadingHeader ? (
@@ -158,7 +186,6 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         conversationId={!tempTargetId ? conversationId : undefined}
         correlationId={tempTargetId ? conversationId : undefined}
         receiverId={tempTargetId}
-        onFocus={handleMarkAsRead}
       />
     </div>
   );

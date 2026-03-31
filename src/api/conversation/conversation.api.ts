@@ -1,7 +1,7 @@
 import { CursorResult, Result } from "@/api/common/result";
 import { buildApiPath, apiGet, apiPost } from "../common/api-helpers";
 import { CursorQuery } from "@/types/query";
-import { ConversationDto } from "./dto/conversation.dto";
+import { ConversationDto, ParticipantsSeenDto } from "./dto/conversation.dto";
 import { MessageResponseDto } from "../message/dto/message.dto";
 
 const PREFIX = buildApiPath("/conversation");
@@ -37,6 +37,10 @@ export class ConversationService {
 
   public async markAsRead(conversationId: string, messageId: string): Promise<Result<void>> {
     return await apiPost(`${PREFIX}/${conversationId}/messages/markRead/${messageId}`);
+  }
+
+  public async getParticipantsSeen(conversationId: string): Promise<Result<ParticipantsSeenDto>> {
+    return await apiGet(`${PREFIX}/${conversationId}/participants/seen`);
   }
 }
 

@@ -3,7 +3,11 @@ import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { MessageList } from "./message";
 import { useEffect, useRef, useState } from "react";
-import { useGetConversation, useMarkConversationAsRead } from "@/features/hooks/use-conversation";
+import {
+  useGetConversation,
+  useLocalMarkAsRead,
+  useMarkConversationAsRead,
+} from "@/features/hooks/use-conversation";
 import { ChatInput } from "./chat-input";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { useTranslation } from "react-i18next";
@@ -26,6 +30,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const { t } = useTranslation();
 
   const { fetch: markAsRead } = useMarkConversationAsRead();
+  const markAsReadLocal = useLocalMarkAsRead();
 
   const {
     data: conversationData,
@@ -47,25 +52,23 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   }, [conversationData, renderConversationName]);
 
   useEffect(() => {
-    const lastMsgId = conversationData?.lastMessage?.id;
+    if (!conversationData?.id) return;
 
-    if (conversationData?.id && lastMsgId) {
-      const handler = setTimeout(() => {
-        markAsRead({
+    const checkAndMarkAsRead = async () => {
+      if (document.hasFocus()) {
+        markAsReadLocal(conversationData.id, conversationData.lastMessage?.id || "");
+        await markAsRead({
           conversationId: conversationData.id,
-          messageId: lastMsgId,
+          messageId: conversationData.lastMessage?.id || "",
         });
-      }, 500);
-
-      return () => clearTimeout(handler);
-    }
+      }
+    };
+    checkAndMarkAsRead();
+    window.addEventListener("focus", checkAndMarkAsRead);
+    return () => {
+      window.removeEventListener("focus", checkAndMarkAsRead);
+    };
   }, [conversationData?.id, conversationData?.lastMessage?.id]);
-
-  useEffect(() => {
-    if (scrollRef.current) {
-      scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
-    }
-  }, [conversationId]);
 
   if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
     return (

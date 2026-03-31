@@ -18,4 +18,15 @@ export interface SeenDto {
   conversationId: string;
   messageId: string;
   userId: string;
+  seenAt: string;
+}
+
+export interface ParticipantsSeenDto {
+  conversationId: string;
+  participantsSeenInfo: {
+    [userId: string]: {
+      messageId: string;
+      seenAt: string;
+    };
+  };
 }

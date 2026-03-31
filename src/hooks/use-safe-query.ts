@@ -150,7 +150,7 @@ export function useSafeInfiniteQueryResult<TData, TCursor = string>(
       const errRes = query.error as unknown as unknown as Result<CursorResult<TData, TCursor>>;
       options?.onError?.(errRes.error, errRes.errors);
     }
-  }, [query.status]);
+  }, [query.dataUpdatedAt, query.errorUpdatedAt]);
 
   return query;
 }

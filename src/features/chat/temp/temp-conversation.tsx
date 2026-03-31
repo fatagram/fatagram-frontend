@@ -35,7 +35,6 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
 
   const handleSendMessage = async () => {
     if (!tempId) return;
-    console.log("Sending message to temp user:", { tempId, message, correlationId });
     await sendMessage(
       {
         correlationId: correlationId,

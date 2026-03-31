@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useGetConversation } from "@/features/hooks/use-conversation";
+import { useCallback } from "react";
 
 interface BubbleChatProps extends ComponentProps {
   conversationId: string;
@@ -16,12 +17,11 @@ export const BubbleChat: React.FC<BubbleChatProps> = ({ className, conversationI
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
   const { data: tempUser } = useGetUserProfile(tempTargetId!);
   const { data: conversationData } = useGetConversation(conversationId);
-
   const chatAvatar = tempUser ? tempUser.infos.avatar : conversationData?.avatarUrl || "";
 
-  const handleOnClick = () => {
+  const handleOnClick = useCallback(async () => {
     toggleMinimize(conversationId);
-  };
+  }, [toggleMinimize, conversationId]);
 
   const handleOnClose = (e: React.MouseEvent) => {
     e.stopPropagation();

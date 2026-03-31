@@ -6,11 +6,12 @@ import { useAuth } from "@/contexts";
 import { useConversations } from "@/features/hooks/use-conversation";
 import { useFormatTime } from "@/utils/format-time";
 import clsx from "clsx";
-import { useCallback, useEffect, useMemo } from "react";
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { isSystemMessage } from "../helpers/conversation-helpers";
 import { MessageType } from "@/types/entities/message.type";
+import { useLocation } from "react-router-dom";
 
 interface ChatListProps extends ComponentProps {
   onConversationClick?: (conversationId: string) => void;
@@ -22,11 +23,10 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   const { formatTime } = useFormatTime();
   const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
   const { renderConversationName, renderSystemMessage } = useRenderConversationContent();
-  const conversations = useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
+  const conversations = data?.pages.flatMap((page) => page.items) || [];
+  const location = useLocation();
 
-  useEffect(() => {
-    console.log("First conversations page:", conversations[0]);
-  }, [conversations]);
+  const currentConversationId = location.pathname.split("/").pop();
 
   const handleConversationClick = useCallback(
     async (conversationId: string) => {
@@ -43,7 +43,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
         className="border-0 w-full"
         type="search"
       />
-      <div className="flex-1 overflow-y-auto mt-2 scrollbar-hide sm:scrollbar-default">
+      <div className="flex-1 overflow-y-auto px-2 mt-2 scrollbar-hide sm:scrollbar-default">
         <InfiniteScrollFlex
           items={conversations}
           onLoadMore={fetchNextPage}
@@ -61,6 +61,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
                   "flex gap-2 px-1 py-3",
                   "hover:bg-bg-fourth rounded-lg transition-colors",
                   "cursor-pointer",
+                  conversation.id === currentConversationId && "bg-bg-fourth",
                 )}
                 onClick={() => handleConversationClick(conversation.id)}
               >
