@@ -2,12 +2,11 @@ import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { RefObject, useEffect, useRef } from "react";
 
-interface InfiniteScrollFlexProps extends ComponentProps {
+interface InfiniteScrollReverseProps extends ComponentProps {
   items: any[];
-  loadingSkeleton?: React.ReactNode;
-  numberOfSkeletons?: number;
   hasMore?: boolean;
   isLoading?: boolean;
+  spinnerContent?: React.ReactNode;
   itemTemplate?: (
     item: any,
     index: number,
@@ -22,13 +21,12 @@ interface InfiniteScrollFlexProps extends ComponentProps {
   emptyComponent?: React.ReactNode;
 }
 
-export default function InfiniteScrollFlex({
+export default function InfiniteScrollReverse({
   items,
-  loadingSkeleton,
-  numberOfSkeletons = 4,
   className,
   hasMore = true,
   isLoading = false,
+  spinnerContent,
   itemTemplate,
   onLoadMore,
   isShowLastSeen = false,
@@ -37,7 +35,7 @@ export default function InfiniteScrollFlex({
   parentRef,
   itemKey,
   emptyComponent,
-}: InfiniteScrollFlexProps) {
+}: InfiniteScrollReverseProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(isLoading);
@@ -75,7 +73,7 @@ export default function InfiniteScrollFlex({
   return (
     <div
       ref={containerRef}
-      className={clsx("relative overflow-y-auto h-full flex flex-col", className)}
+      className={clsx("relative overflow-y-auto h-full flex flex-col-reverse", className)}
       style={{ gap: gap ?? "0.5rem" }}
     >
       {items.map((item, index) => (
@@ -84,13 +82,17 @@ export default function InfiniteScrollFlex({
         </div>
       ))}
 
-      {isLoading && (
-        <div className="relative w-full" style={{ overflowAnchor: "none" }}>
-          {Array.from({ length: numberOfSkeletons }).map((_, index) => (
-            <div key={`skeleton-${index}`} className="relative">
-              {loadingSkeleton ?? "Loading..."}
+      {hasMore && (
+        <div
+          className="w-full flex justify-center py-2 shrink-0"
+          style={{ overflowAnchor: "none" }}
+        >
+          {spinnerContent ?? (
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/30 text-xs text-primary-600">
+              <i className="fa-solid fa-circle-notch animate-spin" />
+              <span>Đang tải tin nhắn cũ...</span>
             </div>
-          ))}
+          )}
         </div>
       )}
 
@@ -103,7 +105,7 @@ export default function InfiniteScrollFlex({
       )}
 
       {items.length > 0 && !hasMore && !isLoading && isShowLastSeen && (
-        <div className="w-full text-center py-4 text-text-third text-sm">
+        <div className="order-last w-full text-center py-4 text-text-third text-sm">
           {lastSeen || "Đã xem hết kết quả."}
         </div>
       )}

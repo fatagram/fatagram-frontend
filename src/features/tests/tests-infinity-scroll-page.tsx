@@ -42,7 +42,6 @@ export default function ThuNghiemCuon() {
         isLoading={dangTaiDuLieu}
         hasMore={conDuLieu}
         onLoadMore={xuLyTaiThem}
-        desc={true}
         itemKey={(tinNhan) => tinNhan.maDinhDanh}
         itemTemplate={(tinNhan) => (
           <div className="p-3 m-2 bg-blue-100 rounded-lg text-black shadow-sm">

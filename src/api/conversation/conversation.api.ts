@@ -10,6 +10,8 @@ export class ConversationService {
   public async getConversations(
     query: CursorQuery<string>,
   ): Promise<Result<CursorResult<ConversationDto, string>>> {
+    // delay
+    await new Promise((resolve) => setTimeout(resolve, 1500));
     return await apiGet(`${PREFIX}`, query);
   }
 

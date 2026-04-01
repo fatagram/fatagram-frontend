@@ -21,6 +21,7 @@ export const useMessages = (
     queryKey: messagesQueryKey(conversationId, queryParams),
     fn: async (cursor?: string) => {
       // delay
+      await new Promise((resolve) => setTimeout(resolve, 1500));
       return await conversationService.getMessages(conversationId, { ...queryParams, cursor });
     },
     enabled: !!conversationId,

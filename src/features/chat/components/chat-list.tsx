@@ -1,7 +1,6 @@
 import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { Text, Avatar, Textbox, Skeleton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
-import InfiniteScrollFlex from "@/components/ui/utils/infinite-scroll-flex";
 import { useAuth } from "@/contexts";
 import { useConversations } from "@/features/hooks/use-conversation";
 import { useFormatTime } from "@/utils/format-time";
@@ -13,6 +12,7 @@ import { isSystemMessage } from "../helpers/conversation-helpers";
 import { MessageType } from "@/types/entities/message.type";
 import { useLocation } from "react-router-dom";
 import { useOpenChat } from "../hooks/use-open-chat";
+import InfiniteScrollFlex from "@/components/ui/utils/infinite-scroll-flex";
 
 interface ChatListProps extends ComponentProps {
   onConversationClick?: (conversationId: string) => void;
@@ -118,7 +118,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
           itemKey={(item) => item.id}
           isLoading={isLoading || isFetching}
           loadingSkeleton={
-            <div className={clsx("flex items-center")}>
+            <div className={clsx("flex items-center my-2")}>
               <Skeleton sz="md" variant="circle" />
               <div className={clsx("flex flex-col w-full flex-1 gap-2 ml-2")}>
                 <Skeleton className={clsx("w-full")} sz="sm" />
