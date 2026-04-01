@@ -108,7 +108,7 @@ export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor
 
   return useSafeInfiniteQueryResult({
     queryKey: conversationKeys.list(queryParams),
-    fn: async (cursor?: string) =>
+    fn: async (cursor?: string) => 
       await conversationService.getConversations({ ...queryParams, cursor }),
     enabled: !!userId,
     options: {
