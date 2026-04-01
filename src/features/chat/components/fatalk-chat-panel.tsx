@@ -127,10 +127,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         )}
       </div>
 
-      <div
-        className="flex-1 overflow-y-auto px-4 py-2 bg-bg-main scrollbar-hide sm:scrollbar-default"
-        ref={scrollRef}
-      >
+      <div className="flex-1 px-4 py-2 bg-bg-main min-h-0" ref={scrollRef}>
         <MessageList
           key={conversationId}
           conversationId={conversationId}

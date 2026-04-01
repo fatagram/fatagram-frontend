@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { RefObject, useEffect, useRef } from "react";
+import { RefObject, useEffect, useLayoutEffect, useRef } from "react";
 
 interface InfiniteScrollFlexProps extends ComponentProps {
   items: any[];
@@ -14,7 +14,6 @@ interface InfiniteScrollFlexProps extends ComponentProps {
     ref: RefObject<HTMLDivElement | null> | null,
   ) => React.ReactNode;
   onLoadMore: () => void;
-  rootMargin?: string;
   isShowLastSeen?: boolean;
   lastSeen?: React.ReactNode;
   gap?: string | number;
@@ -43,110 +42,79 @@ export default function InfiniteScrollFlex({
 }: InfiniteScrollFlexProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
-  const lastItemRef = useRef<HTMLDivElement>(null);
 
-  const isAtBottomRef = useRef(true);
-  const isFetchingRef = useRef(false);
-
-  useEffect(() => {
-    isFetchingRef.current = isLoading;
-  }, [isLoading]);
-
-  useEffect(() => {
-    const target = lastItemRef.current;
-    if (!target || !desc) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        isAtBottomRef.current = entry.isIntersecting;
-        console.log("isAtBottom:", isAtBottomRef.current);
-      },
-      {
-        root: parentRef?.current || containerRef.current,
-      },
-    );
-
-    observer.observe(target);
-    return () => observer.disconnect();
-  }, [desc]);
+  const prevHeightRef = useRef<number>(0);
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel) return;
+    if (!sentinel || !desc) return;
 
-    const observer = new IntersectionObserver(([entry]) => {
-      if (entry.isIntersecting && hasMore && !isLoading && !isFetchingRef.current) {
-        onLoadMore();
-      }
-    });
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting && hasMore && !isLoading) {
+          onLoadMore();
+        }
+      },
+      {
+        root: parentRef?.current || containerRef.current,
+        rootMargin: "150px",
+      },
+    );
 
     observer.observe(sentinel);
-
-    return () => {
-      observer.disconnect();
-    };
-  }, [sentinelRef, isLoading, hasMore]);
-
-  useEffect(() => {
-    if (!lastItemRef.current) return;
-    const scrollContainer = parentRef?.current || containerRef.current;
-    if (!scrollContainer) return;
-
-    const observer = new ResizeObserver(() => {
-      if (isAtBottomRef.current) {
-        scrollContainer.scrollTop = scrollContainer.scrollHeight;
-      }
-    });
-
-    observer.observe(scrollContainer);
     return () => observer.disconnect();
-  }, [items.length]);
+  }, [hasMore, isLoading, desc, onLoadMore, parentRef]);
+
+  useLayoutEffect(() => {
+    const el = containerRef.current;
+    if (!el || !desc) return;
+
+    const currentHeight = el.scrollHeight;
+    const diff = currentHeight - prevHeightRef.current;
+
+    if (prevHeightRef.current > 0 && diff > 0) {
+      if (el.scrollTop > 0) {
+        el.scrollTop += diff;
+      }
+    }
+
+    prevHeightRef.current = currentHeight;
+  }, [items.length, desc]);
 
   return (
     <div
+      ref={containerRef}
       className={clsx(
-        "relative overflow-y-auto",
+        "relative overflow-y-auto h-full",
         desc ? "flex flex-col-reverse" : "flex flex-col",
         className,
       )}
-      style={{
-        gap: gap ?? "0.5rem",
-      }}
-      ref={containerRef}
+      style={{ gap: gap ?? "0.5rem", overflowAnchor: "none" }}
     >
+      {/* Loading Overlay */}
+      {isLoading && (
+        <div className="absolute top-0 left-0 w-full flex justify-center py-2 z-10 pointer-events-none">
+          <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-bg-card shadow-sm border border-border-main text-xs text-text-third">
+            <i className="fa-solid fa-circle-notch animate-spin" />
+            <span>Đang tải tin nhắn cũ...</span>
+          </div>
+        </div>
+      )}
+
       {items.map((item, index) => (
         <div key={itemKey(item, index)}>
           {itemTemplate ? itemTemplate(item, index, null) : item}
         </div>
       ))}
-      <div className="h-[1px] w-1 order-first" ref={lastItemRef}></div>
-      {hasMore && <div ref={sentinelRef} className={clsx("h-[20px] w-[20px] order-last")} />}
-      {isLoading && (
-        <>
-          {Array.from({ length: numberOfSkeletons }).map((_, index) => (
-            <div
-              key={index}
-              style={{
-                textAlign: "center",
-                padding: "1rem 0",
-              }}
-            >
-              {loadingSkeleton ?? "Loading..."}
-            </div>
-          ))}
-        </>
-      )}
+
+      {desc && hasMore && <div ref={sentinelRef} className="order-last h-px w-full shrink-0" />}
+
       {items.length > 0 && !hasMore && !isLoading && isShowLastSeen && (
-        <div
-          style={{
-            gridColumn: "1 / -1",
-            textAlign: "center",
-            padding: "1rem 0",
-            color: "var(--text-third-color)",
-          }}
-        >
+        <div className="order-last w-full text-center py-4 text-text-third text-sm">
           {lastSeen || "Đã xem hết kết quả."}
         </div>
       )}
+
       {items.length === 0 && !isLoading && emptyComponent}
     </div>
   );
