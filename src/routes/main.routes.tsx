@@ -16,6 +16,7 @@ import { settingRoutes } from "./setting.routes";
 import FatalkPage from "@/features/chat/fatalk-page";
 import { ConversationPage } from "@/features/chat/conversation/conversation-page";
 import { TempConversation } from "@/features/chat/temp/temp-conversation";
+import ThuNghiemCuon from "@/features/tests/tests-infinity-scroll-page";
 
 export const mainRoutes: RouteType[] = [
   {
@@ -56,6 +57,11 @@ export const mainRoutes: RouteType[] = [
       },
       { path: "/loading", type: "public", element: <LoadingPage /> },
       { path: "*", type: "public", element: <NotFoundPage /> },
+      {
+        path: "/thu-nghiem-cuon",
+        element: <ThuNghiemCuon />,
+        type: "public",
+      },
     ],
   },
   {

@@ -20,6 +20,7 @@ export const useMessages = (
   return useSafeInfiniteQueryResult({
     queryKey: messagesQueryKey(conversationId, queryParams),
     fn: async (cursor?: string) => {
+      // delay
       return await conversationService.getMessages(conversationId, { ...queryParams, cursor });
     },
     enabled: !!conversationId,

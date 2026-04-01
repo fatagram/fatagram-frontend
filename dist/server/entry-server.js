@@ -6179,14 +6179,20 @@ function InfiniteScrollFlex({
 }) {
   const containerRef = useRef(null);
   const sentinelRef = useRef(null);
+  const isFetchingRef = useRef(false);
+  useEffect(() => {
+    isFetchingRef.current = isLoading;
+  }, [isLoading]);
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel || !desc) return;
     const observer = new IntersectionObserver(
       ([entry]) => {
-        if (entry.isIntersecting && hasMore && !isLoading) {
-          requestAnimationFrame(() => {
-            onLoadMore();
+        if (entry.isIntersecting && hasMore && !isLoading && !isFetchingRef.current) {
+          requestAnimationFrame(async () => {
+            isFetchingRef.current = true;
+            console.log("Load more triggered by infinite scroll");
+            await onLoadMore();
           });
         }
       },
@@ -6211,12 +6217,26 @@ function InfiniteScrollFlex({
       ),
       style: { gap: gap ?? "0.5rem" },
       children: [
-        isLoading && /* @__PURE__ */ jsx("div", { className: "absolute top-0 left-0 w-full flex justify-center py-2 z-10 pointer-events-none", children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-bg-card shadow-sm border border-border-main text-xs text-text-third", children: [
-          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
-          /* @__PURE__ */ jsx("span", { children: "Đang tải tin nhắn cũ..." })
-        ] }) }),
+        isLoading && /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: "absolute top-0 left-0 w-full flex justify-center py-2 z-10 pointer-events-none",
+            style: { overflowAnchor: "none" },
+            children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-bg-card shadow-sm border border-border-main text-xs text-text-third", children: [
+              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
+              /* @__PURE__ */ jsx("span", { children: "Đang tải tin nhắn cũ..." })
+            ] })
+          }
+        ),
         items.map((item, index) => /* @__PURE__ */ jsx("div", { children: itemTemplate ? itemTemplate(item, index, null) : item }, itemKey(item, index))),
-        desc && hasMore && /* @__PURE__ */ jsx("div", { ref: sentinelRef, className: "order-last h-px w-full shrink-0" }),
+        desc && hasMore && /* @__PURE__ */ jsx(
+          "div",
+          {
+            ref: sentinelRef,
+            className: clsx("bg-red-500 h-px w-full shrink-0 "),
+            style: { overflowAnchor: "none" }
+          }
+        ),
         items.length > 0 && !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx("div", { className: "order-last w-full text-center py-4 text-text-third text-sm", children: lastSeen || "Đã xem hết kết quả." }),
         items.length === 0 && !isLoading && emptyComponent
       ]
@@ -6318,10 +6338,11 @@ function isSystemMessage(messageType) {
 }
 const MessageRowComponent = ({
   message,
+  prevMessage,
+  nextMessage,
   index,
   userId,
   conversationId,
-  messages,
   isGroup,
   className,
   userInfo,
@@ -6339,10 +6360,10 @@ const MessageRowComponent = ({
     () => messageUserSeenMap?.[conversationId || ""]?.[message.id || ""] || [],
     [messageUserSeenMap, conversationId, message.id]
   );
-  const isShowTime = index === messages.length - 1 || isSystemMessage(messages[index + 1]?.type) || getDiffBetween(message.createdAt, messages[index + 1]?.createdAt, "minute") > 30;
-  const isPrevMessageShowTime = index === 0 || getDiffBetween(message.createdAt, messages[index - 1]?.createdAt, "minute") > 30;
-  const isLastMessageInGroup = index === messages.length - 1 || messages[index + 1]?.senderId !== message.senderId || isShowTime;
-  const isFirstMessageInGroup = index === 0 || messages[index - 1]?.senderId !== message.senderId || isPrevMessageShowTime;
+  const isShowTime = !prevMessage || isSystemMessage(prevMessage.type) || getDiffBetween(message.createdAt, prevMessage.createdAt, "minute") > 30;
+  const isPrevMessageShowTime = nextMessage && getDiffBetween(message.createdAt, nextMessage.createdAt, "minute") > 30;
+  const isLastMessageInGroup = !prevMessage || prevMessage.senderId !== message.senderId || isShowTime;
+  const isFirstMessageInGroup = !nextMessage || nextMessage.senderId !== message.senderId || isPrevMessageShowTime;
   const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
   const isMyMessage = message.senderId === userId;
   const isShowName = isLastMessageInGroup && !isMyMessage && isGroup;
@@ -6494,7 +6515,7 @@ const MessageList = ({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage
-  } = useMessages(conversationId, { sortDesc: true, limit: 10 });
+  } = useMessages(conversationId, { sortDesc: true, limit: 20 });
   const { data: _ } = useGetPariticipantsSeen(conversationId);
   const messages = useMemo(() => {
     return _messages ? _messages.pages.flatMap((page) => page.items) : [];
@@ -6515,24 +6536,29 @@ const MessageList = ({
     {
       items: messages,
       onLoadMore: fetchNextPage,
-      className: clsx("flex flex-col gap-[0.1rem]", className),
-      itemTemplate: (item, index, ref) => /* @__PURE__ */ jsx(
-        MessageRow,
-        {
-          ref,
-          message: item,
-          messages,
-          userId,
-          index,
-          isGroup,
-          conversationId,
-          userInfo: userProfileMap[item?.senderId || ""]
-        }
-      ),
+      className: clsx("flex flex-col gap-[0.1rem] px-1", className),
+      itemTemplate: (item, index, ref) => {
+        const prevMessage = index < messages.length - 1 ? messages[index + 1] : void 0;
+        const nextMessage = index > 0 ? messages[index - 1] : void 0;
+        return /* @__PURE__ */ jsx(
+          MessageRow,
+          {
+            ref,
+            message: item,
+            prevMessage,
+            nextMessage,
+            userId,
+            index,
+            isGroup,
+            conversationId,
+            userInfo: userProfileMap[item?.senderId || ""]
+          }
+        );
+      },
       hasMore: !!hasNextPage,
       isLoading: isFetchingNextPage,
       loadingSkeleton: messageSkeleton,
-      numberOfSkeletons: 2,
+      numberOfSkeletons: 1,
       gap: 2,
       desc: true,
       parentRef,
