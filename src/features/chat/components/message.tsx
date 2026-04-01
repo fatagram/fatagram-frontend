@@ -30,7 +30,7 @@ export const MessageList: React.FC<MessageListProps> = ({
     fetchNextPage,
     hasNextPage,
     isFetchingNextPage,
-  } = useMessages(conversationId, { sortDesc: true, limit: 10 });
+  } = useMessages(conversationId, { sortDesc: true, limit: 20 });
 
   const { data: _ } = useGetPariticipantsSeen(conversationId);
 
@@ -58,19 +58,24 @@ export const MessageList: React.FC<MessageListProps> = ({
     <InfiniteScroll
       items={messages}
       onLoadMore={fetchNextPage}
-      className={clsx("flex flex-col gap-[0.1rem]", className)}
-      itemTemplate={(item: any, index: number, ref: RefObject<HTMLDivElement | null> | null) => (
-        <MessageRow
-          ref={ref}
-          message={item}
-          messages={messages}
-          userId={userId}
-          index={index}
-          isGroup={isGroup}
-          conversationId={conversationId}
-          userInfo={userProfileMap[item?.senderId || ""]}
-        />
-      )}
+      className={clsx("flex flex-col gap-[0.1rem] px-1", className)}
+      itemTemplate={(item: any, index: number, ref: RefObject<HTMLDivElement | null> | null) => {
+        const prevMessage = index < messages.length - 1 ? messages[index + 1] : undefined;
+        const nextMessage = index > 0 ? messages[index - 1] : undefined;
+        return (
+          <MessageRow
+            ref={ref}
+            message={item}
+            prevMessage={prevMessage}
+            nextMessage={nextMessage}
+            userId={userId}
+            index={index}
+            isGroup={isGroup}
+            conversationId={conversationId}
+            userInfo={userProfileMap[item?.senderId || ""]}
+          />
+        );
+      }}
       hasMore={!!hasNextPage}
       isLoading={isFetchingNextPage}
       loadingSkeleton={messageSkeleton}

@@ -12,8 +12,9 @@ import { useGetUserProfiles } from "@/features/hooks/use-user-profile";
 
 interface MessageProps extends ComponentProps {
   message: Message;
+  prevMessage?: Message;
+  nextMessage?: Message;
   isMyMessage?: boolean;
-  messages: Message[];
   userId?: string;
   conversationId?: string;
   index: number;
@@ -24,10 +25,11 @@ interface MessageProps extends ComponentProps {
 
 const MessageRowComponent: React.FC<MessageProps> = ({
   message,
+  prevMessage,
+  nextMessage,
   index,
   userId,
   conversationId,
-  messages,
   isGroup,
   className,
   userInfo,
@@ -47,17 +49,15 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   );
 
   const isShowTime =
-    index === messages.length - 1 ||
-    isSystemMessage(messages[index + 1]?.type) ||
-    getDiffBetween(message.createdAt, messages[index + 1]?.createdAt, "minute") > 30;
+    !prevMessage ||
+    isSystemMessage(prevMessage.type) ||
+    getDiffBetween(message.createdAt, prevMessage.createdAt, "minute") > 30;
   const isPrevMessageShowTime =
-    index === 0 || getDiffBetween(message.createdAt, messages[index - 1]?.createdAt, "minute") > 30;
+    nextMessage && getDiffBetween(message.createdAt, nextMessage.createdAt, "minute") > 30;
   const isLastMessageInGroup =
-    index === messages.length - 1 ||
-    messages[index + 1]?.senderId !== message.senderId ||
-    isShowTime;
+    !prevMessage || prevMessage.senderId !== message.senderId || isShowTime;
   const isFirstMessageInGroup =
-    index === 0 || messages[index - 1]?.senderId !== message.senderId || isPrevMessageShowTime;
+    !nextMessage || nextMessage.senderId !== message.senderId || isPrevMessageShowTime;
   const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
   const isMyMessage = message.senderId === userId;
 

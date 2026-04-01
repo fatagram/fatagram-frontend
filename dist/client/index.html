@@ -5,16 +5,71 @@
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Fatagram</title>
-    <meta name="theme-color" content="#2563eb" />
-    <link rel="manifest" href="/manifest.webmanifest" />
+    <meta name="theme-color" content="#ffffff" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="default" />
+    <script>
+      (function () {
+        try {
+          var validThemes = [
+            "light",
+            "dark",
+            "universe",
+            "neon",
+            "dark-sea",
+            "dark-yellow",
+            "light-yellow-pink",
+            "pastel-yellow-pink",
+            "dark-red",
+            "emerald",
+            "aurora",
+          ];
+          var theme = localStorage.getItem("theme");
+          if (!theme || validThemes.indexOf(theme) === -1) {
+            var prefersDark =
+              window.matchMedia && window.matchMedia("(prefers-color-scheme: dark)").matches;
+            theme = prefersDark ? "dark" : "light";
+          }
+
+          // Keep data-theme consistent as early as possible
+          document.documentElement.setAttribute("data-theme", theme);
+
+          // Set status bar color to match navbar/background (bg-main)
+          var themeToColor = {
+            light: "#ffffff",
+            dark: "#000000",
+            universe: "#0f172a",
+            neon: "#0a0a0a",
+            "dark-sea": "#022c22",
+            "dark-yellow": "#1c1917",
+            "light-yellow-pink": "#ffffff",
+            "pastel-yellow-pink": "#fff7d9",
+            "dark-red": "#0c0a0a",
+            emerald: "#022c22",
+            aurora: "#031220",
+          };
+          var color = themeToColor[theme] || "#ffffff";
+          var meta = document.querySelector('meta[name="theme-color"]');
+          if (!meta) {
+            meta = document.createElement("meta");
+            meta.setAttribute("name", "theme-color");
+            document.head.appendChild(meta);
+          }
+          meta.setAttribute("content", color);
+        } catch (e) {
+          // ignore
+        }
+      })();
+    </script>
+    <link rel="manifest" href="/manifest.json" />
     <link
       rel="stylesheet"
       href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css"
     />
     <!--app-head-->
-    <script type="module" crossorigin src="/assets/index-C2AZG7-F.js"></script>
-    <link rel="stylesheet" crossorigin href="/assets/index-CcvFms-G.css">
-  <link rel="manifest" href="/manifest.webmanifest"><script id="vite-plugin-pwa:register-sw" src="/registerSW.js"></script></head>
+    <script type="module" crossorigin src="/assets/index-CxKn_eeh.js"></script>
+    <link rel="stylesheet" crossorigin href="/assets/index-OEzOdkKl.css">
+  </head>
   <body>
     <div id="root"><!--app-html--></div>
   </body>

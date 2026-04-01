@@ -43,8 +43,6 @@ export default function InfiniteScrollFlex({
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
 
-  const prevHeightRef = useRef<number>(0);
-
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel || !desc) return;
@@ -52,7 +50,9 @@ export default function InfiniteScrollFlex({
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (entry.isIntersecting && hasMore && !isLoading) {
-          onLoadMore();
+          requestAnimationFrame(() => {
+            onLoadMore();
+          });
         }
       },
       {
@@ -62,24 +62,10 @@ export default function InfiniteScrollFlex({
     );
 
     observer.observe(sentinel);
-    return () => observer.disconnect();
+    return () => {
+      observer.disconnect();
+    };
   }, [hasMore, isLoading, desc, onLoadMore, parentRef]);
-
-  useLayoutEffect(() => {
-    const el = containerRef.current;
-    if (!el || !desc) return;
-
-    const currentHeight = el.scrollHeight;
-    const diff = currentHeight - prevHeightRef.current;
-
-    if (prevHeightRef.current > 0 && diff > 0) {
-      if (el.scrollTop > 0) {
-        el.scrollTop += diff;
-      }
-    }
-
-    prevHeightRef.current = currentHeight;
-  }, [items.length, desc]);
 
   return (
     <div
@@ -89,9 +75,8 @@ export default function InfiniteScrollFlex({
         desc ? "flex flex-col-reverse" : "flex flex-col",
         className,
       )}
-      style={{ gap: gap ?? "0.5rem", overflowAnchor: "none" }}
+      style={{ gap: gap ?? "0.5rem" }}
     >
-      {/* Loading Overlay */}
       {isLoading && (
         <div className="absolute top-0 left-0 w-full flex justify-center py-2 z-10 pointer-events-none">
           <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-bg-card shadow-sm border border-border-main text-xs text-text-third">
