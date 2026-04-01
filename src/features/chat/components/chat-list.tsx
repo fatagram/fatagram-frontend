@@ -46,8 +46,9 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
         className="border-0 w-full"
         type="search"
       />
-      <div className="flex-1 overflow-y-auto px-2 mt-2 scrollbar-hide sm:scrollbar-default">
+      <div className="flex-1 overflow-y-auto px-2 mt-2 ">
         <InfiniteScrollFlex
+          className="scrollbar-hide sm:scrollbar-default"
           items={conversations}
           onLoadMore={fetchNextPage}
           hasMore={hasNextPage}
