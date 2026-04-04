@@ -5,13 +5,15 @@ import { ChatMenu } from "./chat-menu";
 import { RefObject, useRef, useState } from "react";
 import clsx from "clsx";
 import useClickOutside from "@/hooks/use-click-outside";
+import { useGetUnreadMessageCount } from "@/features/hooks/use-conversation";
 
 interface ChatBadgeProps extends ComponentProps {}
 
 export const ChatBadge: React.FC<ChatBadgeProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
   // const navigate = useNavigate();
-  const count = 5;
+  const { data: count } = useGetUnreadMessageCount();
+  console.log("Unread message count:", count);
 
   // Refs for the menu and button
   const menuRef = useRef<HTMLDivElement>(null);

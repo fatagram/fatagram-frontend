@@ -7,6 +7,7 @@ import { useGetInfiniteUsers } from "@/features/hooks/use-user";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import clsx from "clsx";
 import { useCallback, useRef } from "react";
+import { t } from "i18next";
 
 interface CreateGroupChatProps extends ComponentProps {
   onTurnBack?: () => void;
@@ -61,12 +62,12 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
     <div className={clsx("flex flex-col h-full overflow-hidden px-2 pb-4", className)}>
       <div className="ml-1">
         <Text weight="bold" sz="md">
-          Tạo nhóm chat
+          {t("common:conversations.createGroupChat")}
         </Text>
       </div>
       <Textbox
         sz="sm"
-        placeholder="Nhập tên nhóm chat (Không bắt buộc)"
+        placeholder={t("common:conversations.enterGroupNameOptional")}
         className="w-full !rounded-lg my-2"
         ref={textboxRef}
         disabled={isFetching}

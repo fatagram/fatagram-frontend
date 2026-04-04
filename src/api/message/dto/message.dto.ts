@@ -22,4 +22,5 @@ export interface MessageResponseDto {
   type: MessageType;
   metadata?: any;
   createdAt: Date;
+  isConversationStartingFromRead: boolean;
 }

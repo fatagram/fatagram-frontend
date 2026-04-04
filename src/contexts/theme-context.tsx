@@ -34,14 +34,20 @@ interface ThemeProviderProps {
 }
 
 function getInitialTheme(): Theme {
-  const stored = localStorage.getItem("theme");
-  if (stored && ThemeList.some((t) => t === stored)) {
-    return stored as Theme;
-  }
+  if (typeof window !== "undefined") {
+    try {
+      const stored = window.localStorage.getItem("theme");
+      if (stored && ThemeList.some((t) => t === stored)) {
+        return stored as Theme;
+      }
+    } catch {
+      // Ignore storage access issues (e.g. blocked cookies/storage).
+    }
 
-  const domTheme = document.documentElement.getAttribute("data-theme");
-  if (domTheme && ThemeList.some((t) => t === domTheme)) {
-    return domTheme as Theme;
+    const domTheme = window.document?.documentElement?.getAttribute("data-theme");
+    if (domTheme && ThemeList.some((t) => t === domTheme)) {
+      return domTheme as Theme;
+    }
   }
 
   return "light";

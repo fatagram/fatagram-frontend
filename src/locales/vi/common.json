@@ -39,6 +39,10 @@
     "systemMessage": {
       "createGroup": "{{creatorName}} đã tạo nhóm"
     },
-    "privacyDescription": "Hãy yên tâm chia sẻ những khoảnh khắc tuyệt vời nhất! Cuộc trò chuyện này luôn được giữ kín và an toàn tuyệt đối."
+    "privacyDescription": "Hãy yên tâm chia sẻ những khoảnh khắc tuyệt vời nhất! Cuộc trò chuyện này luôn được giữ kín và an toàn tuyệt đối.",
+    "openFatalk": "Mở Fatalk",
+    "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)",
+    "loadingOldMessages": "Đang tải tin nhắn...",
+    "createGroupChat": "Tạo nhóm chat"
   }
 }

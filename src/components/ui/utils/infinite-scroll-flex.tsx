@@ -51,26 +51,34 @@ export default function InfiniteScrollFlex({
     }
   }, [isLoading]);
 
+  const _loadMore = async () => {
+    if (pendingLoadRef.current) return;
+    if (isLoadingRef.current) return;
+
+    pendingLoadRef.current = true;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    await onLoadMore();
+  };
+
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
+      async ([entry]) => {
         if (!entry.isIntersecting) return;
         if (!hasMore) return;
-        if (pendingLoadRef.current) return;
-        if (isLoadingRef.current) return;
-
-        pendingLoadRef.current = true;
-        onLoadMore();
+        _loadMore();
       },
-      { root: parentRef?.current || containerRef.current, rootMargin: "50px" },
+      {
+        root: parentRef?.current || containerRef.current,
+        rootMargin: "0px 0px 200px 0px",
+      },
     );
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, onLoadMore, parentRef]);
+  }, [hasMore, parentRef]);
 
   return (
     <div
@@ -97,7 +105,7 @@ export default function InfiniteScrollFlex({
       {hasMore && (
         <div
           ref={sentinelRef}
-          className={clsx("h-px w-full shrink-0")}
+          className={clsx("h-px w-full shrink-0 bg-red-500")}
           style={{ overflowAnchor: "none" }}
         />
       )}

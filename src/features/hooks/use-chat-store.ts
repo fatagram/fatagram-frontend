@@ -4,6 +4,7 @@ import { create } from "zustand";
 const CHAT_STORAGE_KEY = "fatagram_open_chats";
 
 interface ChatWindowState {
+  focusOnId: string | null;
   activeIds: string[];
   minimizedIds: string[];
   registry: Record<string, ChatMeta>;
@@ -13,6 +14,7 @@ interface ChatWindowState {
   replaceChat: (oldId: string, newId: string) => void;
   reset?: () => void;
   initializeFromStorage?: () => void;
+  setFocusOn: (id: string | null) => void;
 }
 
 const saveToStorage = (
@@ -67,6 +69,7 @@ const loadFromStorage = () => {
 };
 
 export const useChatStore = create<ChatWindowState>((set) => ({
+  focusOnId: null,
   activeIds: [],
   minimizedIds: [],
   registry: {},
@@ -161,4 +164,5 @@ export const useChatStore = create<ChatWindowState>((set) => ({
         registry: {},
       };
     }),
+  setFocusOn: (id) => set({ focusOnId: id }),
 }));

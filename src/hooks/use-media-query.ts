@@ -1,16 +1,37 @@
 import { useEffect, useState } from "react";
 
 export const useMediaQuery = (query: string) => {
-  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+  const getInitial = () => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.matchMedia(query).matches;
+    } catch {
+      return false;
+    }
+  };
+
+  const [matches, setMatches] = useState<boolean>(getInitial);
 
   useEffect(() => {
+    if (typeof window === "undefined") return;
+
     const mediaQuery = window.matchMedia(query);
     const handleChange = (event: MediaQueryListEvent) => {
       setMatches(event.matches);
     };
-    mediaQuery.addEventListener("change", handleChange);
+
+    // Some environments support addEventListener, others only addListener.
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    // Fallback for older browsers
+    // @ts-ignore - some lib types still have addListener
+    mediaQuery.addListener(handleChange);
     return () => {
-      mediaQuery.removeEventListener("change", handleChange);
+      // @ts-ignore
+      mediaQuery.removeListener(handleChange);
     };
   }, [query]);
 

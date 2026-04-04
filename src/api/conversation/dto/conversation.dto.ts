@@ -19,6 +19,7 @@ export interface SeenDto {
   messageId: string;
   userId: string;
   seenAt: string;
+  isPreviousUnread: boolean;
 }
 
 export interface ParticipantsSeenDto {

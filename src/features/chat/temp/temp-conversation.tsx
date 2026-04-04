@@ -26,11 +26,11 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
 
   useEffect(() => {
     const checkConversation = async () => {
-      if (!tempId) {
+      if (!tempUser) {
         navigate("/fatalk");
         return;
       }
-      const hasConversation = await checkConversationWith(tempId);
+      const hasConversation = await checkConversationWith(tempId!);
       if (hasConversation) {
         navigate(`/fatalk/${hasConversation}`);
       }

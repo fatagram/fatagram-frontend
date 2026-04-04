@@ -1,6 +1,7 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { RefObject, useEffect, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
 interface InfiniteScrollReverseProps extends ComponentProps {
   items: any[];
@@ -40,6 +41,7 @@ export default function InfiniteScrollReverse({
   const sentinelRef = useRef<HTMLDivElement>(null);
   const isLoadingRef = useRef(isLoading);
   const pendingLoadRef = useRef(false);
+  const { t } = useTranslation();
 
   useEffect(() => {
     isLoadingRef.current = isLoading;
@@ -49,32 +51,47 @@ export default function InfiniteScrollReverse({
     }
   }, [isLoading]);
 
+  const _loadMore = async () => {
+    if (pendingLoadRef.current) return;
+    if (isLoadingRef.current) return;
+
+    pendingLoadRef.current = true;
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      await onLoadMore();
+    } finally {
+      pendingLoadRef.current = false;
+    }
+  };
+
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel) return;
 
     const observer = new IntersectionObserver(
-      ([entry]) => {
+      async ([entry]) => {
         if (!entry.isIntersecting) return;
         if (!hasMore) return;
-        if (pendingLoadRef.current) return;
-        if (isLoadingRef.current) return;
-
-        pendingLoadRef.current = true;
-        onLoadMore();
+        _loadMore();
       },
-      { root: parentRef?.current || containerRef.current, rootMargin: "50px" },
+      {
+        root: parentRef?.current || containerRef.current,
+        rootMargin: "200px 0px 0px 0px",
+      },
     );
 
     observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, onLoadMore, parentRef]);
+    return () => {
+      observer.disconnect();
+      observer.unobserve(sentinel);
+    };
+  }, [hasMore, parentRef, items.length]);
 
   return (
     <div
       ref={containerRef}
       className={clsx("relative overflow-y-auto h-full flex flex-col-reverse", className)}
-      style={{ gap: gap ?? "0.5rem" }}
+      style={{ gap: gap ?? "0.5rem", overflowAnchor: "auto" }}
     >
       {items.map((item, index) => (
         <div key={itemKey(item, index)}>
@@ -90,7 +107,7 @@ export default function InfiniteScrollReverse({
           {spinnerContent ?? (
             <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/30 text-xs text-primary-600">
               <i className="fa-solid fa-circle-notch animate-spin" />
-              <span>Đang tải tin nhắn cũ...</span>
+              <span>{t("common:messages.loadingOldMessages")}</span>
             </div>
           )}
         </div>

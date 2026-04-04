@@ -6,7 +6,7 @@ import { useLocation, useNavigate } from "react-router-dom";
 
 export const useOpenChat = () => {
   const isMobile = useMediaQuery("(max-width: 640px)");
-  const { openChat, registry } = useChatStore();
+  const { openChat, registry, focusOnId, setFocusOn } = useChatStore();
   const { fetch: fetchConversationWith } = useFetchConversationWith();
   const navigate = useNavigate();
   const location = useLocation();
@@ -74,8 +74,10 @@ export const useOpenChat = () => {
   );
 
   return {
+    focusOnId,
     openChat: _openChat,
     openChatWithTarget: _openChatWithTarget,
     checkConversationWith: _checkConversationWith,
+    setFocusOn,
   };
 };

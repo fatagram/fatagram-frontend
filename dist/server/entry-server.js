@@ -2259,13 +2259,18 @@ const ThemeContext = createContext({
   }
 });
 function getInitialTheme() {
-  const stored = localStorage.getItem("theme");
-  if (stored && ThemeList.some((t) => t === stored)) {
-    return stored;
-  }
-  const domTheme = document.documentElement.getAttribute("data-theme");
-  if (domTheme && ThemeList.some((t) => t === domTheme)) {
-    return domTheme;
+  if (typeof window !== "undefined") {
+    try {
+      const stored = window.localStorage.getItem("theme");
+      if (stored && ThemeList.some((t) => t === stored)) {
+        return stored;
+      }
+    } catch {
+    }
+    const domTheme = window.document?.documentElement?.getAttribute("data-theme");
+    if (domTheme && ThemeList.some((t) => t === domTheme)) {
+      return domTheme;
+    }
   }
   return "light";
 }
@@ -6160,89 +6165,6 @@ const UserMenu = ({ menuClassName, menuStyle }) => {
     )
   ] });
 };
-function InfiniteScrollFlex({
-  items,
-  loadingSkeleton,
-  numberOfSkeletons = 4,
-  className,
-  hasMore = true,
-  isLoading = false,
-  itemTemplate,
-  onLoadMore,
-  isShowLastSeen = false,
-  lastSeen,
-  gap,
-  desc = false,
-  parentRef,
-  itemKey,
-  emptyComponent
-}) {
-  const containerRef = useRef(null);
-  const sentinelRef = useRef(null);
-  const isFetchingRef = useRef(false);
-  useEffect(() => {
-    isFetchingRef.current = isLoading;
-  }, [isLoading]);
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || !desc) return;
-    const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting && hasMore && !isLoading && !isFetchingRef.current) {
-          requestAnimationFrame(async () => {
-            isFetchingRef.current = true;
-            console.log("Load more triggered by infinite scroll");
-            await onLoadMore();
-          });
-        }
-      },
-      {
-        root: parentRef?.current || containerRef.current,
-        rootMargin: "150px"
-      }
-    );
-    observer.observe(sentinel);
-    return () => {
-      observer.disconnect();
-    };
-  }, [hasMore, isLoading, desc, onLoadMore, parentRef]);
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      ref: containerRef,
-      className: clsx(
-        "relative overflow-y-auto h-full",
-        desc ? "flex flex-col-reverse" : "flex flex-col",
-        className
-      ),
-      style: { gap: gap ?? "0.5rem" },
-      children: [
-        isLoading && /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: "absolute top-0 left-0 w-full flex justify-center py-2 z-10 pointer-events-none",
-            style: { overflowAnchor: "none" },
-            children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-bg-card shadow-sm border border-border-main text-xs text-text-third", children: [
-              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
-              /* @__PURE__ */ jsx("span", { children: "Đang tải tin nhắn cũ..." })
-            ] })
-          }
-        ),
-        items.map((item, index) => /* @__PURE__ */ jsx("div", { children: itemTemplate ? itemTemplate(item, index, null) : item }, itemKey(item, index))),
-        desc && hasMore && /* @__PURE__ */ jsx(
-          "div",
-          {
-            ref: sentinelRef,
-            className: clsx("bg-red-500 h-px w-full shrink-0 "),
-            style: { overflowAnchor: "none" }
-          }
-        ),
-        items.length > 0 && !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx("div", { className: "order-last w-full text-center py-4 text-text-third text-sm", children: lastSeen || "Đã xem hết kết quả." }),
-        items.length === 0 && !isLoading && emptyComponent
-      ]
-    }
-  );
-}
 const PREFIX$2 = buildApiPath("/message");
 class MessageService {
   async sendMessage(request) {
@@ -6502,6 +6424,88 @@ const MiniAvatar = memo(({ uid, seenAt }) => {
   );
 });
 const MessageRow = memo(MessageRowComponent);
+function InfiniteScrollReverse({
+  items,
+  className,
+  hasMore = true,
+  isLoading = false,
+  spinnerContent,
+  itemTemplate,
+  onLoadMore,
+  isShowLastSeen = false,
+  lastSeen,
+  gap,
+  parentRef,
+  itemKey,
+  emptyComponent
+}) {
+  const containerRef = useRef(null);
+  const sentinelRef = useRef(null);
+  const isLoadingRef = useRef(isLoading);
+  const pendingLoadRef = useRef(false);
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+    if (!isLoading) {
+      pendingLoadRef.current = false;
+    }
+  }, [isLoading]);
+  const _loadMore = async () => {
+    if (pendingLoadRef.current) return;
+    if (isLoadingRef.current) return;
+    pendingLoadRef.current = true;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    await onLoadMore();
+  };
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        if (!hasMore) return;
+        _loadMore();
+      },
+      {
+        root: parentRef?.current || containerRef.current,
+        rootMargin: "200px 0px 0px 0px"
+      }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, parentRef]);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      ref: containerRef,
+      className: clsx("relative overflow-y-auto h-full flex flex-col-reverse", className),
+      style: { gap: gap ?? "0.5rem" },
+      children: [
+        items.map((item, index) => /* @__PURE__ */ jsx("div", { children: itemTemplate ? itemTemplate(item, index, null) : item }, itemKey(item, index))),
+        hasMore && /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: "w-full flex justify-center py-2 shrink-0",
+            style: { overflowAnchor: "none" },
+            children: spinnerContent ?? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/30 text-xs text-primary-600", children: [
+              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
+              /* @__PURE__ */ jsx("span", { children: "Đang tải tin nhắn cũ..." })
+            ] })
+          }
+        ),
+        hasMore && /* @__PURE__ */ jsx(
+          "div",
+          {
+            ref: sentinelRef,
+            className: clsx("h-px w-full shrink-0"),
+            style: { overflowAnchor: "none" }
+          }
+        ),
+        items.length > 0 && !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx("div", { className: "order-last w-full text-center py-4 text-text-third text-sm", children: lastSeen || "Đã xem hết kết quả." }),
+        items.length === 0 && !isLoading && emptyComponent
+      ]
+    }
+  );
+}
 const MessageList = ({
   isGroup,
   className,
@@ -6524,19 +6528,15 @@ const MessageList = ({
     return [...new Set(messages.map((m) => m.senderId).filter(Boolean))];
   }, [messages]);
   const { userProfileMap } = useGetUserProfiles(senderIds);
-  const messageSkeleton = /* @__PURE__ */ jsxs("div", { className: "flex gap-2 w-full", children: [
-    /* @__PURE__ */ jsx(Skeleton, { variant: "circle", sz: "md" }),
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-col w-[60%] gap-1", children: [
-      /* @__PURE__ */ jsx(Skeleton, { variant: "text", sz: "sm", className: "w-[150px]" }),
-      /* @__PURE__ */ jsx(Skeleton, { variant: "text", sz: "sm", className: "w-[100px]" })
-    ] })
-  ] });
   return /* @__PURE__ */ jsx(
-    InfiniteScrollFlex,
+    InfiniteScrollReverse,
     {
       items: messages,
       onLoadMore: fetchNextPage,
-      className: clsx("flex flex-col gap-[0.1rem] px-1", className),
+      className: clsx(
+        "flex flex-col gap-[0.1rem] px-1 sm:scrollbar-default scrollbar-hide",
+        className
+      ),
       itemTemplate: (item, index, ref) => {
         const prevMessage = index < messages.length - 1 ? messages[index + 1] : void 0;
         const nextMessage = index > 0 ? messages[index - 1] : void 0;
@@ -6557,10 +6557,7 @@ const MessageList = ({
       },
       hasMore: !!hasNextPage,
       isLoading: isFetchingNextPage,
-      loadingSkeleton: messageSkeleton,
-      numberOfSkeletons: 1,
       gap: 2,
-      desc: true,
       parentRef,
       itemKey: (item) => item.id,
       isShowLastSeen: true,
@@ -6835,6 +6832,79 @@ const ChatLayer = ({ className }) => {
     /* @__PURE__ */ jsx(BubbleChatList, { className: "mb-5" })
   ] });
 };
+function InfiniteScrollFlex({
+  items,
+  loadingSkeleton,
+  numberOfSkeletons = 4,
+  className,
+  hasMore = true,
+  isLoading = false,
+  itemTemplate,
+  onLoadMore,
+  isShowLastSeen = false,
+  lastSeen,
+  gap,
+  parentRef,
+  itemKey,
+  emptyComponent
+}) {
+  const containerRef = useRef(null);
+  const sentinelRef = useRef(null);
+  const isLoadingRef = useRef(isLoading);
+  const pendingLoadRef = useRef(false);
+  useEffect(() => {
+    isLoadingRef.current = isLoading;
+    if (!isLoading) {
+      pendingLoadRef.current = false;
+    }
+  }, [isLoading]);
+  const _loadMore = async () => {
+    if (pendingLoadRef.current) return;
+    if (isLoadingRef.current) return;
+    pendingLoadRef.current = true;
+    await new Promise((resolve) => setTimeout(resolve, 50));
+    await onLoadMore();
+  };
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) return;
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (!entry.isIntersecting) return;
+        if (!hasMore) return;
+        _loadMore();
+      },
+      {
+        root: parentRef?.current || containerRef.current,
+        rootMargin: "0px 0px 200px 0px"
+      }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, parentRef]);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      ref: containerRef,
+      className: clsx("relative overflow-y-auto h-full flex flex-col", className),
+      style: { gap: gap ?? "0.5rem" },
+      children: [
+        items.map((item, index) => /* @__PURE__ */ jsx("div", { children: itemTemplate ? itemTemplate(item, index, null) : item }, itemKey(item, index))),
+        isLoading && /* @__PURE__ */ jsx("div", { className: "relative w-full", style: { overflowAnchor: "none" }, children: Array.from({ length: numberOfSkeletons }).map((_, index) => /* @__PURE__ */ jsx("div", { className: "relative", children: loadingSkeleton ?? "Loading..." }, `skeleton-${index}`)) }),
+        hasMore && /* @__PURE__ */ jsx(
+          "div",
+          {
+            ref: sentinelRef,
+            className: clsx("h-px w-full shrink-0"),
+            style: { overflowAnchor: "none" }
+          }
+        ),
+        items.length > 0 && !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx("div", { className: "w-full text-center py-4 text-text-third text-sm", children: lastSeen || "Đã xem hết kết quả." }),
+        items.length === 0 && !isLoading && emptyComponent
+      ]
+    }
+  );
+}
 const ChatList = ({ className, onConversationClick }) => {
   const { t } = useTranslation();
   const { userId } = useAuth();
@@ -6862,9 +6932,10 @@ const ChatList = ({ className, onConversationClick }) => {
         type: "search"
       }
     ),
-    /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto px-2 mt-2 scrollbar-hide sm:scrollbar-default", children: /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto px-2 mt-2 ", children: /* @__PURE__ */ jsx(
       InfiniteScrollFlex,
       {
+        className: "scrollbar-hide sm:scrollbar-default",
         items: conversations2,
         onLoadMore: fetchNextPage,
         hasMore: hasNextPage,
@@ -6928,7 +6999,7 @@ const ChatList = ({ className, onConversationClick }) => {
         },
         itemKey: (item) => item.id,
         isLoading: isLoading || isFetching,
-        loadingSkeleton: /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center"), children: [
+        loadingSkeleton: /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center my-2"), children: [
           /* @__PURE__ */ jsx(Skeleton, { sz: "md", variant: "circle" }),
           /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col w-full flex-1 gap-2 ml-2"), children: [
             /* @__PURE__ */ jsx(Skeleton, { className: clsx("w-full"), sz: "sm" }),
@@ -8615,6 +8686,45 @@ const TempConversation = ({ className }) => {
     }
   );
 };
+const taoDuLieuGia = (soLuong, batDauTu) => {
+  return Array.from({ length: soLuong }).map((_, chiMuc) => ({
+    maDinhDanh: batDauTu + chiMuc,
+    noiDung: `Nội dung tin nhắn số ${batDauTu + chiMuc}`
+  }));
+};
+function ThuNghiemCuon() {
+  const [danhSachTinNhan, setDanhSachTinNhan] = useState(() => taoDuLieuGia(9, 1));
+  const [dangTaiDuLieu, setDangTaiDuLieu] = useState(false);
+  const [conDuLieu, setConDuLieu] = useState(true);
+  const xuLyTaiThem = useCallback(async () => {
+    if (dangTaiDuLieu || !conDuLieu) return;
+    setDangTaiDuLieu(true);
+    await new Promise((giaiQuyet) => setTimeout(giaiQuyet, 10));
+    setDanhSachTinNhan((danhSachHienTai) => {
+      const doDaiHienTai = danhSachHienTai.length;
+      if (doDaiHienTai >= 200) {
+        setConDuLieu(false);
+        return danhSachHienTai;
+      }
+      const duLieuMoi = taoDuLieuGia(9, doDaiHienTai + 1);
+      return [...danhSachHienTai, ...duLieuMoi];
+    });
+    setDangTaiDuLieu(false);
+  }, [dangTaiDuLieu, conDuLieu]);
+  return /* @__PURE__ */ jsx("div", { className: "h-[600px] w-[400px] border border-gray-300 mx-auto mt-10 bg-white", children: /* @__PURE__ */ jsx(
+    InfiniteScrollFlex,
+    {
+      items: danhSachTinNhan,
+      isLoading: dangTaiDuLieu,
+      hasMore: conDuLieu,
+      onLoadMore: xuLyTaiThem,
+      itemKey: (tinNhan) => tinNhan.maDinhDanh,
+      itemTemplate: (tinNhan) => /* @__PURE__ */ jsx("div", { className: "p-3 m-2 bg-blue-100 rounded-lg text-black shadow-sm", children: tinNhan.noiDung }),
+      isShowLastSeen: true,
+      lastSeen: /* @__PURE__ */ jsx("span", { className: "text-gray-500", children: "Đã xem toàn bộ lịch sử trò chuyện" })
+    }
+  ) });
+}
 const mainRoutes = [
   {
     element: /* @__PURE__ */ jsx(DefaultLayout, {}),
@@ -8653,7 +8763,12 @@ const mainRoutes = [
         ]
       },
       { path: "/loading", type: "public", element: /* @__PURE__ */ jsx(LoadingPage, {}) },
-      { path: "*", type: "public", element: /* @__PURE__ */ jsx(NotFoundPage, {}) }
+      { path: "*", type: "public", element: /* @__PURE__ */ jsx(NotFoundPage, {}) },
+      {
+        path: "/thu-nghiem-cuon",
+        element: /* @__PURE__ */ jsx(ThuNghiemCuon, {}),
+        type: "public"
+      }
     ]
   },
   {

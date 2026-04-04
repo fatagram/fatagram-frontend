@@ -14,6 +14,7 @@ import {
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { ChatInput } from "./chat-input";
 import { useTranslation } from "react-i18next";
+import { useOpenChat } from "../hooks/use-open-chat";
 
 interface ChatWindowProps extends ComponentProps {
   conversationId: string;
@@ -33,6 +34,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const markAsReadLocal = useLocalMarkAsRead();
   const { lastMessageMap } = useMessageStore();
 
+  const { setFocusOn } = useOpenChat();
+
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
   const {
@@ -50,40 +53,60 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const isLoadingHeader =
     isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
 
+  const handleMarkAsReadOnFocus = useCallback(async () => {
+    if (!conversationData?.id || !document.hasFocus()) return;
+
+    setFocusOn(conversationData.id);
+
+    const lastMsgId = lastMessageMap[conversationData.id] || conversationData.lastMessage?.id;
+    if (!lastMsgId) return;
+
+    markAsReadLocal(conversationData.id, lastMsgId);
+    await markAsRead({
+      conversationId: conversationData.id,
+      messageId: lastMsgId,
+    });
+  }, [
+    conversationData?.id,
+    conversationData?.lastMessage?.id,
+    lastMessageMap,
+    markAsRead,
+    markAsReadLocal,
+    setFocusOn,
+  ]);
+
   useEffect(() => {
     if (!conversationData?.id) return;
 
-    const checkAndMarkAsRead = async () => {
-      if (!panelRef.current) return;
+    const handleUserInteract = () => {
+      void handleMarkAsReadOnFocus();
+    };
 
-      const isPanelFocused = panelRef.current.contains(document.activeElement);
-      if (document.hasFocus() && isPanelFocused) {
-        const lastMsgId = lastMessageMap[conversationData.id] || conversationData.lastMessage?.id;
-        if (!lastMsgId) return;
-
-        markAsReadLocal(conversationData.id, lastMsgId);
-        await markAsRead({
-          conversationId: conversationData.id,
-          messageId: lastMsgId,
-        });
+    const handleClickOutside = (event: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+        setFocusOn(null);
       }
     };
 
-    checkAndMarkAsRead();
+    const handleWindowBlur = () => {
+      setFocusOn(null);
+    };
 
-    const panel = panelRef.current;
-    if (panel) {
-      panel.addEventListener("focusin", checkAndMarkAsRead);
-      panel.addEventListener("click", checkAndMarkAsRead);
+    const messageArea = scrollRef.current;
+    if (messageArea) {
+      messageArea.addEventListener("click", handleUserInteract);
     }
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("blur", handleWindowBlur);
 
     return () => {
-      if (panel) {
-        panel.removeEventListener("focusin", checkAndMarkAsRead);
-        panel.removeEventListener("click", checkAndMarkAsRead);
+      if (messageArea) {
+        messageArea.removeEventListener("click", handleUserInteract);
       }
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("blur", handleWindowBlur);
     };
-  }, [conversationData?.id, conversationData?.lastMessage?.id]);
+  }, [conversationData?.id, handleMarkAsReadOnFocus, setFocusOn]);
 
   useEffect(() => {
     if (tempUser) {
@@ -96,12 +119,14 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   }, [tempUser, conversationData, renderConversationName]);
 
   const handleOnClose = useCallback(() => {
+    setFocusOn(null);
     closeChat(conversationId);
-  }, [conversationId]);
+  }, [closeChat, conversationId, setFocusOn]);
 
   const handleOnMinimum = useCallback(() => {
+    setFocusOn(null);
     toggleMinimize(conversationId);
-  }, [conversationId]);
+  }, [conversationId, setFocusOn, toggleMinimize]);
 
   return (
     <div
@@ -192,6 +217,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         conversationId={!tempTargetId ? conversationId : undefined}
         correlationId={tempTargetId ? conversationId : undefined}
         receiverId={tempTargetId}
+        onFocus={tempTargetId ? undefined : () => void handleMarkAsReadOnFocus()}
       />
     </div>
   );

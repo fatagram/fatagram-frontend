@@ -9,7 +9,7 @@ import {
   useSafeQueryResult,
 } from "@/hooks/use-safe-query";
 import { CursorQuery } from "@/types/query";
-import { useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSnackbar } from "@/contexts";
@@ -27,19 +27,6 @@ const conversationDetailQueryOptions = (conversationId: string) =>
     queryKey: conversationKeys.detail(conversationId),
     fn: async () => await conversationService.getConversation(conversationId),
   });
-
-// export const useGetConversationWith = (
-//   targetId: string,
-//   config?: SafeQueryResultOptions<any>,
-//   enabled: boolean = true,
-// ) => {
-//   return useSafeQueryResult({
-//     queryKey: conversationKeys.withUser(targetId),
-//     fn: async () => await conversationService.getConversationWith(targetId),
-//     enabled: enabled,
-//     options: config,
-//   });
-// };
 
 export const useFetchConversationWith = () => {
   return useResultFetcher(
@@ -105,12 +92,14 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
 
 export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor">) => {
   const { userId } = useAuth();
+  const queryClient = useQueryClient();
 
   return useSafeInfiniteQueryResult({
     queryKey: conversationKeys.list(queryParams),
-    fn: async (cursor?: string) => 
+    fn: async (cursor?: string) =>
       await conversationService.getConversations({ ...queryParams, cursor }),
     enabled: !!userId,
+    staleTime: Infinity,
     options: {
       onSuccess: (data) => {
         const conversations = data.items;
@@ -120,6 +109,9 @@ export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor
             if (conv.lastMessage) {
               lastMessageIds[conv.id] = conv.lastMessage.id;
             }
+            const key = ["conversation", "unread-count", conv.id];
+            const serverCount = conv.unreadMessageCount ?? 0;
+            queryClient.setQueryData(key, serverCount);
           });
           useMessageStore.getState().setBulkLastMessages(lastMessageIds);
         }
@@ -173,6 +165,7 @@ export const useConversationCacheMutations = () => {
     updateConversationInCache(conversationId, (conv) => ({
       ...conv,
       myLastSeenMessageId: messageId,
+      unreadMessageCount: 0,
     }));
   };
 
@@ -226,6 +219,61 @@ export const useConversationCacheMutations = () => {
   return { pushConversationToTop, updateConversationInCache, markAsRead };
 };
 
+export const useGetUnreadMessageCount = () => {
+  const { userId } = useAuth();
+  return useSafeQueryResult({
+    queryKey: ["conversation", "unread-count", userId],
+    fn: async () => await conversationService.getUnreadCount(),
+  });
+};
+
+type UpdateCountFn = (prev: number) => number;
+
+export const useUnreadMessageCountCacheMutations = () => {
+  const queryClient = useQueryClient();
+  const { userId } = useAuth();
+
+  const setUnreadCount = (update: UpdateCountFn) => {
+    const key = ["conversation", "unread-count", userId];
+
+    queryClient.setQueryData<number>(key, (oldCount) => {
+      const currentCount = oldCount ?? 0;
+      const newCount = update(currentCount);
+      return Math.max(0, newCount);
+    });
+  };
+
+  const setUnreadCountForConversation = (conversationId: string, update: UpdateCountFn) => {
+    const key = ["conversation", "unread-count", conversationId];
+
+    queryClient.setQueryData<number>(key, (oldCount) => {
+      const currentCount = oldCount ?? 0;
+      const newCount = update(currentCount);
+      return Math.max(0, newCount);
+    });
+  };
+
+  const getUnreadCountForConversation = (conversationId: string) => {
+    const key = ["conversation", "unread-count", conversationId];
+    return queryClient.getQueryData<number>(key) ?? 0;
+  };
+
+  return { setUnreadCount, setUnreadCountForConversation, getUnreadCountForConversation };
+};
+
+export const useUnreadMessageCountCache = (conversationId: string) => {
+  const { data: unreadCount } = useQuery({
+    queryKey: ["conversation", "unread-count", conversationId],
+    queryFn: () => {
+      return 0;
+    },
+    enabled: !!conversationId,
+    staleTime: Infinity,
+    initialData: 0,
+  });
+  return unreadCount ?? 0;
+};
+
 interface MessageState {
   lastMessageMap: Record<string, string>;
   messageUserSeenMap?: Record<string, Record<string, { userId: string; seenAt: string }[]>>;
@@ -258,8 +306,11 @@ export const useMessageStore = create<MessageState>((set) => ({
       },
     })),
   setBulkLastMessages: (data) =>
-    set(() => ({
-      lastMessageMap: data,
+    set((state) => ({
+      lastMessageMap: {
+        ...state.lastMessageMap,
+        ...data,
+      },
     })),
   setParticipantsSeen: (conversationId, userId, participantSeen) => {
     set((state) => {

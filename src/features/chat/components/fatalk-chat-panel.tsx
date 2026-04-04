@@ -13,6 +13,7 @@ import { useRenderConversationContent } from "../hooks/use-render-conversation-c
 import { useTranslation } from "react-i18next";
 import { NotFound } from "@/features/components/not-found";
 import { useNavigate } from "react-router-dom";
+import { useOpenChat } from "../hooks/use-open-chat";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
@@ -32,6 +33,8 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
 
+  const { setFocusOn } = useOpenChat();
+
   const {
     data: conversationData,
     isLoading: isLoadingConversation,
@@ -43,6 +46,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const isLoadingHeader = isLoadingConversation || isFetchingConversation;
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
     if (conversationData) {
@@ -54,10 +58,11 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   useEffect(() => {
     if (!conversationData?.id) return;
 
-    const checkAndMarkAsRead = async () => {
+    const handleUserInteract = async () => {
       if (!document.hasFocus()) return;
+      setFocusOn(conversationData.id);
       const lastMsgId = conversationData.lastMessage?.id;
-      if (!lastMsgId) return; // nothing to mark
+      if (!lastMsgId) return;
 
       markAsReadLocal(conversationData.id, lastMsgId);
       await markAsRead({
@@ -65,12 +70,39 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         messageId: lastMsgId,
       });
     };
-    checkAndMarkAsRead();
-    window.addEventListener("focus", checkAndMarkAsRead);
-    return () => {
-      window.removeEventListener("focus", checkAndMarkAsRead);
+
+    const handleClickOutside = (event: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+        setFocusOn(null);
+      }
     };
-  }, [conversationData?.id, conversationData?.lastMessage?.id]);
+
+    const handleWindowBlur = () => {
+      setFocusOn(null);
+    };
+
+    const messageArea = scrollRef.current;
+    if (messageArea) {
+      messageArea.addEventListener("click", handleUserInteract);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("blur", handleWindowBlur);
+
+    return () => {
+      if (messageArea) {
+        messageArea.removeEventListener("click", handleUserInteract);
+      }
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("blur", handleWindowBlur);
+      setFocusOn(null);
+    };
+  }, [
+    conversationData?.id,
+    conversationData?.lastMessage?.id,
+    markAsRead,
+    markAsReadLocal,
+    setFocusOn,
+  ]);
 
   if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
     return (
@@ -94,7 +126,10 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   }
 
   return (
-    <div className={clsx("relative flex flex-col bg-bg-main overflow-hidden", className)}>
+    <div
+      className={clsx("relative flex flex-col bg-bg-main overflow-hidden", className)}
+      ref={panelRef}
+    >
       <div className="flex items-center gap-3 px-4 h-[60px] bg-bg-main border-b border-gray-700/50 shrink-0">
         {isLoadingHeader ? (
           <>
@@ -149,7 +184,21 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         />
       </div>
 
-      <ChatInput className="!bg-bg-main h-auto p-4" conversationId={conversationId} />
+      <ChatInput
+        className="!bg-bg-main h-auto p-4"
+        conversationId={conversationId}
+        onFocus={() => {
+          if (!conversationData?.id || !document.hasFocus()) return;
+          setFocusOn(conversationData.id);
+          const lastMsgId = conversationData.lastMessage?.id;
+          if (!lastMsgId) return;
+          markAsReadLocal(conversationData.id, lastMsgId);
+          void markAsRead({
+            conversationId: conversationData.id,
+            messageId: lastMsgId,
+          });
+        }}
+      />
     </div>
   );
 };

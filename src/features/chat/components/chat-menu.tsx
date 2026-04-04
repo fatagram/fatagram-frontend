@@ -48,7 +48,10 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
         </Text>
       </div>
       {tab === "list" && (
-        <ChatList className="overflow-hidden" onConversationClick={handleSelectConversation} />
+        <ChatList
+          className="overflow-y-auto pt-0 h-full"
+          onConversationClick={handleSelectConversation}
+        />
       )}
       {tab === "create" && (
         <CreateGroupChat
@@ -66,10 +69,10 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
               const firstId = data?.pages[0]?.items[0]?.id || "";
               navigate(`/fatalk/${firstId}`);
             }}
-            title="Mở Fatalk"
+            title={t("common:conversations.openFatalk")}
           >
             <Text sz="sm" color="secondary">
-              Mở Fatalk
+              {t("common:conversations.openFatalk")}
             </Text>
             <Text sz="sm" color="secondary">
               <i className="fa-solid fa-arrow-up-right-from-square" />

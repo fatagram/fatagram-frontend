@@ -39,6 +39,10 @@
     "systemMessage": {
       "createGroup": "{{creatorName}} created the group"
     },
-    "privacyDescription": "Feel free to share your best moments! This conversation is always kept private and completely secure."
+    "privacyDescription": "Feel free to share your best moments! This conversation is always kept private and completely secure.",
+    "openFatalk": "Open Fatalk",
+    "enterGroupNameOptional": "Enter group name (optional)",
+    "loadingOldMessages": "Loading old messages...",
+    "createGroupChat": "Create group chat"
   }
 }

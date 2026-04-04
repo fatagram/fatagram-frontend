@@ -10,7 +10,9 @@ export class ConversationService {
   public async getConversations(
     query: CursorQuery<string>,
   ): Promise<Result<CursorResult<ConversationDto, string>>> {
-    return await apiGet(`${PREFIX}`, query);
+    const res = await apiGet(`${PREFIX}`, query);
+    console.log("Fetched conversations:", res);
+    return res;
   }
 
   public async getConversation(conversationId: string): Promise<Result<ConversationDto>> {
@@ -41,6 +43,10 @@ export class ConversationService {
 
   public async getParticipantsSeen(conversationId: string): Promise<Result<ParticipantsSeenDto>> {
     return await apiGet(`${PREFIX}/${conversationId}/participants/seen`);
+  }
+
+  public async getUnreadCount(): Promise<Result<number>> {
+    return await apiGet(`${PREFIX}/unread-count`);
   }
 }
 
