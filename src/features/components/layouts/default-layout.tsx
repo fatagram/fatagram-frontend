@@ -15,6 +15,7 @@ import { ChatBadge } from "@/features/chat/components/chat-badge";
 
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
+  const isAuthed = Boolean(isAuthenticated);
   const { openDialog, closeDialog } = useDialog();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -50,14 +51,17 @@ const DefaultLayout = () => {
   );
 
   const { conversationId } = useParams();
-  const [isMobile, setIsMobile] = useState(() =>
-    typeof window !== "undefined" ? window.innerWidth < 640 : false,
-  );
+  // Initialize to a stable value to avoid SSR/CSR hydration mismatch.
+  // The real value will be determined on the client in useEffect.
+  const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
     };
+
+    // Determine initial value on client mount
+    handleResize();
 
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
@@ -97,7 +101,7 @@ const DefaultLayout = () => {
   }, [isMobile, openDialog]);
 
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthed) {
       closeDialog();
     } else {
       if (isMobile) return;
@@ -108,7 +112,7 @@ const DefaultLayout = () => {
   }, [isMobile, isAuthenticated, closeDialog, openLoginOverlay]);
 
   const handleGoToHome = useCallback(() => {
-    if (isAuthenticated) {
+    if (isAuthed) {
       navigate("/");
     } else {
       if (!isMobile) {
@@ -136,7 +140,7 @@ const DefaultLayout = () => {
           </div>
         </div>
         <Navbar
-          isAuthenticated={isAuthenticated}
+          isAuthenticated={isAuthed}
           items={items}
           logo={
             !isMobile && (
@@ -150,7 +154,7 @@ const DefaultLayout = () => {
           }
           optionClassName="!justify-end"
           options={
-            isAuthenticated ? (
+            isAuthed ? (
               <div className={clsx("flex items-center gap-2")}>
                 <div className="hidden sm:flex gap-2">
                   {!isFatalkPage && <ChatBadge />}
