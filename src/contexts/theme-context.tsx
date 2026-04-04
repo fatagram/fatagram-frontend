@@ -13,6 +13,7 @@ const ThemeList = [
   "dark-red",
   "emerald",
   "aurora",
+  "dark-blue",
 ] as const;
 
 export type Theme = (typeof ThemeList)[number];
@@ -64,6 +65,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     { key: "neon", label: t("common:themes:neon") },
     { key: "dark-sea", label: t("common:themes:darkSea") },
     { key: "dark-yellow", label: t("common:themes:darkYellow") },
+    { key: "dark-blue", label: t("common:themes:darkBlue") },
     { key: "light-yellow-pink", label: t("common:themes:lightYellowPink") },
     { key: "pastel-yellow-pink", label: t("common:themes:pastelYellowPink") },
     { key: "dark-red", label: t("common:themes:darkRed") },
