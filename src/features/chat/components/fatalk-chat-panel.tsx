@@ -13,7 +13,7 @@ import { useRenderConversationContent } from "../hooks/use-render-conversation-c
 import { useTranslation } from "react-i18next";
 import { NotFound } from "@/features/components/not-found";
 import { useNavigate } from "react-router-dom";
-import { useOpenChat } from "../hooks/use-open-chat";
+import { useChatStore } from "@/features/hooks/use-chat-store";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
@@ -33,7 +33,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
 
-  const { setFocusOn } = useOpenChat();
+  const setFocusOn = useChatStore((state) => state.setFocusOn);
 
   const {
     data: conversationData,
@@ -94,7 +94,6 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       }
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("blur", handleWindowBlur);
-      setFocusOn(null);
     };
   }, [
     conversationData?.id,
@@ -103,6 +102,12 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     markAsReadLocal,
     setFocusOn,
   ]);
+
+  useEffect(() => {
+    return () => {
+      setFocusOn(null);
+    };
+  }, [setFocusOn]);
 
   if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
     return (

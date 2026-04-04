@@ -12,8 +12,7 @@ interface ChatBadgeProps extends ComponentProps {}
 export const ChatBadge: React.FC<ChatBadgeProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
   // const navigate = useNavigate();
-  const { data: count } = useGetUnreadMessageCount();
-  console.log("Unread message count:", count);
+  const { data: count = 0 } = useGetUnreadMessageCount();
 
   // Refs for the menu and button
   const menuRef = useRef<HTMLDivElement>(null);
