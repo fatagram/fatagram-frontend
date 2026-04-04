@@ -11,6 +11,7 @@ import {
 import { OverlayLoading } from "@/components/ui/overlay-loading";
 import { ErrorCodes } from "@/api/user/dto/onboarding.dto";
 import { useNavigate } from "react-router-dom";
+import { authEvents } from "@/events/auth-event";
 import { useOnboarding } from "@/features/hooks/use-user-profile";
 
 const genderOptions: Option[] = [
@@ -40,6 +41,7 @@ export const OnboardingForm: React.FC = () => {
         },
         {
           onSuccess: () => {
+            authEvents.emit("onboardingCompleted");
             navigate("/");
           },
           onError: (err) => {
@@ -96,6 +98,7 @@ export const OnboardingForm: React.FC = () => {
               Boolean(errors.FirstName)
             }
             wrongMessage={t(errors.FirstName || formik.errors.firstName || "")}
+            type={"text"}
           />
           <Textbox
             title="Tên đệm"
@@ -103,6 +106,7 @@ export const OnboardingForm: React.FC = () => {
             placeholder="Tên đệm"
             value={formik.values.middleName}
             onChange={(e) => formik.setFieldValue("middleName", e.target.value)}
+            type={"text"}
           />
           <Textbox
             title="Tên"
@@ -116,6 +120,7 @@ export const OnboardingForm: React.FC = () => {
               Boolean(errors.LastName)
             }
             wrongMessage={t(errors.LastName || formik.errors.lastName || "")}
+            type={"text"}
           />
         </div>
 

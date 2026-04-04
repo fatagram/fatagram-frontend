@@ -1,4 +1,4 @@
-import { HubConnection } from "@microsoft/signalr";
+import { HubConnection, HubConnectionState } from "@microsoft/signalr";
 import { useEffect, useRef } from "react";
 import { authEvents } from "@/events/auth-event";
 import { useAuth } from "@/contexts";
@@ -41,12 +41,34 @@ export function useAppHub<T>(onReceiveMessage: (message: SocketMessage<T>) => vo
 
     startConnection();
 
+    const handleOnboardingCompleted = async () => {
+      console.log("Onboarding completed, attempting to connect to App Hub...");
+      const conn = connectionRef.current;
+      if (!conn) return;
+      try {
+        if (conn.state === HubConnectionState.Disconnected) {
+          await conn.start();
+          conn.on("ReceiveMessage", (message: SocketMessage<T>) => {
+            if (isMounted) {
+              onReceiveMessage(message as any);
+            }
+          });
+        }
+      } catch (err) {
+        // ignore: will let existing retry logic handle further attempts
+        console.error("SignalR reconnect after onboarding error:", err);
+      }
+    };
+
+    authEvents.on("onboardingCompleted", handleOnboardingCompleted);
+
     return () => {
       isMounted = false;
       if (connectionRef.current) {
         connectionRef.current.stop();
         connectionRef.current = null;
       }
+      authEvents.off("onboardingCompleted", handleOnboardingCompleted);
     };
   }, [isAuthenticated]);
 }
