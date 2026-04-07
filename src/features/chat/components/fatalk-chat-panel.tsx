@@ -7,6 +7,7 @@ import {
   useGetConversation,
   useLocalMarkAsRead,
   useMarkConversationAsRead,
+  useMessageStore,
 } from "@/features/hooks/use-conversation";
 import { ChatInput } from "./chat-input";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
@@ -32,6 +33,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
 
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
+  const { lastMessageMap } = useMessageStore();
 
   const setFocusOn = useChatStore((state) => state.setFocusOn);
 
@@ -61,7 +63,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     const handleUserInteract = async () => {
       if (!document.hasFocus()) return;
       setFocusOn(conversationData.id);
-      const lastMsgSeq = conversationData.lastMessage?.sequenceNumber;
+      const lastMsgSeq = lastMessageMap[conversationData.id] || conversationData?.lastMessageNumber;
       if (!lastMsgSeq) return;
 
       markAsReadLocal(conversationData.id, lastMsgSeq);

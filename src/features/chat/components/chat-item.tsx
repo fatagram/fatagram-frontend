@@ -58,7 +58,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
         </Text>
         <div className="flex items-center opacity-80">
           <Text sz="xs" className="truncate max-w-full" weight={isUnread ? "bold" : "regular"}>
-            {unreadCount > 1
+            {isUnread
               ? `Bạn có ${unreadLabel} tin nhắn chưa đọc`
               : lastMessage
                 ? isSystemMessage(lastMessage?.type || MessageType.System)
@@ -77,21 +77,12 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
         </div>
       </div>
       <div className="flex-1 flex items-center justify-end gap-2">
-        {/* Show seen avatar (other user has read) and unread dot together on the right */}
-        {!conversation.isGroup && isOtherUserRead && (
+        {!conversation.isGroup && isOtherUserRead && !isUnread ? (
           <Avatar sz="xs" src={conversation.avatarUrl || ""} alt={"seen"} className="my-auto" />
-        )}
+        ) : null}
 
-        {isUnread && (
-          <div
-            aria-hidden
-            className={clsx(
-              "w-2 h-2 rounded-full",
-              "my-auto",
-              // ensure primary color when unread
-              "bg-primary-500",
-            )}
-          ></div>
+        {Boolean(isUnread) === true && (
+          <div aria-hidden className={clsx("w-2 h-2 rounded-full", "my-auto", "bg-primary-500")} />
         )}
       </div>
     </div>

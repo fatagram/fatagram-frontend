@@ -12,6 +12,27 @@ import { Navbar } from "@/components/ui";
 import UserMenu from "../user-menu";
 import { ChatLayer } from "@/features/chat/chat-layer";
 import { ChatBadge } from "@/features/chat/components/chat-badge";
+import { useGetUnreadMessageCount } from "@/features/hooks/use-conversation";
+
+const MessageIconWithBadge = () => {
+  const { data: count = 0 } = useGetUnreadMessageCount();
+
+  return (
+    <div className="relative">
+      <i className="fa-solid fa-message" />
+      {count > 0 && (
+        <span
+          className={clsx(
+            "absolute -top-2 -right-2 text-xs rounded-full bg-red-500 text-white px-1",
+            "min-w-[12px] h-4 flex items-center justify-center",
+          )}
+        >
+          {count > 99 ? "99+" : count}
+        </span>
+      )}
+    </div>
+  );
+};
 
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
@@ -33,7 +54,7 @@ const DefaultLayout = () => {
       showOnDesktop: true,
     },
     {
-      icon: <i className="fa-solid fa-message" />,
+      icon: <MessageIconWithBadge />,
       path: "/fatalk",
       isIndex: false,
       showOnDesktop: false,
