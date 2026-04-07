@@ -44,8 +44,8 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const isSystem = isSystemMessage(message.type);
   const { messageUserSeenMap } = useMessageStore();
   const seenBy = useMemo(
-    () => messageUserSeenMap?.[conversationId || ""]?.[message.id || ""] || [],
-    [messageUserSeenMap, conversationId, message.id],
+    () => messageUserSeenMap?.[conversationId || ""]?.[message.sequenceNumber || 0] || [],
+    [messageUserSeenMap, conversationId, message.sequenceNumber],
   );
 
   const isShowTime =

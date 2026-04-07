@@ -10,17 +10,16 @@ import { MessageType } from "@/types/entities/message.type";
 
 const messagesQueryKey = (
   conversationId: string,
-  queryParams?: Omit<CursorQuery<string>, "cursor">,
+  queryParams?: Omit<CursorQuery<number>, "cursor">,
 ) => ["messages", conversationId, queryParams] as const;
 
 export const useMessages = (
   conversationId: string,
-  queryParams?: Omit<CursorQuery<string>, "cursor">,
+  queryParams?: Omit<CursorQuery<number>, "cursor">,
 ) => {
   return useSafeInfiniteQueryResult({
     queryKey: messagesQueryKey(conversationId, queryParams),
-    fn: async (cursor?: string) => {
-      // delay
+    fn: async (cursor?: number) => {
       return await conversationService.getMessages(conversationId, { ...queryParams, cursor });
     },
     enabled: !!conversationId,

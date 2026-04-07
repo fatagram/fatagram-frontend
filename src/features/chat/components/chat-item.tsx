@@ -19,8 +19,6 @@ interface ChatItemProps extends ComponentProps {
 
 export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => {
   const lastMessage = conversation.lastMessage;
-  const isUnread = conversation.lastMessage?.id !== conversation.myLastSeenMessageId;
-  const isOtherUserRead = conversation.lastMessage?.id === conversation.otherLastSeenMessageId;
   const location = useLocation();
   const currentConversationId = location.pathname.split("/").pop();
 
@@ -29,6 +27,11 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
   const { formatTime } = useFormatTime();
 
   const unreadCount = useUnreadMessageCountCache(conversation.id);
+  const isUnread = unreadCount > 0;
+  const isOtherUserRead =
+    conversation.otherLastSeenMessageSeq &&
+    conversation.lastMessage?.sequenceNumber &&
+    conversation.otherLastSeenMessageSeq >= conversation.lastMessage.sequenceNumber;
   const unreadLabel = unreadCount > 99 ? "99+" : String(unreadCount);
 
   const { userId } = useAuth();
@@ -55,7 +58,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
         </Text>
         <div className="flex items-center opacity-80">
           <Text sz="xs" className="truncate max-w-full" weight={isUnread ? "bold" : "regular"}>
-            {unreadCount > 0
+            {unreadCount > 1
               ? `Bạn có ${unreadLabel} tin nhắn chưa đọc`
               : lastMessage
                 ? isSystemMessage(lastMessage?.type || MessageType.System)
@@ -73,15 +76,22 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
           </Text>
         </div>
       </div>
-      <div className="flex-1 flex">
-        {isUnread && <div className="my-auto ml-auto w-2 h-2 bg-primary-500 rounded-full"></div>}
+      <div className="flex-1 flex items-center justify-end gap-2">
+        {/* Show seen avatar (other user has read) and unread dot together on the right */}
         {!conversation.isGroup && isOtherUserRead && (
-          <Avatar
-            sz="xs"
-            src={conversation.avatarUrl || ""}
-            alt={"seen"}
-            className="my-auto ml-auto"
-          />
+          <Avatar sz="xs" src={conversation.avatarUrl || ""} alt={"seen"} className="my-auto" />
+        )}
+
+        {isUnread && (
+          <div
+            aria-hidden
+            className={clsx(
+              "w-2 h-2 rounded-full",
+              "my-auto",
+              // ensure primary color when unread
+              "bg-primary-500",
+            )}
+          ></div>
         )}
       </div>
     </div>

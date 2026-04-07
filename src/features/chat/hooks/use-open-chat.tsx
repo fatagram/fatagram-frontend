@@ -44,7 +44,6 @@ export const useOpenChat = () => {
           }
         },
         onError: () => {
-          console.log("No existing conversation, creating temp chat");
           if (isMobile || location.pathname.startsWith("/fatalk")) {
             navigate(`/fatalk/temp?tempId=${targetId}`, {
               state: { correlationId: `temp-${targetId}` },

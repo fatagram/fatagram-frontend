@@ -42,7 +42,6 @@ export function useAppHub<T>(onReceiveMessage: (message: SocketMessage<T>) => vo
     startConnection();
 
     const handleOnboardingCompleted = async () => {
-      console.log("Onboarding completed, attempting to connect to App Hub...");
       const conn = connectionRef.current;
       if (!conn) return;
       try {

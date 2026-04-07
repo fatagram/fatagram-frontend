@@ -58,17 +58,18 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
 
     setFocusOn(conversationData.id);
 
-    const lastMsgId = lastMessageMap[conversationData.id] || conversationData.lastMessage?.id;
-    if (!lastMsgId) return;
+    const lastMsgSeq = lastMessageMap[conversationData.id] || conversationData?.lastMessageNumber;
 
-    markAsReadLocal(conversationData.id, lastMsgId);
+    if (!lastMsgSeq) return;
+
+    markAsReadLocal(conversationData.id, lastMsgSeq);
     await markAsRead({
       conversationId: conversationData.id,
-      messageId: lastMsgId,
+      messageSeq: lastMsgSeq,
     });
   }, [
     conversationData?.id,
-    conversationData?.lastMessage?.id,
+    conversationData?.lastMessage?.sequenceNumber,
     lastMessageMap,
     markAsRead,
     markAsReadLocal,

@@ -23,6 +23,7 @@ export interface Message {
   senderFullName?: string;
   senderAvatarUrl?: string;
   senderNickname?: string;
+  sequenceNumber?: number;
   content: string;
   type: MessageType;
   metadata?: any;

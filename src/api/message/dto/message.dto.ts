@@ -18,9 +18,10 @@ export interface MessageResponseDto {
   senderFullName?: string;
   senderNickname?: string;
   senderAvatarUrl?: string;
+  sequenceNumber: number;
   content: string;
   type: MessageType;
   metadata?: any;
   createdAt: Date;
-  isConversationStartingFromRead: boolean;
+  shouldIncreaseUnreadCount: boolean;
 }

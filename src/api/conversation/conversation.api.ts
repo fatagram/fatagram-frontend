@@ -11,7 +11,6 @@ export class ConversationService {
     query: CursorQuery<string>,
   ): Promise<Result<CursorResult<ConversationDto, string>>> {
     const res = await apiGet(`${PREFIX}`, query);
-    console.log("Fetched conversations:", res);
     return res;
   }
 
@@ -25,8 +24,8 @@ export class ConversationService {
 
   public async getMessages(
     conversationId: string,
-    query: CursorQuery<string>,
-  ): Promise<Result<CursorResult<MessageResponseDto, string>>> {
+    query: CursorQuery<number>,
+  ): Promise<Result<CursorResult<MessageResponseDto, number>>> {
     return await apiGet(`${PREFIX}/${conversationId}/messages`, query);
   }
 
@@ -37,8 +36,8 @@ export class ConversationService {
     return await apiPost(`${PREFIX}`, { participantIds, name });
   }
 
-  public async markAsRead(conversationId: string, messageId: string): Promise<Result<void>> {
-    return await apiPost(`${PREFIX}/${conversationId}/messages/markRead/${messageId}`);
+  public async markAsSeen(conversationId: string, messageSeq: number): Promise<Result<void>> {
+    return await apiPost(`${PREFIX}/${conversationId}/messages/markSeen/${messageSeq}`);
   }
 
   public async getParticipantsSeen(conversationId: string): Promise<Result<ParticipantsSeenDto>> {

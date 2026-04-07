@@ -5,28 +5,29 @@ export interface ConversationDto {
   name?: string | null;
   avatarUrl?: string | null;
   lastMessage?: MessageResponseDto;
+  lastMessageNumber?: number;
   unreadMessageCount: number;
   lastActiveAt: string;
   isGroup: boolean;
   topParticipantNames?: string[];
   participantCount?: number;
-  otherLastSeenMessageId?: string;
-  myLastSeenMessageId?: string;
+  otherLastSeenMessageSeq?: number;
+  myLastSeenMessageSeq?: number;
 }
 
 export interface SeenDto {
   conversationId: string;
-  messageId: string;
+  messageSeq: number;
   userId: string;
   seenAt: string;
-  isPreviousUnread: boolean;
+  shouldDecreaseUnreadCount: boolean;
 }
 
 export interface ParticipantsSeenDto {
   conversationId: string;
   participantsSeenInfo: {
     [userId: string]: {
-      messageId: string;
+      sequenceNumber: number;
       seenAt: string;
     };
   };

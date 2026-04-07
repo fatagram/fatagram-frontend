@@ -15,7 +15,7 @@ interface ChatMenuProps extends ComponentProps {
 
 export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationClick, ref }) => {
   const [tab, setTab] = useState<"list" | "create">("list");
-  const { data } = useConversations();
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -51,6 +51,11 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
         <ChatList
           className="overflow-y-auto pt-0 h-full"
           onConversationClick={handleSelectConversation}
+          data={data}
+          fetchNextPage={fetchNextPage}
+          hasNextPage={hasNextPage}
+          isLoading={isLoading}
+          isFetching={isFetching}
         />
       )}
       {tab === "create" && (

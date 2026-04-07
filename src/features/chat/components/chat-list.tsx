@@ -1,20 +1,32 @@
 import { Text, Textbox, Skeleton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
-import { useConversations } from "@/features/hooks/use-conversation";
 import clsx from "clsx";
 import { useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useOpenChat } from "../hooks/use-open-chat";
 import InfiniteScrollFlex from "@/components/ui/utils/infinite-scroll-flex";
 import { ChatItem } from "./chat-item";
+import { CursorResult } from "@/api/common/result";
 
 interface ChatListProps extends ComponentProps {
   onConversationClick?: (conversationId: string) => void;
+  data?: { pages: Array<CursorResult<any, string>>; pageParams: unknown[] };
+  fetchNextPage?: () => void;
+  hasNextPage?: boolean;
+  isLoading?: boolean;
+  isFetching?: boolean;
 }
 
-export const ChatList: React.FC<ChatListProps> = ({ className, onConversationClick }) => {
+export const ChatList: React.FC<ChatListProps> = ({
+  className,
+  onConversationClick,
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isLoading,
+  isFetching,
+}) => {
   const { t } = useTranslation();
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
   const { openChat } = useOpenChat();
   const conversations = data?.pages.flatMap((page) => page.items) || [];
 
@@ -41,7 +53,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
           className="scrollbar-hide sm:scrollbar-default"
           items={conversations}
           parentRef={scrollWrapperRef}
-          onLoadMore={fetchNextPage}
+          onLoadMore={fetchNextPage ?? (() => {})}
           hasMore={hasNextPage}
           itemTemplate={(item: any) => (
             <ChatItem conversation={item} onClick={() => handleConversationClick(item.id)} />

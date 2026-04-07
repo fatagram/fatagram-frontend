@@ -14,6 +14,7 @@ import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSnackbar } from "@/contexts";
 import { create } from "zustand";
+import { useMemo } from "react";
 
 const conversationKeys = {
   list: (queryParams?: Omit<CursorQuery<string>, "cursor">) =>
@@ -63,15 +64,18 @@ export const useCreateGroupConversation = () => {
 
 export const useMarkConversationAsRead = () => {
   return useResultFetcher(
-    async ({ conversationId, messageId }: { conversationId: string; messageId: string }) =>
-      await conversationService.markAsRead(conversationId, messageId),
+    async ({ conversationId, messageSeq }: { conversationId: string; messageSeq: number }) => {
+      var r = await conversationService.markAsSeen(conversationId, messageSeq);
+      console.log("Marked conversation as read:", conversationId, messageSeq, r);
+      return r;
+    },
   );
 };
 
 export const useLocalMarkAsRead = () => {
   const { markAsRead } = useConversationCacheMutations();
-  return (conversationId: string, messageId: string) => {
-    markAsRead(conversationId, messageId);
+  return (conversationId: string, messageSeq: number) => {
+    markAsRead(conversationId, messageSeq);
   };
 };
 
@@ -94,29 +98,38 @@ export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor
   const { userId } = useAuth();
   const queryClient = useQueryClient();
 
+  const queryOptions = useMemo(
+    () => ({
+      onSuccess: (data: any) => {
+        const conversations = data.items;
+        console.log("Fetched conversations:", conversations);
+        if (conversations.length > 0) {
+          const lastMessageSeqs: Record<string, number> = {};
+          conversations.forEach((conv: ConversationDto) => {
+            if (conv.lastMessage) {
+              lastMessageSeqs[conv.id] = conv.lastMessage.sequenceNumber;
+            }
+            const key = ["conversation", "unread-count", conv.id];
+            const serverCount = conv.unreadMessageCount ?? 0;
+            queryClient.setQueryData(key, (oldCount: number | undefined) => {
+              const currentCount = oldCount ?? 0;
+              return Math.max(currentCount, serverCount);
+            });
+          });
+          useMessageStore.getState().setBulkLastMessages(lastMessageSeqs);
+        }
+      },
+    }),
+    [queryClient],
+  );
+
   return useSafeInfiniteQueryResult({
     queryKey: conversationKeys.list(queryParams),
     fn: async (cursor?: string) =>
       await conversationService.getConversations({ ...queryParams, cursor }),
     enabled: !!userId,
     staleTime: Infinity,
-    options: {
-      onSuccess: (data) => {
-        const conversations = data.items;
-        if (conversations.length > 0) {
-          const lastMessageIds: Record<string, string> = {};
-          conversations.forEach((conv) => {
-            if (conv.lastMessage) {
-              lastMessageIds[conv.id] = conv.lastMessage.id;
-            }
-            const key = ["conversation", "unread-count", conv.id];
-            const serverCount = conv.unreadMessageCount ?? 0;
-            queryClient.setQueryData(key, serverCount);
-          });
-          useMessageStore.getState().setBulkLastMessages(lastMessageIds);
-        }
-      },
-    },
+    options: queryOptions,
   });
 };
 
@@ -161,10 +174,10 @@ export const useConversationCacheMutations = () => {
     updateDetailCache(conversationId, updateFn);
   };
 
-  const markAsRead = async (conversationId: string, messageId: string) => {
+  const markAsRead = async (conversationId: string, messageSeq: number) => {
     updateConversationInCache(conversationId, (conv) => ({
       ...conv,
-      myLastSeenMessageId: messageId,
+      myLastSeenSeq: messageSeq,
       unreadMessageCount: 0,
     }));
   };
@@ -275,18 +288,18 @@ export const useUnreadMessageCountCache = (conversationId: string) => {
 };
 
 interface MessageState {
-  lastMessageMap: Record<string, string>;
-  messageUserSeenMap?: Record<string, Record<string, { userId: string; seenAt: string }[]>>;
-  setLastMessage: (conversationId: string, messageId: string) => void;
-  setBulkLastMessages: (data: Record<string, string>) => void;
+  lastMessageMap: Record<string, number>;
+  messageUserSeenMap?: Record<string, Record<number, { userId: string; seenAt: string }[]>>;
+  setLastMessage: (conversationId: string, messageSeq: number) => void;
+  setBulkLastMessages: (data: Record<string, number>) => void;
   setParticipantsSeen: (
     conversationId: string,
     userId: string,
-    participantSeen: { messageId: string; seenAt: string },
+    participantSeen: { sequenceNumber: number; seenAt: string },
   ) => void;
   setBulkParticipantsSeen: (
     conversationId: string,
-    data: Record<string, { messageId: string; seenAt: string }>,
+    data: Record<string, { sequenceNumber: number; seenAt: string }>,
   ) => void;
 }
 
@@ -298,18 +311,25 @@ interface ViewerInfo {
 export const useMessageStore = create<MessageState>((set) => ({
   lastMessageMap: {},
   messageUserSeenMap: {},
-  setLastMessage: (conversationId, messageId) =>
+  setLastMessage: (conversationId, messageSeq) =>
     set((state) => ({
       lastMessageMap: {
         ...state.lastMessageMap,
-        [conversationId]: messageId,
+        [conversationId]: messageSeq,
       },
     })),
   setBulkLastMessages: (data) =>
     set((state) => ({
       lastMessageMap: {
         ...state.lastMessageMap,
-        ...data,
+        ...Object.entries(data).reduce(
+          (acc, [convId, newSeq]) => {
+            const currentSeq = state.lastMessageMap[convId];
+            acc[convId] = currentSeq !== undefined ? Math.max(currentSeq, newSeq) : newSeq;
+            return acc;
+          },
+          {} as Record<string, number>,
+        ),
       },
     })),
   setParticipantsSeen: (conversationId, userId, participantSeen) => {
@@ -324,13 +344,13 @@ export const useMessageStore = create<MessageState>((set) => ({
         }
       });
 
-      const newMsgId = participantSeen.messageId;
-      if (!currentConvMap[newMsgId]) {
-        currentConvMap[newMsgId] = [];
+      const newMsgSeq = participantSeen.sequenceNumber;
+      if (!currentConvMap[newMsgSeq]) {
+        currentConvMap[newMsgSeq] = [];
       }
 
-      if (!currentConvMap[newMsgId].some((v: any) => v.userId === userId)) {
-        currentConvMap[newMsgId].push({
+      if (!currentConvMap[newMsgSeq].some((v: any) => v.userId === userId)) {
+        currentConvMap[newMsgSeq].push({
           userId,
           seenAt: participantSeen.seenAt,
         });
@@ -355,13 +375,16 @@ export const useMessageStore = create<MessageState>((set) => ({
         return Number.isFinite(t) ? t : 0;
       };
 
-      const mergedByUser: Record<string, { messageId: string; seenAt: string }> = {};
+      const mergedByUser: Record<string, { sequenceNumber: number; seenAt: string }> = {};
 
-      Object.entries(currentConvMap).forEach(([messageId, viewers]) => {
+      Object.entries(currentConvMap).forEach(([messageSeq, viewers]) => {
         viewers.forEach((viewer) => {
           const existing = mergedByUser[viewer.userId];
           if (!existing || toTime(viewer.seenAt) > toTime(existing.seenAt)) {
-            mergedByUser[viewer.userId] = { messageId, seenAt: viewer.seenAt };
+            mergedByUser[viewer.userId] = {
+              sequenceNumber: Number(messageSeq),
+              seenAt: viewer.seenAt,
+            };
           }
         });
       });
@@ -369,14 +392,17 @@ export const useMessageStore = create<MessageState>((set) => ({
       Object.entries(data).forEach(([userId, seenInfo]) => {
         const existing = mergedByUser[userId];
         if (!existing || toTime(seenInfo.seenAt) > toTime(existing.seenAt)) {
-          mergedByUser[userId] = { messageId: seenInfo.messageId, seenAt: seenInfo.seenAt };
+          mergedByUser[userId] = {
+            sequenceNumber: Number(seenInfo.sequenceNumber),
+            seenAt: seenInfo.seenAt,
+          };
         }
       });
 
-      const newConvMap: Record<string, ViewerInfo[]> = {};
+      const newConvMap: Record<number, ViewerInfo[]> = {};
       Object.entries(mergedByUser).forEach(([userId, seenInfo]) => {
-        if (!newConvMap[seenInfo.messageId]) newConvMap[seenInfo.messageId] = [];
-        newConvMap[seenInfo.messageId].push({ userId, seenAt: seenInfo.seenAt });
+        if (!newConvMap[seenInfo.sequenceNumber]) newConvMap[seenInfo.sequenceNumber] = [];
+        newConvMap[seenInfo.sequenceNumber].push({ userId, seenAt: seenInfo.seenAt });
       });
 
       return {

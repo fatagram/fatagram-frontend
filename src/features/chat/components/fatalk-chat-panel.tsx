@@ -61,13 +61,13 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     const handleUserInteract = async () => {
       if (!document.hasFocus()) return;
       setFocusOn(conversationData.id);
-      const lastMsgId = conversationData.lastMessage?.id;
-      if (!lastMsgId) return;
+      const lastMsgSeq = conversationData.lastMessage?.sequenceNumber;
+      if (!lastMsgSeq) return;
 
-      markAsReadLocal(conversationData.id, lastMsgId);
+      markAsReadLocal(conversationData.id, lastMsgSeq);
       await markAsRead({
         conversationId: conversationData.id,
-        messageId: lastMsgId,
+        messageSeq: lastMsgSeq,
       });
     };
 
@@ -195,12 +195,12 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         onFocus={() => {
           if (!conversationData?.id || !document.hasFocus()) return;
           setFocusOn(conversationData.id);
-          const lastMsgId = conversationData.lastMessage?.id;
-          if (!lastMsgId) return;
-          markAsReadLocal(conversationData.id, lastMsgId);
+          const lastMsgSeq = conversationData.lastMessage?.sequenceNumber;
+          if (!lastMsgSeq) return;
+          markAsReadLocal(conversationData.id, lastMsgSeq);
           void markAsRead({
             conversationId: conversationData.id,
-            messageId: lastMsgId,
+            messageSeq: lastMsgSeq,
           });
         }}
       />

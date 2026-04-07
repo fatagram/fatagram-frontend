@@ -27,8 +27,8 @@ export function MessageListener() {
   const markAsReadLocal = useLocalMarkAsRead();
   const autoReadMessageKeysRef = useRef<Set<string>>(new Set());
 
-  const createAutoReadKey = (conversationId: string, messageId: string) =>
-    `${conversationId}:${messageId}`;
+  const createAutoReadKey = (conversationId: string, messageSeq: number) =>
+    `${conversationId}:${messageSeq}`;
 
   useAppHub<MessageResponseDto>(async (message: SocketMessage<MessageResponseDto>) => {
     if (message.event !== "NewMessage") return;
@@ -53,7 +53,7 @@ export function MessageListener() {
     }
 
     // Set lastmessage for conversation
-    useMessageStore.getState().setLastMessage(conversationId, data.id);
+    useMessageStore.getState().setLastMessage(conversationId, data.sequenceNumber);
 
     addMessageToCache(conversationId, data, true);
     pushConversationToTop(conversationId, data);
@@ -61,14 +61,14 @@ export function MessageListener() {
     if (data.senderId === userId) {
       updateConversationInCache(conversationId, (conv) => ({
         ...conv,
-        myLastSeenMessageId: data.id,
+        myLastSeenMessageSeq: data.sequenceNumber,
       }));
 
-      markAsReadLocal(conversationId, data.id);
+      markAsReadLocal(conversationId, data.sequenceNumber);
       try {
         await markAsRead({
           conversationId,
-          messageId: data.id,
+          messageSeq: data.sequenceNumber,
         });
       } catch {
         // ignore mark-as-read errors for own messages
@@ -84,19 +84,19 @@ export function MessageListener() {
     // Set unreadcount
     if (currentFocusId !== conversationId || !isDisplayedChat || !isDocumentFocused) {
       if (!isOwnMessage) {
-        if (data.isConversationStartingFromRead) {
+        if (data.shouldIncreaseUnreadCount) {
           setUnreadCount((prev) => prev + 1);
         }
         setUnreadCountForConversation(conversationId, (prev) => prev + 1);
       }
     } else if (!isOwnMessage && isDisplayedChat && isDocumentFocused) {
-      const autoReadKey = createAutoReadKey(conversationId, data.id);
+      const autoReadKey = createAutoReadKey(conversationId, data.sequenceNumber);
       autoReadMessageKeysRef.current.add(autoReadKey);
-      markAsReadLocal(conversationId, data.id);
+      markAsReadLocal(conversationId, data.sequenceNumber);
       try {
         await markAsRead({
           conversationId: conversationId,
-          messageId: data.id,
+          messageSeq: data.sequenceNumber,
         });
       } catch {
         autoReadMessageKeysRef.current.delete(autoReadKey);
@@ -112,28 +112,28 @@ export function MessageListener() {
     const otherUserId = data.userId;
 
     setParticipantsSeen(conversationId, data.userId, {
-      messageId: data.messageId,
+      sequenceNumber: data.messageSeq,
       seenAt: data.seenAt,
     });
 
     if (otherUserId !== userId) {
       updateConversationInCache(conversationId, (conv) => ({
         ...conv,
-        otherLastSeenMessageId: data.messageId,
+        otherLastSeenMessageSeq: data.messageSeq,
       }));
     } else {
       updateConversationInCache(conversationId, (conv) => ({
         ...conv,
-        myLastSeenMessageId: data.messageId,
+        myLastSeenMessageSeq: data.messageSeq,
       }));
-      const autoReadKey = createAutoReadKey(conversationId, data.messageId);
+      const autoReadKey = createAutoReadKey(conversationId, data.messageSeq);
       const isAutoReadAck = autoReadMessageKeysRef.current.has(autoReadKey);
 
       if (isAutoReadAck) {
         autoReadMessageKeysRef.current.delete(autoReadKey);
       }
 
-      if (data.isPreviousUnread && !isAutoReadAck) {
+      if (data.shouldDecreaseUnreadCount && !isAutoReadAck) {
         setUnreadCount((prev) => prev - 1);
       }
       setUnreadCountForConversation(conversationId, (_prev) => 0);
