@@ -37,6 +37,7 @@ export const useSendMessage = () => {
         id: randomId,
         conversationId: data.conversationId!,
         clientTempId: randomId,
+        sequenceNumber: -1,
         senderId: userId!,
         content: data.content,
         createdAt: new Date(),
