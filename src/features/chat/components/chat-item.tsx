@@ -58,7 +58,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
         </Text>
         <div className="flex items-center opacity-80">
           <Text sz="xs" className="truncate max-w-full" weight={isUnread ? "bold" : "regular"}>
-            {isUnread
+            {unreadCount > 1
               ? `Bạn có ${unreadLabel} tin nhắn chưa đọc`
               : lastMessage
                 ? isSystemMessage(lastMessage?.type || MessageType.System)

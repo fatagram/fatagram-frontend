@@ -105,7 +105,7 @@ export default function InfiniteScrollReverse({
           style={{ overflowAnchor: "none" }}
         >
           {spinnerContent ?? (
-            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/30 text-xs text-primary-600">
+            <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/50 text-xs text-primary-500">
               <i className="fa-solid fa-circle-notch animate-spin" />
               <span>{t("common:conversations.loadingOldMessages")}</span>
             </div>

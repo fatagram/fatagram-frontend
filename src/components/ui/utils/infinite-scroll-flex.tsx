@@ -72,7 +72,7 @@ export default function InfiniteScrollFlex({
       },
       {
         root: parentRef?.current || containerRef.current,
-        rootMargin: "0px 0px 200px 0px",
+        rootMargin: "300px 0px 200px 0px",
       },
     );
 
@@ -105,7 +105,7 @@ export default function InfiniteScrollFlex({
       {hasMore && (
         <div
           ref={sentinelRef}
-          className={clsx("h-px w-full shrink-0 bg-red-500")}
+          className={clsx("h-px w-full shrink-0")}
           style={{ overflowAnchor: "none" }}
         />
       )}

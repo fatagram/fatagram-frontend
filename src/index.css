@@ -16,7 +16,7 @@ html {
 
 body {
   margin: 0;
-  font-family: var(--font-nunito);
+  font-family: var(--font-sans);
   font-size: 1rem;
   font-weight: 400;
   color: rgb(var(--text-main));
