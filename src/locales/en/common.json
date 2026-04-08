@@ -35,7 +35,10 @@
     "notFound": "No conversations found",
     "notFoundMessage": "Select a conversation or start a new one",
     "you": "You",
-    "no-conversations": "No conversations",
+    "noConversations": "No conversations",
+    "noConversationsMessage": "Your conversations will appear here",
+    "noSelectConversation": "No conversation selected",
+    "noSelectConversationMessage": "Select a conversation to start chatting",
     "sent": "Sent",
     "systemMessage": {
       "createGroup": "{{creatorName}} created the group"

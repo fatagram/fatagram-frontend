@@ -1,4 +1,4 @@
-import { Text, Textbox, Skeleton } from "@/components/atoms";
+import { Textbox, Skeleton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useCallback, useRef } from "react";
@@ -7,6 +7,7 @@ import { useOpenChat } from "../hooks/use-open-chat";
 import InfiniteScrollFlex from "@/components/ui/utils/infinite-scroll-flex";
 import { ChatItem } from "./chat-item";
 import { CursorResult } from "@/api/common/result";
+import { NotFound } from "@/features/components/not-found";
 
 interface ChatListProps extends ComponentProps {
   onConversationClick?: (conversationId: string) => void;
@@ -71,12 +72,12 @@ export const ChatList: React.FC<ChatListProps> = ({
           }
           numberOfSkeletons={2}
           emptyComponent={
-            <div className="flex flex-col items-center justify-center gap-2 mt-4 min-h-[200px]">
-              <i className="fa-solid fa-message text-3xl text-gray-400" />
-              <Text sz="md" color="secondary">
-                {t("common:conversations.no-conversations")}
-              </Text>
-            </div>
+            <NotFound
+              icon="fa-regular fa-message"
+              title={t("common:conversations.noConversations")}
+              description={t("common:conversations.noConversationsMessage")}
+              className="py-5"
+            />
           }
         />
       </div>

@@ -13,6 +13,7 @@ import UserMenu from "../user-menu";
 import { ChatLayer } from "@/features/chat/chat-layer";
 import { ChatBadge } from "@/features/chat/components/chat-badge";
 import { useGetUnreadMessageCount } from "@/features/hooks/use-conversation";
+import { useUnreadCount } from "@/features/notifications/hooks/use-notification-store";
 
 const MessageIconWithBadge = () => {
   const { data: count = 0 } = useGetUnreadMessageCount();
@@ -23,11 +24,39 @@ const MessageIconWithBadge = () => {
       {count > 0 && (
         <span
           className={clsx(
-            "absolute -top-2 -right-2 text-xs rounded-full bg-red-500 text-white px-1",
-            "min-w-[12px] h-4 flex items-center justify-center",
+            "absolute -top-1 left-3",
+            "text-xs h-3 min-w-[12px]",
+            "px-1",
+            "flex items-center justify-center",
+            "text-white bg-red-500 rounded-full",
+            "ring-2 ring-bg-main",
           )}
         >
           {count > 99 ? "99+" : count}
+        </span>
+      )}
+    </div>
+  );
+};
+
+const NotificationIconWithBadge = () => {
+  const { unreadCount } = useUnreadCount();
+
+  return (
+    <div className="relative">
+      <i className="fa-solid fa-bell" />
+      {unreadCount > 0 && (
+        <span
+          className={clsx(
+            "absolute -top-1 left-2",
+            "text-xs h-3 min-w-[12px]",
+            "px-1",
+            "flex items-center justify-center",
+            "text-white bg-red-500 rounded-full",
+            "ring-2 ring-bg-main",
+          )}
+        >
+          {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       )}
     </div>
@@ -60,7 +89,7 @@ const DefaultLayout = () => {
       showOnDesktop: false,
     },
     {
-      icon: <i className="fa-solid fa-bell" />,
+      icon: <NotificationIconWithBadge />,
       path: "/notifications",
       isIndex: false,
       showOnDesktop: false,

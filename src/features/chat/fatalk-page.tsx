@@ -1,12 +1,14 @@
 import { Outlet, useLocation } from "react-router-dom";
-import { Text } from "@/components/atoms";
 import { FatalkSidebar } from "./components/fatalk-sidebar";
 import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
 import clsx from "clsx";
+import { NotFound } from "../components/not-found";
+import { useTranslation } from "react-i18next";
 
 const FatalkPage = () => {
   const { pathname } = useLocation();
   const isExactPath = pathname === "/fatalk" || pathname === "/fatalk/";
+  const { t } = useTranslation();
 
   return (
     <SidebarLayout
@@ -28,13 +30,11 @@ const FatalkPage = () => {
               "gap-4 opacity-50",
             )}
           >
-            <div className="w-20 h-20 rounded-full bg-bg-fourth flex items-center justify-center">
-              <i className="fa-solid fa-message text-4xl text-primary-400" />
-            </div>
-            <Text sz="lg" weight="bold">
-              Tin nhắn của bạn
-            </Text>
-            <Text sz="md">Chọn một cuộc trò chuyện để bắt đầu nhắn tin</Text>
+            <NotFound
+              title={t("common:conversations.noSelectConversation")}
+              icon={"fa-solid fa-message"}
+              description={t("common:conversations.noSelectConversationMessage")}
+            />
           </div>
         )}
       </div>

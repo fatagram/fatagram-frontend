@@ -66,7 +66,6 @@ export const useMarkConversationAsRead = () => {
   return useResultFetcher(
     async ({ conversationId, messageSeq }: { conversationId: string; messageSeq: number }) => {
       var r = await conversationService.markAsSeen(conversationId, messageSeq);
-      console.log("Marked conversation as read:", conversationId, messageSeq, r);
       return r;
     },
   );
@@ -102,7 +101,6 @@ export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor
     () => ({
       onSuccess: (data: any) => {
         const conversations = data.items;
-        console.log("Fetched conversations:", conversations);
         if (conversations.length > 0) {
           const lastMessageSeqs: Record<string, number> = {};
           conversations.forEach((conv: ConversationDto) => {

@@ -15,7 +15,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ icon, title, description, cl
       className={clsx("flex flex-col items-center justify-center gap-4 animate-fade-in", className)}
     >
       <div className="flex items-center justify-center w-16 h-16 rounded-full bg-bg-third/50 text-text-third">
-        <i className={icon}></i>
+        <i className={clsx("text-3xl", icon)}></i>
       </div>
 
       <div className="flex flex-col items-center gap-1">

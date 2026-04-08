@@ -2,6 +2,7 @@ import { userProfileService } from "@/api/user/user-profile.api";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSafeQueryResult } from "@/hooks/use-safe-query";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
+import { useMemo } from "react";
 
 const profileQueryKey = (userId: string) => ["user", "profile", userId];
 const avatarQueryKey = (userId: string) => ["user", "avatar", userId];
@@ -35,7 +36,8 @@ export const useGetUserProfiles = (userIds: string[]) => {
   const queries = useQueries({
     queries: userIds.map((id) => ({
       queryKey: ["user", "profile", id],
-      queryFn: async () => await userProfileService.getProfile(id, "id,fullName,avatar,urlName"),
+      queryFn: async () =>
+        (await userProfileService.getProfile(id, "id,fullName,avatar,urlName")) as any,
       enabled: !!id,
       staleTime: 1000 * 60 * 5,
     })),
@@ -43,10 +45,14 @@ export const useGetUserProfiles = (userIds: string[]) => {
 
   const isLoading = queries.some((q) => q.isLoading);
 
-  const userProfileMap = Object.fromEntries(
-    queries
-      .filter((q) => q.data?.data?.infos)
-      .map((q) => [(q.data?.data?.infos as any).id, q.data?.data?.infos]),
+  const userProfileMap = useMemo(
+    () =>
+      Object.fromEntries(
+        queries
+          .filter((q) => q.data?.data?.infos)
+          .map((q) => [(q.data?.data?.infos as any).id, q.data?.data?.infos]),
+      ),
+    [queries],
   );
 
   return { userProfileMap, isLoading };

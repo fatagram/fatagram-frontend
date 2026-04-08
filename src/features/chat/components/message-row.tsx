@@ -113,7 +113,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               isMyMessage && "order-2",
               !hasAvatar && "invisible",
             )}
-            src={userInfo?.avatar}
+            src={message.senderAvatarUrl}
             alt="Avatar"
             sz="sm"
           />

@@ -142,7 +142,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
           numberOfSkeletons={2}
           emptyComponent={
             <NotFound
-              icon="fa-regular fa-bell-slash text-3xl"
+              icon="fa-regular fa-bell-slash"
               title={t("notifications:notifications.no-notifications")}
               description="When you have new updates, they will appear here."
             />

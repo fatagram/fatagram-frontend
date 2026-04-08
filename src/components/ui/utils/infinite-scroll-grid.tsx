@@ -43,13 +43,13 @@ export default function InfiniteScrollGrid({
         }
       },
       {
-        rootMargin: "100px", // Load sớm trước khi chạm hẳn đáy 100px
+        rootMargin: "100px",
       },
     );
 
     observer.observe(sentinel);
     return () => observer.disconnect();
-  }, [hasMore, isLoading, onLoadMore]); // Quan trọng: Thêm dependency để observer cập nhật
+  }, [hasMore, isLoading, onLoadMore]);
 
   return (
     <div

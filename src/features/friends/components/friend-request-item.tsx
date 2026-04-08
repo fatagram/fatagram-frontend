@@ -40,7 +40,7 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
       )}
     >
       <div className="w-full cursor-pointer" onClick={handleNavigate}>
-        <Avatar src={avatar} alt="avatar" shape="rounded" className="w-full" />
+        <Avatar src={avatar} alt="avatar" shape="rounded" className="w-full h-full" />
       </div>
       <Text
         sz="md"
