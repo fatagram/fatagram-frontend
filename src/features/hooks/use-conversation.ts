@@ -333,12 +333,12 @@ export const useMessageStore = create<MessageState>((set) => ({
   setParticipantsSeen: (conversationId, userId, participantSeen) => {
     set((state) => {
       const rawConvMap = state.messageUserSeenMap?.[conversationId] || {};
-      const currentConvMap = JSON.parse(JSON.stringify(rawConvMap));
+      const currentConvMap: Record<number, ViewerInfo[]> = {};
 
-      Object.keys(currentConvMap).forEach((mId) => {
-        currentConvMap[mId] = currentConvMap[mId].filter((v: any) => v.userId !== userId);
-        if (currentConvMap[mId].length === 0) {
-          delete currentConvMap[mId];
+      Object.entries(rawConvMap).forEach(([messageSeq, viewers]) => {
+        const filteredViewers = viewers.filter((viewer) => viewer.userId !== userId);
+        if (filteredViewers.length > 0) {
+          currentConvMap[Number(messageSeq)] = filteredViewers;
         }
       });
 
@@ -347,7 +347,7 @@ export const useMessageStore = create<MessageState>((set) => ({
         currentConvMap[newMsgSeq] = [];
       }
 
-      if (!currentConvMap[newMsgSeq].some((v: any) => v.userId === userId)) {
+      if (!currentConvMap[newMsgSeq].some((v) => v.userId === userId)) {
         currentConvMap[newMsgSeq].push({
           userId,
           seenAt: participantSeen.seenAt,

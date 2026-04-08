@@ -1,7 +1,7 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
 import { renderToString } from "react-dom/server";
 import { useNavigate, Link as Link$1, useLocation, useResolvedPath, useMatch, Outlet, useParams, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
-import i18next from "i18next";
+import i18next, { t } from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
 import React, { useState, useCallback, createContext, useContext, useReducer, useEffect, useMemo, forwardRef, useRef, useId, useLayoutEffect, memo } from "react";
@@ -10,6 +10,7 @@ import { create } from "zustand";
 import clsx, { clsx as clsx$1 } from "clsx";
 import { useNavigate as useNavigate$1 } from "react-router";
 import * as signalR from "@microsoft/signalr";
+import { HubConnectionState } from "@microsoft/signalr";
 import { ArrowLeft } from "lucide-react";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -22,8 +23,8 @@ const auth$1 = {
 const language$3 = { "en": "EN English", "vi": "VN Vietnamese" };
 const navbar$5 = { "profileMenu": { "settings": "Settings", "logout": "Logout" } };
 const notFound$1 = { "title": "Page Not Found", "description": "Oops! The page you're looking for doesn't exist or has been moved.", "backButton": "Back to Home" };
-const themes$1 = { "light": "Light", "dark": "Dark", "universe": "Universe", "neon": "Neon", "darkSea": "Dark Sea", "darkYellow": "Dark Yellow", "lightYellowPink": "Light Yellow Pink", "pastelYellowPink": "Pastel Yellow & Pink (Cute)", "darkRed": "Dark Red", "emerald": "Emerald", "aurora": "Aurora (Northern Lights)" };
-const conversations$1 = { "title": "Conversations", "turnBack": "Turn back", "search": "Search conversations...", "notFound": "No conversations found", "notFoundMessage": "Select a conversation or start a new one", "you": "You", "no-conversations": "No conversations", "sent": "Sent", "systemMessage": { "createGroup": "{{creatorName}} created the group" }, "privacyDescription": "Feel free to share your best moments! This conversation is always kept private and completely secure." };
+const themes$1 = { "light": "Light", "dark": "Dark", "universe": "Universe", "neon": "Neon", "darkSea": "Dark Sea", "darkBlue": "Dark Blue", "darkYellow": "Dark Yellow", "lightYellowPink": "Light Yellow Pink", "pastelYellowPink": "Pastel Yellow & Pink (Cute)", "darkRed": "Dark Red", "emerald": "Emerald", "aurora": "Aurora (Northern Lights)" };
+const conversations$1 = { "title": "Conversations", "turnBack": "Turn back", "search": "Search conversations...", "notFound": "No conversations found", "notFoundMessage": "Select a conversation or start a new one", "you": "You", "noConversations": "No conversations", "noConversationsMessage": "Your conversations will appear here", "noSelectConversation": "No conversation selected", "noSelectConversationMessage": "Select a conversation to start chatting", "sent": "Sent", "systemMessage": { "createGroup": "{{creatorName}} created the group" }, "privacyDescription": "Feel free to share your best moments! This conversation is always kept private and completely secure.", "openFatalk": "Open Fatalk", "enterGroupNameOptional": "Enter group name (optional)", "loadingOldMessages": "Loading messages...", "createGroupChat": "Create group chat" };
 const common$1 = {
   language: language$3,
   navbar: navbar$5,
@@ -78,7 +79,7 @@ const ago$1 = "ago";
 const just_now$1 = "Just now";
 const yesterday$1 = "Yesterday";
 const tomorrow$1 = "Tomorrow";
-const weekday$1 = { "1": "Sunday", "2": "Monday", "3": "Tuesday", "4": "Wednesday", "5": "Thursday", "6": "Friday", "7": "Saturday" };
+const weekday$1 = { "0": "Sunday", "2": "Monday", "3": "Tuesday", "4": "Wednesday", "5": "Thursday", "6": "Friday", "7": "Saturday" };
 const times$1 = {
   time: time$1,
   ago: ago$1,
@@ -110,8 +111,8 @@ const auth = {
 const language$1 = { "en": "EN Tiếng Anh", "vi": "VN Tiếng Việt" };
 const navbar$2 = { "profileMenu": { "settings": "Cài đặt", "logout": "Đăng xuất" } };
 const notFound = { "title": "Không tìm thấy", "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại.", "backButton": "Quay lại trang chủ" };
-const themes = { "light": "Sáng", "dark": "Tối", "universe": "Vũ trụ", "neon": "Neon", "darkSea": "Biển đêm", "darkYellow": "Vàng tối", "lightYellowPink": "Vàng hồng", "pastelYellowPink": "Vàng - Hồng Pastel (Cute)", "darkRed": "Đỏ tối", "emerald": "Ngọc lục bảo", "aurora": "Cực Quang (Aurora Borealis)" };
-const conversations = { "title": "Cuộc trò chuyện", "turnBack": "Quay lại", "search": "Tìm kiếm cuộc trò chuyện...", "notFound": "Không tìm thấy cuộc trò chuyện", "notFoundMessage": "Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới", "you": "Bạn", "no-conversations": "Không có cuộc trò chuyện", "sent": "Đã gửi", "systemMessage": { "createGroup": "{{creatorName}} đã tạo nhóm" }, "privacyDescription": "Hãy yên tâm chia sẻ những khoảnh khắc tuyệt vời nhất! Cuộc trò chuyện này luôn được giữ kín và an toàn tuyệt đối." };
+const themes = { "light": "Sáng", "dark": "Tối", "universe": "Vũ trụ", "neon": "Neon", "darkSea": "Biển đêm", "darkBlue": "Xanh đậm", "darkYellow": "Vàng tối", "lightYellowPink": "Vàng hồng", "pastelYellowPink": "Vàng - Hồng Pastel (Cute)", "darkRed": "Đỏ tối", "emerald": "Ngọc lục bảo", "aurora": "Cực Quang (Aurora Borealis)" };
+const conversations = { "title": "Cuộc trò chuyện", "turnBack": "Quay lại", "search": "Tìm kiếm cuộc trò chuyện...", "notFound": "Không tìm thấy cuộc trò chuyện", "notFoundMessage": "Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới", "you": "Bạn", "no-conversations": "Không có cuộc trò chuyện", "sent": "Đã gửi", "systemMessage": { "createGroup": "{{creatorName}} đã tạo nhóm" }, "privacyDescription": "Hãy yên tâm chia sẻ những khoảnh khắc tuyệt vời nhất! Cuộc trò chuyện này luôn được giữ kín và an toàn tuyệt đối.", "openFatalk": "Mở Fatalk", "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)", "loadingOldMessages": "Đang tải tin nhắn...", "createGroupChat": "Tạo nhóm chat" };
 const common = {
   language: language$1,
   navbar: navbar$2,
@@ -168,7 +169,7 @@ const ago = "trước";
 const just_now = "Vừa xong";
 const yesterday = "Hôm qua";
 const tomorrow = "Ngày mai";
-const weekday = { "1": "Chủ nhật", "2": "Thứ hai", "3": "Thứ ba", "4": "Thứ tư", "5": "Thứ năm", "6": "Thứ sáu", "7": "Thứ bảy" };
+const weekday = { "0": "Chủ nhật", "2": "Thứ hai", "3": "Thứ ba", "4": "Thứ tư", "5": "Thứ năm", "6": "Thứ sáu", "7": "Thứ bảy" };
 const times = {
   time,
   ago,
@@ -521,6 +522,7 @@ const loadFromStorage = () => {
   return { activeIds: [], minimizedIds: [], registry: {} };
 };
 const useChatStore = create((set) => ({
+  focusOnId: null,
   activeIds: [],
   minimizedIds: [],
   registry: {},
@@ -605,7 +607,8 @@ const useChatStore = create((set) => ({
       minimizedIds: [],
       registry: {}
     };
-  })
+  }),
+  setFocusOn: (id) => set({ focusOnId: id })
 }));
 const initialAuthStatus = {
   isAuthenticated: false,
@@ -1231,15 +1234,28 @@ function Transition({
   );
 }
 const useMediaQuery = (query) => {
-  const [matches, setMatches] = useState(() => window.matchMedia(query).matches);
+  const getInitial = () => {
+    if (typeof window === "undefined") return false;
+    try {
+      return window.matchMedia(query).matches;
+    } catch {
+      return false;
+    }
+  };
+  const [matches, setMatches] = useState(getInitial);
   useEffect(() => {
+    if (typeof window === "undefined") return;
     const mediaQuery = window.matchMedia(query);
     const handleChange = (event) => {
       setMatches(event.matches);
     };
-    mediaQuery.addEventListener("change", handleChange);
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+    mediaQuery.addListener(handleChange);
     return () => {
-      mediaQuery.removeEventListener("change", handleChange);
+      mediaQuery.removeListener(handleChange);
     };
   }, [query]);
   return matches;
@@ -1876,15 +1892,15 @@ const typeToI18nKey = {
   [NotificationType.FriendRequestCanceled]: "notifications:notifications.canceled-friend-request",
   [NotificationType.System]: "notifications:notifications.system-notification"
 };
-function getNotificationContent(type, fallbackContent, t) {
+function getNotificationContent(type, fallbackContent, t2) {
   const i18nKey = typeToI18nKey[type];
-  if (i18nKey && t) {
-    return `{actorName} ${t(i18nKey)}`;
+  if (i18nKey && t2) {
+    return `{actorName} ${t2(i18nKey)}`;
   }
   if (fallbackContent) {
     return fallbackContent;
   }
-  return t ? `{actorName} ${t("notifications:notifications.default-notification")}` : "{actorName}";
+  return t2 ? `{actorName} ${t2("notifications:notifications.default-notification")}` : "{actorName}";
 }
 function timeDistance(date, now = /* @__PURE__ */ new Date()) {
   const seconds = Math.floor((now.getTime() - date.getTime()) / 1e3);
@@ -1920,14 +1936,14 @@ function timeDistance(date, now = /* @__PURE__ */ new Date()) {
   return { text: date.toLocaleDateString() };
 }
 const useFormatTime = () => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const formatTime = (rawTime) => {
     const _rawTime = new Date(rawTime);
     const time2 = timeDistance(_rawTime);
     if (time2.count) {
-      return t(`${time2.unit}`, { count: time2.count }) + " " + t(time2.text);
+      return t2(`${time2.unit}`, { count: time2.count }) + " " + t2(time2.text);
     }
-    return t("times:just_now");
+    return t2("times:just_now");
   };
   const formatSmartTimestamp = (date) => {
     const _date = new Date(date);
@@ -1949,7 +1965,7 @@ const useFormatTime = () => {
         minute: "2-digit",
         hour12: false
       });
-      return `${t("times:yesterday")} ${time2}`;
+      return `${t2("times:yesterday")} ${time2}`;
     }
     if (diffInDays < 7) {
       const time2 = _date.toLocaleTimeString("vi-VN", {
@@ -1957,7 +1973,7 @@ const useFormatTime = () => {
         minute: "2-digit",
         hour12: false
       });
-      return `${t(`times:weekday:${_date.getDay()}`)} ${time2}`;
+      return `${t2(`times:weekday:${_date.getDay()}`)} ${time2}`;
     }
     return _date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
   };
@@ -1980,8 +1996,8 @@ const BaseNotification = ({
   children,
   onClick
 }) => {
-  const { t } = useTranslation();
-  const content = getNotificationContent(notificationDto.type, notificationDto.content, t);
+  const { t: t2 } = useTranslation();
+  const content = getNotificationContent(notificationDto.type, notificationDto.content, t2);
   const { formatTime } = useFormatTime();
   return /* @__PURE__ */ jsxs("div", { className: "flex gap-2 select-none", onClick, children: [
     /* @__PURE__ */ jsx("div", { className: "flex items-start", children: /* @__PURE__ */ jsx(Avatar, { src: notificationDto.actorImageUrl, alt: "Avatar", sz: "md" }) }),
@@ -2020,7 +2036,7 @@ const NewFriendRequest = ({
   const [message, setMessage] = React.useState(
     messageMap[notificationDto.id] || null
   );
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const navigate = useNavigate$1();
   const handleClick = useCallback(() => {
     onClick();
@@ -2032,8 +2048,8 @@ const NewFriendRequest = ({
     const acceptFriendRequest = async () => {
       const response = await friendshipService.AcceptAddFriendRequest(notificationDto.actorId);
       if (response.success) {
-        setMessage(t("notifications:notifications.accepted"));
-        messageMap[notificationDto.id] = t("notifications:notifications.accepted");
+        setMessage(t2("notifications:notifications.accepted"));
+        messageMap[notificationDto.id] = t2("notifications:notifications.accepted");
       }
     };
     acceptFriendRequest();
@@ -2044,14 +2060,14 @@ const NewFriendRequest = ({
     const deleteFriendRequest = async () => {
       const response = await friendshipService.DeclineAddFriendRequest(notificationDto.actorId);
       if (response.success) {
-        setMessage(t("notifications:notifications.declined"));
-        messageMap[notificationDto.id] = t("notifications:notifications.declined");
+        setMessage(t2("notifications:notifications.declined"));
+        messageMap[notificationDto.id] = t2("notifications:notifications.declined");
       }
     };
     deleteFriendRequest();
   };
   return /* @__PURE__ */ jsx(BaseNotification, { notificationDto, onClick: handleClick, children: !message ? /* @__PURE__ */ jsxs("div", { className: clsx("flex", "gap-1", "mt-1", "justify-start"), children: [
-    /* @__PURE__ */ jsx(Button, { sz: "sm", variant: "primary", onClick: handleAccept, children: t("user:profileHeader.acceptButton") }),
+    /* @__PURE__ */ jsx(Button, { sz: "sm", variant: "primary", onClick: handleAccept, children: t2("user:profileHeader.acceptButton") }),
     /* @__PURE__ */ jsx(
       Button,
       {
@@ -2059,7 +2075,7 @@ const NewFriendRequest = ({
         variant: "secondary",
         onClick: handleDelete,
         className: "border-[1.5px] border-primary-500",
-        children: t("user:profileHeader.declineButton")
+        children: t2("user:profileHeader.declineButton")
       }
     )
   ] }) : /* @__PURE__ */ jsx(Text, { sz: "sm", className: clsx("opacity-70"), children: message }) });
@@ -2250,7 +2266,8 @@ const ThemeList = [
   "pastel-yellow-pink",
   "dark-red",
   "emerald",
-  "aurora"
+  "aurora",
+  "dark-blue"
 ];
 const ThemeContext = createContext({
   availableThemes: [],
@@ -2262,13 +2279,13 @@ function getInitialTheme() {
   if (typeof window !== "undefined") {
     try {
       const stored = window.localStorage.getItem("theme");
-      if (stored && ThemeList.some((t) => t === stored)) {
+      if (stored && ThemeList.some((t2) => t2 === stored)) {
         return stored;
       }
     } catch {
     }
     const domTheme = window.document?.documentElement?.getAttribute("data-theme");
-    if (domTheme && ThemeList.some((t) => t === domTheme)) {
+    if (domTheme && ThemeList.some((t2) => t2 === domTheme)) {
       return domTheme;
     }
   }
@@ -2276,19 +2293,20 @@ function getInitialTheme() {
 }
 function ThemeProvider({ children }) {
   const [theme2, setTheme] = useState(getInitialTheme);
-  const t = useTranslation().t;
+  const t2 = useTranslation().t;
   const availableThemes = [
-    { key: "light", label: t("common:themes:light") },
-    { key: "dark", label: t("common:themes:dark") },
-    { key: "universe", label: t("common:themes:universe") },
-    { key: "neon", label: t("common:themes:neon") },
-    { key: "dark-sea", label: t("common:themes:darkSea") },
-    { key: "dark-yellow", label: t("common:themes:darkYellow") },
-    { key: "light-yellow-pink", label: t("common:themes:lightYellowPink") },
-    { key: "pastel-yellow-pink", label: t("common:themes:pastelYellowPink") },
-    { key: "dark-red", label: t("common:themes:darkRed") },
-    { key: "emerald", label: t("common:themes:emerald") },
-    { key: "aurora", label: t("common:themes:aurora") }
+    { key: "light", label: t2("common:themes:light") },
+    { key: "dark", label: t2("common:themes:dark") },
+    { key: "universe", label: t2("common:themes:universe") },
+    { key: "neon", label: t2("common:themes:neon") },
+    { key: "dark-sea", label: t2("common:themes:darkSea") },
+    { key: "dark-yellow", label: t2("common:themes:darkYellow") },
+    { key: "dark-blue", label: t2("common:themes:darkBlue") },
+    { key: "light-yellow-pink", label: t2("common:themes:lightYellowPink") },
+    { key: "pastel-yellow-pink", label: t2("common:themes:pastelYellowPink") },
+    { key: "dark-red", label: t2("common:themes:darkRed") },
+    { key: "emerald", label: t2("common:themes:emerald") },
+    { key: "aurora", label: t2("common:themes:aurora") }
   ];
   useEffect(() => {
     const root = window.document.documentElement;
@@ -2778,12 +2796,30 @@ function useAppHub(onReceiveMessage) {
       tryConnect();
     };
     startConnection();
+    const handleOnboardingCompleted = async () => {
+      const conn = connectionRef.current;
+      if (!conn) return;
+      try {
+        if (conn.state === HubConnectionState.Disconnected) {
+          await conn.start();
+          conn.on("ReceiveMessage", (message) => {
+            if (isMounted) {
+              onReceiveMessage(message);
+            }
+          });
+        }
+      } catch (err) {
+        console.error("SignalR reconnect after onboarding error:", err);
+      }
+    };
+    authEvents.on("onboardingCompleted", handleOnboardingCompleted);
     return () => {
       isMounted = false;
       if (connectionRef.current) {
         connectionRef.current.stop();
         connectionRef.current = null;
       }
+      authEvents.off("onboardingCompleted", handleOnboardingCompleted);
     };
   }, [isAuthenticated]);
 }
@@ -2871,7 +2907,6 @@ function InfiniteScrollGrid({
       },
       {
         rootMargin: "100px"
-        // Load sớm trước khi chạm hẳn đáy 100px
       }
     );
     observer.observe(sentinel);
@@ -2925,7 +2960,7 @@ const NotFound = ({ icon, title: title2, description: description2, className })
     {
       className: clsx("flex flex-col items-center justify-center gap-4 animate-fade-in", className),
       children: [
-        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center w-16 h-16 rounded-full bg-bg-third/50 text-text-third", children: /* @__PURE__ */ jsx("i", { className: icon }) }),
+        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center w-16 h-16 rounded-full bg-bg-third/50 text-text-third", children: /* @__PURE__ */ jsx("i", { className: clsx("text-3xl", icon) }) }),
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-1", children: [
           /* @__PURE__ */ jsx(Text, { sz: "md", weight: "bold", className: "text-text-main text-base font-medium", children: title2 }),
           /* @__PURE__ */ jsx(
@@ -2943,7 +2978,7 @@ const NotFound = ({ icon, title: title2, description: description2, className })
   );
 };
 const NotificationMenu = ({ className, ref }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const navigate = useNavigate$1();
   const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
     limit: 20
@@ -2987,14 +3022,14 @@ const NotificationMenu = ({ className, ref }) => {
       ref,
       children: [
         /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-2 pt-2", children: [
-          /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: t("notifications:notifications.title") }),
+          /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: t2("notifications:notifications.title") }),
           notifications2.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
             unreadCount > 0 && /* @__PURE__ */ jsx(
               "button",
               {
                 className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
                 onClick: handleMarkAllAsRead,
-                title: t("notifications:notifications.mark-all-read"),
+                title: t2("notifications:notifications.mark-all-read"),
                 children: /* @__PURE__ */ jsx(Text, { sz: "md", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-check-double" }) })
               }
             ),
@@ -3003,7 +3038,7 @@ const NotificationMenu = ({ className, ref }) => {
               {
                 className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
                 onClick: handleDeleteAll,
-                title: t("notifications:notifications.delete-all"),
+                title: t2("notifications:notifications.delete-all"),
                 children: /* @__PURE__ */ jsx(Text, { sz: "md", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-trash-can" }) })
               }
             )
@@ -3051,8 +3086,8 @@ const NotificationMenu = ({ className, ref }) => {
             emptyComponent: /* @__PURE__ */ jsx(
               NotFound,
               {
-                icon: "fa-regular fa-bell-slash text-3xl",
-                title: t("notifications:notifications.no-notifications"),
+                icon: "fa-regular fa-bell-slash",
+                title: t2("notifications:notifications.no-notifications"),
                 description: "When you have new updates, they will appear here."
               }
             )
@@ -3063,9 +3098,9 @@ const NotificationMenu = ({ className, ref }) => {
           {
             className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2",
             onClick: () => navigate("/notifications"),
-            title: t("notifications:notifications.open-notifications"),
+            title: t2("notifications:notifications.open-notifications"),
             children: [
-              /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: t("notifications:notifications.open-notifications") }),
+              /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: t2("notifications:notifications.open-notifications") }),
               /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-up-right-from-square" }) })
             ]
           }
@@ -3217,7 +3252,8 @@ function useMessageCacheMutations() {
 const PREFIX$3 = buildApiPath("/conversation");
 class ConversationService {
   async getConversations(query) {
-    return await apiGet(`${PREFIX$3}`, query);
+    const res = await apiGet(`${PREFIX$3}`, query);
+    return res;
   }
   async getConversation(conversationId) {
     return await apiGet(`${PREFIX$3}/${conversationId}`);
@@ -3231,11 +3267,14 @@ class ConversationService {
   async createGroupConversation(participantIds, name) {
     return await apiPost(`${PREFIX$3}`, { participantIds, name });
   }
-  async markAsRead(conversationId, messageId) {
-    return await apiPost(`${PREFIX$3}/${conversationId}/messages/markRead/${messageId}`);
+  async markAsSeen(conversationId, messageSeq) {
+    return await apiPost(`${PREFIX$3}/${conversationId}/messages/markSeen/${messageSeq}`);
   }
   async getParticipantsSeen(conversationId) {
     return await apiGet(`${PREFIX$3}/${conversationId}/participants/seen`);
+  }
+  async getUnreadCount() {
+    return await apiGet(`${PREFIX$3}/unread-count`);
   }
 }
 const conversationService = new ConversationService();
@@ -3276,13 +3315,16 @@ const useCreateGroupConversation = () => {
 };
 const useMarkConversationAsRead = () => {
   return useResultFetcher(
-    async ({ conversationId, messageId }) => await conversationService.markAsRead(conversationId, messageId)
+    async ({ conversationId, messageSeq }) => {
+      var r = await conversationService.markAsSeen(conversationId, messageSeq);
+      return r;
+    }
   );
 };
 const useLocalMarkAsRead = () => {
   const { markAsRead } = useConversationCacheMutations();
-  return (conversationId, messageId) => {
-    markAsRead(conversationId, messageId);
+  return (conversationId, messageSeq) => {
+    markAsRead(conversationId, messageSeq);
   };
 };
 const useGetPariticipantsSeen = (conversationId) => {
@@ -3299,24 +3341,36 @@ const useGetPariticipantsSeen = (conversationId) => {
 };
 const useConversations = (queryParams) => {
   const { userId } = useAuth();
+  const queryClient = useQueryClient();
+  const queryOptions = useMemo(
+    () => ({
+      onSuccess: (data) => {
+        const conversations2 = data.items;
+        if (conversations2.length > 0) {
+          const lastMessageSeqs = {};
+          conversations2.forEach((conv) => {
+            if (conv.lastMessage) {
+              lastMessageSeqs[conv.id] = conv.lastMessage.sequenceNumber;
+            }
+            const key = ["conversation", "unread-count", conv.id];
+            const serverCount = conv.unreadMessageCount ?? 0;
+            queryClient.setQueryData(key, (oldCount) => {
+              const currentCount = oldCount ?? 0;
+              return Math.max(currentCount, serverCount);
+            });
+          });
+          useMessageStore.getState().setBulkLastMessages(lastMessageSeqs);
+        }
+      }
+    }),
+    [queryClient]
+  );
   return useSafeInfiniteQueryResult({
     queryKey: conversationKeys.list(queryParams),
     fn: async (cursor) => await conversationService.getConversations({ ...queryParams, cursor }),
     enabled: !!userId,
-    options: {
-      onSuccess: (data) => {
-        const conversations2 = data.items;
-        if (conversations2.length > 0) {
-          const lastMessageIds = {};
-          conversations2.forEach((conv) => {
-            if (conv.lastMessage) {
-              lastMessageIds[conv.id] = conv.lastMessage.id;
-            }
-          });
-          useMessageStore.getState().setBulkLastMessages(lastMessageIds);
-        }
-      }
-    }
+    staleTime: Infinity,
+    options: queryOptions
   });
 };
 const useConversationCacheMutations = () => {
@@ -3343,10 +3397,11 @@ const useConversationCacheMutations = () => {
     });
     updateDetailCache(conversationId, updateFn);
   };
-  const markAsRead = async (conversationId, messageId) => {
+  const markAsRead = async (conversationId, messageSeq) => {
     updateConversationInCache(conversationId, (conv) => ({
       ...conv,
-      myLastSeenMessageId: messageId
+      myLastSeenSeq: messageSeq,
+      unreadMessageCount: 0
     }));
   };
   const pushConversationToTop = async (conversationId, lastMessage) => {
@@ -3386,17 +3441,71 @@ const useConversationCacheMutations = () => {
   };
   return { pushConversationToTop, updateConversationInCache, markAsRead };
 };
+const useGetUnreadMessageCount = () => {
+  const { userId } = useAuth();
+  return useSafeQueryResult({
+    queryKey: ["conversation", "unread-count", userId],
+    fn: async () => await conversationService.getUnreadCount()
+  });
+};
+const useUnreadMessageCountCacheMutations = () => {
+  const queryClient = useQueryClient();
+  const { userId } = useAuth();
+  const setUnreadCount = (update) => {
+    const key = ["conversation", "unread-count", userId];
+    queryClient.setQueryData(key, (oldCount) => {
+      const currentCount = oldCount ?? 0;
+      const newCount = update(currentCount);
+      return Math.max(0, newCount);
+    });
+  };
+  const setUnreadCountForConversation = (conversationId, update) => {
+    const key = ["conversation", "unread-count", conversationId];
+    queryClient.setQueryData(key, (oldCount) => {
+      const currentCount = oldCount ?? 0;
+      const newCount = update(currentCount);
+      return Math.max(0, newCount);
+    });
+  };
+  const getUnreadCountForConversation = (conversationId) => {
+    const key = ["conversation", "unread-count", conversationId];
+    return queryClient.getQueryData(key) ?? 0;
+  };
+  return { setUnreadCount, setUnreadCountForConversation, getUnreadCountForConversation };
+};
+const useUnreadMessageCountCache = (conversationId) => {
+  const { data: unreadCount } = useQuery({
+    queryKey: ["conversation", "unread-count", conversationId],
+    queryFn: () => {
+      return 0;
+    },
+    enabled: !!conversationId,
+    staleTime: Infinity,
+    initialData: 0
+  });
+  return unreadCount ?? 0;
+};
 const useMessageStore = create((set) => ({
   lastMessageMap: {},
   messageUserSeenMap: {},
-  setLastMessage: (conversationId, messageId) => set((state) => ({
+  setLastMessage: (conversationId, messageSeq) => set((state) => ({
     lastMessageMap: {
       ...state.lastMessageMap,
-      [conversationId]: messageId
+      [conversationId]: messageSeq
     }
   })),
-  setBulkLastMessages: (data) => set(() => ({
-    lastMessageMap: data
+  setBulkLastMessages: (data) => set((state) => ({
+    lastMessageMap: {
+      ...state.lastMessageMap,
+      ...Object.entries(data).reduce(
+        (acc, [convId, newSeq]) => {
+          const currentSeq = state.lastMessageMap[convId];
+          acc[convId] = currentSeq !== void 0 ? Math.max(currentSeq, newSeq) : newSeq;
+          return acc;
+        },
+        {}
+      )
+    }
   })),
   setParticipantsSeen: (conversationId, userId, participantSeen) => {
     set((state) => {
@@ -3408,12 +3517,12 @@ const useMessageStore = create((set) => ({
           delete currentConvMap[mId];
         }
       });
-      const newMsgId = participantSeen.messageId;
-      if (!currentConvMap[newMsgId]) {
-        currentConvMap[newMsgId] = [];
+      const newMsgSeq = participantSeen.sequenceNumber;
+      if (!currentConvMap[newMsgSeq]) {
+        currentConvMap[newMsgSeq] = [];
       }
-      if (!currentConvMap[newMsgId].some((v) => v.userId === userId)) {
-        currentConvMap[newMsgId].push({
+      if (!currentConvMap[newMsgSeq].some((v) => v.userId === userId)) {
+        currentConvMap[newMsgSeq].push({
           userId,
           seenAt: participantSeen.seenAt
         });
@@ -3431,28 +3540,34 @@ const useMessageStore = create((set) => ({
       if (!data) return state;
       const currentConvMap = state.messageUserSeenMap?.[conversationId] || {};
       const toTime = (value) => {
-        const t = new Date(value).getTime();
-        return Number.isFinite(t) ? t : 0;
+        const t2 = new Date(value).getTime();
+        return Number.isFinite(t2) ? t2 : 0;
       };
       const mergedByUser = {};
-      Object.entries(currentConvMap).forEach(([messageId, viewers]) => {
+      Object.entries(currentConvMap).forEach(([messageSeq, viewers]) => {
         viewers.forEach((viewer) => {
           const existing = mergedByUser[viewer.userId];
           if (!existing || toTime(viewer.seenAt) > toTime(existing.seenAt)) {
-            mergedByUser[viewer.userId] = { messageId, seenAt: viewer.seenAt };
+            mergedByUser[viewer.userId] = {
+              sequenceNumber: Number(messageSeq),
+              seenAt: viewer.seenAt
+            };
           }
         });
       });
       Object.entries(data).forEach(([userId, seenInfo]) => {
         const existing = mergedByUser[userId];
         if (!existing || toTime(seenInfo.seenAt) > toTime(existing.seenAt)) {
-          mergedByUser[userId] = { messageId: seenInfo.messageId, seenAt: seenInfo.seenAt };
+          mergedByUser[userId] = {
+            sequenceNumber: Number(seenInfo.sequenceNumber),
+            seenAt: seenInfo.seenAt
+          };
         }
       });
       const newConvMap = {};
       Object.entries(mergedByUser).forEach(([userId, seenInfo]) => {
-        if (!newConvMap[seenInfo.messageId]) newConvMap[seenInfo.messageId] = [];
-        newConvMap[seenInfo.messageId].push({ userId, seenAt: seenInfo.seenAt });
+        if (!newConvMap[seenInfo.sequenceNumber]) newConvMap[seenInfo.sequenceNumber] = [];
+        newConvMap[seenInfo.sequenceNumber].push({ userId, seenAt: seenInfo.seenAt });
       });
       return {
         messageUserSeenMap: {
@@ -3466,14 +3581,20 @@ const useMessageStore = create((set) => ({
 function MessageListener() {
   const { addMessageToCache } = useMessageCacheMutations();
   const { pushConversationToTop, updateConversationInCache } = useConversationCacheMutations();
+  const { setUnreadCount, setUnreadCountForConversation } = useUnreadMessageCountCacheMutations();
   const { setParticipantsSeen } = useMessageStore();
   const { userId } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
-  useAppHub((message) => {
+  const { fetch: markAsRead } = useMarkConversationAsRead();
+  const markAsReadLocal = useLocalMarkAsRead();
+  const autoReadMessageKeysRef = useRef(/* @__PURE__ */ new Set());
+  const createAutoReadKey = (conversationId, messageSeq) => `${conversationId}:${messageSeq}`;
+  useAppHub(async (message) => {
     if (message.event !== "NewMessage") return;
     const data = message.payload;
     const conversationId = data.conversationId;
+    const isOwnMessage = data.senderId === userId;
     if (data.correlationId && useChatStore.getState().registry[data.correlationId]) {
       useChatStore.getState().replaceChat(data.correlationId, conversationId);
     } else {
@@ -3486,14 +3607,47 @@ function MessageListener() {
       }
       useChatStore.getState().openChat(conversationId, { type: "conversation", conversationId });
     }
-    useMessageStore.getState().setLastMessage(conversationId, data.id);
+    useMessageStore.getState().setLastMessage(conversationId, data.sequenceNumber);
     addMessageToCache(conversationId, data, true);
     pushConversationToTop(conversationId, data);
     if (data.senderId === userId) {
       updateConversationInCache(conversationId, (conv) => ({
         ...conv,
-        myLastSeenMessageId: data.id
+        myLastSeenMessageSeq: data.sequenceNumber
       }));
+      markAsReadLocal(conversationId, data.sequenceNumber);
+      try {
+        await markAsRead({
+          conversationId,
+          messageSeq: data.sequenceNumber
+        });
+      } catch {
+      }
+    }
+    const { focusOnId: currentFocusId, activeIds, minimizedIds } = useChatStore.getState();
+    const isActiveChat = activeIds.includes(conversationId);
+    const isMinimizedChat = minimizedIds.includes(conversationId);
+    const isDisplayedChat = isActiveChat && !isMinimizedChat;
+    const isDocumentFocused = document.hasFocus();
+    if (currentFocusId !== conversationId || !isDisplayedChat || !isDocumentFocused) {
+      if (!isOwnMessage) {
+        if (data.shouldIncreaseUnreadCount) {
+          setUnreadCount((prev) => prev + 1);
+        }
+        setUnreadCountForConversation(conversationId, (prev) => prev + 1);
+      }
+    } else if (!isOwnMessage && isDisplayedChat && isDocumentFocused) {
+      const autoReadKey = createAutoReadKey(conversationId, data.sequenceNumber);
+      autoReadMessageKeysRef.current.add(autoReadKey);
+      markAsReadLocal(conversationId, data.sequenceNumber);
+      try {
+        await markAsRead({
+          conversationId,
+          messageSeq: data.sequenceNumber
+        });
+      } catch {
+        autoReadMessageKeysRef.current.delete(autoReadKey);
+      }
     }
   });
   useAppHub((message) => {
@@ -3502,26 +3656,34 @@ function MessageListener() {
     const conversationId = data.conversationId;
     const otherUserId = data.userId;
     setParticipantsSeen(conversationId, data.userId, {
-      messageId: data.messageId,
+      sequenceNumber: data.messageSeq,
       seenAt: data.seenAt
     });
     if (otherUserId !== userId) {
       updateConversationInCache(conversationId, (conv) => ({
         ...conv,
-        otherLastSeenMessageId: data.messageId
+        otherLastSeenMessageSeq: data.messageSeq
       }));
     } else {
       updateConversationInCache(conversationId, (conv) => ({
         ...conv,
-        myLastSeenMessageId: data.messageId
+        myLastSeenMessageSeq: data.messageSeq
       }));
+      const autoReadKey = createAutoReadKey(conversationId, data.messageSeq);
+      const isAutoReadAck = autoReadMessageKeysRef.current.has(autoReadKey);
+      if (isAutoReadAck) {
+        autoReadMessageKeysRef.current.delete(autoReadKey);
+      }
+      if (data.shouldDecreaseUnreadCount && !isAutoReadAck) {
+        setUnreadCount((prev) => prev - 1);
+      }
+      setUnreadCountForConversation(conversationId, (_prev) => 0);
     }
   });
-  return null;
 }
 function NotFoundPage() {
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   useEffect(() => {
     document.title = "Page Not Found";
     return () => {
@@ -3549,8 +3711,8 @@ function NotFoundPage() {
             children: "404"
           }
         ),
-        /* @__PURE__ */ jsx(Text, { weight: "extrabold", sz: "xl", className: clsx("uppercase text-gradient-second"), children: t("notFound.title") }),
-        /* @__PURE__ */ jsx(Text, { sz: "lg", className: clsx("flex justify-center text-center"), wrap: "whitespace-normal", children: t("notFound.description") }),
+        /* @__PURE__ */ jsx(Text, { weight: "extrabold", sz: "xl", className: clsx("uppercase text-gradient-second"), children: t2("notFound.title") }),
+        /* @__PURE__ */ jsx(Text, { sz: "lg", className: clsx("flex justify-center text-center"), wrap: "whitespace-normal", children: t2("notFound.description") }),
         /* @__PURE__ */ jsx("div", { className: clsx("flex gap-[10px]"), children: /* @__PURE__ */ jsxs(
           Button,
           {
@@ -3560,7 +3722,7 @@ function NotFoundPage() {
             },
             children: [
               /* @__PURE__ */ jsx(ArrowLeft, { className: clsx("w-5 h-5 mr-2") }),
-              t("notFound.backButton")
+              t2("notFound.backButton")
             ]
           }
         ) }),
@@ -3639,7 +3801,7 @@ const RegisterForm = ({
   showClose = false,
   onClose
 }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const [isShowClose] = useState(showClose);
   const [isShowLogo] = useState(showLogo);
   const navigate = useNavigate();
@@ -3710,7 +3872,7 @@ const RegisterForm = ({
           {
             weight: "extrabold",
             className: "!text-3xl uppercase !text-primary-500 select-none text-center",
-            children: t("auth:register.title")
+            children: t2("auth:register.title")
           }
         ),
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
@@ -3720,10 +3882,10 @@ const RegisterForm = ({
               value: formik.values.username,
               sz: "sm",
               className: "w-full",
-              placeholder: t("auth:register.username"),
+              placeholder: t2("auth:register.username"),
               onChange: (e) => formik.setFieldValue("username", e.target.value),
               isWrong: formik.touched.username && Boolean(formik.errors.username) || Boolean(usernameError),
-              wrongMessage: t(usernameError || formik.errors.username || ""),
+              wrongMessage: t2(usernameError || formik.errors.username || ""),
               disabled: formik.isSubmitting,
               type: "text",
               autoComplete: "username"
@@ -3735,10 +3897,10 @@ const RegisterForm = ({
               value: formik.values.email,
               sz: "sm",
               className: "w-full",
-              placeholder: t("auth:register.email"),
+              placeholder: t2("auth:register.email"),
               onChange: (e) => formik.setFieldValue("email", e.target.value),
               isWrong: formik.touched.email && Boolean(formik.errors.email) || Boolean(emailError),
-              wrongMessage: t(emailError || formik.errors.email || ""),
+              wrongMessage: t2(emailError || formik.errors.email || ""),
               disabled: formik.isSubmitting,
               type: "email",
               autoComplete: "email"
@@ -3750,10 +3912,10 @@ const RegisterForm = ({
               value: formik.values.phoneNumber,
               sz: "sm",
               className: "w-full",
-              placeholder: t("auth:register.phoneNumber"),
+              placeholder: t2("auth:register.phoneNumber"),
               onChange: (e) => formik.setFieldValue("phoneNumber", e.target.value),
               isWrong: formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber) || Boolean(phoneNumberError),
-              wrongMessage: t(phoneNumberError || formik.errors.phoneNumber || ""),
+              wrongMessage: t2(phoneNumberError || formik.errors.phoneNumber || ""),
               disabled: formik.isSubmitting,
               type: "text",
               autoComplete: "tel"
@@ -3766,10 +3928,10 @@ const RegisterForm = ({
               value: formik.values.password,
               sz: "sm",
               className: "w-full",
-              placeholder: t("auth:register.password"),
+              placeholder: t2("auth:register.password"),
               onChange: (e) => formik.setFieldValue("password", e.target.value),
               isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
-              wrongMessage: t(passwordError || formik.errors.password || ""),
+              wrongMessage: t2(passwordError || formik.errors.password || ""),
               disabled: formik.isSubmitting,
               autoComplete: "new-password"
             }
@@ -3781,10 +3943,10 @@ const RegisterForm = ({
               value: formik.values.confirmPassword,
               sz: "sm",
               className: "w-full",
-              placeholder: t("auth:register.confirmPassword"),
+              placeholder: t2("auth:register.confirmPassword"),
               onChange: (e) => formik.setFieldValue("confirmPassword", e.target.value),
               isWrong: formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword) || Boolean(confirmPasswordError),
-              wrongMessage: t(confirmPasswordError || formik.errors.confirmPassword || ""),
+              wrongMessage: t2(confirmPasswordError || formik.errors.confirmPassword || ""),
               disabled: formik.isSubmitting,
               autoComplete: "new-password"
             }
@@ -3795,13 +3957,13 @@ const RegisterForm = ({
           {
             className: "text-[15px] text-single-third gap-[8px] w-full",
             label: /* @__PURE__ */ jsxs(Text, { className: "flex items-center flex-wrap", children: [
-              t("auth:register.agree"),
+              t2("auth:register.agree"),
               " ",
-              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/terms", children: t("auth:register.termsOfService") }),
+              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/terms", children: t2("auth:register.termsOfService") }),
               " ",
-              t("auth:register.and"),
+              t2("auth:register.and"),
               " ",
-              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/policy", children: t("auth:register.privacyPolicy") }),
+              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/policy", children: t2("auth:register.privacyPolicy") }),
               "."
             ] })
           }
@@ -3816,7 +3978,7 @@ const RegisterForm = ({
             disabled: formik.isSubmitting,
             children: [
               formik.isSubmitting && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center mr-2", children: /* @__PURE__ */ jsx("div", { className: "w-3 h-3 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) }),
-              /* @__PURE__ */ jsx(Text, { children: t("auth:register.registerButton") })
+              /* @__PURE__ */ jsx(Text, { children: t2("auth:register.registerButton") })
             ]
           }
         ),
@@ -3828,7 +3990,7 @@ const RegisterForm = ({
           ] }),
           /* @__PURE__ */ jsx(SocialButtons, { disabled: formik.isSubmitting })
         ] }),
-        /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/login", children: t("auth:register.loginButton") }),
+        /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/login", children: t2("auth:register.loginButton") }),
         isShowClose && /* @__PURE__ */ jsx(
           Text,
           {
@@ -3916,7 +4078,7 @@ const LoginForm = ({
   onClose,
   className
 }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const [passwordError, setPasswordError] = useState("");
   const [usernameOrEmailError, setUsernameOrEmailError] = useState("");
   const [isShowClose] = React.useState(showClose);
@@ -3962,7 +4124,7 @@ const LoginForm = ({
               "uppercase !text-primary-500",
               "font-bold font-inter select-none !text-3xl"
             ),
-            children: t("auth:login.title")
+            children: t2("auth:login.title")
           }
         ),
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
@@ -3971,10 +4133,10 @@ const LoginForm = ({
             {
               sz: "sm",
               className: "w-full",
-              placeholder: t("auth:login.username"),
+              placeholder: t2("auth:login.username"),
               onChange: (e) => formik.setFieldValue("usernameOrEmail", e.target.value),
               isWrong: formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail) || Boolean(usernameOrEmailError),
-              wrongMessage: t(usernameOrEmailError || formik.errors.usernameOrEmail || ""),
+              wrongMessage: t2(usernameOrEmailError || formik.errors.usernameOrEmail || ""),
               disabled: formik.isSubmitting,
               type: "text",
               autoComplete: "username"
@@ -3986,10 +4148,10 @@ const LoginForm = ({
               type: "password",
               sz: "sm",
               className: "w-full",
-              placeholder: t("auth:login.password"),
+              placeholder: t2("auth:login.password"),
               onChange: (e) => formik.setFieldValue("password", e.target.value),
               isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
-              wrongMessage: t(passwordError || formik.errors.password || ""),
+              wrongMessage: t2(passwordError || formik.errors.password || ""),
               disabled: formik.isSubmitting,
               autoComplete: "current-password"
             }
@@ -3999,7 +4161,7 @@ const LoginForm = ({
           /* @__PURE__ */ jsx(
             Checkbox,
             {
-              label: t("auth:login.rememberMe"),
+              label: t2("auth:login.rememberMe"),
               onChange: (e) => {
                 formik.setFieldValue("rememberMe", e.target.checked);
               },
@@ -4016,7 +4178,7 @@ const LoginForm = ({
                 "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
               ),
               onClick: switchForgotPassword,
-              children: t("auth:login.forgotPassword")
+              children: t2("auth:login.forgotPassword")
             }
           )
         ] }),
@@ -4030,7 +4192,7 @@ const LoginForm = ({
             disabled: formik.isSubmitting,
             children: [
               formik.isSubmitting && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center mr-2", children: /* @__PURE__ */ jsx("div", { className: "w-3 h-3 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) }),
-              t("auth:login.loginButton")
+              t2("auth:login.loginButton")
             ]
           }
         ),
@@ -4043,9 +4205,9 @@ const LoginForm = ({
           /* @__PURE__ */ jsx(SocialButtons, { disabled: formik.isSubmitting })
         ] }),
         /* @__PURE__ */ jsxs(Text, { children: [
-          t("auth:login.dontHaveAccount"),
+          t2("auth:login.dontHaveAccount"),
           " ",
-          /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/register", children: t("auth:login.registerButton") })
+          /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/register", children: t2("auth:login.registerButton") })
         ] }),
         isShowClose && /* @__PURE__ */ jsx(
           Text,
@@ -4288,20 +4450,20 @@ const PageNavbar = ({ title: title2, header, headerClassName, className, childre
 PageNavbar.Section = PageNavbarSection;
 PageNavbar.Item = PageNavbarItem;
 const FriendsNavbar = ({ className, onSelect }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const friendPageItems = [
     {
       icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-plus" }),
-      name: t("friends:navbar.suggestedFriends"),
+      name: t2("friends:navbar.suggestedFriends"),
       path: "/friends"
     },
     {
       icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-check" }),
-      name: t("friends:navbar.invite"),
+      name: t2("friends:navbar.invite"),
       path: "requests"
     }
   ];
-  return /* @__PURE__ */ jsx(PageNavbar, { title: t("friends:navbar.title"), className: clsx(className), children: /* @__PURE__ */ jsx(PageNavbar.Section, { className: "px-2 pb-3 space-y-1", children: friendPageItems.map((item, index) => /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsx(PageNavbar, { title: t2("friends:navbar.title"), className: clsx(className), children: /* @__PURE__ */ jsx(PageNavbar.Section, { className: "px-2 pb-3 space-y-1", children: friendPageItems.map((item, index) => /* @__PURE__ */ jsx(
     PageNavbar.Item,
     {
       path: item.path,
@@ -4427,14 +4589,14 @@ const SidebarPageCard = ({ title: title2, children, className }) => {
 };
 const FriendPage = () => {
   const [showSidebar, setShowSidebar] = useState(false);
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   useEffect(() => {
-    document.title = t("friends:title");
-  }, [t]);
+    document.title = t2("friends:title");
+  }, [t2]);
   return /* @__PURE__ */ jsx(
     SidebarPageLayout,
     {
-      title: t("friends:title"),
+      title: t2("friends:title"),
       showSidebar,
       setShowSidebar,
       navbar: /* @__PURE__ */ jsx(FriendsNavbar, { className: "h-full", onSelect: () => setShowSidebar(false) }),
@@ -4450,7 +4612,7 @@ const FriendRequestItem = ({
   onCancel,
   path = ""
 }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const navigate = useNavigate();
   const timeDist = time2 ? timeDistance(time2) : { text: "" };
   const handleNavigate = () => {
@@ -4465,7 +4627,7 @@ const FriendRequestItem = ({
         "rounded-2xl shadow-lg p-4 gap-1"
       ),
       children: [
-        /* @__PURE__ */ jsx("div", { className: "w-full cursor-pointer", onClick: handleNavigate, children: /* @__PURE__ */ jsx(Avatar, { src: avatar, alt: "avatar", shape: "rounded", className: "w-full" }) }),
+        /* @__PURE__ */ jsx("div", { className: "w-full cursor-pointer", onClick: handleNavigate, children: /* @__PURE__ */ jsx(Avatar, { src: avatar, alt: "avatar", shape: "rounded", className: "w-full h-full" }) }),
         /* @__PURE__ */ jsx(
           Text,
           {
@@ -4477,12 +4639,12 @@ const FriendRequestItem = ({
           }
         ),
         /* @__PURE__ */ jsxs(Text, { sz: "sm", weight: "light", children: [
-          timeDist.count && t(timeDist.unit || "", { count: timeDist.count }),
+          timeDist.count && t2(timeDist.unit || "", { count: timeDist.count }),
           " ",
-          t(timeDist.text)
+          t2(timeDist.text)
         ] }),
-        /* @__PURE__ */ jsx(Button, { variant: "primary", sz: "sm", className: clsx("w-full mt-2 mb-1"), onClick: onAccept, children: t("user:profileHeader:acceptButton") }),
-        /* @__PURE__ */ jsx(Button, { variant: "fourth", sz: "sm", className: clsx("w-full mt-2r"), onClick: onCancel, children: t("user:profileHeader:declineButton") })
+        /* @__PURE__ */ jsx(Button, { variant: "primary", sz: "sm", className: clsx("w-full mt-2 mb-1"), onClick: onAccept, children: t2("user:profileHeader:acceptButton") }),
+        /* @__PURE__ */ jsx(Button, { variant: "fourth", sz: "sm", className: clsx("w-full mt-2r"), onClick: onCancel, children: t2("user:profileHeader:declineButton") })
       ]
     }
   );
@@ -4515,7 +4677,7 @@ const useGetFriends = (userId, queryParams) => {
   });
 };
 const FriendRequests = () => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const [_total, _setTotal] = React.useState(0);
   const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
     limit: 20
@@ -4523,7 +4685,7 @@ const FriendRequests = () => {
   const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
   const { fetch: acceptFriendRequest } = useAcceptFriendRequest();
   const { fetch: rejectFriendRequest } = useDeclineFriendRequest();
-  return /* @__PURE__ */ jsx(SidebarPageCard, { title: t("friends:requests.title") || "Lời mời kết bạn", children: /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsx(SidebarPageCard, { title: t2("friends:requests.title") || "Lời mời kết bạn", children: /* @__PURE__ */ jsx(
     InfiniteScrollGrid,
     {
       itemMinWidth: "200px",
@@ -4548,8 +4710,8 @@ const FriendRequests = () => {
         NotFound,
         {
           icon: "fa-solid fa-user-plus text-3xl",
-          title: t("friends:requests.noRequests") || "Không có lời mời nào",
-          description: t("friends:requests.noRequestsDescription") || "Khi có người muốn kết bạn với bạn, họ sẽ xuất hiện ở đây."
+          title: t2("friends:requests.noRequests") || "Không có lời mời nào",
+          description: t2("friends:requests.noRequestsDescription") || "Khi có người muốn kết bạn với bạn, họ sẽ xuất hiện ở đây."
         }
       )
     }
@@ -4679,8 +4841,11 @@ const useGetUserProfiles = (userIds) => {
     }))
   });
   const isLoading = queries.some((q) => q.isLoading);
-  const userProfileMap = Object.fromEntries(
-    queries.filter((q) => q.data?.data?.infos).map((q) => [(q.data?.data?.infos).id, q.data?.data?.infos])
+  const userProfileMap = useMemo(
+    () => Object.fromEntries(
+      queries.filter((q) => q.data?.data?.infos).map((q) => [(q.data?.data?.infos).id, q.data?.data?.infos])
+    ),
+    [queries]
   );
   return { userProfileMap, isLoading };
 };
@@ -4785,7 +4950,7 @@ const useSelectAvatar = (userId) => {
   });
 };
 const ProfileBackground = ({}) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const { targetId, isOwner } = useProfilePage();
   const { data, isLoading, isFetching } = useGetUserBackground(targetId);
   const { fetch, isFetching: isUpdating } = useSelectBackground(targetId);
@@ -4815,7 +4980,7 @@ const ProfileBackground = ({}) => {
           ),
           children: [
             /* @__PURE__ */ jsx("i", { className: clsx("fa-solid fa-camera") }),
-            /* @__PURE__ */ jsx(Text, { className: clsx("sm:flex hidden"), sz: "md", children: data?.infos.background ? t("user:profileHeader.changeButton") : t("user:profileHeader.addButton") })
+            /* @__PURE__ */ jsx(Text, { className: clsx("sm:flex hidden"), sz: "md", children: data?.infos.background ? t2("user:profileHeader.changeButton") : t2("user:profileHeader.addButton") })
           ]
         }
       )
@@ -4861,7 +5026,7 @@ const useFriendshipStatus = (targetId) => {
   });
 };
 const FriendButton = ({ uid, sz = "md-1" }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   if (!useAuth().isAuthenticated) return null;
   const [isShowFriendOptions, setIsShowFriendOptions] = useState(false);
   const [isShowRequestOptions, setIsShowRequestOptions] = useState(false);
@@ -4936,14 +5101,14 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
         content: /* @__PURE__ */ jsxs("div", { children: [
           /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-user-xmark", "mr-2") }),
           " ",
-          t("user:profileHeader.unfriendButton")
+          t2("user:profileHeader.unfriendButton")
         ] }),
         onClick: async () => {
           await handleUnfriend?.(uid);
         }
       }
     ],
-    [uid, handleUnfriend, t]
+    [uid, handleUnfriend, t2]
   );
   const requestOptions = useMemo(
     () => [
@@ -4952,7 +5117,7 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
         content: /* @__PURE__ */ jsxs("div", { children: [
           /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-check", "mr-2") }),
           " ",
-          t("user:profileHeader.acceptButton")
+          t2("user:profileHeader.acceptButton")
         ] }),
         onClick: async () => await handleAcceptAddFriendRequest?.(uid)
       },
@@ -4961,12 +5126,12 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
         content: /* @__PURE__ */ jsxs("div", { children: [
           /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-xmark", "mr-2") }),
           " ",
-          t("user:profileHeader.declineButton")
+          t2("user:profileHeader.declineButton")
         ] }),
         onClick: async () => await handleDeclineAddFriendRequest?.(uid)
       }
     ],
-    [uid, handleAcceptAddFriendRequest, handleDeclineAddFriendRequest, t]
+    [uid, handleAcceptAddFriendRequest, handleDeclineAddFriendRequest, t2]
   );
   if (isLoading || isFetching) {
     return /* @__PURE__ */ jsx(Button, { sz, disabled: true, children: /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-spinner", "fa-spin") }) });
@@ -4974,11 +5139,11 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
   return /* @__PURE__ */ jsx("div", { children: currentFriendshipStatus === "None" ? /* @__PURE__ */ jsxs(Button, { sz, onClick: handleSentAddFriendRequest, children: [
     /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-plus") }),
     " ",
-    t("user:profileHeader.addFriendButton")
+    t2("user:profileHeader.addFriendButton")
   ] }) : currentFriendshipStatus === "SentByMe" ? /* @__PURE__ */ jsxs(Button, { sz, onClick: handleCancelAddFriendRequest, children: [
     /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-xmark") }),
     " ",
-    t("user:profileHeader.cancelRequestButton")
+    t2("user:profileHeader.cancelRequestButton")
   ] }) : currentFriendshipStatus === "SentByThem" ? /* @__PURE__ */ jsxs("div", { className: clsx("sm:relative", "z-50"), children: [
     /* @__PURE__ */ jsxs(
       Button,
@@ -4991,7 +5156,7 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
         children: [
           /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-reply") }),
           " ",
-          t("user:profileHeader.respondRequestButton")
+          t2("user:profileHeader.respondRequestButton")
         ]
       }
     ),
@@ -5027,7 +5192,7 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
         children: [
           /* @__PURE__ */ jsx("i", { className: clsx("fa-solid", "fa-user-check") }),
           " ",
-          t("user:profileHeader.friendButton")
+          t2("user:profileHeader.friendButton")
         ]
       }
     ),
@@ -5055,12 +5220,12 @@ const FriendButton = ({ uid, sz = "md-1" }) => {
   ] }) });
 };
 function useLanguage$1() {
-  const { t } = useTranslation();
-  return t;
+  const { t: t2 } = useTranslation();
+  return t2;
 }
 const useOpenChat = () => {
   const isMobile = useMediaQuery("(max-width: 640px)");
-  const { openChat, registry } = useChatStore();
+  const { openChat, registry, focusOnId, setFocusOn } = useChatStore();
   const { fetch: fetchConversationWith } = useFetchConversationWith();
   const navigate = useNavigate();
   const location = useLocation();
@@ -5096,7 +5261,6 @@ const useOpenChat = () => {
           }
         },
         onError: () => {
-          console.log("No existing conversation, creating temp chat");
           if (isMobile || location.pathname.startsWith("/fatalk")) {
             navigate(`/fatalk/temp?tempId=${targetId}`, {
               state: { correlationId: `temp-${targetId}` }
@@ -5124,24 +5288,27 @@ const useOpenChat = () => {
     [registry, fetchConversationWith]
   );
   return {
+    focusOnId,
     openChat: _openChat,
     openChatWithTarget: _openChatWithTarget,
-    checkConversationWith: _checkConversationWith
+    checkConversationWith: _checkConversationWith,
+    setFocusOn
   };
 };
 const ProfileHeader = ({ className }) => {
-  const t = useLanguage$1();
+  const t2 = useLanguage$1();
   const navigate = useNavigate();
   const { targetId, isOwner } = useProfilePage();
   const { isAuthenticated } = useAuth();
   const { data, isLoading, isFetching } = useGetUserProfile(targetId);
   const userProfile = data?.infos;
   const { openChat } = useChatStore();
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 1024);
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 1024);
     };
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => {
       window.removeEventListener("resize", handleResize);
@@ -5167,7 +5334,7 @@ const ProfileHeader = ({ className }) => {
           ] })
         ] }),
         /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center w-full lg:flex-row", children: [
-          !numberOfFriendsFetching ? /* @__PURE__ */ jsx(Text, { sz: "md", weight: "medium", className: "text-[var(--text-color)] opacity-70", children: numberOfFriends && numberOfFriends > 0 ? numberOfFriends + " " + t("user:profileHeader.friendsCount") : t("user:profileHeader.noFriendsCount") }) : /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "!w-36" }),
+          !numberOfFriendsFetching ? /* @__PURE__ */ jsx(Text, { sz: "md", weight: "medium", className: "text-[var(--text-color)] opacity-70", children: numberOfFriends && numberOfFriends > 0 ? numberOfFriends + " " + t2("user:profileHeader.friendsCount") : t2("user:profileHeader.noFriendsCount") }) : /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "!w-36" }),
           !isLoading || !isFetching ? /* @__PURE__ */ jsxs("div", { className: "flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0", children: [
             isAuthenticated && /* @__PURE__ */ jsx(Fragment, { children: isOwner ? /* @__PURE__ */ jsxs(
               Button,
@@ -5179,11 +5346,11 @@ const ProfileHeader = ({ className }) => {
                 children: [
                   /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-pen" }),
                   " ",
-                  t("user:profileHeader.editButton")
+                  t2("user:profileHeader.editButton")
                 ]
               }
             ) : /* @__PURE__ */ jsx(FriendButton, { sz: "sm", uid: targetId }) }),
-            !isOwner && isAuthenticated && /* @__PURE__ */ jsx(Button, { sz: "sm", variant: "secondary", onClick: handleMessageClick, children: t("user:profileHeader.messageButton") }),
+            !isOwner && isAuthenticated && /* @__PURE__ */ jsx(Button, { sz: "sm", variant: "secondary", onClick: handleMessageClick, children: t2("user:profileHeader.messageButton") }),
             /* @__PURE__ */ jsx(Button, { sz: "sm", variant: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-info" }) })
           ] }) : /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "!w-[250px] lg:ml-auto mb-1" })
         ] })
@@ -5295,7 +5462,7 @@ function debounce(func, wait) {
   };
 }
 const ProfileNavbar = ({ className = "" }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const navigate = useNavigate();
   const location = useLocation();
   const { userParam, isOwner } = useProfilePage();
@@ -5311,43 +5478,43 @@ const ProfileNavbar = ({ className = "" }) => {
   const navbarItems = useMemo(
     () => [
       {
-        name: t("user:profileMenu.posts"),
+        name: t2("user:profileMenu.posts"),
         href: `/${userParam}`,
         isOwnerOnly: false,
         isIndex: true
       },
       {
-        name: t("user:profileMenu.friends"),
+        name: t2("user:profileMenu.friends"),
         href: `/${userParam}/friends`,
         isOwnerOnly: false,
         isIndex: false
       },
       {
-        name: t("user:profileMenu.photos"),
+        name: t2("user:profileMenu.photos"),
         href: `/${userParam}/photos`,
         isOwnerOnly: false,
         isIndex: false
       },
       {
-        name: t("user:profileMenu.videos"),
+        name: t2("user:profileMenu.videos"),
         href: `/${userParam}/videos`,
         isOwnerOnly: false,
         isIndex: false
       },
       {
-        name: t("user:profileMenu.about"),
+        name: t2("user:profileMenu.about"),
         href: `/${userParam}/about`,
         isOwnerOnly: false,
         isIndex: false
       },
       {
-        name: t("user:profileMenu.settings"),
+        name: t2("user:profileMenu.settings"),
         href: `/${userParam}/settings`,
         isOwnerOnly: true,
         isIndex: false
       }
     ],
-    [userParam, t]
+    [userParam, t2]
   );
   useEffect(() => {
     const handleResize = () => {
@@ -5520,7 +5687,7 @@ const EditableTextArea = ({
   onCancelClick
 }) => {
   const [inputValue, setInputValue] = React.useState(value);
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   useEffect(() => {
     setInputValue(value);
   }, [value]);
@@ -5553,7 +5720,7 @@ const EditableTextArea = ({
             className: "flex-1",
             children: [
               /* @__PURE__ */ jsx("i", { className: "fa-solid fa-floppy-disk mr-2" }),
-              t("settings:editableField.saveButton")
+              t2("settings:editableField.saveButton")
             ]
           }
         ),
@@ -5566,7 +5733,7 @@ const EditableTextArea = ({
               onCancelClick?.();
             },
             className: "flex-1",
-            children: t("settings:editableField.cancelButton")
+            children: t2("settings:editableField.cancelButton")
           }
         )
       ] }) : /* @__PURE__ */ jsx(
@@ -5587,7 +5754,7 @@ const EditableTextArea = ({
 const ProfileIntroduction = ({ className }) => {
   const [isEditBio, setIsEditBio] = React.useState(false);
   const [isEditDescription, setIsEditDescription] = React.useState(false);
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const { isAuthenticated, userId } = useAuth();
   const { isOwner, targetId } = useProfilePage();
   const updateProfileMutation = useUpdateProfile(userId);
@@ -5623,7 +5790,7 @@ const ProfileIntroduction = ({ className }) => {
   return /* @__PURE__ */ jsxs(
     Card,
     {
-      title: t("user:profilePosts.overview"),
+      title: t2("user:profilePosts.overview"),
       titleClassName: "text-2xl font-bold !mb-0",
       childrenClassName: "flex flex-col gap-4",
       className,
@@ -5633,7 +5800,7 @@ const ProfileIntroduction = ({ className }) => {
           {
             editableMode: "inline",
             isEdit: isEditBio,
-            placeholder: t("user:profilePosts.bioPlaceholder"),
+            placeholder: t2("user:profilePosts.bioPlaceholder"),
             value: userProfile?.bio,
             onChangeClick: () => setIsEditBio(true),
             onSaveClick: (value) => handleSaveBio(value),
@@ -5644,17 +5811,17 @@ const ProfileIntroduction = ({ className }) => {
             btnChildren: /* @__PURE__ */ jsxs(Text, { sz: "sm", children: [
               /* @__PURE__ */ jsx("i", { className: "fas fa-pencil-alt" }),
               "   ",
-              t("user:profilePosts.bioBtn")
+              t2("user:profilePosts.bioBtn")
             ] })
           }
         ),
-        userProfile?.description && /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: t("user:profilePosts.description") }),
+        userProfile?.description && /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: t2("user:profilePosts.description") }),
         (userProfile?.description || canEdit) && /* @__PURE__ */ jsx(
           EditableTextArea,
           {
             editableMode: "inline",
             isEdit: isEditDescription,
-            placeholder: t("user:profilePosts.descriptionPlaceholder"),
+            placeholder: t2("user:profilePosts.descriptionPlaceholder"),
             value: userProfile?.description,
             canEdit: canEdit || false,
             valueClassName: "text-[1.1rem]",
@@ -5665,7 +5832,7 @@ const ProfileIntroduction = ({ className }) => {
             btnChildren: /* @__PURE__ */ jsxs(Text, { sz: "sm", children: [
               /* @__PURE__ */ jsx("i", { className: "fas fa-pencil-alt" }),
               "   ",
-              t("user:profilePosts.descriptionBtn")
+              t2("user:profilePosts.descriptionBtn")
             ] })
           }
         ),
@@ -5689,7 +5856,7 @@ const FriendItem = ({ className = "", friendDto }) => {
   const [isShowDrowdown, setIsShowDropdown] = React.useState(false);
   const [isFriend, setIsFriend] = React.useState(friendDto.isFriend);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const dropdownRef = React.useRef(null);
   const btnRef = React.useRef(null);
   useClickOutside(
@@ -5715,12 +5882,12 @@ const FriendItem = ({ className = "", friendDto }) => {
         content: /* @__PURE__ */ jsxs("div", { children: [
           /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-xmark mr-2" }),
           " ",
-          t("user:profileHeader.unfriendButton")
+          t2("user:profileHeader.unfriendButton")
         ] }),
         onClick: async () => await handleUnfriend?.(friendDto.id)
       }
     ],
-    [friendDto.id, handleUnfriend, t]
+    [friendDto.id, handleUnfriend, t2]
   );
   return /* @__PURE__ */ jsxs(
     "div",
@@ -5774,7 +5941,7 @@ const FriendItem = ({ className = "", friendDto }) => {
   );
 };
 const ProfileFriends = ({ className = "" }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const [keyword, setKeyword] = React.useState("");
   const { targetId } = useProfilePage();
   const { data, isLoading, hasNextPage, fetchNextPage, isFetchingNextPage } = useGetFriends(
@@ -5794,7 +5961,7 @@ const ProfileFriends = ({ className = "" }) => {
       {
         sz: "sm",
         type: "search",
-        placeholder: t("user:profileFriends.searchFriends"),
+        placeholder: t2("user:profileFriends.searchFriends"),
         className: "p-1 w-full sm:max-w-xs",
         onChange: handleOnChange
       }
@@ -5814,18 +5981,18 @@ const ProfileFriends = ({ className = "" }) => {
         itemKey: (item) => item.id,
         emptyComponent: /* @__PURE__ */ jsx("div", { className: "flex w-full justify-center mb-10 mt-10", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center text-[var(--text-color)] opacity-30", children: [
           /* @__PURE__ */ jsx(Text, { sz: "xl", weight: "bold", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user-xmark" }) }),
-          /* @__PURE__ */ jsx(Text, { sz: "md", className: "mt-2", children: t("user:profileFriends.noFriends") })
+          /* @__PURE__ */ jsx(Text, { sz: "md", className: "mt-2", children: t2("user:profileFriends.noFriends") })
         ] }) })
       }
     )
   ] });
 };
 const ProfileFriendsPage = () => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   return /* @__PURE__ */ jsx(
     Card,
     {
-      title: t("user:profileFriends.friends"),
+      title: t2("user:profileFriends.friends"),
       className: clsx("sm:rounded-2xl rounded-none sm:mt-2"),
       children: /* @__PURE__ */ jsx(ProfileFriends, {})
     }
@@ -5927,16 +6094,16 @@ const OverlayLoading = () => {
   );
 };
 const ProfileAboutNavbar = ({ className }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const aboutNavbarItems = [
-    { title: t("user:profileAbout.overview"), path: "" },
+    { title: t2("user:profileAbout.overview"), path: "" },
     {
-      title: t("user:profileAbout.workAndEducation"),
+      title: t2("user:profileAbout.workAndEducation"),
       path: "work-and-education"
     },
-    { title: t("user:profileAbout.placesLived"), path: "places-lived" }
+    { title: t2("user:profileAbout.placesLived"), path: "places-lived" }
   ];
-  return /* @__PURE__ */ jsx(Card, { title: t("user:profileAbout.title"), className: clsx(className), children: /* @__PURE__ */ jsx(SubNavbar, { className: "w-full", children: aboutNavbarItems.map((item, index) => /* @__PURE__ */ jsx(SubNavbar.Item, { title: item.title, path: item.path }, index)) }) });
+  return /* @__PURE__ */ jsx(Card, { title: t2("user:profileAbout.title"), className: clsx(className), children: /* @__PURE__ */ jsx(SubNavbar, { className: "w-full", children: aboutNavbarItems.map((item, index) => /* @__PURE__ */ jsx(SubNavbar.Item, { title: item.title, path: item.path }, index)) }) });
 };
 const ProfileAboutPage = () => {
   return /* @__PURE__ */ jsxs("div", { className: clsx("grid grid-cols-golden gap-2 lg:flex-row flex-col"), children: [
@@ -6045,7 +6212,7 @@ const userRoute = {
 const UserMenu = ({ menuClassName, menuStyle }) => {
   const [isOpenMenu, setIsOpenMenu] = useState(false);
   const { userId, urlName, logOut } = useAuth();
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const navigate = useNavigate();
   const { data: userProfile } = useGetUserProfile(userId);
   const { data: avatarProfile } = useGetUserAvatar(userId);
@@ -6139,7 +6306,7 @@ const UserMenu = ({ menuClassName, menuStyle }) => {
               onClick: handleSettings,
               children: /* @__PURE__ */ jsxs(Text, { className: clsx("flex items-center gap-3"), sz: "md", children: [
                 /* @__PURE__ */ jsx("i", { className: "fa-solid fa-gear" }),
-                t("navbar.profileMenu.settings")
+                t2("navbar.profileMenu.settings")
               ] })
             }
           ) }),
@@ -6156,7 +6323,7 @@ const UserMenu = ({ menuClassName, menuStyle }) => {
               onClick: handleLogout,
               children: /* @__PURE__ */ jsxs(Text, { sz: "md", className: clsx("flex items-center gap-3"), color: "danger", children: [
                 /* @__PURE__ */ jsx("i", { className: "fa-solid fa-right-from-bracket" }),
-                t("navbar.profileMenu.logout")
+                t2("navbar.profileMenu.logout")
               ] })
             }
           ) })
@@ -6208,6 +6375,7 @@ const useSendMessage = () => {
         id: randomId,
         conversationId: data.conversationId,
         clientTempId: randomId,
+        sequenceNumber: -1,
         senderId: userId,
         content: data.content,
         createdAt: /* @__PURE__ */ new Date(),
@@ -6222,13 +6390,13 @@ const useSendMessage = () => {
   });
 };
 const useRenderConversationContent = () => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const { userId } = useAuth();
   const renderSystemMessage = (message) => {
     if (message.type === MessageType.CreateGroup) {
       const { creatorName, creatorId } = message.metadata || {};
-      return t("common:conversations.systemMessage.createGroup", {
-        creatorName: userId === creatorId ? t("common:conversations.you") : creatorName || "Unknown"
+      return t2("common:conversations.systemMessage.createGroup", {
+        creatorName: userId === creatorId ? t2("common:conversations.you") : creatorName || "Unknown"
       });
     }
   };
@@ -6270,7 +6438,7 @@ const MessageRowComponent = ({
   userInfo,
   ref
 }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
   const { getDiffBetween, formatTime, formatSmartTimestamp } = useFormatTime();
   const { renderSystemMessage } = useRenderConversationContent();
@@ -6279,8 +6447,8 @@ const MessageRowComponent = ({
   const isSystem = isSystemMessage(message.type);
   const { messageUserSeenMap } = useMessageStore();
   const seenBy = useMemo(
-    () => messageUserSeenMap?.[conversationId || ""]?.[message.id || ""] || [],
-    [messageUserSeenMap, conversationId, message.id]
+    () => messageUserSeenMap?.[conversationId || ""]?.[message.sequenceNumber || 0] || [],
+    [messageUserSeenMap, conversationId, message.sequenceNumber]
   );
   const isShowTime = !prevMessage || isSystemMessage(prevMessage.type) || getDiffBetween(message.createdAt, prevMessage.createdAt, "minute") > 30;
   const isPrevMessageShowTime = nextMessage && getDiffBetween(message.createdAt, nextMessage.createdAt, "minute") > 30;
@@ -6330,7 +6498,7 @@ const MessageRowComponent = ({
                     isMyMessage && "order-2",
                     !hasAvatar && "invisible"
                   ),
-                  src: userInfo?.avatar,
+                  src: message.senderAvatarUrl,
                   alt: "Avatar",
                   sz: "sm"
                 }
@@ -6383,7 +6551,7 @@ const MessageRowComponent = ({
                       isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0"
                     ),
                     children: isFooterVisible && !isFailed && !isPending && /* @__PURE__ */ jsxs(Text, { sz: "xs", children: [
-                      t("conversations.sent"),
+                      t2("conversations.sent"),
                       " ",
                       getDiffBetween(message.createdAt, /* @__PURE__ */ new Date(), "second") > 60 && /* @__PURE__ */ jsx(Text, { sz: "xs", children: formatTime(message.createdAt) })
                     ] })
@@ -6443,6 +6611,7 @@ function InfiniteScrollReverse({
   const sentinelRef = useRef(null);
   const isLoadingRef = useRef(isLoading);
   const pendingLoadRef = useRef(false);
+  const { t: t2 } = useTranslation();
   useEffect(() => {
     isLoadingRef.current = isLoading;
     if (!isLoading) {
@@ -6453,8 +6622,12 @@ function InfiniteScrollReverse({
     if (pendingLoadRef.current) return;
     if (isLoadingRef.current) return;
     pendingLoadRef.current = true;
-    await new Promise((resolve) => setTimeout(resolve, 50));
-    await onLoadMore();
+    try {
+      await new Promise((resolve) => setTimeout(resolve, 30));
+      await onLoadMore();
+    } finally {
+      pendingLoadRef.current = false;
+    }
   };
   useEffect(() => {
     const sentinel = sentinelRef.current;
@@ -6471,14 +6644,17 @@ function InfiniteScrollReverse({
       }
     );
     observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, parentRef]);
+    return () => {
+      observer.disconnect();
+      observer.unobserve(sentinel);
+    };
+  }, [hasMore, parentRef, items.length]);
   return /* @__PURE__ */ jsxs(
     "div",
     {
       ref: containerRef,
       className: clsx("relative overflow-y-auto h-full flex flex-col-reverse", className),
-      style: { gap: gap ?? "0.5rem" },
+      style: { gap: gap ?? "0.5rem", overflowAnchor: "auto" },
       children: [
         items.map((item, index) => /* @__PURE__ */ jsx("div", { children: itemTemplate ? itemTemplate(item, index, null) : item }, itemKey(item, index))),
         hasMore && /* @__PURE__ */ jsx(
@@ -6486,9 +6662,9 @@ function InfiniteScrollReverse({
           {
             className: "w-full flex justify-center py-2 shrink-0",
             style: { overflowAnchor: "none" },
-            children: spinnerContent ?? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/30 text-xs text-primary-600", children: [
+            children: spinnerContent ?? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/50 text-xs text-primary-500", children: [
               /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
-              /* @__PURE__ */ jsx("span", { children: "Đang tải tin nhắn cũ..." })
+              /* @__PURE__ */ jsx("span", { children: t2("common:conversations.loadingOldMessages") })
             ] })
           }
         ),
@@ -6629,12 +6805,13 @@ const ChatWindow = ({ className, conversationId }) => {
   const [chatAvatar, setChatAvatar] = useState("");
   const { toggleMinimize, closeChat, registry } = useChatStore();
   const { renderConversationName } = useRenderConversationContent();
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const scrollRef = useRef(null);
   const panelRef = useRef(null);
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
   const { lastMessageMap } = useMessageStore();
+  const { setFocusOn } = useOpenChat();
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : void 0;
   const {
@@ -6648,34 +6825,51 @@ const ChatWindow = ({ className, conversationId }) => {
     isFetching: isFetchingConversation
   } = useGetConversation(conversationId, void 0, !tempTargetId);
   const isLoadingHeader = isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
+  const handleMarkAsReadOnFocus = useCallback(async () => {
+    if (!conversationData?.id || !document.hasFocus()) return;
+    setFocusOn(conversationData.id);
+    const lastMsgSeq = lastMessageMap[conversationData.id] || conversationData?.lastMessageNumber;
+    if (!lastMsgSeq) return;
+    markAsReadLocal(conversationData.id, lastMsgSeq);
+    await markAsRead({
+      conversationId: conversationData.id,
+      messageSeq: lastMsgSeq
+    });
+  }, [
+    conversationData?.id,
+    conversationData?.lastMessage?.sequenceNumber,
+    lastMessageMap,
+    markAsRead,
+    markAsReadLocal,
+    setFocusOn
+  ]);
   useEffect(() => {
     if (!conversationData?.id) return;
-    const checkAndMarkAsRead = async () => {
-      if (!panelRef.current) return;
-      const isPanelFocused = panelRef.current.contains(document.activeElement);
-      if (document.hasFocus() && isPanelFocused) {
-        const lastMsgId = lastMessageMap[conversationData.id] || conversationData.lastMessage?.id;
-        if (!lastMsgId) return;
-        markAsReadLocal(conversationData.id, lastMsgId);
-        await markAsRead({
-          conversationId: conversationData.id,
-          messageId: lastMsgId
-        });
+    const handleUserInteract = () => {
+      void handleMarkAsReadOnFocus();
+    };
+    const handleClickOutside = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target)) {
+        setFocusOn(null);
       }
     };
-    checkAndMarkAsRead();
-    const panel = panelRef.current;
-    if (panel) {
-      panel.addEventListener("focusin", checkAndMarkAsRead);
-      panel.addEventListener("click", checkAndMarkAsRead);
+    const handleWindowBlur = () => {
+      setFocusOn(null);
+    };
+    const messageArea = scrollRef.current;
+    if (messageArea) {
+      messageArea.addEventListener("click", handleUserInteract);
     }
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("blur", handleWindowBlur);
     return () => {
-      if (panel) {
-        panel.removeEventListener("focusin", checkAndMarkAsRead);
-        panel.removeEventListener("click", checkAndMarkAsRead);
+      if (messageArea) {
+        messageArea.removeEventListener("click", handleUserInteract);
       }
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("blur", handleWindowBlur);
     };
-  }, [conversationData?.id, conversationData?.lastMessage?.id]);
+  }, [conversationData?.id, handleMarkAsReadOnFocus, setFocusOn]);
   useEffect(() => {
     if (tempUser) {
       setChatTitle(tempUser.infos.fullName);
@@ -6686,11 +6880,13 @@ const ChatWindow = ({ className, conversationId }) => {
     }
   }, [tempUser, conversationData, renderConversationName]);
   const handleOnClose = useCallback(() => {
+    setFocusOn(null);
     closeChat(conversationId);
-  }, [conversationId]);
+  }, [closeChat, conversationId, setFocusOn]);
   const handleOnMinimum = useCallback(() => {
+    setFocusOn(null);
     toggleMinimize(conversationId);
-  }, [conversationId]);
+  }, [conversationId, setFocusOn, toggleMinimize]);
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -6744,7 +6940,7 @@ const ChatWindow = ({ className, conversationId }) => {
               lastSeen: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
                 /* @__PURE__ */ jsx("div", { className: "relative mb-4", children: /* @__PURE__ */ jsx(Avatar, { src: conversationData?.avatarUrl || "", alt: "Avatar", sz: "md" }) }),
                 /* @__PURE__ */ jsx(Text, { sz: "sm", weight: "bold", children: chatTitle }),
-                /* @__PURE__ */ jsx(Text, { sz: "xs", wrap: "whitespace-normal", children: t("common:conversations:privacyDescription") })
+                /* @__PURE__ */ jsx(Text, { sz: "xs", wrap: "whitespace-normal", children: t2("common:conversations:privacyDescription") })
               ] })
             },
             conversationId
@@ -6756,7 +6952,8 @@ const ChatWindow = ({ className, conversationId }) => {
             className: "!bg-bg-main h-fit py-2",
             conversationId: !tempTargetId ? conversationId : void 0,
             correlationId: tempTargetId ? conversationId : void 0,
-            receiverId: tempTargetId
+            receiverId: tempTargetId,
+            onFocus: tempTargetId ? void 0 : () => void handleMarkAsReadOnFocus()
           }
         )
       ]
@@ -6876,7 +7073,7 @@ function InfiniteScrollFlex({
       },
       {
         root: parentRef?.current || containerRef.current,
-        rootMargin: "0px 0px 200px 0px"
+        rootMargin: "300px 0px 200px 0px"
       }
     );
     observer.observe(sentinel);
@@ -6905,16 +7102,67 @@ function InfiniteScrollFlex({
     }
   );
 }
-const ChatList = ({ className, onConversationClick }) => {
-  const { t } = useTranslation();
-  const { userId } = useAuth();
-  const { formatTime } = useFormatTime();
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
-  const { openChat } = useOpenChat();
-  const { renderConversationName, renderSystemMessage } = useRenderConversationContent();
-  const conversations2 = data?.pages.flatMap((page) => page.items) || [];
+const ChatItem = ({ conversation, onClick }) => {
+  const lastMessage = conversation.lastMessage;
   const location = useLocation();
   const currentConversationId = location.pathname.split("/").pop();
+  const { t: t2 } = useTranslation();
+  const { renderConversationName, renderSystemMessage } = useRenderConversationContent();
+  const { formatTime } = useFormatTime();
+  const unreadCount = useUnreadMessageCountCache(conversation.id);
+  const isUnread = unreadCount > 0;
+  const isOtherUserRead = conversation.otherLastSeenMessageSeq && conversation.lastMessage?.sequenceNumber && conversation.otherLastSeenMessageSeq >= conversation.lastMessage.sequenceNumber;
+  const unreadLabel = unreadCount > 99 ? "99+" : String(unreadCount);
+  const { userId } = useAuth();
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "flex gap-2 px-1 py-3",
+        "hover:bg-bg-fourth rounded-lg transition-colors",
+        "cursor-pointer",
+        conversation.id === currentConversationId && "bg-bg-fourth"
+      ),
+      onClick: () => onClick(),
+      children: [
+        /* @__PURE__ */ jsx(Avatar, { src: conversation.avatarUrl ?? "", alt: "Conversation Avatar", sz: "md" }),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-1 min-w-0 justify-center", children: [
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "sm",
+              weight: isUnread ? "bold" : "regular",
+              className: clsx("line-clamp-1 truncate max-w-full"),
+              children: renderConversationName(conversation)
+            }
+          ),
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center opacity-80", children: [
+            /* @__PURE__ */ jsx(Text, { sz: "xs", className: "truncate max-w-full", weight: isUnread ? "bold" : "regular", children: unreadCount > 1 ? `Bạn có ${unreadLabel} tin nhắn chưa đọc` : lastMessage ? isSystemMessage(lastMessage?.type || MessageType.System) ? renderSystemMessage(lastMessage) : userId === lastMessage?.senderId ? t2("common:conversations.you") + ": " + lastMessage?.content : lastMessage?.senderFullName + ": " + lastMessage?.content : "Unknown" }),
+            /* @__PURE__ */ jsx(Text, { sz: "xs", className: "mx-2 shrink-0", weight: isUnread ? "bold" : "regular", children: "•" }),
+            /* @__PURE__ */ jsx(Text, { sz: "xs", className: "shrink-0", weight: isUnread ? "bold" : "regular", children: formatTime(conversation.lastMessage?.createdAt ?? "") })
+          ] })
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex-1 flex items-center justify-end gap-2", children: [
+          !conversation.isGroup && isOtherUserRead && !isUnread ? /* @__PURE__ */ jsx(Avatar, { sz: "xs", src: conversation.avatarUrl || "", alt: "seen", className: "my-auto" }) : null,
+          Boolean(isUnread) === true && /* @__PURE__ */ jsx("div", { "aria-hidden": true, className: clsx("w-2 h-2 rounded-full", "my-auto", "bg-primary-500") })
+        ] })
+      ]
+    },
+    conversation.id
+  );
+};
+const ChatList = ({
+  className,
+  onConversationClick,
+  data,
+  fetchNextPage,
+  hasNextPage,
+  isLoading,
+  isFetching
+}) => {
+  const { t: t2 } = useTranslation();
+  const { openChat } = useOpenChat();
+  const conversations2 = data?.pages.flatMap((page) => page.items) || [];
   const handleConversationClick = useCallback(
     async (conversationId) => {
       onConversationClick?.(conversationId);
@@ -6922,81 +7170,27 @@ const ChatList = ({ className, onConversationClick }) => {
     },
     [onConversationClick, openChat]
   );
+  const scrollWrapperRef = useRef(null);
   return /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col p-2", className), children: [
     /* @__PURE__ */ jsx(
       Textbox,
       {
-        placeholder: t("common:conversations.search"),
+        placeholder: t2("common:conversations.search"),
         sz: "sm",
         className: "border-0 w-full",
         type: "search"
       }
     ),
-    /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto px-2 mt-2 ", children: /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsx("div", { ref: scrollWrapperRef, className: "flex-1 overflow-y-auto mt-2 ", children: /* @__PURE__ */ jsx(
       InfiniteScrollFlex,
       {
         className: "scrollbar-hide sm:scrollbar-default",
         items: conversations2,
-        onLoadMore: fetchNextPage,
+        parentRef: scrollWrapperRef,
+        onLoadMore: fetchNextPage ?? (() => {
+        }),
         hasMore: hasNextPage,
-        itemTemplate: (item) => {
-          const conversation = item;
-          const lastMessage = conversation.lastMessage;
-          const isRead = conversation.lastMessage?.id === conversation.myLastSeenMessageId;
-          const isOtherUserRead = conversation.lastMessage?.id === conversation.otherLastSeenMessageId;
-          return /* @__PURE__ */ jsxs(
-            "div",
-            {
-              className: clsx(
-                "flex gap-2 px-1 py-3",
-                "hover:bg-bg-fourth rounded-lg transition-colors",
-                "cursor-pointer",
-                conversation.id === currentConversationId && "bg-bg-fourth"
-              ),
-              onClick: () => handleConversationClick(conversation.id),
-              children: [
-                /* @__PURE__ */ jsx(Avatar, { src: conversation.avatarUrl ?? "", alt: "Conversation Avatar", sz: "md" }),
-                /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-1 min-w-0 justify-center", children: [
-                  /* @__PURE__ */ jsx(
-                    Text,
-                    {
-                      sz: "sm",
-                      weight: isRead ? "regular" : "bold",
-                      className: clsx("line-clamp-1 truncate max-w-full"),
-                      children: renderConversationName(conversation)
-                    }
-                  ),
-                  /* @__PURE__ */ jsxs("div", { className: "flex items-center opacity-80", children: [
-                    /* @__PURE__ */ jsx(
-                      Text,
-                      {
-                        sz: "xs",
-                        className: "truncate max-w-full",
-                        weight: isRead ? "regular" : "bold",
-                        children: lastMessage ? isSystemMessage(lastMessage?.type || MessageType.System) ? renderSystemMessage(lastMessage) : userId === lastMessage?.senderId ? t("common:conversations.you") + ": " + lastMessage?.content : lastMessage?.senderFullName + ": " + lastMessage?.content : "Unknown"
-                      }
-                    ),
-                    /* @__PURE__ */ jsx(Text, { sz: "xs", className: "mx-2 shrink-0", weight: isRead ? "regular" : "bold", children: "•" }),
-                    /* @__PURE__ */ jsx(Text, { sz: "xs", className: "shrink-0", weight: isRead ? "regular" : "bold", children: formatTime(conversation.lastMessage?.createdAt ?? "") })
-                  ] })
-                ] }),
-                /* @__PURE__ */ jsxs("div", { className: "flex-1 flex", children: [
-                  !isRead && /* @__PURE__ */ jsx("div", { className: "my-auto ml-auto w-2 h-2 bg-primary-500 rounded-full" }),
-                  !conversation.isGroup && isOtherUserRead && /* @__PURE__ */ jsx(
-                    Avatar,
-                    {
-                      sz: "xs",
-                      src: conversation.avatarUrl || "",
-                      alt: "seen",
-                      className: "my-auto ml-auto"
-                    }
-                  )
-                ] })
-              ]
-            },
-            conversation.id
-          );
-        },
+        itemTemplate: (item) => /* @__PURE__ */ jsx(ChatItem, { conversation: item, onClick: () => handleConversationClick(item.id) }),
         itemKey: (item) => item.id,
         isLoading: isLoading || isFetching,
         loadingSkeleton: /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center my-2"), children: [
@@ -7007,10 +7201,15 @@ const ChatList = ({ className, onConversationClick }) => {
           ] })
         ] }),
         numberOfSkeletons: 2,
-        emptyComponent: /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center justify-center gap-2 mt-4 min-h-[200px]", children: [
-          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-message text-3xl text-gray-400" }),
-          /* @__PURE__ */ jsx(Text, { sz: "md", color: "secondary", children: t("common:conversations.no-conversations") })
-        ] })
+        emptyComponent: /* @__PURE__ */ jsx(
+          NotFound,
+          {
+            icon: "fa-regular fa-message",
+            title: t2("common:conversations.noConversations"),
+            description: t2("common:conversations.noConversationsMessage"),
+            className: "py-5"
+          }
+        )
       }
     ) })
   ] });
@@ -7171,12 +7370,12 @@ const CreateGroupChat = ({
     [createGroupChat]
   );
   return /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col h-full overflow-hidden px-2 pb-4", className), children: [
-    /* @__PURE__ */ jsx("div", { className: "ml-1", children: /* @__PURE__ */ jsx(Text, { weight: "bold", sz: "md", children: "Tạo nhóm chat" }) }),
+    /* @__PURE__ */ jsx("div", { className: "ml-1", children: /* @__PURE__ */ jsx(Text, { weight: "bold", sz: "md", children: t("common:conversations.createGroupChat") }) }),
     /* @__PURE__ */ jsx(
       Textbox,
       {
         sz: "sm",
-        placeholder: "Nhập tên nhóm chat (Không bắt buộc)",
+        placeholder: t("common:conversations.enterGroupNameOptional"),
         className: "w-full !rounded-lg my-2",
         ref: textboxRef,
         disabled: isFetching,
@@ -7249,8 +7448,8 @@ const CreateGroupChat = ({
 };
 const ChatMenu = ({ className, onConversationClick, ref }) => {
   const [tab, setTab] = useState("list");
-  const { data } = useConversations();
-  const { t } = useTranslation();
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
+  const { t: t2 } = useTranslation();
   const navigate = useNavigate();
   const handleSelectConversation = (conversationId) => {
     onConversationClick?.(conversationId);
@@ -7270,8 +7469,19 @@ const ChatMenu = ({ className, onConversationClick, ref }) => {
       ref,
       children: [
         /* @__PURE__ */ jsx("div", { className: "absolute top-0 right-0 flex mt-3 mr-3 gap-2", children: /* @__PURE__ */ jsx(MiniButton, { sz: "sm", className: "bg-bg-fifth", onClick: handleCreateConversation, children: /* @__PURE__ */ jsx("i", { className: "fa-regular fa-pen-to-square" }) }) }),
-        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-between px-2 pt-2", children: /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: t("common:conversations.title") }) }),
-        tab === "list" && /* @__PURE__ */ jsx(ChatList, { className: "overflow-hidden", onConversationClick: handleSelectConversation }),
+        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-between px-2 pt-2", children: /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: t2("common:conversations.title") }) }),
+        tab === "list" && /* @__PURE__ */ jsx(
+          ChatList,
+          {
+            className: "overflow-y-auto pt-0 h-full",
+            onConversationClick: handleSelectConversation,
+            data,
+            fetchNextPage,
+            hasNextPage,
+            isLoading,
+            isFetching
+          }
+        ),
         tab === "create" && /* @__PURE__ */ jsx(
           CreateGroupChat,
           {
@@ -7288,9 +7498,9 @@ const ChatMenu = ({ className, onConversationClick, ref }) => {
               const firstId = data?.pages[0]?.items[0]?.id || "";
               navigate(`/fatalk/${firstId}`);
             },
-            title: "Mở Fatalk",
+            title: t2("common:conversations.openFatalk"),
             children: [
-              /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: "Mở Fatalk" }),
+              /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: t2("common:conversations.openFatalk") }),
               /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-up-right-from-square" }) })
             ]
           }
@@ -7301,7 +7511,7 @@ const ChatMenu = ({ className, onConversationClick, ref }) => {
 };
 const ChatBadge = () => {
   const [isOpen, setIsOpen] = useState(false);
-  const count = 5;
+  const { data: count = 0 } = useGetUnreadMessageCount();
   const menuRef = useRef(null);
   const btnRef = useRef(null);
   useClickOutside(menuRef, btnRef, () => {
@@ -7326,8 +7536,49 @@ const ChatBadge = () => {
     )
   ] });
 };
+const MessageIconWithBadge = () => {
+  const { data: count = 0 } = useGetUnreadMessageCount();
+  return /* @__PURE__ */ jsxs("div", { className: "relative", children: [
+    /* @__PURE__ */ jsx("i", { className: "fa-solid fa-message" }),
+    count > 0 && /* @__PURE__ */ jsx(
+      "span",
+      {
+        className: clsx(
+          "absolute -top-1 left-3",
+          "text-xs h-3 min-w-[12px]",
+          "px-1",
+          "flex items-center justify-center",
+          "text-white bg-red-500 rounded-full",
+          "ring-2 ring-bg-main"
+        ),
+        children: count > 99 ? "99+" : count
+      }
+    )
+  ] });
+};
+const NotificationIconWithBadge = () => {
+  const { unreadCount } = useUnreadCount();
+  return /* @__PURE__ */ jsxs("div", { className: "relative", children: [
+    /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" }),
+    unreadCount > 0 && /* @__PURE__ */ jsx(
+      "span",
+      {
+        className: clsx(
+          "absolute -top-1 left-2",
+          "text-xs h-3 min-w-[12px]",
+          "px-1",
+          "flex items-center justify-center",
+          "text-white bg-red-500 rounded-full",
+          "ring-2 ring-bg-main"
+        ),
+        children: unreadCount > 99 ? "99+" : unreadCount
+      }
+    )
+  ] });
+};
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
+  const isAuthed = Boolean(isAuthenticated);
   const { openDialog, closeDialog } = useDialog();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -7342,13 +7593,13 @@ const DefaultLayout = () => {
       showOnDesktop: true
     },
     {
-      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-message" }),
+      icon: /* @__PURE__ */ jsx(MessageIconWithBadge, {}),
       path: "/fatalk",
       isIndex: false,
       showOnDesktop: false
     },
     {
-      icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" }),
+      icon: /* @__PURE__ */ jsx(NotificationIconWithBadge, {}),
       path: "/notifications",
       isIndex: false,
       showOnDesktop: false
@@ -7358,13 +7609,12 @@ const DefaultLayout = () => {
     (path) => pathname === path || pathname.startsWith(path + "/")
   );
   const { conversationId } = useParams();
-  const [isMobile, setIsMobile] = useState(
-    () => typeof window !== "undefined" ? window.innerWidth < 640 : false
-  );
+  const [isMobile, setIsMobile] = useState(false);
   useEffect(() => {
     const handleResize = () => {
       setIsMobile(window.innerWidth < 640);
     };
+    handleResize();
     window.addEventListener("resize", handleResize);
     return () => window.removeEventListener("resize", handleResize);
   }, []);
@@ -7398,7 +7648,7 @@ const DefaultLayout = () => {
     });
   }, [isMobile, openDialog]);
   useEffect(() => {
-    if (isAuthenticated) {
+    if (isAuthed) {
       closeDialog();
     } else {
       if (isMobile) return;
@@ -7407,7 +7657,7 @@ const DefaultLayout = () => {
     return () => closeDialog();
   }, [isMobile, isAuthenticated, closeDialog, openLoginOverlay]);
   const handleGoToHome = useCallback(() => {
-    if (isAuthenticated) {
+    if (isAuthed) {
       navigate("/");
     } else {
       if (!isMobile) {
@@ -7437,7 +7687,7 @@ const DefaultLayout = () => {
           /* @__PURE__ */ jsx(
             Navbar,
             {
-              isAuthenticated,
+              isAuthenticated: isAuthed,
               items,
               logo: !isMobile && /* @__PURE__ */ jsx(
                 "div",
@@ -7448,7 +7698,7 @@ const DefaultLayout = () => {
                 }
               ),
               optionClassName: "!justify-end",
-              options: isAuthenticated ? /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center gap-2"), children: [
+              options: isAuthed ? /* @__PURE__ */ jsxs("div", { className: clsx("flex items-center gap-2"), children: [
                 /* @__PURE__ */ jsxs("div", { className: "hidden sm:flex gap-2", children: [
                   !isFatalkPage && /* @__PURE__ */ jsx(ChatBadge, {}),
                   /* @__PURE__ */ jsx(NotificationBadge, {})
@@ -7594,7 +7844,7 @@ const genderOptions = [
   { key: "other", value: "Khác" }
 ];
 const OnboardingForm = () => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const navigate = useNavigate();
   const [errors, setErrors] = useState({});
   const { fetch: completeOnboarding } = useOnboarding();
@@ -7613,6 +7863,7 @@ const OnboardingForm = () => {
         },
         {
           onSuccess: () => {
+            authEvents.emit("onboardingCompleted");
             navigate("/");
           },
           onError: (err) => {
@@ -7662,7 +7913,8 @@ const OnboardingForm = () => {
             value: formik.values.firstName,
             onChange: (e) => formik.setFieldValue("firstName", e.target.value),
             isWrong: formik.touched.firstName && Boolean(formik.errors.firstName) || Boolean(errors.FirstName),
-            wrongMessage: t(errors.FirstName || formik.errors.firstName || "")
+            wrongMessage: t2(errors.FirstName || formik.errors.firstName || ""),
+            type: "text"
           }
         ),
         /* @__PURE__ */ jsx(
@@ -7672,7 +7924,8 @@ const OnboardingForm = () => {
             className: "w-full",
             placeholder: "Tên đệm",
             value: formik.values.middleName,
-            onChange: (e) => formik.setFieldValue("middleName", e.target.value)
+            onChange: (e) => formik.setFieldValue("middleName", e.target.value),
+            type: "text"
           }
         ),
         /* @__PURE__ */ jsx(
@@ -7685,7 +7938,8 @@ const OnboardingForm = () => {
             value: formik.values.lastName,
             onChange: (e) => formik.setFieldValue("lastName", e.target.value),
             isWrong: formik.touched.lastName && Boolean(formik.errors.lastName) || Boolean(errors.LastName),
-            wrongMessage: t(errors.LastName || formik.errors.lastName || "")
+            wrongMessage: t2(errors.LastName || formik.errors.lastName || ""),
+            type: "text"
           }
         )
       ] }),
@@ -7697,7 +7951,7 @@ const OnboardingForm = () => {
           value: formik.values.birthday,
           onChange: (e) => formik.setFieldValue("birthday", e.target.value),
           isWrong: formik.touched.birthday && Boolean(formik.errors.birthday) || Boolean(errors.Birthday),
-          wrongMessage: t(errors.Birthday || formik.errors.birthday || "")
+          wrongMessage: t2(errors.Birthday || formik.errors.birthday || "")
         }
       ),
       /* @__PURE__ */ jsx("div", { className: "flex gap-2 w-full", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col flex-1", children: [
@@ -7711,7 +7965,7 @@ const OnboardingForm = () => {
             onSelect: (key) => formik.setFieldValue("gender", key)
           }
         ),
-        (formik.touched.gender && formik.errors.gender || errors.Gender) && /* @__PURE__ */ jsx("span", { className: "text-xs text-error ml-1", children: t(errors.Gender || formik.errors.gender || "") })
+        (formik.touched.gender && formik.errors.gender || errors.Gender) && /* @__PURE__ */ jsx("span", { className: "text-xs text-error ml-1", children: t2(errors.Gender || formik.errors.gender || "") })
       ] }) }),
       /* @__PURE__ */ jsx(Button, { type: "button", className: "w-full", onClick: formik.submitForm, sz: "sm", children: "Hoàn tất" })
     ] })
@@ -7761,43 +8015,43 @@ function OnboardingPage() {
   );
 }
 const SettingsNavbar = ({ className, onSelect }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const authSettings = [
     {
       icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-user" }),
-      name: t("settings:navbar.privacy.account"),
+      name: t2("settings:navbar.privacy.account"),
       path: "/settings"
     },
     {
       icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-shield-halved" }),
-      name: t("settings:navbar.privacy.privacy"),
+      name: t2("settings:navbar.privacy.privacy"),
       path: "/settings/privacy"
     }
   ];
   const generalSettings = [
     {
       icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-language" }),
-      name: t("settings:navbar.general.language"),
+      name: t2("settings:navbar.general.language"),
       path: "/settings/language"
     },
     {
       icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" }),
-      name: t("settings:navbar.general.notifications"),
+      name: t2("settings:navbar.general.notifications"),
       path: "/settings/notifications"
     },
     {
       icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-info" }),
-      name: t("settings:navbar.general.about"),
+      name: t2("settings:navbar.general.about"),
       path: "/settings/about"
     },
     {
       icon: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-palette" }),
-      name: t("settings:navbar.general.theme"),
+      name: t2("settings:navbar.general.theme"),
       path: "/settings/theme"
     }
   ];
-  return /* @__PURE__ */ jsxs(PageNavbar, { title: t("settings:navbar.title"), className: clsx(className), children: [
-    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t("settings:navbar.privacy.title"), className: "px-2 space-y-1", children: authSettings.map((item, index) => /* @__PURE__ */ jsx(
+  return /* @__PURE__ */ jsxs(PageNavbar, { title: t2("settings:navbar.title"), className: clsx(className), children: [
+    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t2("settings:navbar.privacy.title"), className: "px-2 space-y-1", children: authSettings.map((item, index) => /* @__PURE__ */ jsx(
       PageNavbar.Item,
       {
         path: item.path,
@@ -7807,7 +8061,7 @@ const SettingsNavbar = ({ className, onSelect }) => {
       },
       index
     )) }),
-    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t("settings:navbar.general.title"), className: "px-2 space-y-1", children: generalSettings.map((item, index) => /* @__PURE__ */ jsx(
+    /* @__PURE__ */ jsx(PageNavbar.Section, { title: t2("settings:navbar.general.title"), className: "px-2 space-y-1", children: generalSettings.map((item, index) => /* @__PURE__ */ jsx(
       PageNavbar.Item,
       {
         path: item.path,
@@ -7820,15 +8074,15 @@ const SettingsNavbar = ({ className, onSelect }) => {
   ] });
 };
 const SettingPage = () => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const [showSidebar, setShowSidebar] = useState(false);
   useEffect(() => {
-    document.title = t("settings:title");
-  }, [t]);
+    document.title = t2("settings:title");
+  }, [t2]);
   return /* @__PURE__ */ jsx(
     SidebarPageLayout,
     {
-      title: t("settings:title"),
+      title: t2("settings:title"),
       showSidebar,
       setShowSidebar,
       navbar: /* @__PURE__ */ jsx(SettingsNavbar, { className: "h-full", onSelect: () => setShowSidebar(false) }),
@@ -7854,7 +8108,7 @@ const EditableField = ({
   onCancelClick
 }) => {
   const [inputValue, setInputValue] = useState(value ?? "");
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   useEffect(() => {
     setInputValue(value ?? "");
   }, [value]);
@@ -7894,7 +8148,7 @@ const EditableField = ({
                 },
                 children: [
                   /* @__PURE__ */ jsx("i", { className: "fa-solid fa-floppy-disk mr-2" }),
-                  t("settings:editableField.saveButton")
+                  t2("settings:editableField.saveButton")
                 ]
               }
             ),
@@ -7906,7 +8160,7 @@ const EditableField = ({
                 onClick: () => {
                   onCancelClick?.();
                 },
-                children: t("settings:editableField.cancelButton")
+                children: t2("settings:editableField.cancelButton")
               }
             )
           ] }) : /* @__PURE__ */ jsx(
@@ -7936,7 +8190,7 @@ const ErrorCodes$2 = {
   INTERNAL_SERVER_ERROR: "settings:account.personalInfo.errorMessages.changeUrlName.internalServerError"
 };
 const ChangeUrlName = ({ userId }) => {
-  const t = useLanguage$1();
+  const t2 = useLanguage$1();
   const { setUrlName: _setUrlName } = useAuth();
   const [isEditUrlName, setIsEditUrlName] = useState(false);
   const [isEditUrlNameFailed, setIsEditUrlNameFailed] = useState(false);
@@ -7956,9 +8210,9 @@ const ChangeUrlName = ({ userId }) => {
         onError: (error) => {
           const errorCode = error?.code;
           if (errorCode && ErrorCodes$2[errorCode]) {
-            setEditUrlFailedMessage(t(ErrorCodes$2[errorCode]));
+            setEditUrlFailedMessage(t2(ErrorCodes$2[errorCode]));
           } else {
-            setEditUrlFailedMessage(t(ErrorCodes$2["UNKNOWN_ERROR"]));
+            setEditUrlFailedMessage(t2(ErrorCodes$2["UNKNOWN_ERROR"]));
           }
           setIsEditUrlNameFailed(true);
         }
@@ -7971,14 +8225,14 @@ const ChangeUrlName = ({ userId }) => {
   return /* @__PURE__ */ jsx(
     EditableField,
     {
-      title: t("settings:account.personalInfo.urlName"),
+      title: t2("settings:account.personalInfo.urlName"),
       value: userProfile?.infos.urlName,
-      noDataValue: t("settings:account.personalInfo.noUrlName"),
-      placeholder: t("settings:account.personalInfo.urlNamePlaceholder"),
+      noDataValue: t2("settings:account.personalInfo.noUrlName"),
+      placeholder: t2("settings:account.personalInfo.urlNamePlaceholder"),
       valueClassName: clsx(!userProfile?.infos.urlName && "!opacity-50"),
       btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
         /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
-        t("settings:account.personalInfo.changeButton")
+        t2("settings:account.personalInfo.changeButton")
       ] }),
       editableMode: "inline",
       isEdit: isEditUrlName,
@@ -7999,7 +8253,7 @@ const ErrorCodes$1 = {
   NICKNAME_TOO_LONG: "settings:account.personalInfo.errorMessages.changeNickname.nicknameTooLong"
 };
 const ChangeNickname = ({ userId }) => {
-  const t = useLanguage$1();
+  const t2 = useLanguage$1();
   const [isEditNickname, setIsEditNickname] = useState(false);
   const [isEditNicknameFailed, setIsEditNicknameFailed] = useState(false);
   const [editNicknameFailedMessage, setEditNicknameFailedMessage] = useState("");
@@ -8017,10 +8271,10 @@ const ChangeNickname = ({ userId }) => {
         onError: (error) => {
           const errorCode = error?.code;
           if (errorCode && ErrorCodes$1[errorCode]) {
-            setEditNicknameFailedMessage(t(ErrorCodes$1[errorCode]));
+            setEditNicknameFailedMessage(t2(ErrorCodes$1[errorCode]));
           } else {
             setEditNicknameFailedMessage(
-              t("settings:account.personalInfo.errorMessages.changeNickname.unknownError")
+              t2("settings:account.personalInfo.errorMessages.changeNickname.unknownError")
             );
           }
           setIsEditNicknameFailed(true);
@@ -8034,14 +8288,14 @@ const ChangeNickname = ({ userId }) => {
   return /* @__PURE__ */ jsx(
     EditableField,
     {
-      title: t("settings:account.personalInfo.nickname"),
+      title: t2("settings:account.personalInfo.nickname"),
       value: userProfile?.infos.nickname,
-      noDataValue: t("settings:account.personalInfo.noNickname"),
-      placeholder: t("settings:account.personalInfo.nicknamePlaceholder"),
+      noDataValue: t2("settings:account.personalInfo.noNickname"),
+      placeholder: t2("settings:account.personalInfo.nicknamePlaceholder"),
       valueClassName: clsx(!userProfile?.infos.nickname && "!opacity-50"),
       btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
         /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
-        t("settings:account.personalInfo.changeButton")
+        t2("settings:account.personalInfo.changeButton")
       ] }),
       editableMode: "inline",
       isEdit: isEditNickname,
@@ -8059,21 +8313,21 @@ const ChangeNickname = ({ userId }) => {
   );
 };
 const AccountSetting = () => {
-  const t = useLanguage$1();
+  const t2 = useLanguage$1();
   const { userId } = useAuth();
   const { data: userProfile, isLoading } = useGetUserProfile(userId);
   const navigate = useNavigate();
   const handleChangeName = () => navigate("name");
-  return /* @__PURE__ */ jsxs(SidebarPageCard, { title: t("settings:account.personalInfo.title"), children: [
+  return /* @__PURE__ */ jsxs(SidebarPageCard, { title: t2("settings:account.personalInfo.title"), children: [
     isLoading ? /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "w-full lg:ml-auto mb-7 mt-2 lg:mt-0" }) : /* @__PURE__ */ jsx(
       EditableField,
       {
-        title: t("settings:account.personalInfo.yourName"),
+        title: t2("settings:account.personalInfo.yourName"),
         value: userProfile?.infos.fullName,
         btnChildren: /* @__PURE__ */ jsxs(Text, { children: [
           /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pen mr-2" }),
           " ",
-          t("settings:account.personalInfo.changeButton")
+          t2("settings:account.personalInfo.changeButton")
         ] }),
         onChangeClick: handleChangeName
       }
@@ -8114,23 +8368,23 @@ const SelectBoxSetting = ({
 const ThemeSettings = () => {
   const { availableThemes, theme: theme2, setTheme } = useTheme();
   const [themeOptions, setThemeOptions] = useState([]);
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const selectTheme = (opt) => {
     setTheme(opt);
-    showSnackbar(t("settings:theme.themeChanged"), "info");
+    showSnackbar(t2("settings:theme.themeChanged"), "info");
   };
   useEffect(() => {
     const options = availableThemes.map((theme22) => ({
       key: theme22.key,
-      value: t(theme22.label)
+      value: t2(theme22.label)
     }));
     setThemeOptions(options);
-  }, [availableThemes, t]);
-  return /* @__PURE__ */ jsx(SidebarPageCard, { title: t("settings:theme.title"), children: /* @__PURE__ */ jsx(
+  }, [availableThemes, t2]);
+  return /* @__PURE__ */ jsx(SidebarPageCard, { title: t2("settings:theme.title"), children: /* @__PURE__ */ jsx(
     SelectBoxSetting,
     {
-      title: t("settings:theme.selectTheme"),
+      title: t2("settings:theme.selectTheme"),
       selectedOption: theme2,
       options: themeOptions,
       onOptionChange: selectTheme
@@ -8165,7 +8419,7 @@ const ChangeNameForm = ({ className }) => {
   const [errorMessage, setErrorMessage] = React.useState("");
   const [isSubmitting, setIsSubmitting] = React.useState(false);
   const navigate = useNavigate();
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const { userId } = useAuth();
   const { data: userProfile, isLoading } = useGetUserProfile(userId);
   const updateNameMutation = useUpdateName(userId);
@@ -8200,11 +8454,11 @@ const ChangeNameForm = ({ className }) => {
         onError: (error) => {
           const errorCode = error?.code;
           if (errorCode && ErrorCodes[errorCode]) {
-            setErrorMessage(t(ErrorCodes[errorCode].message));
+            setErrorMessage(t2(ErrorCodes[errorCode].message));
             setFirstNameFailed(ErrorCodes[errorCode].type === "FirstName");
             setLastNameFailed(ErrorCodes[errorCode].type === "LastName");
           } else {
-            setErrorMessage(t(ErrorCodes["UNKNOWN_ERROR"].message));
+            setErrorMessage(t2(ErrorCodes["UNKNOWN_ERROR"].message));
           }
           setIsSubmitting(false);
         }
@@ -8226,7 +8480,7 @@ const ChangeNameForm = ({ className }) => {
             "rounded-none w-full h-full sm:h-fit sm:w-fit"
           ),
           children: [
-            /* @__PURE__ */ jsx(Text, { className: clsx("sm:mb-4 text-gradient-main !font-bold !text-2xl"), children: t("settings:account.personalInfo.changeNameForm.title") }),
+            /* @__PURE__ */ jsx(Text, { className: clsx("sm:mb-4 text-gradient-main !font-bold !text-2xl"), children: t2("settings:account.personalInfo.changeNameForm.title") }),
             isLoading ? /* @__PURE__ */ jsx(Skeleton, {}) : /* @__PURE__ */ jsxs("div", { children: [
               /* @__PURE__ */ jsxs(
                 "div",
@@ -8236,7 +8490,7 @@ const ChangeNameForm = ({ className }) => {
                   ),
                   children: [
                     /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
-                      /* @__PURE__ */ jsx(Text, { sz: "md", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.firstName") }),
+                      /* @__PURE__ */ jsx(Text, { sz: "md", className: clsx("ml-2 mb-1"), children: t2("settings:account.personalInfo.changeNameForm.firstName") }),
                       /* @__PURE__ */ jsx(
                         Textbox,
                         {
@@ -8251,7 +8505,7 @@ const ChangeNameForm = ({ className }) => {
                       )
                     ] }),
                     /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
-                      /* @__PURE__ */ jsx(Text, { sz: "md", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.middleName") }),
+                      /* @__PURE__ */ jsx(Text, { sz: "md", className: clsx("ml-2 mb-1"), children: t2("settings:account.personalInfo.changeNameForm.middleName") }),
                       /* @__PURE__ */ jsx(
                         Textbox,
                         {
@@ -8266,7 +8520,7 @@ const ChangeNameForm = ({ className }) => {
                       )
                     ] }),
                     /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col"), children: [
-                      /* @__PURE__ */ jsx(Text, { sz: "md", className: clsx("ml-2 mb-1"), children: t("settings:account.personalInfo.changeNameForm.lastName") }),
+                      /* @__PURE__ */ jsx(Text, { sz: "md", className: clsx("ml-2 mb-1"), children: t2("settings:account.personalInfo.changeNameForm.lastName") }),
                       /* @__PURE__ */ jsx(
                         Textbox,
                         {
@@ -8289,26 +8543,26 @@ const ChangeNameForm = ({ className }) => {
             /* @__PURE__ */ jsxs(Text, { sz: "sm", className: clsx("font-light px-2 mb-4 flex flex-col gap-1"), children: [
               /* @__PURE__ */ jsxs(Text, { weight: "bold", className: clsx("text-single-second"), children: [
                 "* ",
-                t("settings:account.personalInfo.changeNameForm.note"),
+                t2("settings:account.personalInfo.changeNameForm.note"),
                 ":"
               ] }),
               /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), wrap: "whitespace-normal", children: [
                 "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText1"),
+                t2("settings:account.personalInfo.changeNameForm.noteText1"),
                 "  ",
                 /* @__PURE__ */ jsxs(Text, { weight: "bold", className: clsx("text-single-main"), children: [
                   "7 ",
-                  t("settings:account.personalInfo.changeNameForm.day")
+                  t2("settings:account.personalInfo.changeNameForm.day")
                 ] }),
                 "."
               ] }),
               /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), wrap: "whitespace-normal", children: [
                 "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText2")
+                t2("settings:account.personalInfo.changeNameForm.noteText2")
               ] }),
               /* @__PURE__ */ jsxs(Text, { className: clsx("opacity-80"), wrap: "whitespace-normal", children: [
                 "- ",
-                t("settings:account.personalInfo.changeNameForm.noteText3"),
+                t2("settings:account.personalInfo.changeNameForm.noteText3"),
                 "  ",
                 /* @__PURE__ */ jsx(Text, { sz: "md", children: "!, #, $, @, ..." }),
                 "."
@@ -8321,7 +8575,7 @@ const ChangeNameForm = ({ className }) => {
                 sz: "md",
                 className: clsx("mt-2"),
                 onClick: handleSubmit,
-                children: isSubmitting ? t("settings:account.personalInfo.changeNameForm.submitting") : t("settings:account.personalInfo.changeNameForm.acceptButton")
+                children: isSubmitting ? t2("settings:account.personalInfo.changeNameForm.submitting") : t2("settings:account.personalInfo.changeNameForm.acceptButton")
               }
             ),
             /* @__PURE__ */ jsx(
@@ -8361,12 +8615,12 @@ const useChangeLanguage = () => {
   );
 };
 const SelectLanguage = ({ className }) => {
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const { changeLanguage, availableLanguages, currentLanguage } = useLanguage();
   const { fetch: changeLanguageFetch } = useChangeLanguage();
   const options = availableLanguages.map((lang) => ({
     key: lang,
-    value: t(`common:language.${lang}`)
+    value: t2(`common:language.${lang}`)
   }));
   const _changeLanguage = (key) => {
     changeLanguageFetch(key, {
@@ -8378,7 +8632,7 @@ const SelectLanguage = ({ className }) => {
   return /* @__PURE__ */ jsx(
     SelectBox,
     {
-      title: t("settings:language.yourLanguage"),
+      title: t2("settings:language.yourLanguage"),
       className: clsx(className),
       options,
       selectedOption: currentLanguage ?? "en",
@@ -8387,11 +8641,11 @@ const SelectLanguage = ({ className }) => {
   );
 };
 const LanguageSettings = () => {
-  const { t } = useTranslation();
-  return /* @__PURE__ */ jsx(SidebarPageCard, { title: t("settings:language.title"), children: /* @__PURE__ */ jsx(
+  const { t: t2 } = useTranslation();
+  return /* @__PURE__ */ jsx(SidebarPageCard, { title: t2("settings:language.title"), children: /* @__PURE__ */ jsx(
     SelectBoxSetting,
     {
-      title: t("settings:language.yourLanguage"),
+      title: t2("settings:language.yourLanguage"),
       selectBox: /* @__PURE__ */ jsx(SelectLanguage, { className: "!min-w-[180px]" })
     }
   ) });
@@ -8420,6 +8674,7 @@ const FatalkSidebar = ({ className, onConversationClick }) => {
   const handleCreateConversation = useCallback(async () => {
     setTab("create");
   }, []);
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
   const handleSelectConversation = (conversationId) => {
     navigate(`/fatalk/${conversationId}`);
     onConversationClick?.();
@@ -8435,7 +8690,18 @@ const FatalkSidebar = ({ className, onConversationClick }) => {
       header: /* @__PURE__ */ jsx("div", { className: "flex ", children: /* @__PURE__ */ jsx(MiniButton, { sz: "sm", className: "bg-bg-fifth", onClick: handleCreateConversation, children: /* @__PURE__ */ jsx("i", { className: "fa-regular fa-pen-to-square" }) }) }),
       headerClassName: "justify-between !flex-row pr-3 ",
       children: [
-        tab === "list" && /* @__PURE__ */ jsx("div", { className: "flex flex-col px-2 h-full overflow-hidden", children: /* @__PURE__ */ jsx(ChatList, { className: "pt-0 h-full", onConversationClick: handleSelectConversation }) }),
+        tab === "list" && /* @__PURE__ */ jsx("div", { className: "flex flex-col px-2 h-full overflow-hidden", children: /* @__PURE__ */ jsx(
+          ChatList,
+          {
+            className: "pt-0 h-full",
+            onConversationClick: handleSelectConversation,
+            data,
+            fetchNextPage,
+            hasNextPage,
+            isLoading,
+            isFetching
+          }
+        ) }),
         tab === "create" && /* @__PURE__ */ jsx(
           CreateGroupChat,
           {
@@ -8454,6 +8720,7 @@ const FatalkSidebar = ({ className, onConversationClick }) => {
 const FatalkPage = () => {
   const { pathname } = useLocation();
   const isExactPath = pathname === "/fatalk" || pathname === "/fatalk/";
+  const { t: t2 } = useTranslation();
   return /* @__PURE__ */ jsx(
     SidebarLayout,
     {
@@ -8465,7 +8732,7 @@ const FatalkPage = () => {
       showOverlay: false,
       children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col w-full h-[calc(100dvh-var(--header-height))] ", children: [
         /* @__PURE__ */ jsx(Outlet, {}),
-        isExactPath && /* @__PURE__ */ jsxs(
+        isExactPath && /* @__PURE__ */ jsx(
           "div",
           {
             className: clsx(
@@ -8473,11 +8740,14 @@ const FatalkPage = () => {
               "",
               "gap-4 opacity-50"
             ),
-            children: [
-              /* @__PURE__ */ jsx("div", { className: "w-20 h-20 rounded-full bg-bg-fourth flex items-center justify-center", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-message text-4xl text-primary-400" }) }),
-              /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: "Tin nhắn của bạn" }),
-              /* @__PURE__ */ jsx(Text, { sz: "md", children: "Chọn một cuộc trò chuyện để bắt đầu nhắn tin" })
-            ]
+            children: /* @__PURE__ */ jsx(
+              NotFound,
+              {
+                title: t2("common:conversations.noSelectConversation"),
+                icon: "fa-solid fa-message",
+                description: t2("common:conversations.noSelectConversationMessage")
+              }
+            )
           }
         )
       ] })
@@ -8492,9 +8762,11 @@ const FatalkChatPanel = ({
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
   const { renderConversationName } = useRenderConversationContent();
-  const { t } = useTranslation();
+  const { t: t2 } = useTranslation();
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
+  const { lastMessageMap } = useMessageStore();
+  const setFocusOn = useChatStore((state) => state.setFocusOn);
   const {
     data: conversationData,
     isLoading: isLoadingConversation,
@@ -8503,6 +8775,7 @@ const FatalkChatPanel = ({
   const navigate = useNavigate();
   const isLoadingHeader = isLoadingConversation || isFetchingConversation;
   const scrollRef = useRef(null);
+  const panelRef = useRef(null);
   useEffect(() => {
     if (conversationData) {
       setChatTitle(renderConversationName(conversationData));
@@ -8511,22 +8784,50 @@ const FatalkChatPanel = ({
   }, [conversationData, renderConversationName]);
   useEffect(() => {
     if (!conversationData?.id) return;
-    const checkAndMarkAsRead = async () => {
+    const handleUserInteract = async () => {
       if (!document.hasFocus()) return;
-      const lastMsgId = conversationData.lastMessage?.id;
-      if (!lastMsgId) return;
-      markAsReadLocal(conversationData.id, lastMsgId);
+      setFocusOn(conversationData.id);
+      const lastMsgSeq = lastMessageMap[conversationData.id] || conversationData?.lastMessageNumber;
+      if (!lastMsgSeq) return;
+      markAsReadLocal(conversationData.id, lastMsgSeq);
       await markAsRead({
         conversationId: conversationData.id,
-        messageId: lastMsgId
+        messageSeq: lastMsgSeq
       });
     };
-    checkAndMarkAsRead();
-    window.addEventListener("focus", checkAndMarkAsRead);
-    return () => {
-      window.removeEventListener("focus", checkAndMarkAsRead);
+    const handleClickOutside = (event) => {
+      if (panelRef.current && !panelRef.current.contains(event.target)) {
+        setFocusOn(null);
+      }
     };
-  }, [conversationData?.id, conversationData?.lastMessage?.id]);
+    const handleWindowBlur = () => {
+      setFocusOn(null);
+    };
+    const messageArea = scrollRef.current;
+    if (messageArea) {
+      messageArea.addEventListener("click", handleUserInteract);
+    }
+    document.addEventListener("mousedown", handleClickOutside);
+    window.addEventListener("blur", handleWindowBlur);
+    return () => {
+      if (messageArea) {
+        messageArea.removeEventListener("click", handleUserInteract);
+      }
+      document.removeEventListener("mousedown", handleClickOutside);
+      window.removeEventListener("blur", handleWindowBlur);
+    };
+  }, [
+    conversationData?.id,
+    conversationData?.lastMessage?.id,
+    markAsRead,
+    markAsReadLocal,
+    setFocusOn
+  ]);
+  useEffect(() => {
+    return () => {
+      setFocusOn(null);
+    };
+  }, [setFocusOn]);
   if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
     return /* @__PURE__ */ jsxs(
       "div",
@@ -8541,40 +8842,64 @@ const FatalkChatPanel = ({
             NotFound,
             {
               icon: "fa-regular fa-comments text-3xl",
-              title: t("common:conversations:notFound"),
-              description: t("common:conversations:notFoundMessage")
+              title: t2("common:conversations:notFound"),
+              description: t2("common:conversations:notFoundMessage")
             }
           ),
-          /* @__PURE__ */ jsx(Button, { className: "block sm:hidden", onClick: () => navigate("/fatalk"), children: t("common:conversations:turnBack") })
+          /* @__PURE__ */ jsx(Button, { className: "block sm:hidden", onClick: () => navigate("/fatalk"), children: t2("common:conversations:turnBack") })
         ]
       }
     );
   }
-  return /* @__PURE__ */ jsxs("div", { className: clsx("relative flex flex-col bg-bg-main overflow-hidden", className), children: [
-    /* @__PURE__ */ jsx("div", { className: "flex items-center gap-3 px-4 h-[60px] bg-bg-main border-b border-gray-700/50 shrink-0", children: isLoadingHeader ? /* @__PURE__ */ jsxs(Fragment, { children: [
-      /* @__PURE__ */ jsx(Skeleton, { sz: "md", variant: "circle", className: "w-10" }),
-      /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "flex-1 max-w-[160px]" })
-    ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-      onTurnback && /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: onTurnback, className: "block lg:hidden", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-left text-primary-400" }) }),
-      /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "sm" }),
-      /* @__PURE__ */ jsx(Text, { sz: "md", weight: "bold", className: "flex-1 text-text-main truncate", children: chatTitle })
-    ] }) }),
-    /* @__PURE__ */ jsx("div", { className: "flex-1 px-4 py-2 bg-bg-main min-h-0", ref: scrollRef, children: /* @__PURE__ */ jsx(
-      MessageList,
-      {
-        conversationId,
-        parentRef: scrollRef,
-        isGroup: conversationData?.isGroup,
-        lastSeen: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
-          /* @__PURE__ */ jsx("div", { className: "relative mb-4", children: /* @__PURE__ */ jsx(Avatar, { src: conversationData?.avatarUrl || "", alt: "Avatar", sz: "md" }) }),
-          /* @__PURE__ */ jsx(Text, { sz: "sm", weight: "bold", children: chatTitle }),
-          /* @__PURE__ */ jsx(Text, { sz: "xs", wrap: "whitespace-normal", children: t("common:conversations:privacyDescription") })
-        ] })
-      },
-      conversationId
-    ) }),
-    /* @__PURE__ */ jsx(ChatInput, { className: "!bg-bg-main h-auto p-4", conversationId })
-  ] });
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx("relative flex flex-col bg-bg-main overflow-hidden", className),
+      ref: panelRef,
+      children: [
+        /* @__PURE__ */ jsx("div", { className: "flex items-center gap-3 px-4 h-[60px] bg-bg-main border-b border-gray-700/50 shrink-0", children: isLoadingHeader ? /* @__PURE__ */ jsxs(Fragment, { children: [
+          /* @__PURE__ */ jsx(Skeleton, { sz: "md", variant: "circle", className: "w-10" }),
+          /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "flex-1 max-w-[160px]" })
+        ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+          onTurnback && /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: onTurnback, className: "block lg:hidden", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-left text-primary-400" }) }),
+          /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "sm" }),
+          /* @__PURE__ */ jsx(Text, { sz: "md", weight: "bold", className: "flex-1 text-text-main truncate", children: chatTitle })
+        ] }) }),
+        /* @__PURE__ */ jsx("div", { className: "flex-1 px-4 py-2 bg-bg-main min-h-0", ref: scrollRef, children: /* @__PURE__ */ jsx(
+          MessageList,
+          {
+            conversationId,
+            parentRef: scrollRef,
+            isGroup: conversationData?.isGroup,
+            lastSeen: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
+              /* @__PURE__ */ jsx("div", { className: "relative mb-4", children: /* @__PURE__ */ jsx(Avatar, { src: conversationData?.avatarUrl || "", alt: "Avatar", sz: "md" }) }),
+              /* @__PURE__ */ jsx(Text, { sz: "sm", weight: "bold", children: chatTitle }),
+              /* @__PURE__ */ jsx(Text, { sz: "xs", wrap: "whitespace-normal", children: t2("common:conversations:privacyDescription") })
+            ] })
+          },
+          conversationId
+        ) }),
+        /* @__PURE__ */ jsx(
+          ChatInput,
+          {
+            className: "!bg-bg-main h-auto p-4",
+            conversationId,
+            onFocus: () => {
+              if (!conversationData?.id || !document.hasFocus()) return;
+              setFocusOn(conversationData.id);
+              const lastMsgSeq = conversationData.lastMessage?.sequenceNumber;
+              if (!lastMsgSeq) return;
+              markAsReadLocal(conversationData.id, lastMsgSeq);
+              void markAsRead({
+                conversationId: conversationData.id,
+                messageSeq: lastMsgSeq
+              });
+            }
+          }
+        )
+      ]
+    }
+  );
 };
 const ConversationPage = ({}) => {
   const navigate = useNavigate();
@@ -8603,7 +8928,7 @@ const TempConversation = ({ className }) => {
   };
   useEffect(() => {
     const checkConversation = async () => {
-      if (!tempId) {
+      if (!tempUser) {
         navigate("/fatalk");
         return;
       }

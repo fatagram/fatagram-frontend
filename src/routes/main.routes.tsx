@@ -1,22 +1,38 @@
 // src/routes/MainRoutes.tsx
+import { lazy, Suspense, ReactNode } from "react";
 import LoadingPage from "../features/components/loading-page";
 import RouteType from "../types/route-type";
-import NotFoundPage from "@/features/components/not-found-page";
-import HomePage from "@/features/home/home-page";
-import RegisterPage from "@/features/auth/register/register-page";
-import LoginPage from "@/features/auth/login/login-page";
 import { friendsRoutes } from "./friends.routes";
-import NotificationPage from "@/features/notifications/notifications-page";
 import { userRoute } from "./profile.routes";
 import DefaultLayout from "../features/components/layouts/default-layout";
 import SecondLayout from "../features/components/layouts/second-layout";
-import GoogleCallbackPage from "@/features/auth/google-callback/google-callback-page";
-import OnboardingPage from "@/features/onboarding/onboarding-page";
 import { settingRoutes } from "./setting.routes";
-import FatalkPage from "@/features/chat/fatalk-page";
-import { ConversationPage } from "@/features/chat/conversation/conversation-page";
-import { TempConversation } from "@/features/chat/temp/temp-conversation";
-import ThuNghiemCuon from "@/features/tests/tests-infinity-scroll-page";
+
+const NotFoundPage = lazy(() => import("@/features/components/not-found-page"));
+const HomePage = lazy(() => import("@/features/home/home-page"));
+const RegisterPage = lazy(() => import("@/features/auth/register/register-page"));
+const LoginPage = lazy(() => import("@/features/auth/login/login-page"));
+const NotificationPage = lazy(() => import("@/features/notifications/notifications-page"));
+const GoogleCallbackPage = lazy(
+  () => import("@/features/auth/google-callback/google-callback-page"),
+);
+const OnboardingPage = lazy(() => import("@/features/onboarding/onboarding-page"));
+const FatalkPage = lazy(() => import("@/features/chat/fatalk-page"));
+const ConversationPage = lazy(() =>
+  import("@/features/chat/conversation/conversation-page").then((module) => ({
+    default: module.ConversationPage,
+  })),
+);
+const TempConversation = lazy(() =>
+  import("@/features/chat/temp/temp-conversation").then((module) => ({
+    default: module.TempConversation,
+  })),
+);
+const ThuNghiemCuon = lazy(() => import("@/features/tests/tests-infinity-scroll-page"));
+
+const withFallback = (element: ReactNode) => (
+  <Suspense fallback={<LoadingPage />}>{element}</Suspense>
+);
 
 export const mainRoutes: RouteType[] = [
   {
@@ -25,7 +41,7 @@ export const mainRoutes: RouteType[] = [
     children: [
       {
         path: "/",
-        element: <HomePage />,
+        element: withFallback(<HomePage />),
         type: "private",
         index: true,
         keepAlive: true,
@@ -35,31 +51,31 @@ export const mainRoutes: RouteType[] = [
       userRoute,
       {
         path: "/notifications",
-        element: <NotificationPage />,
+        element: withFallback(<NotificationPage />),
         type: "private",
       },
       {
         path: "/fatalk",
-        element: <FatalkPage />,
+        element: withFallback(<FatalkPage />),
         type: "private",
         children: [
           {
             path: ":conversationId",
-            element: <ConversationPage />,
+            element: withFallback(<ConversationPage />),
             type: "private",
           },
           {
             path: "temp",
-            element: <TempConversation />,
+            element: withFallback(<TempConversation />),
             type: "private",
           },
         ],
       },
       { path: "/loading", type: "public", element: <LoadingPage /> },
-      { path: "*", type: "public", element: <NotFoundPage /> },
+      { path: "*", type: "public", element: withFallback(<NotFoundPage />) },
       {
         path: "/thu-nghiem-cuon",
-        element: <ThuNghiemCuon />,
+        element: withFallback(<ThuNghiemCuon />),
         type: "public",
       },
     ],
@@ -70,22 +86,22 @@ export const mainRoutes: RouteType[] = [
     children: [
       {
         path: "/login",
-        element: <LoginPage />,
+        element: withFallback(<LoginPage />),
         type: "auth",
       },
       {
         path: "/register",
-        element: <RegisterPage />,
+        element: withFallback(<RegisterPage />),
         type: "auth",
       },
       {
         path: "/auth/google/callback",
-        element: <GoogleCallbackPage />,
+        element: withFallback(<GoogleCallbackPage />),
         type: "auth",
       },
       {
         path: "/onboarding",
-        element: <OnboardingPage />,
+        element: withFallback(<OnboardingPage />),
         type: "private",
       },
     ],

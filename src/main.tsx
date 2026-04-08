@@ -1,6 +1,5 @@
 import { GlobalDialog } from "./features/components/global-dialog";
-import { NotificationListener } from "./features/notifications/components";
-import { MessageListener } from "./features/chat/components/message-listener";
+import { AppHubListener } from "./features/hub/app-hub-listener";
 import AppRoutes from "./routes";
 
 export default function Main() {
@@ -8,8 +7,7 @@ export default function Main() {
     <>
       <AppRoutes />
       <GlobalDialog />
-      <NotificationListener />
-      <MessageListener />
+      <AppHubListener />
     </>
   );
 }

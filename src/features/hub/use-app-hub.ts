@@ -7,11 +7,22 @@ import { SocketMessage } from "@/api/common/socket-message";
 
 export function useAppHub<T>(onReceiveMessage: (message: SocketMessage<T>) => void) {
   const connectionRef = useRef<HubConnection | null>(null);
+  const onReceiveMessageRef = useRef(onReceiveMessage);
   const { isAuthenticated } = useAuth();
+
+  useEffect(() => {
+    onReceiveMessageRef.current = onReceiveMessage;
+  }, [onReceiveMessage]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
     let isMounted = true;
+    let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
+    const receiveMessageHandler = (message: SocketMessage<T>) => {
+      if (isMounted) {
+        onReceiveMessageRef.current(message);
+      }
+    };
 
     const startConnection = async () => {
       const conn = createSignalRConnection();
@@ -20,11 +31,8 @@ export function useAppHub<T>(onReceiveMessage: (message: SocketMessage<T>) => vo
       const tryConnect = async (retry: number = 0) => {
         try {
           await conn.start();
-          conn.on("ReceiveMessage", (message: SocketMessage<T>) => {
-            if (isMounted) {
-              onReceiveMessage(message);
-            }
-          });
+          conn.off("ReceiveMessage", receiveMessageHandler);
+          conn.on("ReceiveMessage", receiveMessageHandler);
         } catch (err: any) {
           if (err?.message?.includes("ONBOARDING_NOT_COMPLETED")) {
             authEvents.emit("redirectToOnboarding");
@@ -32,7 +40,7 @@ export function useAppHub<T>(onReceiveMessage: (message: SocketMessage<T>) => vo
           }
           console.error("SignalR connection error: ", err);
           if (retry < 5) {
-            setTimeout(() => tryConnect(retry + 1), 500);
+            reconnectTimer = setTimeout(() => tryConnect(retry + 1), 500);
           }
         }
       };
@@ -47,11 +55,8 @@ export function useAppHub<T>(onReceiveMessage: (message: SocketMessage<T>) => vo
       try {
         if (conn.state === HubConnectionState.Disconnected) {
           await conn.start();
-          conn.on("ReceiveMessage", (message: SocketMessage<T>) => {
-            if (isMounted) {
-              onReceiveMessage(message as any);
-            }
-          });
+          conn.off("ReceiveMessage", receiveMessageHandler);
+          conn.on("ReceiveMessage", receiveMessageHandler);
         }
       } catch (err) {
         // ignore: will let existing retry logic handle further attempts
@@ -63,7 +68,12 @@ export function useAppHub<T>(onReceiveMessage: (message: SocketMessage<T>) => vo
 
     return () => {
       isMounted = false;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
       if (connectionRef.current) {
+        connectionRef.current.off("ReceiveMessage", receiveMessageHandler);
         connectionRef.current.stop();
         connectionRef.current = null;
       }

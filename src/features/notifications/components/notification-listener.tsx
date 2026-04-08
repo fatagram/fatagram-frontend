@@ -2,15 +2,16 @@ import { NotificationDto, NotificationType } from "@/api/notification/dto/notifi
 import { useCallback } from "react";
 import { useNotificationCacheMutations, useUnreadCount } from "../hooks/use-notification-store";
 import { useToast } from "@/contexts";
-import { useAppHub } from "@/features/hub/use-app-hub";
 import { SocketMessage } from "@/api/common/socket-message";
 
-export function NotificationListener() {
+export type NotificationHubEvent = SocketMessage<NotificationDto>;
+
+export function useNotificationListenerHandler() {
   const { pushToast } = useToast();
   const { incrementUnread, decrementUnread } = useUnreadCount();
   const { addNotificationToCache, removeNotificationFromCache } = useNotificationCacheMutations();
 
-  const handleNewNotification = useCallback(
+  return useCallback(
     (message: SocketMessage<NotificationDto>) => {
       if (message.event !== "NewNotification") return;
       const data: NotificationDto = message.payload;
@@ -44,10 +45,6 @@ export function NotificationListener() {
       decrementUnread,
     ],
   );
-
-  useAppHub<NotificationDto>(handleNewNotification);
-
-  return null;
 }
 
-export default NotificationListener;
+export default useNotificationListenerHandler;
