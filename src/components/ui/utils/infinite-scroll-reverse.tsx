@@ -57,7 +57,7 @@ export default function InfiniteScrollReverse({
 
     pendingLoadRef.current = true;
     try {
-      await new Promise((resolve) => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 30));
       await onLoadMore();
     } finally {
       pendingLoadRef.current = false;
