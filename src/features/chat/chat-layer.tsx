@@ -12,7 +12,7 @@ interface ChatLayerProps extends ComponentProps {
 
 export const ChatLayer: React.FC<ChatLayerProps> = ({ className }) => {
   const isFatalkPage = useLocation().pathname.startsWith("/fatalk");
-  const { initializeFromStorage } = useChatStore();
+  const initializeFromStorage = useChatStore((state) => state.initializeFromStorage);
 
   useEffect(() => {
     initializeFromStorage?.();

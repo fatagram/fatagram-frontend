@@ -3,12 +3,13 @@ import { Message } from "@/types/entities/message.type";
 import { Avatar, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState, memo, useMemo } from "react";
+import { useEffect, useState, memo, useRef } from "react";
 import { useFormatTime } from "@/utils/format-time";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { isSystemMessage } from "../helpers/conversation-helpers";
 import { useMessageStore } from "@/features/hooks/use-conversation";
-import { useGetUserProfiles } from "@/features/hooks/use-user-profile";
+
+const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
 interface MessageProps extends ComponentProps {
   message: Message;
@@ -20,6 +21,7 @@ interface MessageProps extends ComponentProps {
   index: number;
   isGroup?: boolean;
   userInfo?: any;
+  userProfileMap?: Record<string, any>;
   ref: React.RefObject<HTMLDivElement | null> | null;
 }
 
@@ -33,6 +35,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   isGroup,
   className,
   userInfo,
+  userProfileMap,
   ref,
 }) => {
   const { t } = useTranslation();
@@ -42,11 +45,12 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const isPending = message.status === "pending";
   const isFailed = message.status === "failed";
   const isSystem = isSystemMessage(message.type);
-  const { messageUserSeenMap } = useMessageStore();
-  const seenBy = useMemo(
-    () => messageUserSeenMap?.[conversationId || ""]?.[message.sequenceNumber || 0] || [],
-    [messageUserSeenMap, conversationId, message.sequenceNumber],
-  );
+  const timeoutRef = useRef<number | null>(null);
+  const seenBy = useMessageStore((state) => {
+    const convId = conversationId || "";
+    const messageSeq = message.sequenceNumber || 0;
+    return state.messageUserSeenMap?.[convId]?.[messageSeq] ?? EMPTY_VIEWERS;
+  });
 
   const isShowTime =
     !prevMessage ||
@@ -67,11 +71,21 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const isFooterVisible = index === 0 && isMyMessage;
 
   useEffect(() => {
-    if (isPending) {
-      setTimeout(() => {
-        setHasDelayed(true);
-      }, 2000);
+    if (!isPending) {
+      setHasDelayed(false);
+      return;
     }
+
+    timeoutRef.current = window.setTimeout(() => {
+      setHasDelayed(true);
+    }, 2000);
+
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
   }, [isPending]);
 
   if (isSystem) {
@@ -189,7 +203,12 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           {seenBy.map((seenInfo) => {
             if (seenInfo.userId === userId) return null;
             return (
-              <MiniAvatar key={seenInfo.userId} uid={seenInfo.userId} seenAt={seenInfo.seenAt} />
+              <MiniAvatar
+                key={seenInfo.userId}
+                uid={seenInfo.userId}
+                seenAt={seenInfo.seenAt}
+                userInfo={userProfileMap?.[seenInfo.userId]}
+              />
             );
           })}
         </div>
@@ -198,28 +217,27 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   );
 };
 
-export const MiniAvatar = memo(({ uid, seenAt }: { uid: string; seenAt: string }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const { formatSmartTimestamp } = useFormatTime();
-  const { userProfileMap } = useGetUserProfiles([uid]);
+export const MiniAvatar = memo(
+  ({ uid, seenAt, userInfo }: { uid: string; seenAt: string; userInfo?: any }) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+    const { formatSmartTimestamp } = useFormatTime();
 
-  const userInfo = userProfileMap[uid];
-
-  return (
-    <div
-      className="relative"
-      onMouseEnter={() => setShowTooltip(true)}
-      onMouseLeave={() => setShowTooltip(false)}
-    >
-      <Avatar sz="xs" src={userInfo?.avatar} alt="mini" />
-      {showTooltip && (
-        <div className="absolute right-full mr-2 -top-7 px-2 py-1 bg-bg-main text-text-main text-xs rounded shadow-md z-50 whitespace-nowrap border border-border-main">
-          <div className="font-semibold">{userInfo?.fullName}</div>
-          <div className="text-xs opacity-75">{formatSmartTimestamp(seenAt)}</div>
-        </div>
-      )}
-    </div>
-  );
-});
+    return (
+      <div
+        className="relative"
+        onMouseEnter={() => setShowTooltip(true)}
+        onMouseLeave={() => setShowTooltip(false)}
+      >
+        <Avatar sz="xs" src={userInfo?.avatar} alt="mini" />
+        {showTooltip && (
+          <div className="absolute right-full mr-2 -top-7 px-2 py-1 bg-bg-main text-text-main text-xs rounded shadow-md z-50 whitespace-nowrap border border-border-main">
+            <div className="font-semibold">{userInfo?.fullName || uid}</div>
+            <div className="text-xs opacity-75">{formatSmartTimestamp(seenAt)}</div>
+          </div>
+        )}
+      </div>
+    );
+  },
+);
 
 export const MessageRow = memo(MessageRowComponent);

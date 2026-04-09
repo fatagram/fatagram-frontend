@@ -33,7 +33,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
 
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
-  const { lastMessageMap } = useMessageStore();
+  const lastMessageSeq = useMessageStore((state) => state.lastMessageMap[conversationId]);
 
   const setFocusOn = useChatStore((state) => state.setFocusOn);
 
@@ -63,8 +63,10 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     const handleUserInteract = async () => {
       if (!document.hasFocus()) return;
       setFocusOn(conversationData.id);
-      const lastMsgSeq = lastMessageMap[conversationData.id] || conversationData?.lastMessageNumber;
+      const lastMsgSeq = lastMessageSeq || conversationData?.lastMessageNumber;
+      const myLastSeenSeq = conversationData.myLastSeenMessageSeq || 0;
       if (!lastMsgSeq) return;
+      if (lastMsgSeq <= myLastSeenSeq) return;
 
       markAsReadLocal(conversationData.id, lastMsgSeq);
       await markAsRead({
@@ -97,13 +99,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("blur", handleWindowBlur);
     };
-  }, [
-    conversationData?.id,
-    conversationData?.lastMessage?.id,
-    markAsRead,
-    markAsReadLocal,
-    setFocusOn,
-  ]);
+  }, [conversationData?.id, lastMessageSeq, markAsRead, markAsReadLocal, setFocusOn]);
 
   useEffect(() => {
     return () => {
@@ -198,7 +194,9 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
           if (!conversationData?.id || !document.hasFocus()) return;
           setFocusOn(conversationData.id);
           const lastMsgSeq = conversationData.lastMessage?.sequenceNumber;
+          const myLastSeenSeq = conversationData.myLastSeenMessageSeq || 0;
           if (!lastMsgSeq) return;
+          if (lastMsgSeq <= myLastSeenSeq) return;
           markAsReadLocal(conversationData.id, lastMsgSeq);
           void markAsRead({
             conversationId: conversationData.id,

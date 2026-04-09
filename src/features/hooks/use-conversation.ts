@@ -175,7 +175,7 @@ export const useConversationCacheMutations = () => {
   const markAsRead = async (conversationId: string, messageSeq: number) => {
     updateConversationInCache(conversationId, (conv) => ({
       ...conv,
-      myLastSeenSeq: messageSeq,
+      myLastSeenMessageSeq: messageSeq,
       unreadMessageCount: 0,
     }));
   };
@@ -333,31 +333,50 @@ export const useMessageStore = create<MessageState>((set) => ({
   setParticipantsSeen: (conversationId, userId, participantSeen) => {
     set((state) => {
       const rawConvMap = state.messageUserSeenMap?.[conversationId] || {};
-      const currentConvMap: Record<number, ViewerInfo[]> = {};
-
-      Object.entries(rawConvMap).forEach(([messageSeq, viewers]) => {
-        const filteredViewers = viewers.filter((viewer) => viewer.userId !== userId);
-        if (filteredViewers.length > 0) {
-          currentConvMap[Number(messageSeq)] = filteredViewers;
-        }
-      });
-
       const newMsgSeq = participantSeen.sequenceNumber;
-      if (!currentConvMap[newMsgSeq]) {
-        currentConvMap[newMsgSeq] = [];
+
+      let previousSeq: number | undefined;
+      for (const [messageSeq, viewers] of Object.entries(rawConvMap)) {
+        if (viewers.some((viewer) => viewer.userId === userId)) {
+          previousSeq = Number(messageSeq);
+          break;
+        }
       }
 
-      if (!currentConvMap[newMsgSeq].some((v) => v.userId === userId)) {
-        currentConvMap[newMsgSeq].push({
-          userId,
-          seenAt: participantSeen.seenAt,
-        });
+      if (previousSeq === newMsgSeq) {
+        const existingAtNew = rawConvMap[newMsgSeq] || [];
+        const existingViewer = existingAtNew.find((viewer) => viewer.userId === userId);
+        if (existingViewer?.seenAt === participantSeen.seenAt) {
+          return state;
+        }
       }
+
+      const nextConvMap: Record<number, ViewerInfo[]> = { ...rawConvMap };
+
+      if (previousSeq !== undefined) {
+        const reducedPrev = (rawConvMap[previousSeq] || []).filter(
+          (viewer) => viewer.userId !== userId,
+        );
+        if (reducedPrev.length > 0) {
+          nextConvMap[previousSeq] = reducedPrev;
+        } else {
+          delete nextConvMap[previousSeq];
+        }
+      }
+
+      const currentAtNew = nextConvMap[newMsgSeq] ? [...nextConvMap[newMsgSeq]] : [];
+      const existingIndex = currentAtNew.findIndex((viewer) => viewer.userId === userId);
+      if (existingIndex >= 0) {
+        currentAtNew[existingIndex] = { userId, seenAt: participantSeen.seenAt };
+      } else {
+        currentAtNew.push({ userId, seenAt: participantSeen.seenAt });
+      }
+      nextConvMap[newMsgSeq] = currentAtNew;
 
       return {
         messageUserSeenMap: {
           ...state.messageUserSeenMap,
-          [conversationId]: currentConvMap,
+          [conversationId]: nextConvMap,
         },
       };
     });

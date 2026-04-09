@@ -5,6 +5,7 @@ import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { useShallow } from "zustand/react/shallow";
 import {
   useGetConversation,
   useLocalMarkAsRead,
@@ -14,7 +15,6 @@ import {
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { ChatInput } from "./chat-input";
 import { useTranslation } from "react-i18next";
-import { useOpenChat } from "../hooks/use-open-chat";
 
 interface ChatWindowProps extends ComponentProps {
   conversationId: string;
@@ -24,7 +24,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
 
-  const { toggleMinimize, closeChat, registry } = useChatStore();
+  const { toggleMinimize, closeChat, registry } = useChatStore(
+    useShallow((state) => ({
+      toggleMinimize: state.toggleMinimize,
+      closeChat: state.closeChat,
+      registry: state.registry,
+    })),
+  );
   const { renderConversationName } = useRenderConversationContent();
   const { t } = useTranslation();
   const scrollRef = useRef<HTMLDivElement | null>(null);
@@ -32,9 +38,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
 
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
-  const { lastMessageMap } = useMessageStore();
+  const lastMessageSeq = useMessageStore((state) => state.lastMessageMap[conversationId]);
 
-  const { setFocusOn } = useOpenChat();
+  const setFocusOn = useChatStore((state) => state.setFocusOn);
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
@@ -58,9 +64,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
 
     setFocusOn(conversationData.id);
 
-    const lastMsgSeq = lastMessageMap[conversationData.id] || conversationData?.lastMessageNumber;
+    const lastMsgSeq = lastMessageSeq || conversationData?.lastMessageNumber;
+    const myLastSeenSeq = conversationData.myLastSeenMessageSeq || 0;
 
     if (!lastMsgSeq) return;
+    if (lastMsgSeq <= myLastSeenSeq) return;
 
     markAsReadLocal(conversationData.id, lastMsgSeq);
     await markAsRead({
@@ -70,7 +78,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   }, [
     conversationData?.id,
     conversationData?.lastMessage?.sequenceNumber,
-    lastMessageMap,
+    lastMessageSeq,
     markAsRead,
     markAsReadLocal,
     setFocusOn,

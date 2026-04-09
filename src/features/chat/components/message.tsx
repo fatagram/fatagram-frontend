@@ -75,6 +75,7 @@ export const MessageList: React.FC<MessageListProps> = ({
             isGroup={isGroup}
             conversationId={conversationId}
             userInfo={userProfileMap[item?.senderId || ""]}
+            userProfileMap={userProfileMap}
           />
         );
       }}

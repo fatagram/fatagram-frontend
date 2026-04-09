@@ -3,10 +3,17 @@ import { useFetchConversationWith } from "@/features/hooks/use-conversation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
+import { useShallow } from "zustand/react/shallow";
 
 export const useOpenChat = () => {
   const isMobile = useMediaQuery("(max-width: 640px)");
-  const { openChat, registry, focusOnId, setFocusOn } = useChatStore();
+  const { openChat, registry, setFocusOn } = useChatStore(
+    useShallow((state) => ({
+      openChat: state.openChat,
+      registry: state.registry,
+      setFocusOn: state.setFocusOn,
+    })),
+  );
   const { fetch: fetchConversationWith } = useFetchConversationWith();
   const navigate = useNavigate();
   const location = useLocation();
@@ -19,7 +26,7 @@ export const useOpenChat = () => {
         openChat(conversationId, { type: "conversation", conversationId });
       }
     },
-    [isMobile, location.pathname, navigate],
+    [isMobile, location.pathname, navigate, openChat],
   );
 
   const _openChatWithTarget = useCallback(
@@ -73,7 +80,6 @@ export const useOpenChat = () => {
   );
 
   return {
-    focusOnId,
     openChat: _openChat,
     openChatWithTarget: _openChatWithTarget,
     checkConversationWith: _checkConversationWith,

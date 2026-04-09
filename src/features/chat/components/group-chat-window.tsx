@@ -6,7 +6,7 @@ import { useChatStore } from "../../hooks/use-chat-store";
 interface GroupChatWindowProps extends ComponentProps {}
 
 export const GroupChatWindow: React.FC<GroupChatWindowProps> = ({ className }) => {
-  const { activeIds } = useChatStore();
+  const activeIds = useChatStore((state) => state.activeIds);
   return (
     <div className={clsx("flex gap-3", className)}>
       {activeIds.map((id) => {

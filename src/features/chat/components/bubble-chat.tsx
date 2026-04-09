@@ -5,13 +5,20 @@ import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useGetConversation } from "@/features/hooks/use-conversation";
 import { useCallback } from "react";
+import { useShallow } from "zustand/react/shallow";
 
 interface BubbleChatProps extends ComponentProps {
   conversationId: string;
 }
 
 export const BubbleChat: React.FC<BubbleChatProps> = ({ className, conversationId }) => {
-  const { toggleMinimize, closeChat, registry } = useChatStore();
+  const { toggleMinimize, closeChat, registry } = useChatStore(
+    useShallow((state) => ({
+      toggleMinimize: state.toggleMinimize,
+      closeChat: state.closeChat,
+      registry: state.registry,
+    })),
+  );
 
   const chat = registry[conversationId];
   const tempTargetId = chat?.type === "temp" ? chat.targetId : undefined;
@@ -62,7 +69,7 @@ export const BubbleChat: React.FC<BubbleChatProps> = ({ className, conversationI
 interface BubbleChatListProps extends ComponentProps {}
 
 export const BubbleChatList: React.FC<BubbleChatListProps> = ({ className }) => {
-  const { minimizedIds } = useChatStore();
+  const minimizedIds = useChatStore((state) => state.minimizedIds);
   return (
     <div className={clsx("flex gap-4 flex-col", className)}>
       {minimizedIds.map((id) => (

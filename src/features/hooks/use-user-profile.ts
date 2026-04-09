@@ -4,17 +4,30 @@ import { useSafeQueryResult } from "@/hooks/use-safe-query";
 import { useQueries, useQueryClient } from "@tanstack/react-query";
 import { useMemo } from "react";
 
-const profileQueryKey = (userId: string) => ["user", "profile", userId];
-const avatarQueryKey = (userId: string) => ["user", "avatar", userId];
-const backgroundQueryKey = (userId: string) => ["user", "background", userId];
-const profileDetailsQueryKey = (userId: string) => ["user", "profile", "details", userId];
+const USER_PROFILE_BASE_KEY = ["user", "profile"] as const;
+const FULL_PROFILE_FIELDS =
+  "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName";
+const SUMMARY_PROFILE_FIELDS = "id,fullName,avatar,urlName";
+const DETAILS_PROFILE_FIELDS = "bio,description";
+
+const normalizeFields = (fields: string) =>
+  fields
+    .split(",")
+    .map((field) => field.trim())
+    .filter(Boolean)
+    .sort()
+    .join(",");
+
+const userProfilePrefixKey = (userId: string) => ["user", "profile", userId] as const;
+const profileQueryKey = (userId: string, fields: string) =>
+  ["user", "profile", userId, normalizeFields(fields)] as const;
 
 export const useOnboarding = () => {
   const queryClient = useQueryClient();
   return useResultFetcher(userProfileService.completeOnboarding, {
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["user", "profile"],
+        queryKey: USER_PROFILE_BASE_KEY,
       });
     },
   });
@@ -22,22 +35,19 @@ export const useOnboarding = () => {
 
 export const useGetUserProfile = (userId?: string) => {
   return useSafeQueryResult({
-    queryKey: profileQueryKey(userId ?? ""),
-    fn: async () =>
-      await userProfileService.getProfile(
-        userId!,
-        "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName",
-      ),
+    queryKey: profileQueryKey(userId ?? "", FULL_PROFILE_FIELDS),
+    fn: async () => await userProfileService.getProfile(userId!, FULL_PROFILE_FIELDS),
     enabled: !!userId,
   });
 };
 
 export const useGetUserProfiles = (userIds: string[]) => {
+  const normalizedUserIds = useMemo(() => [...new Set(userIds.filter(Boolean))].sort(), [userIds]);
+
   const queries = useQueries({
-    queries: userIds.map((id) => ({
-      queryKey: ["user", "profile", id],
-      queryFn: async () =>
-        (await userProfileService.getProfile(id, "id,fullName,avatar,urlName")) as any,
+    queries: normalizedUserIds.map((id) => ({
+      queryKey: profileQueryKey(id, SUMMARY_PROFILE_FIELDS),
+      queryFn: async () => (await userProfileService.getProfile(id, SUMMARY_PROFILE_FIELDS)) as any,
       enabled: !!id,
       staleTime: 1000 * 60 * 5,
     })),
@@ -60,7 +70,7 @@ export const useGetUserProfiles = (userIds: string[]) => {
 
 export const useGetUserAvatar = (userId: string) => {
   return useSafeQueryResult({
-    queryKey: avatarQueryKey(userId),
+    queryKey: profileQueryKey(userId, "avatar"),
     fn: async () => await userProfileService.getProfile(userId, "avatar"),
     enabled: !!userId,
   });
@@ -68,7 +78,7 @@ export const useGetUserAvatar = (userId: string) => {
 
 export const useGetUserBackground = (userId: string) => {
   return useSafeQueryResult({
-    queryKey: backgroundQueryKey(userId),
+    queryKey: profileQueryKey(userId, "background"),
     fn: async () => await userProfileService.getProfile(userId, "background"),
     enabled: !!userId,
   });
@@ -76,8 +86,8 @@ export const useGetUserBackground = (userId: string) => {
 
 export const useGetUserProfileDetails = (userId: string) => {
   return useSafeQueryResult({
-    queryKey: profileDetailsQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(userId, "bio,description"),
+    queryKey: profileQueryKey(userId, DETAILS_PROFILE_FIELDS),
+    fn: async () => await userProfileService.getProfile(userId, DETAILS_PROFILE_FIELDS),
     enabled: !!userId,
   });
 };
@@ -103,7 +113,7 @@ export const useUpdateName = (userId: string) => {
     {
       onSuccess: () => {
         qc.invalidateQueries({
-          queryKey: profileQueryKey(userId),
+          queryKey: userProfilePrefixKey(userId),
         });
       },
     },
@@ -116,7 +126,7 @@ export const useUpdateUrlName = (userId: string) => {
   return useResultFetcher(userProfileService.updateUrlName, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: profileQueryKey(userId),
+        queryKey: userProfilePrefixKey(userId),
       });
     },
   });
@@ -133,7 +143,7 @@ export const useUpdateNickname = (userId: string) => {
     {
       onSuccess: () => {
         qc.invalidateQueries({
-          queryKey: profileQueryKey(userId),
+          queryKey: userProfilePrefixKey(userId),
         });
       },
     },
@@ -146,10 +156,7 @@ export const useUpdateProfile = (userId: string) => {
   return useResultFetcher((data: any) => userProfileService.updateProfile(data), {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: profileQueryKey(userId),
-      });
-      qc.invalidateQueries({
-        queryKey: profileDetailsQueryKey(userId),
+        queryKey: userProfilePrefixKey(userId),
       });
     },
   });
@@ -161,7 +168,7 @@ export const useSelectBackground = (userId: string) => {
   return useResultFetcher(userProfileService.uploadBackground, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: backgroundQueryKey(userId),
+        queryKey: userProfilePrefixKey(userId),
       });
     },
   });
@@ -173,7 +180,7 @@ export const useSelectAvatar = (userId: string) => {
   return useResultFetcher(userProfileService.uploadAvatar, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: avatarQueryKey(userId),
+        queryKey: userProfilePrefixKey(userId),
       });
     },
   });
