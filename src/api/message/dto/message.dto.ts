@@ -1,4 +1,10 @@
-import { MessageType } from "@/types/entities/message.type";
+import { MediaType, MessageType } from "@/types/entities/message.type";
+
+export interface MessageMediaDto {
+  url: string;
+  type: MediaType;
+  metadata?: any;
+}
 
 export interface MessageDto {
   conversationId?: string;
@@ -6,6 +12,9 @@ export interface MessageDto {
   correlationId?: string;
   clientTempId?: string;
   content: string;
+  metadata?: any;
+  media?: MessageMediaDto[];
+  type: MessageType;
 }
 
 export interface MessageResponseDto {
@@ -22,6 +31,7 @@ export interface MessageResponseDto {
   content: string;
   type: MessageType;
   metadata?: any;
+  media?: MessageMediaDto[];
   createdAt: Date;
   shouldIncreaseUnreadCount: boolean;
 }

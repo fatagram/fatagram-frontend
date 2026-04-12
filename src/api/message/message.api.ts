@@ -6,7 +6,7 @@ const PREFIX = buildApiPath("/message");
 
 export class MessageService {
   public async sendMessage(request: MessageDto): Promise<Result<MessageResponseDto>> {
-    return await apiPost(`${PREFIX}`, request);
+    return await apiPost(`${PREFIX}/${request.conversationId}`, request);
   }
 }
 

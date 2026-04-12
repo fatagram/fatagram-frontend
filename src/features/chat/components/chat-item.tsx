@@ -3,7 +3,7 @@ import { Text, Avatar } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
-import { MessageType } from "@/types/entities/message.type";
+import { MediaType, MessageType } from "@/types/entities/message.type";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { isSystemMessage } from "../helpers/conversation-helpers";
@@ -36,6 +36,36 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
 
   const { userId } = useAuth();
 
+  const renderMessagePreview = () => {
+    if (unreadCount > 1) {
+      return `Bạn có ${unreadLabel} tin nhắn chưa đọc`;
+    }
+
+    if (!lastMessage) {
+      return t("common:conversations.noMessagesYet");
+    }
+
+    if (isSystemMessage(lastMessage.type || MessageType.System)) {
+      return renderSystemMessage(lastMessage);
+    }
+
+    const senderName =
+      userId === lastMessage.senderId ? t("common:conversations.you") : lastMessage.senderFullName;
+
+    switch (lastMessage.type) {
+      case MessageType.Text:
+        return `${senderName}: ${lastMessage.content}`;
+      case MessageType.Media:
+        console.log("Last message media:", lastMessage);
+        if (lastMessage.media && lastMessage.media.some((m) => m.type === MediaType.Image)) {
+          return `${senderName}: ${t("common:conversations.sentImageMessage", { count: lastMessage.media.length })}`;
+        }
+        return `${senderName}: ${t("common:conversations.sentMediaMessage")}`;
+      default:
+        return "";
+    }
+  };
+
   return (
     <div
       key={conversation.id}
@@ -58,15 +88,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
         </Text>
         <div className="flex items-center opacity-80">
           <Text sz="xs" className="truncate max-w-full" weight={isUnread ? "bold" : "regular"}>
-            {unreadCount > 1
-              ? `Bạn có ${unreadLabel} tin nhắn chưa đọc`
-              : lastMessage
-                ? isSystemMessage(lastMessage?.type || MessageType.System)
-                  ? renderSystemMessage(lastMessage)
-                  : userId === lastMessage?.senderId
-                    ? t("common:conversations.you") + ": " + lastMessage?.content
-                    : lastMessage?.senderFullName + ": " + lastMessage?.content
-                : "Unknown"}
+            {renderMessagePreview()}
           </Text>
           <Text sz="xs" className="mx-2 shrink-0" weight={isUnread ? "bold" : "regular"}>
             •

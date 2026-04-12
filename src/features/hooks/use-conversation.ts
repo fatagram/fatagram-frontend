@@ -184,6 +184,7 @@ export const useConversationCacheMutations = () => {
     conversationId: string,
     lastMessage?: MessageResponseDto,
   ) => {
+    console.log("Pushing conversation to top:", conversationId, lastMessage);
     const listKey = conversationKeys.list();
     const currentData = queryClient.getQueryData<ConversationPage>(listKey);
     let existedConv: ConversationDto | null = null;

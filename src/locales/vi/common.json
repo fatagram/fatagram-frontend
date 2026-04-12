@@ -40,6 +40,8 @@
     "systemMessage": {
       "createGroup": "{{creatorName}} đã tạo nhóm"
     },
+    "sentImageMessage": "Đã gửi {{count}} hình ảnh",
+    "sentMediaMessage": "Đã gửi một tệp đính kèm",
     "privacyDescription": "Hãy yên tâm chia sẻ những khoảnh khắc tuyệt vời nhất! Cuộc trò chuyện này luôn được giữ kín và an toàn tuyệt đối.",
     "openFatalk": "Mở Fatalk",
     "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)",

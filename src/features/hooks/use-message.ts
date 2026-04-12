@@ -4,9 +4,6 @@ import { messageService } from "@/api/message/message.api";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSafeInfiniteQueryResult } from "@/hooks/use-safe-query";
 import { CursorQuery } from "@/types/query";
-import { useMessageCacheMutations } from "./use-message-store";
-import { useAuth } from "@/contexts";
-import { MessageType } from "@/types/entities/message.type";
 
 const messagesQueryKey = (
   conversationId: string,
@@ -27,27 +24,7 @@ export const useMessages = (
 };
 
 export const useSendMessage = () => {
-  const { addMessageToCache } = useMessageCacheMutations();
-  const { userId } = useAuth();
   return useResultFetcher(async (data: MessageDto) => {
-    const randomId = crypto.randomUUID();
-    addMessageToCache(
-      data.conversationId!,
-      {
-        id: randomId,
-        conversationId: data.conversationId!,
-        clientTempId: randomId,
-        sequenceNumber: -1,
-        senderId: userId!,
-        content: data.content,
-        createdAt: new Date(),
-        status: "pending",
-        isGroup: false,
-        type: MessageType.Text,
-      },
-      true,
-    );
-    data.clientTempId = randomId;
     return await messageService.sendMessage(data);
   });
 };

@@ -59,7 +59,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
         {editableMode === "inline" && isEdit ? (
           <div className="relative flex flex-col gap-1 w-full">
             <TextArea
-              className={clsx("animate-fade-in px-2 py-1 w-full h-[50px]", isError && "mt-[5px]")}
+              className={clsx("animate-fade-in ", isError && "mt-[5px]")}
               placeholder={placeholder}
               value={inputValue}
               isWrong={isError}

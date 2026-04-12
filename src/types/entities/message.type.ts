@@ -1,7 +1,6 @@
 export enum MessageType {
   Text = "Text",
-  Image = "Image",
-  File = "File",
+  Media = "Media",
   System = "System",
   LeaveGroup = "LeaveGroup",
   JoinGroup = "JoinGroup",
@@ -11,6 +10,19 @@ export enum MessageType {
   ChangeGroupAvatar = "ChangeGroupAvatar",
   RemoveParticipant = "RemoveParticipant",
   AddParticipant = "AddParticipant",
+}
+
+export enum MediaType {
+  Image = "Image",
+  Video = "Video",
+  File = "File",
+  Audio = "Audio",
+}
+
+export interface MessageMedia {
+  url: string;
+  type: MediaType;
+  metadata?: any;
 }
 
 export interface Message {
@@ -27,6 +39,7 @@ export interface Message {
   content: string;
   type: MessageType;
   metadata?: any;
+  media?: MessageMedia[];
   createdAt: Date;
   status?: "success" | "pending" | "failed";
 }
