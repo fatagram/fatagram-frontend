@@ -211,12 +211,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   );
 
   const renderSingleImageMessage = () => (
-    <div
-      className={clsx(
-        "relative rounded-2xl h-fit rounded-xl overflow-hidden",
-        messageBubbleShapeClass,
-      )}
-    >
+    <div className={clsx("relative rounded-2xl h-fit overflow-hidden", messageBubbleShapeClass)}>
       <img src={stackImage[0].url} alt="Image 1" className="w-[200px] h-[200px] object-cover " />
       {hasDelayed && <PendingIndicator />}
     </div>

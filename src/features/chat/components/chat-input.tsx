@@ -6,14 +6,13 @@ import { useMessageCacheMutations } from "@/features/hooks/use-message-store";
 import { useChatUpload } from "@/features/hooks/use-chat-upload";
 import { MediaType, MessageType } from "@/types/entities/message.type";
 import clsx from "clsx";
-import { FocusEventHandler } from "react";
 import { useRef, useState } from "react";
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;
   correlationId?: string;
   receiverId?: string;
-  onFocus?: FocusEventHandler<HTMLTextAreaElement>;
+  onFocus?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -26,7 +25,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [hasInput, setHasInput] = useState(false);
   const [fileUrls, setFileUrls] = useState<{ url: string; file: File }[]>([]);
   const textboxRef = useRef<HTMLTextAreaElement | null>(null);
-  const wasFocusedBeforeSendRef = useRef(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { fetch: send } = useSendMessage();
@@ -76,8 +74,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleSendMessage = async () => {
-    const wasTextboxFocused =
-      wasFocusedBeforeSendRef.current || document.activeElement === textboxRef.current;
     const content = textboxRef.current?.value.trim() || "";
 
     if (!content && fileUrls.length === 0) {
@@ -219,13 +215,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     fileUrls.forEach((it) => URL.revokeObjectURL(it.url));
     setFileUrls([]);
 
-    if (wasTextboxFocused) {
-      setTimeout(() => {
-        requestAnimationFrame(() => {
-          textboxRef.current?.focus();
-        });
-      }, 0);
-    }
+    requestAnimationFrame(() => {
+      textboxRef.current?.focus();
+    });
   };
 
   const handleSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -313,17 +305,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onChange={handleInputChange}
           rows={0}
           maxRows={5}
-          onFocus={(e) => {
-            wasFocusedBeforeSendRef.current = true;
-            onFocus?.(e);
-          }}
-          onBlur={() => {
-            wasFocusedBeforeSendRef.current = false;
+          onFocus={() => {
+            onFocus?.();
           }}
           topContent={
             <>
               {fileUrls.length > 0 && (
-                <div className="flex items-center gap-2 overflow-x-auto py-2 px-2 overflow-x-auto">
+                <div className="flex items-center gap-2 overflow-x-auto py-2 px-2">
                   {fileUrls.map((it) => (
                     <div key={it.url} className="relative group flex-shrink-0">
                       {renderFilePreview(it)}
@@ -348,7 +336,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           }
         />
 
-        <MiniButton onClick={handleSendMessage} disabled={!hasInput && fileUrls.length === 0}>
+        <MiniButton
+          onClick={handleSendMessage}
+          disabled={!hasInput && fileUrls.length === 0}
+          onPointerDown={(e) => e.preventDefault()}
+        >
           <i className="fa-solid fa-paper-plane text-primary-500"></i>
         </MiniButton>
       </div>
