@@ -34,18 +34,33 @@ const FatalkPage = () => {
       if (!isPullingDown) return;
 
       const target = event.target as HTMLElement | null;
-      const scrollContainer = target?.closest?.(
-        "[data-chat-scrollable='true']",
-      ) as HTMLElement | null;
+      const findScrollableAncestor = (el: HTMLElement | null) => {
+        let node: HTMLElement | null = el;
 
-      if (scrollContainer) {
-        if (scrollContainer.scrollTop <= 0) {
-          event.preventDefault();
+        while (node && node !== document.body) {
+          const style = window.getComputedStyle(node);
+          const canScrollY =
+            (style.overflowY === "auto" || style.overflowY === "scroll") &&
+            node.scrollHeight > node.clientHeight;
+
+          if (canScrollY) {
+            return node;
+          }
+          node = node.parentElement;
         }
+
+        return null;
+      };
+
+      const scrollContainer =
+        (target?.closest?.("[data-chat-scrollable='true']") as HTMLElement | null) ||
+        findScrollableAncestor(target);
+
+      if (scrollContainer && scrollContainer.scrollTop > 0) {
         return;
       }
 
-      if (window.scrollY <= 0) {
+      if (window.scrollY <= 0 && (!scrollContainer || scrollContainer.scrollTop <= 0)) {
         event.preventDefault();
       }
     };

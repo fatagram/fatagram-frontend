@@ -6,13 +6,14 @@ import { useMessageCacheMutations } from "@/features/hooks/use-message-store";
 import { useChatUpload } from "@/features/hooks/use-chat-upload";
 import { MediaType, MessageType } from "@/types/entities/message.type";
 import clsx from "clsx";
+import { FocusEventHandler } from "react";
 import { useRef, useState } from "react";
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;
   correlationId?: string;
   receiverId?: string;
-  onFocus?: () => void;
+  onFocus?: FocusEventHandler<HTMLTextAreaElement>;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -25,6 +26,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [hasInput, setHasInput] = useState(false);
   const [fileUrls, setFileUrls] = useState<{ url: string; file: File }[]>([]);
   const textboxRef = useRef<HTMLTextAreaElement | null>(null);
+  const wasFocusedBeforeSendRef = useRef(false);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { fetch: send } = useSendMessage();
@@ -74,7 +76,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleSendMessage = async () => {
-    const wasTextboxFocused = document.activeElement === textboxRef.current;
+    const wasTextboxFocused =
+      wasFocusedBeforeSendRef.current || document.activeElement === textboxRef.current;
     const content = textboxRef.current?.value.trim() || "";
 
     if (!content && fileUrls.length === 0) {
@@ -217,9 +220,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setFileUrls([]);
 
     if (wasTextboxFocused) {
-      requestAnimationFrame(() => {
-        textboxRef.current?.focus();
-      });
+      setTimeout(() => {
+        requestAnimationFrame(() => {
+          textboxRef.current?.focus();
+        });
+      }, 0);
     }
   };
 
@@ -308,7 +313,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onChange={handleInputChange}
           rows={0}
           maxRows={5}
-          onFocus={onFocus}
+          onFocus={(e) => {
+            wasFocusedBeforeSendRef.current = true;
+            onFocus?.(e);
+          }}
+          onBlur={() => {
+            wasFocusedBeforeSendRef.current = false;
+          }}
           topContent={
             <>
               {fileUrls.length > 0 && (
