@@ -27,6 +27,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const [hasInput, setHasInput] = useState(false);
   const [fileUrls, setFileUrls] = useState<{ url: string; file: File }[]>([]);
   const textboxRef = useRef<HTMLTextAreaElement | null>(null);
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { fetch: send } = useSendMessage();
@@ -86,7 +87,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (textboxRef.current) textboxRef.current.value = "";
     setFileUrls([]);
     setHasInput(false);
-    onAfterSend?.();
+
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        onAfterSend?.();
+      });
+    });
 
     const imageMedia = currentFiles.filter((it) => getMediaType(it.file.type) === MediaType.Image);
     const otherMedia = currentFiles.filter((it) => getMediaType(it.file.type) !== MediaType.Image);
@@ -266,7 +272,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className={clsx("flex flex-col w-full bg-bg-third", className)}>
+    <div className={clsx("flex flex-col w-full bg-bg-third", className)} ref={containerRef}>
       <div className="w-full flex items-end gap-1">
         <input
           type="file"
@@ -286,11 +292,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onChange={handleSelectFiles}
         />
 
-        <MiniButton onClick={() => fileInputRef.current?.click()}>
+        <MiniButton
+          onClick={() => fileInputRef.current?.click()}
+          onPointerDown={(e) => e.preventDefault()}
+        >
           <i className="fa-solid fa-paperclip text-primary-500"></i>
         </MiniButton>
 
-        <MiniButton onClick={() => imageInputRef.current?.click()}>
+        <MiniButton
+          onClick={() => imageInputRef.current?.click()}
+          onPointerDown={(e) => e.preventDefault()}
+        >
           <i className="fa-solid fa-image text-primary-500"></i>
         </MiniButton>
 
@@ -306,6 +318,21 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           maxRows={5}
           onFocus={() => {
             onFocus?.();
+          }}
+          onBlur={(e) => {
+            const relatedTarget = e.relatedTarget as Node | null;
+            if (
+              containerRef.current &&
+              relatedTarget &&
+              containerRef.current.contains(relatedTarget)
+            ) {
+              return;
+            }
+            requestAnimationFrame(() => {
+              if (document.activeElement !== textboxRef.current) {
+                textboxRef.current?.focus();
+              }
+            });
           }}
           topContent={
             <>
