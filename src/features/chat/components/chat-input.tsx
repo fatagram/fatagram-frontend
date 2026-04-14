@@ -319,21 +319,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onFocus={() => {
             onFocus?.();
           }}
-          onBlur={(e) => {
-            const relatedTarget = e.relatedTarget as Node | null;
-            if (
-              containerRef.current &&
-              relatedTarget &&
-              containerRef.current.contains(relatedTarget)
-            ) {
-              return;
-            }
-            requestAnimationFrame(() => {
-              if (document.activeElement !== textboxRef.current) {
-                textboxRef.current?.focus();
-              }
-            });
-          }}
           topContent={
             <>
               {fileUrls.length > 0 && (
