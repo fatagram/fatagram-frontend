@@ -23,8 +23,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
 
   const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
 
-  const handleSelectConversation = (conversationId: string) => {
-    navigate(`/fatalk/${conversationId}`);
+  const handleSelectConversation = (_conversationId: string) => {
     onConversationClick?.();
   };
 

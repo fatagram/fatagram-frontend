@@ -74,6 +74,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleSendMessage = async () => {
+    const wasTextboxFocused = document.activeElement === textboxRef.current;
     const content = textboxRef.current?.value.trim() || "";
 
     if (!content && fileUrls.length === 0) {
@@ -214,6 +215,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     fileUrls.forEach((it) => URL.revokeObjectURL(it.url));
     setFileUrls([]);
+
+    if (wasTextboxFocused) {
+      requestAnimationFrame(() => {
+        textboxRef.current?.focus();
+      });
+    }
   };
 
   const handleSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -264,7 +271,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   return (
     <div className={clsx("flex flex-col w-full bg-bg-third", className)}>
-      <div className="px-2 py-2 w-full flex items-end gap-1">
+      <div className="w-full flex items-end gap-1">
         <input
           type="file"
           ref={imageInputRef}
@@ -283,15 +290,13 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onChange={handleSelectFiles}
         />
 
-        <div className="flex items-center flex-shrink-0">
-          <MiniButton onClick={() => fileInputRef.current?.click()}>
-            <i className="fa-solid fa-paperclip text-primary-500"></i>
-          </MiniButton>
+        <MiniButton onClick={() => fileInputRef.current?.click()}>
+          <i className="fa-solid fa-paperclip text-primary-500"></i>
+        </MiniButton>
 
-          <MiniButton onClick={() => imageInputRef.current?.click()}>
-            <i className="fa-solid fa-image text-primary-500"></i>
-          </MiniButton>
-        </div>
+        <MiniButton onClick={() => imageInputRef.current?.click()}>
+          <i className="fa-solid fa-image text-primary-500"></i>
+        </MiniButton>
 
         <TextArea
           sz="sm"
@@ -332,12 +337,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           }
         />
 
-        <MiniButton
-          sz="sm"
-          className="ml-2 "
-          onClick={handleSendMessage}
-          disabled={!hasInput && fileUrls.length === 0}
-        >
+        <MiniButton onClick={handleSendMessage} disabled={!hasInput && fileUrls.length === 0}>
           <i className="fa-solid fa-paper-plane text-primary-500"></i>
         </MiniButton>
       </div>

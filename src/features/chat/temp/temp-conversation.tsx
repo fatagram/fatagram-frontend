@@ -6,6 +6,7 @@ import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
 import { useOpenChat } from "../hooks/use-open-chat";
+import { MessageType } from "@/types/entities/message.type";
 
 interface TempConversationProps extends ComponentProps {}
 
@@ -27,12 +28,12 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
   useEffect(() => {
     const checkConversation = async () => {
       if (!tempUser) {
-        navigate("/fatalk");
+        navigate("/fatalk", { replace: true });
         return;
       }
       const hasConversation = await checkConversationWith(tempId!);
       if (hasConversation) {
-        navigate(`/fatalk/${hasConversation}`);
+        navigate(`/fatalk/${hasConversation}`, { replace: true });
       }
     };
     checkConversation();
@@ -45,10 +46,11 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
         correlationId: correlationId,
         content: message,
         receiverId: tempId,
+        type: MessageType.Text,
       },
       {
         onSuccess: (data) => {
-          navigate(`/fatalk/${data?.conversationId}`);
+          navigate(`/fatalk/${data?.conversationId}`, { replace: true });
         },
       },
     );
@@ -88,7 +90,7 @@ export const TempConversation: React.FC<TempConversationProps> = ({ className })
         )}
       </div>
 
-      <div className="flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh">
+      <div className="flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh" data-chat-scrollable="true">
         <div className="flex flex-col justify-center items-center h-full text-center px-4">
           <div className="relative mb-4">
             <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="md" />

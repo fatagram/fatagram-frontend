@@ -222,7 +222,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         )}
       </div>
       <ChatInput
-        className="!bg-bg-main h-fit py-2"
+        className="!bg-bg-main h-fit py-2 pr-1"
         conversationId={!tempTargetId ? conversationId : undefined}
         correlationId={tempTargetId ? conversationId : undefined}
         receiverId={tempTargetId}

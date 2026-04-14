@@ -4,11 +4,62 @@ import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
 import clsx from "clsx";
 import { NotFound } from "../components/not-found";
 import { useTranslation } from "react-i18next";
+import { useEffect } from "react";
 
 const FatalkPage = () => {
   const { pathname } = useLocation();
   const isExactPath = pathname === "/fatalk" || pathname === "/fatalk/";
+  const isChatDetailPath = pathname === "/fatalk/temp" || /^\/fatalk\/[^/]+$/.test(pathname);
   const { t } = useTranslation();
+
+  useEffect(() => {
+    if (!isChatDetailPath) return;
+
+    const html = document.documentElement;
+    const body = document.body;
+    const prevHtmlOverscroll = html.style.overscrollBehaviorY;
+    const prevBodyOverscroll = body.style.overscrollBehaviorY;
+    html.style.overscrollBehaviorY = "none";
+    body.style.overscrollBehaviorY = "none";
+
+    let touchStartY = 0;
+
+    const handleTouchStart = (event: TouchEvent) => {
+      touchStartY = event.touches[0]?.clientY ?? 0;
+    };
+
+    const handleTouchMove = (event: TouchEvent) => {
+      const currentY = event.touches[0]?.clientY ?? 0;
+      const isPullingDown = currentY > touchStartY;
+      if (!isPullingDown) return;
+
+      const target = event.target as HTMLElement | null;
+      const scrollContainer = target?.closest?.(
+        "[data-chat-scrollable='true']",
+      ) as HTMLElement | null;
+
+      if (scrollContainer) {
+        if (scrollContainer.scrollTop <= 0) {
+          event.preventDefault();
+        }
+        return;
+      }
+
+      if (window.scrollY <= 0) {
+        event.preventDefault();
+      }
+    };
+
+    document.addEventListener("touchstart", handleTouchStart, { passive: true });
+    document.addEventListener("touchmove", handleTouchMove, { passive: false });
+
+    return () => {
+      html.style.overscrollBehaviorY = prevHtmlOverscroll;
+      body.style.overscrollBehaviorY = prevBodyOverscroll;
+      document.removeEventListener("touchstart", handleTouchStart);
+      document.removeEventListener("touchmove", handleTouchMove);
+    };
+  }, [isChatDetailPath]);
 
   return (
     <SidebarLayout

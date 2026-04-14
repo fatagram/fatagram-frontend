@@ -133,7 +133,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       className={clsx("relative flex flex-col bg-bg-main overflow-hidden", className)}
       ref={panelRef}
     >
-      <div className="flex items-center gap-3 px-4 h-[60px] bg-bg-main border-b border-gray-700/50 shrink-0">
+      <div className="flex items-center gap-3 px-2 h-[60px] bg-bg-main border-b border-gray-700/50 shrink-0">
         {isLoadingHeader ? (
           <>
             <Skeleton sz="md" variant="circle" className="w-10" />
@@ -165,7 +165,11 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         )}
       </div>
 
-      <div className="flex-1 px-4 py-2 bg-bg-main min-h-0" ref={scrollRef}>
+      <div
+        className="flex-1 px-4 py-2 bg-bg-main min-h-0"
+        ref={scrollRef}
+        data-chat-scrollable="true"
+      >
         <MessageList
           key={conversationId}
           conversationId={conversationId}
@@ -188,7 +192,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       </div>
 
       <ChatInput
-        className="!bg-bg-main h-auto p-4"
+        className="!bg-bg-main h-auto py-2 px-1"
         conversationId={conversationId}
         onFocus={() => {
           if (!conversationData?.id || !document.hasFocus()) return;
