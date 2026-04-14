@@ -1,7 +1,7 @@
 import { Text, Avatar, Skeleton, MiniButton, Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { MessageList } from "./message";
+import { MessageList, MessageListHandle } from "./message";
 import { useEffect, useRef, useState } from "react";
 import {
   useGetConversation,
@@ -49,6 +49,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
+  const messageListRef = useRef<MessageListHandle | null>(null);
 
   useEffect(() => {
     if (conversationData) {
@@ -171,6 +172,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         data-chat-scrollable="true"
       >
         <MessageList
+          ref={messageListRef}
           key={conversationId}
           conversationId={conversationId}
           parentRef={scrollRef}
@@ -194,6 +196,11 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       <ChatInput
         className="!bg-bg-main h-auto py-2 px-1"
         conversationId={conversationId}
+        onAfterSend={() => {
+          requestAnimationFrame(() => {
+            messageListRef.current?.scrollToBottom();
+          });
+        }}
         onFocus={() => {
           if (!conversationData?.id || !document.hasFocus()) return;
           setFocusOn(conversationData.id);

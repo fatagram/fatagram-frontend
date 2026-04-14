@@ -1,7 +1,7 @@
 import { ComponentProps } from "@/components/common/component-type";
 import { useAuth } from "@/contexts";
 import clsx from "clsx";
-import { RefObject, useMemo } from "react";
+import { forwardRef, RefObject, useImperativeHandle, useMemo, useRef } from "react";
 import { useMessages } from "@/features/hooks/use-message";
 import { MessageRow } from "./message-row";
 import { useGetPariticipantsSeen } from "@/features/hooks/use-conversation";
@@ -15,14 +15,24 @@ interface MessageListProps extends ComponentProps {
   lastSeen?: React.ReactNode;
 }
 
-export const MessageList: React.FC<MessageListProps> = ({
-  isGroup,
-  className,
-  conversationId,
-  parentRef,
-  lastSeen,
-}) => {
+export interface MessageListHandle {
+  scrollToBottom: () => void;
+}
+
+export const MessageList = forwardRef<MessageListHandle, MessageListProps>(function MessageList(
+  { isGroup, className, conversationId, parentRef, lastSeen },
+  ref,
+) {
   const { userId } = useAuth();
+  const scrollContainerRef = useRef<HTMLDivElement>(null);
+
+  useImperativeHandle(ref, () => ({
+    scrollToBottom: () => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      }
+    },
+  }));
 
   const {
     data: _messages,
@@ -43,18 +53,9 @@ export const MessageList: React.FC<MessageListProps> = ({
 
   const { userProfileMap } = useGetUserProfiles(senderIds);
 
-  // const messageSkeleton = (
-  //   <div className="flex gap-2 w-full">
-  //     <Skeleton variant="circle" sz="md" />
-  //     <div className="flex flex-col w-[60%] gap-1">
-  //       <Skeleton variant="text" sz="sm" className="w-[150px]" />
-  //       <Skeleton variant="text" sz="sm" className="w-[100px]" />
-  //     </div>
-  //   </div>
-  // );
-
   return (
     <InfiniteScrollReverse
+      ref={scrollContainerRef}
       items={messages}
       onLoadMore={fetchNextPage}
       className={clsx(
@@ -88,4 +89,4 @@ export const MessageList: React.FC<MessageListProps> = ({
       lastSeen={lastSeen}
     />
   );
-};
+});

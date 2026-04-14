@@ -13,6 +13,7 @@ interface ChatInputProps extends ComponentProps {
   correlationId?: string;
   receiverId?: string;
   onFocus?: () => void;
+  onAfterSend?: () => void;
 }
 
 export const ChatInput: React.FC<ChatInputProps> = ({
@@ -20,6 +21,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   correlationId,
   receiverId,
   onFocus,
+  onAfterSend,
   className,
 }) => {
   const [hasInput, setHasInput] = useState(false);
@@ -84,6 +86,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (textboxRef.current) textboxRef.current.value = "";
     setFileUrls([]);
     setHasInput(false);
+    onAfterSend?.();
 
     const imageMedia = currentFiles.filter((it) => getMediaType(it.file.type) === MediaType.Image);
     const otherMedia = currentFiles.filter((it) => getMediaType(it.file.type) !== MediaType.Image);
@@ -214,10 +217,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     fileUrls.forEach((it) => URL.revokeObjectURL(it.url));
     setFileUrls([]);
-
-    requestAnimationFrame(() => {
-      textboxRef.current?.focus();
-    });
   };
 
   const handleSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
