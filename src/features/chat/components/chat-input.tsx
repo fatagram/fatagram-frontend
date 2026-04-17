@@ -7,6 +7,11 @@ import { useChatUpload } from "@/features/hooks/use-chat-upload";
 import { MediaType, MessageType } from "@/types/entities/message.type";
 import clsx from "clsx";
 import { useRef, useState } from "react";
+import { useTranslation } from "react-i18next";
+import { compressImage } from "@/utils/image-compression";
+import { validateFileSize, MAX_FILE_SIZE } from "@/utils/file-validation";
+import { useSnackbar } from "@/contexts";
+import { getMediaTypeFromFileType } from "@/utils/media";
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;
@@ -34,6 +39,8 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const { addMessageToCache } = useMessageCacheMutations();
   const { userId } = useAuth();
   const { upload, loading: _uploading } = useChatUpload();
+  const { t } = useTranslation();
+  const { showSnackbar } = useSnackbar();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setHasInput(e.target.value.trim() !== "");
@@ -46,42 +53,28 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const getMediaType = (type: string): MediaType => {
-    switch (type) {
-      case "image/jpeg":
-      case "image/png":
-      case "image/gif":
-        return MediaType.Image;
-      case "video/mp4":
-      case "video/webm":
-        return MediaType.Video;
-      case "audio/mpeg":
-      case "audio/wav":
-        return MediaType.Audio;
-      default:
-        return MediaType.File;
-    }
-  };
-
-  const getMediaTypeFromCloudinary = (cloudinaryResourceType: string): MediaType => {
-    switch (cloudinaryResourceType) {
-      case "image":
-        return MediaType.Image;
-      case "video":
-        return MediaType.Video;
-      case "raw":
-        return MediaType.File;
-      default:
-        return MediaType.File;
-    }
-  };
-
   const handleSendMessage = async () => {
     const content = textboxRef.current?.value.trim() || "";
 
     if (!content && fileUrls.length === 0) {
       return;
     }
+
+    const baseBody = {
+      conversationId,
+      correlationId,
+      receiverId,
+    };
+
+    const basePreviewBody = {
+      conversationId: conversationId || "",
+      senderId: userId,
+      status: "pending" as const,
+      content,
+      createdAt: new Date(),
+      sequenceNumber: -1,
+      isGroup: false,
+    };
 
     const currentFiles = [...fileUrls];
     if (textboxRef.current) textboxRef.current.value = "";
@@ -94,8 +87,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       });
     });
 
-    const imageMedia = currentFiles.filter((it) => getMediaType(it.file.type) === MediaType.Image);
-    const otherMedia = currentFiles.filter((it) => getMediaType(it.file.type) !== MediaType.Image);
+    const imageMedia = currentFiles.filter(
+      (it) => getMediaTypeFromFileType(it.file.type) === MediaType.Image,
+    );
+    const otherMedia = currentFiles.filter(
+      (it) => getMediaTypeFromFileType(it.file.type) !== MediaType.Image,
+    );
+
+    // Preserve original media types for otherMedia (audio/video/file)
+    // since Cloudinary returns "video" for both audio and video
+    const otherMediaTypes = otherMedia.map((it) => getMediaTypeFromFileType(it.file.type));
 
     const tempOtherMediaIds = otherMedia.map(() => crypto.randomUUID());
     let tempTextId = "";
@@ -104,20 +105,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (imageMedia.length > 0) {
       tempImageId = crypto.randomUUID();
       addMessageToCache(conversationId || "", {
+        ...basePreviewBody,
         id: tempImageId,
         clientTempId: tempImageId,
-        conversationId: conversationId || "",
-        senderId: userId,
-        content: "",
         type: MessageType.Media,
         media: imageMedia.map((it) => ({
           url: it.url,
-          type: getMediaType(it.file.type),
+          type: getMediaTypeFromFileType(it.file.type),
           metadata: { name: it.file.name, size: it.file.size },
         })),
-        createdAt: new Date(),
-        sequenceNumber: -1,
-        isGroup: false,
       });
     }
 
@@ -127,56 +123,41 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const tempId = tempOtherMediaIds[i];
       const url = URL.createObjectURL(it.file);
       addMessageToCache(conversationId || "", {
+        ...basePreviewBody,
         id: tempId,
         clientTempId: tempId,
-        conversationId: conversationId || "",
-        senderId: userId,
-        content: "",
         type: MessageType.Media,
         media: [
           {
             url,
-            type: getMediaType(it.file.type),
+            type: getMediaTypeFromFileType(it.file.type),
             metadata: { name: it.file.name, size: it.file.size },
           },
         ],
-        createdAt: new Date(),
-        sequenceNumber: -1,
-        isGroup: false,
       });
     }
     if (content && content.trim() !== "") {
       tempTextId = crypto.randomUUID();
       addMessageToCache(conversationId || "", {
+        ...basePreviewBody,
         id: tempTextId,
         clientTempId: tempTextId,
-        conversationId: conversationId || "",
-        senderId: userId,
-        content,
         type: MessageType.Text,
-        createdAt: new Date(),
-        sequenceNumber: -1,
-        isGroup: false,
       });
     }
 
     if (imageMedia.length > 0) {
       try {
-        const image = await upload(
-          imageMedia.map((it) => it.file),
-          "image",
-        );
+        const image = await upload(imageMedia.map((it) => it.file));
         await send({
-          conversationId,
-          receiverId,
-          correlationId,
+          ...baseBody,
           clientTempId: tempImageId,
           content: "",
           type: MessageType.Media,
           media: image.map((url) => ({
             url: url.url,
             type: MediaType.Image,
-            metadata: { name: url.original_filename, size: url.bytes, format: url.format },
+            metadata: { name: url.original_filename, size: url.bytes },
           })),
         });
       } catch (error) {
@@ -185,24 +166,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
 
     if (otherMedia.length > 0) {
-      const otherMediaUrls = await upload(
-        otherMedia.map((it) => it.file),
-        "raw",
-      );
+      const otherMediaUrls = await upload(otherMedia.map((it) => it.file));
       for (let i = 0; i < otherMedia.length; i++) {
         const url = otherMediaUrls[i];
         await send({
-          conversationId,
-          receiverId,
-          correlationId,
+          ...baseBody,
           clientTempId: tempOtherMediaIds[i],
           content: "",
           type: MessageType.Media,
           media: [
             {
               url: url.url,
-              type: getMediaTypeFromCloudinary(url.type),
-              metadata: { name: url.original_filename, size: url.bytes, format: url.format },
+              type: otherMediaTypes[i],
+              metadata: { name: url.original_filename, size: url.bytes },
             },
           ],
         });
@@ -212,9 +188,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (content && content.trim() !== "") {
       console.log("Sending text message with temp ID:", tempTextId);
       await send({
-        conversationId,
-        receiverId,
-        correlationId,
+        ...baseBody,
         clientTempId: tempTextId,
         content,
         type: MessageType.Text,
@@ -225,21 +199,54 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setFileUrls([]);
   };
 
-  const handleSelectFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleSelectFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      const newItems = Array.from(files).map((file) => ({ url: URL.createObjectURL(file), file }));
+      const fileArray = Array.from(files);
+      const newItems: { url: string; file: File }[] = [];
 
-      setFileUrls((prev) => [...prev, ...newItems]);
+      for (const file of fileArray) {
+        const sizeValidation = validateFileSize(file, MAX_FILE_SIZE);
+        if (!sizeValidation.valid) {
+          showSnackbar(
+            t("chat.upload.fileTooLarge", {
+              fileName: file.name,
+              maxSize: "50MB",
+            }),
+            "error",
+          );
+          continue;
+        }
+
+        let fileToAdd = file;
+        if (file.type.startsWith("image/")) {
+          try {
+            fileToAdd = await compressImage(file, 1920, 1920, 0.8);
+          } catch (error) {
+            console.error("Error compressing image:", error);
+            showSnackbar(t("chat.upload.compressionError", { fileName: file.name }), "error");
+            continue;
+          }
+        }
+
+        newItems.push({ url: URL.createObjectURL(fileToAdd), file: fileToAdd });
+      }
+
+      if (newItems.length > 0) {
+        setFileUrls((prev) => [...prev, ...newItems]);
+      }
 
       if (fileInputRef.current) {
         fileInputRef.current.value = "";
+      }
+      if (imageInputRef.current) {
+        imageInputRef.current.value = "";
       }
     }
   };
 
   const renderFilePreview = (it: { url: string; file: File }) => {
-    const type = getMediaType(it.file.type);
+    const type = getMediaTypeFromFileType(it.file.type);
 
     switch (type) {
       case MediaType.Image:
@@ -261,7 +268,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <span className="text-[10px] truncate w-full text-center">{it.file.name}</span>
           </div>
         );
-      default: // MediaType.File
+      default:
         return (
           <div className="h-16 w-32 bg-bg-main border border-border-main rounded-xl flex flex-col items-center justify-center px-2">
             <i className="fa-solid fa-file-lines text-primary-500 mb-1"></i>

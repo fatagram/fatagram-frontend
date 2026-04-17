@@ -3,12 +3,15 @@ import { MediaType, Message, MessageType } from "@/types/entities/message.type";
 import { Avatar, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState, memo, useRef } from "react";
+import { useEffect, useState, memo, useRef, RefObject } from "react";
 import { useFormatTime } from "@/utils/format-time";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { isSystemMessage } from "../helpers/conversation-helpers";
 import { useMessageStore } from "@/features/hooks/use-conversation";
 import { formatFileSize } from "@/utils/format-file-size";
+import { AudioMessage } from "./messages/audio-message";
+import { VideoMessage } from "./messages/video-message";
+import { useMediaViewer } from "../context/media-viewer-context";
 
 const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
@@ -23,7 +26,7 @@ interface MessageProps extends ComponentProps {
   isGroup?: boolean;
   userInfo?: any;
   userProfileMap?: Record<string, any>;
-  ref: React.RefObject<HTMLDivElement | null> | null;
+  ref: RefObject<HTMLDivElement | null> | null;
 }
 
 const PendingIndicator = () => (
@@ -63,8 +66,10 @@ const MessageRowComponent: React.FC<MessageProps> = ({
 }) => {
   const { t } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
+  const [isFileDownloading, setIsFileDownloading] = useState(false);
   const { getDiffBetween, formatTime, formatSmartTimestamp } = useFormatTime();
   const { renderSystemMessage } = useRenderConversationContent();
+  const { onOpen: openMediaViewer } = useMediaViewer();
   const isPending = message.status === "pending";
   const isFailed = message.status === "failed";
   const isSystem = isSystemMessage(message.type);
@@ -96,6 +101,10 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const isMediaMessage = message.type === MessageType.Media;
   const isImageMessage =
     isMediaMessage && message.media?.some((media) => media.type === MediaType.Image);
+  const isVideoMessage =
+    isMediaMessage && message.media?.some((media) => media.type === MediaType.Video);
+  const isAudioMessage =
+    isMediaMessage && message.media?.some((media) => media.type === MediaType.Audio);
   const isFileMessage =
     isMediaMessage && message.media?.some((media) => media.type === MediaType.File);
 
@@ -128,42 +137,117 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     </div>
   );
 
+  const handleFileDownload = async () => {
+    if (isFileDownloading) return;
+    setIsFileDownloading(true);
+    try {
+      const response = await fetch(message.media?.[0].url || "");
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = blobUrl;
+      anchor.download = message.media?.[0].metadata?.name || "file";
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+    } finally {
+      setIsFileDownloading(false);
+    }
+  };
+
   const renderFileMessage = () => (
     <div
       className={clsx(
-        "relative flex bg-bg-fourth px-4 py-3 rounded-xl items-center gap-3",
+        "relative flex px-4 py-3 rounded-xl items-center gap-3",
         "max-w-full",
+        isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
         messageBubbleShapeClass,
       )}
     >
       <div className="flex-shrink-0">
-        <i className="fa-solid fa-file text-2xl text-primary"></i>
+        <i
+          className={clsx(
+            "fa-solid fa-file text-2xl",
+            isMyMessage ? "text-text-reverse-main" : "text-text-main",
+          )}
+        ></i>
       </div>
 
       <div className="flex flex-col min-w-0 flex-1">
         {" "}
         <Text
-          className="underline cursor-pointer break-all leading-tight"
-          onClick={() => window.open(message.media?.[0].url, "_blank")}
+          className={clsx(
+            "underline cursor-pointer break-all leading-tight",
+            isMyMessage ? "text-text-reverse-main" : "text-text-main",
+            isFileDownloading && "opacity-60 pointer-events-none",
+          )}
+          onClick={handleFileDownload}
           wrap="whitespace-pre-wrap"
         >
           {message.media?.[0].metadata?.name || t("conversations.file")}
         </Text>
-        <Text className="text-[10px] text-muted-foreground mt-1">
+        <Text
+          className={clsx(
+            "text-[10px] text-muted-foreground mt-1",
+            isMyMessage ? "text-text-reverse-main" : "text-text-main",
+          )}
+        >
           {message.media?.[0].metadata?.size
             ? formatFileSize(message.media?.[0].metadata?.size)
             : "Unknown size"}
         </Text>
       </div>
       <button
-        className="flex-shrink-0 hover:text-primary transition-colors ml-1"
-        onClick={() => window.open(message.media?.[0].url, "_blank")}
+        className="flex-shrink-0 hover:text-primary transition-colors ml-1 disabled:opacity-60"
+        onClick={handleFileDownload}
+        disabled={isFileDownloading}
       >
-        <i className="fa-solid fa-download"></i>
+        <i
+          className={clsx(
+            "fa-solid",
+            isFileDownloading ? "fa-spinner fa-spin" : "fa-download",
+            isMyMessage ? "text-text-reverse-main" : "text-text-main",
+          )}
+        />
       </button>
 
       {hasDelayed && <PendingIndicator />}
     </div>
+  );
+
+  const renderVideoMessage = () => (
+    <VideoMessage
+      onFrameClick={() => {
+        openMediaViewer({
+          url: message.media?.[0].url!,
+          type: "video",
+          conversationId: conversationId!,
+        });
+      }}
+      onFullscreenToggle={() => {
+        openMediaViewer({
+          url: message.media?.[0].url!,
+          type: "video",
+          conversationId: conversationId!,
+        });
+      }}
+      className={clsx(messageBubbleShapeClass)}
+      url={message.media?.[0].url!}
+    />
+  );
+
+  const renderAudioMessage = () => (
+    <AudioMessage
+      className={clsx(
+        isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
+        messageBubbleShapeClass,
+      )}
+      url={message.media?.[0].url!}
+      isMyMessage={isMyMessage}
+    />
   );
 
   const renderImageStackMessage = () => (
@@ -201,9 +285,16 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           src={stackImage[2].url}
           alt="Image 3"
           className={clsx(
-            "absolute w-[130px] h-[130px] object-cover rounded-xl shadow-lg",
+            "absolute w-[130px] h-[130px] object-cover rounded-xl shadow-lg cursor-pointer",
             "rotate-0 z-30 border-2 border-white/50",
           )}
+          onClick={() => {
+            openMediaViewer({
+              url: stackImage[2].url,
+              type: "image",
+              conversationId: conversationId!,
+            });
+          }}
         />
       )}
       {hasDelayed && <PendingIndicator />}
@@ -212,7 +303,18 @@ const MessageRowComponent: React.FC<MessageProps> = ({
 
   const renderSingleImageMessage = () => (
     <div className={clsx("relative rounded-2xl h-fit overflow-hidden", messageBubbleShapeClass)}>
-      <img src={stackImage[0].url} alt="Image 1" className="w-[200px] h-[200px] object-cover " />
+      <img
+        src={stackImage[0].url}
+        alt="Image 1"
+        className="w-[200px] h-[200px] object-cover cursor-pointer"
+        onClick={() => {
+          openMediaViewer({
+            url: stackImage[0].url,
+            type: "image",
+            conversationId: conversationId!,
+          });
+        }}
+      />
       {hasDelayed && <PendingIndicator />}
     </div>
   );
@@ -293,6 +395,8 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           )}
           {isTextMessage && renderTextMessage()}
           {isFileMessage && renderFileMessage()}
+          {isVideoMessage && renderVideoMessage()}
+          {isAudioMessage && renderAudioMessage()}
           {isImageMessage && stackImage.length > 1 && renderImageStackMessage()}
           {isImageMessage && stackImage.length === 1 && renderSingleImageMessage()}
           {(seenBy?.length === 0 || (seenBy.length === 1 && seenBy[0].userId === userId)) && (

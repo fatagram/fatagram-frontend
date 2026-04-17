@@ -30,6 +30,8 @@
     --info: 59 130 246;
 
     --text-message: 229 229 229;
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 17 24 39;
   }
 
   /* Light Theme (Preserved Signature Colors) */
@@ -61,6 +63,12 @@
     --text-second: 55 65 81;
     --text-third: 107 114 128;
     --text-fourth: 156 163 175;
+
+    /* Chat message text colors */
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 17 24 39;
+
+    --text-reverse-main: 255 255 255;
 
     /* Background colors */
     --bg-main: 255 255 255;
@@ -125,6 +133,12 @@
     --text-second: 229 229 229;
     --text-third: 163 163 163;
     --text-fourth: 115 115 115;
+
+    --text-reverse-main: 17 24 39;
+
+    /* Chat message text colors */
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 229 229 229;
 
     --bg-main: 0 0 0;
     --bg-second: 18 18 18;
@@ -205,6 +219,12 @@
     --text-third: 148 163 184;
     --text-fourth: 100 116 139;
 
+    --text-reverse-main: 17 24 39;
+
+    /* Chat message text colors */
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 248 250 252;
+
     --bg-main: 15 23 42;
     --bg-second: 30 41 59;
     --bg-third: 51 65 85;
@@ -283,6 +303,11 @@
     --text-second: 209 213 219;
     --text-third: 156 163 175;
     --text-fourth: 107 114 128;
+    --text-reverse-main: 17 24 39;
+
+    /* Chat message text colors */
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 255 255 255;
 
     --bg-main: 10 10 10;
     --bg-second: 23 23 23;
@@ -362,7 +387,11 @@
     --text-second: 204 251 241;
     --text-third: 153 246 228;
     --text-fourth: 94 234 212;
+    --text-reverse-main: 17 24 39;
 
+    /* Chat message text colors */
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 240 253 250;
     --bg-main: 2 44 34;
     --bg-second: 4 47 46;
     --bg-third: 17 94 89;
@@ -440,6 +469,11 @@
     --text-second: 226 232 240;
     --text-third: 148 163 184;
     --text-fourth: 100 116 139;
+    --text-reverse-main: 17 24 39;
+
+    /* Chat message text colors */
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 243 244 246;
 
     --bg-main: 4 12 30;
     --bg-second: 6 16 40;
@@ -519,6 +553,7 @@
     --text-second: 254 252 232;
     --text-third: 254 249 195;
     --text-fourth: 254 240 138;
+    --text-reverse-main: 17 24 39;
 
     --bg-main: 28 25 23;
     --bg-second: 41 37 36;
@@ -598,6 +633,7 @@
     --text-second: 157 23 77;
     --text-third: 190 24 93;
     --text-fourth: 219 39 119;
+    --text-reverse-main: 17 24 39;
 
     --bg-main: 255 255 255;
     --bg-second: 255 251 235;
@@ -680,6 +716,7 @@
     --text-second: 110 48 76;
     --text-third: 140 70 100;
     --text-fourth: 170 100 130;
+    --text-reverse-main: 17 24 39;
 
     /* Background colors */
     --bg-main: 255 240 248;
@@ -761,10 +798,14 @@
     --secondary-600: 82 82 91;
 
     /* Text colors */
+    --text-reverse-main: 17 24 39;
     --text-main: 255 255 255;
     --text-second: 228 228 231;
     --text-third: 161 161 170;
     --text-fourth: 113 113 122;
+
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 228 228 231;
 
     /* Background colors - Deep dark with crimson undertones */
     --bg-main: 12 10 10;
@@ -850,6 +891,9 @@
     --text-second: 209 250 229;
     --text-third: 167 243 208;
     --text-fourth: 110 231 183;
+    --text-reverse-main: 17 24 39;
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 228 228 231;
 
     /* Background colors - Deep Jade */
     --bg-main: 2 44 34;
@@ -935,6 +979,7 @@
     --text-second: 226 232 240;
     --text-third: 148 163 184;
     --text-fourth: 100 116 139;
+    --text-reverse-main: 17 24 39;
 
     /* Background colors - Deep Arctic Blue/Purple */
     --bg-main: 3 18 32;

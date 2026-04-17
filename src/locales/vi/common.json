@@ -14,6 +14,33 @@
     "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại.",
     "backButton": "Quay lại trang chủ"
   },
+  "onboarding": {
+    "welcome": "Chào mừng đến với Fatagram!",
+    "description": "Khám phá cách mới để kết nối và chia sẻ với bạn bè của bạn. Hãy bắt đầu hành trình trải nghiệm xã hội sôi động hơn của bạn!",
+    "getStarted": "Bắt đầu",
+    "completeInfo": "Hãy hoàn tất thông tin cần thiết",
+    "privacy": "Thông tin của bạn được bảo mật tuyệt đối",
+    "form": {
+      "firstName": { "title": "Họ", "placeholder": "Họ" },
+      "middleName": { "title": "Tên đệm", "placeholder": "Tên đệm" },
+      "lastName": { "title": "Tên", "placeholder": "Tên" },
+      "birthday": { "title": "Ngày sinh" },
+      "gender": {
+        "title": "Giới tính",
+        "options": { "male": "Nam", "female": "Nữ", "other": "Khác" }
+      },
+      "submit": "Hoàn tất"
+    },
+    "validation": {
+      "firstNameTooShort": "Họ quá ngắn",
+      "firstNameRequired": "Họ là bắt buộc",
+      "lastNameTooShort": "Tên quá ngắn",
+      "lastNameRequired": "Tên là bắt buộc",
+      "birthdayInvalid": "Ngày sinh không hợp lệ",
+      "birthdayRequired": "Ngày sinh là bắt buộc",
+      "genderRequired": "Giới tính là bắt buộc"
+    }
+  },
   "themes": {
     "light": "Sáng",
     "dark": "Tối",
@@ -47,5 +74,14 @@
     "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)",
     "loadingOldMessages": "Đang tải tin nhắn...",
     "createGroupChat": "Tạo nhóm chat"
+  },
+  "chat": {
+    "upload": {
+      "fileTooLarge": "{{fileName}} quá lớn. Kích thước file tối đa là {{maxSize}}.",
+      "imageCompressed": "Ảnh đã được nén từ {{original}} MB xuống {{compressed}} MB",
+      "compressionError": "Không thể nén {{fileName}}. Vui lòng thử lại.",
+      "invalidFileType": "Loại file không hợp lệ. Vui lòng kiểm tra file.",
+      "uploadError": "Không thể tải file. Vui lòng thử lại."
+    }
   }
 }

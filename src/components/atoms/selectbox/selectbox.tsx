@@ -77,7 +77,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
 
   return (
     <div className="relative">
-      {/* {title && (
+      {title && (
         <label
           htmlFor={selectId}
           className={clsx(
@@ -88,7 +88,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
           {title}
           {isRequired && <span className="text-red-400">*</span>}
         </label>
-      )} */}
+      )}
 
       <button
         id={selectId}

@@ -14,14 +14,15 @@ import { useNavigate } from "react-router-dom";
 import { authEvents } from "@/events/auth-event";
 import { useOnboarding } from "@/features/hooks/use-user-profile";
 
-const genderOptions: Option[] = [
-  { key: "male", value: "Nam" },
-  { key: "female", value: "Nữ" },
-  { key: "other", value: "Khác" },
-];
+// gender options will be created inside the component to allow translation
 
 export const OnboardingForm: React.FC = () => {
   const { t } = useTranslation();
+  const genderOptions: Option[] = [
+    { key: "male", value: t("onboarding.form.gender.options.male") },
+    { key: "female", value: t("onboarding.form.gender.options.female") },
+    { key: "other", value: t("onboarding.form.gender.options.other") },
+  ];
   const navigate = useNavigate();
   const [errors, setErrors] = useState<Record<string, string>>({});
   const { fetch: completeOnboarding } = useOnboarding();
@@ -87,10 +88,10 @@ export const OnboardingForm: React.FC = () => {
       <div className="flex flex-col gap-4 w-full">
         <div className="flex sm:flex-row flex-col gap-2 w-full">
           <Textbox
-            title="Họ"
+            title={t("onboarding.form.firstName.title")}
             className="w-full"
             isRequired={true}
-            placeholder="Họ"
+            placeholder={t("onboarding.form.firstName.placeholder")}
             value={formik.values.firstName}
             onChange={(e) => formik.setFieldValue("firstName", e.target.value)}
             isWrong={
@@ -101,17 +102,17 @@ export const OnboardingForm: React.FC = () => {
             type={"text"}
           />
           <Textbox
-            title="Tên đệm"
+            title={t("onboarding.form.middleName.title")}
             className="w-full"
-            placeholder="Tên đệm"
+            placeholder={t("onboarding.form.middleName.placeholder")}
             value={formik.values.middleName}
             onChange={(e) => formik.setFieldValue("middleName", e.target.value)}
             type={"text"}
           />
           <Textbox
-            title="Tên"
+            title={t("onboarding.form.lastName.title")}
             isRequired={true}
-            placeholder="Tên"
+            placeholder={t("onboarding.form.lastName.placeholder")}
             className="w-full"
             value={formik.values.lastName}
             onChange={(e) => formik.setFieldValue("lastName", e.target.value)}
@@ -125,7 +126,7 @@ export const OnboardingForm: React.FC = () => {
         </div>
 
         <SelectDay
-          title="Ngày sinh"
+          title={t("onboarding.form.birthday.title")}
           isRequired={true}
           value={formik.values.birthday}
           onChange={(e) => formik.setFieldValue("birthday", e.target.value)}
@@ -138,7 +139,7 @@ export const OnboardingForm: React.FC = () => {
         <div className="flex gap-2 w-full">
           <div className="flex flex-col flex-1">
             <SelectBox
-              title="Giới tính"
+              title={t("onboarding.form.gender.title")}
               isRequired={true}
               options={genderOptions}
               selectedOption={formik.values.gender}
@@ -153,7 +154,7 @@ export const OnboardingForm: React.FC = () => {
         </div>
 
         <Button type="button" className="w-full" onClick={formik.submitForm} sz="sm">
-          Hoàn tất
+          {t("onboarding.form.submit")}
         </Button>
       </div>
     </div>

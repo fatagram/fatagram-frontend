@@ -1,7 +1,6 @@
 import { uploadService } from "@/api/upload/upload.api";
+import { getCloudinaryResourceTypeFromFileType } from "@/utils/media";
 import { useState } from "react";
-
-type ResourceType = "image" | "video" | "raw" | "auto";
 
 export const useChatUpload = () => {
   const [loading, setLoading] = useState(false);
@@ -9,24 +8,24 @@ export const useChatUpload = () => {
 
   const upload = async (
     files: File[],
-    type: ResourceType = "auto",
-  ): Promise<
-    { url: string; type: string; original_filename: string; format: string; bytes: number }[]
-  > => {
+  ): Promise<{ url: string; type: string; original_filename: string; bytes: number }[]> => {
     setLoading(true);
     setError(null);
 
     try {
-      const sigRes = await uploadService.getSignature("chat-messages", type);
-      console.log("Signature response:", sigRes);
-      if (!sigRes.success || !sigRes.data) throw new Error("Failed to get upload signature");
-
-      const uploadRes = await uploadService.upload(files, sigRes.data);
-      console.log("Upload response:", uploadRes);
-      if (!uploadRes.success || !uploadRes.data) throw new Error("Failed to upload files");
-
+      const uploadPromises = files.map(async (file) => {
+        const result = await uploadService.upload(
+          file,
+          getCloudinaryResourceTypeFromFileType(file.type),
+        );
+        if (!result.success || !result.data) {
+          throw new Error(result.error?.detail || "Upload failed");
+        }
+        return result.data;
+      });
+      const results = await Promise.all(uploadPromises);
       setLoading(false);
-      return uploadRes.data;
+      return results;
     } catch (err: any) {
       setError(err);
       setLoading(false);

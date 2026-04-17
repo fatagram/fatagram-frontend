@@ -4,6 +4,7 @@ import { DialogProvider } from "./contexts/dialog-context";
 import { LoadingProvider } from "./contexts/loading-context";
 import { ThemeProvider } from "./contexts/theme-context";
 import { SnackbarProvider } from "./contexts/snackbar-context";
+import { MediaViewerProvider } from "./features/chat/context/media-viewer-context";
 
 interface ContextTreeProps {
   children: React.ReactNode;
@@ -19,7 +20,9 @@ export default function ContextTree({ children, authContext }: ContextTreeProps)
         <LoadingProvider>
           <DialogProvider>
             <SnackbarProvider>
-              <ToastProvider>{children}</ToastProvider>
+              <ToastProvider>
+                <MediaViewerProvider>{children}</MediaViewerProvider>
+              </ToastProvider>
             </SnackbarProvider>
           </DialogProvider>
         </LoadingProvider>

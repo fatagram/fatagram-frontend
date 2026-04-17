@@ -1,8 +1,10 @@
 import { Logo, Text } from "@/components/atoms";
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form";
 import clsx from "clsx";
+import { useTranslation } from "react-i18next";
 
 export default function OnboardingPage() {
+  const { t } = useTranslation();
   return (
     <div
       className={clsx(
@@ -12,7 +14,7 @@ export default function OnboardingPage() {
     >
       <div
         className={clsx(
-          "relative flex flex-col items-center justify-center gap-8 w-full flex-1 sm:h-auto sm:max-w-[700px]",
+          "relative flex flex-col items-center justify-center gap-8 w-full sm:flex-none flex-1 sm:max-w-[700px]",
           "bg-bg-second/80 sm:rounded-3xl shadow-2xl",
           "sm:p-10 px-4 border border-border-main/50",
         )}
@@ -26,10 +28,10 @@ export default function OnboardingPage() {
             weight="extrabold"
             className="mt-2 !text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-600 font-inter"
           >
-            Chào bạn!
+            {t("onboarding.welcome")}
           </Text>
           <Text sz="md" className="text-text-secondary text-center max-w-[400px]">
-            Hãy hoàn tất thông tin cần thiết
+            {t("onboarding.completeInfo")}
           </Text>
         </div>
 
@@ -39,7 +41,7 @@ export default function OnboardingPage() {
 
         <div className="flex items-center gap-2 text-text-third">
           <i className="fa-solid fa-shield-halved text-primary-500" />
-          <Text sz="sm">Thông tin của bạn được bảo mật tuyệt đối</Text>
+          <Text sz="sm">{t("onboarding.privacy")}</Text>
         </div>
       </div>
     </div>

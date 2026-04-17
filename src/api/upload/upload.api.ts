@@ -15,68 +15,83 @@ export class UploadService {
       folder: string;
       overwrite: boolean;
       signature: string;
+      resourceType: string;
     }>
   > {
     return await apiGet(`${PREFIX}/signature?folder=${folder}&resourceType=${resourceType}`, {});
   }
 
   public async upload(
-    files: File[],
-    signatureData: any,
-  ): Promise<Result<{ url: string; type: string; original_filename: string; bytes: number }[]>> {
-    console.log("Starting upload with signature data:", signatureData);
-    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/${signatureData.resourceType}/upload`;
-
-    const uploadSingleFile = async (file: File): Promise<any> => {
-      const formData = new FormData();
-
-      formData.append("file", file);
-      formData.append("folder", signatureData.folder);
-      formData.append("overwrite", String(signatureData.overwrite));
-      formData.append("timestamp", String(signatureData.timestamp));
-      formData.append("resource_type", signatureData.resourceType);
-      formData.append("api_key", signatureData.apiKey);
-      formData.append("signature", signatureData.signature);
-
-      const response = await fetch(cloudinaryUrl, {
-        method: "POST",
-        body: formData,
-      });
-
-      if (!response.ok) {
-        const errorBody = await response.json();
-        console.error("Cloudinary Detailed Error:", errorBody);
-        throw new Error(errorBody.error?.message || "Upload failed");
-      }
-
-      return response.json();
-    };
-
-    try {
-      const uploadPromises = files.map((file) => uploadSingleFile(file));
-      const results = await Promise.all(uploadPromises);
-      console.log("Upload results:", results);
-      const urls = await Promise.all(
-        files.map(async (file) => {
-          const res = await uploadSingleFile(file);
-          const extension = res.display_name.split(".").pop();
-          return {
-            url: res.secure_url,
-            type: res.resource_type,
-            original_filename: `${res.original_filename}.${extension}`,
-            bytes: res.bytes,
-          };
-        }),
-      );
-
-      return { success: true, data: urls };
-    } catch (error) {
-      console.error("Upload error:", error);
+    file: File,
+    resourceType: string,
+  ): Promise<
+    Result<{
+      url: string;
+      type: string;
+      original_filename: string;
+      bytes: number;
+    }>
+  > {
+    const signatureData = (await this.getSignature("chat-messages", resourceType)).data;
+    if (!signatureData) {
       return {
         success: false,
         error: {
-          code: "UPLOAD_FAILED",
-          detail: "Failed to upload images. Please try again.",
+          detail: "Failed to get upload signature",
+          code: "UPLOAD_SIGNATURE_ERROR",
+        },
+      };
+    }
+
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/${signatureData.resourceType}/upload`;
+
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", signatureData.folder);
+    formData.append("overwrite", String(signatureData.overwrite));
+    formData.append("timestamp", String(signatureData.timestamp));
+    formData.append("resource_type", signatureData.resourceType);
+    formData.append("api_key", signatureData.apiKey);
+    formData.append("signature", signatureData.signature);
+
+    try {
+      const response = await fetch(cloudinaryUrl, {
+        method: "POST",
+        body: formData,
+      }).catch((err) => {
+        console.error("Network error during upload:", err);
+        throw new Error("Network error during upload");
+      });
+      if (!response.ok) {
+        const errorBody = await response.json();
+        console.error("Cloudinary Detailed Error:", errorBody);
+        return {
+          success: false,
+          error: {
+            detail: `Upload failed with status ${response.status}`,
+            code: "UPLOAD_ERROR",
+          },
+        };
+      }
+
+      const _res = await response.json();
+      const extension = _res.display_name.split(".").pop();
+      return {
+        success: true,
+        data: {
+          url: _res.secure_url,
+          type: _res.resource_type,
+          original_filename: `${_res.original_filename}.${extension}`,
+          bytes: _res.bytes,
+        },
+      };
+    } catch (err) {
+      console.error("Upload error:");
+      return {
+        success: false,
+        error: {
+          detail: err instanceof Error ? err.message : "Unknown error",
+          code: "UPLOAD_EXCEPTION",
         },
       };
     }

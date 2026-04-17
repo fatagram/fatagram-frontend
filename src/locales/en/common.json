@@ -14,6 +14,33 @@
     "description": "Oops! The page you're looking for doesn't exist or has been moved.",
     "backButton": "Back to Home"
   },
+  "onboarding": {
+    "welcome": "Welcome!",
+    "description": "Discover a new way to connect and share with your friends. Let's get started on your journey to a more vibrant social experience!",
+    "getStarted": "Get Started",
+    "completeInfo": "Please complete the necessary information",
+    "privacy": "Your information is kept completely private",
+    "form": {
+      "firstName": { "title": "First name", "placeholder": "First name" },
+      "middleName": { "title": "Middle name", "placeholder": "Middle name" },
+      "lastName": { "title": "Last name", "placeholder": "Last name" },
+      "birthday": { "title": "Birthday" },
+      "gender": {
+        "title": "Gender",
+        "options": { "male": "Male", "female": "Female", "other": "Other" }
+      },
+      "submit": "Complete"
+    },
+    "validation": {
+      "firstNameTooShort": "First name is too short",
+      "firstNameRequired": "First name is required",
+      "lastNameTooShort": "Last name is too short",
+      "lastNameRequired": "Last name is required",
+      "birthdayInvalid": "Birthday is invalid",
+      "birthdayRequired": "Birthday is required",
+      "genderRequired": "Gender is required"
+    }
+  },
   "themes": {
     "light": "Light",
     "dark": "Dark",
@@ -50,5 +77,14 @@
     "enterGroupNameOptional": "Enter group name (optional)",
     "loadingOldMessages": "Loading messages...",
     "createGroupChat": "Create group chat"
+  },
+  "chat": {
+    "upload": {
+      "fileTooLarge": "{{fileName}} is too large. Maximum file size is {{maxSize}}.",
+      "imageCompressed": "Image compressed from {{original}} MB to {{compressed}} MB",
+      "compressionError": "Failed to compress {{fileName}}. Please try again.",
+      "invalidFileType": "Invalid file type. Please check the file.",
+      "uploadError": "Failed to upload file. Please try again."
+    }
   }
 }
