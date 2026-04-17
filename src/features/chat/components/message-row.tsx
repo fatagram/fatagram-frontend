@@ -66,7 +66,6 @@ const MessageRowComponent: React.FC<MessageProps> = ({
 }) => {
   const { t } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
-  const [isFileDownloading, setIsFileDownloading] = useState(false);
   const { getDiffBetween, formatTime, formatSmartTimestamp } = useFormatTime();
   const { renderSystemMessage } = useRenderConversationContent();
   const { onOpen: openMediaViewer } = useMediaViewer();
@@ -126,7 +125,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       )}
     >
       <Text
-        sz="sm"
+        sz="md"
         wrap="whitespace-pre-wrap"
         weight="regular"
         className={clsx(isMyMessage ? "text-white " : "text-text-main")}
@@ -136,27 +135,6 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       {hasDelayed && <PendingIndicator />}
     </div>
   );
-
-  const handleFileDownload = async () => {
-    if (isFileDownloading) return;
-    setIsFileDownloading(true);
-    try {
-      const response = await fetch(message.media?.[0].url || "");
-      const blob = await response.blob();
-      const blobUrl = URL.createObjectURL(blob);
-      const anchor = document.createElement("a");
-      anchor.href = blobUrl;
-      anchor.download = message.media?.[0].metadata?.name || "file";
-      document.body.appendChild(anchor);
-      anchor.click();
-      document.body.removeChild(anchor);
-      URL.revokeObjectURL(blobUrl);
-    } catch (error) {
-      console.error("Download failed:", error);
-    } finally {
-      setIsFileDownloading(false);
-    }
-  };
 
   const renderFileMessage = () => (
     <div
@@ -182,9 +160,8 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           className={clsx(
             "underline cursor-pointer break-all leading-tight",
             isMyMessage ? "text-text-reverse-main" : "text-text-main",
-            isFileDownloading && "opacity-60 pointer-events-none",
           )}
-          onClick={handleFileDownload}
+          onClick={() => window.open(message.media?.[0].url, "_blank")}
           wrap="whitespace-pre-wrap"
         >
           {message.media?.[0].metadata?.name || t("conversations.file")}
@@ -201,14 +178,19 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         </Text>
       </div>
       <button
-        className="flex-shrink-0 hover:text-primary transition-colors ml-1 disabled:opacity-60"
-        onClick={handleFileDownload}
-        disabled={isFileDownloading}
+        className="flex-shrink-0 hover:text-primary transition-colors ml-1"
+        onClick={() => {
+          const anchor = document.createElement("a");
+          anchor.href = message.media?.[0].url || "";
+          anchor.download = message.media?.[0].metadata?.name || "file";
+          document.body.appendChild(anchor);
+          anchor.click();
+          document.body.removeChild(anchor);
+        }}
       >
         <i
           className={clsx(
-            "fa-solid",
-            isFileDownloading ? "fa-spinner fa-spin" : "fa-download",
+            "fa-solid fa-download",
             isMyMessage ? "text-text-reverse-main" : "text-text-main",
           )}
         />
