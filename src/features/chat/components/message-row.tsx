@@ -118,7 +118,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const renderTextMessage = () => (
     <div
       className={clsx(
-        "px-3 py-1 break-words rounded-xl shadow-sm relative max-w-full",
+        "px-3 py-2 break-words rounded-xl shadow-sm relative max-w-full",
         isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
         isFailed && "border-red-500 border-2 opacity-50",
         messageBubbleShapeClass,
