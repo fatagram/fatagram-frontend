@@ -295,20 +295,43 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
             grabCursor={true}
             className="w-full h-full"
           >
-            {allMedia.map((m) => (
-              <SwiperSlide key={m.id} className="h-full w-full">
-                <div className="flex h-full w-full items-center justify-center px-4 py-2 md:px-6 md:py-4">
-                  {m.type === MediaType.Image ? (
-                    <ImageView
-                      url={m.url}
-                      className="max-h-full max-w-full object-contain rounded-md select-none"
-                    />
-                  ) : (
-                    <VideoView url={m.url} className="max-h-full max-w-full rounded-md" />
-                  )}
-                </div>
-              </SwiperSlide>
-            ))}
+            {allMedia.map((m) => {
+              // Lazy loading check: Is this specific slide currently active?
+              const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
+
+              return (
+                <SwiperSlide key={m.id} className="h-full w-full">
+                  <div className="flex h-full w-full items-center justify-center px-4 py-2 md:px-6 md:py-4">
+                    {m.type === MediaType.Image ? (
+                      <ImageView
+                        url={m.url}
+                        className="max-h-full max-w-full object-contain rounded-md select-none"
+                      />
+                    ) : isActive ? (
+                      // Only mount the real, heavy VideoView when the slide is active
+                      <VideoView url={m.url} className="max-h-full max-w-full rounded-md" />
+                    ) : (
+                      // Render a lightweight "poster" for inactive video slides to prevent black screens and save data
+                      <div
+                        className="relative max-h-full max-w-full rounded-md overflow-hidden bg-black flex items-center justify-center cursor-pointer"
+                        style={{ aspectRatio: "16/9" }}
+                      >
+                        <video
+                          src={`${m.url}#t=0.1`}
+                          className="max-h-full max-w-full object-contain opacity-50" // Dim it slightly to indicate it's inactive
+                          preload="metadata" // Only fetch metadata (like duration/dimensions) and the first frame, NOT the whole video
+                          muted
+                          playsInline
+                        />
+                        <div className="absolute inset-0 flex items-center justify-center">
+                          <i className="fa-solid fa-play text-white text-6xl opacity-70 drop-shadow-lg" />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                </SwiperSlide>
+              );
+            })}
           </Swiper>
         </div>
 
@@ -333,7 +356,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
         <div className="max-w-[960px] overflow-x-auto overflow-y-hidden scroll-smooth">
           <div className="flex min-w-max items-center gap-2 px-2 py-3">
             {allMedia.map((m, index) => {
-              const isActive = m.id === activeMedia.id;
+              const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
               return (
                 <div
                   key={m.id}
@@ -355,7 +378,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
                   ) : (
                     <>
                       <video
-                        src={`${m.url}#t=0.1`} // Thêm #t=0.1 để lấy frame đầu tiên làm ảnh bìa
+                        src={`${m.url}#t=0.1`} // Fetch first frame for thumbnail
                         className="h-full w-full object-cover pointer-events-none"
                         preload="metadata"
                         muted

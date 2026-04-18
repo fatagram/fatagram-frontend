@@ -9,6 +9,7 @@ import clsx from "clsx";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { compressImage } from "@/utils/image-compression";
+import { compressVideo } from "@/utils/video-compression";
 import { validateFileSize, MAX_FILE_SIZE } from "@/utils/file-validation";
 import { useSnackbar } from "@/contexts";
 import { getMediaTypeFromFileType } from "@/utils/media";
@@ -226,6 +227,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             console.error("Error compressing image:", error);
             showSnackbar(t("chat.upload.compressionError", { fileName: file.name }), "error");
             continue;
+          }
+        } else if (file.type.startsWith("video/")) {
+          try {
+            fileToAdd = await compressVideo(file, {
+              maxWidth: 1280,
+              maxHeight: 720,
+              videoBitsPerSecond: 900_000,
+            });
+          } catch (error) {
+            console.error("Error compressing video:", error);
+            showSnackbar(t("chat.upload.compressionError", { fileName: file.name }), "error");
           }
         }
 
