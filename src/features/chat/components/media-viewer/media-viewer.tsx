@@ -350,7 +350,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
                       : "opacity-50 hover:opacity-100 hover:scale-105",
                   )}
                 >
-                  {/* UPDATE: Check type để render tag video thay vì img */}
                   {m.type === MediaType.Image ? (
                     <img src={m.url} alt="Thumbnail" className="h-full w-full object-cover" />
                   ) : (

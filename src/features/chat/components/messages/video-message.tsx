@@ -22,11 +22,11 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [playbackRate, setPlaybackRate] = useState(1);
   const [isMuted, setIsMuted] = useState(false);
-
   const [volume, setVolume] = useState(1);
 
   const formatTime = (seconds: number, totalDuration: number) => {
@@ -38,7 +38,9 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
 
   const onVideoEnded = () => {
     setIsPlaying(false);
-    setCurrentTime(duration);
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.duration);
+    }
   };
 
   const handleInitialPlay = () => {
@@ -86,7 +88,8 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
     }
   };
 
-  const timePercent = duration > 0 ? Math.min(currentTime / duration, 1) * 100 : 0;
+  const safeTimeRatio = duration > 0 ? Math.min(currentTime / duration, 1) : 0;
+  const timeFillPercent = `${safeTimeRatio * 100}%`;
   const volumePercent = (isMuted ? 0 : volume) * 100;
 
   return (
@@ -112,7 +115,12 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
 
           handleInitialPlay();
         }}
-        onPlay={() => setIsPlaying(true)}
+        onWaiting={() => setIsWaiting(true)}
+        onCanPlay={() => setIsWaiting(false)}
+        onPlaying={() => {
+          setIsPlaying(true);
+          setIsWaiting(false);
+        }}
         onPause={() => setIsPlaying(false)}
         onEnded={onVideoEnded}
         onTimeUpdate={() => setCurrentTime(videoRef.current?.currentTime || 0)}
@@ -125,7 +133,7 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
         <Button
           onClick={handleInitialPlay}
           className={clsx(
-            "absolute",
+            "absolute z-10",
             "w-16 h-16 !rounded-full text-white flex items-center justify-center transition-all active:scale-98",
           )}
         >
@@ -133,23 +141,38 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
         </Button>
       )}
 
+      {isWaiting && hasStarted && (
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
+          <i className="fa-solid fa-spinner fa-spin text-white text-4xl opacity-80" />
+        </div>
+      )}
+
       {hasStarted && (
         <div
           className={`absolute bottom-0 left-0 right-0 z-30 p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent transition-opacity duration-300 
-          ${isPlaying ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}
+          ${isPlaying && !isWaiting ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}
         >
-          <input
-            type="range"
-            min={0}
-            max={duration || 0}
-            step="0.1"
-            value={currentTime}
-            onChange={handleSeek}
-            className="w-full h-1.5 mb-4 accent-primary-500 cursor-pointer appearance-none bg-white/30 rounded-full"
-            style={{
-              background: `linear-gradient(to right, rgb(var(--primary-500)) ${timePercent}%, rgba(255,255,255,0.3) ${timePercent}%)`,
-            }}
-          />
+          <div className="relative w-full h-4 flex items-center mb-4 cursor-pointer group/seek">
+            <div className="relative w-full h-1.5 rounded-full bg-white/30 overflow-hidden">
+              <div
+                className="absolute left-0 top-0 h-full rounded-full bg-primary-500"
+                style={{ width: timeFillPercent }}
+              />
+            </div>
+            <div
+              className="absolute w-3.5 h-3.5 rounded-full bg-primary-500 shadow-md -translate-x-1/2"
+              style={{ left: timeFillPercent }}
+            />
+            <input
+              type="range"
+              min={0}
+              max={duration || 0}
+              step="0.1"
+              value={currentTime}
+              onChange={handleSeek}
+              className="absolute inset-0 w-full opacity-0 cursor-pointer"
+            />
+          </div>
 
           <div className="flex items-center justify-between text-white drop-shadow-md">
             <div className="flex items-center gap-6">
@@ -189,7 +212,7 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
                 </div>
               </div>
 
-              <span className="text-xs bg-black/40 px-2 py-1 rounded font-semibold">
+              <span className="text-xs bg-black/40 px-2 py-1 rounded font-semibold tabular-nums">
                 {formatTime(currentTime, duration)} / {formatTime(duration, duration)}
               </span>
             </div>
@@ -203,7 +226,7 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
                   setPlaybackRate(newSpeed);
                   if (videoRef.current) videoRef.current.playbackRate = newSpeed;
                 }}
-                className="text-[10px] font-black border-2 border-white/50 px-2 py-0.5 rounded-lg hover:bg-white/20 transition-all uppercase"
+                className="text-[10px] font-black border-2 border-white/50 px-2 py-0.5 rounded-lg hover:bg-white/20 transition-all uppercase w-10 text-center"
               >
                 {playbackRate}x
               </button>
@@ -211,7 +234,7 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
               {onFullscreenToggle && (
                 <button
                   onClick={onFullscreenToggle}
-                  className="hover:text-primary-400 transition-colors"
+                  className="hover:text-primary-400 transition-colors w-5 text-right"
                 >
                   <i className={`fas fa-expand`}></i>
                 </button>
