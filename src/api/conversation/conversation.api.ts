@@ -2,7 +2,11 @@ import { CursorResult, Result } from "@/api/common/result";
 import { buildApiPath, apiGet, apiPost } from "../common/api-helpers";
 import { CursorQuery } from "@/types/query";
 import { ConversationDto, ParticipantsSeenDto } from "./dto/conversation.dto";
-import { MessageResponseDto } from "../message/dto/message.dto";
+import {
+  MessageMediaAroundAnchorDto,
+  MessageMediaDto,
+  MessageResponseDto,
+} from "../message/dto/message.dto";
 
 const PREFIX = buildApiPath("/conversation");
 
@@ -46,6 +50,30 @@ export class ConversationService {
 
   public async getUnreadCount(): Promise<Result<number>> {
     return await apiGet(`${PREFIX}/unread-count`);
+  }
+
+  public async getMediaAround(
+    conversationId: string,
+    mediaId: string,
+    config: {
+      limit?: number;
+      before?: boolean;
+    },
+  ): Promise<Result<MessageMediaDto[]>> {
+    const { limit = 20, before = true } = config;
+    return await apiGet(`${PREFIX}/${conversationId}/media/around/${mediaId}`, {
+      limit,
+      before,
+    });
+  }
+
+  public async getMediaAroundAnchor(
+    conversationId: string,
+    mediaId: string,
+    count: number = 10,
+  ): Promise<Result<MessageMediaAroundAnchorDto>> {
+    console.log("Fetching media around anchor:", conversationId, mediaId, count);
+    return await apiGet(`${PREFIX}/${conversationId}/media/around-anchor/${mediaId}`, { count });
   }
 }
 

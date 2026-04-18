@@ -1,9 +1,15 @@
 import { MediaType, MessageType } from "@/types/entities/message.type";
 
 export interface MessageMediaDto {
+  id?: string;
   url: string;
   type: MediaType;
   metadata?: any;
+}
+
+export interface MessageMediaAroundAnchorDto {
+  left: MessageMediaDto[];
+  right: MessageMediaDto[];
 }
 
 export interface MessageDto {

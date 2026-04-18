@@ -56,7 +56,6 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
       case MessageType.Text:
         return `${senderName}: ${lastMessage.content}`;
       case MessageType.Media:
-        console.log("Last message media:", lastMessage);
         if (lastMessage.media && lastMessage.media.some((m) => m.type === MediaType.Image)) {
           return `${senderName}: ${t("common:conversations.sentImageMessage", { count: lastMessage.media.length })}`;
         }

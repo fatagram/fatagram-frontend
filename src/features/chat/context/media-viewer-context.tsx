@@ -1,13 +1,12 @@
+import { MediaType, MessageMedia } from "@/types/entities/message.type";
+import { MessageType } from "@microsoft/signalr";
 import { createContext, useCallback, useContext, useState } from "react";
 
 type MediaViewerContextType = {
-  onOpen: (options: { url: string; type: "image" | "video"; conversationId: string }) => void;
+  onOpen: (options: { id: string; url: string; type: MediaType; conversationId: string }) => void;
   onClose: () => void;
   conversationId: string | null;
-  media: {
-    url: string;
-    type: "image" | "video";
-  } | null;
+  media: MessageMedia | null;
 };
 
 interface MediaViewerProviderProps {
@@ -23,12 +22,12 @@ const MediaViewerContext = createContext<MediaViewerContextType>({
 
 export const MediaViewerProvider: React.FC<MediaViewerProviderProps> = ({ children }) => {
   const [conversationId, setConversationId] = useState<string | null>(null);
-  const [media, setMedia] = useState<{ url: string; type: "image" | "video" } | null>(null);
+  const [media, setMedia] = useState<MessageMedia | null>(null);
 
   const onOpen = useCallback(
-    (options: { url: string; type: "image" | "video"; conversationId: string }) => {
+    (options: { id: string; url: string; type: MediaType; conversationId: string }) => {
       setConversationId(options.conversationId);
-      setMedia({ url: options.url, type: options.type });
+      setMedia({ id: options.id, url: options.url, type: options.type });
     },
     [],
   );

@@ -115,6 +115,27 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     isOnlyMessageInGroup,
   );
 
+  const isOnlyEmoji =
+    isTextMessage &&
+    message.content.trim() !== "" &&
+    (() => {
+      const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
+      const segments = [...segmenter.segment(message.content.trim())].map((s) => s.segment);
+
+      return (
+        segments.length < 6 &&
+        segments.every((char) =>
+          /\p{Emoji_Presentation}|\p{Emoji}\uFE0F|\p{Emoji_Modifier_Base}/u.test(char),
+        )
+      );
+    })();
+
+  const renderOnlyEmojiMessage = () => (
+    <div className={clsx("text-4xl", isMyMessage ? "text-white" : "text-text-main")}>
+      {message.content}
+    </div>
+  );
+
   const renderTextMessage = () => (
     <div
       className={clsx(
@@ -204,15 +225,17 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     <VideoMessage
       onFrameClick={() => {
         openMediaViewer({
+          id: message.media?.[0].id || "",
           url: message.media?.[0].url!,
-          type: "video",
+          type: MediaType.Video,
           conversationId: conversationId!,
         });
       }}
       onFullscreenToggle={() => {
         openMediaViewer({
+          id: message.media?.[0].id || "",
           url: message.media?.[0].url!,
-          type: "video",
+          type: MediaType.Video,
           conversationId: conversationId!,
         });
       }}
@@ -235,10 +258,21 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const renderImageStackMessage = () => (
     <div
       className={clsx(
-        "relative h-[200px] w-[110px] flex items-center justify-center ",
+        "relative h-[200px] w-[110px] flex items-center justify-center cursor-pointer",
         isMyMessage ? "self-end mr-4" : "self-start ml-4",
         messageBubbleShapeClass,
+        "[&>img:last-child]:opacity-100",
+        "[&>img:nth-last-child(2)]:opacity-80",
+        "[&>img:nth-last-child(3)]:opacity-60",
       )}
+      onClick={() => {
+        openMediaViewer({
+          id: stackImage[stackImage.length - 1].id || "",
+          url: stackImage[stackImage.length - 1].url,
+          type: MediaType.Image,
+          conversationId: conversationId!,
+        });
+      }}
     >
       {stackImage[0] && (
         <img
@@ -246,7 +280,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           alt="Image 1"
           className={clsx(
             "absolute w-[130px] h-[130px] object-cover shadow-sm rounded-xl",
-            "rotate-[-12deg] -translate-x-3 translate-y-1 opacity-60 z-10 transition-transform",
+            "rotate-[-12deg] -translate-x-3 translate-y-1 z-10 transition-transform",
           )}
         />
       )}
@@ -257,7 +291,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           alt="Image 2"
           className={clsx(
             "absolute w-[130px] h-[130px] object-cover rounded-xl shadow-md",
-            "rotate-[8deg] translate-x-2 -translate-y-1 opacity-85 z-20 transition-transform",
+            "rotate-[8deg] translate-x-2 -translate-y-1 z-20 transition-transform",
           )}
         />
       )}
@@ -267,16 +301,9 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           src={stackImage[2].url}
           alt="Image 3"
           className={clsx(
-            "absolute w-[130px] h-[130px] object-cover rounded-xl shadow-lg cursor-pointer",
+            "absolute w-[130px] h-[130px] object-cover rounded-xl shadow-lg",
             "rotate-0 z-30 border-2 border-white/50",
           )}
-          onClick={() => {
-            openMediaViewer({
-              url: stackImage[2].url,
-              type: "image",
-              conversationId: conversationId!,
-            });
-          }}
         />
       )}
       {hasDelayed && <PendingIndicator />}
@@ -291,8 +318,9 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         className="w-[200px] h-[200px] object-cover cursor-pointer"
         onClick={() => {
           openMediaViewer({
+            id: stackImage[0].id || "",
             url: stackImage[0].url,
-            type: "image",
+            type: MediaType.Image,
             conversationId: conversationId!,
           });
         }}
@@ -375,7 +403,8 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               {userInfo?.fullName}
             </Text>
           )}
-          {isTextMessage && renderTextMessage()}
+          {isOnlyEmoji ? renderOnlyEmojiMessage() : null}
+          {isTextMessage && !isOnlyEmoji && renderTextMessage()}
           {isFileMessage && renderFileMessage()}
           {isVideoMessage && renderVideoMessage()}
           {isAudioMessage && renderAudioMessage()}

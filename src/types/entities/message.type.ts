@@ -20,9 +20,15 @@ export enum MediaType {
 }
 
 export interface MessageMedia {
+  id?: string;
   url: string;
   type: MediaType;
   metadata?: any;
+}
+
+export interface MessageMediaAroundAnchor {
+  left: MessageMedia[];
+  right: MessageMedia[];
 }
 
 export interface Message {

@@ -432,3 +432,23 @@ export const useMessageStore = create<MessageState>((set) => ({
     });
   },
 }));
+
+export const useMediaAroundAnchor = (conversationId: string, mediaId: string) => {
+  return useSafeQueryResult({
+    queryKey: ["conversation", conversationId, "media-around-anchor", mediaId],
+    fn: async () => await conversationService.getMediaAroundAnchor(conversationId, mediaId, 10),
+    enabled: !!conversationId && !!mediaId,
+    staleTime: 0,
+    gcTime: 0,
+  });
+};
+
+export const useMediaAround = () => {
+  return useResultFetcher(
+    async (data: {
+      conversationId: string;
+      mediaId: string;
+      config: { limit?: number; before?: boolean };
+    }) => await conversationService.getMediaAround(data.conversationId, data.mediaId, data.config),
+  );
+};
