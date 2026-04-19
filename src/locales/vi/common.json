@@ -83,5 +83,9 @@
       "invalidFileType": "Loại file không hợp lệ. Vui lòng kiểm tra file.",
       "uploadError": "Không thể tải file. Vui lòng thử lại."
     }
+  },
+  "offline": {
+    "message": "Bạn đang ngoại tuyến",
+    "retry": "Thử lại"
   }
 }

@@ -4,14 +4,17 @@ import { useNavigate, Link as Link$1, useLocation, useResolvedPath, useMatch, Ou
 import i18next, { t } from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
-import React, { useState, useCallback, createContext, useContext, useReducer, useEffect, useMemo, forwardRef, useRef, useId, useLayoutEffect, memo } from "react";
-import { useQueryClient, useInfiniteQuery, useQuery, useQueries, QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import React, { useState, useCallback, createContext, useContext, useReducer, useEffect, useMemo, forwardRef, useRef, useId, useLayoutEffect, memo, useImperativeHandle, lazy, Suspense } from "react";
+import { useQueryClient, useInfiniteQuery, useQuery, useQueries, QueryClient } from "@tanstack/react-query";
 import { create } from "zustand";
 import clsx, { clsx as clsx$1 } from "clsx";
 import { useNavigate as useNavigate$1 } from "react-router";
+import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
+import { Swiper, SwiperSlide } from "swiper/react";
 import * as signalR from "@microsoft/signalr";
 import { HubConnectionState } from "@microsoft/signalr";
 import { ArrowLeft } from "lucide-react";
+import { useShallow } from "zustand/react/shallow";
 import { useFormik } from "formik";
 import * as Yup from "yup";
 const login$1 = { "title": "Login", "username": "Username", "password": "Password", "rememberMe": "Remember me", "forgotPassword": "Forgot password?", "loginButton": "Login", "dontHaveAccount": "Don't have an account?", "registerButton": "Register", "errors": { "usernameOrEmail": { "required": "Username or email is required", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)", "notFound": "Username or email not found" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)", "incorrect": "Incorrect password" }, "account": { "locked": "Account is locked", "disabled": "Account is disabled" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
@@ -23,14 +26,20 @@ const auth$1 = {
 const language$3 = { "en": "EN English", "vi": "VN Vietnamese" };
 const navbar$5 = { "profileMenu": { "settings": "Settings", "logout": "Logout" } };
 const notFound$1 = { "title": "Page Not Found", "description": "Oops! The page you're looking for doesn't exist or has been moved.", "backButton": "Back to Home" };
+const onboarding$1 = { "welcome": "Welcome!", "description": "Discover a new way to connect and share with your friends. Let's get started on your journey to a more vibrant social experience!", "getStarted": "Get Started", "completeInfo": "Please complete the necessary information", "privacy": "Your information is kept completely private", "form": { "firstName": { "title": "First name", "placeholder": "First name" }, "middleName": { "title": "Middle name", "placeholder": "Middle name" }, "lastName": { "title": "Last name", "placeholder": "Last name" }, "birthday": { "title": "Birthday" }, "gender": { "title": "Gender", "options": { "male": "Male", "female": "Female", "other": "Other" } }, "submit": "Complete" }, "validation": { "firstNameTooShort": "First name is too short", "firstNameRequired": "First name is required", "lastNameTooShort": "Last name is too short", "lastNameRequired": "Last name is required", "birthdayInvalid": "Birthday is invalid", "birthdayRequired": "Birthday is required", "genderRequired": "Gender is required" } };
 const themes$1 = { "light": "Light", "dark": "Dark", "universe": "Universe", "neon": "Neon", "darkSea": "Dark Sea", "darkBlue": "Dark Blue", "darkYellow": "Dark Yellow", "lightYellowPink": "Light Yellow Pink", "pastelYellowPink": "Pastel Yellow & Pink (Cute)", "darkRed": "Dark Red", "emerald": "Emerald", "aurora": "Aurora (Northern Lights)" };
-const conversations$1 = { "title": "Conversations", "turnBack": "Turn back", "search": "Search conversations...", "notFound": "No conversations found", "notFoundMessage": "Select a conversation or start a new one", "you": "You", "noConversations": "No conversations", "noConversationsMessage": "Your conversations will appear here", "noSelectConversation": "No conversation selected", "noSelectConversationMessage": "Select a conversation to start chatting", "sent": "Sent", "systemMessage": { "createGroup": "{{creatorName}} created the group" }, "privacyDescription": "Feel free to share your best moments! This conversation is always kept private and completely secure.", "openFatalk": "Open Fatalk", "enterGroupNameOptional": "Enter group name (optional)", "loadingOldMessages": "Loading messages...", "createGroupChat": "Create group chat" };
+const conversations$1 = { "title": "Conversations", "turnBack": "Turn back", "search": "Search conversations...", "notFound": "No conversations found", "notFoundMessage": "Select a conversation or start a new one", "you": "You", "noConversations": "No conversations", "noConversationsMessage": "Your conversations will appear here", "noSelectConversation": "No conversation selected", "noSelectConversationMessage": "Select a conversation to start chatting", "sent": "Sent", "systemMessage": { "createGroup": "{{creatorName}} created the group" }, "sentImageMessage": "Sent {{count}} images", "sentMediaMessage": "Sent a attached file", "privacyDescription": "Feel free to share your best moments! This conversation is always kept private and completely secure.", "openFatalk": "Open Fatalk", "enterGroupNameOptional": "Enter group name (optional)", "loadingOldMessages": "Loading messages...", "createGroupChat": "Create group chat" };
+const chat$1 = { "upload": { "fileTooLarge": "{{fileName}} is too large. Maximum file size is {{maxSize}}.", "imageCompressed": "Image compressed from {{original}} MB to {{compressed}} MB", "compressionError": "Failed to compress {{fileName}}. Please try again.", "invalidFileType": "Invalid file type. Please check the file.", "uploadError": "Failed to upload file. Please try again." } };
+const offline$1 = { "message": "You are offline", "retry": "Retry" };
 const common$1 = {
   language: language$3,
   navbar: navbar$5,
   notFound: notFound$1,
+  onboarding: onboarding$1,
   themes: themes$1,
-  conversations: conversations$1
+  conversations: conversations$1,
+  chat: chat$1,
+  offline: offline$1
 };
 const title$5 = "Home";
 const description$3 = "Welcome to the home page! This is where you can find the latest updates and news.";
@@ -111,14 +120,20 @@ const auth = {
 const language$1 = { "en": "EN Tiếng Anh", "vi": "VN Tiếng Việt" };
 const navbar$2 = { "profileMenu": { "settings": "Cài đặt", "logout": "Đăng xuất" } };
 const notFound = { "title": "Không tìm thấy", "description": "Xin lỗi, trang bạn đang tìm kiếm không tồn tại.", "backButton": "Quay lại trang chủ" };
+const onboarding = { "welcome": "Chào mừng đến với Fatagram!", "description": "Khám phá cách mới để kết nối và chia sẻ với bạn bè của bạn. Hãy bắt đầu hành trình trải nghiệm xã hội sôi động hơn của bạn!", "getStarted": "Bắt đầu", "completeInfo": "Hãy hoàn tất thông tin cần thiết", "privacy": "Thông tin của bạn được bảo mật tuyệt đối", "form": { "firstName": { "title": "Họ", "placeholder": "Họ" }, "middleName": { "title": "Tên đệm", "placeholder": "Tên đệm" }, "lastName": { "title": "Tên", "placeholder": "Tên" }, "birthday": { "title": "Ngày sinh" }, "gender": { "title": "Giới tính", "options": { "male": "Nam", "female": "Nữ", "other": "Khác" } }, "submit": "Hoàn tất" }, "validation": { "firstNameTooShort": "Họ quá ngắn", "firstNameRequired": "Họ là bắt buộc", "lastNameTooShort": "Tên quá ngắn", "lastNameRequired": "Tên là bắt buộc", "birthdayInvalid": "Ngày sinh không hợp lệ", "birthdayRequired": "Ngày sinh là bắt buộc", "genderRequired": "Giới tính là bắt buộc" } };
 const themes = { "light": "Sáng", "dark": "Tối", "universe": "Vũ trụ", "neon": "Neon", "darkSea": "Biển đêm", "darkBlue": "Xanh đậm", "darkYellow": "Vàng tối", "lightYellowPink": "Vàng hồng", "pastelYellowPink": "Vàng - Hồng Pastel (Cute)", "darkRed": "Đỏ tối", "emerald": "Ngọc lục bảo", "aurora": "Cực Quang (Aurora Borealis)" };
-const conversations = { "title": "Cuộc trò chuyện", "turnBack": "Quay lại", "search": "Tìm kiếm cuộc trò chuyện...", "notFound": "Không tìm thấy cuộc trò chuyện", "notFoundMessage": "Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới", "you": "Bạn", "no-conversations": "Không có cuộc trò chuyện", "sent": "Đã gửi", "systemMessage": { "createGroup": "{{creatorName}} đã tạo nhóm" }, "privacyDescription": "Hãy yên tâm chia sẻ những khoảnh khắc tuyệt vời nhất! Cuộc trò chuyện này luôn được giữ kín và an toàn tuyệt đối.", "openFatalk": "Mở Fatalk", "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)", "loadingOldMessages": "Đang tải tin nhắn...", "createGroupChat": "Tạo nhóm chat" };
+const conversations = { "title": "Cuộc trò chuyện", "turnBack": "Quay lại", "search": "Tìm kiếm cuộc trò chuyện...", "notFound": "Không tìm thấy cuộc trò chuyện", "notFoundMessage": "Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới", "you": "Bạn", "no-conversations": "Không có cuộc trò chuyện", "sent": "Đã gửi", "systemMessage": { "createGroup": "{{creatorName}} đã tạo nhóm" }, "sentImageMessage": "Đã gửi {{count}} hình ảnh", "sentMediaMessage": "Đã gửi một tệp đính kèm", "privacyDescription": "Hãy yên tâm chia sẻ những khoảnh khắc tuyệt vời nhất! Cuộc trò chuyện này luôn được giữ kín và an toàn tuyệt đối.", "openFatalk": "Mở Fatalk", "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)", "loadingOldMessages": "Đang tải tin nhắn...", "createGroupChat": "Tạo nhóm chat" };
+const chat = { "upload": { "fileTooLarge": "{{fileName}} quá lớn. Kích thước file tối đa là {{maxSize}}.", "imageCompressed": "Ảnh đã được nén từ {{original}} MB xuống {{compressed}} MB", "compressionError": "Không thể nén {{fileName}}. Vui lòng thử lại.", "invalidFileType": "Loại file không hợp lệ. Vui lòng kiểm tra file.", "uploadError": "Không thể tải file. Vui lòng thử lại." } };
+const offline = { "message": "Bạn đang ngoại tuyến", "retry": "Thử lại" };
 const common = {
   language: language$1,
   navbar: navbar$2,
   notFound,
+  onboarding,
   themes,
-  conversations
+  conversations,
+  chat,
+  offline
 };
 const title$2 = "Trang chủ";
 const description$1 = "Welcome to the home page! This is where you can find the latest updates and news.";
@@ -392,25 +407,25 @@ const apiPatchFormData = async (url, formData, params) => {
     return handleApiError(error);
   }
 };
-const PREFIX$7 = buildApiPath("/auth");
+const PREFIX$8 = buildApiPath("/auth");
 class AuthService {
   // login method
   async login(dto) {
-    return apiPost(`${PREFIX$7}/login`, {
+    return apiPost(`${PREFIX$8}/login`, {
       usernameOrEmail: dto.usernameOrEmail,
       password: dto.password,
       isRememberMe: dto.isRememberMe
     });
   }
   async loginWithGoogle(code) {
-    return apiPost(`${PREFIX$7}/oauth/google/callback`, { code });
+    return apiPost(`${PREFIX$8}/oauth/google/callback`, { code });
   }
   // logout method
   async logout() {
-    return apiPost(`${PREFIX$7}/logout`);
+    return apiPost(`${PREFIX$8}/logout`);
   }
   async register(dto) {
-    return apiPost(`${PREFIX$7}/register`, {
+    return apiPost(`${PREFIX$8}/register`, {
       username: dto.username,
       password: dto.password,
       email: dto.email,
@@ -421,60 +436,60 @@ class AuthService {
   // This method is responsible for sending a ping request to the server.
   // The method returns a promise of void.
   async ping() {
-    return apiGet(`${PREFIX$7}/ping`);
+    return apiGet(`${PREFIX$8}/ping`);
   }
 }
 const authService = new AuthService();
-const PREFIX$6 = buildApiPath("/userprofile");
+const PREFIX$7 = buildApiPath("/userprofile");
 class UserProfileService {
   // Check if user exists by id or urlName
   async checkUserExist(key) {
-    return await apiGet(`${PREFIX$6}/exist?key=${key}`);
+    return await apiGet(`${PREFIX$7}/exist?key=${key}`);
   }
   async getProfile(target, fields) {
-    return await apiGet(`${PREFIX$6}/${target}`, { fields });
+    return await apiGet(`${PREFIX$7}/${target}`, { fields });
   }
   async getUserId(target) {
-    return await apiGet(`${PREFIX$6}/${target}`, { fields: "id" });
+    return await apiGet(`${PREFIX$7}/${target}`, { fields: "id" });
   }
   // Get current user profile
   async getMe() {
-    return await apiGet(`${PREFIX$6}/me`);
+    return await apiGet(`${PREFIX$7}/me`);
   }
   // Upload avatar
   async uploadAvatar(file) {
     const formData = new FormData();
     formData.append("file", file);
-    return await apiPatchFormData(`${PREFIX$6}/avatar`, formData);
+    return await apiPatchFormData(`${PREFIX$7}/avatar`, formData);
   }
   // Upload background image
   async uploadBackground(file) {
     const formData = new FormData();
     formData.append("file", file);
-    return await apiPatchFormData(`${PREFIX$6}/background`, formData);
+    return await apiPatchFormData(`${PREFIX$7}/background`, formData);
   }
   // Update simple profile fields such as bio, description, etc.
   async updateProfile(data) {
-    return apiPut(`${PREFIX$6}`, data);
+    return apiPut(`${PREFIX$7}`, data);
   }
   // Update user's URL name
   async updateUrlName(changeUrlNameDto) {
-    return apiPatch(`${PREFIX$6}/urlName`, changeUrlNameDto);
+    return apiPatch(`${PREFIX$7}/urlName`, changeUrlNameDto);
   }
   // Complete onboarding
   async completeOnboarding(onboardingDto) {
-    return apiPost(`${PREFIX$6}/onboarding`, onboardingDto);
+    return apiPost(`${PREFIX$7}/onboarding`, onboardingDto);
   }
   // Update user's name
   async updateName(changeNameDto) {
-    return apiPatch(`${PREFIX$6}/name`, changeNameDto);
+    return apiPatch(`${PREFIX$7}/name`, changeNameDto);
   }
   async updateNickname(changeNicknameDto) {
-    return apiPatch(`${PREFIX$6}/nickname`, changeNicknameDto);
+    return apiPatch(`${PREFIX$7}/nickname`, changeNicknameDto);
   }
   // Get onboarding default data
   async getOnboardingDefaults() {
-    return apiGet(`${PREFIX$6}/onboarding/defaults`);
+    return apiGet(`${PREFIX$7}/onboarding/defaults`);
   }
 }
 const userProfileService = new UserProfileService();
@@ -620,7 +635,7 @@ function useResultFetcher(fn, options) {
   const [error, setError] = useState();
   const [errors, setErrors] = useState();
   const [isFetching, setIsFetching] = useState(false);
-  const fetch = useCallback(
+  const fetch2 = useCallback(
     async (...args) => {
       let params;
       let opts;
@@ -667,7 +682,7 @@ function useResultFetcher(fn, options) {
     error,
     errors,
     isFetching,
-    fetch
+    fetch: fetch2
   };
 }
 function useGoogleLogin() {
@@ -1000,7 +1015,7 @@ function Badge({
   );
 }
 const checkmark = "_checkmark_1oahj_3";
-const styles$3 = {
+const styles$2 = {
   checkmark
 };
 const Checkbox = ({
@@ -1012,7 +1027,7 @@ const Checkbox = ({
   className,
   ...props
 }) => {
-  const checkmarkClass = styles$3["checkmark"];
+  const checkmarkClass = styles$2["checkmark"];
   return /* @__PURE__ */ jsxs("label", { className: clsx("relative inline-flex items-start gap-1 select-none", className), children: [
     /* @__PURE__ */ jsx(
       "input",
@@ -1304,6 +1319,20 @@ const SelectBox = ({
   );
   const selectedItem = options.find((opt) => opt.key === selectedOption);
   return /* @__PURE__ */ jsxs("div", { className: "relative", children: [
+    title2 && /* @__PURE__ */ jsxs(
+      "label",
+      {
+        htmlFor: selectId,
+        className: clsx(
+          "flex items-center gap-1 mb-1 ml-1 font-medium text-text-secondary",
+          sizeClasses$4[sz].text
+        ),
+        children: [
+          title2,
+          isRequired && /* @__PURE__ */ jsx("span", { className: "text-red-400", children: "*" })
+        ]
+      }
+    ),
     /* @__PURE__ */ jsxs(
       "button",
       {
@@ -1451,7 +1480,7 @@ const Skeleton = ({
     }
   );
 };
-const styles$2 = {
+const styles$1 = {
   "primary-textbox": "_primary-textbox_1akqj_1",
   "primary-textbox-wrong": "_primary-textbox-wrong_1akqj_28"
 };
@@ -1516,8 +1545,8 @@ const Textbox = forwardRef(
                 "pr-12": type === "password",
                 "bg-bg-main opacity-60 cursor-not-allowed": disabled,
                 "focus:bg-gradient-main-move": !disabled,
-                [styles$2["primary-textbox-wrong"]]: isWrong && !disabled,
-                [styles$2["primary-textbox"]]: !isWrong && !disabled
+                [styles$1["primary-textbox-wrong"]]: isWrong && !disabled,
+                [styles$1["primary-textbox"]]: !isWrong && !disabled
               },
               className
             ),
@@ -1548,9 +1577,10 @@ const Textbox = forwardRef(
   }
 );
 Textbox.displayName = "Textbox";
-const styles$1 = {
-  "my-textarea": "_my-textarea_mkxe1_1",
-  "my-textarea-wrong": "_my-textarea-wrong_mkxe1_30"
+const styles = {
+  "my-textarea": "_my-textarea_1dfsx_1",
+  "my-textarea-wrong": "_my-textarea-wrong_1dfsx_30",
+  "custom-scrollbar": "_custom-scrollbar_1dfsx_60"
 };
 const sizeClasses$1 = {
   sm: { mainText: "px-2 py-2 text-sm", titleText: "text-sm" },
@@ -1565,17 +1595,61 @@ const TextArea = forwardRef(
     title: title2,
     isRequired = false,
     className,
+    containerClassName,
     sz = "md",
     wrapperClassName,
+    topContent,
+    topContentClassName,
     placeholder,
     disabled,
     value,
     onChange,
-    autoComplete = "off",
     rows = 1,
+    maxRows,
     ...props
   }, ref) => {
     const inputId = useId();
+    const innerRef = useRef(null);
+    const styleCache = useRef(
+      null
+    );
+    const setRefs = useCallback(
+      (node) => {
+        innerRef.current = node;
+        if (typeof ref === "function") {
+          ref(node);
+        } else if (ref) {
+          ref.current = node;
+        }
+      },
+      [ref]
+    );
+    const autoResize = useCallback(() => {
+      const textarea = innerRef.current;
+      if (!textarea) return;
+      if (!styleCache.current) {
+        const compStyle = window.getComputedStyle(textarea);
+        styleCache.current = {
+          lineHeight: parseFloat(compStyle.lineHeight) || 20,
+          paddingY: (parseFloat(compStyle.paddingTop) || 0) + (parseFloat(compStyle.paddingBottom) || 0),
+          borderY: (parseFloat(compStyle.borderTopWidth) || 0) + (parseFloat(compStyle.borderBottomWidth) || 0)
+        };
+      }
+      const { lineHeight, paddingY, borderY } = styleCache.current;
+      textarea.style.height = "0px";
+      const minHeight = rows * lineHeight + paddingY + borderY;
+      const maxHeight = maxRows && maxRows > 0 ? maxRows * lineHeight + paddingY + borderY : Number.POSITIVE_INFINITY;
+      const nextHeight = Math.min(Math.max(textarea.scrollHeight + borderY, minHeight), maxHeight);
+      textarea.style.height = `${nextHeight}px`;
+      textarea.style.overflowY = textarea.scrollHeight > maxHeight ? "auto" : "hidden";
+    }, [maxRows, rows]);
+    useLayoutEffect(() => {
+      autoResize();
+    }, [autoResize, value]);
+    const handleChange = (event) => {
+      autoResize();
+      onChange?.(event);
+    };
     return /* @__PURE__ */ jsxs("div", { className: clsx(wrapperClassName, "flex flex-col gap-1"), children: [
       title2 && /* @__PURE__ */ jsxs(
         "label",
@@ -1588,31 +1662,46 @@ const TextArea = forwardRef(
           ]
         }
       ),
-      /* @__PURE__ */ jsx(
-        "textarea",
+      /* @__PURE__ */ jsxs(
+        "div",
         {
-          id: inputId,
-          ref,
-          disabled,
-          placeholder,
-          value,
-          onChange,
-          autoComplete,
-          rows,
           className: clsx(
-            "w-full border-[2px] text-text-main resize-none",
-            "font-normal rounded-xl outline-none caret-primary-500 selection:!bg-primary-600",
-            "transition-all duration-300 ease-out",
-            sizeClasses$1[sz].mainText,
+            "w-full border-[2px] text-text-main",
+            "font-normal rounded-xl transition-all duration-300 ease-out",
+            "focus-within:bg-gradient-main-move",
             {
               "bg-bg-main opacity-60 cursor-not-allowed": disabled,
-              "focus:bg-gradient-main-move": !disabled,
-              [styles$1["my-textarea-wrong"]]: isWrong && !disabled,
-              [styles$1["my-textarea"]]: !isWrong && !disabled
+              [styles["my-textarea-wrong"]]: isWrong && !disabled,
+              [styles["my-textarea"]]: !isWrong && !disabled
             },
+            containerClassName,
             className
           ),
-          ...props
+          children: [
+            topContent && /* @__PURE__ */ jsx("div", { className: clsx(topContentClassName), children: topContent }),
+            /* @__PURE__ */ jsx(
+              "textarea",
+              {
+                id: inputId,
+                ref: setRefs,
+                disabled,
+                placeholder,
+                value,
+                onChange: handleChange,
+                rows,
+                className: clsx(
+                  "w-full bg-transparent text-text-main resize-none",
+                  "outline-none caret-primary-500 selection:!bg-primary-600",
+                  "rounded-b-[inherit]",
+                  "block",
+                  { "pt-0": rows > 0 },
+                  sizeClasses$1[sz].mainText,
+                  styles["custom-scrollbar"]
+                ),
+                ...props
+              }
+            )
+          ]
         }
       ),
       isWrong && wrongMessage && /* @__PURE__ */ jsx("span", { className: "text-red-400 text-sm ml-1", children: wrongMessage })
@@ -1838,34 +1927,34 @@ const NotificationDefault = {
   isRead: true,
   createdAt: (/* @__PURE__ */ new Date()).toISOString()
 };
-const PREFIX$5 = buildApiPath("/friendship");
+const PREFIX$6 = buildApiPath("/friendship");
 class FriendshipService {
   async GetFriendshipStatus(targetId) {
-    return apiGet(`${PREFIX$5}/status/${targetId}`);
+    return apiGet(`${PREFIX$6}/status/${targetId}`);
   }
   async SendAddFriendRequest(receiverId) {
-    return apiPost(`${PREFIX$5}/add/${receiverId}`);
+    return apiPost(`${PREFIX$6}/add/${receiverId}`);
   }
   async CancelAddFriendRequest(senderId) {
-    return apiDelete(`${PREFIX$5}/cancel/${senderId}`);
+    return apiDelete(`${PREFIX$6}/cancel/${senderId}`);
   }
   async AcceptAddFriendRequest(senderId) {
-    return apiPost(`${PREFIX$5}/accept/${senderId}`);
+    return apiPost(`${PREFIX$6}/accept/${senderId}`);
   }
   async DeclineAddFriendRequest(requesterId) {
-    return apiDelete(`${PREFIX$5}/decline/${requesterId}`);
+    return apiDelete(`${PREFIX$6}/decline/${requesterId}`);
   }
   async Unfriend(friendId) {
-    return apiDelete(`${PREFIX$5}/unfriend/${friendId}`);
+    return apiDelete(`${PREFIX$6}/unfriend/${friendId}`);
   }
   async GetNumberOfFriends(targetId) {
-    return apiGet(`${PREFIX$5}/count/${targetId}`);
+    return apiGet(`${PREFIX$6}/count/${targetId}`);
   }
   async GetFriendRequests(query) {
-    return await apiGet(`${PREFIX$5}/requests`, query);
+    return await apiGet(`${PREFIX$6}/requests`, query);
   }
   async GetFriends(userId, query) {
-    return await apiGet(`${PREFIX$5}/friends/${userId}`, query);
+    return await apiGet(`${PREFIX$6}/friends/${userId}`, query);
   }
 }
 const friendshipService = new FriendshipService();
@@ -2418,68 +2507,340 @@ function useSnackbar() {
   }
   return context;
 }
+const MediaViewerContext = createContext({
+  onOpen: () => {
+  },
+  onClose: () => {
+  },
+  conversationId: null,
+  media: null
+});
+const MediaViewerProvider = ({ children }) => {
+  const [conversationId, setConversationId] = useState(null);
+  const [media, setMedia] = useState(null);
+  const onOpen = useCallback(
+    (options) => {
+      setConversationId(options.conversationId);
+      setMedia({ id: options.id, url: options.url, type: options.type });
+    },
+    []
+  );
+  const onClose = useCallback(() => {
+    setMedia(null);
+    setConversationId(null);
+  }, []);
+  return /* @__PURE__ */ jsx(MediaViewerContext.Provider, { value: { onOpen, onClose, conversationId, media }, children });
+};
+function useMediaViewer() {
+  const context = useContext(MediaViewerContext);
+  if (context === void 0) {
+    throw new Error("useMediaViewer must be used within a MediaViewerProvider");
+  }
+  return context;
+}
 function ContextTree({ children, authContext }) {
   return /* @__PURE__ */ jsx(ThemeProvider, { children: /* @__PURE__ */ jsx(
     AuthProvider,
     {
       initialIsAuthenticated: authContext?.isAuthenticated,
       userData: authContext?.userData,
-      children: /* @__PURE__ */ jsx(LoadingProvider, { children: /* @__PURE__ */ jsx(DialogProvider, { children: /* @__PURE__ */ jsx(SnackbarProvider, { children: /* @__PURE__ */ jsx(ToastProvider, { children }) }) }) })
+      children: /* @__PURE__ */ jsx(LoadingProvider, { children: /* @__PURE__ */ jsx(DialogProvider, { children: /* @__PURE__ */ jsx(SnackbarProvider, { children: /* @__PURE__ */ jsx(ToastProvider, { children: /* @__PURE__ */ jsx(MediaViewerProvider, { children }) }) }) }) })
     }
   ) });
 }
-const Dialog = ({
-  title: title2,
-  content,
-  primaryButton,
-  secondaryButton,
-  tertiaryButton,
-  onClose,
-  className
+const ImageView = ({ url, className }) => {
+  return /* @__PURE__ */ jsx(
+    "img",
+    {
+      src: url,
+      alt: "media-view",
+      className: clsx("max-h-[85vh] max-w-[90vw] object-contain rounded-lg select-none", className),
+      draggable: false
+    }
+  );
+};
+const SPEED_OPTIONS = [0.75, 1, 1.5, 2];
+const VideoMessage = ({
+  url,
+  className,
+  onFullscreenToggle,
+  onFrameClick
 }) => {
+  const containerRef = useRef(null);
+  const videoRef = useRef(null);
+  const [isPlaying, setIsPlaying] = useState(false);
+  const [hasStarted, setHasStarted] = useState(false);
+  const [isWaiting, setIsWaiting] = useState(false);
+  const [currentTime, setCurrentTime] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [playbackRate, setPlaybackRate] = useState(1);
+  const [isMuted, setIsMuted] = useState(false);
+  const [volume, setVolume] = useState(1);
+  const formatTime = (seconds, totalDuration) => {
+    const displaySeconds = Math.min(seconds, totalDuration);
+    const mins = Math.floor(displaySeconds / 60);
+    const secs = Math.floor(displaySeconds % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+  const onVideoEnded = () => {
+    setIsPlaying(false);
+    if (videoRef.current) {
+      setCurrentTime(videoRef.current.duration);
+    }
+  };
+  const handleInitialPlay = () => {
+    setHasStarted(true);
+    videoRef.current?.play();
+  };
+  const togglePlay = () => {
+    if (videoRef.current?.paused) {
+      videoRef.current.play();
+    } else {
+      videoRef.current?.pause();
+    }
+  };
+  const handleSeek = (e) => {
+    const time2 = Number(e.target.value);
+    if (videoRef.current) {
+      videoRef.current.currentTime = time2;
+      setCurrentTime(time2);
+    }
+  };
+  const handleVolumeChange = (e) => {
+    const newVolume = parseFloat(e.target.value);
+    setVolume(newVolume);
+    if (videoRef.current) {
+      videoRef.current.volume = newVolume;
+    }
+    setIsMuted(newVolume === 0);
+  };
+  const toggleMute = () => {
+    const newMutedState = !isMuted;
+    setIsMuted(newMutedState);
+    if (videoRef.current) {
+      if (newMutedState) {
+        videoRef.current.volume = 0;
+      } else {
+        const restoreVolume = volume === 0 ? 1 : volume;
+        setVolume(restoreVolume);
+        videoRef.current.volume = restoreVolume;
+      }
+    }
+  };
+  const safeTimeRatio = duration > 0 ? Math.min(currentTime / duration, 1) : 0;
+  const timeFillPercent = `${safeTimeRatio * 100}%`;
+  const volumePercent = (isMuted ? 0 : volume) * 100;
   return /* @__PURE__ */ jsxs(
     "div",
     {
-      className: clsx(
-        "relative flex flex-col gap-4 bg-[var(--second-bg-color)]",
-        "rounded-lg shadow-lg",
-        className
-      ),
+      ref: containerRef,
+      className: `relative group bg-black overflow-hidden flex items-center justify-center transition-all duration-300
+        ${className}`,
       children: [
-        title2 && /* @__PURE__ */ jsx(Text, { weight: "bold", sz: "lg", children: title2 }),
-        content && /* @__PURE__ */ jsx("div", { children: content }),
-        /* @__PURE__ */ jsxs("div", { className: "flex justify-end space-x-2", children: [
-          tertiaryButton && /* @__PURE__ */ jsx(Button, { onClick: tertiaryButton.onClick, variant: "secondary", sz: "sm", children: tertiaryButton.text }),
-          secondaryButton && /* @__PURE__ */ jsx(Button, { onClick: secondaryButton.onClick, variant: "secondary", sz: "sm", children: secondaryButton.text }),
-          primaryButton && /* @__PURE__ */ jsx(Button, { onClick: primaryButton.onClick, variant: "primary", sz: "sm", children: primaryButton.text })
-        ] }),
         /* @__PURE__ */ jsx(
-          Text,
+          "video",
           {
+            ref: videoRef,
+            src: url,
+            className: `w-full h-full object-contain cursor-pointer ${!hasStarted ? "opacity-60" : "opacity-100"}`,
+            onClick: () => {
+              if (onFrameClick) {
+                onFrameClick();
+                return;
+              }
+              if (hasStarted) {
+                togglePlay();
+                return;
+              }
+              handleInitialPlay();
+            },
+            onWaiting: () => setIsWaiting(true),
+            onCanPlay: () => setIsWaiting(false),
+            onPlaying: () => {
+              setIsPlaying(true);
+              setIsWaiting(false);
+            },
+            onPause: () => setIsPlaying(false),
+            onEnded: onVideoEnded,
+            onTimeUpdate: () => setCurrentTime(videoRef.current?.currentTime || 0),
+            onLoadedMetadata: () => setDuration(videoRef.current?.duration || 0),
+            muted: isMuted,
+            playsInline: true
+          }
+        ),
+        !hasStarted && /* @__PURE__ */ jsx(
+          Button,
+          {
+            onClick: handleInitialPlay,
             className: clsx(
-              "absolute top-3 right-5 text-[20px]",
-              "text-gradient-main hover:text-single-main",
-              "cursor-pointer"
+              "absolute z-10",
+              "w-16 h-16 !rounded-full text-white flex items-center justify-center transition-all active:scale-98"
             ),
-            onClick: onClose,
-            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-play text-2xl pl-[2px]" })
+          }
+        ),
+        isWaiting && hasStarted && /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center justify-center z-10 pointer-events-none", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-spinner fa-spin text-white text-4xl opacity-80" }) }),
+        hasStarted && /* @__PURE__ */ jsxs(
+          "div",
+          {
+            className: `absolute bottom-0 left-0 right-0 z-30 p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent transition-opacity duration-300 
+          ${isPlaying && !isWaiting ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`,
+            children: [
+              /* @__PURE__ */ jsxs("div", { className: "relative w-full h-4 flex items-center mb-4 cursor-pointer group/seek", children: [
+                /* @__PURE__ */ jsx("div", { className: "relative w-full h-1.5 rounded-full bg-white/30 overflow-hidden", children: /* @__PURE__ */ jsx(
+                  "div",
+                  {
+                    className: "absolute left-0 top-0 h-full rounded-full bg-primary-500",
+                    style: { width: timeFillPercent }
+                  }
+                ) }),
+                /* @__PURE__ */ jsx(
+                  "div",
+                  {
+                    className: "absolute w-3.5 h-3.5 rounded-full bg-primary-500 shadow-md -translate-x-1/2",
+                    style: { left: timeFillPercent }
+                  }
+                ),
+                /* @__PURE__ */ jsx(
+                  "input",
+                  {
+                    type: "range",
+                    min: 0,
+                    max: duration || 0,
+                    step: "0.1",
+                    value: currentTime,
+                    onChange: handleSeek,
+                    className: "absolute inset-0 w-full opacity-0 cursor-pointer"
+                  }
+                )
+              ] }),
+              /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between text-white drop-shadow-md", children: [
+                /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-6", children: [
+                  /* @__PURE__ */ jsx("button", { onClick: togglePlay, className: "hover:text-primary-400 transition-colors w-5", children: /* @__PURE__ */ jsx("i", { className: `fas ${isPlaying ? "fa-pause" : "fa-play"} text-xl` }) }),
+                  /* @__PURE__ */ jsxs("div", { className: "flex items-center group/volume relative", children: [
+                    /* @__PURE__ */ jsx(
+                      "button",
+                      {
+                        onClick: toggleMute,
+                        className: "hover:text-primary-400 transition-colors w-5 shrink-0",
+                        children: /* @__PURE__ */ jsx(
+                          "i",
+                          {
+                            className: `fas ${isMuted || volume === 0 ? "fa-volume-mute" : volume < 0.5 ? "fa-volume-down" : "fa-volume-up"}`
+                          }
+                        )
+                      }
+                    ),
+                    /* @__PURE__ */ jsx("div", { className: "hidden sm:flex items-center overflow-hidden w-0 opacity-0 group-hover/volume:w-20 group-hover/volume:opacity-100 group-hover/volume:ml-2 transition-all duration-300 ease-in-out", children: /* @__PURE__ */ jsx(
+                      "input",
+                      {
+                        type: "range",
+                        min: 0,
+                        max: 1,
+                        step: 0.05,
+                        value: isMuted ? 0 : volume,
+                        onChange: handleVolumeChange,
+                        className: "w-full h-1.5 accent-primary-500 cursor-pointer appearance-none bg-white/30 rounded-full",
+                        style: {
+                          background: `linear-gradient(to right, rgb(var(--primary-500)) ${volumePercent}%, rgba(255,255,255,0.3) ${volumePercent}%)`
+                        }
+                      }
+                    ) })
+                  ] }),
+                  /* @__PURE__ */ jsxs("span", { className: "text-xs bg-black/40 px-2 py-1 rounded font-semibold tabular-nums", children: [
+                    formatTime(currentTime, duration),
+                    " / ",
+                    formatTime(duration, duration)
+                  ] })
+                ] }),
+                /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+                  /* @__PURE__ */ jsxs(
+                    "button",
+                    {
+                      onClick: () => {
+                        const nextIndex = (SPEED_OPTIONS.indexOf(playbackRate) + 1) % SPEED_OPTIONS.length;
+                        const newSpeed = SPEED_OPTIONS[nextIndex];
+                        setPlaybackRate(newSpeed);
+                        if (videoRef.current) videoRef.current.playbackRate = newSpeed;
+                      },
+                      className: "text-[10px] font-black border-2 border-white/50 px-2 py-0.5 rounded-lg hover:bg-white/20 transition-all uppercase w-10 text-center",
+                      children: [
+                        playbackRate,
+                        "x"
+                      ]
+                    }
+                  ),
+                  onFullscreenToggle && /* @__PURE__ */ jsx(
+                    "button",
+                    {
+                      onClick: onFullscreenToggle,
+                      className: "hover:text-primary-400 transition-colors w-5 text-right",
+                      children: /* @__PURE__ */ jsx("i", { className: `fas fa-expand` })
+                    }
+                  )
+                ] })
+              ] })
+            ]
           }
         )
       ]
     }
   );
 };
-const GlobalDialog = () => {
-  const { isOpen, dialogProps, closeDialog } = useDialog();
-  if (!isOpen) return null;
+const VideoView = ({ url, className }) => {
   return /* @__PURE__ */ jsx(
-    "div",
+    VideoMessage,
     {
-      className: clsx("fixed z-[9998] inset-0 flex items-center justify-center", "bg-bg-overlay"),
-      children: /* @__PURE__ */ jsx(Dialog, { ...dialogProps, onClose: closeDialog })
+      url,
+      className: ["max-h-[85vh] max-w-[90vw] min-h-[220px] min-w-[320px] rounded-lg", className].filter(Boolean).join(" ")
     }
   );
 };
+const PREFIX$5 = buildApiPath("/conversation");
+class ConversationService {
+  async getConversations(query) {
+    const res = await apiGet(`${PREFIX$5}`, query);
+    return res;
+  }
+  async getDeltaConversations(since) {
+    return await apiGet(`${PREFIX$5}/delta`, { since });
+  }
+  async getConversation(conversationId) {
+    return await apiGet(`${PREFIX$5}/${conversationId}`);
+  }
+  async getConversationWith(targetUserId) {
+    return await apiGet(`${PREFIX$5}/with/${targetUserId}`);
+  }
+  async getMessages(conversationId, query) {
+    return await apiGet(`${PREFIX$5}/${conversationId}/messages`, query);
+  }
+  async getDeltaMessages(conversationId, sinceSequenceNumber) {
+    return await apiGet(`${PREFIX$5}/${conversationId}/messages/delta`, { sinceSequenceNumber });
+  }
+  async createGroupConversation(participantIds, name) {
+    return await apiPost(`${PREFIX$5}`, { participantIds, name });
+  }
+  async markAsSeen(conversationId, messageSeq) {
+    return await apiPost(`${PREFIX$5}/${conversationId}/messages/markSeen/${messageSeq}`);
+  }
+  async getParticipantsSeen(conversationId) {
+    return await apiGet(`${PREFIX$5}/${conversationId}/participants/seen`);
+  }
+  async getUnreadCount() {
+    return await apiGet(`${PREFIX$5}/unread-count`);
+  }
+  async getMediaAround(conversationId, mediaId, config) {
+    const { limit = 20, before = true } = config;
+    return await apiGet(`${PREFIX$5}/${conversationId}/media/around/${mediaId}`, {
+      limit,
+      before
+    });
+  }
+  async getMediaAroundAnchor(conversationId, mediaId, count = 10) {
+    return await apiGet(`${PREFIX$5}/${conversationId}/media/around-anchor/${mediaId}`, { count });
+  }
+}
+const conversationService = new ConversationService();
 function createSafeQueryOptions(params) {
   return {
     queryKey: params.queryKey,
@@ -2547,6 +2908,1121 @@ function useSafeInfiniteQueryResult(params) {
     }
   }, [query.dataUpdatedAt, query.errorUpdatedAt]);
   return query;
+}
+const conversationKeys = {
+  list: (queryParams) => ["conversations", queryParams],
+  detail: (conversationId) => ["conversation", conversationId],
+  withUser: (targetId) => ["conversation", "with", targetId]
+};
+const conversationDetailQueryOptions = (conversationId) => createSafeQueryOptions({
+  queryKey: conversationKeys.detail(conversationId),
+  fn: async () => await conversationService.getConversation(conversationId)
+});
+const useFetchConversationWith = () => {
+  return useResultFetcher(
+    async (targetId) => await conversationService.getConversationWith(targetId)
+  );
+};
+const useGetConversation = (conversationId, config, enabled) => {
+  return useSafeQueryResult({
+    queryKey: conversationKeys.detail(conversationId),
+    fn: async () => await conversationService.getConversation(conversationId),
+    enabled: enabled ?? false,
+    options: config
+  });
+};
+const useCreateGroupConversation = () => {
+  const { showSnackbar } = useSnackbar();
+  return useResultFetcher(
+    async ({ participantIds, name }) => {
+      return await conversationService.createGroupConversation(participantIds, name);
+    },
+    {
+      onError: (error) => {
+        showSnackbar(error?.code ?? "Tạo cuộc trò chuyện nhóm thất bại", "error");
+      }
+    }
+  );
+};
+const useMarkConversationAsRead = () => {
+  return useResultFetcher(
+    async ({ conversationId, messageSeq }) => {
+      var r = await conversationService.markAsSeen(conversationId, messageSeq);
+      return r;
+    }
+  );
+};
+const useLocalMarkAsRead = () => {
+  const { markAsRead } = useConversationCacheMutations();
+  return (conversationId, messageSeq) => {
+    markAsRead(conversationId, messageSeq);
+  };
+};
+const useGetPariticipantsSeen = (conversationId) => {
+  return useSafeQueryResult({
+    queryKey: ["conversation", conversationId, "participantsSeen"],
+    fn: async () => await conversationService.getParticipantsSeen(conversationId),
+    enabled: !!conversationId,
+    options: {
+      onSuccess: (data) => {
+        useMessageStore.getState().setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
+      }
+    }
+  });
+};
+const useConversations = (queryParams) => {
+  const { userId } = useAuth();
+  const queryClient = useQueryClient();
+  const queryOptions = useMemo(
+    () => ({
+      onSuccess: (data) => {
+        const conversations2 = data.items;
+        if (conversations2.length > 0) {
+          const lastMessageSeqs = {};
+          conversations2.forEach((conv) => {
+            if (conv.lastMessage) {
+              lastMessageSeqs[conv.id] = conv.lastMessage.sequenceNumber;
+            }
+            const key = ["conversation", "unread-count", conv.id];
+            const serverCount = conv.unreadMessageCount ?? 0;
+            queryClient.setQueryData(key, (oldCount) => {
+              const currentCount = oldCount ?? 0;
+              return Math.max(currentCount, serverCount);
+            });
+          });
+          useMessageStore.getState().setBulkLastMessages(lastMessageSeqs);
+        }
+      }
+    }),
+    [queryClient]
+  );
+  return useSafeInfiniteQueryResult({
+    queryKey: conversationKeys.list(queryParams),
+    fn: async (cursor) => await conversationService.getConversations({ ...queryParams, cursor }),
+    enabled: !!userId,
+    staleTime: Infinity,
+    options: queryOptions
+  });
+};
+const useGetDeltaConversations = () => {
+  const { data } = useConversations();
+  const { mergeDeltaConversations } = useConversationCacheMutations();
+  const fetcher = useResultFetcher(
+    async (since) => await conversationService.getDeltaConversations(since)
+  );
+  const fetcherDelta = async () => {
+    const lastActiveAt = data?.pages[0]?.items[0]?.lastMessage?.createdAt;
+    return await fetcher.fetch(lastActiveAt ?? /* @__PURE__ */ new Date(0), {
+      onSuccess: (data2) => {
+        mergeDeltaConversations(data2 ?? []);
+      }
+    });
+  };
+  return { fetcherDelta };
+};
+const useConversationCacheMutations = () => {
+  const queryClient = useQueryClient();
+  const updateDetailCache = (conversationId, updateFn) => {
+    const detailKey = conversationKeys.detail(conversationId);
+    queryClient.setQueryData(detailKey, (oldDetail) => {
+      if (!oldDetail) return oldDetail;
+      return updateFn(oldDetail);
+    });
+  };
+  const updateConversationInCache = (conversationId, updateFn) => {
+    const listKey = conversationKeys.list();
+    queryClient.setQueryData(listKey, (oldData) => {
+      if (!oldData || !oldData.pages.length) return oldData;
+      const newPages = oldData.pages.map((page) => ({
+        ...page,
+        items: page.items.map((item) => item.id === conversationId ? updateFn(item) : item)
+      }));
+      return {
+        ...oldData,
+        pages: newPages
+      };
+    });
+    updateDetailCache(conversationId, updateFn);
+  };
+  const markAsRead = async (conversationId, messageSeq) => {
+    updateConversationInCache(conversationId, (conv) => ({
+      ...conv,
+      myLastSeenMessageSeq: messageSeq,
+      unreadMessageCount: 0
+    }));
+  };
+  const pushConversationToTop = async (conversationId, lastMessage) => {
+    const listKey = conversationKeys.list();
+    const currentData = queryClient.getQueryData(listKey);
+    let existedConv = null;
+    if (currentData) {
+      for (const page of currentData.pages) {
+        const found = page.items.find((item) => item.id === conversationId);
+        if (found) {
+          existedConv = { ...found, lastMessage: lastMessage || found.lastMessage };
+          break;
+        }
+      }
+    }
+    if (!existedConv) {
+      const fetched = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
+      if (!fetched) return;
+      existedConv = { ...fetched, lastMessage: lastMessage || fetched.lastMessage };
+    }
+    queryClient.setQueryData(conversationKeys.detail(conversationId), existedConv);
+    queryClient.setQueryData(listKey, (oldData) => {
+      if (!oldData || !oldData.pages.length) return oldData;
+      const newPages = oldData.pages.map((page) => ({
+        ...page,
+        items: page.items.filter((item) => item.id !== conversationId)
+      }));
+      newPages[0] = {
+        ...newPages[0],
+        items: [existedConv, ...newPages[0].items]
+      };
+      return {
+        ...oldData,
+        pages: newPages
+      };
+    });
+  };
+  const mergeDeltaConversations = (deltaConvs) => {
+    const listKey = conversationKeys.list();
+    queryClient.setQueryData(listKey, (oldData) => {
+      if (!oldData || deltaConvs.length === 0) return oldData;
+      const deltaMap = new Map(deltaConvs.map((c) => [c.id, c]));
+      const mergedItemsMap = /* @__PURE__ */ new Map();
+      let newPages = oldData.pages.map((page) => {
+        const remainingItems = page.items.filter((item) => {
+          if (deltaMap.has(item.id)) {
+            mergedItemsMap.set(item.id, { ...item, ...deltaMap.get(item.id) });
+            return false;
+          }
+          return true;
+        });
+        return { ...page, items: remainingItems };
+      });
+      const topItems = deltaConvs.map(
+        (delta) => mergedItemsMap.has(delta.id) ? mergedItemsMap.get(delta.id) : delta
+      );
+      if (newPages.length > 0) {
+        const orderedTopItems = [...topItems].reverse();
+        newPages[0] = {
+          ...newPages[0],
+          items: [...orderedTopItems, ...newPages[0].items]
+        };
+      }
+      return { ...oldData, pages: newPages };
+    });
+  };
+  return { mergeDeltaConversations, pushConversationToTop, updateConversationInCache, markAsRead };
+};
+const useGetUnreadMessageCount = () => {
+  const { userId } = useAuth();
+  return useSafeQueryResult({
+    queryKey: ["conversation", "unread-count", userId],
+    fn: async () => await conversationService.getUnreadCount()
+  });
+};
+const useUnreadMessageCountCacheMutations = () => {
+  const queryClient = useQueryClient();
+  const { userId } = useAuth();
+  const setUnreadCount = (update) => {
+    const key = ["conversation", "unread-count", userId];
+    queryClient.setQueryData(key, (oldCount) => {
+      const currentCount = oldCount ?? 0;
+      const newCount = update(currentCount);
+      return Math.max(0, newCount);
+    });
+  };
+  const setUnreadCountForConversation = (conversationId, update) => {
+    const key = ["conversation", "unread-count", conversationId];
+    queryClient.setQueryData(key, (oldCount) => {
+      const currentCount = oldCount ?? 0;
+      const newCount = update(currentCount);
+      return Math.max(0, newCount);
+    });
+  };
+  const getUnreadCountForConversation = (conversationId) => {
+    const key = ["conversation", "unread-count", conversationId];
+    return queryClient.getQueryData(key) ?? 0;
+  };
+  return { setUnreadCount, setUnreadCountForConversation, getUnreadCountForConversation };
+};
+const useUnreadMessageCountCache = (conversationId) => {
+  const { data: unreadCount } = useQuery({
+    queryKey: ["conversation", "unread-count", conversationId],
+    queryFn: () => {
+      return 0;
+    },
+    enabled: !!conversationId,
+    staleTime: Infinity,
+    initialData: 0
+  });
+  return unreadCount ?? 0;
+};
+const useMessageStore = create((set) => ({
+  lastMessageMap: {},
+  messageUserSeenMap: {},
+  setLastMessage: (conversationId, messageSeq) => set((state) => ({
+    lastMessageMap: {
+      ...state.lastMessageMap,
+      [conversationId]: messageSeq
+    }
+  })),
+  setBulkLastMessages: (data) => set((state) => ({
+    lastMessageMap: {
+      ...state.lastMessageMap,
+      ...Object.entries(data).reduce(
+        (acc, [convId, newSeq]) => {
+          const currentSeq = state.lastMessageMap[convId];
+          acc[convId] = currentSeq !== void 0 ? Math.max(currentSeq, newSeq) : newSeq;
+          return acc;
+        },
+        {}
+      )
+    }
+  })),
+  setParticipantsSeen: (conversationId, userId, participantSeen) => {
+    set((state) => {
+      const rawConvMap = state.messageUserSeenMap?.[conversationId] || {};
+      const newMsgSeq = participantSeen.sequenceNumber;
+      let previousSeq;
+      for (const [messageSeq, viewers] of Object.entries(rawConvMap)) {
+        if (viewers.some((viewer) => viewer.userId === userId)) {
+          previousSeq = Number(messageSeq);
+          break;
+        }
+      }
+      if (previousSeq === newMsgSeq) {
+        const existingAtNew = rawConvMap[newMsgSeq] || [];
+        const existingViewer = existingAtNew.find((viewer) => viewer.userId === userId);
+        if (existingViewer?.seenAt === participantSeen.seenAt) {
+          return state;
+        }
+      }
+      const nextConvMap = { ...rawConvMap };
+      if (previousSeq !== void 0) {
+        const reducedPrev = (rawConvMap[previousSeq] || []).filter(
+          (viewer) => viewer.userId !== userId
+        );
+        if (reducedPrev.length > 0) {
+          nextConvMap[previousSeq] = reducedPrev;
+        } else {
+          delete nextConvMap[previousSeq];
+        }
+      }
+      const currentAtNew = nextConvMap[newMsgSeq] ? [...nextConvMap[newMsgSeq]] : [];
+      const existingIndex = currentAtNew.findIndex((viewer) => viewer.userId === userId);
+      if (existingIndex >= 0) {
+        currentAtNew[existingIndex] = { userId, seenAt: participantSeen.seenAt };
+      } else {
+        currentAtNew.push({ userId, seenAt: participantSeen.seenAt });
+      }
+      nextConvMap[newMsgSeq] = currentAtNew;
+      return {
+        messageUserSeenMap: {
+          ...state.messageUserSeenMap,
+          [conversationId]: nextConvMap
+        }
+      };
+    });
+  },
+  setBulkParticipantsSeen: (conversationId, data) => {
+    set((state) => {
+      if (!data) return state;
+      const currentConvMap = state.messageUserSeenMap?.[conversationId] || {};
+      const toTime = (value) => {
+        const t2 = new Date(value).getTime();
+        return Number.isFinite(t2) ? t2 : 0;
+      };
+      const mergedByUser = {};
+      Object.entries(currentConvMap).forEach(([messageSeq, viewers]) => {
+        viewers.forEach((viewer) => {
+          const existing = mergedByUser[viewer.userId];
+          if (!existing || toTime(viewer.seenAt) > toTime(existing.seenAt)) {
+            mergedByUser[viewer.userId] = {
+              sequenceNumber: Number(messageSeq),
+              seenAt: viewer.seenAt
+            };
+          }
+        });
+      });
+      Object.entries(data).forEach(([userId, seenInfo]) => {
+        const existing = mergedByUser[userId];
+        if (!existing || toTime(seenInfo.seenAt) > toTime(existing.seenAt)) {
+          mergedByUser[userId] = {
+            sequenceNumber: Number(seenInfo.sequenceNumber),
+            seenAt: seenInfo.seenAt
+          };
+        }
+      });
+      const newConvMap = {};
+      Object.entries(mergedByUser).forEach(([userId, seenInfo]) => {
+        if (!newConvMap[seenInfo.sequenceNumber]) newConvMap[seenInfo.sequenceNumber] = [];
+        newConvMap[seenInfo.sequenceNumber].push({ userId, seenAt: seenInfo.seenAt });
+      });
+      return {
+        messageUserSeenMap: {
+          ...state.messageUserSeenMap,
+          [conversationId]: newConvMap
+        }
+      };
+    });
+  }
+}));
+const useMediaAroundAnchor = (conversationId, mediaId) => {
+  return useSafeQueryResult({
+    queryKey: ["conversation", conversationId, "media-around-anchor", mediaId],
+    fn: async () => await conversationService.getMediaAroundAnchor(conversationId, mediaId, 10),
+    enabled: !!conversationId && !!mediaId,
+    staleTime: 0,
+    gcTime: 0
+  });
+};
+const useMediaAround = () => {
+  return useResultFetcher(
+    async (data) => await conversationService.getMediaAround(data.conversationId, data.mediaId, data.config)
+  );
+};
+var MessageType = /* @__PURE__ */ ((MessageType2) => {
+  MessageType2["Text"] = "Text";
+  MessageType2["Media"] = "Media";
+  MessageType2["System"] = "System";
+  MessageType2["LeaveGroup"] = "LeaveGroup";
+  MessageType2["JoinGroup"] = "JoinGroup";
+  MessageType2["CreateGroup"] = "CreateGroup";
+  MessageType2["DeleteGroup"] = "DeleteGroup";
+  MessageType2["RenameGroup"] = "RenameGroup";
+  MessageType2["ChangeGroupAvatar"] = "ChangeGroupAvatar";
+  MessageType2["RemoveParticipant"] = "RemoveParticipant";
+  MessageType2["AddParticipant"] = "AddParticipant";
+  return MessageType2;
+})(MessageType || {});
+var MediaType = /* @__PURE__ */ ((MediaType2) => {
+  MediaType2["Image"] = "Image";
+  MediaType2["Video"] = "Video";
+  MediaType2["File"] = "File";
+  MediaType2["Audio"] = "Audio";
+  return MediaType2;
+})(MediaType || {});
+const PREFETCH_DISTANCE = 3;
+const FETCH_BATCH_SIZE = 10;
+const MediaViewer = ({ className }) => {
+  const { conversationId, media, onClose } = useMediaViewer();
+  const [activeMedia, setActiveMedia] = useState(media);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [leftMedia, setLeftMedia] = useState([]);
+  const [rightMedia, setRightMedia] = useState([]);
+  const isFetchingLeft = useRef(false);
+  const isFetchingRight = useRef(false);
+  const [canFetchLeft, setCanFetchLeft] = useState(true);
+  const [canFetchRight, setCanFetchRight] = useState(true);
+  const swiperRef = useRef(null);
+  const initializedAnchor = useRef(null);
+  const thumbnailRefs = useRef({});
+  const { data: mediaAroundAnchor } = useMediaAroundAnchor(conversationId || "", media?.id || "");
+  const { fetch: fetchMediaAround } = useMediaAround();
+  const mergeUniqueMedia = useCallback((items) => {
+    const map = /* @__PURE__ */ new Map();
+    items.forEach((item) => {
+      map.set(item.id || item.url, item);
+    });
+    return Array.from(map.values());
+  }, []);
+  useEffect(() => {
+    if (mediaAroundAnchor && media?.id && initializedAnchor.current !== media.id) {
+      setLeftMedia(mediaAroundAnchor.left || []);
+      setRightMedia(mediaAroundAnchor.right || []);
+      setCanFetchLeft(true);
+      setCanFetchRight(true);
+      initializedAnchor.current = media.id;
+    }
+  }, [mediaAroundAnchor, media?.id]);
+  const allMedia = useMemo(() => {
+    if (!media) return [];
+    const combined = [...leftMedia, media, ...rightMedia];
+    return mergeUniqueMedia(combined);
+  }, [leftMedia, media, mergeUniqueMedia, rightMedia]);
+  const activeIndex = allMedia.findIndex(
+    (m) => (m.id || m.url) === (activeMedia?.id || activeMedia?.url)
+  );
+  const handlePrev = (e) => {
+    e?.stopPropagation();
+    swiperRef.current?.slidePrev();
+  };
+  const handleNext = (e) => {
+    e?.stopPropagation();
+    swiperRef.current?.slideNext();
+  };
+  const handleSlideChange = (swiper) => {
+    const currentMedia = allMedia[swiper.activeIndex];
+    if (currentMedia) {
+      setActiveMedia(currentMedia);
+    }
+  };
+  const prefetchRight = useCallback(async () => {
+    if (!conversationId || isFetchingRight.current || !canFetchRight || allMedia.length === 0)
+      return;
+    const lastMedia = allMedia[allMedia.length - 1];
+    if (!lastMedia?.id) return;
+    isFetchingRight.current = true;
+    try {
+      await fetchMediaAround(
+        {
+          conversationId,
+          mediaId: lastMedia.id,
+          config: { limit: FETCH_BATCH_SIZE, before: false }
+        },
+        {
+          onSuccess: (fetchedMedia) => {
+            const fetched = fetchedMedia || [];
+            if (fetched.length === 0) {
+              setCanFetchRight(false);
+              return;
+            }
+            setRightMedia((prev) => mergeUniqueMedia([...prev, ...fetched]));
+            if (fetched.length < FETCH_BATCH_SIZE) {
+              setCanFetchRight(false);
+            }
+          }
+        }
+      );
+    } finally {
+      isFetchingRight.current = false;
+    }
+  }, [allMedia, canFetchRight, conversationId, fetchMediaAround, mergeUniqueMedia]);
+  const prefetchLeft = useCallback(async () => {
+    if (!conversationId || isFetchingLeft.current || !canFetchLeft || allMedia.length === 0) return;
+    const firstMedia = allMedia[0];
+    if (!firstMedia?.id) return;
+    isFetchingLeft.current = true;
+    try {
+      await fetchMediaAround(
+        {
+          conversationId,
+          mediaId: firstMedia.id,
+          config: { limit: FETCH_BATCH_SIZE, before: true }
+        },
+        {
+          onSuccess: (fetchedMedia) => {
+            const fetched = fetchedMedia || [];
+            if (fetched.length === 0) {
+              setCanFetchLeft(false);
+              return;
+            }
+            setLeftMedia((prev) => mergeUniqueMedia([...fetched, ...prev]));
+            if (fetched.length < FETCH_BATCH_SIZE) {
+              setCanFetchLeft(false);
+            }
+          }
+        }
+      );
+    } finally {
+      isFetchingLeft.current = false;
+    }
+  }, [allMedia, canFetchLeft, conversationId, fetchMediaAround, mergeUniqueMedia]);
+  useEffect(() => {
+    setActiveMedia(media);
+  }, [media]);
+  useEffect(() => {
+    if (!activeMedia) return;
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") onClose();
+      else if (event.key === "ArrowLeft") handlePrev(event);
+      else if (event.key === "ArrowRight") handleNext(event);
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [activeMedia, onClose]);
+  useLayoutEffect(() => {
+    if (swiperRef.current && activeIndex !== -1) {
+      swiperRef.current.slideTo(activeIndex, 0, false);
+    }
+  }, [allMedia.length, activeIndex]);
+  useEffect(() => {
+    if (!activeMedia?.id) return;
+    const activeThumbEl = thumbnailRefs.current[activeMedia.id];
+    if (activeThumbEl) {
+      requestAnimationFrame(() => {
+        activeThumbEl.scrollIntoView({
+          behavior: "smooth",
+          inline: "center",
+          block: "nearest"
+        });
+      });
+    }
+  }, [activeMedia?.id, allMedia.length]);
+  useEffect(() => {
+    if (activeIndex < 0 || allMedia.length === 0) return;
+    const distanceToStart = activeIndex;
+    const distanceToEnd = allMedia.length - 1 - activeIndex;
+    if (distanceToEnd < PREFETCH_DISTANCE && canFetchRight && !isFetchingRight.current) {
+      void prefetchRight();
+    }
+    if (distanceToStart < PREFETCH_DISTANCE && canFetchLeft && !isFetchingLeft.current) {
+      void prefetchLeft();
+    }
+  }, [activeIndex, allMedia.length, canFetchLeft, canFetchRight, prefetchLeft, prefetchRight]);
+  if (!activeMedia) return null;
+  const onDownload = async () => {
+    if (isDownloading) return;
+    setIsDownloading(true);
+    try {
+      const response = await fetch(activeMedia.url);
+      const blob = await response.blob();
+      const blobUrl = URL.createObjectURL(blob);
+      const anchor = document.createElement("a");
+      anchor.href = blobUrl;
+      const urlPath = new URL(activeMedia.url).pathname;
+      const fileName = urlPath.substring(urlPath.lastIndexOf("/") + 1) || (activeMedia.type === MediaType.Image ? "image.jpg" : "video.mp4");
+      anchor.download = fileName;
+      document.body.appendChild(anchor);
+      anchor.click();
+      document.body.removeChild(anchor);
+      URL.revokeObjectURL(blobUrl);
+    } catch {
+      console.error("Failed to download media");
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "fixed inset-0 z-50 flex flex-col bg-black/95 backdrop-blur-md transition-opacity overscroll-none touch-none",
+        className
+      ),
+      onClick: onClose,
+      children: [
+        /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: "flex h-16 w-full items-center justify-end px-6 shrink-0 bg-gradient-to-b from-black/60 to-transparent z-10",
+            onClick: (e) => e.stopPropagation(),
+            children: /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+              /* @__PURE__ */ jsx(
+                MiniButton,
+                {
+                  className: "!text-white/70 hover:!text-white hover:!bg-white/10 transition-colors",
+                  onClick: onDownload,
+                  disabled: isDownloading,
+                  title: "Download",
+                  children: /* @__PURE__ */ jsx(
+                    "i",
+                    {
+                      className: clsx(
+                        "fa-solid text-xl",
+                        isDownloading ? "fa-spinner fa-spin" : "fa-download"
+                      )
+                    }
+                  )
+                }
+              ),
+              /* @__PURE__ */ jsx(
+                MiniButton,
+                {
+                  className: "!text-white/70 hover:!text-white hover:!bg-white/10 transition-colors",
+                  onClick: onClose,
+                  title: "Close (Esc)",
+                  children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark text-2xl" })
+                }
+              )
+            ] })
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "relative flex flex-1 min-h-0 items-center justify-center overflow-hidden w-full", children: [
+          /* @__PURE__ */ jsx(
+            "button",
+            {
+              className: clsx(
+                "absolute left-6 top-1/2 -translate-y-1/2 z-20 p-4 rounded-full transition-all hidden md:block",
+                activeIndex > 0 ? "text-white/50 hover:text-white hover:bg-white/10 cursor-pointer" : "text-white/10 cursor-not-allowed opacity-50"
+              ),
+              onClick: handlePrev,
+              disabled: activeIndex <= 0,
+              children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-chevron-left text-3xl" })
+            }
+          ),
+          /* @__PURE__ */ jsx("div", { className: "h-full w-full", onClick: (e) => e.stopPropagation(), children: /* @__PURE__ */ jsx(
+            Swiper,
+            {
+              onSwiper: (swiper) => swiperRef.current = swiper,
+              onSlideChange: handleSlideChange,
+              initialSlide: activeIndex,
+              spaceBetween: 20,
+              slidesPerView: 1,
+              grabCursor: true,
+              className: "w-full h-full",
+              children: allMedia.map((m) => {
+                const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
+                return /* @__PURE__ */ jsx(SwiperSlide, { className: "h-full w-full", children: /* @__PURE__ */ jsx("div", { className: "flex h-full w-full items-center justify-center px-4 py-2 md:px-6 md:py-4", children: m.type === MediaType.Image ? /* @__PURE__ */ jsx(
+                  ImageView,
+                  {
+                    url: m.url,
+                    className: "max-h-full max-w-full object-contain rounded-md select-none"
+                  }
+                ) : isActive ? (
+                  // Only mount the real, heavy VideoView when the slide is active
+                  /* @__PURE__ */ jsx(VideoView, { url: m.url, className: "max-h-full max-w-full rounded-md" })
+                ) : (
+                  // Render a lightweight "poster" for inactive video slides to prevent black screens and save data
+                  /* @__PURE__ */ jsxs(
+                    "div",
+                    {
+                      className: "relative max-h-full max-w-full rounded-md overflow-hidden bg-black flex items-center justify-center cursor-pointer",
+                      style: { aspectRatio: "16/9" },
+                      children: [
+                        /* @__PURE__ */ jsx(
+                          "video",
+                          {
+                            src: `${m.url}#t=0.1`,
+                            className: "max-h-full max-w-full object-contain opacity-50",
+                            preload: "metadata",
+                            muted: true,
+                            playsInline: true
+                          }
+                        ),
+                        /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center justify-center", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-play text-white text-6xl opacity-70 drop-shadow-lg" }) })
+                      ]
+                    }
+                  )
+                ) }) }, m.id);
+              })
+            }
+          ) }),
+          /* @__PURE__ */ jsx(
+            "button",
+            {
+              className: clsx(
+                "absolute right-6 top-1/2 -translate-y-1/2 z-20 p-4 rounded-full transition-all hidden md:block",
+                activeIndex < allMedia.length - 1 ? "text-white/50 hover:text-white hover:bg-white/10 cursor-pointer" : "text-white/10 cursor-not-allowed opacity-50"
+              ),
+              onClick: handleNext,
+              disabled: activeIndex >= allMedia.length - 1,
+              children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-chevron-right text-3xl" })
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsx(
+          "div",
+          {
+            className: "hidden w-full shrink-0 items-center justify-center bg-black/40 px-4 md:flex z-10",
+            onClick: (e) => e.stopPropagation(),
+            children: /* @__PURE__ */ jsx("div", { className: "max-w-[960px] overflow-x-auto overflow-y-hidden scroll-smooth", children: /* @__PURE__ */ jsx("div", { className: "flex min-w-max items-center gap-2 px-2 py-3", children: allMedia.map((m, index) => {
+              const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
+              return /* @__PURE__ */ jsx(
+                "div",
+                {
+                  ref: (el) => {
+                    thumbnailRefs.current[m.id] = el;
+                  },
+                  onClick: () => {
+                    swiperRef.current?.slideTo(index);
+                  },
+                  className: clsx(
+                    "relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-md transition-all duration-200",
+                    isActive ? "ring-4 ring-primary-500 scale-105 opacity-100 z-10" : "opacity-50 hover:opacity-100 hover:scale-105"
+                  ),
+                  children: m.type === MediaType.Image ? /* @__PURE__ */ jsx("img", { src: m.url, alt: "Thumbnail", className: "h-full w-full object-cover" }) : /* @__PURE__ */ jsxs(Fragment, { children: [
+                    /* @__PURE__ */ jsx(
+                      "video",
+                      {
+                        src: `${m.url}#t=0.1`,
+                        className: "h-full w-full object-cover pointer-events-none",
+                        preload: "metadata",
+                        muted: true,
+                        playsInline: true
+                      }
+                    ),
+                    /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-play text-white text-xs" }) })
+                  ] })
+                },
+                m.id
+              );
+            }) }) })
+          }
+        )
+      ]
+    }
+  );
+};
+const Dialog = ({
+  title: title2,
+  content,
+  primaryButton,
+  secondaryButton,
+  tertiaryButton,
+  onClose,
+  className
+}) => {
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex flex-col gap-4 bg-[var(--second-bg-color)]",
+        "rounded-lg shadow-lg",
+        className
+      ),
+      children: [
+        title2 && /* @__PURE__ */ jsx(Text, { weight: "bold", sz: "lg", children: title2 }),
+        content && /* @__PURE__ */ jsx("div", { children: content }),
+        /* @__PURE__ */ jsxs("div", { className: "flex justify-end space-x-2", children: [
+          tertiaryButton && /* @__PURE__ */ jsx(Button, { onClick: tertiaryButton.onClick, variant: "secondary", sz: "sm", children: tertiaryButton.text }),
+          secondaryButton && /* @__PURE__ */ jsx(Button, { onClick: secondaryButton.onClick, variant: "secondary", sz: "sm", children: secondaryButton.text }),
+          primaryButton && /* @__PURE__ */ jsx(Button, { onClick: primaryButton.onClick, variant: "primary", sz: "sm", children: primaryButton.text })
+        ] }),
+        /* @__PURE__ */ jsx(
+          Text,
+          {
+            className: clsx(
+              "absolute top-3 right-5 text-[20px]",
+              "text-gradient-main hover:text-single-main",
+              "cursor-pointer"
+            ),
+            onClick: onClose,
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+          }
+        )
+      ]
+    }
+  );
+};
+const GlobalDialog = () => {
+  const { isOpen, dialogProps, closeDialog } = useDialog();
+  if (!isOpen) return null;
+  return /* @__PURE__ */ jsx(
+    "div",
+    {
+      className: clsx("fixed z-[9998] inset-0 flex items-center justify-center", "bg-bg-overlay"),
+      children: /* @__PURE__ */ jsx(Dialog, { ...dialogProps, onClose: closeDialog })
+    }
+  );
+};
+let connection = null;
+const createSignalRConnection = () => {
+  try {
+    connection = new signalR.HubConnectionBuilder().withUrl(`${appConfig.apiUrl}/hubs/app`, {
+      withCredentials: true
+    }).withAutomaticReconnect().configureLogging(signalR.LogLevel.Error).build();
+    return connection;
+  } catch (error) {
+    console.error("Error creating SignalR connection: ", error);
+    throw error;
+  }
+};
+const MAX_RETRY = 5;
+function useAppHub(onReceiveMessage, onReconnect) {
+  const connectionRef = useRef(null);
+  const onReceiveMessageRef = useRef(onReceiveMessage);
+  const onReconnectRef = useRef(onReconnect);
+  const { isAuthenticated } = useAuth();
+  useEffect(() => {
+    onReceiveMessageRef.current = onReceiveMessage;
+    onReconnectRef.current = onReconnect;
+  }, [onReceiveMessage, onReconnect]);
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    let isMounted = true;
+    let reconnectTimer = null;
+    const receiveMessageHandler = (message) => {
+      if (isMounted) {
+        onReceiveMessageRef.current(message);
+      }
+    };
+    const tryConnect = async (retry = 0, isReconnectingEvent = false) => {
+      const conn = connectionRef.current;
+      if (!conn) return;
+      try {
+        if (conn.state === HubConnectionState.Disconnected) {
+          await conn.start();
+          conn.off("ReceiveMessage", receiveMessageHandler);
+          conn.on("ReceiveMessage", receiveMessageHandler);
+          if (isReconnectingEvent && onReconnectRef.current) {
+            onReconnectRef.current();
+          }
+        }
+      } catch (err) {
+        if (err?.message?.includes("ONBOARDING_NOT_COMPLETED")) {
+          authEvents.emit("redirectToOnboarding");
+          return;
+        }
+        console.error("SignalR connection error: ", err);
+        if (retry < MAX_RETRY) {
+          reconnectTimer = setTimeout(() => tryConnect(retry + 1, isReconnectingEvent), 500);
+        }
+      }
+    };
+    const handleSignalRReconnected = () => {
+      if (onReconnectRef.current) {
+        onReconnectRef.current();
+      }
+    };
+    const startConnection = async () => {
+      connectionRef.current = createSignalRConnection();
+      connectionRef.current.onreconnected(handleSignalRReconnected);
+      await tryConnect();
+    };
+    startConnection();
+    const handleOnboardingCompleted = async () => {
+      await tryConnect(0, true);
+    };
+    const handleNetworkOrVisibilityChange = async () => {
+      if (document.visibilityState === "visible" && navigator.onLine) {
+        const conn = connectionRef.current;
+        if (conn?.state === HubConnectionState.Disconnected) {
+          await tryConnect(0, true);
+        }
+      }
+    };
+    authEvents.on("onboardingCompleted", handleOnboardingCompleted);
+    window.addEventListener("online", handleNetworkOrVisibilityChange);
+    document.addEventListener("visibilitychange", handleNetworkOrVisibilityChange);
+    return () => {
+      isMounted = false;
+      if (reconnectTimer) {
+        clearTimeout(reconnectTimer);
+        reconnectTimer = null;
+      }
+      if (connectionRef.current) {
+        connectionRef.current.off("ReceiveMessage", receiveMessageHandler);
+        connectionRef.current.onreconnected(() => {
+        });
+        connectionRef.current.stop();
+        connectionRef.current = null;
+      }
+      authEvents.off("onboardingCompleted", handleOnboardingCompleted);
+      window.removeEventListener("online", handleNetworkOrVisibilityChange);
+      document.removeEventListener("visibilitychange", handleNetworkOrVisibilityChange);
+    };
+  }, [isAuthenticated]);
+}
+function useMessageCacheMutations() {
+  const queryClient = useQueryClient();
+  const addMessageToCache = useCallback(
+    (conversationId, message, isDescending = true) => {
+      queryClient.setQueriesData(
+        { queryKey: ["messages", conversationId] },
+        (old) => {
+          if (!old?.pages?.length) {
+            return {
+              pages: [
+                {
+                  items: [message],
+                  nextCursor: void 0,
+                  hasNext: false
+                }
+              ],
+              pageParams: [void 0]
+            };
+          }
+          const targetPageIndex = isDescending ? 0 : old.pages.length - 1;
+          const targetPage = old.pages[targetPageIndex];
+          for (const item of targetPage.items) {
+            if (item.id === message.id) return old;
+            if (item.clientTempId && item.clientTempId === message.clientTempId) {
+              const newPages2 = {
+                ...targetPage,
+                items: targetPage.items.map(
+                  (m) => m.clientTempId === message.clientTempId ? message : m
+                )
+              };
+              return {
+                ...old,
+                pages: [newPages2, ...old.pages.slice(1)]
+              };
+            }
+          }
+          const newPages = [...old.pages];
+          newPages[targetPageIndex] = {
+            ...targetPage,
+            items: isDescending ? [message, ...targetPage.items] : [...targetPage.items, message]
+          };
+          return {
+            ...old,
+            pages: newPages
+          };
+        }
+      );
+    },
+    [queryClient]
+  );
+  const updateMessageInCache = useCallback(
+    (conversationId, messageId, updater) => {
+      queryClient.setQueriesData(
+        { queryKey: ["messages", conversationId] },
+        (old) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.map((m) => m.id === messageId ? updater(m) : m)
+            }))
+          };
+        }
+      );
+    },
+    [queryClient]
+  );
+  const removeMessageFromCache = useCallback(
+    (conversationId, messageId) => {
+      queryClient.setQueriesData(
+        { queryKey: ["messages", conversationId] },
+        (old) => {
+          if (!old?.pages) return old;
+          return {
+            ...old,
+            pages: old.pages.map((page) => ({
+              ...page,
+              items: page.items.filter((m) => m.id !== messageId)
+            }))
+          };
+        }
+      );
+    },
+    [queryClient]
+  );
+  return { addMessageToCache, updateMessageInCache, removeMessageFromCache };
+}
+function useMessageListenerHandler() {
+  const { addMessageToCache } = useMessageCacheMutations();
+  const { pushConversationToTop, updateConversationInCache } = useConversationCacheMutations();
+  const { setUnreadCount, setUnreadCountForConversation } = useUnreadMessageCountCacheMutations();
+  const { setParticipantsSeen } = useMessageStore();
+  const { userId } = useAuth();
+  const location = useLocation();
+  const navigate = useNavigate();
+  const { fetch: markAsRead } = useMarkConversationAsRead();
+  const markAsReadLocal = useLocalMarkAsRead();
+  const autoReadMessageKeysRef = useRef(/* @__PURE__ */ new Set());
+  const createAutoReadKey = (conversationId, messageSeq) => `${conversationId}:${messageSeq}`;
+  const handleNewMessage = useCallback(
+    async (message) => {
+      const data = message.payload;
+      const conversationId = data.conversationId;
+      const isOwnMessage = data.senderId === userId;
+      if (data.correlationId && useChatStore.getState().registry[data.correlationId]) {
+        useChatStore.getState().replaceChat(data.correlationId, conversationId);
+      } else {
+        const queryParams = new URLSearchParams(location.search);
+        const currentTempId = queryParams.get("tempId");
+        if (useChatStore.getState().registry["temp-" + data.senderId]) {
+          useChatStore.getState().replaceChat("temp-" + data.senderId, conversationId);
+        } else if (location.pathname === "/fatalk/temp" && currentTempId === data.senderId) {
+          navigate(`/fatalk/${conversationId}`, { replace: true });
+        }
+        useChatStore.getState().openChat(conversationId, { type: "conversation", conversationId });
+      }
+      useMessageStore.getState().setLastMessage(conversationId, data.sequenceNumber);
+      addMessageToCache(conversationId, data, true);
+      pushConversationToTop(conversationId, data);
+      if (data.senderId === userId) {
+        updateConversationInCache(conversationId, (conv) => ({
+          ...conv,
+          myLastSeenMessageSeq: data.sequenceNumber
+        }));
+        markAsReadLocal(conversationId, data.sequenceNumber);
+        try {
+          await markAsRead({
+            conversationId,
+            messageSeq: data.sequenceNumber
+          });
+        } catch {
+        }
+      }
+      const { focusOnId: currentFocusId, activeIds, minimizedIds } = useChatStore.getState();
+      const isActiveChat = activeIds.includes(conversationId);
+      const isMinimizedChat = minimizedIds.includes(conversationId);
+      const isDisplayedChat = isActiveChat && !isMinimizedChat;
+      const isDocumentFocused = document.hasFocus();
+      if (currentFocusId !== conversationId || !isDisplayedChat || !isDocumentFocused) {
+        if (!isOwnMessage) {
+          if (data.shouldIncreaseUnreadCount) {
+            setUnreadCount((prev) => prev + 1);
+          }
+          setUnreadCountForConversation(conversationId, (prev) => prev + 1);
+        }
+      } else if (!isOwnMessage && isDisplayedChat && isDocumentFocused) {
+        const autoReadKey = createAutoReadKey(conversationId, data.sequenceNumber);
+        autoReadMessageKeysRef.current.add(autoReadKey);
+        markAsReadLocal(conversationId, data.sequenceNumber);
+        try {
+          await markAsRead({
+            conversationId,
+            messageSeq: data.sequenceNumber
+          });
+        } catch {
+          autoReadMessageKeysRef.current.delete(autoReadKey);
+        }
+      }
+    },
+    [
+      addMessageToCache,
+      location.pathname,
+      location.search,
+      markAsRead,
+      markAsReadLocal,
+      navigate,
+      pushConversationToTop,
+      setUnreadCount,
+      setUnreadCountForConversation,
+      updateConversationInCache,
+      userId
+    ]
+  );
+  const handleSeenMessage = useCallback(
+    (message) => {
+      const data = message.payload;
+      const conversationId = data.conversationId;
+      const otherUserId = data.userId;
+      setParticipantsSeen(conversationId, data.userId, {
+        sequenceNumber: data.messageSeq,
+        seenAt: data.seenAt
+      });
+      if (otherUserId !== userId) {
+        updateConversationInCache(conversationId, (conv) => ({
+          ...conv,
+          otherLastSeenMessageSeq: data.messageSeq
+        }));
+      } else {
+        updateConversationInCache(conversationId, (conv) => ({
+          ...conv,
+          myLastSeenMessageSeq: data.messageSeq
+        }));
+        const autoReadKey = createAutoReadKey(conversationId, data.messageSeq);
+        const isAutoReadAck = autoReadMessageKeysRef.current.has(autoReadKey);
+        if (isAutoReadAck) {
+          autoReadMessageKeysRef.current.delete(autoReadKey);
+        }
+        if (data.shouldDecreaseUnreadCount && !isAutoReadAck) {
+          setUnreadCount((prev) => prev - 1);
+        }
+        setUnreadCountForConversation(conversationId, (_prev) => 0);
+      }
+    },
+    [
+      setParticipantsSeen,
+      setUnreadCount,
+      setUnreadCountForConversation,
+      updateConversationInCache,
+      userId
+    ]
+  );
+  return useCallback(
+    async (message) => {
+      switch (message.event) {
+        case "NewMessage":
+          await handleNewMessage(message);
+          break;
+        case "SeenMessage":
+          handleSeenMessage(message);
+          break;
+      }
+    },
+    [handleNewMessage, handleSeenMessage]
+  );
 }
 const PREFIX$4 = buildApiPath("/notification");
 class NotificationService {
@@ -2753,81 +4229,11 @@ function useNotificationCacheMutations() {
     invalidateNotifications
   };
 }
-let connection = null;
-const createSignalRConnection = () => {
-  try {
-    connection = new signalR.HubConnectionBuilder().withUrl(`${appConfig.apiUrl}/hubs/app`, {
-      withCredentials: true
-    }).withAutomaticReconnect().configureLogging(signalR.LogLevel.Error).build();
-    return connection;
-  } catch (error) {
-    console.error("Error creating SignalR connection: ", error);
-    throw error;
-  }
-};
-function useAppHub(onReceiveMessage) {
-  const connectionRef = useRef(null);
-  const { isAuthenticated } = useAuth();
-  useEffect(() => {
-    if (!isAuthenticated) return;
-    let isMounted = true;
-    const startConnection = async () => {
-      const conn = createSignalRConnection();
-      connectionRef.current = conn;
-      const tryConnect = async (retry = 0) => {
-        try {
-          await conn.start();
-          conn.on("ReceiveMessage", (message) => {
-            if (isMounted) {
-              onReceiveMessage(message);
-            }
-          });
-        } catch (err) {
-          if (err?.message?.includes("ONBOARDING_NOT_COMPLETED")) {
-            authEvents.emit("redirectToOnboarding");
-            return;
-          }
-          console.error("SignalR connection error: ", err);
-          if (retry < 5) {
-            setTimeout(() => tryConnect(retry + 1), 500);
-          }
-        }
-      };
-      tryConnect();
-    };
-    startConnection();
-    const handleOnboardingCompleted = async () => {
-      const conn = connectionRef.current;
-      if (!conn) return;
-      try {
-        if (conn.state === HubConnectionState.Disconnected) {
-          await conn.start();
-          conn.on("ReceiveMessage", (message) => {
-            if (isMounted) {
-              onReceiveMessage(message);
-            }
-          });
-        }
-      } catch (err) {
-        console.error("SignalR reconnect after onboarding error:", err);
-      }
-    };
-    authEvents.on("onboardingCompleted", handleOnboardingCompleted);
-    return () => {
-      isMounted = false;
-      if (connectionRef.current) {
-        connectionRef.current.stop();
-        connectionRef.current = null;
-      }
-      authEvents.off("onboardingCompleted", handleOnboardingCompleted);
-    };
-  }, [isAuthenticated]);
-}
-function NotificationListener() {
+function useNotificationListenerHandler() {
   const { pushToast } = useToast();
   const { incrementUnread, decrementUnread } = useUnreadCount();
   const { addNotificationToCache, removeNotificationFromCache } = useNotificationCacheMutations();
-  const handleNewNotification = useCallback(
+  return useCallback(
     (message) => {
       if (message.event !== "NewNotification") return;
       const data = message.payload;
@@ -2856,1414 +4262,86 @@ function NotificationListener() {
       decrementUnread
     ]
   );
-  useAppHub(handleNewNotification);
+}
+function AppHubListener() {
+  const handleMessageEvent = useMessageListenerHandler();
+  const handleNotificationEvent = useNotificationListenerHandler();
+  const { fetcherDelta } = useGetDeltaConversations();
+  useAppHub(
+    async (message) => {
+      switch (message.event) {
+        case "NewMessage":
+        case "SeenMessage":
+          await handleMessageEvent(message);
+          break;
+        case "NewNotification":
+          handleNotificationEvent(message);
+          break;
+      }
+    },
+    async () => {
+      console.log("Reconnected to App Hub, fetching delta conversations...");
+      await fetcherDelta();
+    }
+  );
   return null;
 }
-const notificationQueryKey = (userId, queryParams) => ["notifications", userId, queryParams];
-const useNotifications = (queryParams) => {
-  const { userId } = useAuth();
-  return useSafeInfiniteQueryResult({
-    queryKey: notificationQueryKey(userId, queryParams),
-    fn: async (cursor) => await notificationService.getNotifications({ ...queryParams, cursor }),
-    enabled: !!userId
-  });
-};
-const useMarkNotificationAsRead = () => {
-  return useResultFetcher(
-    (notificationId) => notificationService.markAsRead(notificationId)
+const OfflineStatusNotification = () => {
+  const { t: t2 } = useTranslation("common");
+  const [isOnline, setIsOnline] = useState(
+    typeof navigator !== "undefined" ? navigator.onLine : true
   );
-};
-const useDeleteAllNotifications = () => {
-  const qc = useQueryClient();
-  return useResultFetcher(notificationService.deleteAll, {
-    onSuccess: () => {
-      qc.invalidateQueries({ queryKey: ["notifications"] });
-    }
-  });
-};
-function InfiniteScrollGrid({
-  itemMinWidth,
-  items,
-  loadingSkeleton,
-  numberOfSkeletons = 4,
-  className,
-  hasMore = true,
-  isLoading = false,
-  itemTemplate,
-  onLoadMore,
-  isShowLastSeen = false,
-  itemKey,
-  emptyComponent
-}) {
-  const sentinelRef = useRef(null);
+  const [isVisible, setIsVisible] = useState(false);
   useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore || isLoading) return;
-    const observer = new IntersectionObserver(
-      async ([entry]) => {
-        if (entry.isIntersecting && !isLoading) {
-          await onLoadMore();
-        }
-      },
-      {
-        rootMargin: "100px"
-      }
-    );
-    observer.observe(sentinel);
-    return () => observer.disconnect();
-  }, [hasMore, isLoading, onLoadMore]);
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className,
-      style: {
-        display: "grid",
-        gridTemplateColumns: `repeat(auto-fill, minmax(${itemMinWidth}, 1fr))`,
-        gap: "0.5rem",
-        position: "relative"
-      },
-      children: [
-        items.map((item, index) => /* @__PURE__ */ jsx("div", { className: "w-full", children: itemTemplate ? itemTemplate(item, index) : item }, itemKey ? itemKey(item, index) : index)),
-        isLoading && /* @__PURE__ */ jsx(Fragment, { children: Array.from({ length: numberOfSkeletons }).map((_, index) => /* @__PURE__ */ jsx("div", { children: loadingSkeleton ?? "Loading..." }, `skeleton-${index}`)) }),
-        hasMore && /* @__PURE__ */ jsx("div", { ref: sentinelRef, style: { gridColumn: "1 / -1", height: "10px" } }),
-        !hasMore && items.length > 0 && isShowLastSeen && /* @__PURE__ */ jsx(
-          "div",
-          {
-            style: {
-              gridColumn: "1 / -1",
-              textAlign: "center",
-              padding: "1rem 0",
-              color: "var(--text-third-color)"
-            },
-            children: "Đã xem hết kết quả."
-          }
-        ),
-        items.length === 0 && !isLoading && /* @__PURE__ */ jsx(
-          "div",
-          {
-            style: {
-              gridColumn: "1 / -1",
-              textAlign: "center",
-              padding: "1rem 0",
-              color: "var(--text-third-color)"
-            },
-            children: emptyComponent ?? "Không có dữ liệu nào."
-          }
-        )
-      ]
+    const handleOnline = () => {
+      setIsOnline(true);
+      setIsVisible(false);
+    };
+    const handleOffline = () => {
+      setIsOnline(false);
+      setIsVisible(true);
+    };
+    window.addEventListener("online", handleOnline);
+    window.addEventListener("offline", handleOffline);
+    if (!navigator.onLine) {
+      setIsOnline(false);
+      setIsVisible(true);
     }
-  );
-}
-const NotFound = ({ icon, title: title2, description: description2, className }) => {
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx("flex flex-col items-center justify-center gap-4 animate-fade-in", className),
-      children: [
-        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center w-16 h-16 rounded-full bg-bg-third/50 text-text-third", children: /* @__PURE__ */ jsx("i", { className: clsx("text-3xl", icon) }) }),
-        /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-1", children: [
-          /* @__PURE__ */ jsx(Text, { sz: "md", weight: "bold", className: "text-text-main text-base font-medium", children: title2 }),
-          /* @__PURE__ */ jsx(
-            Text,
-            {
-              sz: "sm",
-              wrap: "whitespace-pre-wrap",
-              className: "text-text-main/60 text-sm text-text-fourth",
-              children: description2
-            }
-          )
-        ] })
-      ]
+    return () => {
+      window.removeEventListener("online", handleOnline);
+      window.removeEventListener("offline", handleOffline);
+    };
+  }, []);
+  const handleRetry = () => {
+    if (navigator.onLine) {
+      setIsOnline(true);
+      setIsVisible(false);
     }
-  );
-};
-const NotificationMenu = ({ className, ref }) => {
-  const { t: t2 } = useTranslation();
-  const navigate = useNavigate$1();
-  const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
-    limit: 20
-  });
-  const { fetch: deleteAll } = useDeleteAllNotifications();
-  const { isInNotificationPage } = useNotificationUiState();
-  const { unreadCount, setUnreadCount } = useUnreadCount();
-  const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } = useNotificationCacheMutations();
-  const { fetch: markAsRead } = useMarkNotificationAsRead();
-  const notifications2 = React.useMemo(() => {
-    return data?.pages.flatMap((page) => page.items) || [];
-  }, [data]);
-  const handleMarkAllAsRead = async () => {
-    markAllAsReadInCache();
-    setUnreadCount(0);
-    await notificationService.markAllAsRead();
-    invalidateNotifications();
   };
-  const handleDeleteAll = async (e) => {
-    e.preventDefault();
-    e.stopPropagation();
-    await deleteAll({
-      onSuccess: () => {
-        clearAllFromCache();
-        setUnreadCount(0);
-        invalidateNotifications();
-      },
-      onError: () => {
-        console.error("Failed to delete all notifications");
-      }
-    });
-  };
-  return /* @__PURE__ */ jsxs(
+  if (!isVisible || isOnline) return null;
+  return /* @__PURE__ */ jsx(
     "div",
     {
-      className: clsx(
-        "bg-bg-main sm:bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
-        "animate-dropdown-slide origin-top scrollbar-hide",
-        className
-      ),
-      ref,
-      children: [
-        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-2 pt-2", children: [
-          /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: t2("notifications:notifications.title") }),
-          notifications2.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
-            unreadCount > 0 && /* @__PURE__ */ jsx(
-              "button",
-              {
-                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
-                onClick: handleMarkAllAsRead,
-                title: t2("notifications:notifications.mark-all-read"),
-                children: /* @__PURE__ */ jsx(Text, { sz: "md", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-check-double" }) })
-              }
-            ),
-            /* @__PURE__ */ jsx(
-              "button",
-              {
-                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
-                onClick: handleDeleteAll,
-                title: t2("notifications:notifications.delete-all"),
-                children: /* @__PURE__ */ jsx(Text, { sz: "md", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-trash-can" }) })
-              }
-            )
-          ] })
+      style: { bottom: "calc(env(safe-area-inset-bottom) + 16px)" },
+      className: "fixed inset-x-0 z-[9999] flex justify-center pointer-events-none",
+      children: /* @__PURE__ */ jsxs("div", { className: "pointer-events-auto inline-flex items-center gap-3 px-5 py-3 bg-error/90 backdrop-blur-md text-white rounded-full shadow-xl border border-error/50 animate-slide-up-in max-w-[calc(100vw-32px)]", children: [
+        /* @__PURE__ */ jsxs("div", { className: "relative flex h-2 w-2 flex-shrink-0", children: [
+          /* @__PURE__ */ jsx("span", { className: "animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" }),
+          /* @__PURE__ */ jsx("span", { className: "relative inline-flex rounded-full h-2 w-2 bg-white" })
         ] }),
-        /* @__PURE__ */ jsx("div", { className: "relative py-1 max-h-[500px] overflow-y-auto scrollbar-hide", children: /* @__PURE__ */ jsx(
-          InfiniteScrollGrid,
-          {
-            itemMinWidth: "300px",
-            items: notifications2,
-            onLoadMore: fetchNextPage,
-            className: "gap-0 scrollbar-hide w-full",
-            itemTemplate: (item) => {
-              const notification = item;
-              return /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: clsx(
-                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
-                    "transition-all duration-200 hover:scale-[1.01]",
-                    "active:scale-[0.99]"
-                  ),
-                  children: /* @__PURE__ */ jsx(
-                    NotificationFactory,
-                    {
-                      notificationDto: notification,
-                      onClick: async () => {
-                        markAsRead(notification.id, {
-                          onSuccess: () => {
-                            markAsReadInCache(notification.id);
-                            setUnreadCount((prev) => Math.max(prev - 1, 0));
-                          }
-                        });
-                      }
-                    }
-                  )
-                }
-              );
-            },
-            itemKey: (item, index) => item.id + "-" + index,
-            hasMore: !!hasNextPage,
-            isLoading: isFetching,
-            loadingSkeleton: /* @__PURE__ */ jsx(NotificationSkeleton, {}),
-            numberOfSkeletons: 2,
-            emptyComponent: /* @__PURE__ */ jsx(
-              NotFound,
-              {
-                icon: "fa-regular fa-bell-slash",
-                title: t2("notifications:notifications.no-notifications"),
-                description: "When you have new updates, they will appear here."
-              }
-            )
-          }
-        ) }),
-        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2", children: /* @__PURE__ */ jsxs(
+        /* @__PURE__ */ jsx("span", { className: "text-sm font-medium", children: t2("offline.message") }),
+        /* @__PURE__ */ jsx(
           "button",
           {
-            className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2",
-            onClick: () => navigate("/notifications"),
-            title: t2("notifications:notifications.open-notifications"),
-            children: [
-              /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: t2("notifications:notifications.open-notifications") }),
-              /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-up-right-from-square" }) })
-            ]
-          }
-        ) })
-      ]
-    }
-  );
-};
-const NotificationBadge = ({}) => {
-  const navigate = useNavigate();
-  const { unreadCount } = useUnreadCount();
-  const { isShowNotification, isInNotificationPage, setShowNotification } = useNotificationUiState();
-  const menuRef = React.useRef(null);
-  const btnRef = React.useRef(null);
-  useClickOutside(menuRef, btnRef, () => {
-    if (isShowNotification) setShowNotification(false);
-  });
-  const handleToggleNotifications = () => {
-    if (window.innerWidth < 640 && !isShowNotification) {
-      navigate("/notifications");
-      return;
-    }
-    setShowNotification(!isShowNotification);
-  };
-  const isActive = isShowNotification || isInNotificationPage;
-  return /* @__PURE__ */ jsxs("div", { className: "relative flex items-center justify-center", children: [
-    /* @__PURE__ */ jsx(
-      Badge,
-      {
-        count: unreadCount,
-        onClick: handleToggleNotifications,
-        ref: btnRef,
-        className: clsx({
-          "!bg-primary-500/30": isActive
-        }),
-        children: /* @__PURE__ */ jsx(
-          Text,
-          {
-            className: clsx({
-              "!text-primary-500": isActive
-            }),
-            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" })
+            onClick: handleRetry,
+            className: "flex-shrink-0 px-3 py-1.5 bg-white/20 text-white rounded-full text-xs font-semibold hover:bg-white/30 active:scale-95 transition-all duration-150 border border-white/20",
+            children: t2("offline.retry")
           }
         )
-      }
-    ),
-    isShowNotification && !isInNotificationPage && /* @__PURE__ */ jsx("div", { onClick: () => setShowNotification(false), children: /* @__PURE__ */ jsx(
-      NotificationMenu,
-      {
-        className: clsx(
-          "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
-          "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
-          "top-[108%] -right-[70px] w-screen h-screen p-6"
-        ),
-        onClick: () => setShowNotification(!isShowNotification),
-        ref: menuRef
-      }
-    ) })
-  ] });
-};
-function useMessageCacheMutations() {
-  const queryClient = useQueryClient();
-  const addMessageToCache = useCallback(
-    (conversationId, message, isDescending = true) => {
-      queryClient.setQueriesData(
-        { queryKey: ["messages", conversationId] },
-        (old) => {
-          if (!old?.pages?.length) {
-            return {
-              pages: [
-                {
-                  items: [message],
-                  nextCursor: void 0,
-                  hasNext: false
-                }
-              ],
-              pageParams: [void 0]
-            };
-          }
-          const targetPageIndex = isDescending ? 0 : old.pages.length - 1;
-          const targetPage = old.pages[targetPageIndex];
-          for (const item of targetPage.items) {
-            if (item.id === message.id) return old;
-            if (item.clientTempId && item.clientTempId === message.clientTempId) {
-              const newPages2 = {
-                ...targetPage,
-                items: targetPage.items.map(
-                  (m) => m.clientTempId === message.clientTempId ? message : m
-                )
-              };
-              return {
-                ...old,
-                pages: [newPages2, ...old.pages.slice(1)]
-              };
-            }
-          }
-          const newPages = [...old.pages];
-          newPages[targetPageIndex] = {
-            ...targetPage,
-            items: isDescending ? [message, ...targetPage.items] : [...targetPage.items, message]
-          };
-          return {
-            ...old,
-            pages: newPages
-          };
-        }
-      );
-    },
-    [queryClient]
-  );
-  const updateMessageInCache = useCallback(
-    (conversationId, messageId, updater) => {
-      queryClient.setQueriesData(
-        { queryKey: ["messages", conversationId] },
-        (old) => {
-          if (!old?.pages) return old;
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              items: page.items.map((m) => m.id === messageId ? updater(m) : m)
-            }))
-          };
-        }
-      );
-    },
-    [queryClient]
-  );
-  const removeMessageFromCache = useCallback(
-    (conversationId, messageId) => {
-      queryClient.setQueriesData(
-        { queryKey: ["messages", conversationId] },
-        (old) => {
-          if (!old?.pages) return old;
-          return {
-            ...old,
-            pages: old.pages.map((page) => ({
-              ...page,
-              items: page.items.filter((m) => m.id !== messageId)
-            }))
-          };
-        }
-      );
-    },
-    [queryClient]
-  );
-  return { addMessageToCache, updateMessageInCache, removeMessageFromCache };
-}
-const PREFIX$3 = buildApiPath("/conversation");
-class ConversationService {
-  async getConversations(query) {
-    const res = await apiGet(`${PREFIX$3}`, query);
-    return res;
-  }
-  async getConversation(conversationId) {
-    return await apiGet(`${PREFIX$3}/${conversationId}`);
-  }
-  async getConversationWith(targetUserId) {
-    return await apiGet(`${PREFIX$3}/with/${targetUserId}`);
-  }
-  async getMessages(conversationId, query) {
-    return await apiGet(`${PREFIX$3}/${conversationId}/messages`, query);
-  }
-  async createGroupConversation(participantIds, name) {
-    return await apiPost(`${PREFIX$3}`, { participantIds, name });
-  }
-  async markAsSeen(conversationId, messageSeq) {
-    return await apiPost(`${PREFIX$3}/${conversationId}/messages/markSeen/${messageSeq}`);
-  }
-  async getParticipantsSeen(conversationId) {
-    return await apiGet(`${PREFIX$3}/${conversationId}/participants/seen`);
-  }
-  async getUnreadCount() {
-    return await apiGet(`${PREFIX$3}/unread-count`);
-  }
-}
-const conversationService = new ConversationService();
-const conversationKeys = {
-  list: (queryParams) => ["conversations", queryParams],
-  detail: (conversationId) => ["conversation", conversationId],
-  withUser: (targetId) => ["conversation", "with", targetId]
-};
-const conversationDetailQueryOptions = (conversationId) => createSafeQueryOptions({
-  queryKey: conversationKeys.detail(conversationId),
-  fn: async () => await conversationService.getConversation(conversationId)
-});
-const useFetchConversationWith = () => {
-  return useResultFetcher(
-    async (targetId) => await conversationService.getConversationWith(targetId)
-  );
-};
-const useGetConversation = (conversationId, config, enabled) => {
-  return useSafeQueryResult({
-    queryKey: conversationKeys.detail(conversationId),
-    fn: async () => await conversationService.getConversation(conversationId),
-    enabled: enabled ?? false,
-    options: config
-  });
-};
-const useCreateGroupConversation = () => {
-  const { showSnackbar } = useSnackbar();
-  return useResultFetcher(
-    async ({ participantIds, name }) => {
-      return await conversationService.createGroupConversation(participantIds, name);
-    },
-    {
-      onError: (error) => {
-        showSnackbar(error?.code ?? "Tạo cuộc trò chuyện nhóm thất bại", "error");
-      }
+      ] })
     }
   );
 };
-const useMarkConversationAsRead = () => {
-  return useResultFetcher(
-    async ({ conversationId, messageSeq }) => {
-      var r = await conversationService.markAsSeen(conversationId, messageSeq);
-      return r;
-    }
-  );
-};
-const useLocalMarkAsRead = () => {
-  const { markAsRead } = useConversationCacheMutations();
-  return (conversationId, messageSeq) => {
-    markAsRead(conversationId, messageSeq);
-  };
-};
-const useGetPariticipantsSeen = (conversationId) => {
-  return useSafeQueryResult({
-    queryKey: ["conversation", conversationId, "participantsSeen"],
-    fn: async () => await conversationService.getParticipantsSeen(conversationId),
-    enabled: !!conversationId,
-    options: {
-      onSuccess: (data) => {
-        useMessageStore.getState().setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
-      }
-    }
-  });
-};
-const useConversations = (queryParams) => {
-  const { userId } = useAuth();
-  const queryClient = useQueryClient();
-  const queryOptions = useMemo(
-    () => ({
-      onSuccess: (data) => {
-        const conversations2 = data.items;
-        if (conversations2.length > 0) {
-          const lastMessageSeqs = {};
-          conversations2.forEach((conv) => {
-            if (conv.lastMessage) {
-              lastMessageSeqs[conv.id] = conv.lastMessage.sequenceNumber;
-            }
-            const key = ["conversation", "unread-count", conv.id];
-            const serverCount = conv.unreadMessageCount ?? 0;
-            queryClient.setQueryData(key, (oldCount) => {
-              const currentCount = oldCount ?? 0;
-              return Math.max(currentCount, serverCount);
-            });
-          });
-          useMessageStore.getState().setBulkLastMessages(lastMessageSeqs);
-        }
-      }
-    }),
-    [queryClient]
-  );
-  return useSafeInfiniteQueryResult({
-    queryKey: conversationKeys.list(queryParams),
-    fn: async (cursor) => await conversationService.getConversations({ ...queryParams, cursor }),
-    enabled: !!userId,
-    staleTime: Infinity,
-    options: queryOptions
-  });
-};
-const useConversationCacheMutations = () => {
-  const queryClient = useQueryClient();
-  const updateDetailCache = (conversationId, updateFn) => {
-    const detailKey = conversationKeys.detail(conversationId);
-    queryClient.setQueryData(detailKey, (oldDetail) => {
-      if (!oldDetail) return oldDetail;
-      return updateFn(oldDetail);
-    });
-  };
-  const updateConversationInCache = (conversationId, updateFn) => {
-    const listKey = conversationKeys.list();
-    queryClient.setQueryData(listKey, (oldData) => {
-      if (!oldData || !oldData.pages.length) return oldData;
-      const newPages = oldData.pages.map((page) => ({
-        ...page,
-        items: page.items.map((item) => item.id === conversationId ? updateFn(item) : item)
-      }));
-      return {
-        ...oldData,
-        pages: newPages
-      };
-    });
-    updateDetailCache(conversationId, updateFn);
-  };
-  const markAsRead = async (conversationId, messageSeq) => {
-    updateConversationInCache(conversationId, (conv) => ({
-      ...conv,
-      myLastSeenSeq: messageSeq,
-      unreadMessageCount: 0
-    }));
-  };
-  const pushConversationToTop = async (conversationId, lastMessage) => {
-    const listKey = conversationKeys.list();
-    const currentData = queryClient.getQueryData(listKey);
-    let existedConv = null;
-    if (currentData) {
-      for (const page of currentData.pages) {
-        const found = page.items.find((item) => item.id === conversationId);
-        if (found) {
-          existedConv = { ...found, lastMessage: lastMessage || found.lastMessage };
-          break;
-        }
-      }
-    }
-    if (!existedConv) {
-      const fetched = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
-      if (!fetched) return;
-      existedConv = { ...fetched, lastMessage: lastMessage || fetched.lastMessage };
-    }
-    queryClient.setQueryData(conversationKeys.detail(conversationId), existedConv);
-    queryClient.setQueryData(listKey, (oldData) => {
-      if (!oldData || !oldData.pages.length) return oldData;
-      const newPages = oldData.pages.map((page) => ({
-        ...page,
-        items: page.items.filter((item) => item.id !== conversationId)
-      }));
-      newPages[0] = {
-        ...newPages[0],
-        items: [existedConv, ...newPages[0].items]
-      };
-      return {
-        ...oldData,
-        pages: newPages
-      };
-    });
-  };
-  return { pushConversationToTop, updateConversationInCache, markAsRead };
-};
-const useGetUnreadMessageCount = () => {
-  const { userId } = useAuth();
-  return useSafeQueryResult({
-    queryKey: ["conversation", "unread-count", userId],
-    fn: async () => await conversationService.getUnreadCount()
-  });
-};
-const useUnreadMessageCountCacheMutations = () => {
-  const queryClient = useQueryClient();
-  const { userId } = useAuth();
-  const setUnreadCount = (update) => {
-    const key = ["conversation", "unread-count", userId];
-    queryClient.setQueryData(key, (oldCount) => {
-      const currentCount = oldCount ?? 0;
-      const newCount = update(currentCount);
-      return Math.max(0, newCount);
-    });
-  };
-  const setUnreadCountForConversation = (conversationId, update) => {
-    const key = ["conversation", "unread-count", conversationId];
-    queryClient.setQueryData(key, (oldCount) => {
-      const currentCount = oldCount ?? 0;
-      const newCount = update(currentCount);
-      return Math.max(0, newCount);
-    });
-  };
-  const getUnreadCountForConversation = (conversationId) => {
-    const key = ["conversation", "unread-count", conversationId];
-    return queryClient.getQueryData(key) ?? 0;
-  };
-  return { setUnreadCount, setUnreadCountForConversation, getUnreadCountForConversation };
-};
-const useUnreadMessageCountCache = (conversationId) => {
-  const { data: unreadCount } = useQuery({
-    queryKey: ["conversation", "unread-count", conversationId],
-    queryFn: () => {
-      return 0;
-    },
-    enabled: !!conversationId,
-    staleTime: Infinity,
-    initialData: 0
-  });
-  return unreadCount ?? 0;
-};
-const useMessageStore = create((set) => ({
-  lastMessageMap: {},
-  messageUserSeenMap: {},
-  setLastMessage: (conversationId, messageSeq) => set((state) => ({
-    lastMessageMap: {
-      ...state.lastMessageMap,
-      [conversationId]: messageSeq
-    }
-  })),
-  setBulkLastMessages: (data) => set((state) => ({
-    lastMessageMap: {
-      ...state.lastMessageMap,
-      ...Object.entries(data).reduce(
-        (acc, [convId, newSeq]) => {
-          const currentSeq = state.lastMessageMap[convId];
-          acc[convId] = currentSeq !== void 0 ? Math.max(currentSeq, newSeq) : newSeq;
-          return acc;
-        },
-        {}
-      )
-    }
-  })),
-  setParticipantsSeen: (conversationId, userId, participantSeen) => {
-    set((state) => {
-      const rawConvMap = state.messageUserSeenMap?.[conversationId] || {};
-      const currentConvMap = JSON.parse(JSON.stringify(rawConvMap));
-      Object.keys(currentConvMap).forEach((mId) => {
-        currentConvMap[mId] = currentConvMap[mId].filter((v) => v.userId !== userId);
-        if (currentConvMap[mId].length === 0) {
-          delete currentConvMap[mId];
-        }
-      });
-      const newMsgSeq = participantSeen.sequenceNumber;
-      if (!currentConvMap[newMsgSeq]) {
-        currentConvMap[newMsgSeq] = [];
-      }
-      if (!currentConvMap[newMsgSeq].some((v) => v.userId === userId)) {
-        currentConvMap[newMsgSeq].push({
-          userId,
-          seenAt: participantSeen.seenAt
-        });
-      }
-      return {
-        messageUserSeenMap: {
-          ...state.messageUserSeenMap,
-          [conversationId]: currentConvMap
-        }
-      };
-    });
-  },
-  setBulkParticipantsSeen: (conversationId, data) => {
-    set((state) => {
-      if (!data) return state;
-      const currentConvMap = state.messageUserSeenMap?.[conversationId] || {};
-      const toTime = (value) => {
-        const t2 = new Date(value).getTime();
-        return Number.isFinite(t2) ? t2 : 0;
-      };
-      const mergedByUser = {};
-      Object.entries(currentConvMap).forEach(([messageSeq, viewers]) => {
-        viewers.forEach((viewer) => {
-          const existing = mergedByUser[viewer.userId];
-          if (!existing || toTime(viewer.seenAt) > toTime(existing.seenAt)) {
-            mergedByUser[viewer.userId] = {
-              sequenceNumber: Number(messageSeq),
-              seenAt: viewer.seenAt
-            };
-          }
-        });
-      });
-      Object.entries(data).forEach(([userId, seenInfo]) => {
-        const existing = mergedByUser[userId];
-        if (!existing || toTime(seenInfo.seenAt) > toTime(existing.seenAt)) {
-          mergedByUser[userId] = {
-            sequenceNumber: Number(seenInfo.sequenceNumber),
-            seenAt: seenInfo.seenAt
-          };
-        }
-      });
-      const newConvMap = {};
-      Object.entries(mergedByUser).forEach(([userId, seenInfo]) => {
-        if (!newConvMap[seenInfo.sequenceNumber]) newConvMap[seenInfo.sequenceNumber] = [];
-        newConvMap[seenInfo.sequenceNumber].push({ userId, seenAt: seenInfo.seenAt });
-      });
-      return {
-        messageUserSeenMap: {
-          ...state.messageUserSeenMap,
-          [conversationId]: newConvMap
-        }
-      };
-    });
-  }
-}));
-function MessageListener() {
-  const { addMessageToCache } = useMessageCacheMutations();
-  const { pushConversationToTop, updateConversationInCache } = useConversationCacheMutations();
-  const { setUnreadCount, setUnreadCountForConversation } = useUnreadMessageCountCacheMutations();
-  const { setParticipantsSeen } = useMessageStore();
-  const { userId } = useAuth();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const { fetch: markAsRead } = useMarkConversationAsRead();
-  const markAsReadLocal = useLocalMarkAsRead();
-  const autoReadMessageKeysRef = useRef(/* @__PURE__ */ new Set());
-  const createAutoReadKey = (conversationId, messageSeq) => `${conversationId}:${messageSeq}`;
-  useAppHub(async (message) => {
-    if (message.event !== "NewMessage") return;
-    const data = message.payload;
-    const conversationId = data.conversationId;
-    const isOwnMessage = data.senderId === userId;
-    if (data.correlationId && useChatStore.getState().registry[data.correlationId]) {
-      useChatStore.getState().replaceChat(data.correlationId, conversationId);
-    } else {
-      const queryParams = new URLSearchParams(location.search);
-      const currentTempId = queryParams.get("tempId");
-      if (useChatStore.getState().registry["temp-" + data.senderId]) {
-        useChatStore.getState().replaceChat("temp-" + data.senderId, conversationId);
-      } else if (location.pathname === "/fatalk/temp" && currentTempId === data.senderId) {
-        navigate(`/fatalk/${conversationId}`, { replace: true });
-      }
-      useChatStore.getState().openChat(conversationId, { type: "conversation", conversationId });
-    }
-    useMessageStore.getState().setLastMessage(conversationId, data.sequenceNumber);
-    addMessageToCache(conversationId, data, true);
-    pushConversationToTop(conversationId, data);
-    if (data.senderId === userId) {
-      updateConversationInCache(conversationId, (conv) => ({
-        ...conv,
-        myLastSeenMessageSeq: data.sequenceNumber
-      }));
-      markAsReadLocal(conversationId, data.sequenceNumber);
-      try {
-        await markAsRead({
-          conversationId,
-          messageSeq: data.sequenceNumber
-        });
-      } catch {
-      }
-    }
-    const { focusOnId: currentFocusId, activeIds, minimizedIds } = useChatStore.getState();
-    const isActiveChat = activeIds.includes(conversationId);
-    const isMinimizedChat = minimizedIds.includes(conversationId);
-    const isDisplayedChat = isActiveChat && !isMinimizedChat;
-    const isDocumentFocused = document.hasFocus();
-    if (currentFocusId !== conversationId || !isDisplayedChat || !isDocumentFocused) {
-      if (!isOwnMessage) {
-        if (data.shouldIncreaseUnreadCount) {
-          setUnreadCount((prev) => prev + 1);
-        }
-        setUnreadCountForConversation(conversationId, (prev) => prev + 1);
-      }
-    } else if (!isOwnMessage && isDisplayedChat && isDocumentFocused) {
-      const autoReadKey = createAutoReadKey(conversationId, data.sequenceNumber);
-      autoReadMessageKeysRef.current.add(autoReadKey);
-      markAsReadLocal(conversationId, data.sequenceNumber);
-      try {
-        await markAsRead({
-          conversationId,
-          messageSeq: data.sequenceNumber
-        });
-      } catch {
-        autoReadMessageKeysRef.current.delete(autoReadKey);
-      }
-    }
-  });
-  useAppHub((message) => {
-    if (message.event !== "SeenMessage") return;
-    const data = message.payload;
-    const conversationId = data.conversationId;
-    const otherUserId = data.userId;
-    setParticipantsSeen(conversationId, data.userId, {
-      sequenceNumber: data.messageSeq,
-      seenAt: data.seenAt
-    });
-    if (otherUserId !== userId) {
-      updateConversationInCache(conversationId, (conv) => ({
-        ...conv,
-        otherLastSeenMessageSeq: data.messageSeq
-      }));
-    } else {
-      updateConversationInCache(conversationId, (conv) => ({
-        ...conv,
-        myLastSeenMessageSeq: data.messageSeq
-      }));
-      const autoReadKey = createAutoReadKey(conversationId, data.messageSeq);
-      const isAutoReadAck = autoReadMessageKeysRef.current.has(autoReadKey);
-      if (isAutoReadAck) {
-        autoReadMessageKeysRef.current.delete(autoReadKey);
-      }
-      if (data.shouldDecreaseUnreadCount && !isAutoReadAck) {
-        setUnreadCount((prev) => prev - 1);
-      }
-      setUnreadCountForConversation(conversationId, (_prev) => 0);
-    }
-  });
-}
-function NotFoundPage() {
-  const navigate = useNavigate();
-  const { t: t2 } = useTranslation();
-  useEffect(() => {
-    document.title = "Page Not Found";
-    return () => {
-      document.title = "Fatagram";
-    };
-  });
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "flex flex-col items-center sm:justify-start flex-1 w-full gap-[20px] pt-10",
-        "bg-bg-main sm:bg-bg-second"
-      ),
-      children: [
-        /* @__PURE__ */ jsx(Logo, { hasSlogan: false, sz: "md" }),
-        /* @__PURE__ */ jsx(
-          "span",
-          {
-            className: clsx(
-              "font-bagel_fat_one leading-none tracking-tighter",
-              "text-8xl sm:text-9xl",
-              "text-gradient-main",
-              "drop-shadow-sm"
-            ),
-            children: "404"
-          }
-        ),
-        /* @__PURE__ */ jsx(Text, { weight: "extrabold", sz: "xl", className: clsx("uppercase text-gradient-second"), children: t2("notFound.title") }),
-        /* @__PURE__ */ jsx(Text, { sz: "lg", className: clsx("flex justify-center text-center"), wrap: "whitespace-normal", children: t2("notFound.description") }),
-        /* @__PURE__ */ jsx("div", { className: clsx("flex gap-[10px]"), children: /* @__PURE__ */ jsxs(
-          Button,
-          {
-            className: clsx("flex items-center"),
-            onClick: () => {
-              navigate("/");
-            },
-            children: [
-              /* @__PURE__ */ jsx(ArrowLeft, { className: clsx("w-5 h-5 mr-2") }),
-              t2("notFound.backButton")
-            ]
-          }
-        ) }),
-        /* @__PURE__ */ jsx(Footer, { className: clsx("text-text-third") })
-      ]
-    }
-  );
-}
-const HomePage = () => {
-  const navigate = useNavigate();
-  const handleRedirectToAdminProfile = () => {
-    navigate("/zzz");
-  };
-  return /* @__PURE__ */ jsx("div", { className: "h-full", children: /* @__PURE__ */ jsx(Button, { onClick: handleRedirectToAdminProfile, children: "Go to Fat Profile" }) });
-};
-const registerInitialValues = {
-  username: "",
-  email: "",
-  password: "",
-  confirmPassword: "",
-  isRememberMe: true
-};
-const registerValidationSchema = Yup.object().shape({
-  username: Yup.string().required("auth:register.errors.username.required").min(3, "auth:register.errors.username.tooShort").max(30, "auth:register.errors.username.tooLong").matches(/^[a-zA-Z0-9_]+$/, "auth:register.errors.username.notCorrectFormat"),
-  email: Yup.string().required("auth:register.errors.email.required").email("auth:register.errors.email.notCorrectFormat"),
-  password: Yup.string().required("auth:register.errors.password.required").min(8, "auth:register.errors.password.tooShort").max(100, "auth:register.errors.password.tooLong"),
-  confirmPassword: Yup.string().required("auth:register.errors.confirmPassword.required").oneOf([Yup.ref("password")], "auth:register.errors.passwords.doNotMatch")
-});
-const registerErrorCodeMap = {
-  USERNAME_EXISTED: {
-    message: "auth:register.errors.username.alreadyExists",
-    type: "username"
-  },
-  EMAIL_EXISTED: { message: "auth:register.errors.email.alreadyExists", type: "email" },
-  PHONE_NUMBER_EXISTED: {
-    message: "auth:register.errors.phoneNumber.alreadyExists",
-    type: "phoneNumber"
-  },
-  PASSWORD_TOO_WEAK: { message: "auth:register.errors.password.tooWeak", type: "password" },
-  UNKNOWN_ERROR: { message: "auth:register.errors.unknown", type: "username" }
-};
-const SocialButton = ({ icon, name, onClick, disabled }) => {
-  return /* @__PURE__ */ jsxs(
-    Button,
-    {
-      variant: "fourth",
-      className: "flex gap-2 flex-1 items-center justify-center",
-      onClick,
-      sz: "sm",
-      disabled,
-      children: [
-        /* @__PURE__ */ jsx("img", { src: icon, alt: name, className: "w-5 h-5" }),
-        /* @__PURE__ */ jsx("span", { className: "hidden sm:inline", children: name })
-      ]
-    }
-  );
-};
-const SocialButtons = ({ disabled }) => {
-  const { redirectToGoogle } = useAuth();
-  return /* @__PURE__ */ jsxs("div", { className: "flex gap-3 w-full", children: [
-    /* @__PURE__ */ jsx(
-      SocialButton,
-      {
-        name: "Google",
-        icon: "/svgs/google-icon.svg",
-        onClick: redirectToGoogle,
-        disabled
-      }
-    ),
-    /* @__PURE__ */ jsx(SocialButton, { name: "Facebook", icon: "/svgs/facebook-icon.svg", disabled: true })
-  ] });
-};
-const RegisterForm = ({
-  className,
-  showLogo = true,
-  showClose = false,
-  onClose
-}) => {
-  const { t: t2 } = useTranslation();
-  const [isShowClose] = useState(showClose);
-  const [isShowLogo] = useState(showLogo);
-  const navigate = useNavigate();
-  const [usernameError, setUsernameError] = useState("");
-  const [emailError, setEmailError] = useState("");
-  const [phoneNumberError, setPhoneNumberError] = useState("");
-  const [passwordError, setPasswordError] = useState("");
-  const [confirmPasswordError, setConfirmPasswordError] = useState("");
-  const { fetch: register2 } = useResultFetcher(authService.register, {
-    onSuccess: () => {
-      navigate("/login");
-    },
-    onError: (err, _errs) => {
-      const errMap = registerErrorCodeMap[err?.code] ?? registerErrorCodeMap["UNKNOWN_ERROR"];
-      if (errMap) {
-        switch (errMap.type) {
-          case "username":
-            setUsernameError(errMap.message);
-            break;
-          case "email":
-            setEmailError(errMap.message);
-            break;
-          case "phoneNumber":
-            setPhoneNumberError(errMap.message);
-            break;
-          case "password":
-            setPasswordError(errMap.message);
-            break;
-          case "confirmPassword":
-            setConfirmPasswordError(errMap.message);
-            break;
-        }
-      }
-    }
-  });
-  const formik = useFormik({
-    initialValues: registerInitialValues,
-    validationSchema: registerValidationSchema,
-    onSubmit: async (values) => {
-      setUsernameError("");
-      setEmailError("");
-      setPhoneNumberError("");
-      setPasswordError("");
-      setConfirmPasswordError("");
-      await register2({
-        username: values.username,
-        password: values.password,
-        confirmPassword: values.confirmPassword,
-        email: values.email,
-        phoneNumber: values.phoneNumber
-      });
-    }
-  });
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col items-center justify-center gap-3",
-        "rounded-2xl",
-        "animate-fade-in ",
-        className
-      ),
-      onSubmit: formik.submitForm,
-      children: [
-        isShowLogo && /* @__PURE__ */ jsx(Logo, { sz: "md" }),
-        /* @__PURE__ */ jsx(
-          Text,
-          {
-            weight: "extrabold",
-            className: "!text-3xl uppercase !text-primary-500 select-none text-center",
-            children: t2("auth:register.title")
-          }
-        ),
-        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              value: formik.values.username,
-              sz: "sm",
-              className: "w-full",
-              placeholder: t2("auth:register.username"),
-              onChange: (e) => formik.setFieldValue("username", e.target.value),
-              isWrong: formik.touched.username && Boolean(formik.errors.username) || Boolean(usernameError),
-              wrongMessage: t2(usernameError || formik.errors.username || ""),
-              disabled: formik.isSubmitting,
-              type: "text",
-              autoComplete: "username"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              value: formik.values.email,
-              sz: "sm",
-              className: "w-full",
-              placeholder: t2("auth:register.email"),
-              onChange: (e) => formik.setFieldValue("email", e.target.value),
-              isWrong: formik.touched.email && Boolean(formik.errors.email) || Boolean(emailError),
-              wrongMessage: t2(emailError || formik.errors.email || ""),
-              disabled: formik.isSubmitting,
-              type: "email",
-              autoComplete: "email"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              value: formik.values.phoneNumber,
-              sz: "sm",
-              className: "w-full",
-              placeholder: t2("auth:register.phoneNumber"),
-              onChange: (e) => formik.setFieldValue("phoneNumber", e.target.value),
-              isWrong: formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber) || Boolean(phoneNumberError),
-              wrongMessage: t2(phoneNumberError || formik.errors.phoneNumber || ""),
-              disabled: formik.isSubmitting,
-              type: "text",
-              autoComplete: "tel"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              type: "password",
-              value: formik.values.password,
-              sz: "sm",
-              className: "w-full",
-              placeholder: t2("auth:register.password"),
-              onChange: (e) => formik.setFieldValue("password", e.target.value),
-              isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
-              wrongMessage: t2(passwordError || formik.errors.password || ""),
-              disabled: formik.isSubmitting,
-              autoComplete: "new-password"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              type: "password",
-              value: formik.values.confirmPassword,
-              sz: "sm",
-              className: "w-full",
-              placeholder: t2("auth:register.confirmPassword"),
-              onChange: (e) => formik.setFieldValue("confirmPassword", e.target.value),
-              isWrong: formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword) || Boolean(confirmPasswordError),
-              wrongMessage: t2(confirmPasswordError || formik.errors.confirmPassword || ""),
-              disabled: formik.isSubmitting,
-              autoComplete: "new-password"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsx(
-          Checkbox,
-          {
-            className: "text-[15px] text-single-third gap-[8px] w-full",
-            label: /* @__PURE__ */ jsxs(Text, { className: "flex items-center flex-wrap", children: [
-              t2("auth:register.agree"),
-              " ",
-              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/terms", children: t2("auth:register.termsOfService") }),
-              " ",
-              t2("auth:register.and"),
-              " ",
-              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/policy", children: t2("auth:register.privacyPolicy") }),
-              "."
-            ] })
-          }
-        ),
-        /* @__PURE__ */ jsxs(
-          Button,
-          {
-            type: "button",
-            sz: "md",
-            className: "flex justify-center w-full",
-            onClick: formik.submitForm,
-            disabled: formik.isSubmitting,
-            children: [
-              formik.isSubmitting && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center mr-2", children: /* @__PURE__ */ jsx("div", { className: "w-3 h-3 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) }),
-              /* @__PURE__ */ jsx(Text, { children: t2("auth:register.registerButton") })
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center gap-3", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center w-full gap-3", children: [
-            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" }),
-            /* @__PURE__ */ jsx(Text, { sz: "sm", className: "text-text-third", children: "OR" }),
-            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" })
-          ] }),
-          /* @__PURE__ */ jsx(SocialButtons, { disabled: formik.isSubmitting })
-        ] }),
-        /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/login", children: t2("auth:register.loginButton") }),
-        isShowClose && /* @__PURE__ */ jsx(
-          Text,
-          {
-            sz: "lg",
-            className: clsx(
-              "absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer"
-            ),
-            onClick: onClose,
-            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
-          }
-        )
-      ]
-    }
-  );
-};
-function RegisterPage() {
-  useEffect(() => {
-    document.title = "Register - Fatagram";
-  }, []);
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col bg-bg-second flex-1 h-full lg:p-4",
-        "justify-center items-center"
-      ),
-      children: [
-        /* @__PURE__ */ jsx("div", { className: "absolute hidden sm:block inset-0 filter blur-lg opacity-80 background-image" }),
-        /* @__PURE__ */ jsxs(
-          "div",
-          {
-            className: clsx(
-              "relative flex bg-bg-second w-full ",
-              "flex-1 lg:w-[80%] lg:max-h-[800px]",
-              "lg:rounded-3xl rounded-none overflow-hidden"
-            ),
-            children: [
-              /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: clsx(
-                    "sm:absolute inset-0 lg:relative hidden sm:flex",
-                    "flex-1 login-bg justify-center items-center z-0"
-                  ),
-                  children: /* @__PURE__ */ jsx(Text, { className: "text-6xl select-none hidden lg:block", children: "Feeling" })
-                }
-              ),
-              /* @__PURE__ */ jsx("div", { className: "bg-bg-second px-[3rem] py-[1rem] flex-1 m-auto max-w-[500px] z-10 rounded-3xl lg:rounded-none", children: /* @__PURE__ */ jsx(RegisterForm, { className: "m-auto" }) })
-            ]
-          }
-        )
-      ]
-    }
-  );
-}
-const loginInitialValues = {
-  usernameOrEmail: "",
-  password: "",
-  isRememberMe: true
-};
-const loginValidationSchema = Yup.object().shape({
-  usernameOrEmail: Yup.string().required("auth:login.errors.usernameOrEmail.required").test(
-    "IS_VALID_USERNAME_OR_EMAIL",
-    "auth:login.errors.usernameOrEmail.invalidFormat",
-    function(value) {
-      if (!value) return false;
-      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
-      const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
-      return emailRegex.test(value) || usernameRegex.test(value);
-    }
-  ),
-  password: Yup.string().required("auth:login.errors.password.required").min(6, "auth:login.errors.password.tooShort")
-});
-const errorCodeMap = {
-  PASSWORD_INCORRECT: { message: "auth:login.errors.password.incorrect", type: "password" },
-  ACCOUNT_NOT_FOUND: {
-    message: "auth:login.errors.usernameOrEmail.notFound",
-    type: "username"
-  }
-};
-const LoginForm = ({
-  switchForgotPassword,
-  showLogo = true,
-  showClose = false,
-  onClose,
-  className
-}) => {
-  const { t: t2 } = useTranslation();
-  const [passwordError, setPasswordError] = useState("");
-  const [usernameOrEmailError, setUsernameOrEmailError] = useState("");
-  const [isShowClose] = React.useState(showClose);
-  const [isShowLogo] = React.useState(showLogo);
-  const { logIn } = useAuth();
-  const formik = useFormik({
-    initialValues: loginInitialValues,
-    validationSchema: loginValidationSchema,
-    onSubmit: async (values) => {
-      setUsernameOrEmailError("");
-      setPasswordError("");
-      await logIn(
-        {
-          usernameOrEmail: values.usernameOrEmail,
-          password: values.password
-        },
-        {
-          onError: (err, _errs) => {
-            const errMap = errorCodeMap[err.code] ?? errorCodeMap["UNKNOWN_ERROR"];
-            if (errMap) {
-              errMap.type === "username" ? setUsernameOrEmailError(errMap.message) : errMap.type == "password" ? setPasswordError(errMap.message) : null;
-            }
-          }
-        }
-      );
-    }
-  });
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col items-center justify-center gap-5",
-        "animate-fade-in",
-        className
-      ),
-      children: [
-        isShowLogo && /* @__PURE__ */ jsx(Logo, { sz: "md" }),
-        /* @__PURE__ */ jsx(
-          Text,
-          {
-            weight: "extrabold",
-            className: clsx(
-              "uppercase !text-primary-500",
-              "font-bold font-inter select-none !text-3xl"
-            ),
-            children: t2("auth:login.title")
-          }
-        ),
-        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              sz: "sm",
-              className: "w-full",
-              placeholder: t2("auth:login.username"),
-              onChange: (e) => formik.setFieldValue("usernameOrEmail", e.target.value),
-              isWrong: formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail) || Boolean(usernameOrEmailError),
-              wrongMessage: t2(usernameOrEmailError || formik.errors.usernameOrEmail || ""),
-              disabled: formik.isSubmitting,
-              type: "text",
-              autoComplete: "username"
-            }
-          ),
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              type: "password",
-              sz: "sm",
-              className: "w-full",
-              placeholder: t2("auth:login.password"),
-              onChange: (e) => formik.setFieldValue("password", e.target.value),
-              isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
-              wrongMessage: t2(passwordError || formik.errors.password || ""),
-              disabled: formik.isSubmitting,
-              autoComplete: "current-password"
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxs("div", { className: "flex justify-between w-full items-center gap-[50px]", children: [
-          /* @__PURE__ */ jsx(
-            Checkbox,
-            {
-              label: t2("auth:login.rememberMe"),
-              onChange: (e) => {
-                formik.setFieldValue("rememberMe", e.target.checked);
-              },
-              className: "items-center",
-              disabled: formik.isSubmitting
-            }
-          ),
-          switchForgotPassword && /* @__PURE__ */ jsx(
-            Text,
-            {
-              sz: "md",
-              className: clsx(
-                "!text-primary-500 hover:!text-primary-600",
-                "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
-              ),
-              onClick: switchForgotPassword,
-              children: t2("auth:login.forgotPassword")
-            }
-          )
-        ] }),
-        /* @__PURE__ */ jsxs(
-          Button,
-          {
-            type: "button",
-            onClick: formik.submitForm,
-            sz: "md",
-            className: "w-full flex items-center justify-center",
-            disabled: formik.isSubmitting,
-            children: [
-              formik.isSubmitting && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center mr-2", children: /* @__PURE__ */ jsx("div", { className: "w-3 h-3 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) }),
-              t2("auth:login.loginButton")
-            ]
-          }
-        ),
-        /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center gap-3", children: [
-          /* @__PURE__ */ jsxs("div", { className: "flex items-center w-full gap-3", children: [
-            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" }),
-            /* @__PURE__ */ jsx(Text, { sz: "sm", className: "text-text-third", children: "OR" }),
-            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" })
-          ] }),
-          /* @__PURE__ */ jsx(SocialButtons, { disabled: formik.isSubmitting })
-        ] }),
-        /* @__PURE__ */ jsxs(Text, { children: [
-          t2("auth:login.dontHaveAccount"),
-          " ",
-          /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/register", children: t2("auth:login.registerButton") })
-        ] }),
-        isShowClose && /* @__PURE__ */ jsx(
-          Text,
-          {
-            className: clsx(
-              "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
-            ),
-            onClick: onClose,
-            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
-          }
-        )
-      ]
-    }
-  );
-};
-function LoginPage() {
-  const [forgotPassword, _setForgotPassword] = useState(false);
-  useEffect(() => {
-    document.title = forgotPassword ? "Forgot Password - Fatagram" : "Login - Fatagram";
-  }, [forgotPassword]);
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col bg-bg-second flex-1 h-full lg:p-4",
-        "justify-center items-center"
-      ),
-      children: [
-        /* @__PURE__ */ jsx("div", { className: "absolute hidden sm:block inset-0 filter blur-lg opacity-80 background-image" }),
-        /* @__PURE__ */ jsxs(
-          "div",
-          {
-            className: clsx(
-              "relative flex bg-bg-second w-full ",
-              "flex-1 lg:w-[80%] lg:max-h-[800px]",
-              "lg:rounded-3xl rounded-none overflow-hidden"
-            ),
-            children: [
-              /* @__PURE__ */ jsx(
-                "div",
-                {
-                  className: clsx(
-                    "sm:absolute inset-0 lg:relative hidden sm:flex",
-                    "flex-1 login-bg justify-center items-center z-0"
-                  ),
-                  children: /* @__PURE__ */ jsx(Text, { className: "text-6xl select-none hidden lg:block", children: "Feeling" })
-                }
-              ),
-              /* @__PURE__ */ jsx("div", { className: "bg-bg-second px-[3rem] py-[1rem] flex-1 m-auto max-w-[500px] z-10 rounded-3xl lg:rounded-none", children: /* @__PURE__ */ jsx(LoginForm, { className: "m-auto" }) })
-            ]
-          }
-        )
-      ]
-    }
-  );
-}
 const useActiveRoute = (to, end = false) => {
   const resolved = useResolvedPath(to);
   const match = useMatch({ path: resolved.pathname, end });
@@ -4649,6 +4727,102 @@ const FriendRequestItem = ({
     }
   );
 };
+function InfiniteScrollGrid({
+  itemMinWidth,
+  items,
+  loadingSkeleton,
+  numberOfSkeletons = 4,
+  className,
+  hasMore = true,
+  isLoading = false,
+  itemTemplate,
+  onLoadMore,
+  isShowLastSeen = false,
+  itemKey,
+  emptyComponent
+}) {
+  const sentinelRef = useRef(null);
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel || !hasMore || isLoading) return;
+    const observer = new IntersectionObserver(
+      async ([entry]) => {
+        if (entry.isIntersecting && !isLoading) {
+          await onLoadMore();
+        }
+      },
+      {
+        rootMargin: "100px"
+      }
+    );
+    observer.observe(sentinel);
+    return () => observer.disconnect();
+  }, [hasMore, isLoading, onLoadMore]);
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className,
+      style: {
+        display: "grid",
+        gridTemplateColumns: `repeat(auto-fill, minmax(${itemMinWidth}, 1fr))`,
+        gap: "0.5rem",
+        position: "relative"
+      },
+      children: [
+        items.map((item, index) => /* @__PURE__ */ jsx("div", { className: "w-full", children: itemTemplate ? itemTemplate(item, index) : item }, itemKey ? itemKey(item, index) : index)),
+        isLoading && /* @__PURE__ */ jsx(Fragment, { children: Array.from({ length: numberOfSkeletons }).map((_, index) => /* @__PURE__ */ jsx("div", { children: loadingSkeleton ?? "Loading..." }, `skeleton-${index}`)) }),
+        hasMore && /* @__PURE__ */ jsx("div", { ref: sentinelRef, style: { gridColumn: "1 / -1", height: "10px" } }),
+        !hasMore && items.length > 0 && isShowLastSeen && /* @__PURE__ */ jsx(
+          "div",
+          {
+            style: {
+              gridColumn: "1 / -1",
+              textAlign: "center",
+              padding: "1rem 0",
+              color: "var(--text-third-color)"
+            },
+            children: "Đã xem hết kết quả."
+          }
+        ),
+        items.length === 0 && !isLoading && /* @__PURE__ */ jsx(
+          "div",
+          {
+            style: {
+              gridColumn: "1 / -1",
+              textAlign: "center",
+              padding: "1rem 0",
+              color: "var(--text-third-color)"
+            },
+            children: emptyComponent ?? "Không có dữ liệu nào."
+          }
+        )
+      ]
+    }
+  );
+}
+const NotFound = ({ icon, title: title2, description: description2, className }) => {
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx("flex flex-col items-center justify-center gap-4 animate-fade-in", className),
+      children: [
+        /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center w-16 h-16 rounded-full bg-bg-third/50 text-text-third", children: /* @__PURE__ */ jsx("i", { className: clsx("text-3xl", icon) }) }),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-1", children: [
+          /* @__PURE__ */ jsx(Text, { sz: "md", weight: "bold", className: "text-text-main text-base font-medium", children: title2 }),
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "sm",
+              wrap: "whitespace-pre-wrap",
+              className: "text-text-main/60 text-sm text-text-fourth",
+              children: description2
+            }
+          )
+        ] })
+      ]
+    }
+  );
+};
 const useAcceptFriendRequest = () => {
   return useResultFetcher(friendshipService.AcceptAddFriendRequest);
 };
@@ -4734,32 +4908,60 @@ const friendsRoutes = {
     }
   ]
 };
-const NotificationsPage = () => {
-  const { setInNotificationPage, setShowNotification } = useNotificationUiState();
-  useLayoutEffect(() => {
-    setInNotificationPage(true);
+function NotFoundPage$1() {
+  const navigate = useNavigate();
+  const { t: t2 } = useTranslation();
+  useEffect(() => {
+    document.title = "Page Not Found";
     return () => {
-      setInNotificationPage(false);
-      setShowNotification(false);
+      document.title = "Fatagram";
     };
-  }, []);
-  return /* @__PURE__ */ jsx(
+  });
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
-        "relative flex items-start justify-center w-full h-[calc(100dvh-var(--header-height))] sm:mt-1"
+        "flex flex-col items-center sm:justify-start flex-1 w-full gap-[20px] pt-10",
+        "bg-bg-main sm:bg-bg-second"
       ),
-      children: /* @__PURE__ */ jsx(
-        NotificationMenu,
-        {
-          className: clsx(
-            "sm:max-w-[600px] w-full px-2 py-2 sm:mx-4 sm:!rounded-lg h-full sm:h-auto !rounded-none"
-          )
-        }
-      )
+      children: [
+        /* @__PURE__ */ jsx(Logo, { hasSlogan: false, sz: "md" }),
+        /* @__PURE__ */ jsx(
+          "span",
+          {
+            className: clsx(
+              "font-bagel_fat_one leading-none tracking-tighter",
+              "text-8xl sm:text-9xl",
+              "text-gradient-main",
+              "drop-shadow-sm"
+            ),
+            children: "404"
+          }
+        ),
+        /* @__PURE__ */ jsx(Text, { weight: "extrabold", sz: "xl", className: clsx("uppercase text-gradient-second"), children: t2("notFound.title") }),
+        /* @__PURE__ */ jsx(Text, { sz: "lg", className: clsx("flex justify-center text-center"), wrap: "whitespace-normal", children: t2("notFound.description") }),
+        /* @__PURE__ */ jsx("div", { className: clsx("flex gap-[10px]"), children: /* @__PURE__ */ jsxs(
+          Button,
+          {
+            className: clsx("flex items-center"),
+            onClick: () => {
+              navigate("/");
+            },
+            children: [
+              /* @__PURE__ */ jsx(ArrowLeft, { className: clsx("w-5 h-5 mr-2") }),
+              t2("notFound.backButton")
+            ]
+          }
+        ) }),
+        /* @__PURE__ */ jsx(Footer, { className: clsx("text-text-third") })
+      ]
     }
   );
-};
+}
+const notFoundPage = /* @__PURE__ */ Object.freeze(/* @__PURE__ */ Object.defineProperty({
+  __proto__: null,
+  default: NotFoundPage$1
+}, Symbol.toStringTag, { value: "Module" }));
 const useUserId = (userParam) => {
   return useSafeQueryResult({
     queryKey: ["user-profile-id", userParam],
@@ -4796,7 +4998,7 @@ function ProfilePageProvider({ children }) {
     return /* @__PURE__ */ jsx(LoadingPage, {});
   }
   if (!data) {
-    return /* @__PURE__ */ jsx(NotFoundPage, {});
+    return /* @__PURE__ */ jsx(NotFoundPage$1, {});
   }
   return /* @__PURE__ */ jsx(ProfilePageContext.Provider, { value: contextValue, children });
 }
@@ -4807,35 +5009,36 @@ function useProfilePage() {
   }
   return context;
 }
-const profileQueryKey = (userId) => ["user", "profile", userId];
-const avatarQueryKey = (userId) => ["user", "avatar", userId];
-const backgroundQueryKey = (userId) => ["user", "background", userId];
-const profileDetailsQueryKey = (userId) => ["user", "profile", "details", userId];
+const USER_PROFILE_BASE_KEY = ["user", "profile"];
+const FULL_PROFILE_FIELDS = "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName";
+const SUMMARY_PROFILE_FIELDS = "id,fullName,avatar,urlName";
+const DETAILS_PROFILE_FIELDS = "bio,description";
+const normalizeFields = (fields) => fields.split(",").map((field) => field.trim()).filter(Boolean).sort().join(",");
+const userProfilePrefixKey = (userId) => ["user", "profile", userId];
+const profileQueryKey = (userId, fields) => ["user", "profile", userId, normalizeFields(fields)];
 const useOnboarding = () => {
   const queryClient = useQueryClient();
   return useResultFetcher(userProfileService.completeOnboarding, {
     onSuccess: () => {
       queryClient.invalidateQueries({
-        queryKey: ["user", "profile"]
+        queryKey: USER_PROFILE_BASE_KEY
       });
     }
   });
 };
 const useGetUserProfile = (userId) => {
   return useSafeQueryResult({
-    queryKey: profileQueryKey(userId ?? ""),
-    fn: async () => await userProfileService.getProfile(
-      userId,
-      "id,firstName,lastName,middleName,fullName,nickname,avatar,background,urlName"
-    ),
+    queryKey: profileQueryKey(userId ?? "", FULL_PROFILE_FIELDS),
+    fn: async () => await userProfileService.getProfile(userId, FULL_PROFILE_FIELDS),
     enabled: !!userId
   });
 };
 const useGetUserProfiles = (userIds) => {
+  const normalizedUserIds = useMemo(() => [...new Set(userIds.filter(Boolean))].sort(), [userIds]);
   const queries = useQueries({
-    queries: userIds.map((id) => ({
-      queryKey: ["user", "profile", id],
-      queryFn: async () => await userProfileService.getProfile(id, "id,fullName,avatar,urlName"),
+    queries: normalizedUserIds.map((id) => ({
+      queryKey: profileQueryKey(id, SUMMARY_PROFILE_FIELDS),
+      queryFn: async () => await userProfileService.getProfile(id, SUMMARY_PROFILE_FIELDS),
       enabled: !!id,
       staleTime: 1e3 * 60 * 5
     }))
@@ -4851,22 +5054,22 @@ const useGetUserProfiles = (userIds) => {
 };
 const useGetUserAvatar = (userId) => {
   return useSafeQueryResult({
-    queryKey: avatarQueryKey(userId),
+    queryKey: profileQueryKey(userId, "avatar"),
     fn: async () => await userProfileService.getProfile(userId, "avatar"),
     enabled: !!userId
   });
 };
 const useGetUserBackground = (userId) => {
   return useSafeQueryResult({
-    queryKey: backgroundQueryKey(userId),
+    queryKey: profileQueryKey(userId, "background"),
     fn: async () => await userProfileService.getProfile(userId, "background"),
     enabled: !!userId
   });
 };
 const useGetUserProfileDetails = (userId) => {
   return useSafeQueryResult({
-    queryKey: profileDetailsQueryKey(userId),
-    fn: async () => await userProfileService.getProfile(userId, "bio,description"),
+    queryKey: profileQueryKey(userId, DETAILS_PROFILE_FIELDS),
+    fn: async () => await userProfileService.getProfile(userId, DETAILS_PROFILE_FIELDS),
     enabled: !!userId
   });
 };
@@ -4885,7 +5088,7 @@ const useUpdateName = (userId) => {
     {
       onSuccess: () => {
         qc.invalidateQueries({
-          queryKey: profileQueryKey(userId)
+          queryKey: userProfilePrefixKey(userId)
         });
       }
     }
@@ -4896,7 +5099,7 @@ const useUpdateUrlName = (userId) => {
   return useResultFetcher(userProfileService.updateUrlName, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: profileQueryKey(userId)
+        queryKey: userProfilePrefixKey(userId)
       });
     }
   });
@@ -4910,7 +5113,7 @@ const useUpdateNickname = (userId) => {
     {
       onSuccess: () => {
         qc.invalidateQueries({
-          queryKey: profileQueryKey(userId)
+          queryKey: userProfilePrefixKey(userId)
         });
       }
     }
@@ -4921,10 +5124,7 @@ const useUpdateProfile = (userId) => {
   return useResultFetcher((data) => userProfileService.updateProfile(data), {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: profileQueryKey(userId)
-      });
-      qc.invalidateQueries({
-        queryKey: profileDetailsQueryKey(userId)
+        queryKey: userProfilePrefixKey(userId)
       });
     }
   });
@@ -4934,7 +5134,7 @@ const useSelectBackground = (userId) => {
   return useResultFetcher(userProfileService.uploadBackground, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: backgroundQueryKey(userId)
+        queryKey: userProfilePrefixKey(userId)
       });
     }
   });
@@ -4944,7 +5144,7 @@ const useSelectAvatar = (userId) => {
   return useResultFetcher(userProfileService.uploadAvatar, {
     onSuccess: () => {
       qc.invalidateQueries({
-        queryKey: avatarQueryKey(userId)
+        queryKey: userProfilePrefixKey(userId)
       });
     }
   });
@@ -4953,10 +5153,10 @@ const ProfileBackground = ({}) => {
   const { t: t2 } = useTranslation();
   const { targetId, isOwner } = useProfilePage();
   const { data, isLoading, isFetching } = useGetUserBackground(targetId);
-  const { fetch, isFetching: isUpdating } = useSelectBackground(targetId);
+  const { fetch: fetch2, isFetching: isUpdating } = useSelectBackground(targetId);
   const { showSnackbar } = useSnackbar();
   const handleSelectBackground = async (file) => {
-    await fetch(file, {
+    await fetch2(file, {
       onSuccess: () => {
         showSnackbar("Background updated successfully", "success");
       }
@@ -4990,10 +5190,10 @@ const ProfileBackground = ({}) => {
 const ProfileAvatar = ({ className }) => {
   const { targetId, isOwner } = useProfilePage();
   const { data, isLoading, isFetching } = useGetUserAvatar(targetId);
-  const { fetch, isFetching: isUpdating } = useSelectAvatar(targetId);
+  const { fetch: fetch2, isFetching: isUpdating } = useSelectAvatar(targetId);
   const { showSnackbar } = useSnackbar();
   const handleSelectAvatar = async (file) => {
-    await fetch(file, {
+    await fetch2(file, {
       onSuccess: () => {
         showSnackbar("Avatar updated successfully", "success");
       }
@@ -5225,7 +5425,13 @@ function useLanguage$1() {
 }
 const useOpenChat = () => {
   const isMobile = useMediaQuery("(max-width: 640px)");
-  const { openChat, registry, focusOnId, setFocusOn } = useChatStore();
+  const { openChat, registry, setFocusOn } = useChatStore(
+    useShallow((state) => ({
+      openChat: state.openChat,
+      registry: state.registry,
+      setFocusOn: state.setFocusOn
+    }))
+  );
   const { fetch: fetchConversationWith } = useFetchConversationWith();
   const navigate = useNavigate();
   const location = useLocation();
@@ -5237,7 +5443,7 @@ const useOpenChat = () => {
         openChat(conversationId, { type: "conversation", conversationId });
       }
     },
-    [isMobile, location.pathname, navigate]
+    [isMobile, location.pathname, navigate, openChat]
   );
   const _openChatWithTarget = useCallback(
     async (targetId) => {
@@ -5288,7 +5494,6 @@ const useOpenChat = () => {
     [registry, fetchConversationWith]
   );
   return {
-    focusOnId,
     openChat: _openChat,
     openChatWithTarget: _openChatWithTarget,
     checkConversationWith: _checkConversationWith,
@@ -5698,7 +5903,7 @@ const EditableTextArea = ({
         /* @__PURE__ */ jsx(
           TextArea,
           {
-            className: clsx("animate-fade-in px-2 py-1 w-full h-[50px]", isError && "mt-[5px]"),
+            className: clsx("animate-fade-in ", isError && "mt-[5px]"),
             placeholder,
             value: inputValue,
             isWrong: isError,
@@ -6069,30 +6274,6 @@ const SubNavbar = ({ className, children }) => {
 };
 SubNavbar.Item = SubNavbarItem;
 SubNavbar.Section = SubNavbarSection;
-const styles = {
-  "overlay-loading-bg-color": "_overlay-loading-bg-color_snybu_4"
-};
-const OverlayLoading = () => {
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      className: clsx(
-        "absolute inset-0 flex items-center justify-center z-50",
-        styles["overlay-loading-bg-color"]
-      ),
-      children: /* @__PURE__ */ jsx(
-        "div",
-        {
-          className: clsx(
-            "absolute top-1/2 w-12 h-12 border-4 border-transparent",
-            "border-t-primary-700 border-r-primary-700",
-            "rounded-full animate-spin"
-          )
-        }
-      )
-    }
-  );
-};
 const ProfileAboutNavbar = ({ className }) => {
   const { t: t2 } = useTranslation();
   const aboutNavbarItems = [
@@ -6208,6 +6389,657 @@ const userRoute = {
       type: "public"
     }
   ]
+};
+const notificationQueryKey = (userId, queryParams) => ["notifications", userId, queryParams];
+const useNotifications = (queryParams) => {
+  const { userId } = useAuth();
+  return useSafeInfiniteQueryResult({
+    queryKey: notificationQueryKey(userId, queryParams),
+    fn: async (cursor) => await notificationService.getNotifications({ ...queryParams, cursor }),
+    enabled: !!userId
+  });
+};
+const useMarkNotificationAsRead = () => {
+  return useResultFetcher(
+    (notificationId) => notificationService.markAsRead(notificationId)
+  );
+};
+const useDeleteAllNotifications = () => {
+  const qc = useQueryClient();
+  return useResultFetcher(notificationService.deleteAll, {
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ["notifications"] });
+    }
+  });
+};
+const NotificationMenu = ({ className, ref }) => {
+  const { t: t2 } = useTranslation();
+  const navigate = useNavigate$1();
+  const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
+    limit: 20
+  });
+  const { fetch: deleteAll } = useDeleteAllNotifications();
+  const { isInNotificationPage } = useNotificationUiState();
+  const { unreadCount, setUnreadCount } = useUnreadCount();
+  const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } = useNotificationCacheMutations();
+  const { fetch: markAsRead } = useMarkNotificationAsRead();
+  const notifications2 = React.useMemo(() => {
+    return data?.pages.flatMap((page) => page.items) || [];
+  }, [data]);
+  const handleMarkAllAsRead = async () => {
+    markAllAsReadInCache();
+    setUnreadCount(0);
+    await notificationService.markAllAsRead();
+    invalidateNotifications();
+  };
+  const handleDeleteAll = async (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    await deleteAll({
+      onSuccess: () => {
+        clearAllFromCache();
+        setUnreadCount(0);
+        invalidateNotifications();
+      },
+      onError: () => {
+        console.error("Failed to delete all notifications");
+      }
+    });
+  };
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "bg-bg-main sm:bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
+        "animate-dropdown-slide origin-top scrollbar-hide",
+        className
+      ),
+      ref,
+      children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between px-2 pt-2", children: [
+          /* @__PURE__ */ jsx(Text, { sz: "lg", weight: "bold", children: t2("notifications:notifications.title") }),
+          notifications2.length > 0 && /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2", children: [
+            unreadCount > 0 && /* @__PURE__ */ jsx(
+              "button",
+              {
+                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
+                onClick: handleMarkAllAsRead,
+                title: t2("notifications:notifications.mark-all-read"),
+                children: /* @__PURE__ */ jsx(Text, { sz: "md", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-check-double" }) })
+              }
+            ),
+            /* @__PURE__ */ jsx(
+              "button",
+              {
+                className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer",
+                onClick: handleDeleteAll,
+                title: t2("notifications:notifications.delete-all"),
+                children: /* @__PURE__ */ jsx(Text, { sz: "md", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-trash-can" }) })
+              }
+            )
+          ] })
+        ] }),
+        /* @__PURE__ */ jsx("div", { className: "relative py-1 max-h-[500px] overflow-y-auto scrollbar-hide", children: /* @__PURE__ */ jsx(
+          InfiniteScrollGrid,
+          {
+            itemMinWidth: "300px",
+            items: notifications2,
+            onLoadMore: fetchNextPage,
+            className: "gap-0 scrollbar-hide w-full",
+            itemTemplate: (item) => {
+              const notification = item;
+              return /* @__PURE__ */ jsx(
+                "div",
+                {
+                  className: clsx(
+                    "px-2 py-3 hover:bg-bg-fourth rounded-lg cursor-pointer",
+                    "transition-all duration-200 hover:scale-[1.01]",
+                    "active:scale-[0.99]"
+                  ),
+                  children: /* @__PURE__ */ jsx(
+                    NotificationFactory,
+                    {
+                      notificationDto: notification,
+                      onClick: async () => {
+                        markAsRead(notification.id, {
+                          onSuccess: () => {
+                            markAsReadInCache(notification.id);
+                            setUnreadCount((prev) => Math.max(prev - 1, 0));
+                          }
+                        });
+                      }
+                    }
+                  )
+                }
+              );
+            },
+            itemKey: (item, index) => item.id + "-" + index,
+            hasMore: !!hasNextPage,
+            isLoading: isFetching,
+            loadingSkeleton: /* @__PURE__ */ jsx(NotificationSkeleton, {}),
+            numberOfSkeletons: 2,
+            emptyComponent: /* @__PURE__ */ jsx(
+              NotFound,
+              {
+                icon: "fa-regular fa-bell-slash",
+                title: t2("notifications:notifications.no-notifications"),
+                description: "When you have new updates, they will appear here."
+              }
+            )
+          }
+        ) }),
+        !isInNotificationPage && /* @__PURE__ */ jsx("div", { className: "flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2", children: /* @__PURE__ */ jsxs(
+          "button",
+          {
+            className: "p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2",
+            onClick: () => navigate("/notifications"),
+            title: t2("notifications:notifications.open-notifications"),
+            children: [
+              /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: t2("notifications:notifications.open-notifications") }),
+              /* @__PURE__ */ jsx(Text, { sz: "sm", color: "secondary", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-up-right-from-square" }) })
+            ]
+          }
+        ) })
+      ]
+    }
+  );
+};
+const NotificationBadge = ({}) => {
+  const navigate = useNavigate();
+  const { unreadCount } = useUnreadCount();
+  const { isShowNotification, isInNotificationPage, setShowNotification } = useNotificationUiState();
+  const menuRef = React.useRef(null);
+  const btnRef = React.useRef(null);
+  useClickOutside(menuRef, btnRef, () => {
+    if (isShowNotification) setShowNotification(false);
+  });
+  const handleToggleNotifications = () => {
+    if (window.innerWidth < 640 && !isShowNotification) {
+      navigate("/notifications");
+      return;
+    }
+    setShowNotification(!isShowNotification);
+  };
+  const isActive = isShowNotification || isInNotificationPage;
+  return /* @__PURE__ */ jsxs("div", { className: "relative flex items-center justify-center", children: [
+    /* @__PURE__ */ jsx(
+      Badge,
+      {
+        count: unreadCount,
+        onClick: handleToggleNotifications,
+        ref: btnRef,
+        className: clsx({
+          "!bg-primary-500/30": isActive
+        }),
+        children: /* @__PURE__ */ jsx(
+          Text,
+          {
+            className: clsx({
+              "!text-primary-500": isActive
+            }),
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-bell" })
+          }
+        )
+      }
+    ),
+    isShowNotification && !isInNotificationPage && /* @__PURE__ */ jsx("div", { onClick: () => setShowNotification(false), children: /* @__PURE__ */ jsx(
+      NotificationMenu,
+      {
+        className: clsx(
+          "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
+          "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
+          "top-[108%] -right-[70px] w-screen h-screen p-6"
+        ),
+        onClick: () => setShowNotification(!isShowNotification),
+        ref: menuRef
+      }
+    ) })
+  ] });
+};
+const SocialButton = ({ icon, name, onClick, disabled }) => {
+  return /* @__PURE__ */ jsxs(
+    Button,
+    {
+      variant: "fourth",
+      className: "flex gap-2 flex-1 items-center justify-center",
+      onClick,
+      sz: "sm",
+      disabled,
+      children: [
+        /* @__PURE__ */ jsx("img", { src: icon, alt: name, className: "w-5 h-5" }),
+        /* @__PURE__ */ jsx("span", { className: "hidden sm:inline", children: name })
+      ]
+    }
+  );
+};
+const SocialButtons = ({ disabled }) => {
+  const { redirectToGoogle } = useAuth();
+  return /* @__PURE__ */ jsxs("div", { className: "flex gap-3 w-full", children: [
+    /* @__PURE__ */ jsx(
+      SocialButton,
+      {
+        name: "Google",
+        icon: "/svgs/google-icon.svg",
+        onClick: redirectToGoogle,
+        disabled
+      }
+    ),
+    /* @__PURE__ */ jsx(SocialButton, { name: "Facebook", icon: "/svgs/facebook-icon.svg", disabled: true })
+  ] });
+};
+const loginInitialValues = {
+  usernameOrEmail: "",
+  password: "",
+  isRememberMe: true
+};
+const loginValidationSchema = Yup.object().shape({
+  usernameOrEmail: Yup.string().required("auth:login.errors.usernameOrEmail.required").test(
+    "IS_VALID_USERNAME_OR_EMAIL",
+    "auth:login.errors.usernameOrEmail.invalidFormat",
+    function(value) {
+      if (!value) return false;
+      const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
+      const usernameRegex = /^[a-zA-Z0-9_]{3,30}$/;
+      return emailRegex.test(value) || usernameRegex.test(value);
+    }
+  ),
+  password: Yup.string().required("auth:login.errors.password.required").min(6, "auth:login.errors.password.tooShort")
+});
+const errorCodeMap = {
+  PASSWORD_INCORRECT: { message: "auth:login.errors.password.incorrect", type: "password" },
+  ACCOUNT_NOT_FOUND: {
+    message: "auth:login.errors.usernameOrEmail.notFound",
+    type: "username"
+  }
+};
+const LoginForm = ({
+  switchForgotPassword,
+  showLogo = true,
+  showClose = false,
+  onClose,
+  className
+}) => {
+  const { t: t2 } = useTranslation();
+  const [passwordError, setPasswordError] = useState("");
+  const [usernameOrEmailError, setUsernameOrEmailError] = useState("");
+  const [isShowClose] = React.useState(showClose);
+  const [isShowLogo] = React.useState(showLogo);
+  const { logIn } = useAuth();
+  const formik = useFormik({
+    initialValues: loginInitialValues,
+    validationSchema: loginValidationSchema,
+    onSubmit: async (values) => {
+      setUsernameOrEmailError("");
+      setPasswordError("");
+      await logIn(
+        {
+          usernameOrEmail: values.usernameOrEmail,
+          password: values.password
+        },
+        {
+          onError: (err, _errs) => {
+            const errMap = errorCodeMap[err.code] ?? errorCodeMap["UNKNOWN_ERROR"];
+            if (errMap) {
+              errMap.type === "username" ? setUsernameOrEmailError(errMap.message) : errMap.type == "password" ? setPasswordError(errMap.message) : null;
+            }
+          }
+        }
+      );
+    }
+  });
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex flex-col items-center justify-center gap-5",
+        "animate-fade-in",
+        className
+      ),
+      children: [
+        isShowLogo && /* @__PURE__ */ jsx(Logo, { sz: "md" }),
+        /* @__PURE__ */ jsx(
+          Text,
+          {
+            weight: "extrabold",
+            className: clsx(
+              "uppercase !text-primary-500",
+              "font-bold font-inter select-none !text-3xl"
+            ),
+            children: t2("auth:login.title")
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              sz: "sm",
+              className: "w-full",
+              placeholder: t2("auth:login.username"),
+              onChange: (e) => formik.setFieldValue("usernameOrEmail", e.target.value),
+              isWrong: formik.touched.usernameOrEmail && Boolean(formik.errors.usernameOrEmail) || Boolean(usernameOrEmailError),
+              wrongMessage: t2(usernameOrEmailError || formik.errors.usernameOrEmail || ""),
+              disabled: formik.isSubmitting,
+              type: "text",
+              autoComplete: "username"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              type: "password",
+              sz: "sm",
+              className: "w-full",
+              placeholder: t2("auth:login.password"),
+              onChange: (e) => formik.setFieldValue("password", e.target.value),
+              isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
+              wrongMessage: t2(passwordError || formik.errors.password || ""),
+              disabled: formik.isSubmitting,
+              autoComplete: "current-password"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs("div", { className: "flex justify-between w-full items-center gap-[50px]", children: [
+          /* @__PURE__ */ jsx(
+            Checkbox,
+            {
+              label: t2("auth:login.rememberMe"),
+              onChange: (e) => {
+                formik.setFieldValue("rememberMe", e.target.checked);
+              },
+              className: "items-center",
+              disabled: formik.isSubmitting
+            }
+          ),
+          switchForgotPassword && /* @__PURE__ */ jsx(
+            Text,
+            {
+              sz: "md",
+              className: clsx(
+                "!text-primary-500 hover:!text-primary-600",
+                "hover:cursor-pointer transition-all duration-100 active:scale-95 select-none"
+              ),
+              onClick: switchForgotPassword,
+              children: t2("auth:login.forgotPassword")
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsxs(
+          Button,
+          {
+            type: "button",
+            onClick: formik.submitForm,
+            sz: "md",
+            className: "w-full flex items-center justify-center",
+            disabled: formik.isSubmitting,
+            children: [
+              formik.isSubmitting && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center mr-2", children: /* @__PURE__ */ jsx("div", { className: "w-3 h-3 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) }),
+              t2("auth:login.loginButton")
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center gap-3", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center w-full gap-3", children: [
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" }),
+            /* @__PURE__ */ jsx(Text, { sz: "sm", className: "text-text-third", children: "OR" }),
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" })
+          ] }),
+          /* @__PURE__ */ jsx(SocialButtons, { disabled: formik.isSubmitting })
+        ] }),
+        /* @__PURE__ */ jsxs(Text, { children: [
+          t2("auth:login.dontHaveAccount"),
+          " ",
+          /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/register", children: t2("auth:login.registerButton") })
+        ] }),
+        isShowClose && /* @__PURE__ */ jsx(
+          Text,
+          {
+            className: clsx(
+              "absolute top-3 right-5 text-[20px] text-gradient-main hover:text-single-main cursor-pointer"
+            ),
+            onClick: onClose,
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+          }
+        )
+      ]
+    }
+  );
+};
+const registerInitialValues = {
+  username: "",
+  email: "",
+  password: "",
+  confirmPassword: "",
+  isRememberMe: true
+};
+const registerValidationSchema = Yup.object().shape({
+  username: Yup.string().required("auth:register.errors.username.required").min(3, "auth:register.errors.username.tooShort").max(30, "auth:register.errors.username.tooLong").matches(/^[a-zA-Z0-9_]+$/, "auth:register.errors.username.notCorrectFormat"),
+  email: Yup.string().required("auth:register.errors.email.required").email("auth:register.errors.email.notCorrectFormat"),
+  password: Yup.string().required("auth:register.errors.password.required").min(8, "auth:register.errors.password.tooShort").max(100, "auth:register.errors.password.tooLong"),
+  confirmPassword: Yup.string().required("auth:register.errors.confirmPassword.required").oneOf([Yup.ref("password")], "auth:register.errors.passwords.doNotMatch")
+});
+const registerErrorCodeMap = {
+  USERNAME_EXISTED: {
+    message: "auth:register.errors.username.alreadyExists",
+    type: "username"
+  },
+  EMAIL_EXISTED: { message: "auth:register.errors.email.alreadyExists", type: "email" },
+  PHONE_NUMBER_EXISTED: {
+    message: "auth:register.errors.phoneNumber.alreadyExists",
+    type: "phoneNumber"
+  },
+  PASSWORD_TOO_WEAK: { message: "auth:register.errors.password.tooWeak", type: "password" },
+  UNKNOWN_ERROR: { message: "auth:register.errors.unknown", type: "username" }
+};
+const RegisterForm = ({
+  className,
+  showLogo = true,
+  showClose = false,
+  onClose
+}) => {
+  const { t: t2 } = useTranslation();
+  const [isShowClose] = useState(showClose);
+  const [isShowLogo] = useState(showLogo);
+  const navigate = useNavigate();
+  const [usernameError, setUsernameError] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [phoneNumberError, setPhoneNumberError] = useState("");
+  const [passwordError, setPasswordError] = useState("");
+  const [confirmPasswordError, setConfirmPasswordError] = useState("");
+  const { fetch: register2 } = useResultFetcher(authService.register, {
+    onSuccess: () => {
+      navigate("/login");
+    },
+    onError: (err, _errs) => {
+      const errMap = registerErrorCodeMap[err?.code] ?? registerErrorCodeMap["UNKNOWN_ERROR"];
+      if (errMap) {
+        switch (errMap.type) {
+          case "username":
+            setUsernameError(errMap.message);
+            break;
+          case "email":
+            setEmailError(errMap.message);
+            break;
+          case "phoneNumber":
+            setPhoneNumberError(errMap.message);
+            break;
+          case "password":
+            setPasswordError(errMap.message);
+            break;
+          case "confirmPassword":
+            setConfirmPasswordError(errMap.message);
+            break;
+        }
+      }
+    }
+  });
+  const formik = useFormik({
+    initialValues: registerInitialValues,
+    validationSchema: registerValidationSchema,
+    onSubmit: async (values) => {
+      setUsernameError("");
+      setEmailError("");
+      setPhoneNumberError("");
+      setPasswordError("");
+      setConfirmPasswordError("");
+      await register2({
+        username: values.username,
+        password: values.password,
+        confirmPassword: values.confirmPassword,
+        email: values.email,
+        phoneNumber: values.phoneNumber
+      });
+    }
+  });
+  return /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex flex-col items-center justify-center gap-3",
+        "rounded-2xl",
+        "animate-fade-in ",
+        className
+      ),
+      onSubmit: formik.submitForm,
+      children: [
+        isShowLogo && /* @__PURE__ */ jsx(Logo, { sz: "md" }),
+        /* @__PURE__ */ jsx(
+          Text,
+          {
+            weight: "extrabold",
+            className: "!text-3xl uppercase !text-primary-500 select-none text-center",
+            children: t2("auth:register.title")
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              value: formik.values.username,
+              sz: "sm",
+              className: "w-full",
+              placeholder: t2("auth:register.username"),
+              onChange: (e) => formik.setFieldValue("username", e.target.value),
+              isWrong: formik.touched.username && Boolean(formik.errors.username) || Boolean(usernameError),
+              wrongMessage: t2(usernameError || formik.errors.username || ""),
+              disabled: formik.isSubmitting,
+              type: "text",
+              autoComplete: "username"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              value: formik.values.email,
+              sz: "sm",
+              className: "w-full",
+              placeholder: t2("auth:register.email"),
+              onChange: (e) => formik.setFieldValue("email", e.target.value),
+              isWrong: formik.touched.email && Boolean(formik.errors.email) || Boolean(emailError),
+              wrongMessage: t2(emailError || formik.errors.email || ""),
+              disabled: formik.isSubmitting,
+              type: "email",
+              autoComplete: "email"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              value: formik.values.phoneNumber,
+              sz: "sm",
+              className: "w-full",
+              placeholder: t2("auth:register.phoneNumber"),
+              onChange: (e) => formik.setFieldValue("phoneNumber", e.target.value),
+              isWrong: formik.touched.phoneNumber && Boolean(formik.errors.phoneNumber) || Boolean(phoneNumberError),
+              wrongMessage: t2(phoneNumberError || formik.errors.phoneNumber || ""),
+              disabled: formik.isSubmitting,
+              type: "text",
+              autoComplete: "tel"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              type: "password",
+              value: formik.values.password,
+              sz: "sm",
+              className: "w-full",
+              placeholder: t2("auth:register.password"),
+              onChange: (e) => formik.setFieldValue("password", e.target.value),
+              isWrong: formik.touched.password && Boolean(formik.errors.password) || Boolean(passwordError),
+              wrongMessage: t2(passwordError || formik.errors.password || ""),
+              disabled: formik.isSubmitting,
+              autoComplete: "new-password"
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Textbox,
+            {
+              type: "password",
+              value: formik.values.confirmPassword,
+              sz: "sm",
+              className: "w-full",
+              placeholder: t2("auth:register.confirmPassword"),
+              onChange: (e) => formik.setFieldValue("confirmPassword", e.target.value),
+              isWrong: formik.touched.confirmPassword && Boolean(formik.errors.confirmPassword) || Boolean(confirmPasswordError),
+              wrongMessage: t2(confirmPasswordError || formik.errors.confirmPassword || ""),
+              disabled: formik.isSubmitting,
+              autoComplete: "new-password"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsx(
+          Checkbox,
+          {
+            className: "text-[15px] text-single-third gap-[8px] w-full",
+            label: /* @__PURE__ */ jsxs(Text, { className: "flex items-center flex-wrap", children: [
+              t2("auth:register.agree"),
+              " ",
+              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/terms", children: t2("auth:register.termsOfService") }),
+              " ",
+              t2("auth:register.and"),
+              " ",
+              /* @__PURE__ */ jsx(Link, { className: "sm:text-[15px]", to: "/policy", children: t2("auth:register.privacyPolicy") }),
+              "."
+            ] })
+          }
+        ),
+        /* @__PURE__ */ jsxs(
+          Button,
+          {
+            type: "button",
+            sz: "md",
+            className: "flex justify-center w-full",
+            onClick: formik.submitForm,
+            disabled: formik.isSubmitting,
+            children: [
+              formik.isSubmitting && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center mr-2", children: /* @__PURE__ */ jsx("div", { className: "w-3 h-3 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) }),
+              /* @__PURE__ */ jsx(Text, { children: t2("auth:register.registerButton") })
+            ]
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "w-full flex flex-col items-center gap-3", children: [
+          /* @__PURE__ */ jsxs("div", { className: "flex items-center w-full gap-3", children: [
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" }),
+            /* @__PURE__ */ jsx(Text, { sz: "sm", className: "text-text-third", children: "OR" }),
+            /* @__PURE__ */ jsx("div", { className: "h-[1px] bg-border-main flex-1" })
+          ] }),
+          /* @__PURE__ */ jsx(SocialButtons, { disabled: formik.isSubmitting })
+        ] }),
+        /* @__PURE__ */ jsx(Link, { className: "font-bold", to: "/login", children: t2("auth:register.loginButton") }),
+        isShowClose && /* @__PURE__ */ jsx(
+          Text,
+          {
+            sz: "lg",
+            className: clsx(
+              "absolute z-50 top-3 right-5 text-gradient-main hover:text-single-main cursor-pointer"
+            ),
+            onClick: onClose,
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" })
+          }
+        )
+      ]
+    }
+  );
 };
 const UserMenu = ({ menuClassName, menuStyle }) => {
   const [isOpenMenu, setIsOpenMenu] = useState(false);
@@ -6332,28 +7164,13 @@ const UserMenu = ({ menuClassName, menuStyle }) => {
     )
   ] });
 };
-const PREFIX$2 = buildApiPath("/message");
+const PREFIX$3 = buildApiPath("/message");
 class MessageService {
   async sendMessage(request) {
-    return await apiPost(`${PREFIX$2}`, request);
+    return await apiPost(`${PREFIX$3}/${request.conversationId}`, request);
   }
 }
 const messageService = new MessageService();
-var MessageType = /* @__PURE__ */ ((MessageType2) => {
-  MessageType2["Text"] = "Text";
-  MessageType2["Image"] = "Image";
-  MessageType2["File"] = "File";
-  MessageType2["System"] = "System";
-  MessageType2["LeaveGroup"] = "LeaveGroup";
-  MessageType2["JoinGroup"] = "JoinGroup";
-  MessageType2["CreateGroup"] = "CreateGroup";
-  MessageType2["DeleteGroup"] = "DeleteGroup";
-  MessageType2["RenameGroup"] = "RenameGroup";
-  MessageType2["ChangeGroupAvatar"] = "ChangeGroupAvatar";
-  MessageType2["RemoveParticipant"] = "RemoveParticipant";
-  MessageType2["AddParticipant"] = "AddParticipant";
-  return MessageType2;
-})(MessageType || {});
 const messagesQueryKey = (conversationId, queryParams) => ["messages", conversationId, queryParams];
 const useMessages = (conversationId, queryParams) => {
   return useSafeInfiniteQueryResult({
@@ -6365,27 +7182,7 @@ const useMessages = (conversationId, queryParams) => {
   });
 };
 const useSendMessage = () => {
-  const { addMessageToCache } = useMessageCacheMutations();
-  const { userId } = useAuth();
   return useResultFetcher(async (data) => {
-    const randomId = crypto.randomUUID();
-    addMessageToCache(
-      data.conversationId,
-      {
-        id: randomId,
-        conversationId: data.conversationId,
-        clientTempId: randomId,
-        sequenceNumber: -1,
-        senderId: userId,
-        content: data.content,
-        createdAt: /* @__PURE__ */ new Date(),
-        status: "pending",
-        isGroup: false,
-        type: MessageType.Text
-      },
-      true
-    );
-    data.clientTempId = randomId;
     return await messageService.sendMessage(data);
   });
 };
@@ -6426,6 +7223,114 @@ function isSystemMessage(messageType) {
     MessageType.AddParticipant
   ].includes(messageType);
 }
+const formatFileSize = (sizeInBytes) => {
+  if (sizeInBytes < 1024) {
+    return `${sizeInBytes} B`;
+  } else if (sizeInBytes < 1024 * 1024) {
+    return `${(sizeInBytes / 1024).toFixed(2)} KB`;
+  } else if (sizeInBytes < 1024 * 1024 * 1024) {
+    return `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`;
+  } else {
+    return `${(sizeInBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+  }
+};
+const SPEEDS = [0.75, 1, 1.5, 2];
+const AudioMessage = ({ url, className, isMyMessage }) => {
+  const audioRef = useRef(null);
+  const [playing, setPlaying] = useState(false);
+  const [current, setCurrent] = useState(0);
+  const [duration, setDuration] = useState(0);
+  const [speedIndex, setSpeedIndex] = useState(1);
+  const formatTime = (time2) => {
+    const mins = Math.floor(time2 / 60);
+    const secs = Math.floor(time2 % 60);
+    return `${mins}:${secs.toString().padStart(2, "0")}`;
+  };
+  const togglePlay = () => {
+    if (playing) {
+      audioRef.current?.pause();
+    } else {
+      audioRef.current?.play();
+    }
+  };
+  const handleSeek = (e) => {
+    const time2 = Number(e.target.value);
+    if (audioRef.current) {
+      audioRef.current.currentTime = time2;
+      setCurrent(time2);
+    }
+  };
+  const changeSpeed = () => {
+    const nextIndex = (speedIndex + 1) % SPEEDS.length;
+    setSpeedIndex(nextIndex);
+    if (audioRef.current) {
+      audioRef.current.playbackRate = SPEEDS[nextIndex];
+    }
+  };
+  return /* @__PURE__ */ jsxs("div", { className: `flex items-center gap-2 p-2 h-[60px] w-full max-w-[320px] ${className || ""}`, children: [
+    /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+      /* @__PURE__ */ jsx(
+        "button",
+        {
+          onClick: togglePlay,
+          className: clsx(isMyMessage ? "text-text-my-msg" : "text-text-other-msg", "w-8"),
+          children: playing ? /* @__PURE__ */ jsx("i", { className: "fa-solid fa-pause text-lg" }) : /* @__PURE__ */ jsx("i", { className: "fa-solid fa-play text-lg pl-[2px]" })
+        }
+      ),
+      /* @__PURE__ */ jsxs("div", { className: "flex-1 flex flex-col gap-3", children: [
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            type: "range",
+            min: 0,
+            max: duration || 0,
+            value: current,
+            onChange: handleSeek,
+            className: "w-full h-1.5 bg-bg-sixth rounded-lg appearance-none cursor-pointer accent-primary-500"
+          }
+        ),
+        /* @__PURE__ */ jsxs("div", { className: "flex justify-between items-center", children: [
+          /* @__PURE__ */ jsxs("span", { className: "text-sm font-medium", children: [
+            formatTime(current),
+            " / ",
+            formatTime(duration)
+          ] }),
+          /* @__PURE__ */ jsxs(
+            "button",
+            {
+              onClick: changeSpeed,
+              className: "text-xs bg-bg-fourth px-2 py-0.5 rounded-md font-bold transition-colors",
+              children: [
+                SPEEDS[speedIndex],
+                "x"
+              ]
+            }
+          )
+        ] })
+      ] })
+    ] }),
+    /* @__PURE__ */ jsx(
+      "audio",
+      {
+        ref: audioRef,
+        src: url,
+        onPlay: () => setPlaying(true),
+        onPause: () => setPlaying(false),
+        onTimeUpdate: () => setCurrent(audioRef.current?.currentTime || 0),
+        onLoadedMetadata: () => setDuration(audioRef.current?.duration || 0)
+      }
+    )
+  ] });
+};
+const EMPTY_VIEWERS = [];
+const PendingIndicator = () => /* @__PURE__ */ jsx("div", { className: "absolute -left-4 top-1/2 -translate-y-1/2 flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "w-2 h-2 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) });
+const getMessageBubbleShapeClass = (isMyMessage, isFirstMessageInGroup, isLastMessageInGroup, isOnlyMessageInGroup) => clsx(
+  isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
+  isOnlyMessageInGroup && "!rounded-3xl",
+  isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
+  isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
+  !isFirstMessageInGroup && !isLastMessageInGroup && (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none")
+);
 const MessageRowComponent = ({
   message,
   prevMessage,
@@ -6436,22 +7341,25 @@ const MessageRowComponent = ({
   isGroup,
   className,
   userInfo,
+  userProfileMap,
   ref
 }) => {
   const { t: t2 } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
   const { getDiffBetween, formatTime, formatSmartTimestamp } = useFormatTime();
   const { renderSystemMessage } = useRenderConversationContent();
+  const { onOpen: openMediaViewer } = useMediaViewer();
   const isPending = message.status === "pending";
   const isFailed = message.status === "failed";
   const isSystem = isSystemMessage(message.type);
-  const { messageUserSeenMap } = useMessageStore();
-  const seenBy = useMemo(
-    () => messageUserSeenMap?.[conversationId || ""]?.[message.sequenceNumber || 0] || [],
-    [messageUserSeenMap, conversationId, message.sequenceNumber]
-  );
+  const timeoutRef = useRef(null);
+  const seenBy = useMessageStore((state) => {
+    const convId = conversationId || "";
+    const messageSeq = message.sequenceNumber || 0;
+    return state.messageUserSeenMap?.[convId]?.[messageSeq] ?? EMPTY_VIEWERS;
+  });
   const isShowTime = !prevMessage || isSystemMessage(prevMessage.type) || getDiffBetween(message.createdAt, prevMessage.createdAt, "minute") > 30;
-  const isPrevMessageShowTime = nextMessage && getDiffBetween(message.createdAt, nextMessage.createdAt, "minute") > 30;
+  const isPrevMessageShowTime = !!nextMessage && getDiffBetween(message.createdAt, nextMessage.createdAt, "minute") > 30;
   const isLastMessageInGroup = !prevMessage || prevMessage.senderId !== message.senderId || isShowTime;
   const isFirstMessageInGroup = !nextMessage || nextMessage.senderId !== message.senderId || isPrevMessageShowTime;
   const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
@@ -6459,12 +7367,246 @@ const MessageRowComponent = ({
   const isShowName = isLastMessageInGroup && !isMyMessage && isGroup;
   const hasAvatar = isFirstMessageInGroup;
   const isFooterVisible = index === 0 && isMyMessage;
-  useEffect(() => {
-    if (isPending) {
-      setTimeout(() => {
-        setHasDelayed(true);
-      }, 2e3);
+  const isTextMessage = message.type === MessageType.Text;
+  const isMediaMessage = message.type === MessageType.Media;
+  const isImageMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.Image);
+  const isVideoMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.Video);
+  const isAudioMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.Audio);
+  const isFileMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.File);
+  const stackImage = message.media?.filter((media) => media.type === MediaType.Image) || [];
+  const messageBubbleShapeClass = getMessageBubbleShapeClass(
+    isMyMessage,
+    isFirstMessageInGroup,
+    isLastMessageInGroup,
+    isOnlyMessageInGroup
+  );
+  const isOnlyEmoji = isTextMessage && message.content.trim() !== "" && (() => {
+    const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
+    const segments = [...segmenter.segment(message.content.trim())].map((s) => s.segment);
+    return segments.length < 6 && segments.every(
+      (char) => new RegExp("\\p{Emoji_Presentation}|\\p{Emoji}\\uFE0F|\\p{Emoji_Modifier_Base}", "u").test(char)
+    );
+  })();
+  const renderOnlyEmojiMessage = () => /* @__PURE__ */ jsx("div", { className: clsx("text-4xl", isMyMessage ? "text-white" : "text-text-main"), children: message.content });
+  const renderTextMessage = () => /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "px-3 py-2 break-words rounded-xl shadow-sm relative max-w-full",
+        isMyMessage ? isFailed ? "bg-primary-800" : "bg-primary-600" : "bg-bg-fourth",
+        isFailed && "border-red-500 border-2 opacity-50",
+        messageBubbleShapeClass
+      ),
+      children: [
+        /* @__PURE__ */ jsx(
+          Text,
+          {
+            sz: "md",
+            wrap: "whitespace-pre-wrap",
+            weight: "regular",
+            className: clsx(isMyMessage ? "text-white " : "text-text-main"),
+            children: message.content
+          }
+        ),
+        hasDelayed && /* @__PURE__ */ jsx(PendingIndicator, {})
+      ]
     }
+  );
+  const renderFileMessage = () => /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative flex px-4 py-3 rounded-xl items-center gap-3",
+        "max-w-full",
+        isMyMessage ? isFailed ? "bg-primary-800" : "bg-primary-600" : "bg-bg-fourth",
+        messageBubbleShapeClass
+      ),
+      children: [
+        /* @__PURE__ */ jsx("div", { className: "flex-shrink-0", children: /* @__PURE__ */ jsx(
+          "i",
+          {
+            className: clsx(
+              "fa-solid fa-file text-2xl",
+              isMyMessage ? "text-text-reverse-main" : "text-text-main"
+            )
+          }
+        ) }),
+        /* @__PURE__ */ jsxs("div", { className: "flex flex-col min-w-0 flex-1", children: [
+          " ",
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              className: clsx(
+                "underline cursor-pointer break-all leading-tight",
+                isMyMessage ? "text-text-reverse-main" : "text-text-main"
+              ),
+              onClick: () => window.open(message.media?.[0].url, "_blank"),
+              wrap: "whitespace-pre-wrap",
+              children: message.media?.[0].metadata?.name || t2("conversations.file")
+            }
+          ),
+          /* @__PURE__ */ jsx(
+            Text,
+            {
+              className: clsx(
+                "text-[10px] text-muted-foreground mt-1",
+                isMyMessage ? "text-text-reverse-main" : "text-text-main"
+              ),
+              children: message.media?.[0].metadata?.size ? formatFileSize(message.media?.[0].metadata?.size) : "Unknown size"
+            }
+          )
+        ] }),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            className: "flex-shrink-0 hover:text-primary transition-colors ml-1",
+            onClick: () => {
+              const anchor = document.createElement("a");
+              anchor.href = message.media?.[0].url || "";
+              anchor.download = message.media?.[0].metadata?.name || "file";
+              document.body.appendChild(anchor);
+              anchor.click();
+              document.body.removeChild(anchor);
+            },
+            children: /* @__PURE__ */ jsx(
+              "i",
+              {
+                className: clsx(
+                  "fa-solid fa-download",
+                  isMyMessage ? "text-text-reverse-main" : "text-text-main"
+                )
+              }
+            )
+          }
+        ),
+        hasDelayed && /* @__PURE__ */ jsx(PendingIndicator, {})
+      ]
+    }
+  );
+  const renderVideoMessage = () => /* @__PURE__ */ jsx(
+    VideoMessage,
+    {
+      onFrameClick: () => {
+        openMediaViewer({
+          id: message.media?.[0].id || "",
+          url: message.media?.[0].url,
+          type: MediaType.Video,
+          conversationId
+        });
+      },
+      onFullscreenToggle: () => {
+        openMediaViewer({
+          id: message.media?.[0].id || "",
+          url: message.media?.[0].url,
+          type: MediaType.Video,
+          conversationId
+        });
+      },
+      className: clsx(messageBubbleShapeClass),
+      url: message.media?.[0].url
+    }
+  );
+  const renderAudioMessage = () => /* @__PURE__ */ jsx(
+    AudioMessage,
+    {
+      className: clsx(
+        isMyMessage ? isFailed ? "bg-primary-800" : "bg-primary-600" : "bg-bg-fourth",
+        messageBubbleShapeClass
+      ),
+      url: message.media?.[0].url,
+      isMyMessage
+    }
+  );
+  const renderImageStackMessage = () => /* @__PURE__ */ jsxs(
+    "div",
+    {
+      className: clsx(
+        "relative h-[200px] w-[110px] flex items-center justify-center cursor-pointer",
+        isMyMessage ? "self-end mr-4" : "self-start ml-4",
+        messageBubbleShapeClass,
+        "[&>img:last-child]:opacity-100",
+        "[&>img:nth-last-child(2)]:opacity-80",
+        "[&>img:nth-last-child(3)]:opacity-60"
+      ),
+      onClick: () => {
+        openMediaViewer({
+          id: stackImage[stackImage.length - 1].id || "",
+          url: stackImage[stackImage.length - 1].url,
+          type: MediaType.Image,
+          conversationId
+        });
+      },
+      children: [
+        stackImage[0] && /* @__PURE__ */ jsx(
+          "img",
+          {
+            src: stackImage[0].url,
+            alt: "Image 1",
+            className: clsx(
+              "absolute w-[130px] h-[130px] object-cover shadow-sm rounded-xl",
+              "rotate-[-12deg] -translate-x-3 translate-y-1 z-10 transition-transform"
+            )
+          }
+        ),
+        stackImage[1] && /* @__PURE__ */ jsx(
+          "img",
+          {
+            src: stackImage[1].url,
+            alt: "Image 2",
+            className: clsx(
+              "absolute w-[130px] h-[130px] object-cover rounded-xl shadow-md",
+              "rotate-[8deg] translate-x-2 -translate-y-1 z-20 transition-transform"
+            )
+          }
+        ),
+        stackImage[2] && /* @__PURE__ */ jsx(
+          "img",
+          {
+            src: stackImage[2].url,
+            alt: "Image 3",
+            className: clsx(
+              "absolute w-[130px] h-[130px] object-cover rounded-xl shadow-lg",
+              "rotate-0 z-30 border-2 border-white/50"
+            )
+          }
+        ),
+        hasDelayed && /* @__PURE__ */ jsx(PendingIndicator, {})
+      ]
+    }
+  );
+  const renderSingleImageMessage = () => /* @__PURE__ */ jsxs("div", { className: clsx("relative rounded-2xl h-fit overflow-hidden", messageBubbleShapeClass), children: [
+    /* @__PURE__ */ jsx(
+      "img",
+      {
+        src: stackImage[0].url,
+        alt: "Image 1",
+        className: "w-[200px] h-[200px] object-cover cursor-pointer",
+        onClick: () => {
+          openMediaViewer({
+            id: stackImage[0].id || "",
+            url: stackImage[0].url,
+            type: MediaType.Image,
+            conversationId
+          });
+        }
+      }
+    ),
+    hasDelayed && /* @__PURE__ */ jsx(PendingIndicator, {})
+  ] });
+  useEffect(() => {
+    if (!isPending) {
+      setHasDelayed(false);
+      return;
+    }
+    timeoutRef.current = window.setTimeout(() => {
+      setHasDelayed(true);
+    }, 2e3);
+    return () => {
+      if (timeoutRef.current) {
+        clearTimeout(timeoutRef.current);
+        timeoutRef.current = null;
+      }
+    };
   }, [isPending]);
   if (isSystem) {
     return /* @__PURE__ */ jsx("div", { className: "flex justify-center w-full my-2", children: /* @__PURE__ */ jsx(Text, { sz: "sm", className: "opacity-80", children: renderSystemMessage(message) }) });
@@ -6515,34 +7657,13 @@ const MessageRowComponent = ({
                     children: userInfo?.fullName
                   }
                 ),
-                /* @__PURE__ */ jsxs(
-                  "div",
-                  {
-                    className: clsx(
-                      "px-3 py-1 break-words rounded-xl shadow-sm relative max-w-full",
-                      isMyMessage ? isFailed ? "bg-primary-800" : "bg-primary-600" : "bg-bg-fourth",
-                      isFailed && "border-red-500 border-2 opacity-50",
-                      isMyMessage ? "rounded-l-2xl self-end" : "rounded-r-2xl self-start",
-                      isOnlyMessageInGroup && "!rounded-2xl",
-                      isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
-                      isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
-                      !isFirstMessageInGroup && !isLastMessageInGroup && (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none")
-                    ),
-                    children: [
-                      /* @__PURE__ */ jsx(
-                        Text,
-                        {
-                          sz: "sm",
-                          wrap: "whitespace-pre-wrap",
-                          weight: "regular",
-                          className: clsx(isMyMessage ? "text-white " : "text-text-main"),
-                          children: message.content
-                        }
-                      ),
-                      hasDelayed && /* @__PURE__ */ jsx("div", { className: "absolute -left-4 top-1/2 -translate-y-1/2 flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "w-2 h-2 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) })
-                    ]
-                  }
-                ),
+                isOnlyEmoji ? renderOnlyEmojiMessage() : null,
+                isTextMessage && !isOnlyEmoji && renderTextMessage(),
+                isFileMessage && renderFileMessage(),
+                isVideoMessage && renderVideoMessage(),
+                isAudioMessage && renderAudioMessage(),
+                isImageMessage && stackImage.length > 1 && renderImageStackMessage(),
+                isImageMessage && stackImage.length === 1 && renderSingleImageMessage(),
                 (seenBy?.length === 0 || seenBy.length === 1 && seenBy[0].userId === userId) && /* @__PURE__ */ jsx(
                   "div",
                   {
@@ -6564,132 +7685,145 @@ const MessageRowComponent = ({
         ),
         seenBy?.length > 0 && !(seenBy.length === 1 && seenBy[0].userId === userId) && /* @__PURE__ */ jsx("div", { className: "flex justify-end gap-1 mt-1", children: seenBy.map((seenInfo) => {
           if (seenInfo.userId === userId) return null;
-          return /* @__PURE__ */ jsx(MiniAvatar, { uid: seenInfo.userId, seenAt: seenInfo.seenAt }, seenInfo.userId);
+          return /* @__PURE__ */ jsx(
+            MiniAvatar,
+            {
+              uid: seenInfo.userId,
+              seenAt: seenInfo.seenAt,
+              userInfo: userProfileMap?.[seenInfo.userId]
+            },
+            seenInfo.userId
+          );
         }) })
       ]
     }
   );
 };
-const MiniAvatar = memo(({ uid, seenAt }) => {
-  const [showTooltip, setShowTooltip] = useState(false);
-  const { formatSmartTimestamp } = useFormatTime();
-  const { userProfileMap } = useGetUserProfiles([uid]);
-  const userInfo = userProfileMap[uid];
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: "relative",
-      onMouseEnter: () => setShowTooltip(true),
-      onMouseLeave: () => setShowTooltip(false),
-      children: [
-        /* @__PURE__ */ jsx(Avatar, { sz: "xs", src: userInfo?.avatar, alt: "mini" }),
-        showTooltip && /* @__PURE__ */ jsxs("div", { className: "absolute right-full mr-2 -top-7 px-2 py-1 bg-bg-main text-text-main text-xs rounded shadow-md z-50 whitespace-nowrap border border-border-main", children: [
-          /* @__PURE__ */ jsx("div", { className: "font-semibold", children: userInfo?.fullName }),
-          /* @__PURE__ */ jsx("div", { className: "text-xs opacity-75", children: formatSmartTimestamp(seenAt) })
-        ] })
-      ]
-    }
-  );
-});
-const MessageRow = memo(MessageRowComponent);
-function InfiniteScrollReverse({
-  items,
-  className,
-  hasMore = true,
-  isLoading = false,
-  spinnerContent,
-  itemTemplate,
-  onLoadMore,
-  isShowLastSeen = false,
-  lastSeen,
-  gap,
-  parentRef,
-  itemKey,
-  emptyComponent
-}) {
-  const containerRef = useRef(null);
-  const sentinelRef = useRef(null);
-  const isLoadingRef = useRef(isLoading);
-  const pendingLoadRef = useRef(false);
-  const { t: t2 } = useTranslation();
-  useEffect(() => {
-    isLoadingRef.current = isLoading;
-    if (!isLoading) {
-      pendingLoadRef.current = false;
-    }
-  }, [isLoading]);
-  const _loadMore = async () => {
-    if (pendingLoadRef.current) return;
-    if (isLoadingRef.current) return;
-    pendingLoadRef.current = true;
-    try {
-      await new Promise((resolve) => setTimeout(resolve, 30));
-      await onLoadMore();
-    } finally {
-      pendingLoadRef.current = false;
-    }
-  };
-  useEffect(() => {
-    const sentinel = sentinelRef.current;
-    if (!sentinel) return;
-    const observer = new IntersectionObserver(
-      async ([entry]) => {
-        if (!entry.isIntersecting) return;
-        if (!hasMore) return;
-        _loadMore();
-      },
+const MiniAvatar = memo(
+  ({ uid, seenAt, userInfo }) => {
+    const [showTooltip, setShowTooltip] = useState(false);
+    const { formatSmartTimestamp } = useFormatTime();
+    return /* @__PURE__ */ jsxs(
+      "div",
       {
-        root: parentRef?.current || containerRef.current,
-        rootMargin: "200px 0px 0px 0px"
+        className: "relative",
+        onMouseEnter: () => setShowTooltip(true),
+        onMouseLeave: () => setShowTooltip(false),
+        children: [
+          /* @__PURE__ */ jsx(Avatar, { sz: "xs", src: userInfo?.avatar, alt: "mini" }),
+          showTooltip && /* @__PURE__ */ jsxs("div", { className: "absolute right-full mr-2 -top-7 px-2 py-1 bg-bg-main text-text-main text-xs rounded shadow-md z-50 whitespace-nowrap border border-border-main", children: [
+            /* @__PURE__ */ jsx("div", { className: "font-semibold", children: userInfo?.fullName || uid }),
+            /* @__PURE__ */ jsx("div", { className: "text-xs opacity-75", children: formatSmartTimestamp(seenAt) })
+          ] })
+        ]
       }
     );
-    observer.observe(sentinel);
-    return () => {
-      observer.disconnect();
-      observer.unobserve(sentinel);
+  }
+);
+const MessageRow = memo(MessageRowComponent);
+const InfiniteScrollReverse = forwardRef(
+  function InfiniteScrollReverse2({
+    items,
+    className,
+    hasMore = true,
+    isLoading = false,
+    spinnerContent,
+    itemTemplate,
+    onLoadMore,
+    isShowLastSeen = false,
+    lastSeen,
+    gap,
+    parentRef,
+    itemKey,
+    emptyComponent
+  }, ref) {
+    const containerRef = useRef(null);
+    useImperativeHandle(ref, () => containerRef.current);
+    const sentinelRef = useRef(null);
+    const isLoadingRef = useRef(isLoading);
+    const pendingLoadRef = useRef(false);
+    const { t: t2 } = useTranslation();
+    useEffect(() => {
+      isLoadingRef.current = isLoading;
+      if (!isLoading) {
+        pendingLoadRef.current = false;
+      }
+    }, [isLoading]);
+    const _loadMore = async () => {
+      if (pendingLoadRef.current) return;
+      if (isLoadingRef.current) return;
+      pendingLoadRef.current = true;
+      try {
+        await new Promise((resolve) => setTimeout(resolve, 30));
+        await onLoadMore();
+      } finally {
+        pendingLoadRef.current = false;
+      }
     };
-  }, [hasMore, parentRef, items.length]);
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      ref: containerRef,
-      className: clsx("relative overflow-y-auto h-full flex flex-col-reverse", className),
-      style: { gap: gap ?? "0.5rem", overflowAnchor: "auto" },
-      children: [
-        items.map((item, index) => /* @__PURE__ */ jsx("div", { children: itemTemplate ? itemTemplate(item, index, null) : item }, itemKey(item, index))),
-        hasMore && /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: "w-full flex justify-center py-2 shrink-0",
-            style: { overflowAnchor: "none" },
-            children: spinnerContent ?? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/50 text-xs text-primary-500", children: [
-              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
-              /* @__PURE__ */ jsx("span", { children: t2("common:conversations.loadingOldMessages") })
-            ] })
-          }
-        ),
-        hasMore && /* @__PURE__ */ jsx(
-          "div",
-          {
-            ref: sentinelRef,
-            className: clsx("h-px w-full shrink-0"),
-            style: { overflowAnchor: "none" }
-          }
-        ),
-        items.length > 0 && !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx("div", { className: "order-last w-full text-center py-4 text-text-third text-sm", children: lastSeen || "Đã xem hết kết quả." }),
-        items.length === 0 && !isLoading && emptyComponent
-      ]
-    }
-  );
-}
-const MessageList = ({
-  isGroup,
-  className,
-  conversationId,
-  parentRef,
-  lastSeen
-}) => {
+    useEffect(() => {
+      const sentinel = sentinelRef.current;
+      if (!sentinel) return;
+      const observer = new IntersectionObserver(
+        async ([entry]) => {
+          if (!entry.isIntersecting) return;
+          if (!hasMore) return;
+          _loadMore();
+        },
+        {
+          root: parentRef?.current || containerRef.current,
+          rootMargin: "200px 0px 0px 0px"
+        }
+      );
+      observer.observe(sentinel);
+      return () => {
+        observer.disconnect();
+        observer.unobserve(sentinel);
+      };
+    }, [hasMore, parentRef, items.length]);
+    return /* @__PURE__ */ jsxs(
+      "div",
+      {
+        ref: containerRef,
+        className: clsx("relative overflow-y-auto h-full flex flex-col-reverse", className),
+        style: { gap: gap ?? "0.5rem", overflowAnchor: "auto", overscrollBehaviorY: "contain" },
+        children: [
+          items.map((item, index) => /* @__PURE__ */ jsx("div", { children: itemTemplate ? itemTemplate(item, index, null) : item }, itemKey(item, index))),
+          hasMore && /* @__PURE__ */ jsx(
+            "div",
+            {
+              className: "w-full flex justify-center py-2 shrink-0",
+              style: { overflowAnchor: "none" },
+              children: spinnerContent ?? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/50 text-xs text-primary-500", children: [
+                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
+                /* @__PURE__ */ jsx("span", { children: t2("common:conversations.loadingOldMessages") })
+              ] })
+            }
+          ),
+          hasMore && /* @__PURE__ */ jsx(
+            "div",
+            {
+              ref: sentinelRef,
+              className: clsx("h-px w-full shrink-0"),
+              style: { overflowAnchor: "none" }
+            }
+          ),
+          items.length > 0 && !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx("div", { className: "order-last w-full text-center py-4 text-text-third text-sm", children: lastSeen || "Đã xem hết kết quả." }),
+          items.length === 0 && !isLoading && emptyComponent
+        ]
+      }
+    );
+  }
+);
+const MessageList = forwardRef(function MessageList2({ isGroup, className, conversationId, parentRef, lastSeen }, ref) {
   const { userId } = useAuth();
+  const scrollContainerRef = useRef(null);
+  useImperativeHandle(ref, () => ({
+    scrollToBottom: () => {
+      if (scrollContainerRef.current) {
+        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
+      }
+    }
+  }));
   const {
     data: _messages,
     fetchNextPage,
@@ -6707,19 +7841,20 @@ const MessageList = ({
   return /* @__PURE__ */ jsx(
     InfiniteScrollReverse,
     {
+      ref: scrollContainerRef,
       items: messages,
       onLoadMore: fetchNextPage,
       className: clsx(
         "flex flex-col gap-[0.1rem] px-1 sm:scrollbar-default scrollbar-hide",
         className
       ),
-      itemTemplate: (item, index, ref) => {
+      itemTemplate: (item, index, ref2) => {
         const prevMessage = index < messages.length - 1 ? messages[index + 1] : void 0;
         const nextMessage = index > 0 ? messages[index - 1] : void 0;
         return /* @__PURE__ */ jsx(
           MessageRow,
           {
-            ref,
+            ref: ref2,
             message: item,
             prevMessage,
             nextMessage,
@@ -6727,7 +7862,8 @@ const MessageList = ({
             index,
             isGroup,
             conversationId,
-            userInfo: userProfileMap[item?.senderId || ""]
+            userInfo: userProfileMap[item?.senderId || ""],
+            userProfileMap
           }
         );
       },
@@ -6740,22 +7876,360 @@ const MessageList = ({
       lastSeen
     }
   );
+});
+const PREFIX$2 = buildApiPath("/upload");
+class UploadService {
+  async getSignature(folder, resourceType) {
+    return await apiGet(`${PREFIX$2}/signature?folder=${folder}&resourceType=${resourceType}`, {});
+  }
+  async upload(file, resourceType) {
+    const signatureData = (await this.getSignature("chat-messages", resourceType)).data;
+    if (!signatureData) {
+      return {
+        success: false,
+        error: {
+          detail: "Failed to get upload signature",
+          code: "UPLOAD_SIGNATURE_ERROR"
+        }
+      };
+    }
+    const cloudinaryUrl = `https://api.cloudinary.com/v1_1/${signatureData.cloudName}/${signatureData.resourceType}/upload`;
+    const formData = new FormData();
+    formData.append("file", file);
+    formData.append("folder", signatureData.folder);
+    formData.append("overwrite", String(signatureData.overwrite));
+    formData.append("timestamp", String(signatureData.timestamp));
+    formData.append("resource_type", signatureData.resourceType);
+    formData.append("api_key", signatureData.apiKey);
+    formData.append("signature", signatureData.signature);
+    try {
+      const response = await fetch(cloudinaryUrl, {
+        method: "POST",
+        body: formData
+      }).catch((err) => {
+        console.error("Network error during upload:", err);
+        throw new Error("Network error during upload");
+      });
+      if (!response.ok) {
+        const errorBody = await response.json();
+        console.error("Cloudinary Detailed Error:", errorBody);
+        return {
+          success: false,
+          error: {
+            detail: `Upload failed with status ${response.status}`,
+            code: "UPLOAD_ERROR"
+          }
+        };
+      }
+      const _res = await response.json();
+      const extension = _res.display_name.split(".").pop();
+      return {
+        success: true,
+        data: {
+          url: _res.secure_url,
+          type: _res.resource_type,
+          original_filename: `${_res.original_filename}.${extension}`,
+          bytes: _res.bytes
+        }
+      };
+    } catch (err) {
+      console.error("Upload error:");
+      return {
+        success: false,
+        error: {
+          detail: err instanceof Error ? err.message : "Unknown error",
+          code: "UPLOAD_EXCEPTION"
+        }
+      };
+    }
+  }
+}
+const uploadService = new UploadService();
+const getMediaTypeFromFileType = (fileType) => {
+  switch (fileType) {
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+    case "image/webp":
+    case "image/svg+xml":
+    case "image/bmp":
+    case "image/tiff":
+      return MediaType.Image;
+    case "video/mp4":
+    case "video/webm":
+    case "video/quicktime":
+    case "video/x-msvideo":
+    case "video/mpeg":
+    case "video/ogg":
+    case "video/3gpp":
+      return MediaType.Video;
+    case "audio/mpeg":
+    case "audio/wav":
+    case "audio/ogg":
+    case "audio/aac":
+    case "audio/flac":
+    case "audio/x-m4a":
+    case "audio/mp4":
+    case "audio/webm":
+    case "audio/opus":
+      return MediaType.Audio;
+    default:
+      return MediaType.File;
+  }
+};
+const getCloudinaryResourceTypeFromFileType = (fileType) => {
+  switch (fileType) {
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+    case "image/webp":
+    case "image/svg+xml":
+    case "image/bmp":
+    case "image/tiff":
+      return "image";
+    case "video/mp4":
+    case "video/webm":
+    case "video/quicktime":
+    case "video/x-msvideo":
+    case "video/mpeg":
+    case "video/ogg":
+    case "video/3gpp":
+    case "audio/mpeg":
+    case "audio/wav":
+    case "audio/ogg":
+    case "audio/aac":
+    case "audio/flac":
+    case "audio/x-m4a":
+    case "audio/mp4":
+    case "audio/webm":
+    case "audio/opus":
+      return "video";
+    default:
+      return "raw";
+  }
+};
+const useChatUpload = () => {
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const upload = async (files) => {
+    setLoading(true);
+    setError(null);
+    try {
+      const uploadPromises = files.map(async (file) => {
+        const result = await uploadService.upload(
+          file,
+          getCloudinaryResourceTypeFromFileType(file.type)
+        );
+        if (!result.success || !result.data) {
+          throw new Error(result.error?.detail || "Upload failed");
+        }
+        return result.data;
+      });
+      const results = await Promise.all(uploadPromises);
+      setLoading(false);
+      return results;
+    } catch (err) {
+      setError(err);
+      setLoading(false);
+      return [];
+    }
+  };
+  return { upload, loading, error };
+};
+const compressImage = async (file, maxWidth = 1920, maxHeight = 1920, quality = 0.8) => {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = (event) => {
+      const img = new Image();
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        let { width, height } = img;
+        if (width > height) {
+          if (width > maxWidth) {
+            height = Math.round(height * maxWidth / width);
+            width = maxWidth;
+          }
+        } else {
+          if (height > maxHeight) {
+            width = Math.round(width * maxHeight / height);
+            height = maxHeight;
+          }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext("2d");
+        if (!ctx) {
+          reject(new Error("Failed to get canvas context"));
+          return;
+        }
+        ctx.drawImage(img, 0, 0, width, height);
+        canvas.toBlob(
+          (blob) => {
+            if (!blob) {
+              reject(new Error("Failed to compress image"));
+              return;
+            }
+            const compressedFile = new File([blob], file.name, {
+              type: "image/jpeg",
+              lastModified: file.lastModified
+            });
+            resolve(compressedFile);
+          },
+          "image/jpeg",
+          quality
+        );
+      };
+      img.onerror = () => {
+        reject(new Error("Failed to load image"));
+      };
+      const result = event.target?.result;
+      if (typeof result === "string") {
+        img.src = result;
+      } else {
+        reject(new Error("Failed to read file"));
+      }
+    };
+    reader.onerror = () => {
+      reject(new Error("Failed to read file"));
+    };
+    reader.readAsDataURL(file);
+  });
+};
+const compressVideo = async (file, options) => {
+  const maxWidth = options?.maxWidth;
+  const maxHeight = options?.maxHeight;
+  const videoBitsPerSecond = options?.videoBitsPerSecond;
+  const sourceUrl = URL.createObjectURL(file);
+  try {
+    const video = document.createElement("video");
+    video.src = sourceUrl;
+    video.preload = "metadata";
+    video.muted = true;
+    video.playsInline = true;
+    await new Promise((resolve, reject) => {
+      const onLoaded = () => {
+        cleanup();
+        resolve();
+      };
+      const onError = () => {
+        cleanup();
+        reject(new Error("Failed to load video metadata"));
+      };
+      const cleanup = () => {
+        video.removeEventListener("loadedmetadata", onLoaded);
+        video.removeEventListener("error", onError);
+      };
+      video.addEventListener("loadedmetadata", onLoaded);
+      video.addEventListener("error", onError);
+    });
+    const ratio = Math.min(maxWidth / video.videoWidth, maxHeight / video.videoHeight, 1);
+    const targetWidth = Math.max(2, Math.floor(video.videoWidth * ratio / 2) * 2);
+    const targetHeight = Math.max(2, Math.floor(video.videoHeight * ratio / 2) * 2);
+    const canvas = document.createElement("canvas");
+    canvas.width = targetWidth;
+    canvas.height = targetHeight;
+    const context = canvas.getContext("2d");
+    if (!context) {
+      throw new Error("Failed to initialize video encoder");
+    }
+    const outputStream = canvas.captureStream(30);
+    const videoWithCapture = video;
+    const capturedVideoStream = typeof videoWithCapture.captureStream === "function" ? videoWithCapture.captureStream() : null;
+    capturedVideoStream?.getAudioTracks().forEach((track) => {
+      outputStream.addTrack(track);
+    });
+    const mimeTypeCandidates = [
+      "video/webm;codecs=vp9,opus",
+      "video/webm;codecs=vp8,opus",
+      "video/webm"
+    ];
+    const mimeType = mimeTypeCandidates.find((candidate) => MediaRecorder.isTypeSupported(candidate)) || "video/webm";
+    const recorder = new MediaRecorder(outputStream, {
+      mimeType,
+      videoBitsPerSecond
+    });
+    const chunks = [];
+    recorder.ondataavailable = (event) => {
+      if (event.data && event.data.size > 0) {
+        chunks.push(event.data);
+      }
+    };
+    const recordPromise = new Promise((resolve, reject) => {
+      recorder.onerror = () => reject(new Error("Failed to compress video"));
+      recorder.onstop = () => {
+        resolve(new Blob(chunks, { type: mimeType }));
+      };
+    });
+    const drawFrame = () => {
+      if (video.paused || video.ended) {
+        return;
+      }
+      context.drawImage(video, 0, 0, targetWidth, targetHeight);
+      requestAnimationFrame(drawFrame);
+    };
+    recorder.start(100);
+    try {
+      await video.play();
+    } catch {
+      recorder.stop();
+      throw new Error("Unable to start video compression playback");
+    }
+    drawFrame();
+    await new Promise((resolve) => {
+      video.onended = () => {
+        if (recorder.state !== "inactive") {
+          recorder.stop();
+        }
+        resolve();
+      };
+    });
+    const compressedBlob = await recordPromise;
+    const baseName = file.name.replace(/\.[^/.]+$/, "");
+    const compressedFile = new File([compressedBlob], `${baseName}.webm`, {
+      type: "video/webm",
+      lastModified: file.lastModified
+    });
+    if (compressedFile.size >= file.size) {
+      return file;
+    }
+    return compressedFile;
+  } finally {
+    URL.revokeObjectURL(sourceUrl);
+  }
+};
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const validateFileSize = (file, maxSize = MAX_FILE_SIZE) => {
+  if (file.size > maxSize) {
+    return {
+      valid: false,
+      error: "FILE_TOO_LARGE"
+      /* FILE_TOO_LARGE */
+    };
+  }
+  return { valid: true };
 };
 const ChatInput = ({
   conversationId,
   correlationId,
   receiverId,
   onFocus,
+  onAfterSend,
   className
 }) => {
   const [hasInput, setHasInput] = useState(false);
+  const [fileUrls, setFileUrls] = useState([]);
   const textboxRef = useRef(null);
+  const containerRef = useRef(null);
+  const imageInputRef = useRef(null);
+  const fileInputRef = useRef(null);
   const { fetch: send } = useSendMessage();
+  const { addMessageToCache } = useMessageCacheMutations();
+  const { userId } = useAuth();
+  const { upload } = useChatUpload();
+  const { t: t2 } = useTranslation();
+  const { showSnackbar } = useSnackbar();
   const handleInputChange = (e) => {
-    const isNotEmpty = e.target.value.trim() !== "";
-    if (isNotEmpty !== hasInput) {
-      setHasInput(isNotEmpty);
-    }
+    setHasInput(e.target.value.trim() !== "");
   };
   const handleKeyDown = (e) => {
     if (e.key === "Enter" && !e.shiftKey) {
@@ -6763,57 +8237,317 @@ const ChatInput = ({
       handleSendMessage();
     }
   };
-  const handleSendMessage = () => {
-    const content = textboxRef.current?.value ?? "";
-    if (content.trim() === "") {
+  const handleSendMessage = async () => {
+    const content = textboxRef.current?.value.trim() || "";
+    if (!content && fileUrls.length === 0) {
       return;
     }
-    send({
+    const baseBody = {
       conversationId,
       correlationId,
-      content: content.trim(),
       receiverId
-    });
-    if (textboxRef.current) {
-      textboxRef.current.value = "";
-    }
+    };
+    const basePreviewBody = {
+      conversationId: conversationId || "",
+      senderId: userId,
+      status: "pending",
+      content,
+      createdAt: /* @__PURE__ */ new Date(),
+      sequenceNumber: -1,
+      isGroup: false
+    };
+    const currentFiles = [...fileUrls];
+    if (textboxRef.current) textboxRef.current.value = "";
+    setFileUrls([]);
     setHasInput(false);
+    requestAnimationFrame(() => {
+      requestAnimationFrame(() => {
+        onAfterSend?.();
+      });
+    });
+    const imageMedia = currentFiles.filter(
+      (it) => getMediaTypeFromFileType(it.file.type) === MediaType.Image
+    );
+    const otherMedia = currentFiles.filter(
+      (it) => getMediaTypeFromFileType(it.file.type) !== MediaType.Image
+    );
+    const otherMediaTypes = otherMedia.map((it) => getMediaTypeFromFileType(it.file.type));
+    const tempOtherMediaIds = otherMedia.map(() => crypto.randomUUID());
+    let tempTextId = "";
+    let tempImageId = "";
+    if (imageMedia.length > 0) {
+      tempImageId = crypto.randomUUID();
+      addMessageToCache(conversationId || "", {
+        ...basePreviewBody,
+        id: tempImageId,
+        clientTempId: tempImageId,
+        type: MessageType.Media,
+        media: imageMedia.map((it) => ({
+          url: it.url,
+          type: getMediaTypeFromFileType(it.file.type),
+          metadata: { name: it.file.name, size: it.file.size }
+        }))
+      });
+    }
+    for (let i = 0; i < otherMedia.length; i++) {
+      const it = otherMedia[i];
+      const tempId = tempOtherMediaIds[i];
+      const url = URL.createObjectURL(it.file);
+      addMessageToCache(conversationId || "", {
+        ...basePreviewBody,
+        id: tempId,
+        clientTempId: tempId,
+        type: MessageType.Media,
+        media: [
+          {
+            url,
+            type: getMediaTypeFromFileType(it.file.type),
+            metadata: { name: it.file.name, size: it.file.size }
+          }
+        ]
+      });
+    }
+    if (content && content.trim() !== "") {
+      tempTextId = crypto.randomUUID();
+      addMessageToCache(conversationId || "", {
+        ...basePreviewBody,
+        id: tempTextId,
+        clientTempId: tempTextId,
+        type: MessageType.Text
+      });
+    }
+    if (imageMedia.length > 0) {
+      try {
+        const image = await upload(imageMedia.map((it) => it.file));
+        await send({
+          ...baseBody,
+          clientTempId: tempImageId,
+          content: "",
+          type: MessageType.Media,
+          media: image.map((url) => ({
+            url: url.url,
+            type: MediaType.Image,
+            metadata: { name: url.original_filename, size: url.bytes }
+          }))
+        });
+      } catch (error) {
+        console.error("Error uploading images:", error);
+      }
+    }
+    if (otherMedia.length > 0) {
+      const otherMediaUrls = await upload(otherMedia.map((it) => it.file));
+      for (let i = 0; i < otherMedia.length; i++) {
+        const url = otherMediaUrls[i];
+        await send({
+          ...baseBody,
+          clientTempId: tempOtherMediaIds[i],
+          content: "",
+          type: MessageType.Media,
+          media: [
+            {
+              url: url.url,
+              type: otherMediaTypes[i],
+              metadata: { name: url.original_filename, size: url.bytes }
+            }
+          ]
+        });
+      }
+    }
+    if (content && content.trim() !== "") {
+      await send({
+        ...baseBody,
+        clientTempId: tempTextId,
+        content,
+        type: MessageType.Text
+      });
+    }
+    fileUrls.forEach((it) => URL.revokeObjectURL(it.url));
+    setFileUrls([]);
   };
-  const handleFocus = () => {
-    onFocus?.();
+  const handleSelectFiles = async (e) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      const fileArray = Array.from(files);
+      const newItems = [];
+      for (const file of fileArray) {
+        const sizeValidation = validateFileSize(file, MAX_FILE_SIZE);
+        if (!sizeValidation.valid) {
+          showSnackbar(
+            t2("chat.upload.fileTooLarge", {
+              fileName: file.name,
+              maxSize: "50MB"
+            }),
+            "error"
+          );
+          continue;
+        }
+        let fileToAdd = file;
+        if (file.type.startsWith("image/")) {
+          try {
+            fileToAdd = await compressImage(file, 1920, 1920, 0.8);
+          } catch (error) {
+            console.error("Error compressing image:", error);
+            showSnackbar(t2("chat.upload.compressionError", { fileName: file.name }), "error");
+            continue;
+          }
+        } else if (file.type.startsWith("video/")) {
+          try {
+            fileToAdd = await compressVideo(file, {
+              maxWidth: 1280,
+              maxHeight: 720,
+              videoBitsPerSecond: 9e5
+            });
+          } catch (error) {
+            console.error("Error compressing video:", error);
+            showSnackbar(t2("chat.upload.compressionError", { fileName: file.name }), "error");
+          }
+        }
+        newItems.push({ url: URL.createObjectURL(fileToAdd), file: fileToAdd });
+      }
+      if (newItems.length > 0) {
+        setFileUrls((prev) => [...prev, ...newItems]);
+      }
+      if (fileInputRef.current) {
+        fileInputRef.current.value = "";
+      }
+      if (imageInputRef.current) {
+        imageInputRef.current.value = "";
+      }
+    }
   };
-  return /* @__PURE__ */ jsxs("div", { className: clsx("px-2 h-[15%] self-end bg-bg-third w-full flex items-center", className), children: [
+  const renderFilePreview = (it) => {
+    const type = getMediaTypeFromFileType(it.file.type);
+    switch (type) {
+      case MediaType.Image:
+        return /* @__PURE__ */ jsx("img", { src: it.url, alt: "preview", className: "h-16 w-16 object-cover rounded-xl" });
+      case MediaType.Video:
+        return /* @__PURE__ */ jsxs("div", { className: "h-16 w-16 bg-black rounded-xl flex items-center justify-center relative", children: [
+          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-video text-white/50 text-xl" }),
+          /* @__PURE__ */ jsx(
+            "video",
+            {
+              src: it.url,
+              className: "absolute inset-0 h-full w-full object-cover opacity-30 rounded-xl"
+            }
+          )
+        ] });
+      case MediaType.Audio:
+        return /* @__PURE__ */ jsxs("div", { className: "h-16 w-32 bg-primary-100 rounded-xl flex flex-col items-center justify-center px-2", children: [
+          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-microphone text-primary-500 mb-1" }),
+          /* @__PURE__ */ jsx("span", { className: "text-[10px] truncate w-full text-center", children: it.file.name })
+        ] });
+      default:
+        return /* @__PURE__ */ jsxs("div", { className: "h-16 w-32 bg-bg-main border border-border-main rounded-xl flex flex-col items-center justify-center px-2", children: [
+          /* @__PURE__ */ jsx("i", { className: "fa-solid fa-file-lines text-primary-500 mb-1" }),
+          /* @__PURE__ */ jsx("span", { className: "text-[10px] truncate w-full text-center", children: it.file.name })
+        ] });
+    }
+  };
+  return /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col w-full bg-bg-third", className), ref: containerRef, children: /* @__PURE__ */ jsxs("div", { className: "w-full flex items-end gap-1", children: [
+    /* @__PURE__ */ jsx(
+      "input",
+      {
+        type: "file",
+        ref: imageInputRef,
+        className: "hidden",
+        multiple: true,
+        accept: "image/*",
+        onChange: handleSelectFiles
+      }
+    ),
+    /* @__PURE__ */ jsx(
+      "input",
+      {
+        type: "file",
+        ref: fileInputRef,
+        className: "hidden",
+        multiple: true,
+        accept: "video/*,audio/*,.pdf,.doc,.docx,.zip,.rar",
+        onChange: handleSelectFiles
+      }
+    ),
+    /* @__PURE__ */ jsx(
+      MiniButton,
+      {
+        onClick: () => fileInputRef.current?.click(),
+        onPointerDown: (e) => e.preventDefault(),
+        children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-paperclip text-primary-500" })
+      }
+    ),
+    /* @__PURE__ */ jsx(
+      MiniButton,
+      {
+        onClick: () => imageInputRef.current?.click(),
+        onPointerDown: (e) => e.preventDefault(),
+        children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-image text-primary-500" })
+      }
+    ),
     /* @__PURE__ */ jsx(
       TextArea,
       {
         sz: "sm",
-        className: "w-full !rounded-full",
-        wrapperClassName: "flex-1",
+        className: "!rounded-2xl",
+        wrapperClassName: "flex-1 min-w-0",
         placeholder: "Tin nhắn của bạn",
         onKeyDown: handleKeyDown,
         ref: textboxRef,
         onChange: handleInputChange,
-        rows: 1,
-        onFocus: handleFocus
+        rows: 0,
+        maxRows: 5,
+        onFocus: () => {
+          onFocus?.();
+        },
+        topContent: /* @__PURE__ */ jsx(Fragment, { children: fileUrls.length > 0 && /* @__PURE__ */ jsx("div", { className: "flex items-center gap-2 overflow-x-auto py-2 px-2", children: fileUrls.map((it) => /* @__PURE__ */ jsxs("div", { className: "relative group flex-shrink-0", children: [
+          renderFilePreview(it),
+          /* @__PURE__ */ jsx(
+            "button",
+            {
+              type: "button",
+              className: clsx(
+                "absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5",
+                "flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
+              ),
+              onClick: () => {
+                URL.revokeObjectURL(it.url);
+                setFileUrls((prev) => prev.filter((u) => u.url !== it.url));
+              },
+              children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark text-[10px]" })
+            }
+          )
+        ] }, it.url)) }) })
       }
     ),
-    /* @__PURE__ */ jsx(MiniButton, { sz: "sm", className: "ml-2", onClick: handleSendMessage, disabled: !hasInput, children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-paper-plane text-primary-500" }) })
-  ] });
+    /* @__PURE__ */ jsx(
+      MiniButton,
+      {
+        onClick: handleSendMessage,
+        disabled: !hasInput && fileUrls.length === 0,
+        onPointerDown: (e) => e.preventDefault(),
+        children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-paper-plane text-primary-500" })
+      }
+    )
+  ] }) });
 };
 const ChatWindow = ({ className, conversationId }) => {
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
-  const { toggleMinimize, closeChat, registry } = useChatStore();
+  const { toggleMinimize, closeChat, registry } = useChatStore(
+    useShallow((state) => ({
+      toggleMinimize: state.toggleMinimize,
+      closeChat: state.closeChat,
+      registry: state.registry
+    }))
+  );
   const { renderConversationName } = useRenderConversationContent();
   const { t: t2 } = useTranslation();
   const scrollRef = useRef(null);
   const panelRef = useRef(null);
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
-  const { lastMessageMap } = useMessageStore();
-  const { setFocusOn } = useOpenChat();
-  const chat = registry[conversationId];
-  const tempTargetId = chat?.type === "temp" ? chat.targetId : void 0;
+  const lastMessageSeq = useMessageStore((state) => state.lastMessageMap[conversationId]);
+  const setFocusOn = useChatStore((state) => state.setFocusOn);
+  const chat2 = registry[conversationId];
+  const tempTargetId = chat2?.type === "temp" ? chat2.targetId : void 0;
   const {
     data: tempUser,
     isLoading: isLoadingTempUser,
@@ -6828,8 +8562,10 @@ const ChatWindow = ({ className, conversationId }) => {
   const handleMarkAsReadOnFocus = useCallback(async () => {
     if (!conversationData?.id || !document.hasFocus()) return;
     setFocusOn(conversationData.id);
-    const lastMsgSeq = lastMessageMap[conversationData.id] || conversationData?.lastMessageNumber;
+    const lastMsgSeq = lastMessageSeq || conversationData?.lastMessageNumber;
+    const myLastSeenSeq = conversationData.myLastSeenMessageSeq || 0;
     if (!lastMsgSeq) return;
+    if (lastMsgSeq <= myLastSeenSeq) return;
     markAsReadLocal(conversationData.id, lastMsgSeq);
     await markAsRead({
       conversationId: conversationData.id,
@@ -6838,7 +8574,7 @@ const ChatWindow = ({ className, conversationId }) => {
   }, [
     conversationData?.id,
     conversationData?.lastMessage?.sequenceNumber,
-    lastMessageMap,
+    lastMessageSeq,
     markAsRead,
     markAsReadLocal,
     setFocusOn
@@ -6949,7 +8685,7 @@ const ChatWindow = ({ className, conversationId }) => {
         /* @__PURE__ */ jsx(
           ChatInput,
           {
-            className: "!bg-bg-main h-fit py-2",
+            className: "!bg-bg-main h-fit py-2 pr-1",
             conversationId: !tempTargetId ? conversationId : void 0,
             correlationId: tempTargetId ? conversationId : void 0,
             receiverId: tempTargetId,
@@ -6961,15 +8697,21 @@ const ChatWindow = ({ className, conversationId }) => {
   );
 };
 const GroupChatWindow = ({ className }) => {
-  const { activeIds } = useChatStore();
+  const activeIds = useChatStore((state) => state.activeIds);
   return /* @__PURE__ */ jsx("div", { className: clsx("flex gap-3", className), children: activeIds.map((id) => {
     return /* @__PURE__ */ jsx("div", { children: /* @__PURE__ */ jsx(ChatWindow, { className: "rounded-b-none", conversationId: id }) }, id);
   }) });
 };
 const BubbleChat = ({ className, conversationId }) => {
-  const { toggleMinimize, closeChat, registry } = useChatStore();
-  const chat = registry[conversationId];
-  const tempTargetId = chat?.type === "temp" ? chat.targetId : void 0;
+  const { toggleMinimize, closeChat, registry } = useChatStore(
+    useShallow((state) => ({
+      toggleMinimize: state.toggleMinimize,
+      closeChat: state.closeChat,
+      registry: state.registry
+    }))
+  );
+  const chat2 = registry[conversationId];
+  const tempTargetId = chat2?.type === "temp" ? chat2.targetId : void 0;
   const { data: tempUser } = useGetUserProfile(tempTargetId);
   const { data: conversationData } = useGetConversation(
     conversationId,
@@ -7014,12 +8756,12 @@ const BubbleChat = ({ className, conversationId }) => {
   ] });
 };
 const BubbleChatList = ({ className }) => {
-  const { minimizedIds } = useChatStore();
+  const minimizedIds = useChatStore((state) => state.minimizedIds);
   return /* @__PURE__ */ jsx("div", { className: clsx("flex gap-4 flex-col", className), children: minimizedIds.map((id) => /* @__PURE__ */ jsx(BubbleChat, { conversationId: id }, id)) });
 };
 const ChatLayer = ({ className }) => {
   const isFatalkPage = useLocation().pathname.startsWith("/fatalk");
-  const { initializeFromStorage } = useChatStore();
+  const initializeFromStorage = useChatStore((state) => state.initializeFromStorage);
   useEffect(() => {
     initializeFromStorage?.();
   }, [initializeFromStorage]);
@@ -7114,6 +8856,29 @@ const ChatItem = ({ conversation, onClick }) => {
   const isOtherUserRead = conversation.otherLastSeenMessageSeq && conversation.lastMessage?.sequenceNumber && conversation.otherLastSeenMessageSeq >= conversation.lastMessage.sequenceNumber;
   const unreadLabel = unreadCount > 99 ? "99+" : String(unreadCount);
   const { userId } = useAuth();
+  const renderMessagePreview = () => {
+    if (unreadCount > 1) {
+      return `Bạn có ${unreadLabel} tin nhắn chưa đọc`;
+    }
+    if (!lastMessage) {
+      return t2("common:conversations.noMessagesYet");
+    }
+    if (isSystemMessage(lastMessage.type || MessageType.System)) {
+      return renderSystemMessage(lastMessage);
+    }
+    const senderName = userId === lastMessage.senderId ? t2("common:conversations.you") : lastMessage.senderFullName;
+    switch (lastMessage.type) {
+      case MessageType.Text:
+        return `${senderName}: ${lastMessage.content}`;
+      case MessageType.Media:
+        if (lastMessage.media && lastMessage.media.some((m) => m.type === MediaType.Image)) {
+          return `${senderName}: ${t2("common:conversations.sentImageMessage", { count: lastMessage.media.length })}`;
+        }
+        return `${senderName}: ${t2("common:conversations.sentMediaMessage")}`;
+      default:
+        return "";
+    }
+  };
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -7137,7 +8902,7 @@ const ChatItem = ({ conversation, onClick }) => {
             }
           ),
           /* @__PURE__ */ jsxs("div", { className: "flex items-center opacity-80", children: [
-            /* @__PURE__ */ jsx(Text, { sz: "xs", className: "truncate max-w-full", weight: isUnread ? "bold" : "regular", children: unreadCount > 1 ? `Bạn có ${unreadLabel} tin nhắn chưa đọc` : lastMessage ? isSystemMessage(lastMessage?.type || MessageType.System) ? renderSystemMessage(lastMessage) : userId === lastMessage?.senderId ? t2("common:conversations.you") + ": " + lastMessage?.content : lastMessage?.senderFullName + ": " + lastMessage?.content : "Unknown" }),
+            /* @__PURE__ */ jsx(Text, { sz: "xs", className: "truncate max-w-full", weight: isUnread ? "bold" : "regular", children: renderMessagePreview() }),
             /* @__PURE__ */ jsx(Text, { sz: "xs", className: "mx-2 shrink-0", weight: isUnread ? "bold" : "regular", children: "•" }),
             /* @__PURE__ */ jsx(Text, { sz: "xs", className: "shrink-0", weight: isUnread ? "bold" : "regular", children: formatTime(conversation.lastMessage?.createdAt ?? "") })
           ] })
@@ -7777,243 +9542,6 @@ const SecondLayout = () => {
     /* @__PURE__ */ jsx(Layout.Footer, { className: "relative", children: /* @__PURE__ */ jsx("div", { className: "bg-bg-second text-center py-4", children: /* @__PURE__ */ jsx("p", { className: "text-sm text-text-secondary", children: "© 2026 Fatagram. All rights reserved." }) }) })
   ] });
 };
-function GoogleCallbackPage() {
-  const navigate = useNavigate();
-  const { loginWithGoogle } = useAuth();
-  useEffect(() => {
-    const code = new URLSearchParams(window.location.search).get("code");
-    if (!code) {
-      navigate("/login");
-      return;
-    }
-    loginWithGoogle(code);
-  }, []);
-  return /* @__PURE__ */ jsx(LoadingPage, {});
-}
-const onboardingValidationSchema = Yup.object({
-  firstName: Yup.string().min(2, "onboarding:validation.firstNameTooShort").required("onboarding:validation.firstNameRequired"),
-  middleName: Yup.string(),
-  lastName: Yup.string().min(2, "onboarding:validation.lastNameTooShort").required("onboarding:validation.lastNameRequired"),
-  birthday: Yup.date().max(/* @__PURE__ */ new Date(), "onboarding:validation.birthdayInvalid").required("onboarding:validation.birthdayRequired"),
-  gender: Yup.string().required("onboarding:validation.genderRequired")
-});
-const onboardingInitialValues = {
-  firstName: "",
-  middleName: "",
-  lastName: "",
-  birthday: "",
-  gender: ""
-};
-const ErrorCodes$3 = {
-  FIRSTNAME_REQUIRED: {
-    message: "onboarding:errorMessages.firstNameRequired",
-    type: "FirstName"
-  },
-  FIRSTNAME_TOO_SHORT: {
-    message: "onboarding:errorMessages.firstNameTooShort",
-    type: "FirstName"
-  },
-  LASTNAME_REQUIRED: {
-    message: "onboarding:errorMessages.lastNameRequired",
-    type: "LastName"
-  },
-  LASTNAME_TOO_SHORT: {
-    message: "onboarding:errorMessages.lastNameTooShort",
-    type: "LastName"
-  },
-  BIRTHDAY_REQUIRED: {
-    message: "onboarding:errorMessages.birthdayRequired",
-    type: "Birthday"
-  },
-  BIRTHDAY_INVALID: {
-    message: "onboarding:errorMessages.birthdayInvalid",
-    type: "Birthday"
-  },
-  GENDER_REQUIRED: {
-    message: "onboarding:errorMessages.genderRequired",
-    type: "Gender"
-  },
-  UNKNOWN_ERROR: {
-    message: "onboarding:errorMessages.unknownError",
-    type: "UnknownError"
-  }
-};
-const genderOptions = [
-  { key: "male", value: "Nam" },
-  { key: "female", value: "Nữ" },
-  { key: "other", value: "Khác" }
-];
-const OnboardingForm = () => {
-  const { t: t2 } = useTranslation();
-  const navigate = useNavigate();
-  const [errors, setErrors] = useState({});
-  const { fetch: completeOnboarding } = useOnboarding();
-  const formik = useFormik({
-    initialValues: { ...onboardingInitialValues, gender: genderOptions[0].key },
-    validationSchema: onboardingValidationSchema,
-    onSubmit: async (values) => {
-      setErrors({});
-      await completeOnboarding(
-        {
-          firstName: values.firstName,
-          middleName: values.middleName,
-          lastName: values.lastName,
-          birthday: values.birthday,
-          gender: values.gender.toString()
-        },
-        {
-          onSuccess: () => {
-            authEvents.emit("onboardingCompleted");
-            navigate("/");
-          },
-          onError: (err) => {
-            console.error("Error completing onboarding:", err);
-            const errorCode = err?.code;
-            if (errorCode && ErrorCodes$3[errorCode]) {
-              const errorInfo = ErrorCodes$3[errorCode];
-              setErrors({ [errorInfo.type]: errorInfo.message });
-            }
-          }
-        }
-      );
-    }
-  });
-  React.useEffect(() => {
-    const fetchDefaults = async () => {
-      const result = await userProfileService.getOnboardingDefaults();
-      if (result.success && result.data) {
-        const data = result.data;
-        const genderMap = {
-          0: "male",
-          1: "female",
-          2: "other"
-        };
-        formik.setValues({
-          firstName: data.firstName || "",
-          middleName: data.middleName || "",
-          lastName: data.lastName || "",
-          birthday: data.birthDay ? data.birthDay.split("T")[0] : "",
-          gender: data.gender !== void 0 ? genderMap[data.gender] || "male" : "male"
-        });
-      }
-    };
-    fetchDefaults();
-  }, [formik.setValues]);
-  return /* @__PURE__ */ jsxs("div", { className: "relative w-full", children: [
-    formik.isSubmitting && /* @__PURE__ */ jsx(OverlayLoading, {}),
-    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-4 w-full", children: [
-      /* @__PURE__ */ jsxs("div", { className: "flex sm:flex-row flex-col gap-2 w-full", children: [
-        /* @__PURE__ */ jsx(
-          Textbox,
-          {
-            title: "Họ",
-            className: "w-full",
-            isRequired: true,
-            placeholder: "Họ",
-            value: formik.values.firstName,
-            onChange: (e) => formik.setFieldValue("firstName", e.target.value),
-            isWrong: formik.touched.firstName && Boolean(formik.errors.firstName) || Boolean(errors.FirstName),
-            wrongMessage: t2(errors.FirstName || formik.errors.firstName || ""),
-            type: "text"
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          Textbox,
-          {
-            title: "Tên đệm",
-            className: "w-full",
-            placeholder: "Tên đệm",
-            value: formik.values.middleName,
-            onChange: (e) => formik.setFieldValue("middleName", e.target.value),
-            type: "text"
-          }
-        ),
-        /* @__PURE__ */ jsx(
-          Textbox,
-          {
-            title: "Tên",
-            isRequired: true,
-            placeholder: "Tên",
-            className: "w-full",
-            value: formik.values.lastName,
-            onChange: (e) => formik.setFieldValue("lastName", e.target.value),
-            isWrong: formik.touched.lastName && Boolean(formik.errors.lastName) || Boolean(errors.LastName),
-            wrongMessage: t2(errors.LastName || formik.errors.lastName || ""),
-            type: "text"
-          }
-        )
-      ] }),
-      /* @__PURE__ */ jsx(
-        SelectDay,
-        {
-          title: "Ngày sinh",
-          isRequired: true,
-          value: formik.values.birthday,
-          onChange: (e) => formik.setFieldValue("birthday", e.target.value),
-          isWrong: formik.touched.birthday && Boolean(formik.errors.birthday) || Boolean(errors.Birthday),
-          wrongMessage: t2(errors.Birthday || formik.errors.birthday || "")
-        }
-      ),
-      /* @__PURE__ */ jsx("div", { className: "flex gap-2 w-full", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col flex-1", children: [
-        /* @__PURE__ */ jsx(
-          SelectBox,
-          {
-            title: "Giới tính",
-            isRequired: true,
-            options: genderOptions,
-            selectedOption: formik.values.gender,
-            onSelect: (key) => formik.setFieldValue("gender", key)
-          }
-        ),
-        (formik.touched.gender && formik.errors.gender || errors.Gender) && /* @__PURE__ */ jsx("span", { className: "text-xs text-error ml-1", children: t2(errors.Gender || formik.errors.gender || "") })
-      ] }) }),
-      /* @__PURE__ */ jsx(Button, { type: "button", className: "w-full", onClick: formik.submitForm, sz: "sm", children: "Hoàn tất" })
-    ] })
-  ] });
-};
-function OnboardingPage() {
-  return /* @__PURE__ */ jsx(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col bg-bg-second flex-1 h-full lg:p-4",
-        "justify-center items-center"
-      ),
-      children: /* @__PURE__ */ jsxs(
-        "div",
-        {
-          className: clsx(
-            "relative flex flex-col items-center justify-center gap-8 w-full flex-1 sm:h-auto sm:max-w-[700px]",
-            "bg-bg-second/80 sm:rounded-3xl shadow-2xl",
-            "sm:p-10 px-4 border border-border-main/50"
-          ),
-          children: [
-            /* @__PURE__ */ jsx("div", { className: "absolute -top-20 -left-20 w-40 h-40 bg-primary-500/20 rounded-full blur-3xl" }),
-            /* @__PURE__ */ jsxs("div", { className: "flex flex-col items-center gap-3 z-10", children: [
-              /* @__PURE__ */ jsx(Logo, { sz: "md", hasSlogan: false }),
-              /* @__PURE__ */ jsx(
-                Text,
-                {
-                  sz: "xl",
-                  weight: "extrabold",
-                  className: "mt-2 !text-transparent bg-clip-text bg-gradient-to-r from-primary-500 to-primary-600 font-inter",
-                  children: "Chào bạn!"
-                }
-              ),
-              /* @__PURE__ */ jsx(Text, { sz: "md", className: "text-text-secondary text-center max-w-[400px]", children: "Hãy hoàn tất thông tin cần thiết" })
-            ] }),
-            /* @__PURE__ */ jsx("div", { className: "w-full h-[1px] bg-gradient-to-r from-transparent via-border-main to-transparent" }),
-            /* @__PURE__ */ jsx(OnboardingForm, {}),
-            /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 text-text-third", children: [
-              /* @__PURE__ */ jsx("i", { className: "fa-solid fa-shield-halved text-primary-500" }),
-              /* @__PURE__ */ jsx(Text, { sz: "sm", children: "Thông tin của bạn được bảo mật tuyệt đối" })
-            ] })
-          ]
-        }
-      )
-    }
-  );
-}
 const SettingsNavbar = ({ className, onSelect }) => {
   const { t: t2 } = useTranslation();
   const authSettings = [
@@ -8667,389 +10195,28 @@ const settingRoutes = {
     { path: "language", element: /* @__PURE__ */ jsx(LanguageSettingPage, {}) }
   ]
 };
-const FatalkSidebar = ({ className, onConversationClick }) => {
-  const navigate = useNavigate();
-  const { fetch: _createConversation } = useCreateGroupConversation();
-  const [tab, setTab] = useState("list");
-  const handleCreateConversation = useCallback(async () => {
-    setTab("create");
-  }, []);
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
-  const handleSelectConversation = (conversationId) => {
-    navigate(`/fatalk/${conversationId}`);
-    onConversationClick?.();
-  };
-  return /* @__PURE__ */ jsxs(
-    PageNavbar,
-    {
-      title: "Fatalk",
-      className: clsx(
-        "flex flex-col relative !h-[calc(100dvh-var(--header-height))] !overflow-hidden !rounded-none",
-        className
-      ),
-      header: /* @__PURE__ */ jsx("div", { className: "flex ", children: /* @__PURE__ */ jsx(MiniButton, { sz: "sm", className: "bg-bg-fifth", onClick: handleCreateConversation, children: /* @__PURE__ */ jsx("i", { className: "fa-regular fa-pen-to-square" }) }) }),
-      headerClassName: "justify-between !flex-row pr-3 ",
-      children: [
-        tab === "list" && /* @__PURE__ */ jsx("div", { className: "flex flex-col px-2 h-full overflow-hidden", children: /* @__PURE__ */ jsx(
-          ChatList,
-          {
-            className: "pt-0 h-full",
-            onConversationClick: handleSelectConversation,
-            data,
-            fetchNextPage,
-            hasNextPage,
-            isLoading,
-            isFetching
-          }
-        ) }),
-        tab === "create" && /* @__PURE__ */ jsx(
-          CreateGroupChat,
-          {
-            className: "flex-1 min-h-0",
-            onCreateSuccess: (conversationId) => {
-              navigate(`/fatalk/${conversationId}`);
-              setTab("list");
-            },
-            onTurnBack: () => setTab("list")
-          }
-        )
-      ]
-    }
-  );
-};
-const FatalkPage = () => {
-  const { pathname } = useLocation();
-  const isExactPath = pathname === "/fatalk" || pathname === "/fatalk/";
-  const { t: t2 } = useTranslation();
-  return /* @__PURE__ */ jsx(
-    SidebarLayout,
-    {
-      title: "Fatalk",
-      navbar: /* @__PURE__ */ jsx(FatalkSidebar, { className: "h-full" }),
-      showMenuButton: false,
-      sidebarClassName: clsx("lg:w-[400px] w-full", "max-w-full !transition-none"),
-      showSidebar: isExactPath,
-      showOverlay: false,
-      children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col w-full h-[calc(100dvh-var(--header-height))] ", children: [
-        /* @__PURE__ */ jsx(Outlet, {}),
-        isExactPath && /* @__PURE__ */ jsx(
-          "div",
-          {
-            className: clsx(
-              "flex flex-col items-center justify-center flex-1",
-              "",
-              "gap-4 opacity-50"
-            ),
-            children: /* @__PURE__ */ jsx(
-              NotFound,
-              {
-                title: t2("common:conversations.noSelectConversation"),
-                icon: "fa-solid fa-message",
-                description: t2("common:conversations.noSelectConversationMessage")
-              }
-            )
-          }
-        )
-      ] })
-    }
-  );
-};
-const FatalkChatPanel = ({
-  className,
-  conversationId,
-  onTurnback
-}) => {
-  const [chatTitle, setChatTitle] = useState("");
-  const [chatAvatar, setChatAvatar] = useState("");
-  const { renderConversationName } = useRenderConversationContent();
-  const { t: t2 } = useTranslation();
-  const { fetch: markAsRead } = useMarkConversationAsRead();
-  const markAsReadLocal = useLocalMarkAsRead();
-  const { lastMessageMap } = useMessageStore();
-  const setFocusOn = useChatStore((state) => state.setFocusOn);
-  const {
-    data: conversationData,
-    isLoading: isLoadingConversation,
-    isFetching: isFetchingConversation
-  } = useGetConversation(conversationId, void 0, true);
-  const navigate = useNavigate();
-  const isLoadingHeader = isLoadingConversation || isFetchingConversation;
-  const scrollRef = useRef(null);
-  const panelRef = useRef(null);
-  useEffect(() => {
-    if (conversationData) {
-      setChatTitle(renderConversationName(conversationData));
-      setChatAvatar(conversationData.avatarUrl || "");
-    }
-  }, [conversationData, renderConversationName]);
-  useEffect(() => {
-    if (!conversationData?.id) return;
-    const handleUserInteract = async () => {
-      if (!document.hasFocus()) return;
-      setFocusOn(conversationData.id);
-      const lastMsgSeq = lastMessageMap[conversationData.id] || conversationData?.lastMessageNumber;
-      if (!lastMsgSeq) return;
-      markAsReadLocal(conversationData.id, lastMsgSeq);
-      await markAsRead({
-        conversationId: conversationData.id,
-        messageSeq: lastMsgSeq
-      });
-    };
-    const handleClickOutside = (event) => {
-      if (panelRef.current && !panelRef.current.contains(event.target)) {
-        setFocusOn(null);
-      }
-    };
-    const handleWindowBlur = () => {
-      setFocusOn(null);
-    };
-    const messageArea = scrollRef.current;
-    if (messageArea) {
-      messageArea.addEventListener("click", handleUserInteract);
-    }
-    document.addEventListener("mousedown", handleClickOutside);
-    window.addEventListener("blur", handleWindowBlur);
-    return () => {
-      if (messageArea) {
-        messageArea.removeEventListener("click", handleUserInteract);
-      }
-      document.removeEventListener("mousedown", handleClickOutside);
-      window.removeEventListener("blur", handleWindowBlur);
-    };
-  }, [
-    conversationData?.id,
-    conversationData?.lastMessage?.id,
-    markAsRead,
-    markAsReadLocal,
-    setFocusOn
-  ]);
-  useEffect(() => {
-    return () => {
-      setFocusOn(null);
-    };
-  }, [setFocusOn]);
-  if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
-    return /* @__PURE__ */ jsxs(
-      "div",
-      {
-        className: clsx(
-          "flex flex-col items-center justify-center h-56 gap-4 animate-fade-in",
-          "bg-bg-main sm:bg-bg-second",
-          className
-        ),
-        children: [
-          /* @__PURE__ */ jsx(
-            NotFound,
-            {
-              icon: "fa-regular fa-comments text-3xl",
-              title: t2("common:conversations:notFound"),
-              description: t2("common:conversations:notFoundMessage")
-            }
-          ),
-          /* @__PURE__ */ jsx(Button, { className: "block sm:hidden", onClick: () => navigate("/fatalk"), children: t2("common:conversations:turnBack") })
-        ]
-      }
-    );
-  }
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx("relative flex flex-col bg-bg-main overflow-hidden", className),
-      ref: panelRef,
-      children: [
-        /* @__PURE__ */ jsx("div", { className: "flex items-center gap-3 px-4 h-[60px] bg-bg-main border-b border-gray-700/50 shrink-0", children: isLoadingHeader ? /* @__PURE__ */ jsxs(Fragment, { children: [
-          /* @__PURE__ */ jsx(Skeleton, { sz: "md", variant: "circle", className: "w-10" }),
-          /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "flex-1 max-w-[160px]" })
-        ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-          onTurnback && /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: onTurnback, className: "block lg:hidden", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-left text-primary-400" }) }),
-          /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "sm" }),
-          /* @__PURE__ */ jsx(Text, { sz: "md", weight: "bold", className: "flex-1 text-text-main truncate", children: chatTitle })
-        ] }) }),
-        /* @__PURE__ */ jsx("div", { className: "flex-1 px-4 py-2 bg-bg-main min-h-0", ref: scrollRef, children: /* @__PURE__ */ jsx(
-          MessageList,
-          {
-            conversationId,
-            parentRef: scrollRef,
-            isGroup: conversationData?.isGroup,
-            lastSeen: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
-              /* @__PURE__ */ jsx("div", { className: "relative mb-4", children: /* @__PURE__ */ jsx(Avatar, { src: conversationData?.avatarUrl || "", alt: "Avatar", sz: "md" }) }),
-              /* @__PURE__ */ jsx(Text, { sz: "sm", weight: "bold", children: chatTitle }),
-              /* @__PURE__ */ jsx(Text, { sz: "xs", wrap: "whitespace-normal", children: t2("common:conversations:privacyDescription") })
-            ] })
-          },
-          conversationId
-        ) }),
-        /* @__PURE__ */ jsx(
-          ChatInput,
-          {
-            className: "!bg-bg-main h-auto p-4",
-            conversationId,
-            onFocus: () => {
-              if (!conversationData?.id || !document.hasFocus()) return;
-              setFocusOn(conversationData.id);
-              const lastMsgSeq = conversationData.lastMessage?.sequenceNumber;
-              if (!lastMsgSeq) return;
-              markAsReadLocal(conversationData.id, lastMsgSeq);
-              void markAsRead({
-                conversationId: conversationData.id,
-                messageSeq: lastMsgSeq
-              });
-            }
-          }
-        )
-      ]
-    }
-  );
-};
-const ConversationPage = ({}) => {
-  const navigate = useNavigate();
-  const { conversationId } = useParams();
-  return /* @__PURE__ */ jsx(
-    FatalkChatPanel,
-    {
-      conversationId,
-      className: "h-[calc(100dvh-var(--header-height))]",
-      onTurnback: () => navigate("/fatalk")
-    }
-  );
-};
-const TempConversation = ({ className }) => {
-  const [message, setMessage] = useState("");
-  const [searchParams] = useSearchParams();
-  const location = useLocation();
-  const navigate = useNavigate();
-  const tempId = searchParams.get("tempId") || void 0;
-  const correlationId = location.state?.correlationId;
-  const { data: tempUser, isLoading, isFetching } = useGetUserProfile(tempId);
-  const { checkConversationWith } = useOpenChat();
-  const { fetch: sendMessage } = useSendMessage();
-  const handleTurnBack = () => {
-    navigate("/fatalk");
-  };
-  useEffect(() => {
-    const checkConversation = async () => {
-      if (!tempUser) {
-        navigate("/fatalk");
-        return;
-      }
-      const hasConversation = await checkConversationWith(tempId);
-      if (hasConversation) {
-        navigate(`/fatalk/${hasConversation}`);
-      }
-    };
-    checkConversation();
-  }, [checkConversationWith, navigate, tempUser, isLoading]);
-  const handleSendMessage = async () => {
-    if (!tempId) return;
-    await sendMessage(
-      {
-        correlationId,
-        content: message,
-        receiverId: tempId
-      },
-      {
-        onSuccess: (data) => {
-          navigate(`/fatalk/${data?.conversationId}`);
-        }
-      }
-    );
-  };
-  const handleKeyDown = (e) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
-    }
-  };
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "relative flex flex-col bg-bg-main overflow-hidden",
-        "h-[calc(100dvh-var(--header-height))]",
-        className
-      ),
-      children: [
-        /* @__PURE__ */ jsx("div", { className: "flex items-center gap-3 px-4 h-[60px] bg-bg-second border-b border-gray-700/50 shrink-0", children: isLoading || isFetching ? /* @__PURE__ */ jsxs(Fragment, { children: [
-          /* @__PURE__ */ jsx(Skeleton, { sz: "md", variant: "circle", className: "w-10" }),
-          /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "flex-1 max-w-[160px]" })
-        ] }) : /* @__PURE__ */ jsxs(Fragment, { children: [
-          /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: handleTurnBack, className: "block lg:hidden", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-arrow-left text-primary-400" }) }),
-          /* @__PURE__ */ jsx(Avatar, { src: tempUser?.infos.avatar, alt: "Avatar", sz: "sm" }),
-          /* @__PURE__ */ jsx(Text, { sz: "md", weight: "bold", className: "flex-1 text-text-main", children: tempUser?.infos.fullName })
-        ] }) }),
-        /* @__PURE__ */ jsx("div", { className: "flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh", children: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
-          /* @__PURE__ */ jsx("div", { className: "relative mb-4", children: /* @__PURE__ */ jsx(Avatar, { src: tempUser?.infos.avatar, alt: "Avatar", sz: "md" }) }),
-          /* @__PURE__ */ jsx(Text, { sz: "md", weight: "bold", children: tempUser?.infos.fullName }),
-          /* @__PURE__ */ jsx(Text, { sz: "sm", className: "text-gray-400 mt-1", children: "Hai bạn chưa có tin nhắn nào" }),
-          /* @__PURE__ */ jsx("div", { className: "mt-5 px-4 py-2 bg-gray-700/30 rounded-full", children: /* @__PURE__ */ jsx(Text, { sz: "sm", className: "text-gray-300", children: "Gửi lời chào đầu tiên 👋" }) })
-        ] }) }),
-        /* @__PURE__ */ jsxs("div", { className: "px-4 py-3 bg-bg-second border-t border-gray-700/50 flex items-center gap-2", children: [
-          /* @__PURE__ */ jsx(
-            Textbox,
-            {
-              sz: "sm",
-              className: "!rounded-full w-full",
-              wrapperClassName: "flex-1",
-              placeholder: "Aa",
-              value: message,
-              onChange: (e) => setMessage(e.target.value),
-              onKeyDown: handleKeyDown,
-              type: "text"
-            }
-          ),
-          /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: handleSendMessage, disabled: !message.trim() || isFetching, children: /* @__PURE__ */ jsx(
-            "i",
-            {
-              className: clsx(
-                "fa-solid",
-                message.trim() ? "fa-paper-plane text-primary-500" : "fa-thumbs-up text-primary-400"
-              )
-            }
-          ) })
-        ] })
-      ]
-    }
-  );
-};
-const taoDuLieuGia = (soLuong, batDauTu) => {
-  return Array.from({ length: soLuong }).map((_, chiMuc) => ({
-    maDinhDanh: batDauTu + chiMuc,
-    noiDung: `Nội dung tin nhắn số ${batDauTu + chiMuc}`
-  }));
-};
-function ThuNghiemCuon() {
-  const [danhSachTinNhan, setDanhSachTinNhan] = useState(() => taoDuLieuGia(9, 1));
-  const [dangTaiDuLieu, setDangTaiDuLieu] = useState(false);
-  const [conDuLieu, setConDuLieu] = useState(true);
-  const xuLyTaiThem = useCallback(async () => {
-    if (dangTaiDuLieu || !conDuLieu) return;
-    setDangTaiDuLieu(true);
-    await new Promise((giaiQuyet) => setTimeout(giaiQuyet, 10));
-    setDanhSachTinNhan((danhSachHienTai) => {
-      const doDaiHienTai = danhSachHienTai.length;
-      if (doDaiHienTai >= 200) {
-        setConDuLieu(false);
-        return danhSachHienTai;
-      }
-      const duLieuMoi = taoDuLieuGia(9, doDaiHienTai + 1);
-      return [...danhSachHienTai, ...duLieuMoi];
-    });
-    setDangTaiDuLieu(false);
-  }, [dangTaiDuLieu, conDuLieu]);
-  return /* @__PURE__ */ jsx("div", { className: "h-[600px] w-[400px] border border-gray-300 mx-auto mt-10 bg-white", children: /* @__PURE__ */ jsx(
-    InfiniteScrollFlex,
-    {
-      items: danhSachTinNhan,
-      isLoading: dangTaiDuLieu,
-      hasMore: conDuLieu,
-      onLoadMore: xuLyTaiThem,
-      itemKey: (tinNhan) => tinNhan.maDinhDanh,
-      itemTemplate: (tinNhan) => /* @__PURE__ */ jsx("div", { className: "p-3 m-2 bg-blue-100 rounded-lg text-black shadow-sm", children: tinNhan.noiDung }),
-      isShowLastSeen: true,
-      lastSeen: /* @__PURE__ */ jsx("span", { className: "text-gray-500", children: "Đã xem toàn bộ lịch sử trò chuyện" })
-    }
-  ) });
-}
+const NotFoundPage = lazy(() => Promise.resolve().then(() => notFoundPage));
+const HomePage = lazy(() => import("./assets/home-page-DNFGi8VM.js"));
+const RegisterPage = lazy(() => import("./assets/register-page-EdLUcPyj.js"));
+const LoginPage = lazy(() => import("./assets/login-page-HKe56hIf.js"));
+const NotificationPage = lazy(() => import("./assets/notifications-page-4FQVKoGg.js"));
+const GoogleCallbackPage = lazy(
+  () => import("./assets/google-callback-page-BO-RCBaP.js")
+);
+const OnboardingPage = lazy(() => import("./assets/onboarding-page-Dauc5sff.js"));
+const FatalkPage = lazy(() => import("./assets/fatalk-page-DQpEXTS5.js"));
+const ConversationPage = lazy(
+  () => import("./assets/conversation-page-CoLZ1hDU.js").then((module) => ({
+    default: module.ConversationPage
+  }))
+);
+const TempConversation = lazy(
+  () => import("./assets/temp-conversation-BUWgNMw9.js").then((module) => ({
+    default: module.TempConversation
+  }))
+);
+const ThuNghiemCuon = lazy(() => import("./assets/tests-infinity-scroll-page-zA0afFsj.js"));
+const withFallback = (element) => /* @__PURE__ */ jsx(Suspense, { fallback: /* @__PURE__ */ jsx(LoadingPage, {}), children: element });
 const mainRoutes = [
   {
     element: /* @__PURE__ */ jsx(DefaultLayout, {}),
@@ -9057,7 +10224,7 @@ const mainRoutes = [
     children: [
       {
         path: "/",
-        element: /* @__PURE__ */ jsx(HomePage, {}),
+        element: withFallback(/* @__PURE__ */ jsx(HomePage, {})),
         type: "private",
         index: true,
         keepAlive: true
@@ -9067,31 +10234,31 @@ const mainRoutes = [
       userRoute,
       {
         path: "/notifications",
-        element: /* @__PURE__ */ jsx(NotificationsPage, {}),
+        element: withFallback(/* @__PURE__ */ jsx(NotificationPage, {})),
         type: "private"
       },
       {
         path: "/fatalk",
-        element: /* @__PURE__ */ jsx(FatalkPage, {}),
+        element: withFallback(/* @__PURE__ */ jsx(FatalkPage, {})),
         type: "private",
         children: [
           {
             path: ":conversationId",
-            element: /* @__PURE__ */ jsx(ConversationPage, {}),
+            element: withFallback(/* @__PURE__ */ jsx(ConversationPage, {})),
             type: "private"
           },
           {
             path: "temp",
-            element: /* @__PURE__ */ jsx(TempConversation, {}),
+            element: withFallback(/* @__PURE__ */ jsx(TempConversation, {})),
             type: "private"
           }
         ]
       },
       { path: "/loading", type: "public", element: /* @__PURE__ */ jsx(LoadingPage, {}) },
-      { path: "*", type: "public", element: /* @__PURE__ */ jsx(NotFoundPage, {}) },
+      { path: "*", type: "public", element: withFallback(/* @__PURE__ */ jsx(NotFoundPage, {})) },
       {
         path: "/thu-nghiem-cuon",
-        element: /* @__PURE__ */ jsx(ThuNghiemCuon, {}),
+        element: withFallback(/* @__PURE__ */ jsx(ThuNghiemCuon, {})),
         type: "public"
       }
     ]
@@ -9102,22 +10269,22 @@ const mainRoutes = [
     children: [
       {
         path: "/login",
-        element: /* @__PURE__ */ jsx(LoginPage, {}),
+        element: withFallback(/* @__PURE__ */ jsx(LoginPage, {})),
         type: "auth"
       },
       {
         path: "/register",
-        element: /* @__PURE__ */ jsx(RegisterPage, {}),
+        element: withFallback(/* @__PURE__ */ jsx(RegisterPage, {})),
         type: "auth"
       },
       {
         path: "/auth/google/callback",
-        element: /* @__PURE__ */ jsx(GoogleCallbackPage, {}),
+        element: withFallback(/* @__PURE__ */ jsx(GoogleCallbackPage, {})),
         type: "auth"
       },
       {
         path: "/onboarding",
-        element: /* @__PURE__ */ jsx(OnboardingPage, {}),
+        element: withFallback(/* @__PURE__ */ jsx(OnboardingPage, {})),
         type: "private"
       }
     ]
@@ -9176,12 +10343,161 @@ function Main() {
   return /* @__PURE__ */ jsxs(Fragment, { children: [
     /* @__PURE__ */ jsx(AppRoutes, {}),
     /* @__PURE__ */ jsx(GlobalDialog, {}),
-    /* @__PURE__ */ jsx(NotificationListener, {}),
-    /* @__PURE__ */ jsx(MessageListener, {})
+    /* @__PURE__ */ jsx(MediaViewer, {}),
+    /* @__PURE__ */ jsx(AppHubListener, {}),
+    /* @__PURE__ */ jsx(OfflineStatusNotification, {})
   ] });
 }
+const DB_NAME = "fatagram-query-cache";
+const STORE_NAME = "tanstack-query";
+const DB_VERSION = 1;
+const CLIENT_KEY = "client";
+const noopPersister = {
+  persistClient: async () => {
+  },
+  restoreClient: async () => void 0,
+  removeClient: async () => {
+  }
+};
+const openDatabase = async () => {
+  return await new Promise((resolve, reject) => {
+    const request = window.indexedDB.open(DB_NAME, DB_VERSION);
+    request.onupgradeneeded = () => {
+      const db = request.result;
+      if (!db.objectStoreNames.contains(STORE_NAME)) {
+        db.createObjectStore(STORE_NAME);
+      }
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+const putValue = async (db, key, value) => {
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.put(value, key);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+};
+const getValue = async (db, key) => {
+  return await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readonly");
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.get(key);
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+};
+const deleteValue = async (db, key) => {
+  await new Promise((resolve, reject) => {
+    const tx = db.transaction(STORE_NAME, "readwrite");
+    const store = tx.objectStore(STORE_NAME);
+    const request = store.delete(key);
+    request.onsuccess = () => resolve();
+    request.onerror = () => reject(request.error);
+  });
+};
+const createQueryPersister = () => {
+  if (typeof window === "undefined" || !("indexedDB" in window)) {
+    return noopPersister;
+  }
+  return {
+    persistClient: async (client) => {
+      try {
+        const db = await openDatabase();
+        await putValue(db, CLIENT_KEY, client);
+      } catch (error) {
+        console.error("Persist query cache failed:", error);
+      }
+    },
+    restoreClient: async () => {
+      try {
+        const db = await openDatabase();
+        return await getValue(db, CLIENT_KEY);
+      } catch (error) {
+        console.error("Restore query cache failed:", error);
+        return void 0;
+      }
+    },
+    removeClient: async () => {
+      try {
+        const db = await openDatabase();
+        await deleteValue(db, CLIENT_KEY);
+      } catch (error) {
+        console.error("Remove query cache failed:", error);
+      }
+    }
+  };
+};
+const getConversationIdsFromMessageQueries = (queryClient) => {
+  const ids = /* @__PURE__ */ new Set();
+  const queries = queryClient.getQueryCache().findAll({ queryKey: ["messages"] });
+  for (const query of queries) {
+    const [prefix, conversationId] = query.queryKey;
+    if (prefix === "messages" && typeof conversationId === "string") {
+      ids.add(conversationId);
+    }
+  }
+  return ids;
+};
+const ChatQueryNetworkSync = () => {
+  const queryClient = useQueryClient();
+  const focusOnId = useChatStore((state) => state.focusOnId);
+  const activeIds = useChatStore((state) => state.activeIds);
+  const latestFocusRef = useRef(focusOnId);
+  const latestActiveIdsRef = useRef(activeIds);
+  const lastSyncKeyRef = useRef("");
+  useEffect(() => {
+    latestFocusRef.current = focusOnId;
+    latestActiveIdsRef.current = activeIds;
+  }, [focusOnId, activeIds]);
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const invalidateMessageQueries = (isOnline) => {
+      const focusId = latestFocusRef.current;
+      const activeIdList = latestActiveIdsRef.current;
+      const syncKey = `${isOnline ? "online" : "offline"}|${focusId ?? ""}|${activeIdList.join(",")}`;
+      if (syncKey === lastSyncKeyRef.current) {
+        return;
+      }
+      lastSyncKeyRef.current = syncKey;
+      const refetchFullIds = new Set(activeIdList);
+      if (focusId) {
+        refetchFullIds.add(focusId);
+      }
+      const cachedConversationIds = getConversationIdsFromMessageQueries(queryClient);
+      refetchFullIds.forEach((id) => cachedConversationIds.add(id));
+      cachedConversationIds.forEach((conversationId) => {
+        const shouldRefetchActive = isOnline && refetchFullIds.has(conversationId);
+        void queryClient.invalidateQueries({
+          queryKey: ["messages", conversationId],
+          refetchType: shouldRefetchActive ? "active" : "none"
+        });
+      });
+    };
+    const handleOffline = () => {
+      invalidateMessageQueries(false);
+    };
+    const handleOnline = () => {
+      invalidateMessageQueries(true);
+    };
+    window.addEventListener("offline", handleOffline);
+    window.addEventListener("online", handleOnline);
+    if (!navigator.onLine) {
+      invalidateMessageQueries(false);
+    }
+    return () => {
+      window.removeEventListener("offline", handleOffline);
+      window.removeEventListener("online", handleOnline);
+    };
+  }, [queryClient]);
+  return null;
+};
 function App({ authContext }) {
   const queryClientRef = useRef(null);
+  const persisterRef = useRef(createQueryPersister());
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient({
       defaultOptions: {
@@ -9197,7 +10513,21 @@ function App({ authContext }) {
   if (authContext?.userData?.languageCode) {
     i18next.changeLanguage(authContext.userData.languageCode);
   }
-  return /* @__PURE__ */ jsx(QueryClientProvider, { client: queryClientRef.current, children: /* @__PURE__ */ jsx(ContextTree, { authContext, children: /* @__PURE__ */ jsx(Main, {}) }) });
+  return /* @__PURE__ */ jsx(
+    PersistQueryClientProvider,
+    {
+      client: queryClientRef.current,
+      persistOptions: {
+        persister: persisterRef.current,
+        buster: "fatagram-query-cache-v1",
+        maxAge: 1e3 * 60 * 60 * 24
+      },
+      children: /* @__PURE__ */ jsxs(ContextTree, { authContext, children: [
+        /* @__PURE__ */ jsx(ChatQueryNetworkSync, {}),
+        /* @__PURE__ */ jsx(Main, {})
+      ] })
+    }
+  );
 }
 function render(_url, context) {
   const url = _url.startsWith("/") ? _url : "/" + _url;
@@ -9215,5 +10545,43 @@ function render(_url, context) {
   }
 }
 export {
-  render
+  Avatar as A,
+  Button as B,
+  ChatList as C,
+  MessageType as D,
+  InfiniteScrollFlex as I,
+  LoginForm as L,
+  MiniButton as M,
+  NotificationMenu as N,
+  PageNavbar as P,
+  RegisterForm as R,
+  SelectDay as S,
+  Text as T,
+  useAuth as a,
+  LoadingPage as b,
+  useOnboarding as c,
+  authEvents as d,
+  Textbox as e,
+  SelectBox as f,
+  userProfileService as g,
+  Logo as h,
+  useCreateGroupConversation as i,
+  useConversations as j,
+  CreateGroupChat as k,
+  SidebarLayout as l,
+  NotFound as m,
+  useRenderConversationContent as n,
+  useMarkConversationAsRead as o,
+  useLocalMarkAsRead as p,
+  useMessageStore as q,
+  useChatStore as r,
+  render,
+  useGetConversation as s,
+  Skeleton as t,
+  useNotificationUiState as u,
+  MessageList as v,
+  ChatInput as w,
+  useGetUserProfile as x,
+  useOpenChat as y,
+  useSendMessage as z
 };

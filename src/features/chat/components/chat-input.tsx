@@ -119,7 +119,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
 
     for (let i = 0; i < otherMedia.length; i++) {
-      console.log("Adding other media to cache:", otherMedia[i].file.name);
       const it = otherMedia[i];
       const tempId = tempOtherMediaIds[i];
       const url = URL.createObjectURL(it.file);
@@ -187,7 +186,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
 
     if (content && content.trim() !== "") {
-      console.log("Sending text message with temp ID:", tempTextId);
       await send({
         ...baseBody,
         clientTempId: tempTextId,

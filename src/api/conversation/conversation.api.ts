@@ -18,6 +18,10 @@ export class ConversationService {
     return res;
   }
 
+  public async getDeltaConversations(since: Date): Promise<Result<ConversationDto[]>> {
+    return await apiGet(`${PREFIX}/delta`, { since });
+  }
+
   public async getConversation(conversationId: string): Promise<Result<ConversationDto>> {
     return await apiGet(`${PREFIX}/${conversationId}`);
   }
@@ -31,6 +35,13 @@ export class ConversationService {
     query: CursorQuery<number>,
   ): Promise<Result<CursorResult<MessageResponseDto, number>>> {
     return await apiGet(`${PREFIX}/${conversationId}/messages`, query);
+  }
+
+  public async getDeltaMessages(
+    conversationId: string,
+    sinceSequenceNumber: number,
+  ): Promise<Result<MessageResponseDto[]>> {
+    return await apiGet(`${PREFIX}/${conversationId}/messages/delta`, { sinceSequenceNumber });
   }
 
   public async createGroupConversation(
@@ -72,7 +83,6 @@ export class ConversationService {
     mediaId: string,
     count: number = 10,
   ): Promise<Result<MessageMediaAroundAnchorDto>> {
-    console.log("Fetching media around anchor:", conversationId, mediaId, count);
     return await apiGet(`${PREFIX}/${conversationId}/media/around-anchor/${mediaId}`, { count });
   }
 }

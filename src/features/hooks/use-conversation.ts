@@ -131,6 +131,26 @@ export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor
   });
 };
 
+export const useGetDeltaConversations = () => {
+  const { data } = useConversations();
+  const { mergeDeltaConversations } = useConversationCacheMutations();
+
+  const fetcher = useResultFetcher(
+    async (since: Date) => await conversationService.getDeltaConversations(since),
+  );
+
+  const fetcherDelta = async () => {
+    const lastActiveAt = data?.pages[0]?.items[0]?.lastMessage?.createdAt;
+    return await fetcher.fetch(lastActiveAt ?? new Date(0), {
+      onSuccess: (data) => {
+        mergeDeltaConversations(data ?? []);
+      },
+    });
+  };
+
+  return { fetcherDelta };
+};
+
 type ConversationPage<TCursor = string> = {
   pages: Array<CursorResult<any, TCursor>>;
   pageParams: unknown[];
@@ -184,7 +204,6 @@ export const useConversationCacheMutations = () => {
     conversationId: string,
     lastMessage?: MessageResponseDto,
   ) => {
-    console.log("Pushing conversation to top:", conversationId, lastMessage);
     const listKey = conversationKeys.list();
     const currentData = queryClient.getQueryData<ConversationPage>(listKey);
     let existedConv: ConversationDto | null = null;
@@ -228,7 +247,44 @@ export const useConversationCacheMutations = () => {
     });
   };
 
-  return { pushConversationToTop, updateConversationInCache, markAsRead };
+  const mergeDeltaConversations = (deltaConvs: ConversationDto[]) => {
+    const listKey = conversationKeys.list();
+
+    queryClient.setQueryData(listKey, (oldData: ConversationPage | undefined) => {
+      if (!oldData || deltaConvs.length === 0) return oldData;
+
+      const deltaMap = new Map(deltaConvs.map((c) => [c.id, c]));
+      const mergedItemsMap = new Map();
+
+      let newPages = oldData.pages.map((page) => {
+        const remainingItems = page.items.filter((item) => {
+          if (deltaMap.has(item.id)) {
+            mergedItemsMap.set(item.id, { ...item, ...deltaMap.get(item.id) });
+            return false;
+          }
+          return true;
+        });
+        return { ...page, items: remainingItems };
+      });
+
+      const topItems = deltaConvs.map((delta) =>
+        mergedItemsMap.has(delta.id) ? mergedItemsMap.get(delta.id) : delta,
+      );
+
+      if (newPages.length > 0) {
+        const orderedTopItems = [...topItems].reverse();
+
+        newPages[0] = {
+          ...newPages[0],
+          items: [...orderedTopItems, ...newPages[0].items],
+        };
+      }
+
+      return { ...oldData, pages: newPages };
+    });
+  };
+
+  return { mergeDeltaConversations, pushConversationToTop, updateConversationInCache, markAsRead };
 };
 
 export const useGetUnreadMessageCount = () => {

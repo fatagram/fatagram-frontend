@@ -34,7 +34,6 @@ export function useMessageListenerHandler() {
   const handleNewMessage = useCallback(
     async (message: SocketMessage<MessageResponseDto>) => {
       const data = message.payload;
-      console.log("Received new message via WebSocket:", data);
       const conversationId = data.conversationId;
       const isOwnMessage = data.senderId === userId;
 

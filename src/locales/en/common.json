@@ -86,5 +86,9 @@
       "invalidFileType": "Invalid file type. Please check the file.",
       "uploadError": "Failed to upload file. Please try again."
     }
+  },
+  "offline": {
+    "message": "You are offline",
+    "retry": "Retry"
   }
 }

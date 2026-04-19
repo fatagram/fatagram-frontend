@@ -42,8 +42,8 @@ const getMessageBubbleShapeClass = (
   isOnlyMessageInGroup: boolean,
 ) =>
   clsx(
-    isMyMessage ? "rounded-l-2xl self-end" : "rounded-r-2xl self-start",
-    isOnlyMessageInGroup && "!rounded-2xl",
+    isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
+    isOnlyMessageInGroup && "!rounded-3xl",
     isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
     isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
     !isFirstMessageInGroup &&
