@@ -30,7 +30,7 @@ export const Dialog: React.FC<DialogBoxProps> = ({
   return (
     <div
       className={clsx(
-        "relative flex flex-col gap-4 bg-[var(--second-bg-color)]",
+        "relative flex flex-col gap-4 bg-bg-main p-4",
         "rounded-lg shadow-lg",
         className,
       )}

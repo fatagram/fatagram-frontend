@@ -78,8 +78,8 @@ export const useGetUserAvatar = (userId: string) => {
 
 export const useGetUserBackground = (userId: string) => {
   return useSafeQueryResult({
-    queryKey: profileQueryKey(userId, "background"),
-    fn: async () => await userProfileService.getProfile(userId, "background"),
+    queryKey: profileQueryKey(userId, "background,backgroundMetadata"),
+    fn: async () => await userProfileService.getProfile(userId, "background,backgroundMetadata"),
     enabled: !!userId,
   });
 };
@@ -165,13 +165,17 @@ export const useUpdateProfile = (userId: string) => {
 export const useSelectBackground = (userId: string) => {
   const qc = useQueryClient();
 
-  return useResultFetcher(userProfileService.uploadBackground, {
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: userProfilePrefixKey(userId),
-      });
+  return useResultFetcher(
+    async (data: { file: File; metadata: any }) =>
+      await userProfileService.uploadBackground(data.file, data.metadata),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: userProfilePrefixKey(userId),
+        });
+      },
     },
-  });
+  );
 };
 
 export const useSelectAvatar = (userId: string) => {

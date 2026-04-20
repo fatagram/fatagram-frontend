@@ -25,7 +25,7 @@ type ProfilePageProviderProps = {
 export default function ProfilePageProvider({ children }: ProfilePageProviderProps) {
   const { userId } = useAuth();
   const userParam = useParams<{ userParam: string }>();
-  const { data, isLoading, isFetching } = useUserId(userParam.userParam || "");
+  const { data, isLoading, isFetching, isPending } = useUserId(userParam.userParam || "");
 
   const cachedTargetIdRef = useRef<string | undefined>(undefined);
 
@@ -43,7 +43,7 @@ export default function ProfilePageProvider({ children }: ProfilePageProviderPro
     [userId, validTargetId, userParam.userParam],
   );
 
-  if (isLoading || isFetching) {
+  if (isLoading || isFetching || isPending) {
     return <LoadingPage />;
   }
 

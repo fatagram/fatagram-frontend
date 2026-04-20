@@ -23,6 +23,7 @@ const sizeClasses: Record<Size, { main: string; text: string }> = {
 
 interface SelectBoxProps extends Omit<ComponentProps<HTMLButtonElement>, "onSelect"> {
   title?: string;
+  showTitle?: boolean;
   isRequired?: boolean;
   optionClassName?: string;
   optionActiveClassName?: string;
@@ -35,6 +36,7 @@ interface SelectBoxProps extends Omit<ComponentProps<HTMLButtonElement>, "onSele
 
 export const SelectBox: React.FC<SelectBoxProps> = ({
   title,
+  showTitle = true,
   isRequired = false,
   options,
   selectedOption,
@@ -77,7 +79,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
 
   return (
     <div className="relative">
-      {title && (
+      {showTitle && title && (
         <label
           htmlFor={selectId}
           className={clsx(

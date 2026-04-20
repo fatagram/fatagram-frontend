@@ -29,7 +29,7 @@ type NotificationMenuProps = {
 const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) => {
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
   const navigate = useNavigate();
-  const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
+  const { data, fetchNextPage, hasNextPage, isFetching, isPending } = useNotifications({
     limit: 20,
   });
   const { fetch: deleteAll } = useDeleteAllNotifications();
@@ -137,7 +137,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
           }}
           itemKey={(item: any, index: number) => (item as NotificationDto).id + "-" + index}
           hasMore={!!hasNextPage}
-          isLoading={isFetching}
+          isLoading={isFetching || isPending}
           loadingSkeleton={<NotificationSkeletonLoading />}
           numberOfSkeletons={2}
           emptyComponent={

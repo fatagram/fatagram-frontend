@@ -141,7 +141,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
     <div
       className={clsx(
         "w-[330px] h-[450px] bg-bg-main rounded-xl shadow-lg overflow-hidden flex flex-col",
-        "border border-gray-700 shadow-xl",
+        "border border-bg-seventh shadow-xl",
         className,
       )}
       ref={panelRef}

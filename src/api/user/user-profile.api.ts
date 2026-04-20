@@ -44,9 +44,10 @@ export class UserProfileService {
   }
 
   // Upload background image
-  async uploadBackground(file: File): Promise<Result<any>> {
+  async uploadBackground(file: File, metadata: any): Promise<Result<any>> {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("metadata", JSON.stringify(metadata));
     return await apiPatchFormData(`${PREFIX}/background`, formData);
   }
 

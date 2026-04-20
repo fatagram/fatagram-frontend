@@ -1,7 +1,7 @@
 .user-bg-image {
   aspect-ratio: 3/1;
-  background-size: cover;
-  background-position: center;
+  background-size: var(--bg-size, cover);
+  background-position: var(--bg-position, center);
   background-repeat: no-repeat;
   background-color: rgba(var(--bg-third));
   background-image: var(--bg-image);

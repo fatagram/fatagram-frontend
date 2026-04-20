@@ -10,6 +10,7 @@ import {
   useDeclineFriendRequest,
   useListFriendRequests,
 } from "@/features/hooks/use-friend";
+import { Skeleton } from "@/components/atoms";
 
 type FriendRequestsProps = {
   className?: string;
@@ -19,7 +20,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = () => {
   const { t } = useTranslation();
   const [_total, _setTotal] = React.useState(0);
 
-  const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
+  const { data, fetchNextPage, hasNextPage, isFetching, isPending } = useListFriendRequests({
     limit: 20,
   });
   const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
@@ -46,7 +47,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = () => {
           />
         )}
         hasMore={!!hasNextPage}
-        isLoading={isFetching}
+        isLoading={isFetching || isPending}
         itemKey={(item: any) => item.senderId}
         emptyComponent={
           <NotFound
@@ -57,6 +58,14 @@ const FriendRequests: React.FC<FriendRequestsProps> = () => {
               "Khi có người muốn kết bạn với bạn, họ sẽ xuất hiện ở đây."
             }
           />
+        }
+        numberOfSkeletons={2}
+        loadingSkeleton={
+          <div className="flex flex-col gap-2 rounded-xl p-2 bg-bg-second items-center">
+            <Skeleton sz="lg" className="w-full" />
+            <Skeleton sz="md" className="self-start w-[80%]" />
+            <Skeleton sz="md" className="self-start w-[85%]" />
+          </div>
         }
       />
     </SidebarPageCard>

@@ -37,7 +37,9 @@ export const ChatQueryNetworkSync = () => {
       const activeIdList = latestActiveIdsRef.current;
 
       const syncKey = `${isOnline ? "online" : "offline"}|${focusId ?? ""}|${activeIdList.join(",")}`;
-      if (syncKey === lastSyncKeyRef.current) {
+      // Allow re-triggering online directly if we want to ensure freshness
+      // when networks act up, but prevent spamming.
+      if (syncKey === lastSyncKeyRef.current && !isOnline) {
         return;
       }
       lastSyncKeyRef.current = syncKey;

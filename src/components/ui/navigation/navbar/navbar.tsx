@@ -27,7 +27,7 @@ export const Navbar: React.FC<NavbarProps> = ({
     <nav
       className={clsx(
         "flex items-center",
-        "bg-bg-main p-[2px] shadow-md sm:px-8 justify-between",
+        "bg-bg-main p-[2px] shadow-sm sm:px-8 justify-between",
         className,
       )}
       style={style}

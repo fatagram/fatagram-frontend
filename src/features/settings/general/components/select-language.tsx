@@ -28,6 +28,7 @@ const SelectLanguage: React.FC<SelectLanguageProps> = ({ className }) => {
 
   return (
     <SelectBox
+      showTitle={false}
       title={t("settings:language.yourLanguage")}
       className={clsx(className)}
       options={options}

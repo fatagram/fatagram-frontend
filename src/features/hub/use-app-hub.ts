@@ -83,6 +83,10 @@ export function useAppHub<T>(
         const conn = connectionRef.current;
         if (conn?.state === HubConnectionState.Disconnected) {
           await tryConnect(0, true);
+        } else if (conn?.state === HubConnectionState.Reconnecting) {
+          // Force immediate reconnect instead of waiting for SignalR's default backoff
+          await conn.stop();
+          await tryConnect(0, true);
         }
       }
     };
