@@ -2,6 +2,7 @@
 import { useAuth } from "@/contexts";
 import { useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
+import LoadingPage from "../loading-page";
 
 const GuestOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const auth = useAuth();
@@ -16,7 +17,7 @@ const GuestOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   }, [auth?.isAuthenticated, navigate, searchParams]);
 
   if (auth?.isAuthenticated) {
-    return null;
+    return <LoadingPage />;
   }
 
   return children;

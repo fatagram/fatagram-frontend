@@ -41,11 +41,13 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     data: conversationData,
     isLoading: isLoadingConversation,
     isFetching: isFetchingConversation,
+    isPending: isPendingConversation,
   } = useGetConversation(conversationId, undefined, true);
 
   const navigate = useNavigate();
 
-  const isLoadingHeader = isLoadingConversation || isFetchingConversation;
+  const isLoadingHeader =
+    isLoadingConversation || isFetchingConversation || (isPendingConversation && !conversationData);
 
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
@@ -134,7 +136,12 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     };
   }, [setFocusOn]);
 
-  if (!isLoadingConversation && !isFetchingConversation && !conversationData) {
+  if (
+    !isLoadingConversation &&
+    !isFetchingConversation &&
+    !isPendingConversation &&
+    !conversationData
+  ) {
     return (
       <div
         className={clsx(
@@ -205,15 +212,27 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
           isGroup={conversationData?.isGroup}
           lastSeen={
             <div className="flex flex-col justify-center items-center h-full text-center px-4">
-              <div className="relative mb-4">
-                <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
-              </div>
-              <Text sz="sm" weight="bold">
-                {chatTitle}
-              </Text>
-              <Text sz="xs" wrap="whitespace-normal">
-                {t("common:conversations:privacyDescription")}
-              </Text>
+              {isLoadingHeader ? (
+                <>
+                  <div className="relative mb-4">
+                    <Skeleton variant="circle" sz="md" />
+                  </div>
+                  <Skeleton sz="sm" className="w-[150px] mb-2" />
+                  <Skeleton sz="sm" className="w-[200px]" />
+                </>
+              ) : (
+                <>
+                  <div className="relative mb-4">
+                    <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
+                  </div>
+                  <Text sz="sm" weight="bold">
+                    {chatTitle}
+                  </Text>
+                  <Text sz="xs" wrap="whitespace-normal">
+                    {t("common:conversations:privacyDescription")}
+                  </Text>
+                </>
+              )}
             </div>
           }
         />

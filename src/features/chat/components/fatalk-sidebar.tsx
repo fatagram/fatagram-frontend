@@ -21,7 +21,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
     setTab("create");
   }, []);
 
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetching, isPending } = useConversations();
 
   const handleSelectConversation = (_conversationId: string) => {
     onConversationClick?.();
@@ -51,7 +51,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
             data={data}
             fetchNextPage={fetchNextPage}
             hasNextPage={hasNextPage}
-            isLoading={isLoading}
+            isLoading={isLoading || isPending}
             isFetching={isFetching}
           />
         </div>

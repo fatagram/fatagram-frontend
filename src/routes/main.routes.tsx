@@ -56,7 +56,7 @@ export const mainRoutes: RouteType[] = [
       },
       {
         path: "/fatalk",
-        element: withFallback(<FatalkPage />),
+        element: <FatalkPage />,
         type: "private",
         children: [
           {

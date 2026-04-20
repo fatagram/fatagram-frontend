@@ -2,6 +2,7 @@
 import { useAuth } from "@/contexts";
 import { useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import LoadingPage from "../loading-page";
 
 const UserOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   const user = useAuth();
@@ -18,7 +19,7 @@ const UserOnlyRoute = ({ children }: { children: React.ReactNode }) => {
   // user is authenticated. Just render children.
   // Client: Return null while redirecting to prevent flash
   if (!user?.isAuthenticated) {
-    return null;
+    return <LoadingPage />;
   }
 
   return children;
