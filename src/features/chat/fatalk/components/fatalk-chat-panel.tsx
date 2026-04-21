@@ -1,7 +1,7 @@
 import { Text, Avatar, Skeleton, MiniButton, Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { MessageList, MessageListHandle } from "./message";
+import { MessageList, MessageListHandle } from "../../components/message";
 import { useEffect, useRef, useState } from "react";
 import {
   useGetConversation,
@@ -9,8 +9,8 @@ import {
   useMarkConversationAsRead,
   useMessageStore,
 } from "@/features/hooks/use-conversation";
-import { ChatInput } from "./chat-input";
-import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
+import { ChatInput } from "../../components/chat-input";
+import { useRenderConversationContent } from "../../hooks/use-render-conversation-content";
 import { useTranslation } from "react-i18next";
 import { NotFound } from "@/features/components/not-found";
 import { useNavigate } from "react-router-dom";

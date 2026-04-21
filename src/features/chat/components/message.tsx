@@ -44,15 +44,18 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
     isLoading: isMessagesLoading,
   } = useMessages(conversationId, { sortDesc: true, limit: 20 });
 
-  const { data: _ } = useGetPariticipantsSeen(conversationId);
+  const { data: participantsSeen } = useGetPariticipantsSeen(conversationId);
+  const participantIds = useMemo(() => {
+    return participantsSeen ? Object.keys(participantsSeen.participantsSeenInfo) : [];
+  }, [participantsSeen]);
 
   const messages = useMemo(() => {
     return _messages ? _messages.pages.flatMap((page) => page.items) : [];
   }, [_messages]);
 
   const senderIds = useMemo(() => {
-    return [...new Set(messages.map((m) => m.senderId).filter(Boolean))] as string[];
-  }, [messages]);
+    return [...new Set(participantIds)] as string[];
+  }, [participantIds]);
 
   const { userProfileMap } = useGetUserProfiles(senderIds);
 
@@ -60,7 +63,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
 
   if (initialLoading && !messages.length) {
     return (
-      <div className={clsx("flex flex-col gap-4 px-4 py-2 w-full", className)}>
+      <div className={clsx("flex flex-col gap-4 py-2 w-full h-full justify-end", className)}>
         {[...Array(5)].map((_, i) => (
           <div
             key={i}

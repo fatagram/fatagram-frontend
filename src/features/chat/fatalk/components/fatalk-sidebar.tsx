@@ -1,12 +1,12 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import PageNavbar from "@/components/ui/navigation/page-navbar/page-navbar";
-import { ChatList } from "./chat-list";
+import { ChatList } from "../../components/chat-list";
 import { useNavigate } from "react-router-dom";
 import { MiniButton } from "@/components/atoms/button";
 import { useCreateGroupConversation, useConversations } from "@/features/hooks/use-conversation";
 import { useCallback, useState } from "react";
-import { CreateGroupChat } from "./create-group-chat/create-group-chat";
+import { CreateGroupChat } from "../../components/create-group-chat/create-group-chat";
 
 interface FatalkSidebarProps extends ComponentProps {
   onConversationClick?: () => void;

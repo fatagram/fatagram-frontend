@@ -4,7 +4,7 @@ import { conversationService } from "@/api/conversation/conversation.api";
 import { useAuth } from "@/contexts/auth-context";
 import {
   createSafeQueryOptions,
-  SafeQueryResultOptions,
+  SafeQueryCallbacks,
   useSafeInfiniteQueryResult,
   useSafeQueryResult,
 } from "@/hooks/use-safe-query";
@@ -37,7 +37,7 @@ export const useFetchConversationWith = () => {
 
 export const useGetConversation = (
   conversationId: string,
-  config?: SafeQueryResultOptions<any>,
+  config?: SafeQueryCallbacks<any>,
   enabled?: boolean,
 ) => {
   return useSafeQueryResult({
@@ -85,10 +85,14 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
     enabled: !!conversationId,
     options: {
       onSuccess: (data) => {
+        console.log("Participants seen data: ", data);
         useMessageStore
           .getState()
           .setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
       },
+    },
+    fetchOptions: {
+      refetchOnMount: "always",
     },
   });
 };

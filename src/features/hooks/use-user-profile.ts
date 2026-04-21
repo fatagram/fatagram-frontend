@@ -42,14 +42,22 @@ export const useGetUserProfile = (userId?: string) => {
 };
 
 export const useGetUserProfiles = (userIds: string[]) => {
-  const normalizedUserIds = useMemo(() => [...new Set(userIds.filter(Boolean))].sort(), [userIds]);
+  const normalizedUserIds = useMemo(
+    () => [...new Set(userIds.filter(Boolean))].sort(),
+    [userIds.join(",")],
+  );
+  console.log("fetching profiles for userIds", normalizedUserIds);
 
   const queries = useQueries({
     queries: normalizedUserIds.map((id) => ({
       queryKey: profileQueryKey(id, SUMMARY_PROFILE_FIELDS),
-      queryFn: async () => (await userProfileService.getProfile(id, SUMMARY_PROFILE_FIELDS)) as any,
+      queryFn: async () => {
+        console.log("fetching profile for user", id);
+        return await userProfileService.getProfile(id, SUMMARY_PROFILE_FIELDS);
+      },
       enabled: !!id,
-      staleTime: 1000 * 60 * 5,
+      staleTime: 0,
+      refetchOnMount: "always",
     })),
   });
 
@@ -64,6 +72,8 @@ export const useGetUserProfiles = (userIds: string[]) => {
       ),
     [queries],
   );
+
+  console.log("userProfileMap", userProfileMap);
 
   return { userProfileMap, isLoading };
 };

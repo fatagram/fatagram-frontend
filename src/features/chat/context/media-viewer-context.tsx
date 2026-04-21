@@ -1,5 +1,4 @@
 import { MediaType, MessageMedia } from "@/types/entities/message.type";
-import { MessageType } from "@microsoft/signalr";
 import { createContext, useCallback, useContext, useState } from "react";
 
 type MediaViewerContextType = {

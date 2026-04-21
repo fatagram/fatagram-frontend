@@ -34,12 +34,12 @@
   "yesterday": "Hôm qua",
   "tomorrow": "Ngày mai",
   "weekday": {
-    "2": "Thứ hai",
-    "3": "Thứ ba",
-    "4": "Thứ tư",
-    "5": "Thứ năm",
-    "6": "Thứ sáu",
-    "7": "Thứ bảy",
+    "1": "Thứ hai",
+    "2": "Thứ ba",
+    "3": "Thứ tư",
+    "4": "Thứ năm",
+    "5": "Thứ sáu",
+    "6": "Thứ bảy",
     "0": "Chủ nhật"
   }
 }

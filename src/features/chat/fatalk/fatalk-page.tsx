@@ -2,7 +2,7 @@ import { Outlet, useLocation } from "react-router-dom";
 import { FatalkSidebar } from "./components/fatalk-sidebar";
 import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
 import clsx from "clsx";
-import { NotFound } from "../components/not-found";
+import { NotFound } from "../../components/not-found";
 import { useTranslation } from "react-i18next";
 
 const FatalkPage = () => {

@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
-import { FatalkChatPanel } from "../components/fatalk-chat-panel";
 import { useNavigate, useParams } from "react-router-dom";
+import { FatalkChatPanel } from "../components/fatalk-chat-panel";
 
 interface ConversationPageProps extends ComponentProps {}
 

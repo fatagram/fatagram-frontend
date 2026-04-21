@@ -17,14 +17,14 @@ const GoogleCallbackPage = lazy(
   () => import("@/features/auth/google-callback/google-callback-page"),
 );
 const OnboardingPage = lazy(() => import("@/features/onboarding/onboarding-page"));
-const FatalkPage = lazy(() => import("@/features/chat/fatalk-page"));
+const FatalkPage = lazy(() => import("@/features/chat/fatalk/fatalk-page"));
 const ConversationPage = lazy(() =>
-  import("@/features/chat/conversation/conversation-page").then((module) => ({
+  import("@/features/chat/fatalk/conversation/conversation-page").then((module) => ({
     default: module.ConversationPage,
   })),
 );
 const TempConversation = lazy(() =>
-  import("@/features/chat/temp/temp-conversation").then((module) => ({
+  import("@/features/chat/fatalk/temp/temp-conversation").then((module) => ({
     default: module.TempConversation,
   })),
 );
