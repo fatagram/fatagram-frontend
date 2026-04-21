@@ -62,12 +62,24 @@ export const ChatQueryNetworkSync = () => {
       });
     };
 
+    const invalidateSeenQueries = (isOnline: boolean) => {
+      const focusId = latestFocusRef.current;
+      if (focusId) {
+        queryClient.invalidateQueries({
+          queryKey: ["conversation", focusId, "participantsSeen"],
+          refetchType: isOnline ? "active" : "none",
+        });
+      }
+    };
+
     const handleOffline = () => {
       invalidateMessageQueries(false);
+      invalidateSeenQueries(false);
     };
 
     const handleOnline = () => {
       invalidateMessageQueries(true);
+      invalidateSeenQueries(true);
     };
 
     window.addEventListener("offline", handleOffline);
@@ -75,6 +87,7 @@ export const ChatQueryNetworkSync = () => {
 
     if (!navigator.onLine) {
       invalidateMessageQueries(false);
+      invalidateSeenQueries(false);
     }
 
     return () => {
