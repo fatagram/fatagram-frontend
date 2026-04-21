@@ -4,7 +4,7 @@ import { useNavigate, Link as Link$1, useLocation, useResolvedPath, useMatch, Ou
 import i18next, { t } from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
-import React, { useState, useCallback, createContext, useContext, useReducer, useEffect, useMemo, forwardRef, useRef, useId, useLayoutEffect, memo, useImperativeHandle, lazy, Suspense } from "react";
+import React, { useState, useCallback, createContext, useContext, useReducer, useEffect, useMemo, forwardRef, useRef, useId, useLayoutEffect, useImperativeHandle, memo, lazy, Suspense } from "react";
 import { useQueryClient, useInfiniteQuery, useQuery, useQueries, QueryClient } from "@tanstack/react-query";
 import { create } from "zustand";
 import clsx, { clsx as clsx$1 } from "clsx";
@@ -14,6 +14,7 @@ import { Swiper, SwiperSlide } from "swiper/react";
 import * as signalR from "@microsoft/signalr";
 import { HubConnectionState } from "@microsoft/signalr";
 import { ArrowLeft } from "lucide-react";
+import Cropper from "react-easy-crop";
 import { useShallow } from "zustand/react/shallow";
 import { useFormik } from "formik";
 import * as Yup from "yup";
@@ -88,7 +89,7 @@ const ago$1 = "ago";
 const just_now$1 = "Just now";
 const yesterday$1 = "Yesterday";
 const tomorrow$1 = "Tomorrow";
-const weekday$1 = { "0": "Sunday", "2": "Monday", "3": "Tuesday", "4": "Wednesday", "5": "Thursday", "6": "Friday", "7": "Saturday" };
+const weekday$1 = { "0": "Sunday", "1": "Monday", "2": "Tuesday", "3": "Wednesday", "4": "Thursday", "5": "Friday", "6": "Saturday" };
 const times$1 = {
   time: time$1,
   ago: ago$1,
@@ -184,7 +185,7 @@ const ago = "trước";
 const just_now = "Vừa xong";
 const yesterday = "Hôm qua";
 const tomorrow = "Ngày mai";
-const weekday = { "0": "Chủ nhật", "2": "Thứ hai", "3": "Thứ ba", "4": "Thứ tư", "5": "Thứ năm", "6": "Thứ sáu", "7": "Thứ bảy" };
+const weekday = { "0": "Chủ nhật", "1": "Thứ hai", "2": "Thứ ba", "3": "Thứ tư", "4": "Thứ năm", "5": "Thứ sáu", "6": "Thứ bảy" };
 const times = {
   time,
   ago,
@@ -463,9 +464,10 @@ class UserProfileService {
     return await apiPatchFormData(`${PREFIX$7}/avatar`, formData);
   }
   // Upload background image
-  async uploadBackground(file) {
+  async uploadBackground(file, metadata) {
     const formData = new FormData();
     formData.append("file", file);
+    formData.append("metadata", JSON.stringify(metadata));
     return await apiPatchFormData(`${PREFIX$7}/background`, formData);
   }
   // Update simple profile fields such as bio, description, etc.
@@ -755,14 +757,16 @@ const AuthProvider = ({
     onSuccess: async () => {
       await me({
         onSuccess: (data) => {
-          dispatch({
-            type: "LOGIN",
-            payload: {
-              userId: data?.infos.id,
-              urlName: data?.infos.urlName,
-              lang: data?.infos.languageCode || "en"
-            }
-          });
+          const payload = {
+            userId: data?.infos.id,
+            urlName: data?.infos.urlName,
+            lang: data?.infos.languageCode || "en"
+          };
+          dispatch({ type: "LOGIN", payload });
+          try {
+            localStorage.setItem("fatagram:user", JSON.stringify(payload));
+          } catch (e) {
+          }
         }
       });
     }
@@ -770,6 +774,10 @@ const AuthProvider = ({
   const { fetch: logout } = useResultFetcher(authService.logout, {
     onSuccess: () => {
       dispatch({ type: "LOGOUT" });
+      try {
+        localStorage.removeItem("fatagram:user");
+      } catch (e) {
+      }
       clearUserData();
     }
   });
@@ -779,14 +787,16 @@ const AuthProvider = ({
       onSuccess: async () => {
         await me({
           onSuccess: async (data) => {
-            dispatch({
-              type: "LOGIN",
-              payload: {
-                userId: data?.infos.id,
-                urlName: data?.infos.urlName,
-                lang: data?.infos.languageCode || "en"
-              }
-            });
+            const payload = {
+              userId: data?.infos.id,
+              urlName: data?.infos.urlName,
+              lang: data?.infos.languageCode || "en"
+            };
+            dispatch({ type: "LOGIN", payload });
+            try {
+              localStorage.setItem("fatagram:user", JSON.stringify(payload));
+            } catch (e) {
+            }
           }
         });
       }
@@ -827,6 +837,25 @@ const AuthProvider = ({
       });
     }
   }, [state.isAuthenticated, state.userId]);
+  useEffect(() => {
+    if (!state.userId) {
+      try {
+        const raw = localStorage.getItem("fatagram:user");
+        if (raw) {
+          const parsed = JSON.parse(raw);
+          if (parsed?.userId) {
+            const payload = {
+              userId: parsed.userId,
+              urlName: parsed.urlName,
+              lang: parsed.lang || "en"
+            };
+            dispatch({ type: "LOGIN", payload });
+          }
+        }
+      } catch (e) {
+      }
+    }
+  }, []);
   const contextValue = useMemo(
     () => ({
       isAuthenticated: state.isAuthenticated,
@@ -1063,17 +1092,40 @@ const Checkbox = ({
   ] });
 };
 const style = {
-  "user-bg-image": "_user-bg-image_1szjy_1"
+  "user-bg-image": "_user-bg-image_1roog_1"
 };
-function BackgroundImage({ src, alt, className, children }) {
+function BackgroundImage({
+  src,
+  alt,
+  className,
+  children,
+  metadata
+}) {
+  const containerRef = useRef(null);
+  console.log("BackgroundImage metadata:", metadata);
   useEffect(() => {
-    document.documentElement.style.setProperty("--bg-image", `url(${src})`);
-  }, [src]);
+    if (containerRef.current) {
+      containerRef.current.style.setProperty("--bg-image", `url(${src})`);
+      if (metadata && metadata.width && metadata.height) {
+        const { x = 0, y = 0, width = 100, height = 100 } = metadata;
+        const sizeX = 100 / (width / 100);
+        const sizeY = 100 / (height / 100);
+        const posX = width < 100 ? x / (100 - width) * 100 : 50;
+        const posY = height < 100 ? y / (100 - height) * 100 : 50;
+        containerRef.current.style.setProperty("--bg-size", `${sizeX}% ${sizeY}%`);
+        containerRef.current.style.setProperty("--bg-position", `${posX}% ${posY}%`);
+      } else {
+        containerRef.current.style.setProperty("--bg-size", `cover`);
+        containerRef.current.style.setProperty("--bg-position", `center`);
+      }
+    }
+  }, [src, metadata]);
   return /* @__PURE__ */ jsx(
     "div",
     {
+      ref: containerRef,
       className: clsx(
-        "rounded-2xl",
+        "rounded-2xl relative overflow-hidden",
         style["user-bg-image"],
         src ? "" : "h-[200px] bg-bg-fourth",
         className
@@ -1283,6 +1335,7 @@ const sizeClasses$4 = {
 };
 const SelectBox = ({
   title: title2,
+  showTitle = true,
   isRequired = false,
   options,
   selectedOption,
@@ -1319,7 +1372,7 @@ const SelectBox = ({
   );
   const selectedItem = options.find((opt) => opt.key === selectedOption);
   return /* @__PURE__ */ jsxs("div", { className: "relative", children: [
-    title2 && /* @__PURE__ */ jsxs(
+    showTitle && title2 && /* @__PURE__ */ jsxs(
       "label",
       {
         htmlFor: selectId,
@@ -2847,41 +2900,61 @@ function createSafeQueryOptions(params) {
     queryFn: async () => {
       const result = await params.fn();
       if (!result.success) throw result;
+      if (result.data === void 0) {
+        throw new Error("Success result is missing data");
+      }
       return result.data;
     }
   };
 }
 function useSafeQueryResult(params) {
-  const { fn, options, ...queryOptions } = params;
+  const { fn, options, fetchOptions, ...queryOptions } = params;
+  const onSuccessRef = useRef(options?.onSuccess);
+  const onErrorRef = useRef(options?.onError);
+  useEffect(() => {
+    onSuccessRef.current = options?.onSuccess;
+    onErrorRef.current = options?.onError;
+  });
   const callbacksCalledRef = useRef(false);
-  const safeOptions = createSafeQueryOptions({ queryKey: queryOptions.queryKey, fn });
+  const safeOptions = createSafeQueryOptions({
+    queryKey: queryOptions.queryKey,
+    fn
+  });
   const query = useQuery({
+    retry: 0,
     ...queryOptions,
     ...safeOptions,
-    retry: 0
+    ...fetchOptions
   });
+  const lastDataUpdatedAtRef = useRef(0);
   useEffect(() => {
-    if (query.isSuccess && query.data) {
-      if (!callbacksCalledRef.current) {
-        options?.onSuccess?.(query.data);
-        callbacksCalledRef.current = true;
+    if (query.isSuccess && query.data !== void 0) {
+      if (query.dataUpdatedAt > lastDataUpdatedAtRef.current) {
+        lastDataUpdatedAtRef.current = query.dataUpdatedAt;
+        onSuccessRef.current?.(query.data);
       }
     } else if (query.isError) {
       if (!callbacksCalledRef.current) {
-        const errorResult = query.error;
-        options?.onError?.(errorResult.error, errorResult.errors);
+        const errRes = query.error;
+        onErrorRef.current?.(errRes.error, errRes.errors);
         callbacksCalledRef.current = true;
       }
-    } else if (query.isPending) {
+    } else if (query.isFetching) {
       callbacksCalledRef.current = false;
     }
-  }, [query.status]);
+  }, [query.status, query.isFetching, query.dataUpdatedAt]);
   return query;
 }
 function useSafeInfiniteQueryResult(params) {
-  const { fn, options, ...queryOptions } = params;
+  const { fn, options, fetchOptions, ...queryOptions } = params;
+  const onSuccessRef = useRef(options?.onSuccess);
+  const onErrorRef = useRef(options?.onError);
+  useEffect(() => {
+    onSuccessRef.current = options?.onSuccess;
+    onErrorRef.current = options?.onError;
+  });
+  const callbacksCalledRef = useRef(false);
   const query = useInfiniteQuery({
-    ...queryOptions,
     queryFn: async ({ pageParam }) => {
       const result = await fn(pageParam);
       if (!result.success) {
@@ -2892,21 +2965,31 @@ function useSafeInfiniteQueryResult(params) {
     initialPageParam: void 0,
     getNextPageParam: (lastPage) => {
       return lastPage.hasNext ? lastPage.nextCursor : void 0;
-    }
+    },
+    retry: 0,
+    ...queryOptions,
+    ...fetchOptions
   });
   useEffect(() => {
     if (query.isSuccess && query.data) {
-      const pages = query.data.pages;
-      const lastPage = pages[pages.length - 1];
-      if (lastPage) {
-        options?.onSuccess?.(lastPage);
+      if (!callbacksCalledRef.current) {
+        const pages = query.data.pages;
+        const lastPage = pages[pages.length - 1];
+        if (lastPage) {
+          onSuccessRef.current?.(lastPage);
+        }
+        callbacksCalledRef.current = true;
       }
+    } else if (query.isError && query.error) {
+      if (!callbacksCalledRef.current) {
+        const errRes = query.error;
+        onErrorRef.current?.(errRes.error, errRes.errors);
+        callbacksCalledRef.current = true;
+      }
+    } else if (query.isFetching) {
+      callbacksCalledRef.current = false;
     }
-    if (query.isError && query.error) {
-      const errRes = query.error;
-      options?.onError?.(errRes.error, errRes.errors);
-    }
-  }, [query.dataUpdatedAt, query.errorUpdatedAt]);
+  }, [query.status, query.isFetching]);
   return query;
 }
 const conversationKeys = {
@@ -2959,12 +3042,26 @@ const useLocalMarkAsRead = () => {
   };
 };
 const useGetPariticipantsSeen = (conversationId) => {
+  const queryClient = useQueryClient();
+  const queryKey = ["conversation", conversationId, "participantsSeen"];
+  useEffect(() => {
+    if (conversationId) {
+      try {
+        queryClient.removeQueries({ queryKey, exact: true });
+      } catch (e) {
+      }
+    }
+  }, [conversationId, queryClient, queryKey]);
   return useSafeQueryResult({
-    queryKey: ["conversation", conversationId, "participantsSeen"],
+    queryKey,
     fn: async () => await conversationService.getParticipantsSeen(conversationId),
     enabled: !!conversationId,
+    staleTime: 0,
+    gcTime: 0,
+    fetchOptions: { refetchOnMount: "always" },
     options: {
       onSuccess: (data) => {
+        console.log("Participants seen data: ", data);
         useMessageStore.getState().setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
       }
     }
@@ -3661,7 +3758,7 @@ const Dialog = ({
     "div",
     {
       className: clsx(
-        "relative flex flex-col gap-4 bg-[var(--second-bg-color)]",
+        "relative flex flex-col gap-4 bg-bg-main p-4",
         "rounded-lg shadow-lg",
         className
       ),
@@ -3772,6 +3869,9 @@ function useAppHub(onReceiveMessage, onReconnect) {
       if (document.visibilityState === "visible" && navigator.onLine) {
         const conn = connectionRef.current;
         if (conn?.state === HubConnectionState.Disconnected) {
+          await tryConnect(0, true);
+        } else if (conn?.state === HubConnectionState.Reconnecting) {
+          await conn.stop();
           await tryConnect(0, true);
         }
       }
@@ -4323,18 +4423,18 @@ const OfflineStatusNotification = () => {
     "div",
     {
       style: { bottom: "calc(env(safe-area-inset-bottom) + 16px)" },
-      className: "fixed inset-x-0 z-[9999] flex justify-center pointer-events-none",
-      children: /* @__PURE__ */ jsxs("div", { className: "pointer-events-auto inline-flex items-center gap-3 px-5 py-3 bg-error/90 backdrop-blur-md text-white rounded-full shadow-xl border border-error/50 animate-slide-up-in max-w-[calc(100vw-32px)]", children: [
-        /* @__PURE__ */ jsxs("div", { className: "relative flex h-2 w-2 flex-shrink-0", children: [
-          /* @__PURE__ */ jsx("span", { className: "animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75" }),
-          /* @__PURE__ */ jsx("span", { className: "relative inline-flex rounded-full h-2 w-2 bg-white" })
+      className: "fixed inset-x-0 z-[9999] flex justify-center pointer-events-none px-4",
+      children: /* @__PURE__ */ jsxs("div", { className: "pointer-events-auto inline-flex items-center gap-3 px-5 py-3 bg-bg-fourth text-text-main rounded-full shadow-sm shadow-warning border border-border-main animate-slide-up-in max-w-sm w-full", children: [
+        /* @__PURE__ */ jsxs("div", { className: "relative flex h-3 w-3 flex-shrink-0", children: [
+          /* @__PURE__ */ jsx("span", { className: "animate-ping absolute inline-flex h-full w-full rounded-full bg-warning/40 opacity-60" }),
+          /* @__PURE__ */ jsx("span", { className: "relative inline-flex rounded-full h-3 w-3 bg-warning" })
         ] }),
-        /* @__PURE__ */ jsx("span", { className: "text-sm font-medium", children: t2("offline.message") }),
+        /* @__PURE__ */ jsx("span", { className: "text-sm font-medium flex-1 truncate", children: t2("offline.message") }),
         /* @__PURE__ */ jsx(
           "button",
           {
             onClick: handleRetry,
-            className: "flex-shrink-0 px-3 py-1.5 bg-white/20 text-white rounded-full text-xs font-semibold hover:bg-white/30 active:scale-95 transition-all duration-150 border border-white/20",
+            className: "flex-shrink-0 px-3 py-1.5 rounded-full border border-warning text-warning text-xs font-semibold hover:bg-warning/10 active:scale-95 transition-all duration-150",
             children: t2("offline.retry")
           }
         )
@@ -4853,7 +4953,7 @@ const useGetFriends = (userId, queryParams) => {
 const FriendRequests = () => {
   const { t: t2 } = useTranslation();
   const [_total, _setTotal] = React.useState(0);
-  const { data, fetchNextPage, hasNextPage, isFetching } = useListFriendRequests({
+  const { data, fetchNextPage, hasNextPage, isFetching, isPending } = useListFriendRequests({
     limit: 20
   });
   const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
@@ -4878,7 +4978,7 @@ const FriendRequests = () => {
         }
       ),
       hasMore: !!hasNextPage,
-      isLoading: isFetching,
+      isLoading: isFetching || isPending,
       itemKey: (item) => item.senderId,
       emptyComponent: /* @__PURE__ */ jsx(
         NotFound,
@@ -4887,7 +4987,13 @@ const FriendRequests = () => {
           title: t2("friends:requests.noRequests") || "Không có lời mời nào",
           description: t2("friends:requests.noRequestsDescription") || "Khi có người muốn kết bạn với bạn, họ sẽ xuất hiện ở đây."
         }
-      )
+      ),
+      numberOfSkeletons: 2,
+      loadingSkeleton: /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 rounded-xl p-2 bg-bg-second items-center", children: [
+        /* @__PURE__ */ jsx(Skeleton, { sz: "lg", className: "w-full" }),
+        /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "self-start w-[80%]" }),
+        /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "self-start w-[85%]" })
+      ] })
     }
   ) });
 };
@@ -4980,7 +5086,7 @@ const ProfilePageContext = createContext({
 function ProfilePageProvider({ children }) {
   const { userId } = useAuth();
   const userParam = useParams();
-  const { data, isLoading, isFetching } = useUserId(userParam.userParam || "");
+  const { data, isLoading, isFetching, isPending } = useUserId(userParam.userParam || "");
   const cachedTargetIdRef = useRef(void 0);
   if (data?.infos.id) {
     cachedTargetIdRef.current = data.infos.id;
@@ -4994,7 +5100,7 @@ function ProfilePageProvider({ children }) {
     }),
     [userId, validTargetId, userParam.userParam]
   );
-  if (isLoading || isFetching) {
+  if (isLoading || isFetching || isPending) {
     return /* @__PURE__ */ jsx(LoadingPage, {});
   }
   if (!data) {
@@ -5034,13 +5140,21 @@ const useGetUserProfile = (userId) => {
   });
 };
 const useGetUserProfiles = (userIds) => {
-  const normalizedUserIds = useMemo(() => [...new Set(userIds.filter(Boolean))].sort(), [userIds]);
+  const normalizedUserIds = useMemo(
+    () => [...new Set(userIds.filter(Boolean))].sort(),
+    [userIds.join(",")]
+  );
+  console.log("fetching profiles for userIds", normalizedUserIds);
   const queries = useQueries({
     queries: normalizedUserIds.map((id) => ({
       queryKey: profileQueryKey(id, SUMMARY_PROFILE_FIELDS),
-      queryFn: async () => await userProfileService.getProfile(id, SUMMARY_PROFILE_FIELDS),
+      queryFn: async () => {
+        console.log("fetching profile for user", id);
+        return await userProfileService.getProfile(id, SUMMARY_PROFILE_FIELDS);
+      },
       enabled: !!id,
-      staleTime: 1e3 * 60 * 5
+      staleTime: 0,
+      refetchOnMount: "always"
     }))
   });
   const isLoading = queries.some((q) => q.isLoading);
@@ -5050,6 +5164,7 @@ const useGetUserProfiles = (userIds) => {
     ),
     [queries]
   );
+  console.log("userProfileMap", userProfileMap);
   return { userProfileMap, isLoading };
 };
 const useGetUserAvatar = (userId) => {
@@ -5061,8 +5176,8 @@ const useGetUserAvatar = (userId) => {
 };
 const useGetUserBackground = (userId) => {
   return useSafeQueryResult({
-    queryKey: profileQueryKey(userId, "background"),
-    fn: async () => await userProfileService.getProfile(userId, "background"),
+    queryKey: profileQueryKey(userId, "background,backgroundMetadata"),
+    fn: async () => await userProfileService.getProfile(userId, "background,backgroundMetadata"),
     enabled: !!userId
   });
 };
@@ -5131,13 +5246,16 @@ const useUpdateProfile = (userId) => {
 };
 const useSelectBackground = (userId) => {
   const qc = useQueryClient();
-  return useResultFetcher(userProfileService.uploadBackground, {
-    onSuccess: () => {
-      qc.invalidateQueries({
-        queryKey: userProfilePrefixKey(userId)
-      });
+  return useResultFetcher(
+    async (data) => await userProfileService.uploadBackground(data.file, data.metadata),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({
+          queryKey: userProfilePrefixKey(userId)
+        });
+      }
     }
-  });
+  );
 };
 const useSelectAvatar = (userId) => {
   const qc = useQueryClient();
@@ -5149,43 +5267,212 @@ const useSelectAvatar = (userId) => {
     }
   });
 };
+const ZoomOutIcon = () => /* @__PURE__ */ jsxs(
+  "svg",
+  {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "text-gray-500 hover:text-gray-800 transition-colors",
+    children: [
+      /* @__PURE__ */ jsx("circle", { cx: "11", cy: "11", r: "8" }),
+      /* @__PURE__ */ jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
+      /* @__PURE__ */ jsx("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
+    ]
+  }
+);
+const ZoomInIcon = () => /* @__PURE__ */ jsxs(
+  "svg",
+  {
+    xmlns: "http://www.w3.org/2000/svg",
+    width: "18",
+    height: "18",
+    viewBox: "0 0 24 24",
+    fill: "none",
+    stroke: "currentColor",
+    strokeWidth: "2",
+    strokeLinecap: "round",
+    strokeLinejoin: "round",
+    className: "text-gray-500 hover:text-gray-800 transition-colors",
+    children: [
+      /* @__PURE__ */ jsx("circle", { cx: "11", cy: "11", r: "8" }),
+      /* @__PURE__ */ jsx("line", { x1: "21", y1: "21", x2: "16.65", y2: "16.65" }),
+      /* @__PURE__ */ jsx("line", { x1: "11", y1: "8", x2: "11", y2: "14" }),
+      /* @__PURE__ */ jsx("line", { x1: "8", y1: "11", x2: "14", y2: "11" })
+    ]
+  }
+);
+const UpdateBackgroundContent = forwardRef(({ imageSrc }, ref) => {
+  const [crop, setCrop] = useState({ x: 0, y: 0 });
+  const [zoom, setZoom] = useState(1);
+  const [croppedArea, setCroppedArea] = useState(null);
+  const onCropComplete = (_croppedAreaPercentage, _croppedAreaPixels) => {
+    setCroppedArea(_croppedAreaPercentage);
+  };
+  useImperativeHandle(ref, () => ({
+    getMetadata: () => ({
+      x: croppedArea?.x || 0,
+      y: croppedArea?.y || 0,
+      width: croppedArea?.width || 100,
+      height: croppedArea?.height || 100
+    })
+  }));
+  return /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-4 w-full bg-bg-main rounded-xl box-border", children: [
+    /* @__PURE__ */ jsxs("div", { className: "relative w-full h-[250px] sm:h-[300px] rounded-xl overflow-hidden bg-bg-fourth/50 shadow-inner border border-bg-fourth group", children: [
+      /* @__PURE__ */ jsx(
+        Cropper,
+        {
+          image: imageSrc,
+          crop,
+          zoom,
+          aspect: 16 / 6,
+          onCropChange: setCrop,
+          onZoomChange: setZoom,
+          onCropComplete,
+          showGrid: true,
+          style: {
+            containerStyle: { borderRadius: "0.75rem", width: "100%", height: "100%" }
+          }
+        }
+      ),
+      /* @__PURE__ */ jsx(Text, { className: "absolute bottom-4 left-1/2 -translate-x-1/2 px-4 py-1.5 text-white text-xs font-medium rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none backdrop-blur-sm", children: "Drag to reposition" })
+    ] }),
+    /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-3 w-full", children: [
+      /* @__PURE__ */ jsxs("div", { className: "flex justify-between items-center px-1", children: [
+        /* @__PURE__ */ jsx(Text, { className: "text-sm font-semibold", children: "Zoom level" }),
+        /* @__PURE__ */ jsxs("div", { className: "text-xs font-bold text-primary-600 bg-primary-500/20 px-2.5 py-1 rounded-md ", children: [
+          Math.round(zoom * 100),
+          "%"
+        ] })
+      ] }),
+      /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3 bg-bg-fourth p-3.5 rounded-lg border border-bg-fourth/60 w-full box-border", children: [
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setZoom((z) => Math.max(1, z - 0.1)),
+            className: "p-1.5 shrink-0 hover:bg-bg-second hover:shadow-sm rounded-md transition-all active:scale-95",
+            "aria-label": "Zoom out",
+            children: /* @__PURE__ */ jsx(ZoomOutIcon, {})
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "input",
+          {
+            type: "range",
+            value: zoom,
+            min: 1,
+            max: 3,
+            step: 0.01,
+            onChange: (e) => setZoom(Number(e.target.value)),
+            className: "flex-1 min-w-0 h-1.5 bg-bg-third rounded-lg appearance-none cursor-pointer accent-primary-500 transition-all  focus:ring-primary-700 focus:ring-offset-1"
+          }
+        ),
+        /* @__PURE__ */ jsx(
+          "button",
+          {
+            type: "button",
+            onClick: () => setZoom((z) => Math.min(3, z + 0.1)),
+            className: "p-1.5 shrink-0 hover:bg-white hover:shadow-sm rounded-md transition-all active:scale-95",
+            "aria-label": "Zoom in",
+            children: /* @__PURE__ */ jsx(ZoomInIcon, {})
+          }
+        )
+      ] })
+    ] })
+  ] });
+});
+UpdateBackgroundContent.displayName = "UpdateBackgroundContent";
 const ProfileBackground = ({}) => {
   const { t: t2 } = useTranslation();
   const { targetId, isOwner } = useProfilePage();
   const { data, isLoading, isFetching } = useGetUserBackground(targetId);
+  console.log("DATA: ", data);
   const { fetch: fetch2, isFetching: isUpdating } = useSelectBackground(targetId);
   const { showSnackbar } = useSnackbar();
-  const handleSelectBackground = async (file) => {
-    await fetch2(file, {
-      onSuccess: () => {
-        showSnackbar("Background updated successfully", "success");
+  const { openDialog, closeDialog } = useDialog();
+  const handleSelectBackgroundFile = (file) => {
+    const objectUrl = URL.createObjectURL(file);
+    const contentRef = React.createRef();
+    openDialog({
+      title: "Adjust Background",
+      content: /* @__PURE__ */ jsx(UpdateBackgroundContent, { ref: contentRef, imageSrc: objectUrl }),
+      className: "w-[400px]",
+      primaryButton: {
+        text: "Save",
+        onClick: async () => {
+          const metadata = contentRef.current?.getMetadata() || {
+            x: 0,
+            y: 0,
+            width: 100,
+            height: 100
+          };
+          await fetch2(
+            { file, metadata },
+            {
+              onSuccess: () => {
+                showSnackbar("Background updated successfully", "success");
+                URL.revokeObjectURL(objectUrl);
+                closeDialog();
+              },
+              onError: () => {
+                URL.revokeObjectURL(objectUrl);
+                closeDialog();
+              }
+            }
+          );
+        }
+      },
+      secondaryButton: {
+        text: "Cancel",
+        onClick: () => {
+          URL.revokeObjectURL(objectUrl);
+          closeDialog();
+        }
+      },
+      onClose: () => {
+        URL.revokeObjectURL(objectUrl);
+        closeDialog();
       }
     });
   };
-  return /* @__PURE__ */ jsx("div", { className: clsx("relative aspect-[16/6] w-full"), children: isLoading || isFetching || isUpdating ? /* @__PURE__ */ jsx(Skeleton, { className: "h-full" }) : /* @__PURE__ */ jsx(
-    BackgroundImage,
+  return /* @__PURE__ */ jsx(
+    "div",
     {
-      src: data?.infos.background,
-      alt: "Background Image",
-      className: clsx("relative h-full w-full sm:rounded-xl rounded-none"),
-      children: isOwner && /* @__PURE__ */ jsxs(
-        SelectFile,
+      className: clsx("relative aspect-[16/6] w-full overflow-hidden sm:rounded-xl rounded-none"),
+      children: isLoading || isFetching || isUpdating ? /* @__PURE__ */ jsx(Skeleton, { className: "h-full w-full" }) : /* @__PURE__ */ jsx(
+        BackgroundImage,
         {
-          onChange: handleSelectBackground,
-          accept: "image/*",
-          multiple: false,
-          className: clsx(
-            "absolute flex items-center right-2 bottom-2 z-10",
-            "opacity-40 hover:opacity-70 gap-2"
-          ),
-          children: [
-            /* @__PURE__ */ jsx("i", { className: clsx("fa-solid fa-camera") }),
-            /* @__PURE__ */ jsx(Text, { className: clsx("sm:flex hidden"), sz: "md", children: data?.infos.background ? t2("user:profileHeader.changeButton") : t2("user:profileHeader.addButton") })
-          ]
+          src: data?.infos.background,
+          alt: "Background Image",
+          className: clsx("relative h-full w-full sm:rounded-xl rounded-none"),
+          metadata: typeof data?.infos.backgroundMetadata === "string" ? JSON.parse(data?.infos.backgroundMetadata || "{}") : data?.infos.backgroundMetadata,
+          children: isOwner && /* @__PURE__ */ jsxs(
+            SelectFile,
+            {
+              onChange: handleSelectBackgroundFile,
+              accept: "image/*",
+              multiple: false,
+              className: clsx(
+                "absolute flex items-center right-2 bottom-2 z-10",
+                "opacity-40 hover:opacity-70 gap-2"
+              ),
+              children: [
+                /* @__PURE__ */ jsx("i", { className: clsx("fa-solid fa-camera") }),
+                /* @__PURE__ */ jsx(Text, { className: clsx("sm:flex hidden"), sz: "md", children: data?.infos.background ? t2("user:profileHeader.changeButton") : t2("user:profileHeader.addButton") })
+              ]
+            }
+          )
         }
       )
     }
-  ) });
+  );
 };
 const ProfileAvatar = ({ className }) => {
   const { targetId, isOwner } = useProfilePage();
@@ -5526,7 +5813,7 @@ const ProfileHeader = ({ className }) => {
     await openChatWithTarget(targetId);
   }, [isMobile, targetId, openChatWithTarget, openChat]);
   return /* @__PURE__ */ jsxs("div", { className: clsx("relative w-full flex flex-col items-center", className), children: [
-    /* @__PURE__ */ jsx("div", { className: "relative w-full mt-2", children: /* @__PURE__ */ jsx(ProfileBackground, {}) }),
+    /* @__PURE__ */ jsx("div", { className: "relative w-full", children: /* @__PURE__ */ jsx(ProfileBackground, {}) }),
     /* @__PURE__ */ jsxs("div", { className: "-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3", children: [
       /* @__PURE__ */ jsx(ProfileAvatar, {}),
       /* @__PURE__ */ jsxs("div", { className: "flex flex-col gap-2 items-start flex-1 lg:mb-3 lg:ml-4", children: [
@@ -5609,7 +5896,7 @@ const Navbar = ({
     {
       className: clsx(
         "flex items-center",
-        "bg-bg-main p-[2px] shadow-md sm:px-8 justify-between",
+        "bg-bg-main p-[2px] shadow-sm sm:px-8 justify-between",
         className
       ),
       style: style2,
@@ -6415,7 +6702,7 @@ const useDeleteAllNotifications = () => {
 const NotificationMenu = ({ className, ref }) => {
   const { t: t2 } = useTranslation();
   const navigate = useNavigate$1();
-  const { data, fetchNextPage, hasNextPage, isFetching } = useNotifications({
+  const { data, fetchNextPage, hasNextPage, isFetching, isPending } = useNotifications({
     limit: 20
   });
   const { fetch: deleteAll } = useDeleteAllNotifications();
@@ -6515,7 +6802,7 @@ const NotificationMenu = ({ className, ref }) => {
             },
             itemKey: (item, index) => item.id + "-" + index,
             hasMore: !!hasNextPage,
-            isLoading: isFetching,
+            isLoading: isFetching || isPending,
             loadingSkeleton: /* @__PURE__ */ jsx(NotificationSkeleton, {}),
             numberOfSkeletons: 2,
             emptyComponent: /* @__PURE__ */ jsx(
@@ -7828,16 +8115,50 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
     data: _messages,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage
+    isFetchingNextPage,
+    isPending,
+    isLoading: isMessagesLoading
   } = useMessages(conversationId, { sortDesc: true, limit: 20 });
-  const { data: _ } = useGetPariticipantsSeen(conversationId);
+  const { data: participantsSeen } = useGetPariticipantsSeen(conversationId);
+  const participantIds = useMemo(() => {
+    return participantsSeen ? Object.keys(participantsSeen.participantsSeenInfo) : [];
+  }, [participantsSeen]);
   const messages = useMemo(() => {
     return _messages ? _messages.pages.flatMap((page) => page.items) : [];
   }, [_messages]);
   const senderIds = useMemo(() => {
-    return [...new Set(messages.map((m) => m.senderId).filter(Boolean))];
-  }, [messages]);
+    return [...new Set(participantIds)];
+  }, [participantIds]);
   const { userProfileMap } = useGetUserProfiles(senderIds);
+  const initialLoading = isPending || isMessagesLoading;
+  if (initialLoading && !messages.length) {
+    return /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-4 py-2 w-full h-full justify-end", className), children: [...Array(5)].map((_, i) => /* @__PURE__ */ jsxs(
+      "div",
+      {
+        className: clsx(
+          "flex gap-3 w-[80%]",
+          i % 2 === 0 ? "self-end flex-row-reverse" : "self-start"
+        ),
+        children: [
+          /* @__PURE__ */ jsx(Skeleton, { sz: "md", variant: "circle", className: "w-8 h-8 shrink-0" }),
+          /* @__PURE__ */ jsxs(
+            "div",
+            {
+              className: clsx(
+                "flex flex-col gap-2 flex-1",
+                i % 2 === 0 ? "items-end" : "items-start"
+              ),
+              children: [
+                /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "w-[80%]" }),
+                /* @__PURE__ */ jsx(Skeleton, { sz: "md", className: "w-[30%]" })
+              ]
+            }
+          )
+        ]
+      },
+      i
+    )) });
+  }
   return /* @__PURE__ */ jsx(
     InfiniteScrollReverse,
     {
@@ -8628,7 +8949,7 @@ const ChatWindow = ({ className, conversationId }) => {
     {
       className: clsx(
         "w-[330px] h-[450px] bg-bg-main rounded-xl shadow-lg overflow-hidden flex flex-col",
-        "border border-gray-700 shadow-xl",
+        "border border-bg-seventh shadow-xl",
         className
       ),
       ref: panelRef,
@@ -9884,6 +10205,7 @@ const SelectBoxSetting = ({
     selectBox ? selectBox : /* @__PURE__ */ jsx(
       SelectBox,
       {
+        showTitle: false,
         title: title2,
         className: "!min-w-[170px]",
         selectedOption,
@@ -10160,6 +10482,7 @@ const SelectLanguage = ({ className }) => {
   return /* @__PURE__ */ jsx(
     SelectBox,
     {
+      showTitle: false,
       title: t2("settings:language.yourLanguage"),
       className: clsx(className),
       options,
@@ -10196,26 +10519,26 @@ const settingRoutes = {
   ]
 };
 const NotFoundPage = lazy(() => Promise.resolve().then(() => notFoundPage));
-const HomePage = lazy(() => import("./assets/home-page-DNFGi8VM.js"));
-const RegisterPage = lazy(() => import("./assets/register-page-EdLUcPyj.js"));
-const LoginPage = lazy(() => import("./assets/login-page-HKe56hIf.js"));
-const NotificationPage = lazy(() => import("./assets/notifications-page-4FQVKoGg.js"));
+const HomePage = lazy(() => import("./assets/home-page-DmDUw1Te.js"));
+const RegisterPage = lazy(() => import("./assets/register-page-C7jmGits.js"));
+const LoginPage = lazy(() => import("./assets/login-page-B8IKLw6p.js"));
+const NotificationPage = lazy(() => import("./assets/notifications-page-DPh2o-5z.js"));
 const GoogleCallbackPage = lazy(
-  () => import("./assets/google-callback-page-BO-RCBaP.js")
+  () => import("./assets/google-callback-page-N7twKa-M.js")
 );
-const OnboardingPage = lazy(() => import("./assets/onboarding-page-Dauc5sff.js"));
-const FatalkPage = lazy(() => import("./assets/fatalk-page-DQpEXTS5.js"));
+const OnboardingPage = lazy(() => import("./assets/onboarding-page-yHLJzkxd.js"));
+const FatalkPage = lazy(() => import("./assets/fatalk-page-CWCx4Lnn.js"));
 const ConversationPage = lazy(
-  () => import("./assets/conversation-page-CoLZ1hDU.js").then((module) => ({
+  () => import("./assets/conversation-page-BzUApiXd.js").then((module) => ({
     default: module.ConversationPage
   }))
 );
 const TempConversation = lazy(
-  () => import("./assets/temp-conversation-BUWgNMw9.js").then((module) => ({
+  () => import("./assets/temp-conversation-BzbxnkeA.js").then((module) => ({
     default: module.TempConversation
   }))
 );
-const ThuNghiemCuon = lazy(() => import("./assets/tests-infinity-scroll-page-zA0afFsj.js"));
+const ThuNghiemCuon = lazy(() => import("./assets/tests-infinity-scroll-page-CVrRFnCY.js"));
 const withFallback = (element) => /* @__PURE__ */ jsx(Suspense, { fallback: /* @__PURE__ */ jsx(LoadingPage, {}), children: element });
 const mainRoutes = [
   {
@@ -10239,7 +10562,7 @@ const mainRoutes = [
       },
       {
         path: "/fatalk",
-        element: withFallback(/* @__PURE__ */ jsx(FatalkPage, {})),
+        element: /* @__PURE__ */ jsx(FatalkPage, {}),
         type: "private",
         children: [
           {
@@ -10301,7 +10624,7 @@ const GuestOnlyRoute = ({ children }) => {
     }
   }, [auth2?.isAuthenticated, navigate, searchParams]);
   if (auth2?.isAuthenticated) {
-    return null;
+    return /* @__PURE__ */ jsx(LoadingPage, {});
   }
   return children;
 };
@@ -10314,7 +10637,7 @@ const UserOnlyRoute = ({ children }) => {
     }
   }, [user2?.isAuthenticated, navigate]);
   if (!user2?.isAuthenticated) {
-    return null;
+    return /* @__PURE__ */ jsx(LoadingPage, {});
   }
   return children;
 };
@@ -10459,7 +10782,7 @@ const ChatQueryNetworkSync = () => {
       const focusId = latestFocusRef.current;
       const activeIdList = latestActiveIdsRef.current;
       const syncKey = `${isOnline ? "online" : "offline"}|${focusId ?? ""}|${activeIdList.join(",")}`;
-      if (syncKey === lastSyncKeyRef.current) {
+      if (syncKey === lastSyncKeyRef.current && !isOnline) {
         return;
       }
       lastSyncKeyRef.current = syncKey;
@@ -10477,16 +10800,28 @@ const ChatQueryNetworkSync = () => {
         });
       });
     };
+    const invalidateSeenQueries = (isOnline) => {
+      const focusId = latestFocusRef.current;
+      if (focusId) {
+        queryClient.invalidateQueries({
+          queryKey: ["conversation", focusId, "participantsSeen"],
+          refetchType: isOnline ? "active" : "none"
+        });
+      }
+    };
     const handleOffline = () => {
       invalidateMessageQueries(false);
+      invalidateSeenQueries(false);
     };
     const handleOnline = () => {
       invalidateMessageQueries(true);
+      invalidateSeenQueries(true);
     };
     window.addEventListener("offline", handleOffline);
     window.addEventListener("online", handleOnline);
     if (!navigator.onLine) {
       invalidateMessageQueries(false);
+      invalidateSeenQueries(false);
     }
     return () => {
       window.removeEventListener("offline", handleOffline);

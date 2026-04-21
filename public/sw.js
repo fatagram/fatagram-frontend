@@ -39,22 +39,6 @@ self.addEventListener("fetch", (event) => {
     return;
   }
 
-  // Network-first for API requests to ensure fresh data
-  if (url.pathname.startsWith("/api/")) {
-    event.respondWith(
-      fetch(request)
-        .then((res) => {
-          if (!res || res.status !== 200 || res.type !== "basic") return res;
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(request, clone));
-          return res;
-        })
-        .catch(() => caches.match(request)), // fallback to cache only if fetch fails (offline)
-    );
-    return;
-  }
-
-  // Cache-first for other assets
   event.respondWith(
     caches.match(request).then((cached) => {
       return (

@@ -5,8 +5,8 @@ import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import clsx from "clsx";
 import { useEffect, useState } from "react";
 import { useLocation, useNavigate, useSearchParams } from "react-router-dom";
-import { useOpenChat } from "../hooks/use-open-chat";
 import { MessageType } from "@/types/entities/message.type";
+import { useOpenChat } from "../../hooks/use-open-chat";
 
 interface TempConversationProps extends ComponentProps {}
 
