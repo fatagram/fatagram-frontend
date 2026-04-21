@@ -79,19 +79,8 @@ export const useLocalMarkAsRead = () => {
 };
 
 export const useGetPariticipantsSeen = (conversationId: string) => {
-  const queryClient = useQueryClient();
-  const queryKey = ["conversation", conversationId, "participantsSeen"] as const;
-
-  useEffect(() => {
-    if (conversationId) {
-      try {
-        queryClient.removeQueries({ queryKey, exact: true });
-      } catch (e) {}
-    }
-  }, [conversationId, queryClient, queryKey]);
-
   return useSafeQueryResult({
-    queryKey: queryKey,
+    queryKey: ["conversation", conversationId, "participantsSeen"],
     fn: async () => await conversationService.getParticipantsSeen(conversationId),
     enabled: !!conversationId,
     staleTime: 0,
