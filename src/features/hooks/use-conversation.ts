@@ -14,7 +14,7 @@ import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSnackbar } from "@/contexts";
 import { create } from "zustand";
-import { useMemo } from "react";
+import { useEffect, useMemo } from "react";
 
 const conversationKeys = {
   list: (queryParams?: Omit<CursorQuery<string>, "cursor">) =>
@@ -79,13 +79,24 @@ export const useLocalMarkAsRead = () => {
 };
 
 export const useGetPariticipantsSeen = (conversationId: string) => {
+  const queryClient = useQueryClient();
+  const queryKey = ["conversation", conversationId, "participantsSeen"] as const;
+
+  useEffect(() => {
+    if (conversationId) {
+      try {
+        queryClient.removeQueries({ queryKey, exact: true });
+      } catch (e) {}
+    }
+  }, [conversationId, queryClient, queryKey]);
+
   return useSafeQueryResult({
-    queryKey: ["conversation", conversationId, "participantsSeen"],
+    queryKey: queryKey,
     fn: async () => await conversationService.getParticipantsSeen(conversationId),
     enabled: !!conversationId,
     staleTime: 0,
     gcTime: 0,
-    refetchOnMount: "always",
+    fetchOptions: { refetchOnMount: "always" },
     options: {
       onSuccess: (data) => {
         console.log("Participants seen data: ", data);
