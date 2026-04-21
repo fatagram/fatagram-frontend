@@ -14,7 +14,7 @@ import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSnackbar } from "@/contexts";
 import { create } from "zustand";
-import { useEffect, useMemo } from "react";
+import { useMemo } from "react";
 
 const conversationKeys = {
   list: (queryParams?: Omit<CursorQuery<string>, "cursor">) =>
@@ -83,9 +83,6 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
     queryKey: ["conversation", conversationId, "participantsSeen"],
     fn: async () => await conversationService.getParticipantsSeen(conversationId),
     enabled: !!conversationId,
-    staleTime: 0,
-    gcTime: 0,
-    fetchOptions: { refetchOnMount: "always" },
     options: {
       onSuccess: (data) => {
         console.log("Participants seen data: ", data);
