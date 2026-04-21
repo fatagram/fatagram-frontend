@@ -106,14 +106,17 @@ export const AuthProvider: FC<AuthProviderProps> = ({
     onSuccess: async () => {
       await me({
         onSuccess: (data) => {
-          dispatch({
-            type: "LOGIN",
-            payload: {
-              userId: data?.infos.id,
-              urlName: data?.infos.urlName,
-              lang: (data?.infos.languageCode as LocaleKeys) || "en",
-            },
-          });
+          const payload = {
+            userId: data?.infos.id,
+            urlName: data?.infos.urlName,
+            lang: (data?.infos.languageCode as LocaleKeys) || "en",
+          };
+          dispatch({ type: "LOGIN", payload });
+          try {
+            localStorage.setItem("fatagram:user", JSON.stringify(payload));
+          } catch (e) {
+            /* ignore storage errors */
+          }
         },
       });
     },
@@ -121,6 +124,11 @@ export const AuthProvider: FC<AuthProviderProps> = ({
   const { fetch: logout } = useResultFetcher(authService.logout, {
     onSuccess: () => {
       dispatch({ type: "LOGOUT" });
+      try {
+        localStorage.removeItem("fatagram:user");
+      } catch (e) {
+        /* ignore */
+      }
       clearUserData();
     },
   });
@@ -132,14 +140,17 @@ export const AuthProvider: FC<AuthProviderProps> = ({
       onSuccess: async () => {
         await me({
           onSuccess: async (data) => {
-            dispatch({
-              type: "LOGIN",
-              payload: {
-                userId: data?.infos.id,
-                urlName: data?.infos.urlName,
-                lang: (data?.infos.languageCode as LocaleKeys) || "en",
-              },
-            });
+            const payload = {
+              userId: data?.infos.id,
+              urlName: data?.infos.urlName,
+              lang: (data?.infos.languageCode as LocaleKeys) || "en",
+            };
+            dispatch({ type: "LOGIN", payload });
+            try {
+              localStorage.setItem("fatagram:user", JSON.stringify(payload));
+            } catch (e) {
+              /* ignore */
+            }
           },
         });
       },
@@ -186,6 +197,28 @@ export const AuthProvider: FC<AuthProviderProps> = ({
       });
     }
   }, [state.isAuthenticated, state.userId]);
+
+  // Hydrate minimal user info from localStorage for offline usage
+  useEffect(() => {
+    if (!state.userId) {
+      try {
+        const raw = localStorage.getItem("fatagram:user");
+        if (raw) {
+          const parsed = JSON.parse(raw) as { userId?: string; urlName?: string; lang?: string };
+          if (parsed?.userId) {
+            const payload = {
+              userId: parsed.userId,
+              urlName: parsed.urlName,
+              lang: ((parsed.lang as LocaleKeys) || "en") as LocaleKeys,
+            };
+            dispatch({ type: "LOGIN", payload });
+          }
+        }
+      } catch (e) {
+        /* ignore */
+      }
+    }
+  }, []);
 
   const contextValue = useMemo(
     () => ({

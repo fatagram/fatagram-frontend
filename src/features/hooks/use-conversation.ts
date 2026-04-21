@@ -83,6 +83,9 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
     queryKey: ["conversation", conversationId, "participantsSeen"],
     fn: async () => await conversationService.getParticipantsSeen(conversationId),
     enabled: !!conversationId,
+    staleTime: 0,
+    gcTime: 0,
+    refetchOnMount: "always",
     options: {
       onSuccess: (data) => {
         console.log("Participants seen data: ", data);
@@ -90,9 +93,6 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
           .getState()
           .setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
       },
-    },
-    fetchOptions: {
-      refetchOnMount: "always",
     },
   });
 };
