@@ -92,11 +92,17 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
 
   return useSafeQueryResult({
     queryKey: queryKey,
-    fn: async () => await conversationService.getParticipantsSeen(conversationId),
+    fn: async () => {
+      // Force cache-busting on each fetch to bypass service worker cache in production
+      const timestamp = Date.now();
+      const result = await conversationService.getParticipantsSeen(conversationId);
+      console.log("[participantsSeen] fetched at", new Date(timestamp).toISOString(), result);
+      return result;
+    },
     enabled: !!conversationId,
     staleTime: 0,
     gcTime: 0,
-    fetchOptions: { refetchOnMount: "always" },
+    fetchOptions: { refetchOnMount: "always", refetchOnWindowFocus: true },
     options: {
       onSuccess: (data) => {
         console.log("Participants seen data: ", data);
