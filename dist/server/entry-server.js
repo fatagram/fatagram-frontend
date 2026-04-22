@@ -4,7 +4,7 @@ import { useNavigate, Link as Link$1, useLocation, useResolvedPath, useMatch, Ou
 import i18next, { t } from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
-import React, { useState, useCallback, createContext, useContext, useReducer, useEffect, useMemo, forwardRef, useRef, useId, useLayoutEffect, useImperativeHandle, memo, lazy, Suspense } from "react";
+import React, { useState, useCallback, createContext, useContext, useReducer, useEffect, useMemo, forwardRef, useRef, useId, useLayoutEffect, useImperativeHandle, memo, useDeferredValue, lazy, Suspense } from "react";
 import { useQueryClient, useInfiniteQuery, useQuery, useQueries, QueryClient } from "@tanstack/react-query";
 import { create } from "zustand";
 import clsx, { clsx as clsx$1 } from "clsx";
@@ -18,6 +18,7 @@ import Cropper from "react-easy-crop";
 import { useShallow } from "zustand/react/shallow";
 import { useFormik } from "formik";
 import * as Yup from "yup";
+import { Virtuoso } from "react-virtuoso";
 const login$1 = { "title": "Login", "username": "Username", "password": "Password", "rememberMe": "Remember me", "forgotPassword": "Forgot password?", "loginButton": "Login", "dontHaveAccount": "Don't have an account?", "registerButton": "Register", "errors": { "usernameOrEmail": { "required": "Username or email is required", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)", "notFound": "Username or email not found" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)", "incorrect": "Incorrect password" }, "account": { "locked": "Account is locked", "disabled": "Account is disabled" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const register$2 = { "title": "Register", "username": "Username", "password": "Password", "confirmPassword": "Confirm password", "email": "Email", "phoneNumber": "Phone number", "registerButton": "Register", "backToLogin": "Back to login", "agree": "I agree to the", "termsOfService": "Terms of Service", "and": " and ", "privacyPolicy": "Privacy Policy", "loginButton": "Login", "errors": { "username": { "required": "Username is required", "alreadyExists": "Username already exists", "invalidFormat": "Invalid username format", "tooLong": "Username is too long (maximum 20 characters)", "tooShort": "Username is too short (minimum 3 characters)" }, "email": { "required": "Email is required", "alreadyExists": "Email already exists", "invalidFormat": "Invalid email format" }, "phoneNumber": { "alreadyExists": "Phone number already exists", "invalidFormat": "Invalid phone number format" }, "password": { "required": "Password is required", "invalidFormat": "Invalid password format", "tooLong": "Password is too long (maximum 50 characters)", "tooShort": "Password is too short (minimum 8 characters)" }, "confirmPassword": { "required": "Please confirm your password", "doNotMatch": "Passwords do not match" }, "unknownError": "An unknown error occurred", "internalServerError": "Internal server error" } };
 const auth$1 = {
@@ -1102,7 +1103,6 @@ function BackgroundImage({
   metadata
 }) {
   const containerRef = useRef(null);
-  console.log("BackgroundImage metadata:", metadata);
   useEffect(() => {
     if (containerRef.current) {
       containerRef.current.style.setProperty("--bg-image", `url(${src})`);
@@ -2087,7 +2087,7 @@ const useFormatTime = () => {
     }
     return t2("times:just_now");
   };
-  const formatSmartTimestamp = (date) => {
+  const formatSmartTimestamp = (date, showHourOnDay) => {
     const _date = new Date(date);
     const now = /* @__PURE__ */ new Date();
     const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate());
@@ -2117,7 +2117,20 @@ const useFormatTime = () => {
       });
       return `${t2(`times:weekday:${_date.getDay()}`)} ${time2}`;
     }
-    return _date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const dateStr = _date.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric"
+    });
+    if (showHourOnDay) {
+      const time2 = _date.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false
+      });
+      return `${time2} - ${dateStr}`;
+    }
+    return dateStr;
   };
   const getDiffBetween = (startDate, endDate, unit = "minute") => {
     const start = new Date(startDate).getTime();
@@ -2687,15 +2700,21 @@ const VideoMessage = ({
     "div",
     {
       ref: containerRef,
-      className: `relative group bg-black overflow-hidden flex items-center justify-center transition-all duration-300
-        ${className}`,
+      className: clsx(
+        "relative group bg-black overflow-hidden flex items-center justify-center transition-all duration-300",
+        "w-[280px] sm:w-[320px] aspect-video min-h-[157px] sm:min-h-[180px] rounded-2xl shadow-sm shrink-0",
+        className
+      ),
       children: [
         /* @__PURE__ */ jsx(
           "video",
           {
             ref: videoRef,
             src: url,
-            className: `w-full h-full object-contain cursor-pointer ${!hasStarted ? "opacity-60" : "opacity-100"}`,
+            className: clsx(
+              "w-full h-full object-cover cursor-pointer transition-opacity duration-300",
+              !hasStarted ? "opacity-60" : "opacity-100"
+            ),
             onClick: () => {
               if (onFrameClick) {
                 onFrameClick();
@@ -2727,20 +2746,22 @@ const VideoMessage = ({
             onClick: handleInitialPlay,
             className: clsx(
               "absolute z-10",
-              "w-16 h-16 !rounded-full text-white flex items-center justify-center transition-all active:scale-98"
+              "w-14 h-14 !rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center transition-all hover:bg-black/60 hover:scale-105 active:scale-95"
             ),
-            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-play text-2xl pl-[2px]" })
+            children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-play text-xl pl-[2px]" })
           }
         ),
-        isWaiting && hasStarted && /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center justify-center z-10 pointer-events-none", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-spinner fa-spin text-white text-4xl opacity-80" }) }),
+        isWaiting && hasStarted && /* @__PURE__ */ jsx("div", { className: "absolute inset-0 flex items-center justify-center z-10 pointer-events-none bg-black/20", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-spinner fa-spin text-white text-3xl opacity-80" }) }),
         hasStarted && /* @__PURE__ */ jsxs(
           "div",
           {
-            className: `absolute bottom-0 left-0 right-0 z-30 p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent transition-opacity duration-300 
-          ${isPlaying && !isWaiting ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`,
+            className: clsx(
+              "absolute bottom-0 left-0 right-0 z-30 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300",
+              isPlaying && !isWaiting ? "opacity-0 group-hover:opacity-100" : "opacity-100"
+            ),
             children: [
-              /* @__PURE__ */ jsxs("div", { className: "relative w-full h-4 flex items-center mb-4 cursor-pointer group/seek", children: [
-                /* @__PURE__ */ jsx("div", { className: "relative w-full h-1.5 rounded-full bg-white/30 overflow-hidden", children: /* @__PURE__ */ jsx(
+              /* @__PURE__ */ jsxs("div", { className: "relative w-full h-3 flex items-center mb-2 cursor-pointer group/seek", children: [
+                /* @__PURE__ */ jsx("div", { className: "relative w-full h-1 rounded-full bg-white/30 overflow-hidden", children: /* @__PURE__ */ jsx(
                   "div",
                   {
                     className: "absolute left-0 top-0 h-full rounded-full bg-primary-500",
@@ -2750,7 +2771,7 @@ const VideoMessage = ({
                 /* @__PURE__ */ jsx(
                   "div",
                   {
-                    className: "absolute w-3.5 h-3.5 rounded-full bg-primary-500 shadow-md -translate-x-1/2",
+                    className: "absolute w-2.5 h-2.5 rounded-full bg-primary-500 shadow-md -translate-x-1/2 opacity-0 group-hover/seek:opacity-100 transition-opacity",
                     style: { left: timeFillPercent }
                   }
                 ),
@@ -2768,23 +2789,23 @@ const VideoMessage = ({
                 )
               ] }),
               /* @__PURE__ */ jsxs("div", { className: "flex items-center justify-between text-white drop-shadow-md", children: [
-                /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-6", children: [
-                  /* @__PURE__ */ jsx("button", { onClick: togglePlay, className: "hover:text-primary-400 transition-colors w-5", children: /* @__PURE__ */ jsx("i", { className: `fas ${isPlaying ? "fa-pause" : "fa-play"} text-xl` }) }),
+                /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+                  /* @__PURE__ */ jsx("button", { onClick: togglePlay, className: "hover:text-primary-400 transition-colors w-4", children: /* @__PURE__ */ jsx("i", { className: `fas ${isPlaying ? "fa-pause" : "fa-play"} text-sm` }) }),
                   /* @__PURE__ */ jsxs("div", { className: "flex items-center group/volume relative", children: [
                     /* @__PURE__ */ jsx(
                       "button",
                       {
                         onClick: toggleMute,
-                        className: "hover:text-primary-400 transition-colors w-5 shrink-0",
+                        className: "hover:text-primary-400 transition-colors w-4 shrink-0",
                         children: /* @__PURE__ */ jsx(
                           "i",
                           {
-                            className: `fas ${isMuted || volume === 0 ? "fa-volume-mute" : volume < 0.5 ? "fa-volume-down" : "fa-volume-up"}`
+                            className: `fas ${isMuted || volume === 0 ? "fa-volume-mute" : volume < 0.5 ? "fa-volume-down" : "fa-volume-up"} text-sm`
                           }
                         )
                       }
                     ),
-                    /* @__PURE__ */ jsx("div", { className: "hidden sm:flex items-center overflow-hidden w-0 opacity-0 group-hover/volume:w-20 group-hover/volume:opacity-100 group-hover/volume:ml-2 transition-all duration-300 ease-in-out", children: /* @__PURE__ */ jsx(
+                    /* @__PURE__ */ jsx("div", { className: "hidden sm:flex items-center overflow-hidden w-0 opacity-0 group-hover/volume:w-16 group-hover/volume:opacity-100 group-hover/volume:ml-2 transition-all duration-300 ease-in-out", children: /* @__PURE__ */ jsx(
                       "input",
                       {
                         type: "range",
@@ -2793,20 +2814,20 @@ const VideoMessage = ({
                         step: 0.05,
                         value: isMuted ? 0 : volume,
                         onChange: handleVolumeChange,
-                        className: "w-full h-1.5 accent-primary-500 cursor-pointer appearance-none bg-white/30 rounded-full",
+                        className: "w-full h-1 accent-primary-500 cursor-pointer appearance-none bg-white/30 rounded-full",
                         style: {
                           background: `linear-gradient(to right, rgb(var(--primary-500)) ${volumePercent}%, rgba(255,255,255,0.3) ${volumePercent}%)`
                         }
                       }
                     ) })
                   ] }),
-                  /* @__PURE__ */ jsxs("span", { className: "text-xs bg-black/40 px-2 py-1 rounded font-semibold tabular-nums", children: [
+                  /* @__PURE__ */ jsxs("span", { className: "text-[10px] bg-black/40 px-1.5 py-0.5 rounded font-medium tabular-nums", children: [
                     formatTime(currentTime, duration),
                     " / ",
                     formatTime(duration, duration)
                   ] })
                 ] }),
-                /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-4", children: [
+                /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-3", children: [
                   /* @__PURE__ */ jsxs(
                     "button",
                     {
@@ -2816,7 +2837,7 @@ const VideoMessage = ({
                         setPlaybackRate(newSpeed);
                         if (videoRef.current) videoRef.current.playbackRate = newSpeed;
                       },
-                      className: "text-[10px] font-black border-2 border-white/50 px-2 py-0.5 rounded-lg hover:bg-white/20 transition-all uppercase w-10 text-center",
+                      className: "text-[9px] font-bold border border-white/50 px-1.5 py-0.5 rounded-md hover:bg-white/20 transition-all uppercase w-8 text-center",
                       children: [
                         playbackRate,
                         "x"
@@ -2827,8 +2848,8 @@ const VideoMessage = ({
                     "button",
                     {
                       onClick: onFullscreenToggle,
-                      className: "hover:text-primary-400 transition-colors w-5 text-right",
-                      children: /* @__PURE__ */ jsx("i", { className: `fas fa-expand` })
+                      className: "hover:text-primary-400 transition-colors w-4 text-right",
+                      children: /* @__PURE__ */ jsx("i", { className: `fas fa-expand text-sm` })
                     }
                   )
                 ] })
@@ -2966,6 +2987,7 @@ function useSafeInfiniteQueryResult(params) {
     getNextPageParam: (lastPage) => {
       return lastPage.hasNext ? lastPage.nextCursor : void 0;
     },
+    placeholderData: (previousData) => previousData,
     retry: 0,
     ...queryOptions,
     ...fetchOptions
@@ -3042,29 +3064,16 @@ const useLocalMarkAsRead = () => {
   };
 };
 const useGetPariticipantsSeen = (conversationId) => {
-  const queryClient = useQueryClient();
-  const queryKey = ["conversation", conversationId, "participantsSeen"];
-  useEffect(() => {
-    if (conversationId) {
-      try {
-        queryClient.removeQueries({ queryKey, exact: true });
-      } catch (e) {
-      }
-    }
-  }, [conversationId, queryClient, queryKey]);
   return useSafeQueryResult({
-    queryKey,
+    queryKey: ["conversation", conversationId, "participantsSeen"],
     fn: async () => await conversationService.getParticipantsSeen(conversationId),
     enabled: !!conversationId,
-    staleTime: 0,
-    gcTime: 0,
-    fetchOptions: { refetchOnMount: "always" },
     options: {
       onSuccess: (data) => {
-        console.log("Participants seen data: ", data);
         useMessageStore.getState().setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
       }
-    }
+    },
+    refetchOnMount: "always"
   });
 };
 const useConversations = (queryParams) => {
@@ -4380,7 +4389,6 @@ function AppHubListener() {
       }
     },
     async () => {
-      console.log("Reconnected to App Hub, fetching delta conversations...");
       await fetcherDelta();
     }
   );
@@ -5144,17 +5152,13 @@ const useGetUserProfiles = (userIds) => {
     () => [...new Set(userIds.filter(Boolean))].sort(),
     [userIds.join(",")]
   );
-  console.log("fetching profiles for userIds", normalizedUserIds);
   const queries = useQueries({
     queries: normalizedUserIds.map((id) => ({
       queryKey: profileQueryKey(id, SUMMARY_PROFILE_FIELDS),
       queryFn: async () => {
-        console.log("fetching profile for user", id);
         return await userProfileService.getProfile(id, SUMMARY_PROFILE_FIELDS);
       },
-      enabled: !!id,
-      staleTime: 0,
-      refetchOnMount: "always"
+      enabled: !!id
     }))
   });
   const isLoading = queries.some((q) => q.isLoading);
@@ -5164,7 +5168,6 @@ const useGetUserProfiles = (userIds) => {
     ),
     [queries]
   );
-  console.log("userProfileMap", userProfileMap);
   return { userProfileMap, isLoading };
 };
 const useGetUserAvatar = (userId) => {
@@ -5393,7 +5396,6 @@ const ProfileBackground = ({}) => {
   const { t: t2 } = useTranslation();
   const { targetId, isOwner } = useProfilePage();
   const { data, isLoading, isFetching } = useGetUserBackground(targetId);
-  console.log("DATA: ", data);
   const { fetch: fetch2, isFetching: isUpdating } = useSelectBackground(targetId);
   const { showSnackbar } = useSnackbar();
   const { openDialog, closeDialog } = useDialog();
@@ -7614,22 +7616,21 @@ const PendingIndicator = () => /* @__PURE__ */ jsx("div", { className: "absolute
 const getMessageBubbleShapeClass = (isMyMessage, isFirstMessageInGroup, isLastMessageInGroup, isOnlyMessageInGroup) => clsx(
   isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
   isOnlyMessageInGroup && "!rounded-3xl",
-  isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
-  isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
-  !isFirstMessageInGroup && !isLastMessageInGroup && (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none")
+  isLastMessageInGroup && (isMyMessage ? "rounded-br-[4px]" : "rounded-bl-[4px]"),
+  isFirstMessageInGroup && (isMyMessage ? "rounded-tr-[4px]" : "rounded-tl-[4px]"),
+  !isFirstMessageInGroup && !isLastMessageInGroup && (isMyMessage ? "rounded-tr-[4px] rounded-br-[4px]" : "rounded-tl-[4px] rounded-bl-[4px]")
 );
 const MessageRowComponent = ({
   message,
   prevMessage,
   nextMessage,
-  index,
   userId,
   conversationId,
   isGroup,
   className,
   userInfo,
   userProfileMap,
-  ref
+  isLatestMessage
 }) => {
   const { t: t2 } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
@@ -7653,7 +7654,7 @@ const MessageRowComponent = ({
   const isMyMessage = message.senderId === userId;
   const isShowName = isLastMessageInGroup && !isMyMessage && isGroup;
   const hasAvatar = isFirstMessageInGroup;
-  const isFooterVisible = index === 0 && isMyMessage;
+  const isFooterVisible = isLatestMessage && isMyMessage;
   const isTextMessage = message.type === MessageType.Text;
   const isMediaMessage = message.type === MessageType.Media;
   const isImageMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.Image);
@@ -7898,93 +7899,81 @@ const MessageRowComponent = ({
   if (isSystem) {
     return /* @__PURE__ */ jsx("div", { className: "flex justify-center w-full my-2", children: /* @__PURE__ */ jsx(Text, { sz: "sm", className: "opacity-80", children: renderSystemMessage(message) }) });
   }
-  return /* @__PURE__ */ jsxs(
-    "div",
-    {
-      className: clsx(
-        "flex flex-col",
-        isLastMessageInGroup ? "mt-[0.5rem]" : "mt-0",
-        index === 0 ? "mb-[0.5rem]" : "mb-0",
-        className
-      ),
-      ref,
-      children: [
-        isShowTime && /* @__PURE__ */ jsx(Text, { sz: "xs", className: "text-center my-2", children: formatSmartTimestamp(message.createdAt) }),
-        /* @__PURE__ */ jsxs(
-          "div",
-          {
-            className: clsx(
-              "flex gap-2 w-full",
-              isMyMessage ? "flex-row-reverse" : "flex-row",
-              hasDelayed && "opacity-50"
-            ),
-            children: [
-              !isMyMessage && /* @__PURE__ */ jsx(
-                Avatar,
-                {
-                  className: clsx(
-                    "flex-shrink-0 self-end",
-                    isMyMessage && "order-2",
-                    !hasAvatar && "invisible"
-                  ),
-                  src: message.senderAvatarUrl,
-                  alt: "Avatar",
-                  sz: "sm"
-                }
-              ),
-              /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col", "max-w-[75%]"), children: [
-                isShowName && /* @__PURE__ */ jsx(
-                  Text,
-                  {
-                    sz: "xs",
-                    className: clsx(
-                      "mb-1 min-h-[1rem]",
-                      isMyMessage ? "text-right mr-1" : "text-left ml-1"
-                    ),
-                    children: userInfo?.fullName
-                  }
-                ),
-                isOnlyEmoji ? renderOnlyEmojiMessage() : null,
-                isTextMessage && !isOnlyEmoji && renderTextMessage(),
-                isFileMessage && renderFileMessage(),
-                isVideoMessage && renderVideoMessage(),
-                isAudioMessage && renderAudioMessage(),
-                isImageMessage && stackImage.length > 1 && renderImageStackMessage(),
-                isImageMessage && stackImage.length === 1 && renderSingleImageMessage(),
-                (seenBy?.length === 0 || seenBy.length === 1 && seenBy[0].userId === userId) && /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    className: clsx(
-                      "flex items-center justify-end mr-2 overflow-hidden transition-all duration-200",
-                      isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0"
-                    ),
-                    children: isFooterVisible && !isFailed && !isPending && /* @__PURE__ */ jsxs(Text, { sz: "xs", children: [
-                      t2("conversations.sent"),
-                      " ",
-                      getDiffBetween(message.createdAt, /* @__PURE__ */ new Date(), "second") > 60 && /* @__PURE__ */ jsx(Text, { sz: "xs", children: formatTime(message.createdAt) })
-                    ] })
-                  }
-                )
-              ] }),
-              isFailed && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-exclamation text-red-500" }) })
-            ]
-          }
+  return /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col", className), children: [
+    isShowTime && /* @__PURE__ */ jsx(Text, { sz: "xs", className: "text-center my-2", children: formatSmartTimestamp(message.createdAt, true) }),
+    /* @__PURE__ */ jsxs(
+      "div",
+      {
+        className: clsx(
+          "flex gap-2 w-full",
+          isMyMessage ? "flex-row-reverse" : "flex-row",
+          hasDelayed && "opacity-50"
         ),
-        seenBy?.length > 0 && !(seenBy.length === 1 && seenBy[0].userId === userId) && /* @__PURE__ */ jsx("div", { className: "flex justify-end gap-1 mt-1", children: seenBy.map((seenInfo) => {
-          if (seenInfo.userId === userId) return null;
-          return /* @__PURE__ */ jsx(
-            MiniAvatar,
+        children: [
+          !isMyMessage && /* @__PURE__ */ jsx(
+            Avatar,
             {
-              uid: seenInfo.userId,
-              seenAt: seenInfo.seenAt,
-              userInfo: userProfileMap?.[seenInfo.userId]
-            },
-            seenInfo.userId
-          );
-        }) })
-      ]
-    }
-  );
+              className: clsx(
+                "flex-shrink-0 self-end",
+                isMyMessage && "order-2",
+                !hasAvatar && "invisible"
+              ),
+              src: message.senderAvatarUrl,
+              alt: "Avatar",
+              sz: "sm"
+            }
+          ),
+          /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col", "max-w-[75%]"), children: [
+            isShowName && /* @__PURE__ */ jsx(
+              Text,
+              {
+                sz: "xs",
+                className: clsx(
+                  "mb-1 min-h-[1rem]",
+                  isMyMessage ? "text-right mr-1" : "text-left ml-1"
+                ),
+                children: userInfo?.fullName
+              }
+            ),
+            isOnlyEmoji ? renderOnlyEmojiMessage() : null,
+            isTextMessage && !isOnlyEmoji && renderTextMessage(),
+            isFileMessage && renderFileMessage(),
+            isVideoMessage && renderVideoMessage(),
+            isAudioMessage && renderAudioMessage(),
+            isImageMessage && stackImage.length > 1 && renderImageStackMessage(),
+            isImageMessage && stackImage.length === 1 && renderSingleImageMessage(),
+            (seenBy?.length === 0 || seenBy.length === 1 && seenBy[0].userId === userId) && /* @__PURE__ */ jsx(
+              "div",
+              {
+                className: clsx(
+                  "flex items-center justify-end mr-2 overflow-hidden transition-all duration-200",
+                  isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0"
+                ),
+                children: isFooterVisible && !isFailed && !isPending && /* @__PURE__ */ jsxs(Text, { sz: "xs", children: [
+                  t2("conversations.sent"),
+                  " ",
+                  getDiffBetween(message.createdAt, /* @__PURE__ */ new Date(), "second") > 60 && /* @__PURE__ */ jsx(Text, { sz: "xs", children: formatTime(message.createdAt) })
+                ] })
+              }
+            )
+          ] }),
+          isFailed && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-exclamation text-red-500" }) })
+        ]
+      }
+    ),
+    seenBy?.length > 0 && !(seenBy.length === 1 && seenBy[0].userId === userId) && /* @__PURE__ */ jsx("div", { className: "flex justify-end gap-1 p-1", children: seenBy.map((seenInfo) => {
+      if (seenInfo.userId === userId) return null;
+      return /* @__PURE__ */ jsx(
+        MiniAvatar,
+        {
+          uid: seenInfo.userId,
+          seenAt: seenInfo.seenAt,
+          userInfo: userProfileMap?.[seenInfo.userId]
+        },
+        seenInfo.userId
+      );
+    }) })
+  ] });
 };
 const MiniAvatar = memo(
   ({ uid, seenAt, userInfo }) => {
@@ -8000,7 +7989,7 @@ const MiniAvatar = memo(
           /* @__PURE__ */ jsx(Avatar, { sz: "xs", src: userInfo?.avatar, alt: "mini" }),
           showTooltip && /* @__PURE__ */ jsxs("div", { className: "absolute right-full mr-2 -top-7 px-2 py-1 bg-bg-main text-text-main text-xs rounded shadow-md z-50 whitespace-nowrap border border-border-main", children: [
             /* @__PURE__ */ jsx("div", { className: "font-semibold", children: userInfo?.fullName || uid }),
-            /* @__PURE__ */ jsx("div", { className: "text-xs opacity-75", children: formatSmartTimestamp(seenAt) })
+            /* @__PURE__ */ jsx("div", { className: "text-xs opacity-75", children: formatSmartTimestamp(seenAt, true) })
           ] })
         ]
       }
@@ -8008,6 +7997,19 @@ const MiniAvatar = memo(
   }
 );
 const MessageRow = memo(MessageRowComponent);
+const START_INDEX = 1e5;
+const VirtuosoItem = ({ children, ...props }) => /* @__PURE__ */ jsx(
+  "div",
+  {
+    ...props,
+    style: {
+      minHeight: "1px",
+      overflow: "hidden",
+      boxSizing: "border-box"
+    },
+    children
+  }
+);
 const InfiniteScrollReverse = forwardRef(
   function InfiniteScrollReverse2({
     items,
@@ -8019,98 +8021,72 @@ const InfiniteScrollReverse = forwardRef(
     onLoadMore,
     isShowLastSeen = false,
     lastSeen,
-    gap,
-    parentRef,
-    itemKey,
-    emptyComponent
+    itemKey
   }, ref) {
-    const containerRef = useRef(null);
-    useImperativeHandle(ref, () => containerRef.current);
-    const sentinelRef = useRef(null);
+    const [firstItemIndex, setFirstItemIndex] = useState(() => START_INDEX - (items?.length || 0));
+    const prevFirstItemKey = useRef(
+      items?.[0] ? itemKey(0, items[0]) : void 0
+    );
+    useEffect(() => {
+      if (!items || items.length === 0) return;
+      const currentFirstKey = itemKey(0, items[0]);
+      if (currentFirstKey !== prevFirstItemKey.current) {
+        setFirstItemIndex(START_INDEX - items.length);
+        prevFirstItemKey.current = currentFirstKey;
+      }
+    }, [items, itemKey]);
     const isLoadingRef = useRef(isLoading);
-    const pendingLoadRef = useRef(false);
-    const { t: t2 } = useTranslation();
     useEffect(() => {
       isLoadingRef.current = isLoading;
-      if (!isLoading) {
-        pendingLoadRef.current = false;
-      }
     }, [isLoading]);
-    const _loadMore = async () => {
-      if (pendingLoadRef.current) return;
-      if (isLoadingRef.current) return;
-      pendingLoadRef.current = true;
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 30));
-        await onLoadMore();
-      } finally {
-        pendingLoadRef.current = false;
-      }
-    };
-    useEffect(() => {
-      const sentinel = sentinelRef.current;
-      if (!sentinel) return;
-      const observer = new IntersectionObserver(
-        async ([entry]) => {
-          if (!entry.isIntersecting) return;
-          if (!hasMore) return;
-          _loadMore();
-        },
-        {
-          root: parentRef?.current || containerRef.current,
-          rootMargin: "200px 0px 0px 0px"
-        }
-      );
-      observer.observe(sentinel);
-      return () => {
-        observer.disconnect();
-        observer.unobserve(sentinel);
-      };
-    }, [hasMore, parentRef, items.length]);
-    return /* @__PURE__ */ jsxs(
-      "div",
+    const handleStartReached = useCallback(() => {
+      if (isLoadingRef.current || !hasMore || items.length === 0) return;
+      isLoadingRef.current = true;
+      onLoadMore();
+    }, [onLoadMore, hasMore, items.length]);
+    const Header = useCallback(
+      () => /* @__PURE__ */ jsx(Fragment, { children: hasMore ? spinnerContent || /* @__PURE__ */ jsx("div", { className: "flex justify-center items-center py-2 min-h-[40px]", children: isLoading && /* @__PURE__ */ jsx("span", { children: "Loading..." }) }) : /* @__PURE__ */ jsx(Fragment, { children: isShowLastSeen && lastSeen }) }),
+      [hasMore, spinnerContent, isLoading, isShowLastSeen, lastSeen]
+    );
+    const components = useMemo(
+      () => ({
+        Header,
+        Item: VirtuosoItem
+      }),
+      [Header]
+    );
+    return /* @__PURE__ */ jsx(
+      Virtuoso,
       {
-        ref: containerRef,
-        className: clsx("relative overflow-y-auto h-full flex flex-col-reverse", className),
-        style: { gap: gap ?? "0.5rem", overflowAnchor: "auto", overscrollBehaviorY: "contain" },
-        children: [
-          items.map((item, index) => /* @__PURE__ */ jsx("div", { children: itemTemplate ? itemTemplate(item, index, null) : item }, itemKey(item, index))),
-          hasMore && /* @__PURE__ */ jsx(
-            "div",
-            {
-              className: "w-full flex justify-center py-2 shrink-0",
-              style: { overflowAnchor: "none" },
-              children: spinnerContent ?? /* @__PURE__ */ jsxs("div", { className: "flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/50 text-xs text-primary-500", children: [
-                /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
-                /* @__PURE__ */ jsx("span", { children: t2("common:conversations.loadingOldMessages") })
-              ] })
-            }
-          ),
-          hasMore && /* @__PURE__ */ jsx(
-            "div",
-            {
-              ref: sentinelRef,
-              className: clsx("h-px w-full shrink-0"),
-              style: { overflowAnchor: "none" }
-            }
-          ),
-          items.length > 0 && !hasMore && !isLoading && isShowLastSeen && /* @__PURE__ */ jsx("div", { className: "order-last w-full text-center py-4 text-text-third text-sm", children: lastSeen || "Đã xem hết kết quả." }),
-          items.length === 0 && !isLoading && emptyComponent
-        ]
+        ref,
+        className,
+        data: items,
+        totalCount: items.length,
+        firstItemIndex,
+        startReached: handleStartReached,
+        initialTopMostItemIndex: items.length - 1,
+        computeItemKey: itemKey,
+        itemContent: itemTemplate,
+        increaseViewportBy: { top: 10, bottom: 400 },
+        components,
+        followOutput: (isAtBottom) => {
+          if (isAtBottom) return "smooth";
+          return false;
+        },
+        alignToBottom: true
       }
     );
   }
 );
+InfiniteScrollReverse.displayName = "InfiniteScrollReverse";
+const INITIAL_LIMIT = 40;
+const LOAD_MORE_CHUNK = 20;
 const MessageList = forwardRef(function MessageList2({ isGroup, className, conversationId, parentRef, lastSeen }, ref) {
+  const { t: t2 } = useTranslation();
+  const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
+  const [isLocalPaging, setIsLocalPaging] = useState(false);
   const { userId } = useAuth();
-  const scrollContainerRef = useRef(null);
-  useImperativeHandle(ref, () => ({
-    scrollToBottom: () => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-      }
-    }
-  }));
+  const virtuosoRef = useRef(null);
   const {
     data: _messages,
     fetchNextPage,
@@ -8119,19 +8095,59 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
     isPending,
     isLoading: isMessagesLoading
   } = useMessages(conversationId, { sortDesc: true, limit: 20 });
+  const allCachedMessages = useMemo(() => {
+    return _messages ? _messages.pages.flatMap((page) => page.items) : [];
+  }, [_messages]);
+  const messagesWithContext = useMemo(() => {
+    const visibleMessages = [...allCachedMessages].reverse();
+    return visibleMessages.map((msg, index) => ({
+      ...msg,
+      _prev: index > 0 ? visibleMessages[index - 1] : void 0,
+      _next: index < visibleMessages.length - 1 ? visibleMessages[index + 1] : void 0,
+      _isLatest: index === visibleMessages.length - 1
+    }));
+  }, [allCachedMessages]);
+  const deferredMessages = useDeferredValue(messagesWithContext);
+  useImperativeHandle(ref, () => ({
+    scrollToBottom: () => {
+      virtuosoRef.current?.scrollToIndex({
+        index: deferredMessages.length - 1,
+        behavior: "smooth"
+      });
+    }
+  }));
+  const handleLoadMore = useCallback(() => {
+    if (isLocalPaging || isFetchingNextPage) return;
+    const totalInRAM = allCachedMessages.length;
+    if (displayLimit < totalInRAM) {
+      setIsLocalPaging(true);
+      setTimeout(() => {
+        setDisplayLimit((prev) => prev + LOAD_MORE_CHUNK);
+        setIsLocalPaging(false);
+      }, 50);
+    } else if (hasNextPage) {
+      fetchNextPage();
+    }
+  }, [
+    displayLimit,
+    allCachedMessages.length,
+    isLocalPaging,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage
+  ]);
+  const initialLoading = isPending || isMessagesLoading;
+  const hasMoreToShow = displayLimit < allCachedMessages.length || hasNextPage;
+  const showSpinner = isLocalPaging || isFetchingNextPage;
   const { data: participantsSeen } = useGetPariticipantsSeen(conversationId);
   const participantIds = useMemo(() => {
     return participantsSeen ? Object.keys(participantsSeen.participantsSeenInfo) : [];
   }, [participantsSeen]);
-  const messages = useMemo(() => {
-    return _messages ? _messages.pages.flatMap((page) => page.items) : [];
-  }, [_messages]);
   const senderIds = useMemo(() => {
     return [...new Set(participantIds)];
   }, [participantIds]);
   const { userProfileMap } = useGetUserProfiles(senderIds);
-  const initialLoading = isPending || isMessagesLoading;
-  if (initialLoading && !messages.length) {
+  if (initialLoading && !allCachedMessages.length) {
     return /* @__PURE__ */ jsx("div", { className: clsx("flex flex-col gap-4 py-2 w-full h-full justify-end", className), children: [...Array(5)].map((_, i) => /* @__PURE__ */ jsxs(
       "div",
       {
@@ -8162,39 +8178,48 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
   return /* @__PURE__ */ jsx(
     InfiniteScrollReverse,
     {
-      ref: scrollContainerRef,
-      items: messages,
-      onLoadMore: fetchNextPage,
-      className: clsx(
-        "flex flex-col gap-[0.1rem] px-1 sm:scrollbar-default scrollbar-hide",
-        className
-      ),
-      itemTemplate: (item, index, ref2) => {
-        const prevMessage = index < messages.length - 1 ? messages[index + 1] : void 0;
-        const nextMessage = index > 0 ? messages[index - 1] : void 0;
+      items: deferredMessages,
+      onLoadMore: handleLoadMore,
+      className: clsx("flex flex-col gap-[0.1rem]", className),
+      itemTemplate: (_index, item) => {
         return /* @__PURE__ */ jsx(
           MessageRow,
           {
-            ref: ref2,
             message: item,
-            prevMessage,
-            nextMessage,
+            prevMessage: item._prev,
+            nextMessage: item._next,
             userId,
-            index,
             isGroup,
             conversationId,
             userInfo: userProfileMap[item?.senderId || ""],
-            userProfileMap
+            userProfileMap,
+            isLatestMessage: item._isLatest,
+            className: "py-[0.5px] pl-2 pr-1"
           }
         );
       },
-      hasMore: !!hasNextPage,
-      isLoading: isFetchingNextPage,
+      hasMore: !!hasMoreToShow,
+      isLoading: showSpinner,
       gap: 2,
       parentRef,
-      itemKey: (item) => item.id,
+      itemKey: (_index, item) => item.id || item._id,
       isShowLastSeen: true,
-      lastSeen
+      lastSeen,
+      ref: virtuosoRef,
+      spinnerContent: /* @__PURE__ */ jsx("div", { className: "flex justify-center w-full select-none", children: /* @__PURE__ */ jsxs(
+        "div",
+        {
+          className: clsx(
+            "flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10",
+            "border border-primary-500/50 text-xs text-primary-500",
+            "w-[11%] min-w-[100px]"
+          ),
+          children: [
+            /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-notch animate-spin" }),
+            /* @__PURE__ */ jsx("span", { children: t2("common:conversations.loadingOldMessages") })
+          ]
+        }
+      ) })
     }
   );
 });
@@ -8977,7 +9002,7 @@ const ChatWindow = ({ className, conversationId }) => {
           /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: handleOnMinimum, children: /* @__PURE__ */ jsx("i", { className: "fas fa-minus" }) }),
           /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: handleOnClose, children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" }) })
         ] }),
-        /* @__PURE__ */ jsxs("div", { ref: scrollRef, className: "flex flex-col px-0 flex-1 overflow-y-auto bg-bg-second", children: [
+        /* @__PURE__ */ jsxs("div", { ref: scrollRef, className: "flex flex-col px-0 flex-1 bg-bg-second", children: [
           tempTargetId ? /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
             /* @__PURE__ */ jsxs("div", { className: "relative mb-3", children: [
               /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "sm" }),
@@ -8990,11 +9015,10 @@ const ChatWindow = ({ className, conversationId }) => {
           !tempTargetId && /* @__PURE__ */ jsx(
             MessageList,
             {
-              className: "px-2",
               conversationId,
               isGroup: conversationData?.isGroup,
               parentRef: scrollRef,
-              lastSeen: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
+              lastSeen: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4 py-5", children: [
                 /* @__PURE__ */ jsx("div", { className: "relative mb-4", children: /* @__PURE__ */ jsx(Avatar, { src: conversationData?.avatarUrl || "", alt: "Avatar", sz: "md" }) }),
                 /* @__PURE__ */ jsx(Text, { sz: "sm", weight: "bold", children: chatTitle }),
                 /* @__PURE__ */ jsx(Text, { sz: "xs", wrap: "whitespace-normal", children: t2("common:conversations:privacyDescription") })
@@ -10519,26 +10543,26 @@ const settingRoutes = {
   ]
 };
 const NotFoundPage = lazy(() => Promise.resolve().then(() => notFoundPage));
-const HomePage = lazy(() => import("./assets/home-page-DmDUw1Te.js"));
-const RegisterPage = lazy(() => import("./assets/register-page-C7jmGits.js"));
-const LoginPage = lazy(() => import("./assets/login-page-B8IKLw6p.js"));
-const NotificationPage = lazy(() => import("./assets/notifications-page-DPh2o-5z.js"));
+const HomePage = lazy(() => import("./assets/home-page-CR9m3ZqM.js"));
+const RegisterPage = lazy(() => import("./assets/register-page-D3BSMQwr.js"));
+const LoginPage = lazy(() => import("./assets/login-page-4ANOczpy.js"));
+const NotificationPage = lazy(() => import("./assets/notifications-page-Ctjbxul7.js"));
 const GoogleCallbackPage = lazy(
-  () => import("./assets/google-callback-page-N7twKa-M.js")
+  () => import("./assets/google-callback-page-CxMwlnRi.js")
 );
-const OnboardingPage = lazy(() => import("./assets/onboarding-page-yHLJzkxd.js"));
-const FatalkPage = lazy(() => import("./assets/fatalk-page-CWCx4Lnn.js"));
+const OnboardingPage = lazy(() => import("./assets/onboarding-page-CpaWFNbE.js"));
+const FatalkPage = lazy(() => import("./assets/fatalk-page-v3RawoQc.js"));
 const ConversationPage = lazy(
-  () => import("./assets/conversation-page-BzUApiXd.js").then((module) => ({
+  () => import("./assets/conversation-page-DdmjYQrn.js").then((module) => ({
     default: module.ConversationPage
   }))
 );
 const TempConversation = lazy(
-  () => import("./assets/temp-conversation-BzbxnkeA.js").then((module) => ({
+  () => import("./assets/temp-conversation-D3u6et08.js").then((module) => ({
     default: module.TempConversation
   }))
 );
-const ThuNghiemCuon = lazy(() => import("./assets/tests-infinity-scroll-page-CVrRFnCY.js"));
+const ThuNghiemCuon = lazy(() => import("./assets/tests-infinity-scroll-page-JsXuSa8-.js"));
 const withFallback = (element) => /* @__PURE__ */ jsx(Suspense, { fallback: /* @__PURE__ */ jsx(LoadingPage, {}), children: element });
 const mainRoutes = [
   {
@@ -10673,7 +10697,7 @@ function Main() {
 }
 const DB_NAME = "fatagram-query-cache";
 const STORE_NAME = "tanstack-query";
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 const CLIENT_KEY = "client";
 const noopPersister = {
   persistClient: async () => {
