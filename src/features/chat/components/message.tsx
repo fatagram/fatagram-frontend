@@ -58,7 +58,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
   }, [_messages]);
 
   const messagesWithContext = useMemo(() => {
-    const visibleMessages = allCachedMessages.slice(0, displayLimit).reverse();
+    const visibleMessages = [...allCachedMessages].reverse();
 
     return visibleMessages.map((msg, index) => ({
       ...msg,
@@ -66,7 +66,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       _next: index < visibleMessages.length - 1 ? visibleMessages[index + 1] : undefined,
       _isLatest: index === visibleMessages.length - 1,
     }));
-  }, [allCachedMessages, displayLimit]);
+  }, [allCachedMessages]);
 
   const deferredMessages = useDeferredValue(messagesWithContext);
 
@@ -111,9 +111,11 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
   const participantIds = useMemo(() => {
     return participantsSeen ? Object.keys(participantsSeen.participantsSeenInfo) : [];
   }, [participantsSeen]);
+
   const senderIds = useMemo(() => {
     return [...new Set(participantIds)] as string[];
   }, [participantIds]);
+
   const { userProfileMap } = useGetUserProfiles(senderIds);
 
   // Render

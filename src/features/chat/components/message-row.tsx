@@ -359,7 +359,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     <div className={clsx("flex flex-col", className)}>
       {isShowTime && (
         <Text sz="xs" className="text-center my-2">
-          {formatSmartTimestamp(message.createdAt)}
+          {formatSmartTimestamp(message.createdAt, true)}
         </Text>
       )}
       <div
@@ -458,7 +458,7 @@ export const MiniAvatar = memo(
         {showTooltip && (
           <div className="absolute right-full mr-2 -top-7 px-2 py-1 bg-bg-main text-text-main text-xs rounded shadow-md z-50 whitespace-nowrap border border-border-main">
             <div className="font-semibold">{userInfo?.fullName || uid}</div>
-            <div className="text-xs opacity-75">{formatSmartTimestamp(seenAt)}</div>
+            <div className="text-xs opacity-75">{formatSmartTimestamp(seenAt, true)}</div>
           </div>
         )}
       </div>

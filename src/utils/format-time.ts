@@ -16,7 +16,7 @@ export const useFormatTime = () => {
     return t("times:just_now");
   };
 
-  const formatSmartTimestamp = (date: Date | string) => {
+  const formatSmartTimestamp = (date: Date | string, showHourOnDay: boolean) => {
     const _date = new Date(date);
     const now = new Date();
 
@@ -45,7 +45,6 @@ export const useFormatTime = () => {
     }
 
     if (diffInDays < 7) {
-      // const weekday = _date.toLocaleDateString("vi-VN", { weekday: "long" });
       const time = _date.toLocaleTimeString("vi-VN", {
         hour: "2-digit",
         minute: "2-digit",
@@ -54,7 +53,21 @@ export const useFormatTime = () => {
       return `${t(`times:weekday:${_date.getDay()}`)} ${time}`;
     }
 
-    return _date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const dateStr = _date.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    if (showHourOnDay) {
+      const time = _date.toLocaleTimeString("vi-VN", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+      });
+      return `${time} - ${dateStr}`;
+    }
+    return dateStr;
   };
 
   const getDiffBetween = (

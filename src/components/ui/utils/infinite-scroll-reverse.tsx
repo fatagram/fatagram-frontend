@@ -1,5 +1,5 @@
 import { ComponentProps } from "@/components/common/component-type";
-import { forwardRef, RefObject, useCallback, useEffect, useMemo, useRef } from "react";
+import { forwardRef, RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ItemProps, Virtuoso, VirtuosoHandle } from "react-virtuoso";
 
 interface InfiniteScrollReverseProps extends ComponentProps {
@@ -44,14 +44,26 @@ const InfiniteScrollReverse = forwardRef<VirtuosoHandle, InfiniteScrollReversePr
       onLoadMore,
       isShowLastSeen = false,
       lastSeen,
-      emptyComponent,
       itemKey,
     },
     ref,
   ) {
-    const firstItemIndex = useMemo(() => {
-      return START_INDEX - items.length;
-    }, [items.length]);
+    const [firstItemIndex, setFirstItemIndex] = useState(() => START_INDEX - (items?.length || 0));
+
+    const prevFirstItemKey = useRef<string | number | undefined>(
+      items?.[0] ? itemKey(0, items[0]) : undefined,
+    );
+
+    useEffect(() => {
+      if (!items || items.length === 0) return;
+
+      const currentFirstKey = itemKey(0, items[0]);
+
+      if (currentFirstKey !== prevFirstItemKey.current) {
+        setFirstItemIndex(START_INDEX - items.length);
+        prevFirstItemKey.current = currentFirstKey;
+      }
+    }, [items, itemKey]);
 
     const isLoadingRef = useRef(isLoading);
     useEffect(() => {
@@ -90,10 +102,6 @@ const InfiniteScrollReverse = forwardRef<VirtuosoHandle, InfiniteScrollReversePr
       [Header],
     );
 
-    if (items.length === 0 && !isLoading) {
-      return <>{emptyComponent}</>;
-    }
-
     return (
       <Virtuoso
         ref={ref}
@@ -103,12 +111,15 @@ const InfiniteScrollReverse = forwardRef<VirtuosoHandle, InfiniteScrollReversePr
         firstItemIndex={firstItemIndex}
         startReached={handleStartReached}
         initialTopMostItemIndex={items.length - 1}
-        alignToBottom
-        followOutput={(isAtBottom) => (isAtBottom ? "smooth" : false)}
         computeItemKey={itemKey}
         itemContent={itemTemplate}
         increaseViewportBy={{ top: 10, bottom: 400 }}
         components={components}
+        followOutput={(isAtBottom) => {
+          if (isAtBottom) return "smooth";
+          return false;
+        }}
+        alignToBottom
       />
     );
   },
