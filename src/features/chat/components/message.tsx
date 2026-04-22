@@ -1,13 +1,23 @@
 import { ComponentProps } from "@/components/common/component-type";
 import { useAuth } from "@/contexts";
 import clsx from "clsx";
-import { forwardRef, RefObject, useImperativeHandle, useMemo, useRef } from "react";
+import {
+  forwardRef,
+  useCallback,
+  useDeferredValue,
+  useImperativeHandle,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useMessages } from "@/features/hooks/use-message";
 import { MessageRow } from "./message-row";
 import { useGetPariticipantsSeen } from "@/features/hooks/use-conversation";
 import { useGetUserProfiles } from "@/features/hooks/use-user-profile";
 import InfiniteScrollReverse from "@/components/ui/utils/infinite-scroll-reverse";
 import { Skeleton } from "@/components/atoms";
+import { VirtuosoHandle } from "react-virtuoso";
+import { useTranslation } from "react-i18next";
 
 interface MessageListProps extends ComponentProps {
   isGroup?: boolean;
@@ -15,6 +25,9 @@ interface MessageListProps extends ComponentProps {
   parentRef?: React.RefObject<HTMLDivElement | null>;
   lastSeen?: React.ReactNode;
 }
+
+const INITIAL_LIMIT = 40;
+const LOAD_MORE_CHUNK = 20;
 
 export interface MessageListHandle {
   scrollToBottom: () => void;
@@ -24,16 +37,12 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
   { isGroup, className, conversationId, parentRef, lastSeen },
   ref,
 ) {
-  const { userId } = useAuth();
-  const scrollContainerRef = useRef<HTMLDivElement>(null);
+  const { t } = useTranslation();
+  const [displayLimit, setDisplayLimit] = useState(INITIAL_LIMIT);
+  const [isLocalPaging, setIsLocalPaging] = useState(false);
 
-  useImperativeHandle(ref, () => ({
-    scrollToBottom: () => {
-      if (scrollContainerRef.current) {
-        scrollContainerRef.current.scrollTop = scrollContainerRef.current.scrollHeight;
-      }
-    },
-  }));
+  const { userId } = useAuth();
+  const virtuosoRef = useRef<VirtuosoHandle>(null);
 
   const {
     data: _messages,
@@ -44,24 +53,71 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
     isLoading: isMessagesLoading,
   } = useMessages(conversationId, { sortDesc: true, limit: 20 });
 
+  const allCachedMessages = useMemo(() => {
+    return _messages ? _messages.pages.flatMap((page) => page.items) : [];
+  }, [_messages]);
+
+  const messagesWithContext = useMemo(() => {
+    const visibleMessages = allCachedMessages.slice(0, displayLimit).reverse();
+
+    return visibleMessages.map((msg, index) => ({
+      ...msg,
+      _prev: index > 0 ? visibleMessages[index - 1] : undefined,
+      _next: index < visibleMessages.length - 1 ? visibleMessages[index + 1] : undefined,
+      _isLatest: index === visibleMessages.length - 1,
+    }));
+  }, [allCachedMessages, displayLimit]);
+
+  const deferredMessages = useDeferredValue(messagesWithContext);
+
+  useImperativeHandle(ref, () => ({
+    scrollToBottom: () => {
+      virtuosoRef.current?.scrollToIndex({
+        index: deferredMessages.length - 1,
+        behavior: "smooth",
+      });
+    },
+  }));
+
+  const handleLoadMore = useCallback(() => {
+    if (isLocalPaging || isFetchingNextPage) return;
+
+    const totalInRAM = allCachedMessages.length;
+
+    if (displayLimit < totalInRAM) {
+      setIsLocalPaging(true);
+      setTimeout(() => {
+        setDisplayLimit((prev) => prev + LOAD_MORE_CHUNK);
+        setIsLocalPaging(false);
+      }, 50);
+    } else if (hasNextPage) {
+      fetchNextPage();
+    }
+  }, [
+    displayLimit,
+    allCachedMessages.length,
+    isLocalPaging,
+    isFetchingNextPage,
+    hasNextPage,
+    fetchNextPage,
+  ]);
+
+  const initialLoading = isPending || isMessagesLoading;
+  const hasMoreToShow = displayLimit < allCachedMessages.length || hasNextPage;
+  const showSpinner = isLocalPaging || isFetchingNextPage;
+
+  // Seen Infos
   const { data: participantsSeen } = useGetPariticipantsSeen(conversationId);
   const participantIds = useMemo(() => {
     return participantsSeen ? Object.keys(participantsSeen.participantsSeenInfo) : [];
   }, [participantsSeen]);
-
-  const messages = useMemo(() => {
-    return _messages ? _messages.pages.flatMap((page) => page.items) : [];
-  }, [_messages]);
-
   const senderIds = useMemo(() => {
     return [...new Set(participantIds)] as string[];
   }, [participantIds]);
-
   const { userProfileMap } = useGetUserProfiles(senderIds);
 
-  const initialLoading = isPending || isMessagesLoading;
-
-  if (initialLoading && !messages.length) {
+  // Render
+  if (initialLoading && !allCachedMessages.length) {
     return (
       <div className={clsx("flex flex-col gap-4 py-2 w-full h-full justify-end", className)}>
         {[...Array(5)].map((_, i) => (
@@ -90,38 +146,47 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
 
   return (
     <InfiniteScrollReverse
-      ref={scrollContainerRef}
-      items={messages}
-      onLoadMore={fetchNextPage}
-      className={clsx(
-        "flex flex-col gap-[0.1rem] px-1 sm:scrollbar-default scrollbar-hide",
-        className,
-      )}
-      itemTemplate={(item: any, index: number, ref: RefObject<HTMLDivElement | null> | null) => {
-        const prevMessage = index < messages.length - 1 ? messages[index + 1] : undefined;
-        const nextMessage = index > 0 ? messages[index - 1] : undefined;
+      items={deferredMessages}
+      onLoadMore={handleLoadMore}
+      className={clsx("flex flex-col gap-[0.1rem]", className)}
+      itemTemplate={(_index: number, item: any) => {
         return (
           <MessageRow
-            ref={ref}
             message={item}
-            prevMessage={prevMessage}
-            nextMessage={nextMessage}
+            prevMessage={item._prev}
+            nextMessage={item._next}
             userId={userId}
-            index={index}
             isGroup={isGroup}
             conversationId={conversationId}
             userInfo={userProfileMap[item?.senderId || ""]}
             userProfileMap={userProfileMap}
+            isLatestMessage={item._isLatest}
+            className="py-[0.5px] pl-2 pr-1"
           />
         );
       }}
-      hasMore={!!hasNextPage}
-      isLoading={isFetchingNextPage}
+      hasMore={!!hasMoreToShow}
+      isLoading={showSpinner}
       gap={2}
       parentRef={parentRef}
-      itemKey={(item) => item.id}
+      itemKey={(_index, item) => item.id || item._id}
       isShowLastSeen={true}
       lastSeen={lastSeen}
+      ref={virtuosoRef}
+      spinnerContent={
+        <div className="flex justify-center w-full select-none">
+          <div
+            className={clsx(
+              "flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10",
+              "border border-primary-500/50 text-xs text-primary-500",
+              "w-[11%] min-w-[100px]",
+            )}
+          >
+            <i className="fa-solid fa-circle-notch animate-spin" />
+            <span>{t("common:conversations.loadingOldMessages")}</span>
+          </div>
+        </div>
+      }
     />
   );
 });

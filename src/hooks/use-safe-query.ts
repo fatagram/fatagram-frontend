@@ -155,6 +155,7 @@ export function useSafeInfiniteQueryResult<TData, TCursor = string>(
     getNextPageParam: (lastPage: CursorResult<TData, TCursor>) => {
       return lastPage.hasNext ? lastPage.nextCursor : undefined;
     },
+    placeholderData: (previousData) => previousData,
     retry: 0,
     ...queryOptions,
     ...fetchOptions,

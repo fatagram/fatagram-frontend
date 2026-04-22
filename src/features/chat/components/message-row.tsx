@@ -3,7 +3,7 @@ import { MediaType, Message, MessageType } from "@/types/entities/message.type";
 import { Avatar, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
-import { useEffect, useState, memo, useRef, RefObject } from "react";
+import { useEffect, useState, memo, useRef } from "react";
 import { useFormatTime } from "@/utils/format-time";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { isSystemMessage } from "../helpers/conversation-helpers";
@@ -22,11 +22,10 @@ interface MessageProps extends ComponentProps {
   isMyMessage?: boolean;
   userId?: string;
   conversationId?: string;
-  index: number;
   isGroup?: boolean;
   userInfo?: any;
   userProfileMap?: Record<string, any>;
-  ref: RefObject<HTMLDivElement | null> | null;
+  isLatestMessage?: boolean;
 }
 
 const PendingIndicator = () => (
@@ -44,25 +43,24 @@ const getMessageBubbleShapeClass = (
   clsx(
     isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
     isOnlyMessageInGroup && "!rounded-3xl",
-    isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
-    isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
+    isLastMessageInGroup && (isMyMessage ? "rounded-br-[4px]" : "rounded-bl-[4px]"),
+    isFirstMessageInGroup && (isMyMessage ? "rounded-tr-[4px]" : "rounded-tl-[4px]"),
     !isFirstMessageInGroup &&
       !isLastMessageInGroup &&
-      (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none"),
+      (isMyMessage ? "rounded-tr-[4px] rounded-br-[4px]" : "rounded-tl-[4px] rounded-bl-[4px]"),
   );
 
 const MessageRowComponent: React.FC<MessageProps> = ({
   message,
   prevMessage,
   nextMessage,
-  index,
   userId,
   conversationId,
   isGroup,
   className,
   userInfo,
   userProfileMap,
-  ref,
+  isLatestMessage,
 }) => {
   const { t } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
@@ -95,7 +93,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const isShowName = isLastMessageInGroup && !isMyMessage && isGroup;
   const hasAvatar = isFirstMessageInGroup;
 
-  const isFooterVisible = index === 0 && isMyMessage;
+  const isFooterVisible = isLatestMessage && isMyMessage;
   const isTextMessage = message.type === MessageType.Text;
   const isMediaMessage = message.type === MessageType.Media;
   const isImageMessage =
@@ -358,15 +356,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   }
 
   return (
-    <div
-      className={clsx(
-        "flex flex-col",
-        isLastMessageInGroup ? "mt-[0.5rem]" : "mt-0",
-        index === 0 ? "mb-[0.5rem]" : "mb-0",
-        className,
-      )}
-      ref={ref}
-    >
+    <div className={clsx("flex flex-col", className)}>
       {isShowTime && (
         <Text sz="xs" className="text-center my-2">
           {formatSmartTimestamp(message.createdAt)}

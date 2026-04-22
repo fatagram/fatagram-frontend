@@ -29,7 +29,6 @@ export function AppHubListener() {
       }
     },
     async () => {
-      console.log("Reconnected to App Hub, fetching delta conversations...");
       await fetcherDelta();
     },
   );

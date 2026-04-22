@@ -175,7 +175,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           <i className="fa-solid fa-xmark"></i>
         </MiniButton>
       </div>
-      <div ref={scrollRef} className="flex flex-col px-0 flex-1 overflow-y-auto bg-bg-second">
+      <div ref={scrollRef} className="flex flex-col px-0 flex-1 bg-bg-second">
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-3">
@@ -201,12 +201,11 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         {!tempTargetId && (
           <MessageList
             key={conversationId}
-            className="px-2"
             conversationId={conversationId}
             isGroup={conversationData?.isGroup}
             parentRef={scrollRef}
             lastSeen={
-              <div className="flex flex-col justify-center items-center h-full text-center px-4">
+              <div className="flex flex-col justify-center items-center h-full text-center px-4 py-5">
                 <div className="relative mb-4">
                   <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
                 </div>

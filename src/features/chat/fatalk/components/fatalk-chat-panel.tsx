@@ -211,7 +211,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
           parentRef={scrollRef}
           isGroup={conversationData?.isGroup}
           lastSeen={
-            <div className="flex flex-col justify-center items-center h-full text-center px-4">
+            <div className="flex flex-col justify-center items-center h-full text-center px-4 py-4">
               {isLoadingHeader ? (
                 <>
                   <div className="relative mb-4">
@@ -221,17 +221,25 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
                   <Skeleton sz="sm" className="w-[200px]" />
                 </>
               ) : (
-                <>
+                <div className="flex flex-col items-center justify-center h-full text-center ">
                   <div className="relative mb-4">
                     <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
                   </div>
                   <Text sz="sm" weight="bold">
                     {chatTitle}
                   </Text>
-                  <Text sz="xs" wrap="whitespace-normal">
+                  <Text sz="xs" wrap="whitespace-normal" className="mt-1">
                     {t("common:conversations:privacyDescription")}
                   </Text>
-                </>
+                  {/* <Button
+                    sz="sm"
+                    variant="secondary"
+                    className="mt-1"
+                    onClick={() => navigate(`/${conversationData?.id}`)}
+                  >
+                    Trang cá nhân
+                  </Button> */}
+                </div>
               )}
             </div>
           }

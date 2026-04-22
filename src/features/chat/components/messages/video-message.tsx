@@ -95,13 +95,19 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative group bg-black overflow-hidden flex items-center justify-center transition-all duration-300
-        ${className}`}
+      className={clsx(
+        "relative group bg-black overflow-hidden flex items-center justify-center transition-all duration-300",
+        "w-[280px] sm:w-[320px] aspect-video min-h-[157px] sm:min-h-[180px] rounded-2xl shadow-sm shrink-0",
+        className,
+      )}
     >
       <video
         ref={videoRef}
         src={url}
-        className={`w-full h-full object-contain cursor-pointer ${!hasStarted ? "opacity-60" : "opacity-100"}`}
+        className={clsx(
+          "w-full h-full object-cover cursor-pointer transition-opacity duration-300",
+          !hasStarted ? "opacity-60" : "opacity-100",
+        )}
         onClick={() => {
           if (onFrameClick) {
             onFrameClick();
@@ -134,33 +140,35 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
           onClick={handleInitialPlay}
           className={clsx(
             "absolute z-10",
-            "w-16 h-16 !rounded-full text-white flex items-center justify-center transition-all active:scale-98",
+            "w-14 h-14 !rounded-full bg-black/40 backdrop-blur-sm border border-white/20 text-white flex items-center justify-center transition-all hover:bg-black/60 hover:scale-105 active:scale-95",
           )}
         >
-          <i className="fa-solid fa-play text-2xl pl-[2px]" />
+          <i className="fa-solid fa-play text-xl pl-[2px]" />
         </Button>
       )}
 
       {isWaiting && hasStarted && (
-        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-          <i className="fa-solid fa-spinner fa-spin text-white text-4xl opacity-80" />
+        <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none bg-black/20">
+          <i className="fa-solid fa-spinner fa-spin text-white text-3xl opacity-80" />
         </div>
       )}
 
       {hasStarted && (
         <div
-          className={`absolute bottom-0 left-0 right-0 z-30 p-4 bg-gradient-to-t from-black/95 via-black/50 to-transparent transition-opacity duration-300 
-          ${isPlaying && !isWaiting ? "opacity-0 group-hover:opacity-100" : "opacity-100"}`}
+          className={clsx(
+            "absolute bottom-0 left-0 right-0 z-30 p-3 bg-gradient-to-t from-black/80 via-black/40 to-transparent transition-opacity duration-300",
+            isPlaying && !isWaiting ? "opacity-0 group-hover:opacity-100" : "opacity-100",
+          )}
         >
-          <div className="relative w-full h-4 flex items-center mb-4 cursor-pointer group/seek">
-            <div className="relative w-full h-1.5 rounded-full bg-white/30 overflow-hidden">
+          <div className="relative w-full h-3 flex items-center mb-2 cursor-pointer group/seek">
+            <div className="relative w-full h-1 rounded-full bg-white/30 overflow-hidden">
               <div
                 className="absolute left-0 top-0 h-full rounded-full bg-primary-500"
                 style={{ width: timeFillPercent }}
               />
             </div>
             <div
-              className="absolute w-3.5 h-3.5 rounded-full bg-primary-500 shadow-md -translate-x-1/2"
+              className="absolute w-2.5 h-2.5 rounded-full bg-primary-500 shadow-md -translate-x-1/2 opacity-0 group-hover/seek:opacity-100 transition-opacity"
               style={{ left: timeFillPercent }}
             />
             <input
@@ -175,15 +183,15 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
           </div>
 
           <div className="flex items-center justify-between text-white drop-shadow-md">
-            <div className="flex items-center gap-6">
-              <button onClick={togglePlay} className="hover:text-primary-400 transition-colors w-5">
-                <i className={`fas ${isPlaying ? "fa-pause" : "fa-play"} text-xl`}></i>
+            <div className="flex items-center gap-4">
+              <button onClick={togglePlay} className="hover:text-primary-400 transition-colors w-4">
+                <i className={`fas ${isPlaying ? "fa-pause" : "fa-play"} text-sm`}></i>
               </button>
 
               <div className="flex items-center group/volume relative">
                 <button
                   onClick={toggleMute}
-                  className="hover:text-primary-400 transition-colors w-5 shrink-0"
+                  className="hover:text-primary-400 transition-colors w-4 shrink-0"
                 >
                   <i
                     className={`fas ${
@@ -192,11 +200,11 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
                         : volume < 0.5
                           ? "fa-volume-down"
                           : "fa-volume-up"
-                    }`}
+                    } text-sm`}
                   ></i>
                 </button>
 
-                <div className="hidden sm:flex items-center overflow-hidden w-0 opacity-0 group-hover/volume:w-20 group-hover/volume:opacity-100 group-hover/volume:ml-2 transition-all duration-300 ease-in-out">
+                <div className="hidden sm:flex items-center overflow-hidden w-0 opacity-0 group-hover/volume:w-16 group-hover/volume:opacity-100 group-hover/volume:ml-2 transition-all duration-300 ease-in-out">
                   <input
                     type="range"
                     min={0}
@@ -204,7 +212,7 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
                     step={0.05}
                     value={isMuted ? 0 : volume}
                     onChange={handleVolumeChange}
-                    className="w-full h-1.5 accent-primary-500 cursor-pointer appearance-none bg-white/30 rounded-full"
+                    className="w-full h-1 accent-primary-500 cursor-pointer appearance-none bg-white/30 rounded-full"
                     style={{
                       background: `linear-gradient(to right, rgb(var(--primary-500)) ${volumePercent}%, rgba(255,255,255,0.3) ${volumePercent}%)`,
                     }}
@@ -212,12 +220,12 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
                 </div>
               </div>
 
-              <span className="text-xs bg-black/40 px-2 py-1 rounded font-semibold tabular-nums">
+              <span className="text-[10px] bg-black/40 px-1.5 py-0.5 rounded font-medium tabular-nums">
                 {formatTime(currentTime, duration)} / {formatTime(duration, duration)}
               </span>
             </div>
 
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-3">
               <button
                 onClick={() => {
                   const nextIndex =
@@ -226,7 +234,7 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
                   setPlaybackRate(newSpeed);
                   if (videoRef.current) videoRef.current.playbackRate = newSpeed;
                 }}
-                className="text-[10px] font-black border-2 border-white/50 px-2 py-0.5 rounded-lg hover:bg-white/20 transition-all uppercase w-10 text-center"
+                className="text-[9px] font-bold border border-white/50 px-1.5 py-0.5 rounded-md hover:bg-white/20 transition-all uppercase w-8 text-center"
               >
                 {playbackRate}x
               </button>
@@ -234,9 +242,9 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
               {onFullscreenToggle && (
                 <button
                   onClick={onFullscreenToggle}
-                  className="hover:text-primary-400 transition-colors w-5 text-right"
+                  className="hover:text-primary-400 transition-colors w-4 text-right"
                 >
-                  <i className={`fas fa-expand`}></i>
+                  <i className={`fas fa-expand text-sm`}></i>
                 </button>
               )}
             </div>
