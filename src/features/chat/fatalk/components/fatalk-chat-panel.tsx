@@ -53,28 +53,28 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const panelRef = useRef<HTMLDivElement | null>(null);
   const messageListRef = useRef<MessageListHandle | null>(null);
 
-  useEffect(() => {
-    const vv = window.visualViewport;
-    if (!vv) return;
+  // useEffect(() => {
+  //   const vv = window.visualViewport;
+  //   if (!vv) return;
 
-    const onResize = () => {
-      const panel = panelRef.current;
-      if (!panel) return;
-      const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
-      if (keyboardHeight > 0) {
-        const panelTop = panel.getBoundingClientRect().top;
-        const newHeight = Math.max(0, vv.height - panelTop);
-        panel.style.height = `${newHeight}px`;
-        panel.style.maxHeight = `${newHeight}px`;
-      } else {
-        panel.style.height = "";
-        panel.style.maxHeight = "";
-      }
-    };
+  //   const onResize = () => {
+  //     const panel = panelRef.current;
+  //     if (!panel) return;
+  //     const keyboardHeight = Math.max(0, window.innerHeight - vv.height - vv.offsetTop);
+  //     if (keyboardHeight > 0) {
+  //       const panelTop = panel.getBoundingClientRect().top;
+  //       const newHeight = Math.max(0, vv.height - panelTop);
+  //       panel.style.height = `${newHeight}px`;
+  //       panel.style.maxHeight = `${newHeight}px`;
+  //     } else {
+  //       panel.style.height = "";
+  //       panel.style.maxHeight = "";
+  //     }
+  //   };
 
-    vv.addEventListener("resize", onResize);
-    return () => vv.removeEventListener("resize", onResize);
-  }, []);
+  //   vv.addEventListener("resize", onResize);
+  //   return () => vv.removeEventListener("resize", onResize);
+  // }, []);
 
   useEffect(() => {
     if (conversationData) {
