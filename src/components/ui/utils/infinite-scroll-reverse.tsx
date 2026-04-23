@@ -61,6 +61,24 @@ const InfiniteScrollReverse = forwardRef<VListHandle, any>(function InfiniteScro
     }
   }, [items.length]);
 
+  useEffect(() => {
+    const handleResize = () => {
+      if (shouldStickToBottom.current && listRef.current && containerRef.current) {
+        requestAnimationFrame(() => {
+          listRef.current?.scrollToIndex(items.length, { align: "end" });
+        });
+      }
+    };
+
+    window.addEventListener("resize", handleResize);
+    window.addEventListener("orientationchange", handleResize);
+
+    return () => {
+      window.removeEventListener("resize", handleResize);
+      window.removeEventListener("orientationchange", handleResize);
+    };
+  }, [items.length, shouldStickToBottom]);
+
   const handleScroll = (offset: number) => {
     const handle = listRef.current;
     if (!handle) return;
