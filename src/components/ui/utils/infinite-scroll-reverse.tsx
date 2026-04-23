@@ -1,141 +1,110 @@
-import { ComponentProps } from "@/components/common/component-type";
-import clsx from "clsx";
-import { forwardRef, RefObject, useEffect, useImperativeHandle, useRef } from "react";
-import { useTranslation } from "react-i18next";
+import { mergeRefs } from "@/utils/merge-refs";
+import { forwardRef, useImperativeHandle, useRef, useLayoutEffect, useEffect } from "react";
+import { VList, VListHandle } from "virtua";
 
-interface InfiniteScrollReverseProps extends ComponentProps {
-  items: any[];
-  hasMore?: boolean;
-  isLoading?: boolean;
-  spinnerContent?: React.ReactNode;
-  itemTemplate?: (
-    item: any,
-    index: number,
-    ref: RefObject<HTMLDivElement | null> | null,
-  ) => React.ReactNode;
-  onLoadMore: () => void;
-  isShowLastSeen?: boolean;
-  lastSeen?: React.ReactNode;
-  gap?: string | number;
-  parentRef?: RefObject<HTMLDivElement | null>;
-  itemKey: (item: any, index: number) => string | number;
-  emptyComponent?: React.ReactNode;
-}
-
-const InfiniteScrollReverse = forwardRef<HTMLDivElement, InfiniteScrollReverseProps>(
-  function InfiniteScrollReverse(
-    {
-      items,
-      className,
-      hasMore = true,
-      isLoading = false,
-      spinnerContent,
-      itemTemplate,
-      onLoadMore,
-      isShowLastSeen = false,
-      lastSeen,
-      gap,
-      parentRef,
-      itemKey,
-      emptyComponent,
-    },
-    ref,
-  ) {
-    const containerRef = useRef<HTMLDivElement>(null);
-    useImperativeHandle(ref, () => containerRef.current as HTMLDivElement);
-    const sentinelRef = useRef<HTMLDivElement>(null);
-    const isLoadingRef = useRef(isLoading);
-    const pendingLoadRef = useRef(false);
-    const { t } = useTranslation();
-
-    useEffect(() => {
-      isLoadingRef.current = isLoading;
-
-      if (!isLoading) {
-        pendingLoadRef.current = false;
-      }
-    }, [isLoading]);
-
-    const _loadMore = async () => {
-      if (pendingLoadRef.current) return;
-      if (isLoadingRef.current) return;
-
-      pendingLoadRef.current = true;
-      try {
-        await new Promise((resolve) => setTimeout(resolve, 30));
-        await onLoadMore();
-      } finally {
-        pendingLoadRef.current = false;
-      }
-    };
-
-    useEffect(() => {
-      const sentinel = sentinelRef.current;
-      if (!sentinel) return;
-
-      const observer = new IntersectionObserver(
-        async ([entry]) => {
-          if (!entry.isIntersecting) return;
-          if (!hasMore) return;
-          _loadMore();
-        },
-        {
-          root: parentRef?.current || containerRef.current,
-          rootMargin: "200px 0px 0px 0px",
-        },
-      );
-
-      observer.observe(sentinel);
-      return () => {
-        observer.disconnect();
-        observer.unobserve(sentinel);
-      };
-    }, [hasMore, parentRef, items.length]);
-
-    return (
-      <div
-        ref={containerRef}
-        className={clsx("relative overflow-y-auto h-full flex flex-col-reverse", className)}
-        style={{ gap: gap ?? "0.5rem", overflowAnchor: "auto", overscrollBehaviorY: "contain" }}
-      >
-        {items.map((item, index) => (
-          <div key={itemKey(item, index)}>
-            {itemTemplate ? itemTemplate(item, index, null) : item}
-          </div>
-        ))}
-
-        {hasMore && (
-          <div
-            className="w-full flex justify-center py-2 shrink-0"
-            style={{ overflowAnchor: "none" }}
-          >
-            {spinnerContent ?? (
-              <div className="flex items-center gap-2 px-4 py-1.5 rounded-full bg-primary-500/10 border border-primary-500/50 text-xs text-primary-500">
-                <i className="fa-solid fa-circle-notch animate-spin" />
-                <span>{t("common:conversations.loadingOldMessages")}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-        {hasMore && (
-          <div
-            ref={sentinelRef}
-            className={clsx("h-px w-full shrink-0")}
-            style={{ overflowAnchor: "none" }}
-          />
-        )}
-
-        {items.length > 0 && !hasMore && !isLoading && isShowLastSeen && (
-          <div className="order-last w-full text-center py-4 text-text-third text-sm">
-            {lastSeen || "Đã xem hết kết quả."}
-          </div>
-        )}
-
-        {items.length === 0 && !isLoading && emptyComponent}
-      </div>
-    );
+const InfiniteScrollReverse = forwardRef<VListHandle, any>(function InfiniteScrollReverse(
+  {
+    items,
+    itemTemplate,
+    isShowLastSeen,
+    lastSeen,
+    itemKey,
+    onLoadMore,
+    hasMore,
+    isLoading,
+    listRef: listRefFromParent,
+    spinner,
   },
-);
+  ref,
+) {
+  const listRef = useRef<VListHandle>(null);
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const isPrepend = useRef(false);
+  const isInitialScrolled = useRef(false);
+  const lastScrollSize = useRef(0);
+  const shouldStickToBottom = useRef(true);
+
+  useImperativeHandle(ref, () => listRef.current!);
+
+  useLayoutEffect(() => {
+    if (isPrepend.current && listRef.current && containerRef.current) {
+      const handle = listRef.current;
+      const container = containerRef.current;
+
+      const newScrollSize = handle.scrollSize;
+      const delta = newScrollSize - lastScrollSize.current;
+
+      if (delta > 0) {
+        container.scrollTop = delta;
+      }
+
+      isPrepend.current = false;
+    }
+  }, [items.length]);
+
+  useEffect(() => {
+    if (!listRef.current || items.length === 0) return;
+
+    if (!isInitialScrolled.current) {
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToIndex(items.length, { align: "end" });
+        isInitialScrolled.current = true;
+      });
+      return;
+    }
+
+    if (shouldStickToBottom.current) {
+      requestAnimationFrame(() => {
+        listRef.current?.scrollToIndex(items.length, { align: "end" });
+      });
+    }
+  }, [items.length]);
+
+  const handleScroll = (offset: number) => {
+    const handle = listRef.current;
+    if (!handle) return;
+
+    const isAtBottom = offset - handle.scrollSize + handle.viewportSize >= -50;
+    shouldStickToBottom.current = isAtBottom;
+
+    if (!hasMore || isLoading || isPrepend.current) return;
+    if (offset < 100 && handle.scrollSize > handle.viewportSize) {
+      isPrepend.current = true;
+      lastScrollSize.current = handle.scrollSize;
+      onLoadMore();
+    }
+  };
+
+  return (
+    <div
+      ref={containerRef}
+      onScroll={(e) => handleScroll(e.currentTarget.scrollTop)}
+      className="h-full w-full flex flex-col overflow-hidden"
+      style={{
+        flex: 1,
+        overflowAnchor: "none",
+      }}
+    >
+      <VList
+        ref={mergeRefs(listRef, listRefFromParent)}
+        onScroll={handleScroll}
+        shift={isPrepend.current}
+      >
+        {hasMore && spinner}
+        {!hasMore && isShowLastSeen && lastSeen && (
+          <div className="flex items-center justify-center w-full py-2">
+            <div className="h-px bg-bg-fourth flex-1" />
+            <span className="px-2 text-sm text-text-secondary">{lastSeen}</span>
+            <div className="h-px bg-bg-fourth flex-1" />
+          </div>
+        )}
+        {items.map((item: any, index: number) => (
+          <div key={itemKey(item)}>{itemTemplate(item, index, null)}</div>
+        ))}
+      </VList>
+    </div>
+  );
+});
 
 export default InfiniteScrollReverse;
