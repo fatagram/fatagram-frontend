@@ -90,6 +90,7 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
           .setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
       },
     },
+    refetchOnMount: "always",
   });
 };
 
