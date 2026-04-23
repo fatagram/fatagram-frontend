@@ -69,8 +69,6 @@ export const useGetUserProfiles = (userIds: string[]) => {
     [queries],
   );
 
-  console.log("userProfileMap", userProfileMap);
-
   return { userProfileMap, isLoading };
 };
 

@@ -1,7 +1,7 @@
 import { ComponentProps } from "@/components/common/component-type";
 import { useAuth } from "@/contexts";
 import clsx from "clsx";
-import { forwardRef, RefObject, useEffect, useMemo, useRef } from "react";
+import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import { useMessages } from "@/features/hooks/use-message";
 import { MessageRow } from "./message-row";
 import { useGetPariticipantsSeen } from "@/features/hooks/use-conversation";
@@ -22,24 +22,34 @@ export interface MessageListHandle {
   scrollToBottom: () => void;
 }
 
-export const MessageList = forwardRef<MessageListHandle, MessageListProps>(function MessageList({
-  isGroup,
-  className,
-  conversationId,
-  lastSeen,
-}) {
-  const listRef = useRef<any>(null);
+export const MessageList = forwardRef<MessageListHandle, MessageListProps>(function MessageList(
+  { isGroup, className, conversationId, lastSeen, parentRef },
+  ref,
+) {
   const { t } = useTranslation();
   const { userId } = useAuth();
+
+  // Tham chiếu đến container cuộn (Reference to scroll container)
+  const localScrollRef = useRef<HTMLDivElement>(null);
+  const scrollRef = parentRef || localScrollRef;
+  const prevNewestMessageId = useRef<string | number | null>(null);
+
+  // Cung cấp hàm (Provide function) scrollToBottom ra bên ngoài thông qua ref
+  useImperativeHandle(ref, () => ({
+    scrollToBottom: () => {
+      if (scrollRef.current) {
+        scrollRef.current.scrollTop = 0; // Bố cục lật ngược (Inverted layout) nên 0 là đáy (0 is bottom)
+      }
+    },
+  }));
 
   const {
     data: _messages,
     fetchNextPage,
     hasNextPage,
-    isFetchingNextPage,
     isPending,
     isLoading: isMessagesLoading,
-  } = useMessages(conversationId, { sortDesc: true, limit: 20 });
+  } = useMessages(conversationId, { sortDesc: true, limit: 30 });
 
   const { data: participantsSeen } = useGetPariticipantsSeen(conversationId);
   const participantIds = useMemo(() => {
@@ -50,6 +60,32 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
     return _messages ? _messages.pages.flatMap((page) => page.items).reverse() : [];
   }, [_messages]);
 
+  useEffect(() => {
+    if (!messages.length) return;
+
+    const newestMessage = messages[messages.length - 1];
+
+    if (newestMessage.id !== prevNewestMessageId.current) {
+      if (newestMessage.senderId === userId) {
+        requestAnimationFrame(() => {
+          if (scrollRef.current) {
+            scrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
+          }
+        });
+      }
+      prevNewestMessageId.current = newestMessage.id;
+    }
+  }, [messages, userId, scrollRef]);
+
+  const messagesWithMetadata = useMemo(() => {
+    return messages.map((msg, index) => ({
+      ...msg,
+      _prev: index - 1 >= 0 ? messages[index - 1] : undefined,
+      _next: index + 1 < messages.length ? messages[index + 1] : undefined,
+      _isLastMessage: index === 0,
+    }));
+  }, [messages]);
+
   const senderIds = useMemo(() => {
     return [...new Set(participantIds)] as string[];
   }, [participantIds]);
@@ -57,24 +93,6 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
   const { userProfileMap } = useGetUserProfiles(senderIds);
 
   const initialLoading = isPending || isMessagesLoading;
-
-  const prevMessagesCount = useRef(messages.length);
-
-  useEffect(() => {
-    if (!listRef.current || messages.length === 0) return;
-
-    const lastMsg = messages[messages.length - 1];
-    const isMyMessage = lastMsg?.senderId === userId;
-    const isActuallyNewMessage = messages.length - prevMessagesCount.current < 5;
-
-    if (isMyMessage && isActuallyNewMessage) {
-      requestAnimationFrame(() => {
-        listRef.current?.scrollToIndex(messages.length - 1, { align: "end" });
-      });
-    }
-
-    prevMessagesCount.current = messages.length;
-  }, [messages.length, userId]);
 
   if (initialLoading && !messages.length) {
     return (
@@ -105,35 +123,34 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
 
   return (
     <InfiniteScrollReverse
-      items={messages}
-      onLoadMore={fetchNextPage}
-      className={clsx("px-1 sm:scrollbar-default scrollbar-hide", className)}
-      itemTemplate={(item: any, index: number, ref: RefObject<HTMLDivElement | null> | null) => {
-        const nextMessage = index < messages.length - 1 ? messages[index + 1] : undefined;
-        const prevMessage = index > 0 ? messages[index - 1] : undefined;
+      scrollRef={scrollRef}
+      items={messagesWithMetadata}
+      loadMore={fetchNextPage}
+      className={clsx("h-full px-1 sm:scrollbar-default scrollbar-hide", className)}
+      renderItem={(item) => {
         return (
-          <MessageRow
-            ref={ref}
-            message={item}
-            prevMessage={prevMessage}
-            nextMessage={nextMessage}
-            userId={userId}
-            index={index}
-            isGroup={isGroup}
-            conversationId={conversationId}
-            userInfo={userProfileMap[item?.senderId || ""]}
-            userProfileMap={userProfileMap}
-            className="py-[0.5px] px-1"
-          />
+          <div
+            style={{
+              animation: "messageFadeIn 0.3s ease",
+            }}
+          >
+            <MessageRow
+              message={item}
+              prevMessage={item._prev}
+              nextMessage={item._next}
+              userId={userId}
+              isGroup={isGroup}
+              conversationId={conversationId}
+              userInfo={userProfileMap[item?.senderId || ""]}
+              userProfileMap={userProfileMap}
+              className="py-[0.5px] px-1"
+            />
+          </div>
         );
       }}
       hasMore={!!hasNextPage}
-      isLoading={isFetchingNextPage}
-      gap={2}
-      itemKey={(item: any) => item.id || item.sequenceNumber}
-      isShowLastSeen={true}
-      lastSeen={lastSeen}
-      listRef={listRef}
+      itemKey={(item) => item.id || item.sequenceNumber}
+      end={lastSeen}
       spinner={
         <div className="flex justify-center w-full select-none">
           <div

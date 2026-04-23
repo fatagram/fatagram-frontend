@@ -16,7 +16,6 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
   const { t } = useTranslation() as { t: (key: string) => string };
   const { targetId, isOwner } = useProfilePage();
   const { data, isLoading, isFetching } = useGetUserBackground(targetId);
-  console.log("DATA: ", data);
   const { fetch, isFetching: isUpdating } = useSelectBackground(targetId);
   const { showSnackbar } = useSnackbar();
   const { openDialog, closeDialog } = useDialog();

@@ -98,6 +98,11 @@ body {
   background-color: #888;
 }
 
+.scroll-container {
+  overscroll-behavior-y: contain;
+  touch-action: none;
+}
+
 /* Ẩn scrollbar chỉ trên màn hình nhỏ (<640px), vẫn giữ khả năng cuộn */
 @media (max-width: 639px) {
   :root,

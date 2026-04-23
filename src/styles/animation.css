@@ -234,3 +234,15 @@
     transform: translateY(100%);
   }
 }
+
+@keyframes messageFadeIn {
+  from {
+    opacity: 0;
+    /* Giảm khoảng cách trượt (Reduce sliding distance) xuống -10px hoặc -15px để tinh tế hơn (for a subtler look) */
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

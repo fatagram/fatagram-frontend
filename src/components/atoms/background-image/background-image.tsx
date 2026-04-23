@@ -22,7 +22,6 @@ export default function BackgroundImage({
   metadata,
 }: BackgroundImageProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  console.log("BackgroundImage metadata:", metadata);
 
   useEffect(() => {
     // We update the CSS variables on the container to avoid global scope leaks

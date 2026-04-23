@@ -85,7 +85,6 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
     enabled: !!conversationId,
     options: {
       onSuccess: (data) => {
-        console.log("Participants seen data: ", data);
         useMessageStore
           .getState()
           .setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
