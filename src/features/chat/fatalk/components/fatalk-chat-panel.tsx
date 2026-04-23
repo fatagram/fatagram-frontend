@@ -66,9 +66,6 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         const newHeight = Math.max(0, vv.height - panelTop);
         panel.style.height = `${newHeight}px`;
         panel.style.maxHeight = `${newHeight}px`;
-        requestAnimationFrame(() => {
-          messageListRef.current?.scrollToBottom();
-        });
       } else {
         panel.style.height = "";
         panel.style.maxHeight = "";
