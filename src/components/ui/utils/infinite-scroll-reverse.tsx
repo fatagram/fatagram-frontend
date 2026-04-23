@@ -1,5 +1,5 @@
 import { ComponentProps } from "@/components/common/component-type";
-import { useEffect, useRef, useMemo, useLayoutEffect } from "react";
+import { useEffect, useRef, useMemo, useLayoutEffect, Key } from "react";
 import { useVirtualizer } from "@tanstack/react-virtual";
 import clsx from "clsx";
 import { mergeRefs } from "@/utils/merge-refs";
@@ -13,7 +13,6 @@ interface Props<T> extends ComponentProps {
   end?: React.ReactNode;
   spinner?: React.ReactNode;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
-  canKeepPosition?: boolean;
 }
 
 export default function InfiniteScrollReverse<T>({
@@ -26,24 +25,23 @@ export default function InfiniteScrollReverse<T>({
   end,
   spinner,
   scrollRef,
-  canKeepPosition = false,
 }: Props<T>) {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
   const reversedItems = useMemo(() => [...items].reverse(), [items]);
 
-  // Các refs hỗ trợ giữ vị trí cuộn (Refs for maintaining scroll position)
-  const prevSizeRef = useRef(0);
   const isScrolledUpRef = useRef(false);
-  const prevFirstKeyRef = useRef<string | number | null>(null);
-  const isCompensatingRef = useRef(false);
+  const anchorRef = useRef<{ key: Key | null; start: number }>({
+    key: null,
+    start: 0,
+  });
 
   const rowVirtualizer = useVirtualizer({
     count: reversedItems.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 70,
-    overscan: 10,
+    overscan: 4,
     getItemKey: (index) => itemKey(reversedItems[index]),
   });
 
@@ -53,27 +51,30 @@ export default function InfiniteScrollReverse<T>({
 
   useLayoutEffect(() => {
     const el = parentRef.current;
-    if (!el || !canKeepPosition) return;
+    if (!el) return;
 
-    const currentSize = rowVirtualizer.getTotalSize();
-    const sizeDiff = currentSize - prevSizeRef.current;
-    const currentFirstKey = reversedItems.length > 0 ? itemKey(reversedItems[0]) : null;
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    if (virtualItems.length === 0) return;
 
-    if (currentFirstKey !== prevFirstKeyRef.current) {
-      isCompensatingRef.current = true;
-      prevFirstKeyRef.current = currentFirstKey;
+    if (isScrolledUpRef.current && anchorRef.current.key !== null) {
+      const prevAnchor = virtualItems.find((v) => v.key === anchorRef.current.key);
+      if (prevAnchor) {
+        const delta = prevAnchor.start - anchorRef.current.start;
+        if (delta !== 0) {
+          el.scrollTop += delta;
+        }
+      }
     }
 
-    if (isCompensatingRef.current && isScrolledUpRef.current && sizeDiff !== 0) {
-      el.scrollTop += sizeDiff;
-    }
+    const currentScrollTop = el.scrollTop;
 
-    if (sizeDiff === 0) {
-      isCompensatingRef.current = false;
-    }
+    const stableItem = virtualItems.find((v) => v.start >= currentScrollTop) || virtualItems[0];
 
-    prevSizeRef.current = currentSize;
-  }, [rowVirtualizer.getTotalSize(), reversedItems, itemKey, canKeepPosition]);
+    anchorRef.current = {
+      key: stableItem.key,
+      start: stableItem.start,
+    };
+  });
 
   useEffect(() => {
     const el = parentRef.current;
@@ -173,6 +174,7 @@ export default function InfiniteScrollReverse<T>({
       style={{
         height: "100%",
         transform: "scaleY(-1)",
+        overflowAnchor: "none",
       }}
     >
       <div
