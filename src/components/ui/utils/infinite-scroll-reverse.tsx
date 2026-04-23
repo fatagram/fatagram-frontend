@@ -170,7 +170,6 @@ export default function InfiniteScrollReverse<T>({
       className={clsx("w-full overflow-y-auto relative", className)}
       style={{
         height: "100%",
-        minHeight: "400px",
         transform: "scaleY(-1)",
       }}
     >

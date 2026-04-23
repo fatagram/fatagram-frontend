@@ -164,7 +164,10 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
 
   return (
     <div
-      className={clsx("relative flex flex-col bg-bg-main overflow-hidden", className)}
+      className={clsx(
+        "relative flex flex-col bg-bg-main overflow-hidden overscroll-none",
+        className,
+      )}
       ref={panelRef}
     >
       <div className="flex items-center gap-3 px-2 h-[60px] bg-bg-main border-b border-bg-fourth shrink-0">
@@ -199,11 +202,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         )}
       </div>
 
-      <div
-        className="flex-1 px-4 py-2 bg-bg-main min-h-0"
-        ref={scrollRef}
-        data-chat-scrollable="true"
-      >
+      <div className="flex-1 py-2 bg-bg-main min-h-0" ref={scrollRef} data-chat-scrollable="true">
         <MessageList
           ref={messageListRef}
           key={conversationId}
@@ -239,13 +238,8 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       </div>
 
       <ChatInput
-        className="!bg-bg-main h-auto py-2 px-1"
+        className="!bg-bg-main h-auto py-2 px-1 touch-none"
         conversationId={conversationId}
-        onAfterSend={() => {
-          requestAnimationFrame(() => {
-            messageListRef.current?.scrollToBottom();
-          });
-        }}
         onFocus={() => {
           if (!conversationData?.id || !document.hasFocus()) return;
           setFocusOn(conversationData.id);

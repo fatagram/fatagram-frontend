@@ -29,16 +29,14 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
   const { t } = useTranslation();
   const { userId } = useAuth();
 
-  // Tham chiếu đến container cuộn (Reference to scroll container)
   const localScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = parentRef || localScrollRef;
   const prevNewestMessageId = useRef<string | number | null>(null);
 
-  // Cung cấp hàm (Provide function) scrollToBottom ra bên ngoài thông qua ref
   useImperativeHandle(ref, () => ({
     scrollToBottom: () => {
       if (scrollRef.current) {
-        scrollRef.current.scrollTop = 0; // Bố cục lật ngược (Inverted layout) nên 0 là đáy (0 is bottom)
+        scrollRef.current.scrollTop = 0;
       }
     },
   }));
@@ -69,7 +67,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       if (newestMessage.senderId === userId) {
         requestAnimationFrame(() => {
           if (scrollRef.current) {
-            scrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
+            scrollRef.current.scrollTo({ top: 0, behavior: "auto" });
           }
         });
       }
@@ -82,7 +80,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       ...msg,
       _prev: index - 1 >= 0 ? messages[index - 1] : undefined,
       _next: index + 1 < messages.length ? messages[index + 1] : undefined,
-      _isLastMessage: index === 0,
+      _isLastMessage: index === messages.length - 1,
     }));
   }, [messages]);
 
@@ -126,7 +124,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       scrollRef={scrollRef}
       items={messagesWithMetadata}
       loadMore={fetchNextPage}
-      className={clsx("h-full px-1 sm:scrollbar-default scrollbar-hide", className)}
+      className={clsx("px-1 sm:scrollbar-default scrollbar-hide", className)}
       renderItem={(item) => {
         return (
           <div
@@ -144,12 +142,13 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
               userInfo={userProfileMap[item?.senderId || ""]}
               userProfileMap={userProfileMap}
               className="py-[0.5px] px-1"
+              isLastMessage={item._isLastMessage}
             />
           </div>
         );
       }}
       hasMore={!!hasNextPage}
-      itemKey={(item) => item.id || item.sequenceNumber}
+      itemKey={(item) => item.clientTempId || item.id || item.sequenceNumber}
       end={lastSeen}
       spinner={
         <div className="flex justify-center w-full select-none">

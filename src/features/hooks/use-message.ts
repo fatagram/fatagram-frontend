@@ -16,8 +16,9 @@ export const useMessages = (
 ) => {
   return useSafeInfiniteQueryResult({
     queryKey: messagesQueryKey(conversationId, queryParams),
-    fn: async (cursor?: number) =>
-      await conversationService.getMessages(conversationId, { ...queryParams, cursor }),
+    fn: async (cursor?: number) => {
+      return await conversationService.getMessages(conversationId, { ...queryParams, cursor });
+    },
     enabled: !!conversationId,
   });
 };

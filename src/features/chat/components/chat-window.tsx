@@ -140,7 +140,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   return (
     <div
       className={clsx(
-        "w-[330px] h-[450px] bg-bg-main rounded-xl shadow-lg overflow-hidden flex flex-col",
+        "w-[330px] h-[450px] bg-bg-main rounded-xl shadow-lg flex flex-col",
         "border border-bg-seventh shadow-xl",
         className,
       )}
@@ -175,7 +175,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           <i className="fa-solid fa-xmark"></i>
         </MiniButton>
       </div>
-      <div ref={scrollRef} className="flex flex-col px-0 flex-1 overflow-y-auto bg-bg-second">
+
+      <div className="flex-1 min-h-0 flex flex-col bg-bg-second">
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-3">
@@ -201,10 +202,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         {!tempTargetId && (
           <MessageList
             key={conversationId}
-            className="px-2"
             conversationId={conversationId}
             isGroup={conversationData?.isGroup}
-            parentRef={scrollRef}
+            className="h-full w-full"
             lastSeen={
               <div className="flex flex-col justify-center items-center h-full text-center px-4">
                 <div className="relative mb-4">
@@ -221,8 +221,9 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
           />
         )}
       </div>
+
       <ChatInput
-        className="!bg-bg-main h-fit py-2 pr-1"
+        className="shrink-0 !bg-bg-main py-2 pr-1"
         conversationId={!tempTargetId ? conversationId : undefined}
         correlationId={tempTargetId ? conversationId : undefined}
         receiverId={tempTargetId}
