@@ -13,6 +13,7 @@ interface Props<T> extends ComponentProps {
   end?: React.ReactNode;
   spinner?: React.ReactNode;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
+  canKeepPosition?: boolean;
 }
 
 export default function InfiniteScrollReverse<T>({
@@ -25,6 +26,7 @@ export default function InfiniteScrollReverse<T>({
   end,
   spinner,
   scrollRef,
+  canKeepPosition = false,
 }: Props<T>) {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
@@ -51,7 +53,7 @@ export default function InfiniteScrollReverse<T>({
 
   useLayoutEffect(() => {
     const el = parentRef.current;
-    if (!el) return;
+    if (!el || !canKeepPosition) return;
 
     const currentSize = rowVirtualizer.getTotalSize();
     const sizeDiff = currentSize - prevSizeRef.current;
@@ -71,7 +73,7 @@ export default function InfiniteScrollReverse<T>({
     }
 
     prevSizeRef.current = currentSize;
-  }, [rowVirtualizer.getTotalSize(), reversedItems, itemKey]);
+  }, [rowVirtualizer.getTotalSize(), reversedItems, itemKey, canKeepPosition]);
 
   useEffect(() => {
     const el = parentRef.current;

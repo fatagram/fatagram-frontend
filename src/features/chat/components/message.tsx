@@ -150,6 +150,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       hasMore={!!hasNextPage}
       itemKey={(item) => item.clientTempId || item.id || item.sequenceNumber}
       end={lastSeen}
+      canKeepPosition={messages[messages.length - 1]?.senderId !== userId} // Nếu tin nhắn cuối cùng không phải của mình thì giữ vị trí, ngược lại cuộn xuống dưới --- IGNORE ---
       spinner={
         <div className="flex justify-center w-full select-none">
           <div
