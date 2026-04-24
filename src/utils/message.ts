@@ -10,11 +10,11 @@ export const getMessageBubbleShapeClass = (
   clsx(
     isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
     isOnlyMessageInGroup && "!rounded-3xl",
-    isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
-    isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
+    isLastMessageInGroup && (isMyMessage ? "rounded-br-[4px]" : "rounded-bl-[4px]"),
+    isFirstMessageInGroup && (isMyMessage ? "rounded-tr-[4px]" : "rounded-tl-[4px]"),
     !isFirstMessageInGroup &&
       !isLastMessageInGroup &&
-      (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none"),
+      (isMyMessage ? "rounded-tr-[4px] rounded-br-[4px]" : "rounded-tl-[4px] rounded-bl-[4px]"),
   );
 
 export const getMessageType = (msg: Message): MessageRenderType => {
