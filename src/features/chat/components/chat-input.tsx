@@ -49,9 +49,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      // On mobile/touch devices, we want Enter to be a new line
-      const isMobile = window.matchMedia("(pointer: coarse)").matches;
-      if (!isMobile) {
+      const isDesktop = e.nativeEvent.isComposing === false && !("ontouchstart" in window);
+
+      if (isDesktop) {
         e.preventDefault();
         handleSendMessage();
       }
@@ -336,7 +336,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           ref={textboxRef}
           value={content}
           onChange={handleInputChange}
-          rows={1}
+          rows={0}
           maxRows={5}
           onFocus={() => {
             onFocus?.();
