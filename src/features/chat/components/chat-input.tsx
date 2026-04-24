@@ -76,7 +76,16 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     };
 
     const currentFiles = [...fileUrls];
-    if (textboxRef.current) textboxRef.current.value = "";
+    if (textboxRef.current) {
+      textboxRef.current.value = "";
+      try {
+        // collapse textarea to its initial height after send
+        textboxRef.current.style.height = "0px";
+        textboxRef.current.style.overflowY = "hidden";
+      } catch (e) {
+        // ignore if DOM manipulation isn't allowed
+      }
+    }
     setFileUrls([]);
     setHasInput(false);
 

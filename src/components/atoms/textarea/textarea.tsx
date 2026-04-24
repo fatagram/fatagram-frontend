@@ -4,6 +4,7 @@ import {
   ReactNode,
   useCallback,
   useId,
+  useImperativeHandle,
   useLayoutEffect,
   useRef,
 } from "react";
@@ -162,6 +163,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
               sizeClasses[sz].mainText,
               styles["custom-scrollbar"],
             )}
+            enterKeyHint="enter"
             {...props}
           />
         </div>
