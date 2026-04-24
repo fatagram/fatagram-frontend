@@ -1,6 +1,7 @@
 import { jsx, jsxs, Fragment } from "react/jsx-runtime";
-import { renderToString } from "react-dom/server";
+import { renderToPipeableStream } from "react-dom/server";
 import { useNavigate, Link as Link$1, useLocation, useResolvedPath, useMatch, Outlet, useParams, useSearchParams, Route, Routes, StaticRouter } from "react-router-dom";
+import { PassThrough } from "node:stream";
 import i18next, { t } from "i18next";
 import { initReactI18next, useTranslation } from "react-i18next";
 import axios from "axios";
@@ -7488,19 +7489,6 @@ const useRenderConversationContent = () => {
     renderConversationName
   };
 };
-function isSystemMessage(messageType) {
-  return [
-    MessageType.System,
-    MessageType.LeaveGroup,
-    MessageType.JoinGroup,
-    MessageType.CreateGroup,
-    MessageType.DeleteGroup,
-    MessageType.RenameGroup,
-    MessageType.ChangeGroupAvatar,
-    MessageType.RemoveParticipant,
-    MessageType.AddParticipant
-  ].includes(messageType);
-}
 const PendingIndicator = () => /* @__PURE__ */ jsx("div", { className: "absolute -left-4 top-1/2 -translate-y-1/2 flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "w-2 h-2 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) });
 const MAX_FILE_SIZE = 50 * 1024 * 1024;
 const validateFileSize = (file, maxSize = MAX_FILE_SIZE) => {
@@ -7905,10 +7893,8 @@ const MessageRowComponent = ({
   const { t: t2 } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
   const { formatTime, formatSmartTimestamp } = useFormatTime();
-  const { renderSystemMessage } = useRenderConversationContent();
   const isPending = message.status === "pending";
   const isFailed = message.status === "failed";
-  const isSystem = isSystemMessage(message.type);
   const timeoutRef = useRef(null);
   const seenBy = useMessageStore(
     useShallow(
@@ -7936,9 +7922,6 @@ const MessageRowComponent = ({
       }
     };
   }, [isPending]);
-  if (isSystem) {
-    return /* @__PURE__ */ jsx("div", { className: "flex justify-center w-full my-2", children: /* @__PURE__ */ jsx(Text, { sz: "sm", className: "opacity-80", children: renderSystemMessage(message) }) });
-  }
   return /* @__PURE__ */ jsxs(
     "div",
     {
@@ -7972,86 +7955,105 @@ const MessageRowComponent = ({
                   sz: "sm"
                 }
               ),
-              /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col", "max-w-[75%]"), children: [
-                meta._isShowName && /* @__PURE__ */ jsx(
-                  Text,
-                  {
-                    sz: "xs",
-                    className: clsx(
-                      "mb-1 min-h-[1rem]",
-                      meta._isMyMessage ? "text-right mr-1" : "text-left ml-1"
+              /* @__PURE__ */ jsxs(
+                "div",
+                {
+                  className: clsx(
+                    "flex flex-col",
+                    "max-w-[75%]",
+                    meta._shouldAnimate && "bubble",
+                    meta._isMyMessage ? "me" : "them"
+                  ),
+                  children: [
+                    meta._isShowName && /* @__PURE__ */ jsx(
+                      Text,
+                      {
+                        sz: "xs",
+                        className: clsx(
+                          "mb-1 min-h-[1rem]",
+                          meta._isMyMessage ? "text-right mr-1" : "text-left ml-1"
+                        ),
+                        children: userInfo?.fullName
+                      }
                     ),
-                    children: userInfo?.fullName
-                  }
-                ),
-                meta._isOnlyEmoji ? renderOnlyEmojiMessage(meta._isMyMessage, message.content) : null,
-                isTextMessage && !meta._isOnlyEmoji && renderTextMessage(
-                  meta._isMyMessage,
-                  isFailed,
-                  meta._messageBubbleShapeClass,
-                  message.content,
-                  hasDelayed
-                ),
-                meta._type === MessageRenderType.File && renderFileMessage(
-                  meta._isMyMessage,
-                  isFailed,
-                  {
-                    url: message.media?.[0]?.url || "",
-                    metadata: {
-                      name: message.media?.[0]?.metadata?.filename,
-                      size: message.media?.[0]?.metadata?.size
-                    }
-                  },
-                  meta._messageBubbleShapeClass,
-                  hasDelayed
-                ),
-                meta._type === MessageRenderType.Video && renderVideoMessage(
-                  {
-                    id: message.media?.[0]?.id || "",
-                    url: message.media?.[0]?.url || ""
-                  },
-                  conversationId,
-                  meta._messageBubbleShapeClass
-                ),
-                meta._type === MessageRenderType.Audio && renderAudioMessage(
-                  meta._isMyMessage,
-                  isFailed,
-                  {
-                    url: message.media?.[0]?.url || ""
-                  },
-                  meta._messageBubbleShapeClass
-                ),
-                meta._type === MessageRenderType.Image && stackImage.length > 1 && renderImageStackMessage(
-                  meta._isMyMessage,
-                  meta._messageBubbleShapeClass,
-                  message.media,
-                  conversationId,
-                  hasDelayed
-                ),
-                meta._type === MessageRenderType.Image && stackImage.length === 1 && renderSingleImageMessage(
-                  {
-                    id: stackImage[0].id || "",
-                    url: stackImage[0].url || ""
-                  },
-                  meta._messageBubbleShapeClass,
-                  conversationId,
-                  hasDelayed
-                ),
-                (seenBy?.length === 0 || seenBy.length === 1 && seenBy[0].userId === userId) && /* @__PURE__ */ jsx(
-                  "div",
-                  {
-                    className: clsx(
-                      "flex items-center justify-end mr-2 overflow-hidden transition-all duration-200",
-                      isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0"
+                    meta._isOnlyEmoji ? renderOnlyEmojiMessage(meta._isMyMessage, message.content) : null,
+                    isTextMessage && !meta._isOnlyEmoji && renderTextMessage(
+                      meta._isMyMessage,
+                      isFailed,
+                      meta._messageBubbleShapeClass,
+                      message.content,
+                      hasDelayed
                     ),
-                    children: isFooterVisible && !isFailed && !isPending && /* @__PURE__ */ jsxs(Text, { sz: "xs", children: [
-                      t2("conversations.sent"),
-                      " ",
-                      meta._isOlderThanOneMinute && /* @__PURE__ */ jsx(Text, { sz: "xs", children: formatTime(message.createdAt) })
-                    ] })
-                  }
-                )
-              ] }),
+                    meta._type === MessageRenderType.File && renderFileMessage(
+                      meta._isMyMessage,
+                      isFailed,
+                      {
+                        url: message.media?.[0]?.url || "",
+                        metadata: {
+                          name: message.media?.[0]?.metadata?.filename,
+                          size: message.media?.[0]?.metadata?.size
+                        }
+                      },
+                      meta._messageBubbleShapeClass,
+                      hasDelayed
+                    ),
+                    meta._type === MessageRenderType.Video && renderVideoMessage(
+                      {
+                        id: message.media?.[0]?.id || "",
+                        url: message.media?.[0]?.url || ""
+                      },
+                      conversationId,
+                      meta._messageBubbleShapeClass
+                    ),
+                    meta._type === MessageRenderType.Audio && renderAudioMessage(
+                      meta._isMyMessage,
+                      isFailed,
+                      {
+                        url: message.media?.[0]?.url || ""
+                      },
+                      meta._messageBubbleShapeClass
+                    ),
+                    meta._type === MessageRenderType.Image && stackImage.length > 1 && renderImageStackMessage(
+                      meta._isMyMessage,
+                      meta._messageBubbleShapeClass,
+                      message.media,
+                      conversationId,
+                      hasDelayed
+                    ),
+                    meta._type === MessageRenderType.Image && stackImage.length === 1 && renderSingleImageMessage(
+                      {
+                        id: stackImage[0].id || "",
+                        url: stackImage[0].url || ""
+                      },
+                      meta._messageBubbleShapeClass,
+                      conversationId,
+                      hasDelayed
+                    ),
+                    /* @__PURE__ */ jsx(
+                      Transition,
+                      {
+                        show: seenBy?.length === 0 || seenBy.length === 1 && seenBy[0].userId === userId,
+                        duration: 300,
+                        animation: AnimationLib.Opacity,
+                        children: /* @__PURE__ */ jsx(
+                          "div",
+                          {
+                            className: clsx(
+                              "flex items-center justify-end mr-2 overflow-hidden",
+                              isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0"
+                            ),
+                            children: isFooterVisible && !isFailed && !isPending && /* @__PURE__ */ jsxs(Text, { sz: "xs", children: [
+                              t2("conversations.sent"),
+                              " ",
+                              meta._isOlderThanOneMinute && /* @__PURE__ */ jsx(Text, { sz: "xs", children: formatTime(message.createdAt) })
+                            ] })
+                          }
+                        )
+                      }
+                    )
+                  ]
+                }
+              ),
               isFailed && /* @__PURE__ */ jsx("div", { className: "flex items-center justify-center", children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-circle-exclamation text-red-500" }) })
             ]
           }
@@ -8238,7 +8240,7 @@ function InfiniteScrollReverse({
     {
       ref: mergeRefs(parentRef, scrollRef),
       onScroll: handleScroll,
-      className: clsx("w-full overflow-y-auto relative", className),
+      className: clsx("w-full overflow-y-auto overflow-x-hidden relative", className),
       style: {
         height: "100%",
         transform: "scaleY(-1)",
@@ -8286,9 +8288,9 @@ const isOnlyEmoji = (text) => {
 const getMessageBubbleShapeClass = (isMyMessage, isFirstMessageInGroup, isLastMessageInGroup, isOnlyMessageInGroup) => clsx(
   isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
   isOnlyMessageInGroup && "!rounded-3xl",
-  isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
-  isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
-  !isFirstMessageInGroup && !isLastMessageInGroup && (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none")
+  isLastMessageInGroup && (isMyMessage ? "rounded-br-[4px]" : "rounded-bl-[4px]"),
+  isFirstMessageInGroup && (isMyMessage ? "rounded-tr-[4px]" : "rounded-tl-[4px]"),
+  !isFirstMessageInGroup && !isLastMessageInGroup && (isMyMessage ? "rounded-tr-[4px] rounded-br-[4px]" : "rounded-tl-[4px] rounded-bl-[4px]")
 );
 const getMessageType = (msg) => {
   if (msg.type === MessageType.Text) return MessageRenderType.Text;
@@ -8300,6 +8302,19 @@ const getMessageType = (msg) => {
   }
   return MessageRenderType.System;
 };
+function isSystemMessage(messageType) {
+  return [
+    MessageType.System,
+    MessageType.LeaveGroup,
+    MessageType.JoinGroup,
+    MessageType.CreateGroup,
+    MessageType.DeleteGroup,
+    MessageType.RenameGroup,
+    MessageType.ChangeGroupAvatar,
+    MessageType.RemoveParticipant,
+    MessageType.AddParticipant
+  ].includes(messageType);
+}
 const MessageList = forwardRef(function MessageList2({ isGroup, className, conversationId, lastSeen, parentRef }, ref) {
   const { t: t2 } = useTranslation();
   const { userId } = useAuth();
@@ -8352,7 +8367,7 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
       const isLastInGroup = !prev || prev.senderId !== msg.senderId || isShowTime;
       const isOnlyOneInGroup = isFirstInGroup && isLastInGroup;
       const isMyMessage = msg.senderId === userId;
-      const isShowAvatar = isLastInGroup && !isMyMessage;
+      const isShowAvatar = isFirstInGroup && !isMyMessage;
       const messageBubbleShapeClass = getMessageBubbleShapeClass(
         isMyMessage,
         isFirstInGroup || false,
@@ -8367,13 +8382,14 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
           _isOnlyOneInGroup: isOnlyOneInGroup || false,
           _isLastMessage: index === messages.length - 1,
           _isShowTime: isShowTime,
-          _isShowAvatar: isShowAvatar,
+          _isShowAvatar: isShowAvatar || false,
           _isMyMessage: isMyMessage,
           _messageBubbleShapeClass: messageBubbleShapeClass,
           _isOnlyEmoji: isOnlyEmoji(msg.content),
           _type: getMessageType(msg),
           _isShowName: isLastInGroup && isGroup && !isMyMessage || false,
-          _isOlderThanOneMinute: getDiffBetween(msg.createdAt, /* @__PURE__ */ new Date(), "second") > 60
+          _isOlderThanOneMinute: getDiffBetween(msg.createdAt, /* @__PURE__ */ new Date(), "second") > 60,
+          _shouldAnimate: index === messages.length - 1 && getDiffBetween(msg.createdAt, /* @__PURE__ */ new Date(), "second") < 5
         }
       };
     });
@@ -8419,9 +8435,9 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
       loadMore: fetchNextPage,
       className: clsx("px-1 sm:scrollbar-default scrollbar-hide", className),
       renderItem: (item) => {
-        const shouldAnimation = item.meta._isLastMessage;
-        if (item.type === MessageType.System) return /* @__PURE__ */ jsx(SystemMessageRow, { message: item });
-        return /* @__PURE__ */ jsx("div", { style: shouldAnimation ? { animation: "messageFadeIn 0.3s ease" } : void 0, children: /* @__PURE__ */ jsx(
+        const isSystemMsg = isSystemMessage(item.type);
+        if (isSystemMsg) return /* @__PURE__ */ jsx(SystemMessageRow, { message: item });
+        return /* @__PURE__ */ jsx(
           MessageRow,
           {
             message: item,
@@ -8432,7 +8448,7 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
             className: "py-[0.5px] px-1",
             meta: item.meta
           }
-        ) });
+        );
       },
       hasMore: !!hasNextPage,
       itemKey: (item) => item.clientTempId || item.id || item.sequenceNumber,
@@ -10700,26 +10716,26 @@ const settingRoutes = {
   ]
 };
 const NotFoundPage = lazy(() => Promise.resolve().then(() => notFoundPage));
-const HomePage = lazy(() => import("./assets/home-page-CaKs7YTE.js"));
-const RegisterPage = lazy(() => import("./assets/register-page-Bm-tm8ey.js"));
-const LoginPage = lazy(() => import("./assets/login-page-BbQiDyuD.js"));
-const NotificationPage = lazy(() => import("./assets/notifications-page-E5_S73jo.js"));
+const HomePage = lazy(() => import("./assets/home-page-Bx-eH_kE.js"));
+const RegisterPage = lazy(() => import("./assets/register-page-B0hRYjnm.js"));
+const LoginPage = lazy(() => import("./assets/login-page-DxlJe_-I.js"));
+const NotificationPage = lazy(() => import("./assets/notifications-page-B8PQ5faS.js"));
 const GoogleCallbackPage = lazy(
-  () => import("./assets/google-callback-page-BPQ--mPS.js")
+  () => import("./assets/google-callback-page-C4DEz7sc.js")
 );
-const OnboardingPage = lazy(() => import("./assets/onboarding-page-B0p32zww.js"));
-const FatalkPage = lazy(() => import("./assets/fatalk-page-WHXo160A.js"));
+const OnboardingPage = lazy(() => import("./assets/onboarding-page-FzGmSRHw.js"));
+const FatalkPage = lazy(() => import("./assets/fatalk-page-DCfQqLS2.js"));
 const ConversationPage = lazy(
-  () => import("./assets/conversation-page-C1BlxSmQ.js").then((module) => ({
+  () => import("./assets/conversation-page-BMw1UZil.js").then((module) => ({
     default: module.ConversationPage
   }))
 );
 const TempConversation = lazy(
-  () => import("./assets/temp-conversation-r20qnFzT.js").then((module) => ({
+  () => import("./assets/temp-conversation-DklWu7rs.js").then((module) => ({
     default: module.TempConversation
   }))
 );
-const ThuNghiemCuon = lazy(() => import("./assets/tests-infinity-scroll-page-CDZMrz5A.js"));
+const ThuNghiemCuon = lazy(() => import("./assets/tests-infinity-scroll-page-C-cbGsow.js"));
 const withFallback = (element) => /* @__PURE__ */ jsx(Suspense, { fallback: /* @__PURE__ */ jsx(LoadingPage, {}), children: element });
 const mainRoutes = [
   {
@@ -10743,7 +10759,7 @@ const mainRoutes = [
       },
       {
         path: "/fatalk",
-        element: /* @__PURE__ */ jsx(FatalkPage, {}),
+        element: withFallback(/* @__PURE__ */ jsx(FatalkPage, {})),
         type: "private",
         children: [
           {
@@ -11047,18 +11063,25 @@ function App({ authContext }) {
 }
 function render(_url, context) {
   const url = _url.startsWith("/") ? _url : "/" + _url;
-  try {
-    const html = renderToString(
-      /* @__PURE__ */ jsx(StaticRouter, { location: url, children: /* @__PURE__ */ jsx(App, { authContext: context }) })
+  return new Promise((resolve, reject) => {
+    const chunks = [];
+    const passThrough = new PassThrough();
+    passThrough.on("data", (chunk) => chunks.push(chunk));
+    passThrough.on("end", () => resolve(Buffer.concat(chunks).toString()));
+    passThrough.on("error", reject);
+    const { pipe } = renderToPipeableStream(
+      /* @__PURE__ */ jsx(StaticRouter, { location: url, children: /* @__PURE__ */ jsx(App, { authContext: context }) }),
+      {
+        onShellReady() {
+          pipe(passThrough);
+        },
+        onError(error) {
+          console.error("SSR Error during render:", error);
+          reject(error);
+        }
+      }
     );
-    return html;
-  } catch (error) {
-    console.error("SSR Error during render:", error);
-    if (error instanceof Error) {
-      console.error(error.stack);
-    }
-    return "";
-  }
+  });
 }
 export {
   Avatar as A,

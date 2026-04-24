@@ -43,7 +43,7 @@ export async function handleSSR(req, res, vite, templateHtml) {
       const css = isProduction ? await loadCssProduction() : await compileCssDev();
 
       // Render app to HTML string
-      const appHtml = render(url, { isAuthenticated, userData });
+      const appHtml = await render(url, { isAuthenticated, userData });
 
       // Serialize initial data for client hydration
       const initialData = {

@@ -49,7 +49,7 @@ export default async function handler(req, res) {
     const template = fs.readFileSync(path.resolve(__dirname, "../dist/client/index.html"), "utf-8");
     const { render } = await import("../dist/server/entry-server.js");
 
-    const appHtml = render(url, { isAuthenticated, userData });
+    const appHtml = await render(url, { isAuthenticated, userData });
 
     const initialData = { isAuthenticated, userData };
     const safeJson = JSON.stringify(initialData)
