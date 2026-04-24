@@ -29,6 +29,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   className,
 }) => {
   const [hasInput, setHasInput] = useState(false);
+  const [content, setContent] = useState("");
   const [fileUrls, setFileUrls] = useState<{ url: string; file: File }[]>([]);
   const textboxRef = useRef<HTMLTextAreaElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -42,20 +43,25 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const { showSnackbar } = useSnackbar();
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    setContent(e.target.value);
     setHasInput(e.target.value.trim() !== "");
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+      // On mobile/touch devices, we want Enter to be a new line
+      const isMobile = window.matchMedia("(pointer: coarse)").matches;
+      if (!isMobile) {
+        e.preventDefault();
+        handleSendMessage();
+      }
     }
   };
 
   const handleSendMessage = async () => {
-    const content = textboxRef.current?.value.trim() || "";
+    const textContent = content.trim();
 
-    if (!content && fileUrls.length === 0) {
+    if (!textContent && fileUrls.length === 0) {
       return;
     }
 
@@ -69,24 +75,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       conversationId: conversationId || "",
       senderId: userId,
       status: "pending" as const,
-      content,
+      content: textContent,
       createdAt: new Date(),
       sequenceNumber: -1,
       isGroup: false,
     };
 
     const currentFiles = [...fileUrls];
-    if (textboxRef.current) {
-      textboxRef.current.value = "";
-      try {
-        // collapse textarea to its initial height after send
-        textboxRef.current.style.height = "0px";
-        textboxRef.current.style.overflowY = "hidden";
-      } catch (e) {
-        // ignore if DOM manipulation isn't allowed
-      }
-    }
     setFileUrls([]);
+    setContent("");
     setHasInput(false);
 
     requestAnimationFrame(() => {
@@ -143,7 +140,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         ],
       });
     }
-    if (content && content.trim() !== "") {
+    if (textContent) {
       tempTextId = crypto.randomUUID();
       addMessageToCache(conversationId || "", {
         ...basePreviewBody,
@@ -192,11 +189,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       }
     }
 
-    if (content && content.trim() !== "") {
+    if (textContent) {
       await send({
         ...baseBody,
         clientTempId: tempTextId,
-        content,
+        content: textContent,
         type: MessageType.Text,
       });
     }
@@ -337,8 +334,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           placeholder="Tin nhắn của bạn"
           onKeyDown={handleKeyDown}
           ref={textboxRef}
+          value={content}
           onChange={handleInputChange}
-          rows={0}
+          rows={1}
           maxRows={5}
           onFocus={() => {
             onFocus?.();
