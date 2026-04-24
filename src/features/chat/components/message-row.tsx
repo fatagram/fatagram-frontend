@@ -17,15 +17,21 @@ const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
 interface MessageProps extends ComponentProps {
   message: Message;
-  prevMessage?: Message;
-  nextMessage?: Message;
-  isMyMessage?: boolean;
   userId?: string;
   conversationId?: string;
   isGroup?: boolean;
   userInfo?: any;
   userProfileMap?: Record<string, any>;
-  isLastMessage?: boolean;
+  meta: {
+    _isFirstInGroup: boolean;
+    _isLastInGroup: boolean;
+    _isOnlyOneInGroup: boolean;
+    _isLastMessage: boolean;
+    _isShowTime: boolean;
+    _isShowAvatar: boolean;
+    _isMyMessage: boolean;
+    _messageBubbleShapeClass: string;
+  };
 }
 
 const PendingIndicator = () => (
@@ -34,33 +40,15 @@ const PendingIndicator = () => (
   </div>
 );
 
-const getMessageBubbleShapeClass = (
-  isMyMessage: boolean,
-  isFirstMessageInGroup: boolean,
-  isLastMessageInGroup: boolean,
-  isOnlyMessageInGroup: boolean,
-) =>
-  clsx(
-    isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
-    isOnlyMessageInGroup && "!rounded-3xl",
-    isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
-    isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
-    !isFirstMessageInGroup &&
-      !isLastMessageInGroup &&
-      (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none"),
-  );
-
 const MessageRowComponent: React.FC<MessageProps> = ({
   message,
-  prevMessage,
-  nextMessage,
   userId,
   conversationId,
   isGroup,
   className,
   userInfo,
   userProfileMap,
-  isLastMessage,
+  meta,
 }) => {
   const { t } = useTranslation();
   const [hasDelayed, setHasDelayed] = useState(false);
@@ -77,23 +65,10 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     return state.messageUserSeenMap?.[convId]?.[messageSeq] ?? EMPTY_VIEWERS;
   });
 
-  const isShowTime =
-    !prevMessage ||
-    isSystemMessage(prevMessage.type) ||
-    getDiffBetween(message.createdAt, prevMessage.createdAt, "minute") > 30;
-  const isPrevMessageShowTime =
-    !!nextMessage && getDiffBetween(message.createdAt, nextMessage.createdAt, "minute") > 30;
-  const isLastMessageInGroup =
-    !prevMessage || prevMessage.senderId !== message.senderId || isShowTime;
-  const isFirstMessageInGroup =
-    !nextMessage || nextMessage.senderId !== message.senderId || isPrevMessageShowTime;
-  const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
-  const isMyMessage = message.senderId === userId;
+  const isShowName = meta._isLastInGroup && !meta._isMyMessage && isGroup;
+  const hasAvatar = meta._isFirstInGroup;
 
-  const isShowName = isLastMessageInGroup && !isMyMessage && isGroup;
-  const hasAvatar = isFirstMessageInGroup;
-
-  const isFooterVisible = isLastMessage && isMyMessage;
+  const isFooterVisible = meta._isLastMessage && meta._isMyMessage;
   const isTextMessage = message.type === MessageType.Text;
   const isMediaMessage = message.type === MessageType.Media;
   const isImageMessage =
@@ -106,12 +81,6 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     isMediaMessage && message.media?.some((media) => media.type === MediaType.File);
 
   const stackImage = message.media?.filter((media) => media.type === MediaType.Image) || [];
-  const messageBubbleShapeClass = getMessageBubbleShapeClass(
-    isMyMessage,
-    isFirstMessageInGroup,
-    isLastMessageInGroup,
-    isOnlyMessageInGroup,
-  );
 
   const isOnlyEmoji =
     isTextMessage &&
@@ -129,7 +98,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     })();
 
   const renderOnlyEmojiMessage = () => (
-    <div className={clsx("text-4xl", isMyMessage ? "text-white" : "text-text-main")}>
+    <div className={clsx("text-4xl", meta._isMyMessage ? "text-white" : "text-text-main")}>
       {message.content}
     </div>
   );
@@ -138,16 +107,16 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     <div
       className={clsx(
         "px-3 py-2 break-words rounded-xl shadow-sm relative max-w-full",
-        isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
+        meta._isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
         isFailed && "border-red-500 border-2 opacity-50",
-        messageBubbleShapeClass,
+        meta._messageBubbleShapeClass,
       )}
     >
       <Text
         sz="md"
         wrap="whitespace-pre-wrap"
         weight="regular"
-        className={clsx(isMyMessage ? "text-white " : "text-text-main")}
+        className={clsx(meta._isMyMessage ? "text-white " : "text-text-main")}
       >
         {message.content}
       </Text>
@@ -160,15 +129,15 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       className={clsx(
         "relative flex px-4 py-3 rounded-xl items-center gap-3",
         "max-w-full",
-        isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
-        messageBubbleShapeClass,
+        meta._isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
+        meta._messageBubbleShapeClass,
       )}
     >
       <div className="flex-shrink-0">
         <i
           className={clsx(
             "fa-solid fa-file text-2xl",
-            isMyMessage ? "text-text-reverse-main" : "text-text-main",
+            meta._isMyMessage ? "text-text-reverse-main" : "text-text-main",
           )}
         ></i>
       </div>
@@ -178,7 +147,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         <Text
           className={clsx(
             "underline cursor-pointer break-all leading-tight",
-            isMyMessage ? "text-text-reverse-main" : "text-text-main",
+            meta._isMyMessage ? "text-text-reverse-main" : "text-text-main",
           )}
           onClick={() => window.open(message.media?.[0].url, "_blank")}
           wrap="whitespace-pre-wrap"
@@ -188,7 +157,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         <Text
           className={clsx(
             "text-[10px] text-muted-foreground mt-1",
-            isMyMessage ? "text-text-reverse-main" : "text-text-main",
+            meta._isMyMessage ? "text-text-reverse-main" : "text-text-main",
           )}
         >
           {message.media?.[0].metadata?.size
@@ -210,7 +179,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         <i
           className={clsx(
             "fa-solid fa-download",
-            isMyMessage ? "text-text-reverse-main" : "text-text-main",
+            meta._isMyMessage ? "text-text-reverse-main" : "text-text-main",
           )}
         />
       </button>
@@ -237,7 +206,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           conversationId: conversationId!,
         });
       }}
-      className={clsx(messageBubbleShapeClass)}
+      className={meta._messageBubbleShapeClass}
       url={message.media?.[0].url!}
     />
   );
@@ -245,11 +214,11 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const renderAudioMessage = () => (
     <AudioMessage
       className={clsx(
-        isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
-        messageBubbleShapeClass,
+        meta._isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
+        meta._messageBubbleShapeClass,
       )}
       url={message.media?.[0].url!}
-      isMyMessage={isMyMessage}
+      isMyMessage={meta._isMyMessage}
     />
   );
 
@@ -257,8 +226,8 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     <div
       className={clsx(
         "relative h-[200px] w-[110px] flex items-center justify-center cursor-pointer",
-        isMyMessage ? "self-end mr-4" : "self-start ml-4",
-        messageBubbleShapeClass,
+        meta._isMyMessage ? "self-end mr-4" : "self-start ml-4",
+        meta._messageBubbleShapeClass,
         "[&>img:last-child]:opacity-100",
         "[&>img:nth-last-child(2)]:opacity-80",
         "[&>img:nth-last-child(3)]:opacity-60",
@@ -309,7 +278,9 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   );
 
   const renderSingleImageMessage = () => (
-    <div className={clsx("relative rounded-2xl h-fit overflow-hidden", messageBubbleShapeClass)}>
+    <div
+      className={clsx("relative rounded-2xl h-fit overflow-hidden", meta._messageBubbleShapeClass)}
+    >
       <img
         src={stackImage[0].url}
         alt="Image 1"
@@ -359,12 +330,12 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     <div
       className={clsx(
         "flex flex-col",
-        isLastMessageInGroup ? "mt-[0.5rem]" : "mt-0",
-        isLastMessage ? "mb-[0.5rem]" : "mb-0",
+        meta._isLastInGroup ? "mt-[0.5rem]" : "mt-0",
+        meta._isLastMessage ? "mb-[0.5rem]" : "mb-0",
         className,
       )}
     >
-      {isShowTime && (
+      {meta._isShowTime && (
         <Text sz="xs" className="text-center my-2">
           {formatSmartTimestamp(message.createdAt)}
         </Text>
@@ -372,15 +343,15 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       <div
         className={clsx(
           "flex gap-2 w-full",
-          isMyMessage ? "flex-row-reverse" : "flex-row",
+          meta._isMyMessage ? "flex-row-reverse" : "flex-row",
           hasDelayed && "opacity-50",
         )}
       >
-        {!isMyMessage && (
+        {!meta._isMyMessage && (
           <Avatar
             className={clsx(
               "flex-shrink-0 self-end",
-              isMyMessage && "order-2",
+              meta._isMyMessage && "order-2",
               !hasAvatar && "invisible",
             )}
             src={message.senderAvatarUrl}
@@ -394,7 +365,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               sz="xs"
               className={clsx(
                 "mb-1 min-h-[1rem]",
-                isMyMessage ? "text-right mr-1" : "text-left ml-1",
+                meta._isMyMessage ? "text-right mr-1" : "text-left ml-1",
               )}
             >
               {userInfo?.fullName}

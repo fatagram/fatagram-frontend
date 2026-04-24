@@ -10,6 +10,8 @@ import InfiniteScrollReverse from "@/components/ui/utils/infinite-scroll-reverse
 import { Skeleton } from "@/components/atoms";
 import { useTranslation } from "react-i18next";
 import { Text } from "@/components/atoms";
+import { useFormatTime } from "@/utils/format-time";
+import { getMessageBubbleShapeClass } from "@/utils/message-bubble-shape-class";
 
 interface MessageListProps extends ComponentProps {
   isGroup?: boolean;
@@ -28,6 +30,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
 ) {
   const { t } = useTranslation();
   const { userId } = useAuth();
+  const { getDiffBetween } = useFormatTime();
 
   const localScrollRef = useRef<HTMLDivElement>(null);
   const scrollRef = parentRef || localScrollRef;
@@ -76,12 +79,38 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
   }, [messages, userId, scrollRef]);
 
   const messagesWithMetadata = useMemo(() => {
-    return messages.map((msg, index) => ({
-      ...msg,
-      _prev: index - 1 >= 0 ? messages[index - 1] : undefined,
-      _next: index + 1 < messages.length ? messages[index + 1] : undefined,
-      _isLastMessage: index === messages.length - 1,
-    }));
+    return messages.map((msg, index) => {
+      const prev = index > 0 ? messages[index - 1] : null;
+      const next = index < messages.length - 1 ? messages[index + 1] : null;
+      const isShowTime = !prev || getDiffBetween(msg.createdAt, prev.createdAt, "minute") > 30;
+      const isNextShowTime = next && getDiffBetween(next!.createdAt, msg.createdAt, "minute") > 30;
+      const isFirstInGroup = !next || next.senderId !== msg.senderId || isNextShowTime;
+      const isLastInGroup = !prev || prev.senderId !== msg.senderId || isShowTime;
+      const isOnlyOneInGroup = isFirstInGroup && isLastInGroup;
+      const isMyMessage = msg.senderId === userId;
+      const isShowAvatar = isLastInGroup && !isMyMessage;
+
+      const messageBubbleShapeClass = getMessageBubbleShapeClass(
+        isMyMessage,
+        isFirstInGroup || false,
+        isLastInGroup,
+        isOnlyOneInGroup || false,
+      );
+
+      return {
+        ...msg,
+        meta: {
+          _isFirstInGroup: isFirstInGroup || false,
+          _isLastInGroup: isLastInGroup,
+          _isOnlyOneInGroup: isOnlyOneInGroup || false,
+          _isLastMessage: index === messages.length - 1,
+          _isShowTime: isShowTime,
+          _isShowAvatar: isShowAvatar,
+          _isMyMessage: isMyMessage,
+          _messageBubbleShapeClass: messageBubbleShapeClass,
+        },
+      };
+    });
   }, [messages]);
 
   const senderIds = useMemo(() => {
@@ -126,23 +155,18 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       loadMore={fetchNextPage}
       className={clsx("px-1 sm:scrollbar-default scrollbar-hide", className)}
       renderItem={(item) => {
+        const shouldAnimation = item.meta._isLastMessage;
         return (
-          <div
-            style={{
-              animation: "messageFadeIn 0.3s ease",
-            }}
-          >
+          <div style={shouldAnimation ? { animation: "messageFadeIn 0.3s ease" } : undefined}>
             <MessageRow
               message={item}
-              prevMessage={item._prev}
-              nextMessage={item._next}
               userId={userId}
               isGroup={isGroup}
               conversationId={conversationId}
               userInfo={userProfileMap[item?.senderId || ""]}
               userProfileMap={userProfileMap}
               className="py-[0.5px] px-1"
-              isLastMessage={item._isLastMessage}
+              meta={item.meta}
             />
           </div>
         );
