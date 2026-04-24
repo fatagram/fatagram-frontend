@@ -17,7 +17,6 @@ import {
   renderVideoMessage,
 } from "./messages/render";
 import { useShallow } from "zustand/react/shallow";
-import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 
 const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
@@ -74,6 +73,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     () => message.media?.filter((m) => m.type === MediaType.Image) ?? [],
     [message.media],
   );
+  const hasSeenByOther = seenBy?.length > 1 || (seenBy.length === 1 && seenBy[0].userId !== userId);
 
   useEffect(() => {
     if (!isPending) {
@@ -207,27 +207,6 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               conversationId!,
               hasDelayed,
             )}
-          <Transition
-            show={seenBy?.length === 0 || (seenBy.length === 1 && seenBy[0].userId === userId)}
-            duration={300}
-            animation={AnimationLib.Opacity}
-          >
-            <div
-              className={clsx(
-                "flex items-center justify-end mr-2 overflow-hidden",
-                isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0",
-              )}
-            >
-              {isFooterVisible && !isFailed && !isPending && (
-                <Text sz="xs">
-                  {t("conversations.sent")}{" "}
-                  {meta._isOlderThanOneMinute && (
-                    <Text sz="xs">{formatTime(message.createdAt)}</Text>
-                  )}
-                </Text>
-              )}
-            </div>
-          </Transition>
         </div>
         {isFailed && (
           <div className="flex items-center justify-center">
@@ -235,8 +214,14 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           </div>
         )}
       </div>
-      {seenBy?.length > 0 && !(seenBy.length === 1 && seenBy[0].userId === userId) && (
-        <div className="flex justify-end gap-1 mt-1">
+      {(isFooterVisible || hasSeenByOther) && (
+        <div className="flex justify-end items-center m-1">
+          {!hasSeenByOther && (
+            <Text sz="xs">
+              {t("conversations.sent")}{" "}
+              {meta._isOlderThanOneMinute && <Text sz="xs">{formatTime(message.createdAt)}</Text>}
+            </Text>
+          )}
           {seenBy.map((seenInfo) => {
             if (seenInfo.userId === userId) return null;
             return (
