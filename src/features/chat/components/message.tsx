@@ -114,6 +114,9 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
           _type: getMessageType(msg),
           _isShowName: (isLastInGroup && isGroup && !isMyMessage) || false,
           _isOlderThanOneMinute: getDiffBetween(msg.createdAt, new Date(), "second") > 60,
+          _shouldAnimate:
+            index === messages.length - 1 &&
+            getDiffBetween(msg.createdAt, new Date(), "second") < 5,
         },
       };
     });
@@ -161,27 +164,20 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       loadMore={fetchNextPage}
       className={clsx("px-1 sm:scrollbar-default scrollbar-hide", className)}
       renderItem={(item) => {
-        const isLast = item.meta._isLastMessage;
-        const isMyMsg = item.meta._isMyMessage;
+        const isSystemMsg = isSystemMessage(item.type);
 
-        const animationClass = isLast
-          ? isMyMsg
-            ? "animate-message-right"
-            : "animate-message-left"
-          : "";
-        if (isSystemMessage(item.type)) return <SystemMessageRow message={item} />;
+        if (isSystemMsg) return <SystemMessageRow message={item} />;
+
         return (
-          <div className={animationClass}>
-            <MessageRow
-              message={item}
-              userId={userId}
-              conversationId={conversationId}
-              userInfo={userProfileMap[item?.senderId || ""]}
-              userProfileMap={userProfileMap}
-              className="py-[0.5px] px-1"
-              meta={item.meta}
-            />
-          </div>
+          <MessageRow
+            message={item}
+            userId={userId}
+            conversationId={conversationId}
+            userInfo={userProfileMap[item?.senderId || ""]}
+            userProfileMap={userProfileMap}
+            className="py-[0.5px] px-1"
+            meta={item.meta}
+          />
         );
       }}
       hasMore={!!hasNextPage}

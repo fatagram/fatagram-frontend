@@ -41,6 +41,7 @@ interface MessageProps extends ComponentProps {
     _type: MessageRenderType;
     _isShowName: boolean;
     _isOlderThanOneMinute: boolean;
+    _shouldAnimate: boolean;
   };
 }
 
@@ -125,7 +126,14 @@ const MessageRowComponent: React.FC<MessageProps> = ({
             sz="sm"
           />
         )}
-        <div className={clsx("flex flex-col", "max-w-[75%]")}>
+        <div
+          className={clsx(
+            "flex flex-col",
+            "max-w-[75%]",
+            meta._shouldAnimate && "bubble",
+            meta._isMyMessage ? "me" : "them",
+          )}
+        >
           {meta._isShowName && (
             <Text
               sz="xs"

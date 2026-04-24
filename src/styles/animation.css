@@ -213,110 +213,35 @@
   }
 }
 
-@keyframes slide-up-in {
+@keyframes p-telegram {
   0% {
     opacity: 0;
-    transform: translateY(100%);
+    transform: scale(0.4) translateY(20px);
+  }
+  60% {
+    transform: scale(1.03) translateY(-4px);
   }
   100% {
     opacity: 1;
-    transform: translateY(0);
+    transform: scale(1) translateY(0);
   }
 }
 
-@keyframes slide-up-out {
-  0% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-  100% {
-    opacity: 0;
-    transform: translateY(100%);
-  }
-}
-
-@keyframes slide-in-right {
-  from {
-    opacity: 0;
-    transform: translateX(30px) scale(0.9);
-  }
-  to {
-    opacity: 1;
-    transform: translateX(0) scale(1);
-  }
-}
-
-@keyframes message-slide-in-right {
-  0% {
-    opacity: 0;
-    transform: translateX(50px) scale(0.9) skewX(-4deg);
-    filter: blur(4px);
-  }
-  70% {
-    transform: translateX(-5px) scale(1.03) skewX(1deg);
-    filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1) skewX(0);
-  }
-}
-
-@keyframes message-slide-in-left {
-  0% {
-    opacity: 0;
-    transform: translateX(-50px) scale(0.9) skewX(4deg);
-    filter: blur(4px);
-  }
-  70% {
-    transform: translateX(5px) scale(1.03) skewX(-1deg);
-    filter: blur(0);
-  }
-  100% {
-    opacity: 1;
-    transform: translateX(0) scale(1) skewX(0);
-  }
-}
-
-.animate-message-right {
-  animation: message-slide-in-right 0.4s cubic-bezier(0.15, 1.15, 0.6, 1) forwards;
+.bubble {
+  animation: p-telegram 460ms cubic-bezier(0.18, 0.9, 0.38, 1) both;
   will-change: transform, opacity;
-  transform-origin: right center;
 }
 
-.animate-message-left {
-  animation: message-slide-in-left 0.4s cubic-bezier(0.15, 1.15, 0.6, 1) forwards;
-  will-change: transform, opacity;
-  transform-origin: left center;
+.bubble.me {
+  transform-origin: bottom right;
+}
+
+.bubble.them {
+  transform-origin: bottom left;
 }
 
 @media (max-width: 767px) {
-  @keyframes message-slide-in-right {
-    from {
-      opacity: 0;
-      transform: translateX(15px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  @keyframes message-slide-in-left {
-    from {
-      opacity: 0;
-      transform: translateX(-15px);
-    }
-    to {
-      opacity: 1;
-      transform: translateX(0);
-    }
-  }
-
-  .animate-message-right,
-  .animate-message-left {
-    animation-duration: 0.2s;
-    animation-timing-function: ease-out;
-    will-change: transform, opacity;
+  .bubble {
+    animation-duration: 320ms;
   }
 }

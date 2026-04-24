@@ -170,7 +170,7 @@ export default function InfiniteScrollReverse<T>({
     <div
       ref={mergeRefs(parentRef, scrollRef)}
       onScroll={handleScroll}
-      className={clsx("w-full overflow-y-auto relative", className)}
+      className={clsx("w-full overflow-y-auto overflow-x-hidden relative", className)}
       style={{
         height: "100%",
         transform: "scaleY(-1)",
