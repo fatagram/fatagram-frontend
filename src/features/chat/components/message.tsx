@@ -161,10 +161,17 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       loadMore={fetchNextPage}
       className={clsx("px-1 sm:scrollbar-default scrollbar-hide", className)}
       renderItem={(item) => {
-        const shouldAnimation = item.meta._isLastMessage;
+        const isLast = item.meta._isLastMessage;
+        const isMyMsg = item.meta._isMyMessage;
+
+        const animationClass = isLast
+          ? isMyMsg
+            ? "animate-message-right"
+            : "animate-message-left"
+          : "";
         if (isSystemMessage(item.type)) return <SystemMessageRow message={item} />;
         return (
-          <div style={shouldAnimation ? { animation: "messageFadeIn 0.3s ease" } : undefined}>
+          <div className={animationClass}>
             <MessageRow
               message={item}
               userId={userId}

@@ -235,14 +235,59 @@
   }
 }
 
-@keyframes messageFadeIn {
+@keyframes slide-in-right {
   from {
     opacity: 0;
-    /* Giảm khoảng cách trượt (Reduce sliding distance) xuống -10px hoặc -15px để tinh tế hơn (for a subtler look) */
-    transform: translateY(-10px);
+    transform: translateX(30px) scale(0.9);
   }
   to {
     opacity: 1;
-    transform: translateY(0);
+    transform: translateX(0) scale(1);
   }
+}
+
+@keyframes slide-in-right {
+  0% {
+    opacity: 0;
+    /* Đẩy xa hơn, thu nhỏ và nghiêng nhẹ để tạo Motion Blur giả */
+    transform: translateX(50px) scale(0.9) skewX(-4deg);
+    filter: blur(4px);
+  }
+  70% {
+    /* Overshoot: Bay lố qua một chút để tạo độ nảy đàn hồi */
+    transform: translateX(-5px) scale(1.03) skewX(1deg);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) skewX(0);
+  }
+}
+
+@keyframes slide-in-left {
+  0% {
+    opacity: 0;
+    transform: translateX(-50px) scale(0.9) skewX(4deg);
+    filter: blur(4px);
+  }
+  70% {
+    transform: translateX(5px) scale(1.03) skewX(-1deg);
+    filter: blur(0);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) skewX(0);
+  }
+}
+
+.animate-message-right {
+  animation: slide-in-right 0.4s cubic-bezier(0.15, 1.15, 0.6, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: right center;
+}
+
+.animate-message-left {
+  animation: slide-in-left 0.4s cubic-bezier(0.15, 1.15, 0.6, 1) forwards;
+  will-change: transform, opacity;
+  transform-origin: left center;
 }

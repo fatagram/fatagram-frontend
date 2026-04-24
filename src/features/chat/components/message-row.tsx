@@ -17,6 +17,7 @@ import {
   renderVideoMessage,
 } from "./messages/render";
 import { useShallow } from "zustand/react/shallow";
+import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 
 const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
@@ -198,10 +199,14 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               conversationId!,
               hasDelayed,
             )}
-          {(seenBy?.length === 0 || (seenBy.length === 1 && seenBy[0].userId === userId)) && (
+          <Transition
+            show={seenBy?.length === 0 || (seenBy.length === 1 && seenBy[0].userId === userId)}
+            duration={300}
+            animation={AnimationLib.Opacity}
+          >
             <div
               className={clsx(
-                "flex items-center justify-end mr-2 overflow-hidden transition-all duration-200",
+                "flex items-center justify-end mr-2 overflow-hidden",
                 isFooterVisible ? "h-[15px] mt-1" : "h-0 mt-0",
               )}
             >
@@ -214,7 +219,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
                 </Text>
               )}
             </div>
-          )}
+          </Transition>
         </div>
         {isFailed && (
           <div className="flex items-center justify-center">

@@ -7,7 +7,19 @@ export interface AnimationType {
   duration: number;
 }
 
-export const AnimationLib: Record<string, AnimationType> = {
+export enum AnimationName {
+  SoftFade = "SoftFade",
+  Fade = "Fade",
+  SlideRightToLeft = "SlideRightToLeft",
+  SlideLeftToRight = "SlideLeftToRight",
+  DropdownSlide = "DropdownSlide",
+  SlideUp = "SlideUp",
+  Opacity = "Opacity",
+  SlideSnappy = "SlideSnappy",
+  None = "None",
+}
+
+export const AnimationLib: Record<AnimationName, AnimationType> = {
   SoftFade: {
     in: "animate-soft-fade-in",
     out: "animate-soft-fade-out",
