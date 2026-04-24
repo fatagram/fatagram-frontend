@@ -9,17 +9,17 @@ const MAX_RETRY = 5;
 
 export function useAppHub<T>(
   onReceiveMessage: (message: SocketMessage<T>) => void,
-  onReconnect?: () => void,
+  onConnected?: () => void,
 ) {
   const connectionRef = useRef<HubConnection | null>(null);
   const onReceiveMessageRef = useRef(onReceiveMessage);
-  const onReconnectRef = useRef(onReconnect);
+  const onConnectedRef = useRef(onConnected);
   const { isAuthenticated } = useAuth();
 
   useEffect(() => {
     onReceiveMessageRef.current = onReceiveMessage;
-    onReconnectRef.current = onReconnect;
-  }, [onReceiveMessage, onReconnect]);
+    onConnectedRef.current = onConnected;
+  }, [onReceiveMessage, onConnected]);
 
   useEffect(() => {
     if (!isAuthenticated) return;
@@ -32,7 +32,7 @@ export function useAppHub<T>(
       }
     };
 
-    const tryConnect = async (retry: number = 0, isReconnectingEvent: boolean = false) => {
+    const tryConnect = async (retry: number = 0, isTriggerConnectedCallback: boolean = false) => {
       const conn = connectionRef.current;
       if (!conn) return;
 
@@ -42,8 +42,8 @@ export function useAppHub<T>(
           conn.off("ReceiveMessage", receiveMessageHandler);
           conn.on("ReceiveMessage", receiveMessageHandler);
 
-          if (isReconnectingEvent && onReconnectRef.current) {
-            onReconnectRef.current();
+          if (isTriggerConnectedCallback && onConnectedRef.current) {
+            onConnectedRef.current();
           }
         }
       } catch (err: any) {
@@ -53,23 +53,22 @@ export function useAppHub<T>(
         }
         console.error("SignalR connection error: ", err);
         if (retry < MAX_RETRY) {
-          reconnectTimer = setTimeout(() => tryConnect(retry + 1, isReconnectingEvent), 500);
+          reconnectTimer = setTimeout(() => tryConnect(retry + 1, isTriggerConnectedCallback), 500);
         }
       }
     };
 
     const handleSignalRReconnected = () => {
-      if (onReconnectRef.current) {
-        onReconnectRef.current();
+      if (onConnectedRef.current) {
+        onConnectedRef.current();
       }
     };
 
     const startConnection = async () => {
       connectionRef.current = createSignalRConnection();
-
       connectionRef.current.onreconnected(handleSignalRReconnected);
 
-      await tryConnect();
+      await tryConnect(0, true);
     };
 
     startConnection();
@@ -81,12 +80,16 @@ export function useAppHub<T>(
     const handleNetworkOrVisibilityChange = async () => {
       if (document.visibilityState === "visible" && navigator.onLine) {
         const conn = connectionRef.current;
+
         if (conn?.state === HubConnectionState.Disconnected) {
           await tryConnect(0, true);
         } else if (conn?.state === HubConnectionState.Reconnecting) {
-          // Force immediate reconnect instead of waiting for SignalR's default backoff
           await conn.stop();
           await tryConnect(0, true);
+        } else if (conn?.state === HubConnectionState.Connected) {
+          if (onConnectedRef.current) {
+            onConnectedRef.current();
+          }
         }
       }
     };
