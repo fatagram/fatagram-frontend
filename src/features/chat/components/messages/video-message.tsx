@@ -95,8 +95,10 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
   return (
     <div
       ref={containerRef}
-      className={`relative group bg-black overflow-hidden flex items-center justify-center transition-all duration-300
-        ${className}`}
+      className={clsx(
+        "relative group bg-black overflow-hidden flex items-center justify-center transition-all duration-300",
+        className,
+      )}
     >
       <video
         ref={videoRef}

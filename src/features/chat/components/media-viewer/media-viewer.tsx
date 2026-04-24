@@ -10,6 +10,8 @@ import { MediaType } from "@/types/entities/message.type";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
+import { Zoom, Navigation, Mousewheel } from "swiper/modules";
+
 import "swiper/swiper-bundle.css";
 
 interface MediaViewerProps extends ComponentProps {}
@@ -28,13 +30,12 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
 
   const isFetchingLeft = useRef(false);
   const isFetchingRight = useRef(false);
-
   const [canFetchLeft, setCanFetchLeft] = useState(true);
   const [canFetchRight, setCanFetchRight] = useState(true);
 
   const swiperRef = useRef<SwiperType | null>(null);
+  const swiperContainerRef = useRef<HTMLDivElement>(null);
   const initializedAnchor = useRef<string | null>(null);
-
   const thumbnailRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
   const { data: mediaAroundAnchor } = useMediaAroundAnchor(conversationId || "", media?.id || "");
@@ -68,16 +69,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
     (m) => (m.id || m.url) === (activeMedia?.id || activeMedia?.url),
   );
 
-  const handlePrev = (e?: React.MouseEvent | KeyboardEvent) => {
-    e?.stopPropagation();
-    swiperRef.current?.slidePrev();
-  };
-
-  const handleNext = (e?: React.MouseEvent | KeyboardEvent) => {
-    e?.stopPropagation();
-    swiperRef.current?.slideNext();
-  };
-
   const handleSlideChange = (swiper: SwiperType) => {
     const currentMedia = allMedia[swiper.activeIndex];
     if (currentMedia) {
@@ -88,10 +79,8 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
   const prefetchRight = useCallback(async () => {
     if (!conversationId || isFetchingRight.current || !canFetchRight || allMedia.length === 0)
       return;
-
     const lastMedia = allMedia[allMedia.length - 1];
     if (!lastMedia?.id) return;
-
     isFetchingRight.current = true;
     try {
       await fetchMediaAround(
@@ -108,9 +97,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
               return;
             }
             setRightMedia((prev) => mergeUniqueMedia([...prev, ...fetched]));
-            if (fetched.length < FETCH_BATCH_SIZE) {
-              setCanFetchRight(false);
-            }
+            if (fetched.length < FETCH_BATCH_SIZE) setCanFetchRight(false);
           },
         },
       );
@@ -121,10 +108,8 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
 
   const prefetchLeft = useCallback(async () => {
     if (!conversationId || isFetchingLeft.current || !canFetchLeft || allMedia.length === 0) return;
-
     const firstMedia = allMedia[0];
     if (!firstMedia?.id) return;
-
     isFetchingLeft.current = true;
     try {
       await fetchMediaAround(
@@ -141,9 +126,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
               return;
             }
             setLeftMedia((prev) => mergeUniqueMedia([...fetched, ...prev]));
-            if (fetched.length < FETCH_BATCH_SIZE) {
-              setCanFetchLeft(false);
-            }
+            if (fetched.length < FETCH_BATCH_SIZE) setCanFetchLeft(false);
           },
         },
       );
@@ -158,59 +141,66 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
 
   useEffect(() => {
     if (!activeMedia) return;
-
     const handleKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") onClose();
-      else if (event.key === "ArrowLeft") handlePrev(event);
-      else if (event.key === "ArrowRight") handleNext(event);
+      else if (event.key === "ArrowLeft") swiperRef.current?.slidePrev();
+      else if (event.key === "ArrowRight") swiperRef.current?.slideNext();
     };
-
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeMedia, onClose]);
 
-  // Sync Swiper
   useLayoutEffect(() => {
     if (swiperRef.current && activeIndex !== -1) {
       swiperRef.current.slideTo(activeIndex, 0, false);
     }
   }, [allMedia.length, activeIndex]);
 
-  // Auto-scroll Filmstrip (Thumbnails)
   useEffect(() => {
     if (!activeMedia?.id) return;
-
     const activeThumbEl = thumbnailRefs.current[activeMedia.id];
     if (activeThumbEl) {
-      requestAnimationFrame(() => {
-        activeThumbEl.scrollIntoView({
-          behavior: "smooth",
-          inline: "center",
-          block: "nearest",
-        });
-      });
+      activeThumbEl.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
     }
   }, [activeMedia?.id, allMedia.length]);
 
   useEffect(() => {
     if (activeIndex < 0 || allMedia.length === 0) return;
-
-    const distanceToStart = activeIndex;
-    const distanceToEnd = allMedia.length - 1 - activeIndex;
-
-    if (distanceToEnd < PREFETCH_DISTANCE && canFetchRight && !isFetchingRight.current) {
+    if (
+      allMedia.length - 1 - activeIndex < PREFETCH_DISTANCE &&
+      canFetchRight &&
+      !isFetchingRight.current
+    )
       void prefetchRight();
-    }
-
-    if (distanceToStart < PREFETCH_DISTANCE && canFetchLeft && !isFetchingLeft.current) {
+    if (activeIndex < PREFETCH_DISTANCE && canFetchLeft && !isFetchingLeft.current)
       void prefetchLeft();
-    }
   }, [activeIndex, allMedia.length, canFetchLeft, canFetchRight, prefetchLeft, prefetchRight]);
 
-  if (!activeMedia) return null;
+  useEffect(() => {
+    const el = swiperContainerRef.current;
+    if (!el) return;
+
+    const handleWheel = (e: WheelEvent) => {
+      if (!swiperRef.current) return;
+
+      const swiper = swiperRef.current;
+      const zoom = swiper.zoom;
+
+      if (e.deltaY < 0) {
+        zoom.in();
+        e.preventDefault();
+      } else if (e.deltaY > 0 && zoom.scale > 1) {
+        zoom.out();
+        e.preventDefault();
+      }
+    };
+
+    el.addEventListener("wheel", handleWheel, { passive: false });
+    return () => el.removeEventListener("wheel", handleWheel);
+  }, [activeMedia]);
 
   const onDownload = async () => {
-    if (isDownloading) return;
+    if (isDownloading || !activeMedia) return;
     setIsDownloading(true);
     try {
       const response = await fetch(activeMedia.url);
@@ -219,20 +209,17 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
       const anchor = document.createElement("a");
       anchor.href = blobUrl;
       const urlPath = new URL(activeMedia.url).pathname;
-      const fileName =
-        urlPath.substring(urlPath.lastIndexOf("/") + 1) ||
-        (activeMedia.type === MediaType.Image ? "image.jpg" : "video.mp4");
-      anchor.download = fileName;
-      document.body.appendChild(anchor);
+      anchor.download = urlPath.substring(urlPath.lastIndexOf("/") + 1) || "media";
       anchor.click();
-      document.body.removeChild(anchor);
       URL.revokeObjectURL(blobUrl);
-    } catch {
-      console.error("Failed to download media");
+    } catch (e) {
+      console.error("Download failed", e);
     } finally {
       setIsDownloading(false);
     }
   };
+
+  if (!activeMedia) return null;
 
   return (
     <div
@@ -248,10 +235,9 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
       >
         <div className="flex items-center gap-4">
           <MiniButton
-            className="!text-white/70 hover:!text-white hover:!bg-white/10 transition-colors"
+            className="!text-white/70 hover:!text-white"
             onClick={onDownload}
             disabled={isDownloading}
-            title="Download"
           >
             <i
               className={clsx(
@@ -260,12 +246,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
               )}
             />
           </MiniButton>
-
-          <MiniButton
-            className="!text-white/70 hover:!text-white hover:!bg-white/10 transition-colors"
-            onClick={onClose}
-            title="Close (Esc)"
-          >
+          <MiniButton className="!text-white/70 hover:!text-white" onClick={onClose}>
             <i className="fa-solid fa-xmark text-2xl" />
           </MiniButton>
         </div>
@@ -273,59 +254,56 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
 
       <div className="relative flex flex-1 min-h-0 items-center justify-center overflow-hidden w-full">
         <button
-          className={clsx(
-            "absolute left-6 top-1/2 -translate-y-1/2 z-20 p-4 rounded-full transition-all hidden md:block",
-            activeIndex > 0
-              ? "text-white/50 hover:text-white hover:bg-white/10 cursor-pointer"
-              : "text-white/10 cursor-not-allowed opacity-50",
-          )}
-          onClick={handlePrev}
+          className="absolute left-6 top-1/2 -translate-y-1/2 z-20 p-4 hidden md:block text-white/50 hover:text-white disabled:opacity-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            swiperRef.current?.slidePrev();
+          }}
           disabled={activeIndex <= 0}
         >
           <i className="fa-solid fa-chevron-left text-3xl" />
         </button>
 
-        <div className="h-full w-full" onClick={(e) => e.stopPropagation()}>
+        <div
+          className="h-full w-full"
+          onClick={(e) => e.stopPropagation()}
+          ref={swiperContainerRef}
+        >
           <Swiper
+            modules={[Zoom, Navigation, Mousewheel]}
+            zoom={{ maxRatio: 3, minRatio: 1, toggle: true }}
             onSwiper={(swiper) => (swiperRef.current = swiper)}
             onSlideChange={handleSlideChange}
+            mousewheel={{
+              forceToAxis: true,
+              sensitivity: 1,
+            }}
             initialSlide={activeIndex}
             spaceBetween={20}
             slidesPerView={1}
-            grabCursor={true}
             className="w-full h-full"
           >
             {allMedia.map((m) => {
-              // Lazy loading check: Is this specific slide currently active?
               const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
-
               return (
-                <SwiperSlide key={m.id} className="h-full w-full">
-                  <div className="flex h-full w-full items-center justify-center px-4 py-2 md:px-6 md:py-4">
+                <SwiperSlide key={m.id} className="h-full w-full overflow-hidden">
+                  <div className="swiper-zoom-container h-full w-full flex items-center justify-center p-2 md:p-10">
                     {m.type === MediaType.Image ? (
                       <ImageView
                         url={m.url}
-                        className="max-h-full max-w-full object-contain rounded-md select-none"
+                        className="max-h-full max-w-full object-contain select-none shadow-2xl"
                       />
                     ) : isActive ? (
-                      // Only mount the real, heavy VideoView when the slide is active
                       <VideoView url={m.url} className="max-h-full max-w-full rounded-md" />
                     ) : (
-                      // Render a lightweight "poster" for inactive video slides to prevent black screens and save data
-                      <div
-                        className="relative max-h-full max-w-full rounded-md overflow-hidden bg-black flex items-center justify-center cursor-pointer"
-                        style={{ aspectRatio: "16/9" }}
-                      >
+                      <div className="relative max-h-full max-w-full aspect-video bg-black flex items-center justify-center">
                         <video
                           src={`${m.url}#t=0.1`}
-                          className="max-h-full max-w-full object-contain opacity-50" // Dim it slightly to indicate it's inactive
-                          preload="metadata" // Only fetch metadata (like duration/dimensions) and the first frame, NOT the whole video
+                          className="max-h-full max-w-full opacity-50"
+                          preload="metadata"
                           muted
-                          playsInline
                         />
-                        <div className="absolute inset-0 flex items-center justify-center">
-                          <i className="fa-solid fa-play text-white text-6xl opacity-70 drop-shadow-lg" />
-                        </div>
+                        <i className="fa-solid fa-play text-white text-6xl absolute" />
                       </div>
                     )}
                   </div>
@@ -336,13 +314,11 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
         </div>
 
         <button
-          className={clsx(
-            "absolute right-6 top-1/2 -translate-y-1/2 z-20 p-4 rounded-full transition-all hidden md:block",
-            activeIndex < allMedia.length - 1
-              ? "text-white/50 hover:text-white hover:bg-white/10 cursor-pointer"
-              : "text-white/10 cursor-not-allowed opacity-50",
-          )}
-          onClick={handleNext}
+          className="absolute right-6 top-1/2 -translate-y-1/2 z-20 p-4 hidden md:block text-white/50 hover:text-white disabled:opacity-10"
+          onClick={(e) => {
+            e.stopPropagation();
+            swiperRef.current?.slideNext();
+          }}
           disabled={activeIndex >= allMedia.length - 1}
         >
           <i className="fa-solid fa-chevron-right text-3xl" />
@@ -350,11 +326,11 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
       </div>
 
       <div
-        className="hidden w-full shrink-0 items-center justify-center bg-black/40 px-4 md:flex z-10"
+        className="flex w-full shrink-0 items-center justify-center bg-black/40 px-4 z-10"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="max-w-[960px] overflow-x-auto overflow-y-hidden scroll-smooth">
-          <div className="flex min-w-max items-center gap-2 px-2 py-3">
+        <div className="w-full max-w-[960px] overflow-x-auto overflow-y-hidden py-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/20">
+          <div className="flex flex-nowrap items-center gap-2 px-2 min-w-max">
             {allMedia.map((m, index) => {
               const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
               return (
@@ -363,31 +339,30 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
                   ref={(el) => {
                     thumbnailRefs.current[m.id!] = el;
                   }}
-                  onClick={() => {
-                    swiperRef.current?.slideTo(index);
-                  }}
+                  onClick={() => swiperRef.current?.slideTo(index)}
                   className={clsx(
-                    "relative h-16 w-16 shrink-0 cursor-pointer overflow-hidden rounded-md transition-all duration-200",
+                    "relative h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded transition-all duration-200",
                     isActive
-                      ? "ring-4 ring-primary-500 scale-105 opacity-100 z-10"
-                      : "opacity-50 hover:opacity-100 hover:scale-105",
+                      ? "ring-2 ring-blue-500 scale-110 opacity-100 shadow-lg"
+                      : "opacity-40 hover:opacity-100 hover:scale-105",
                   )}
                 >
                   {m.type === MediaType.Image ? (
-                    <img src={m.url} alt="Thumbnail" className="h-full w-full object-cover" />
+                    <img
+                      src={m.url}
+                      className="h-full w-full object-cover pointer-events-none"
+                      alt=""
+                    />
                   ) : (
-                    <>
+                    <div className="relative h-full w-full pointer-events-none">
                       <video
-                        src={`${m.url}#t=0.1`} // Fetch first frame for thumbnail
-                        className="h-full w-full object-cover pointer-events-none"
+                        src={`${m.url}#t=0.1`}
+                        className="h-full w-full object-cover"
                         preload="metadata"
                         muted
-                        playsInline
                       />
-                      <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                        <i className="fa-solid fa-play text-white text-xs" />
-                      </div>
-                    </>
+                      <i className="fa-solid fa-play text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/20" />
+                    </div>
                   )}
                 </div>
               );

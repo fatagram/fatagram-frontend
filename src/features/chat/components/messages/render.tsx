@@ -65,7 +65,7 @@ export const renderVideoMessage = (
           conversationId: conversationId,
         });
       }}
-      className={messageBubbleShapeClass}
+      className={clsx(messageBubbleShapeClass, "max-h-[300px] max-w-[350px] rounded-xl")}
       url={media.url}
     />
   );
@@ -249,11 +249,13 @@ export const renderSingleImageMessage = (
   const { onOpen: openMediaViewer } = useMediaViewer();
 
   return (
-    <div className={clsx("relative rounded-2xl h-fit overflow-hidden", messageBubbleShapeClass)}>
+    <div
+      className={clsx("relative rounded-2xl h-fit overflow-hidden w-fit", messageBubbleShapeClass)}
+    >
       <img
         src={image.url}
-        alt="Image 1"
-        className="w-[200px] h-[200px] object-cover cursor-pointer"
+        alt="Image"
+        className="max-w-full max-h-[330px] w-auto h-auto cursor-pointer"
         onClick={() => {
           openMediaViewer({
             id: image.id || "",
