@@ -4,7 +4,7 @@ import { renderContent } from "../../helper/render-content";
 import { getNotificationContent } from "../../helper/get-notification-content";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { useFormatTime } from "../../../../utils/format-time";
+import { useFormatTime } from "../../../../utils/time";
 
 interface BaseNotificationProps {
   notificationDto: NotificationDto;

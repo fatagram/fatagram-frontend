@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { Avatar, Button, Text } from "@/components/atoms";
 import clsx from "clsx";
-import { timeDistance } from "@/utils/time-distance";
+import { timeDistance } from "@/utils/time";
 
 type FriendRequestItemProps = {
   avatar?: string;

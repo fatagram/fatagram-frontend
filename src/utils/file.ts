@@ -1,3 +1,5 @@
+import { MediaType } from "@/types/entities/message.type";
+
 export enum FileValidationError {
   FILE_TOO_LARGE = "FILE_TOO_LARGE",
   INVALID_FILE_TYPE = "INVALID_FILE_TYPE",
@@ -104,11 +106,101 @@ export const getFileSizeInMB = (file: File): number => {
  * @returns Formatted size string (e.g., "2.5 MB")
  */
 export const formatFileSize = (bytes: number): string => {
-  if (bytes === 0) return "0 Bytes";
+  if (bytes === 0) return "0 B";
 
   const k = 1024;
-  const sizes = ["Bytes", "KB", "MB", "GB"];
+  const sizes = ["B", "KB", "MB", "GB"];
   const i = Math.floor(Math.log(bytes) / Math.log(k));
 
   return Math.round((bytes / Math.pow(k, i)) * 100) / 100 + " " + sizes[i];
+};
+
+// export const formatFileSize = (sizeInBytes: number): string => {
+//   if (sizeInBytes < 1024) {
+//     return `${sizeInBytes} B`;
+//   } else if (sizeInBytes < 1024 * 1024) {
+//     return `${(sizeInBytes / 1024).toFixed(2)} KB`;
+//   } else if (sizeInBytes < 1024 * 1024 * 1024) {
+//     return `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`;
+//   } else {
+//     return `${(sizeInBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+//   }
+// };
+
+export const getMediaTypeFromCloudinary = (resourceType: string): MediaType => {
+  switch (resourceType) {
+    case "image":
+      return MediaType.Image;
+    case "video":
+      return MediaType.Video;
+    case "audio":
+      return MediaType.Audio;
+    default:
+      return MediaType.File;
+  }
+};
+
+export const getMediaTypeFromFileType = (fileType: string): MediaType => {
+  switch (fileType) {
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+    case "image/webp":
+    case "image/svg+xml":
+    case "image/bmp":
+    case "image/tiff":
+      return MediaType.Image;
+    case "video/mp4":
+    case "video/webm":
+    case "video/quicktime":
+    case "video/x-msvideo":
+    case "video/mpeg":
+    case "video/ogg":
+    case "video/3gpp":
+      return MediaType.Video;
+    case "audio/mpeg":
+    case "audio/wav":
+    case "audio/ogg":
+    case "audio/aac":
+    case "audio/flac":
+    case "audio/x-m4a":
+    case "audio/mp4":
+    case "audio/webm":
+    case "audio/opus":
+      return MediaType.Audio;
+    default:
+      return MediaType.File;
+  }
+};
+
+export const getCloudinaryResourceTypeFromFileType = (fileType: string): string => {
+  switch (fileType) {
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+    case "image/webp":
+    case "image/svg+xml":
+    case "image/bmp":
+    case "image/tiff":
+      return "image";
+    case "video/mp4":
+    case "video/webm":
+    case "video/quicktime":
+    case "video/x-msvideo":
+    case "video/mpeg":
+    case "video/ogg":
+    case "video/3gpp":
+    case "audio/mpeg":
+    case "audio/wav":
+    case "audio/ogg":
+    case "audio/aac":
+    case "audio/flac":
+    case "audio/x-m4a":
+    case "audio/mp4":
+    case "audio/webm":
+    case "audio/opus":
+      return "video";
+    default:
+      return "raw";
+  }
 };

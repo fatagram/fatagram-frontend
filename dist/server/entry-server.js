@@ -2044,39 +2044,6 @@ function getNotificationContent(type, fallbackContent, t2) {
   }
   return t2 ? `{actorName} ${t2("notifications:notifications.default-notification")}` : "{actorName}";
 }
-function timeDistance(date, now = /* @__PURE__ */ new Date()) {
-  const seconds = Math.floor((now.getTime() - date.getTime()) / 1e3);
-  if (seconds < 10) {
-    return { text: "times:just_now" };
-  }
-  const intervals = [
-    [60, "times:time.second"],
-    // < 60s  → second
-    [3600, "times:time.minute"],
-    // < 1h   → minute
-    [86400, "times:time.hour"],
-    // < 24h  → hour
-    [604800, "times:time.day"],
-    // < 7d   → day
-    [2592e3, "times:time.week"],
-    // < 30d  → week
-    [31536e3, "times:time.month"],
-    // < 365d → month
-    [Number.MAX_SAFE_INTEGER, "times:time.year"]
-  ];
-  for (let i = 0; i < intervals.length; i++) {
-    if (seconds < intervals[i][0]) {
-      const prev = i === 0 ? 1 : intervals[i - 1][0];
-      const count = Math.floor(seconds / prev);
-      return {
-        count,
-        unit: intervals[i][1] + (count > 1 ? ":other" : ":one"),
-        text: "times:ago"
-      };
-    }
-  }
-  return { text: date.toLocaleDateString() };
-}
 const useFormatTime = () => {
   const { t: t2 } = useTranslation();
   const formatTime = (rawTime) => {
@@ -2133,6 +2100,39 @@ const useFormatTime = () => {
   };
   return { formatTime, formatSmartTimestamp, getDiffBetween };
 };
+function timeDistance(date, now = /* @__PURE__ */ new Date()) {
+  const seconds = Math.floor((now.getTime() - date.getTime()) / 1e3);
+  if (seconds < 10) {
+    return { text: "times:just_now" };
+  }
+  const intervals = [
+    [60, "times:time.second"],
+    // < 60s  → second
+    [3600, "times:time.minute"],
+    // < 1h   → minute
+    [86400, "times:time.hour"],
+    // < 24h  → hour
+    [604800, "times:time.day"],
+    // < 7d   → day
+    [2592e3, "times:time.week"],
+    // < 30d  → week
+    [31536e3, "times:time.month"],
+    // < 365d → month
+    [Number.MAX_SAFE_INTEGER, "times:time.year"]
+  ];
+  for (let i = 0; i < intervals.length; i++) {
+    if (seconds < intervals[i][0]) {
+      const prev = i === 0 ? 1 : intervals[i - 1][0];
+      const count = Math.floor(seconds / prev);
+      return {
+        count,
+        unit: intervals[i][1] + (count > 1 ? ":other" : ":one"),
+        text: "times:ago"
+      };
+    }
+  }
+  return { text: date.toLocaleDateString() };
+}
 const BaseNotification = ({
   notificationDto,
   children,
@@ -3050,7 +3050,8 @@ const useGetPariticipantsSeen = (conversationId) => {
       onSuccess: (data) => {
         useMessageStore.getState().setBulkParticipantsSeen(conversationId, data.participantsSeenInfo);
       }
-    }
+    },
+    refetchOnMount: "always"
   });
 };
 const useConversations = (queryParams) => {
@@ -3382,6 +3383,16 @@ var MessageType = /* @__PURE__ */ ((MessageType2) => {
   MessageType2["AddParticipant"] = "AddParticipant";
   return MessageType2;
 })(MessageType || {});
+var MessageRenderType = /* @__PURE__ */ ((MessageRenderType2) => {
+  MessageRenderType2["Text"] = "Text";
+  MessageRenderType2["Image"] = "Image";
+  MessageRenderType2["Video"] = "Video";
+  MessageRenderType2["Audio"] = "Audio";
+  MessageRenderType2["File"] = "File";
+  MessageRenderType2["System"] = "System";
+  MessageRenderType2["StackImage"] = "StackImage";
+  return MessageRenderType2;
+})(MessageRenderType || {});
 var MediaType = /* @__PURE__ */ ((MediaType2) => {
   MediaType2["Image"] = "Image";
   MediaType2["Video"] = "Video";
@@ -7442,7 +7453,9 @@ const messagesQueryKey = (conversationId, queryParams) => ["messages", conversat
 const useMessages = (conversationId, queryParams) => {
   return useSafeInfiniteQueryResult({
     queryKey: messagesQueryKey(conversationId, queryParams),
-    fn: async (cursor) => await conversationService.getMessages(conversationId, { ...queryParams, cursor }),
+    fn: async (cursor) => {
+      return await conversationService.getMessages(conversationId, { ...queryParams, cursor });
+    },
     enabled: !!conversationId
   });
 };
@@ -7488,15 +7501,86 @@ function isSystemMessage(messageType) {
     MessageType.AddParticipant
   ].includes(messageType);
 }
-const formatFileSize = (sizeInBytes) => {
-  if (sizeInBytes < 1024) {
-    return `${sizeInBytes} B`;
-  } else if (sizeInBytes < 1024 * 1024) {
-    return `${(sizeInBytes / 1024).toFixed(2)} KB`;
-  } else if (sizeInBytes < 1024 * 1024 * 1024) {
-    return `${(sizeInBytes / (1024 * 1024)).toFixed(2)} MB`;
-  } else {
-    return `${(sizeInBytes / (1024 * 1024 * 1024)).toFixed(2)} GB`;
+const PendingIndicator = () => /* @__PURE__ */ jsx("div", { className: "absolute -left-4 top-1/2 -translate-y-1/2 flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "w-2 h-2 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) });
+const MAX_FILE_SIZE = 50 * 1024 * 1024;
+const validateFileSize = (file, maxSize = MAX_FILE_SIZE) => {
+  if (file.size > maxSize) {
+    return {
+      valid: false,
+      error: "FILE_TOO_LARGE"
+      /* FILE_TOO_LARGE */
+    };
+  }
+  return { valid: true };
+};
+const formatFileSize = (bytes) => {
+  if (bytes === 0) return "0 B";
+  const k = 1024;
+  const sizes = ["B", "KB", "MB", "GB"];
+  const i = Math.floor(Math.log(bytes) / Math.log(k));
+  return Math.round(bytes / Math.pow(k, i) * 100) / 100 + " " + sizes[i];
+};
+const getMediaTypeFromFileType = (fileType) => {
+  switch (fileType) {
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+    case "image/webp":
+    case "image/svg+xml":
+    case "image/bmp":
+    case "image/tiff":
+      return MediaType.Image;
+    case "video/mp4":
+    case "video/webm":
+    case "video/quicktime":
+    case "video/x-msvideo":
+    case "video/mpeg":
+    case "video/ogg":
+    case "video/3gpp":
+      return MediaType.Video;
+    case "audio/mpeg":
+    case "audio/wav":
+    case "audio/ogg":
+    case "audio/aac":
+    case "audio/flac":
+    case "audio/x-m4a":
+    case "audio/mp4":
+    case "audio/webm":
+    case "audio/opus":
+      return MediaType.Audio;
+    default:
+      return MediaType.File;
+  }
+};
+const getCloudinaryResourceTypeFromFileType = (fileType) => {
+  switch (fileType) {
+    case "image/jpeg":
+    case "image/png":
+    case "image/gif":
+    case "image/webp":
+    case "image/svg+xml":
+    case "image/bmp":
+    case "image/tiff":
+      return "image";
+    case "video/mp4":
+    case "video/webm":
+    case "video/quicktime":
+    case "video/x-msvideo":
+    case "video/mpeg":
+    case "video/ogg":
+    case "video/3gpp":
+    case "audio/mpeg":
+    case "audio/wav":
+    case "audio/ogg":
+    case "audio/aac":
+    case "audio/flac":
+    case "audio/x-m4a":
+    case "audio/mp4":
+    case "audio/webm":
+    case "audio/opus":
+      return "video";
+    default:
+      return "raw";
   }
 };
 const SPEEDS = [0.75, 1, 1.5, 2];
@@ -7587,72 +7671,8 @@ const AudioMessage = ({ url, className, isMyMessage }) => {
     )
   ] });
 };
-const EMPTY_VIEWERS = [];
-const PendingIndicator = () => /* @__PURE__ */ jsx("div", { className: "absolute -left-4 top-1/2 -translate-y-1/2 flex items-center justify-center", children: /* @__PURE__ */ jsx("div", { className: "w-2 h-2 aspect-square animate-spin rounded-full border-[1.5px] border-gray-300 border-t-transparent" }) });
-const getMessageBubbleShapeClass = (isMyMessage, isFirstMessageInGroup, isLastMessageInGroup, isOnlyMessageInGroup) => clsx(
-  isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
-  isOnlyMessageInGroup && "!rounded-3xl",
-  isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
-  isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
-  !isFirstMessageInGroup && !isLastMessageInGroup && (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none")
-);
-const MessageRowComponent = ({
-  message,
-  prevMessage,
-  nextMessage,
-  userId,
-  conversationId,
-  isGroup,
-  className,
-  userInfo,
-  userProfileMap,
-  isLastMessage
-}) => {
-  const { t: t2 } = useTranslation();
-  const [hasDelayed, setHasDelayed] = useState(false);
-  const { getDiffBetween, formatTime, formatSmartTimestamp } = useFormatTime();
-  const { renderSystemMessage } = useRenderConversationContent();
-  const { onOpen: openMediaViewer } = useMediaViewer();
-  const isPending = message.status === "pending";
-  const isFailed = message.status === "failed";
-  const isSystem = isSystemMessage(message.type);
-  const timeoutRef = useRef(null);
-  const seenBy = useMessageStore((state) => {
-    const convId = conversationId || "";
-    const messageSeq = message.sequenceNumber || 0;
-    return state.messageUserSeenMap?.[convId]?.[messageSeq] ?? EMPTY_VIEWERS;
-  });
-  const isShowTime = !prevMessage || isSystemMessage(prevMessage.type) || getDiffBetween(message.createdAt, prevMessage.createdAt, "minute") > 30;
-  const isPrevMessageShowTime = !!nextMessage && getDiffBetween(message.createdAt, nextMessage.createdAt, "minute") > 30;
-  const isLastMessageInGroup = !prevMessage || prevMessage.senderId !== message.senderId || isShowTime;
-  const isFirstMessageInGroup = !nextMessage || nextMessage.senderId !== message.senderId || isPrevMessageShowTime;
-  const isOnlyMessageInGroup = isFirstMessageInGroup && isLastMessageInGroup;
-  const isMyMessage = message.senderId === userId;
-  const isShowName = isLastMessageInGroup && !isMyMessage && isGroup;
-  const hasAvatar = isFirstMessageInGroup;
-  const isFooterVisible = isLastMessage && isMyMessage;
-  const isTextMessage = message.type === MessageType.Text;
-  const isMediaMessage = message.type === MessageType.Media;
-  const isImageMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.Image);
-  const isVideoMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.Video);
-  const isAudioMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.Audio);
-  const isFileMessage = isMediaMessage && message.media?.some((media) => media.type === MediaType.File);
-  const stackImage = message.media?.filter((media) => media.type === MediaType.Image) || [];
-  const messageBubbleShapeClass = getMessageBubbleShapeClass(
-    isMyMessage,
-    isFirstMessageInGroup,
-    isLastMessageInGroup,
-    isOnlyMessageInGroup
-  );
-  const isOnlyEmoji = isTextMessage && message.content.trim() !== "" && (() => {
-    const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
-    const segments = [...segmenter.segment(message.content.trim())].map((s) => s.segment);
-    return segments.length < 6 && segments.every(
-      (char) => new RegExp("\\p{Emoji_Presentation}|\\p{Emoji}\\uFE0F|\\p{Emoji_Modifier_Base}", "u").test(char)
-    );
-  })();
-  const renderOnlyEmojiMessage = () => /* @__PURE__ */ jsx("div", { className: clsx("text-4xl", isMyMessage ? "text-white" : "text-text-main"), children: message.content });
-  const renderTextMessage = () => /* @__PURE__ */ jsxs(
+const renderTextMessage = (isMyMessage, isFailed, messageBubbleShapeClass, content, hasDelayed) => {
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -7669,14 +7689,43 @@ const MessageRowComponent = ({
             wrap: "whitespace-pre-wrap",
             weight: "regular",
             className: clsx(isMyMessage ? "text-white " : "text-text-main"),
-            children: message.content
+            children: content
           }
         ),
         hasDelayed && /* @__PURE__ */ jsx(PendingIndicator, {})
       ]
     }
   );
-  const renderFileMessage = () => /* @__PURE__ */ jsxs(
+};
+const renderVideoMessage = (media, conversationId, messageBubbleShapeClass) => {
+  const { onOpen: openMediaViewer } = useMediaViewer();
+  return /* @__PURE__ */ jsx(
+    VideoMessage,
+    {
+      onFrameClick: () => {
+        openMediaViewer({
+          id: media.id,
+          url: media.url,
+          type: MediaType.Video,
+          conversationId
+        });
+      },
+      onFullscreenToggle: () => {
+        openMediaViewer({
+          id: media.id,
+          url: media.url,
+          type: MediaType.Video,
+          conversationId
+        });
+      },
+      className: messageBubbleShapeClass,
+      url: media.url
+    }
+  );
+};
+const renderFileMessage = (isMyMessage, isFailed, media, messageBubbleShapeClass, hasDelayed) => {
+  const { t: t2 } = useTranslation();
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -7704,9 +7753,9 @@ const MessageRowComponent = ({
                 "underline cursor-pointer break-all leading-tight",
                 isMyMessage ? "text-text-reverse-main" : "text-text-main"
               ),
-              onClick: () => window.open(message.media?.[0].url, "_blank"),
+              onClick: () => window.open(media.url, "_blank"),
               wrap: "whitespace-pre-wrap",
-              children: message.media?.[0].metadata?.name || t2("conversations.file")
+              children: media.metadata?.name || t2("conversations.file")
             }
           ),
           /* @__PURE__ */ jsx(
@@ -7716,7 +7765,7 @@ const MessageRowComponent = ({
                 "text-[10px] text-muted-foreground mt-1",
                 isMyMessage ? "text-text-reverse-main" : "text-text-main"
               ),
-              children: message.media?.[0].metadata?.size ? formatFileSize(message.media?.[0].metadata?.size) : "Unknown size"
+              children: media.metadata?.size ? formatFileSize(media.metadata?.size) : "Unknown size"
             }
           )
         ] }),
@@ -7726,8 +7775,8 @@ const MessageRowComponent = ({
             className: "flex-shrink-0 hover:text-primary transition-colors ml-1",
             onClick: () => {
               const anchor = document.createElement("a");
-              anchor.href = message.media?.[0].url || "";
-              anchor.download = message.media?.[0].metadata?.name || "file";
+              anchor.href = media.url || "";
+              anchor.download = media.metadata?.name || "file";
               document.body.appendChild(anchor);
               anchor.click();
               document.body.removeChild(anchor);
@@ -7747,41 +7796,23 @@ const MessageRowComponent = ({
       ]
     }
   );
-  const renderVideoMessage = () => /* @__PURE__ */ jsx(
-    VideoMessage,
-    {
-      onFrameClick: () => {
-        openMediaViewer({
-          id: message.media?.[0].id || "",
-          url: message.media?.[0].url,
-          type: MediaType.Video,
-          conversationId
-        });
-      },
-      onFullscreenToggle: () => {
-        openMediaViewer({
-          id: message.media?.[0].id || "",
-          url: message.media?.[0].url,
-          type: MediaType.Video,
-          conversationId
-        });
-      },
-      className: clsx(messageBubbleShapeClass),
-      url: message.media?.[0].url
-    }
-  );
-  const renderAudioMessage = () => /* @__PURE__ */ jsx(
-    AudioMessage,
-    {
-      className: clsx(
-        isMyMessage ? isFailed ? "bg-primary-800" : "bg-primary-600" : "bg-bg-fourth",
-        messageBubbleShapeClass
-      ),
-      url: message.media?.[0].url,
-      isMyMessage
-    }
-  );
-  const renderImageStackMessage = () => /* @__PURE__ */ jsxs(
+};
+const renderOnlyEmojiMessage = (isMyMessage, content) => /* @__PURE__ */ jsx("div", { className: clsx("text-4xl", isMyMessage ? "text-white" : "text-text-main"), children: content });
+const renderAudioMessage = (isMyMessage, isFailed, media, messageBubbleShapeClass) => /* @__PURE__ */ jsx(
+  AudioMessage,
+  {
+    className: clsx(
+      isMyMessage ? isFailed ? "bg-primary-800" : "bg-primary-600" : "bg-bg-fourth",
+      messageBubbleShapeClass
+    ),
+    url: media.url,
+    isMyMessage
+  }
+);
+const renderImageStackMessage = (isMyMessage, messageBubbleShapeClass, stackImage, conversationId, hasDelayed) => {
+  const { onOpen: openMediaViewer } = useMediaViewer();
+  if (!stackImage) throw new Error("Stack image is required for rendering image stack message");
+  return /* @__PURE__ */ jsxs(
     "div",
     {
       className: clsx(
@@ -7838,17 +7869,20 @@ const MessageRowComponent = ({
       ]
     }
   );
-  const renderSingleImageMessage = () => /* @__PURE__ */ jsxs("div", { className: clsx("relative rounded-2xl h-fit overflow-hidden", messageBubbleShapeClass), children: [
+};
+const renderSingleImageMessage = (image, messageBubbleShapeClass, conversationId, hasDelayed) => {
+  const { onOpen: openMediaViewer } = useMediaViewer();
+  return /* @__PURE__ */ jsxs("div", { className: clsx("relative rounded-2xl h-fit overflow-hidden", messageBubbleShapeClass), children: [
     /* @__PURE__ */ jsx(
       "img",
       {
-        src: stackImage[0].url,
+        src: image.url,
         alt: "Image 1",
         className: "w-[200px] h-[200px] object-cover cursor-pointer",
         onClick: () => {
           openMediaViewer({
-            id: stackImage[0].id || "",
-            url: stackImage[0].url,
+            id: image.id || "",
+            url: image.url,
             type: MediaType.Image,
             conversationId
           });
@@ -7857,6 +7891,36 @@ const MessageRowComponent = ({
     ),
     hasDelayed && /* @__PURE__ */ jsx(PendingIndicator, {})
   ] });
+};
+const EMPTY_VIEWERS = [];
+const MessageRowComponent = ({
+  message,
+  userId,
+  conversationId,
+  className,
+  userInfo,
+  userProfileMap,
+  meta
+}) => {
+  const { t: t2 } = useTranslation();
+  const [hasDelayed, setHasDelayed] = useState(false);
+  const { formatTime, formatSmartTimestamp } = useFormatTime();
+  const { renderSystemMessage } = useRenderConversationContent();
+  const isPending = message.status === "pending";
+  const isFailed = message.status === "failed";
+  const isSystem = isSystemMessage(message.type);
+  const timeoutRef = useRef(null);
+  const seenBy = useMessageStore(
+    useShallow(
+      (state) => state.messageUserSeenMap?.[conversationId || ""]?.[message.sequenceNumber || 0] ?? EMPTY_VIEWERS
+    )
+  );
+  const isFooterVisible = meta._isLastMessage && meta._isMyMessage;
+  const isTextMessage = meta._type === MessageRenderType.Text;
+  const stackImage = useMemo(
+    () => message.media?.filter((m) => m.type === MediaType.Image) ?? [],
+    [message.media]
+  );
   useEffect(() => {
     if (!isPending) {
       setHasDelayed(false);
@@ -7880,28 +7944,28 @@ const MessageRowComponent = ({
     {
       className: clsx(
         "flex flex-col",
-        isLastMessageInGroup ? "mt-[0.5rem]" : "mt-0",
-        isLastMessage ? "mb-[0.5rem]" : "mb-0",
+        meta._isLastInGroup ? "mt-[0.5rem]" : "mt-0",
+        meta._isLastMessage ? "mb-[0.5rem]" : "mb-0",
         className
       ),
       children: [
-        isShowTime && /* @__PURE__ */ jsx(Text, { sz: "xs", className: "text-center my-2", children: formatSmartTimestamp(message.createdAt) }),
+        meta._isShowTime && /* @__PURE__ */ jsx(Text, { sz: "xs", className: "text-center my-2", children: formatSmartTimestamp(message.createdAt) }),
         /* @__PURE__ */ jsxs(
           "div",
           {
             className: clsx(
               "flex gap-2 w-full",
-              isMyMessage ? "flex-row-reverse" : "flex-row",
+              meta._isMyMessage ? "flex-row-reverse" : "flex-row",
               hasDelayed && "opacity-50"
             ),
             children: [
-              !isMyMessage && /* @__PURE__ */ jsx(
+              !meta._isMyMessage && /* @__PURE__ */ jsx(
                 Avatar,
                 {
                   className: clsx(
                     "flex-shrink-0 self-end",
-                    isMyMessage && "order-2",
-                    !hasAvatar && "invisible"
+                    meta._isMyMessage && "order-2",
+                    !meta._isShowAvatar && "invisible"
                   ),
                   src: message.senderAvatarUrl,
                   alt: "Avatar",
@@ -7909,24 +7973,70 @@ const MessageRowComponent = ({
                 }
               ),
               /* @__PURE__ */ jsxs("div", { className: clsx("flex flex-col", "max-w-[75%]"), children: [
-                isShowName && /* @__PURE__ */ jsx(
+                meta._isShowName && /* @__PURE__ */ jsx(
                   Text,
                   {
                     sz: "xs",
                     className: clsx(
                       "mb-1 min-h-[1rem]",
-                      isMyMessage ? "text-right mr-1" : "text-left ml-1"
+                      meta._isMyMessage ? "text-right mr-1" : "text-left ml-1"
                     ),
                     children: userInfo?.fullName
                   }
                 ),
-                isOnlyEmoji ? renderOnlyEmojiMessage() : null,
-                isTextMessage && !isOnlyEmoji && renderTextMessage(),
-                isFileMessage && renderFileMessage(),
-                isVideoMessage && renderVideoMessage(),
-                isAudioMessage && renderAudioMessage(),
-                isImageMessage && stackImage.length > 1 && renderImageStackMessage(),
-                isImageMessage && stackImage.length === 1 && renderSingleImageMessage(),
+                meta._isOnlyEmoji ? renderOnlyEmojiMessage(meta._isMyMessage, message.content) : null,
+                isTextMessage && !meta._isOnlyEmoji && renderTextMessage(
+                  meta._isMyMessage,
+                  isFailed,
+                  meta._messageBubbleShapeClass,
+                  message.content,
+                  hasDelayed
+                ),
+                meta._type === MessageRenderType.File && renderFileMessage(
+                  meta._isMyMessage,
+                  isFailed,
+                  {
+                    url: message.media?.[0]?.url || "",
+                    metadata: {
+                      name: message.media?.[0]?.metadata?.filename,
+                      size: message.media?.[0]?.metadata?.size
+                    }
+                  },
+                  meta._messageBubbleShapeClass,
+                  hasDelayed
+                ),
+                meta._type === MessageRenderType.Video && renderVideoMessage(
+                  {
+                    id: message.media?.[0]?.id || "",
+                    url: message.media?.[0]?.url || ""
+                  },
+                  conversationId,
+                  meta._messageBubbleShapeClass
+                ),
+                meta._type === MessageRenderType.Audio && renderAudioMessage(
+                  meta._isMyMessage,
+                  isFailed,
+                  {
+                    url: message.media?.[0]?.url || ""
+                  },
+                  meta._messageBubbleShapeClass
+                ),
+                meta._type === MessageRenderType.Image && stackImage.length > 1 && renderImageStackMessage(
+                  meta._isMyMessage,
+                  meta._messageBubbleShapeClass,
+                  message.media,
+                  conversationId,
+                  hasDelayed
+                ),
+                meta._type === MessageRenderType.Image && stackImage.length === 1 && renderSingleImageMessage(
+                  {
+                    id: stackImage[0].id || "",
+                    url: stackImage[0].url || ""
+                  },
+                  meta._messageBubbleShapeClass,
+                  conversationId,
+                  hasDelayed
+                ),
                 (seenBy?.length === 0 || seenBy.length === 1 && seenBy[0].userId === userId) && /* @__PURE__ */ jsx(
                   "div",
                   {
@@ -7937,7 +8047,7 @@ const MessageRowComponent = ({
                     children: isFooterVisible && !isFailed && !isPending && /* @__PURE__ */ jsxs(Text, { sz: "xs", children: [
                       t2("conversations.sent"),
                       " ",
-                      getDiffBetween(message.createdAt, /* @__PURE__ */ new Date(), "second") > 60 && /* @__PURE__ */ jsx(Text, { sz: "xs", children: formatTime(message.createdAt) })
+                      meta._isOlderThanOneMinute && /* @__PURE__ */ jsx(Text, { sz: "xs", children: formatTime(message.createdAt) })
                     ] })
                   }
                 )
@@ -7962,6 +8072,10 @@ const MessageRowComponent = ({
     }
   );
 };
+const SystemMessageRow = memo(({ message }) => {
+  const { renderSystemMessage } = useRenderConversationContent();
+  return /* @__PURE__ */ jsx("div", { className: "flex justify-center w-full my-2", children: /* @__PURE__ */ jsx(Text, { sz: "sm", className: "opacity-80", children: renderSystemMessage(message) }) });
+});
 const MiniAvatar = memo(
   ({ uid, seenAt, userInfo }) => {
     const [showTooltip, setShowTooltip] = useState(false);
@@ -8011,15 +8125,16 @@ function InfiniteScrollReverse({
   const sentinelRef = useRef(null);
   const isFetchingRef = useRef(false);
   const reversedItems = useMemo(() => [...items].reverse(), [items]);
-  const prevSizeRef = useRef(0);
   const isScrolledUpRef = useRef(false);
-  const prevFirstKeyRef = useRef(null);
-  const isCompensatingRef = useRef(false);
+  const anchorRef = useRef({
+    key: null,
+    start: 0
+  });
   const rowVirtualizer = useVirtualizer({
     count: reversedItems.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 70,
-    overscan: 10,
+    overscan: 4,
     getItemKey: (index) => itemKey(reversedItems[index])
   });
   const handleScroll = (e) => {
@@ -8028,21 +8143,24 @@ function InfiniteScrollReverse({
   useLayoutEffect(() => {
     const el = parentRef.current;
     if (!el) return;
-    const currentSize = rowVirtualizer.getTotalSize();
-    const sizeDiff = currentSize - prevSizeRef.current;
-    const currentFirstKey = reversedItems.length > 0 ? itemKey(reversedItems[0]) : null;
-    if (currentFirstKey !== prevFirstKeyRef.current) {
-      isCompensatingRef.current = true;
-      prevFirstKeyRef.current = currentFirstKey;
+    const virtualItems = rowVirtualizer.getVirtualItems();
+    if (virtualItems.length === 0) return;
+    if (isScrolledUpRef.current && anchorRef.current.key !== null) {
+      const prevAnchor = virtualItems.find((v) => v.key === anchorRef.current.key);
+      if (prevAnchor) {
+        const delta = prevAnchor.start - anchorRef.current.start;
+        if (delta !== 0) {
+          el.scrollTop += delta;
+        }
+      }
     }
-    if (isCompensatingRef.current && isScrolledUpRef.current && sizeDiff !== 0) {
-      el.scrollTop += sizeDiff;
-    }
-    if (sizeDiff === 0) {
-      isCompensatingRef.current = false;
-    }
-    prevSizeRef.current = currentSize;
-  }, [rowVirtualizer.getTotalSize(), reversedItems, itemKey]);
+    const currentScrollTop = el.scrollTop;
+    const stableItem = virtualItems.find((v) => v.start >= currentScrollTop) || virtualItems[0];
+    anchorRef.current = {
+      key: stableItem.key,
+      start: stableItem.start
+    };
+  });
   useEffect(() => {
     const el = parentRef.current;
     if (!el) return;
@@ -8123,8 +8241,8 @@ function InfiniteScrollReverse({
       className: clsx("w-full overflow-y-auto relative", className),
       style: {
         height: "100%",
-        minHeight: "400px",
-        transform: "scaleY(-1)"
+        transform: "scaleY(-1)",
+        overflowAnchor: "none"
       },
       children: [
         /* @__PURE__ */ jsx(
@@ -8161,9 +8279,31 @@ function InfiniteScrollReverse({
     }
   );
 }
+const isOnlyEmoji = (text) => {
+  const emojiRegex = new RegExp("^(?:\\p{Emoji_Presentation}|\\p{Emoji}\\uFE0F)$", "u");
+  return emojiRegex.test(text);
+};
+const getMessageBubbleShapeClass = (isMyMessage, isFirstMessageInGroup, isLastMessageInGroup, isOnlyMessageInGroup) => clsx(
+  isMyMessage ? "rounded-l-3xl self-end" : "rounded-r-3xl self-start",
+  isOnlyMessageInGroup && "!rounded-3xl",
+  isLastMessageInGroup && (isMyMessage ? "rounded-br-none" : "rounded-bl-none"),
+  isFirstMessageInGroup && (isMyMessage ? "rounded-tr-none" : "rounded-tl-none"),
+  !isFirstMessageInGroup && !isLastMessageInGroup && (isMyMessage ? "rounded-tr-none rounded-br-none" : "rounded-tl-none rounded-bl-none")
+);
+const getMessageType = (msg) => {
+  if (msg.type === MessageType.Text) return MessageRenderType.Text;
+  if (msg.type === MessageType.Media) {
+    if (msg.media?.some((media) => media.type === MediaType.Image)) return MessageRenderType.Image;
+    if (msg.media?.some((media) => media.type === MediaType.Video)) return MessageRenderType.Video;
+    if (msg.media?.some((media) => media.type === MediaType.Audio)) return MessageRenderType.Audio;
+    if (msg.media?.some((media) => media.type === MediaType.File)) return MessageRenderType.File;
+  }
+  return MessageRenderType.System;
+};
 const MessageList = forwardRef(function MessageList2({ isGroup, className, conversationId, lastSeen, parentRef }, ref) {
   const { t: t2 } = useTranslation();
   const { userId } = useAuth();
+  const { getDiffBetween } = useFormatTime();
   const localScrollRef = useRef(null);
   const scrollRef = parentRef || localScrollRef;
   const prevNewestMessageId = useRef(null);
@@ -8195,7 +8335,7 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
       if (newestMessage.senderId === userId) {
         requestAnimationFrame(() => {
           if (scrollRef.current) {
-            scrollRef.current.scrollTo({ top: 0, behavior: "smooth" });
+            scrollRef.current.scrollTo({ top: 0, behavior: "auto" });
           }
         });
       }
@@ -8203,12 +8343,40 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
     }
   }, [messages, userId, scrollRef]);
   const messagesWithMetadata = useMemo(() => {
-    return messages.map((msg, index) => ({
-      ...msg,
-      _prev: index - 1 >= 0 ? messages[index - 1] : void 0,
-      _next: index + 1 < messages.length ? messages[index + 1] : void 0,
-      _isLastMessage: index === 0
-    }));
+    return messages.map((msg, index) => {
+      const prev = index > 0 ? messages[index - 1] : null;
+      const next = index < messages.length - 1 ? messages[index + 1] : null;
+      const isShowTime = !prev || getDiffBetween(msg.createdAt, prev.createdAt, "minute") > 30;
+      const isNextShowTime = next && getDiffBetween(next.createdAt, msg.createdAt, "minute") > 30;
+      const isFirstInGroup = !next || next.senderId !== msg.senderId || isNextShowTime;
+      const isLastInGroup = !prev || prev.senderId !== msg.senderId || isShowTime;
+      const isOnlyOneInGroup = isFirstInGroup && isLastInGroup;
+      const isMyMessage = msg.senderId === userId;
+      const isShowAvatar = isLastInGroup && !isMyMessage;
+      const messageBubbleShapeClass = getMessageBubbleShapeClass(
+        isMyMessage,
+        isFirstInGroup || false,
+        isLastInGroup,
+        isOnlyOneInGroup || false
+      );
+      return {
+        ...msg,
+        meta: {
+          _isFirstInGroup: isFirstInGroup || false,
+          _isLastInGroup: isLastInGroup,
+          _isOnlyOneInGroup: isOnlyOneInGroup || false,
+          _isLastMessage: index === messages.length - 1,
+          _isShowTime: isShowTime,
+          _isShowAvatar: isShowAvatar,
+          _isMyMessage: isMyMessage,
+          _messageBubbleShapeClass: messageBubbleShapeClass,
+          _isOnlyEmoji: isOnlyEmoji(msg.content),
+          _type: getMessageType(msg),
+          _isShowName: isLastInGroup && isGroup && !isMyMessage || false,
+          _isOlderThanOneMinute: getDiffBetween(msg.createdAt, /* @__PURE__ */ new Date(), "second") > 60
+        }
+      };
+    });
   }, [messages]);
   const senderIds = useMemo(() => {
     return [...new Set(participantIds)];
@@ -8249,33 +8417,25 @@ const MessageList = forwardRef(function MessageList2({ isGroup, className, conve
       scrollRef,
       items: messagesWithMetadata,
       loadMore: fetchNextPage,
-      className: clsx("h-full px-1 sm:scrollbar-default scrollbar-hide", className),
+      className: clsx("px-1 sm:scrollbar-default scrollbar-hide", className),
       renderItem: (item) => {
-        return /* @__PURE__ */ jsx(
-          "div",
+        const shouldAnimation = item.meta._isLastMessage;
+        if (item.type === MessageType.System) return /* @__PURE__ */ jsx(SystemMessageRow, { message: item });
+        return /* @__PURE__ */ jsx("div", { style: shouldAnimation ? { animation: "messageFadeIn 0.3s ease" } : void 0, children: /* @__PURE__ */ jsx(
+          MessageRow,
           {
-            style: {
-              animation: "messageFadeIn 0.3s ease"
-            },
-            children: /* @__PURE__ */ jsx(
-              MessageRow,
-              {
-                message: item,
-                prevMessage: item._prev,
-                nextMessage: item._next,
-                userId,
-                isGroup,
-                conversationId,
-                userInfo: userProfileMap[item?.senderId || ""],
-                userProfileMap,
-                className: "py-[0.5px] px-1"
-              }
-            )
+            message: item,
+            userId,
+            conversationId,
+            userInfo: userProfileMap[item?.senderId || ""],
+            userProfileMap,
+            className: "py-[0.5px] px-1",
+            meta: item.meta
           }
-        );
+        ) });
       },
       hasMore: !!hasNextPage,
-      itemKey: (item) => item.id || item.sequenceNumber,
+      itemKey: (item) => item.clientTempId || item.id || item.sequenceNumber,
       end: lastSeen,
       spinner: /* @__PURE__ */ jsx("div", { className: "flex justify-center w-full select-none", children: /* @__PURE__ */ jsxs(
         "div",
@@ -8362,69 +8522,6 @@ class UploadService {
   }
 }
 const uploadService = new UploadService();
-const getMediaTypeFromFileType = (fileType) => {
-  switch (fileType) {
-    case "image/jpeg":
-    case "image/png":
-    case "image/gif":
-    case "image/webp":
-    case "image/svg+xml":
-    case "image/bmp":
-    case "image/tiff":
-      return MediaType.Image;
-    case "video/mp4":
-    case "video/webm":
-    case "video/quicktime":
-    case "video/x-msvideo":
-    case "video/mpeg":
-    case "video/ogg":
-    case "video/3gpp":
-      return MediaType.Video;
-    case "audio/mpeg":
-    case "audio/wav":
-    case "audio/ogg":
-    case "audio/aac":
-    case "audio/flac":
-    case "audio/x-m4a":
-    case "audio/mp4":
-    case "audio/webm":
-    case "audio/opus":
-      return MediaType.Audio;
-    default:
-      return MediaType.File;
-  }
-};
-const getCloudinaryResourceTypeFromFileType = (fileType) => {
-  switch (fileType) {
-    case "image/jpeg":
-    case "image/png":
-    case "image/gif":
-    case "image/webp":
-    case "image/svg+xml":
-    case "image/bmp":
-    case "image/tiff":
-      return "image";
-    case "video/mp4":
-    case "video/webm":
-    case "video/quicktime":
-    case "video/x-msvideo":
-    case "video/mpeg":
-    case "video/ogg":
-    case "video/3gpp":
-    case "audio/mpeg":
-    case "audio/wav":
-    case "audio/ogg":
-    case "audio/aac":
-    case "audio/flac":
-    case "audio/x-m4a":
-    case "audio/mp4":
-    case "audio/webm":
-    case "audio/opus":
-      return "video";
-    default:
-      return "raw";
-  }
-};
 const useChatUpload = () => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
@@ -8613,17 +8710,6 @@ const compressVideo = async (file, options) => {
   } finally {
     URL.revokeObjectURL(sourceUrl);
   }
-};
-const MAX_FILE_SIZE = 50 * 1024 * 1024;
-const validateFileSize = (file, maxSize = MAX_FILE_SIZE) => {
-  if (file.size > maxSize) {
-    return {
-      valid: false,
-      error: "FILE_TOO_LARGE"
-      /* FILE_TOO_LARGE */
-    };
-  }
-  return { valid: true };
 };
 const ChatInput = ({
   conversationId,
@@ -9044,7 +9130,7 @@ const ChatWindow = ({ className, conversationId }) => {
     "div",
     {
       className: clsx(
-        "w-[330px] h-[450px] bg-bg-main rounded-xl shadow-lg overflow-hidden flex flex-col",
+        "w-[330px] h-[450px] bg-bg-main rounded-xl shadow-lg flex flex-col",
         "border border-bg-seventh shadow-xl",
         className
       ),
@@ -9073,7 +9159,7 @@ const ChatWindow = ({ className, conversationId }) => {
           /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: handleOnMinimum, children: /* @__PURE__ */ jsx("i", { className: "fas fa-minus" }) }),
           /* @__PURE__ */ jsx(MiniButton, { sz: "sm", onClick: handleOnClose, children: /* @__PURE__ */ jsx("i", { className: "fa-solid fa-xmark" }) })
         ] }),
-        /* @__PURE__ */ jsxs("div", { ref: scrollRef, className: "flex flex-col px-0 flex-1 overflow-y-auto bg-bg-second", children: [
+        /* @__PURE__ */ jsxs("div", { className: "flex-1 min-h-0 flex flex-col bg-bg-second", children: [
           tempTargetId ? /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
             /* @__PURE__ */ jsxs("div", { className: "relative mb-3", children: [
               /* @__PURE__ */ jsx(Avatar, { src: chatAvatar, alt: "Avatar", sz: "sm" }),
@@ -9086,10 +9172,9 @@ const ChatWindow = ({ className, conversationId }) => {
           !tempTargetId && /* @__PURE__ */ jsx(
             MessageList,
             {
-              className: "px-2",
               conversationId,
               isGroup: conversationData?.isGroup,
-              parentRef: scrollRef,
+              className: "h-full w-full",
               lastSeen: /* @__PURE__ */ jsxs("div", { className: "flex flex-col justify-center items-center h-full text-center px-4", children: [
                 /* @__PURE__ */ jsx("div", { className: "relative mb-4", children: /* @__PURE__ */ jsx(Avatar, { src: conversationData?.avatarUrl || "", alt: "Avatar", sz: "md" }) }),
                 /* @__PURE__ */ jsx(Text, { sz: "sm", weight: "bold", children: chatTitle }),
@@ -9102,7 +9187,7 @@ const ChatWindow = ({ className, conversationId }) => {
         /* @__PURE__ */ jsx(
           ChatInput,
           {
-            className: "!bg-bg-main h-fit py-2 pr-1",
+            className: "shrink-0 !bg-bg-main py-2 pr-1",
             conversationId: !tempTargetId ? conversationId : void 0,
             correlationId: tempTargetId ? conversationId : void 0,
             receiverId: tempTargetId,
@@ -10625,7 +10710,7 @@ const GoogleCallbackPage = lazy(
 const OnboardingPage = lazy(() => import("./assets/onboarding-page-B0p32zww.js"));
 const FatalkPage = lazy(() => import("./assets/fatalk-page-WHXo160A.js"));
 const ConversationPage = lazy(
-  () => import("./assets/conversation-page-DP4jcze5.js").then((module) => ({
+  () => import("./assets/conversation-page-C1BlxSmQ.js").then((module) => ({
     default: module.ConversationPage
   }))
 );

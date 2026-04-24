@@ -8,11 +8,9 @@ import { MediaType, MessageType } from "@/types/entities/message.type";
 import clsx from "clsx";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { compressImage } from "@/utils/image-compression";
-import { compressVideo } from "@/utils/video-compression";
-import { validateFileSize, MAX_FILE_SIZE } from "@/utils/file-validation";
 import { useSnackbar } from "@/contexts";
-import { getMediaTypeFromFileType } from "@/utils/media";
+import { getMediaTypeFromFileType, MAX_FILE_SIZE, validateFileSize } from "@/utils/file";
+import { compressImage, compressVideo } from "@/utils/compression";
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;

@@ -1,5 +1,5 @@
 import { uploadService } from "@/api/upload/upload.api";
-import { getCloudinaryResourceTypeFromFileType } from "@/utils/media";
+import { getCloudinaryResourceTypeFromFileType } from "@/utils/file";
 import { useState } from "react";
 
 export const useChatUpload = () => {

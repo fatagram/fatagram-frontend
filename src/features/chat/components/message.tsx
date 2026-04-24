@@ -3,15 +3,17 @@ import { useAuth } from "@/contexts";
 import clsx from "clsx";
 import { forwardRef, useEffect, useImperativeHandle, useMemo, useRef } from "react";
 import { useMessages } from "@/features/hooks/use-message";
-import { MessageRow } from "./message-row";
+import { MessageRow, SystemMessageRow } from "./message-row";
 import { useGetPariticipantsSeen } from "@/features/hooks/use-conversation";
 import { useGetUserProfiles } from "@/features/hooks/use-user-profile";
 import InfiniteScrollReverse from "@/components/ui/utils/infinite-scroll-reverse";
 import { Skeleton } from "@/components/atoms";
 import { useTranslation } from "react-i18next";
 import { Text } from "@/components/atoms";
-import { useFormatTime } from "@/utils/format-time";
-import { getMessageBubbleShapeClass } from "@/utils/message-bubble-shape-class";
+import { useFormatTime } from "@/utils/time";
+import { isOnlyEmoji } from "@/utils/string";
+import { getMessageBubbleShapeClass, getMessageType } from "@/utils/message";
+import { isSystemMessage } from "../helpers/conversation-helpers";
 
 interface MessageListProps extends ComponentProps {
   isGroup?: boolean;
@@ -88,7 +90,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       const isLastInGroup = !prev || prev.senderId !== msg.senderId || isShowTime;
       const isOnlyOneInGroup = isFirstInGroup && isLastInGroup;
       const isMyMessage = msg.senderId === userId;
-      const isShowAvatar = isLastInGroup && !isMyMessage;
+      const isShowAvatar = isFirstInGroup && !isMyMessage;
 
       const messageBubbleShapeClass = getMessageBubbleShapeClass(
         isMyMessage,
@@ -105,9 +107,13 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
           _isOnlyOneInGroup: isOnlyOneInGroup || false,
           _isLastMessage: index === messages.length - 1,
           _isShowTime: isShowTime,
-          _isShowAvatar: isShowAvatar,
+          _isShowAvatar: isShowAvatar || false,
           _isMyMessage: isMyMessage,
           _messageBubbleShapeClass: messageBubbleShapeClass,
+          _isOnlyEmoji: isOnlyEmoji(msg.content),
+          _type: getMessageType(msg),
+          _isShowName: (isLastInGroup && isGroup && !isMyMessage) || false,
+          _isOlderThanOneMinute: getDiffBetween(msg.createdAt, new Date(), "second") > 60,
         },
       };
     });
@@ -156,12 +162,12 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       className={clsx("px-1 sm:scrollbar-default scrollbar-hide", className)}
       renderItem={(item) => {
         const shouldAnimation = item.meta._isLastMessage;
+        if (isSystemMessage(item.type)) return <SystemMessageRow message={item} />;
         return (
           <div style={shouldAnimation ? { animation: "messageFadeIn 0.3s ease" } : undefined}>
             <MessageRow
               message={item}
               userId={userId}
-              isGroup={isGroup}
               conversationId={conversationId}
               userInfo={userProfileMap[item?.senderId || ""]}
               userProfileMap={userProfileMap}

@@ -7,7 +7,7 @@ import { MediaType, MessageType } from "@/types/entities/message.type";
 import { useTranslation } from "react-i18next";
 import { useLocation } from "react-router-dom";
 import { isSystemMessage } from "../helpers/conversation-helpers";
-import { useFormatTime } from "@/utils/format-time";
+import { useFormatTime } from "@/utils/time";
 import { useAuth } from "@/contexts";
 import { useUnreadMessageCountCache } from "@/features/hooks/use-conversation";
 

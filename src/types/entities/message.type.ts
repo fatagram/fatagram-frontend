@@ -12,6 +12,16 @@ export enum MessageType {
   AddParticipant = "AddParticipant",
 }
 
+export enum MessageRenderType {
+  Text = "Text",
+  Image = "Image",
+  Video = "Video",
+  Audio = "Audio",
+  File = "File",
+  System = "System",
+  StackImage = "StackImage",
+}
+
 export enum MediaType {
   Image = "Image",
   Video = "Video",
