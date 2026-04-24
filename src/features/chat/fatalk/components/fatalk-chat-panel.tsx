@@ -144,7 +144,12 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       )}
       ref={panelRef}
     >
-      <div className="flex items-center gap-3 px-2 h-[60px] bg-bg-main border-b border-bg-fourth shrink-0">
+      <div
+        className={clsx(
+          "flex items-center gap-3 px-2 h-[60px] bg-bg-main border-b border-bg-fourth shrink-0",
+          "sticky top-0",
+        )}
+      >
         {isLoadingHeader ? (
           <>
             <Skeleton sz="md" variant="circle" className="w-10" />

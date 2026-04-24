@@ -132,24 +132,24 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
 
   if (initialLoading && !messages.length) {
     return (
-      <div className={clsx("flex flex-col gap-4 py-2 w-full h-full justify-end", className)}>
-        {[...Array(5)].map((_, i) => (
+      <div className={clsx("flex flex-col gap-4 p-2 w-full h-full justify-end", className)}>
+        {[...Array(6)].map((_, i) => (
           <div
             key={i}
             className={clsx(
-              "flex gap-3 w-[80%]",
+              "flex gap-3 !w-[30%] min-w-[200px]",
               i % 2 === 0 ? "self-end flex-row-reverse" : "self-start",
             )}
           >
             <Skeleton sz="md" variant="circle" className="w-8 h-8 shrink-0" />
             <div
               className={clsx(
-                "flex flex-col gap-2 flex-1",
+                "flex flex-col gap-1 flex-1 w-full",
                 i % 2 === 0 ? "items-end" : "items-start",
               )}
             >
-              <Skeleton sz="md" className="w-[80%]" />
-              <Skeleton sz="md" className="w-[30%]" />
+              <Skeleton sz="md" className="!w-[60%] !rounded-xl" />
+              <Skeleton sz="md" className="!w-[30%] !rounded-xl" />
             </div>
           </div>
         ))}
