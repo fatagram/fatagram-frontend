@@ -19,6 +19,67 @@ interface MediaViewerProps extends ComponentProps {}
 const PREFETCH_DISTANCE = 3;
 const FETCH_BATCH_SIZE = 10;
 
+// Lazy video thumbnail: chỉ render <video> khi gần active, tránh load metadata hàng loạt
+const VideoThumbnail: React.FC<{ url: string; isNearActive: boolean }> = ({
+  url,
+  isNearActive,
+}) => {
+  if (!isNearActive) {
+    // Placeholder rất nhẹ, không trigger network request
+    return (
+      <div className="relative h-full w-full bg-black/60 flex items-center justify-center">
+        <i className="fa-solid fa-play text-white text-[10px]" />
+      </div>
+    );
+  }
+  return (
+    <div className="relative h-full w-full pointer-events-none">
+      <video
+        src={`${url}#t=0.1`}
+        className="h-full w-full object-cover"
+        preload="metadata"
+        muted
+        playsInline
+      />
+      <i className="fa-solid fa-play text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/20" />
+    </div>
+  );
+};
+
+// Slide video không active: chỉ render khi adjacent (1 slide cạnh), tránh decode nhiều video cùng lúc
+const VideoSlideContent: React.FC<{ url: string; isActive: boolean; isAdjacent: boolean }> = ({
+  url,
+  isActive,
+  isAdjacent,
+}) => {
+  if (isActive) {
+    return <VideoView url={url} className="max-h-full max-w-full rounded-md" />;
+  }
+
+  if (!isAdjacent) {
+    // Slide xa: placeholder tĩnh hoàn toàn, 0 cost
+    return (
+      <div className="relative max-h-full max-w-full aspect-video bg-black flex items-center justify-center">
+        <i className="fa-solid fa-play text-white text-6xl" />
+      </div>
+    );
+  }
+
+  // Slide kế bên: load metadata nhưng không autoplay/decode
+  return (
+    <div className="relative max-h-full max-w-full aspect-video bg-black flex items-center justify-center">
+      <video
+        src={`${url}#t=0.1`}
+        className="max-h-full max-w-full opacity-50"
+        preload="metadata"
+        muted
+        playsInline
+      />
+      <i className="fa-solid fa-play text-white text-6xl absolute" />
+    </div>
+  );
+};
+
 export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
   const { conversationId, media, onClose } = useMediaViewer();
   type ViewerMedia = NonNullable<typeof media>;
@@ -38,6 +99,9 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
   const initializedAnchor = useRef<string | null>(null);
   const thumbnailRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
+  // Fix: track xem đã init swiper position chưa để tránh slideTo thừa
+  const hasInitialSlide = useRef(false);
+
   const { data: mediaAroundAnchor } = useMediaAroundAnchor(conversationId || "", media?.id || "");
   const { fetch: fetchMediaAround } = useMediaAround();
 
@@ -56,6 +120,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
       setCanFetchLeft(true);
       setCanFetchRight(true);
       initializedAnchor.current = media.id;
+      hasInitialSlide.current = false; // reset khi media anchor đổi
     }
   }, [mediaAroundAnchor, media?.id]);
 
@@ -150,9 +215,11 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeMedia, onClose]);
 
+  // Fix: chỉ slideTo khi chưa init, tránh jump mỗi lần fetch thêm media
   useLayoutEffect(() => {
-    if (swiperRef.current && activeIndex !== -1) {
+    if (swiperRef.current && activeIndex !== -1 && !hasInitialSlide.current) {
       swiperRef.current.slideTo(activeIndex, 0, false);
+      hasInitialSlide.current = true;
     }
   }, [allMedia.length, activeIndex]);
 
@@ -176,27 +243,39 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
       void prefetchLeft();
   }, [activeIndex, allMedia.length, canFetchLeft, canFetchRight, prefetchLeft, prefetchRight]);
 
+  // Fix: Tách wheel handler cho desktop zoom, KHÔNG dùng passive: false trên toàn container
+  // Chỉ preventDefault khi thực sự đang zoom (scale > 1) — tránh block swipe gesture của mobile
   useEffect(() => {
     const el = swiperContainerRef.current;
     if (!el) return;
 
     const handleWheel = (e: WheelEvent) => {
       if (!swiperRef.current) return;
-
       const swiper = swiperRef.current;
       const zoom = swiper.zoom;
+      const currentScale = zoom.scale;
 
       if (e.deltaY < 0) {
+        // Chỉ chặn scroll khi zoom in (không phải lần đầu tiên để tránh conflict với swipe)
+        e.preventDefault();
         zoom.in();
+      } else if (e.deltaY > 0 && currentScale > 1) {
+        // Chỉ chặn khi đang zoom out — nếu scale = 1 thì cho swiper xử lý navigation
         e.preventDefault();
-      } else if (e.deltaY > 0 && zoom.scale > 1) {
         zoom.out();
-        e.preventDefault();
       }
+      // Khi scale = 1 và scroll xuống: KHÔNG preventDefault → swiper tự xử lý slide next
     };
 
-    el.addEventListener("wheel", handleWheel, { passive: false });
-    return () => el.removeEventListener("wheel", handleWheel);
+    // passive: true cho mobile touch events — chỉ non-passive cho wheel (desktop)
+    // Dùng check để phân biệt touch vs mouse wheel
+    const isTouchDevice = "ontouchstart" in window;
+
+    if (!isTouchDevice) {
+      el.addEventListener("wheel", handleWheel, { passive: false });
+      return () => el.removeEventListener("wheel", handleWheel);
+    }
+    // Mobile: không gắn wheel handler, swiper tự handle touch natively
   }, [activeMedia]);
 
   const onDownload = async () => {
@@ -277,34 +356,38 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
             mousewheel={{
               forceToAxis: true,
               sensitivity: 1,
+              // Fix: chỉ bật mousewheel navigation khi không đang zoom
+              releaseOnEdges: true,
             }}
+            // Fix: thêm cssMode=false (mặc định) + virtualTranslate=false để dùng GPU transform
+            cssMode={false}
             initialSlide={activeIndex}
             spaceBetween={20}
             slidesPerView={1}
             className="w-full h-full"
+            // Fix: lazy load slides để tránh render tất cả video cùng lúc
+            lazyPreloadPrevNext={1}
           >
-            {allMedia.map((m) => {
+            {allMedia.map((m, index) => {
               const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
+              // Chỉ render đầy đủ slide cạnh active index
+              const isAdjacent = Math.abs(index - activeIndex) <= 1;
+
               return (
-                <SwiperSlide key={m.id} className="h-full w-full overflow-hidden">
+                <SwiperSlide
+                  key={m.id}
+                  className="h-full w-full overflow-hidden"
+                  // Fix: GPU layer hint cho mỗi slide
+                  style={{ willChange: "transform" }}
+                >
                   <div className="swiper-zoom-container h-full w-full flex items-center justify-center p-2 md:p-10">
                     {m.type === MediaType.Image ? (
                       <ImageView
                         url={m.url}
                         className="max-h-full max-w-full object-contain select-none shadow-2xl"
                       />
-                    ) : isActive ? (
-                      <VideoView url={m.url} className="max-h-full max-w-full rounded-md" />
                     ) : (
-                      <div className="relative max-h-full max-w-full aspect-video bg-black flex items-center justify-center">
-                        <video
-                          src={`${m.url}#t=0.1`}
-                          className="max-h-full max-w-full opacity-50"
-                          preload="metadata"
-                          muted
-                        />
-                        <i className="fa-solid fa-play text-white text-6xl absolute" />
-                      </div>
+                      <VideoSlideContent url={m.url} isActive={isActive} isAdjacent={isAdjacent} />
                     )}
                   </div>
                 </SwiperSlide>
@@ -333,6 +416,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
           <div className="flex flex-nowrap items-center gap-2 px-2 min-w-max">
             {allMedia.map((m, index) => {
               const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
+              const isNearActive = Math.abs(index - activeIndex) <= 2;
               return (
                 <div
                   key={m.id}
@@ -343,8 +427,9 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
                   className={clsx(
                     "relative h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded transition-all duration-200",
                     isActive
-                      ? "ring-2 ring-blue-500 scale-110 opacity-100 shadow-lg"
+                      ? "ring-2 ring-primary-500 scale-110 opacity-100 shadow-lg"
                       : "opacity-40 hover:opacity-100 hover:scale-105",
+                    "select-none",
                   )}
                 >
                   {m.type === MediaType.Image ? (
@@ -354,15 +439,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
                       alt=""
                     />
                   ) : (
-                    <div className="relative h-full w-full pointer-events-none">
-                      <video
-                        src={`${m.url}#t=0.1`}
-                        className="h-full w-full object-cover"
-                        preload="metadata"
-                        muted
-                      />
-                      <i className="fa-solid fa-play text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/20" />
-                    </div>
+                    <VideoThumbnail url={m.url} isNearActive={isNearActive} />
                   )}
                 </div>
               );

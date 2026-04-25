@@ -190,6 +190,7 @@ export const renderImageStackMessage = (
         "[&>img:last-child]:opacity-100",
         "[&>img:nth-last-child(2)]:opacity-80",
         "[&>img:nth-last-child(3)]:opacity-60",
+        "select-none",
       )}
       onClick={() => {
         openMediaViewer({
@@ -250,7 +251,11 @@ export const renderSingleImageMessage = (
 
   return (
     <div
-      className={clsx("relative rounded-2xl h-fit overflow-hidden w-fit", messageBubbleShapeClass)}
+      className={clsx(
+        "relative rounded-2xl h-fit overflow-hidden w-fit",
+        "select-none",
+        messageBubbleShapeClass,
+      )}
     >
       <img
         src={image.url}
