@@ -48,10 +48,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter" && !e.shiftKey) {
-      const isDesktop = e.nativeEvent.isComposing === false && !("ontouchstart" in window);
+    if (e.key === "Enter") {
+      if (e.shiftKey) return;
 
-      if (isDesktop) {
+      const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
+
+      if (!isTouchDevice) {
         e.preventDefault();
         handleSendMessage();
       }
