@@ -120,7 +120,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       <div
         className={clsx(
           "flex flex-col items-center justify-center h-56 gap-4 animate-fade-in",
-          "bg-bg-main sm:bg-bg-second",
+          "bg-bg-main sm:bg-bg-second h-full",
           className,
         )}
       >
