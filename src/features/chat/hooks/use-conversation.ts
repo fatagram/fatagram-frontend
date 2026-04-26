@@ -1,33 +1,24 @@
-import { CursorResult } from "@/api/common/result";
-import { MessageResponseDto } from "@/api/message/dto/message.dto";
 import { conversationService } from "@/api/conversation/conversation.api";
 import { useAuth } from "@/contexts/auth-context";
 import {
-  createSafeQueryOptions,
   SafeQueryCallbacks,
   useSafeInfiniteQueryResult,
   useSafeQueryResult,
 } from "@/hooks/use-safe-query";
 import { CursorQuery } from "@/types/query";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useSnackbar } from "@/contexts";
 import { create } from "zustand";
-import { useMemo } from "react";
+import { convManager, useConversationStore } from "../services/conversation-manager";
+import { useEffect, useMemo, useState } from "react";
+import { useQueryClient } from "@tanstack/react-query";
 
-const conversationKeys = {
+export const CONVERSATION_KEYS = {
   list: (queryParams?: Omit<CursorQuery<string>, "cursor">) =>
     ["conversations", queryParams] as const,
   detail: (conversationId: string) => ["conversation", conversationId] as const,
   withUser: (targetId: string) => ["conversation", "with", targetId] as const,
 };
-
-const conversationDetailQueryOptions = (conversationId: string) =>
-  createSafeQueryOptions<ConversationDto>({
-    queryKey: conversationKeys.detail(conversationId),
-    fn: async () => await conversationService.getConversation(conversationId),
-  });
 
 export const useFetchConversationWith = () => {
   return useResultFetcher(
@@ -41,7 +32,7 @@ export const useGetConversation = (
   enabled?: boolean,
 ) => {
   return useSafeQueryResult({
-    queryKey: conversationKeys.detail(conversationId),
+    queryKey: CONVERSATION_KEYS.detail(conversationId),
     fn: async () => await conversationService.getConversation(conversationId),
     enabled: enabled ?? false,
     options: config,
@@ -72,9 +63,8 @@ export const useMarkConversationAsRead = () => {
 };
 
 export const useLocalMarkAsRead = () => {
-  const { markAsRead } = useConversationCacheMutations();
   return (conversationId: string, messageSeq: number) => {
-    markAsRead(conversationId, messageSeq);
+    convManager.markAsSeen(conversationId, messageSeq);
   };
 };
 
@@ -94,57 +84,70 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
   });
 };
 
-export const useConversations = (queryParams?: Omit<CursorQuery<string>, "cursor">) => {
+export const useGetConversations = (queryParams?: Omit<CursorQuery<string>, "cursor">) => {
   const { userId } = useAuth();
   const queryClient = useQueryClient();
+  const [isHydrated, setIsHydrated] = useState(false);
+  const queryKey = useMemo(() => CONVERSATION_KEYS.list(queryParams), [queryParams]);
 
-  const queryOptions = useMemo(
-    () => ({
-      onSuccess: (data: any) => {
-        const conversations = data.items;
-        if (conversations.length > 0) {
-          const lastMessageSeqs: Record<string, number> = {};
-          conversations.forEach((conv: ConversationDto) => {
-            if (conv.lastMessage) {
-              lastMessageSeqs[conv.id] = conv.lastMessage.sequenceNumber;
-            }
-            const key = ["conversation", "unread-count", conv.id];
-            const serverCount = conv.unreadMessageCount ?? 0;
-            queryClient.setQueryData(key, (oldCount: number | undefined) => {
-              const currentCount = oldCount ?? 0;
-              return Math.max(currentCount, serverCount);
-            });
+  useEffect(() => {
+    const hydrateConversations = async () => {
+      if (!userId || isHydrated) return;
+
+      try {
+        const localData = await convManager.getConversations();
+
+        if (localData && localData.length > 0) {
+          queryClient.setQueryData(queryKey, {
+            pages: [{ items: localData, nextCursor: await convManager.getCursor() }],
+            pageParams: [undefined],
           });
-          useMessageStore.getState().setBulkLastMessages(lastMessageSeqs);
         }
-      },
-    }),
-    [queryClient],
-  );
+      } finally {
+        setIsHydrated(true);
+      }
+    };
 
-  return useSafeInfiniteQueryResult({
-    queryKey: conversationKeys.list(queryParams),
-    fn: async (cursor?: string) =>
-      await conversationService.getConversations({ ...queryParams, cursor }),
-    enabled: !!userId,
+    hydrateConversations();
+  }, [queryKey, userId]);
+
+  const infiniteQuery = useSafeInfiniteQueryResult({
+    queryKey: CONVERSATION_KEYS.list(queryParams),
+    fn: async (cursor?: string) => {
+      return await conversationService.getConversations({
+        ...queryParams,
+        cursor,
+      });
+    },
+    enabled: !!userId && isHydrated,
     staleTime: Infinity,
-    options: queryOptions,
+    options: {
+      onSuccess: (data) => {
+        convManager.appendConversations(data.items, !data.nextCursor);
+      },
+    },
   });
+
+  return {
+    ...infiniteQuery,
+    isLoading: !isHydrated || infiniteQuery.isLoading,
+  };
 };
 
 export const useGetDeltaConversations = () => {
-  const { data } = useConversations();
-  const { mergeDeltaConversations } = useConversationCacheMutations();
-
   const fetcher = useResultFetcher(
     async (since: Date) => await conversationService.getDeltaConversations(since),
   );
 
   const fetcherDelta = async () => {
-    const lastActiveAt = data?.pages[0]?.items[0]?.lastMessage?.createdAt;
-    return await fetcher.fetch(lastActiveAt ?? new Date(0), {
+    const conversations = useConversationStore.getState().conversations;
+    const lastConv = conversations[0];
+
+    const since = lastConv?.lastActiveAt ? new Date(lastConv.lastActiveAt) : new Date(0);
+    return await fetcher.fetch(since, {
       onSuccess: (data) => {
-        mergeDeltaConversations(data ?? []);
+        if (!data || data?.length == 0) return;
+        convManager.appendConversations(data, true);
       },
     });
   };
@@ -152,195 +155,18 @@ export const useGetDeltaConversations = () => {
   return { fetcherDelta };
 };
 
-type ConversationPage<TCursor = string> = {
-  pages: Array<CursorResult<any, TCursor>>;
-  pageParams: unknown[];
-};
-
-export const useConversationCacheMutations = () => {
-  const queryClient = useQueryClient();
-
-  const updateDetailCache = (
-    conversationId: string,
-    updateFn: (conv: ConversationDto) => ConversationDto,
-  ) => {
-    const detailKey = conversationKeys.detail(conversationId);
-    queryClient.setQueryData(detailKey, (oldDetail: ConversationDto | undefined) => {
-      if (!oldDetail) return oldDetail;
-      return updateFn(oldDetail);
-    });
-  };
-
-  const updateConversationInCache = (
-    conversationId: string,
-    updateFn: (conv: ConversationDto) => ConversationDto,
-  ) => {
-    const listKey = conversationKeys.list();
-    queryClient.setQueryData(listKey, (oldData: ConversationPage) => {
-      if (!oldData || !oldData.pages.length) return oldData;
-
-      const newPages = oldData.pages.map((page) => ({
-        ...page,
-        items: page.items.map((item) => (item.id === conversationId ? updateFn(item) : item)),
-      }));
-
-      return {
-        ...oldData,
-        pages: newPages,
-      };
-    });
-
-    updateDetailCache(conversationId, updateFn);
-  };
-
-  const markAsRead = async (conversationId: string, messageSeq: number) => {
-    updateConversationInCache(conversationId, (conv) => ({
-      ...conv,
-      myLastSeenMessageSeq: messageSeq,
-      unreadMessageCount: 0,
-    }));
-  };
-
-  const pushConversationToTop = async (
-    conversationId: string,
-    lastMessage?: MessageResponseDto,
-  ) => {
-    const listKey = conversationKeys.list();
-    const currentData = queryClient.getQueryData<ConversationPage>(listKey);
-    let existedConv: ConversationDto | null = null;
-
-    if (currentData) {
-      for (const page of currentData.pages) {
-        const found = page.items.find((item) => item.id === conversationId);
-        if (found) {
-          existedConv = { ...found, lastMessage: lastMessage || found.lastMessage };
-          break;
-        }
-      }
-    }
-
-    if (!existedConv) {
-      const fetched = await queryClient.fetchQuery(conversationDetailQueryOptions(conversationId));
-      if (!fetched) return;
-      existedConv = { ...fetched, lastMessage: lastMessage || fetched.lastMessage };
-    }
-
-    // Keep the detail cache in sync too. `ChatWindow` reads from `conversationKeys.detail`.
-    queryClient.setQueryData(conversationKeys.detail(conversationId), existedConv);
-
-    queryClient.setQueryData(listKey, (oldData: ConversationPage) => {
-      if (!oldData || !oldData.pages.length) return oldData;
-
-      const newPages = oldData.pages.map((page) => ({
-        ...page,
-        items: page.items.filter((item) => item.id !== conversationId),
-      }));
-
-      newPages[0] = {
-        ...newPages[0],
-        items: [existedConv!, ...newPages[0].items],
-      };
-
-      return {
-        ...oldData,
-        pages: newPages,
-      };
-    });
-  };
-
-  const mergeDeltaConversations = (deltaConvs: ConversationDto[]) => {
-    const listKey = conversationKeys.list();
-
-    queryClient.setQueryData(listKey, (oldData: ConversationPage | undefined) => {
-      if (!oldData || deltaConvs.length === 0) return oldData;
-
-      const deltaMap = new Map(deltaConvs.map((c) => [c.id, c]));
-      const mergedItemsMap = new Map();
-
-      let newPages = oldData.pages.map((page) => {
-        const remainingItems = page.items.filter((item) => {
-          if (deltaMap.has(item.id)) {
-            mergedItemsMap.set(item.id, { ...item, ...deltaMap.get(item.id) });
-            return false;
-          }
-          return true;
-        });
-        return { ...page, items: remainingItems };
-      });
-
-      const topItems = deltaConvs.map((delta) =>
-        mergedItemsMap.has(delta.id) ? mergedItemsMap.get(delta.id) : delta,
-      );
-
-      if (newPages.length > 0) {
-        const orderedTopItems = [...topItems].reverse();
-
-        newPages[0] = {
-          ...newPages[0],
-          items: [...orderedTopItems, ...newPages[0].items],
-        };
-      }
-
-      return { ...oldData, pages: newPages };
-    });
-  };
-
-  return { mergeDeltaConversations, pushConversationToTop, updateConversationInCache, markAsRead };
-};
-
-export const useGetUnreadMessageCount = () => {
+export const useGetTotalUnreadCount = () => {
   const { userId } = useAuth();
   return useSafeQueryResult({
     queryKey: ["conversation", "unread-count", userId],
     fn: async () => await conversationService.getUnreadCount(),
-  });
-};
-
-type UpdateCountFn = (prev: number) => number;
-
-export const useUnreadMessageCountCacheMutations = () => {
-  const queryClient = useQueryClient();
-  const { userId } = useAuth();
-
-  const setUnreadCount = (update: UpdateCountFn) => {
-    const key = ["conversation", "unread-count", userId];
-
-    queryClient.setQueryData<number>(key, (oldCount) => {
-      const currentCount = oldCount ?? 0;
-      const newCount = update(currentCount);
-      return Math.max(0, newCount);
-    });
-  };
-
-  const setUnreadCountForConversation = (conversationId: string, update: UpdateCountFn) => {
-    const key = ["conversation", "unread-count", conversationId];
-
-    queryClient.setQueryData<number>(key, (oldCount) => {
-      const currentCount = oldCount ?? 0;
-      const newCount = update(currentCount);
-      return Math.max(0, newCount);
-    });
-  };
-
-  const getUnreadCountForConversation = (conversationId: string) => {
-    const key = ["conversation", "unread-count", conversationId];
-    return queryClient.getQueryData<number>(key) ?? 0;
-  };
-
-  return { setUnreadCount, setUnreadCountForConversation, getUnreadCountForConversation };
-};
-
-export const useUnreadMessageCountCache = (conversationId: string) => {
-  const { data: unreadCount } = useQuery({
-    queryKey: ["conversation", "unread-count", conversationId],
-    queryFn: () => {
-      return 0;
+    options: {
+      onSuccess: (data) => {
+        convManager.setUnreadCount(data);
+      },
     },
-    enabled: !!conversationId,
-    staleTime: Infinity,
-    initialData: 0,
+    refetchOnReconnect: true,
   });
-  return unreadCount ?? 0;
 };
 
 interface MessageState {

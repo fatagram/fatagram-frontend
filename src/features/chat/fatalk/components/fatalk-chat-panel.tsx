@@ -7,14 +7,14 @@ import {
   useGetConversation,
   useLocalMarkAsRead,
   useMarkConversationAsRead,
-  useMessageStore,
-} from "@/features/hooks/use-conversation";
+} from "@/features/chat/hooks/use-conversation";
 import { ChatInput } from "../../components/chat-input";
 import { useRenderConversationContent } from "../../hooks/use-render-conversation-content";
 import { useTranslation } from "react-i18next";
 import { NotFound } from "@/features/components/not-found";
 import { useNavigate } from "react-router-dom";
-import { useChatStore } from "@/features/hooks/use-chat-store";
+import { useChatStore } from "../../hooks/use-floating-chat";
+import { useConversationStore } from "../../services/conversation-manager";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
@@ -33,7 +33,6 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
 
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
-  const lastMessageSeq = useMessageStore((state) => state.lastMessageMap[conversationId]);
 
   const setFocusOn = useChatStore((state) => state.setFocusOn);
 
@@ -66,8 +65,11 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     const handleUserInteract = async () => {
       if (!document.hasFocus()) return;
       setFocusOn(conversationData.id);
-      const lastMsgSeq = lastMessageSeq || conversationData?.lastMessageNumber;
-      const myLastSeenSeq = conversationData.myLastSeenMessageSeq || 0;
+      const lastMsgSeq =
+        useConversationStore.getState().lastMessageSequenceMap[conversationData.id] ||
+        conversationData.lastMessageNumber;
+      const myLastSeenSeq = useConversationStore.getState().userSeenMap[conversationData.id] || 0;
+
       if (!lastMsgSeq) return;
       if (lastMsgSeq <= myLastSeenSeq) return;
 
@@ -102,7 +104,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("blur", handleWindowBlur);
     };
-  }, [conversationData?.id, lastMessageSeq, markAsRead, markAsReadLocal, setFocusOn]);
+  }, [conversationData?.id, markAsRead, markAsReadLocal, setFocusOn]);
 
   useEffect(() => {
     return () => {

@@ -5,7 +5,7 @@ import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { useAppHub } from "@/features/hub/use-app-hub";
 import { useMessageListenerHandler } from "@/features/chat/message-listener";
 import { useNotificationListenerHandler } from "@/features/notifications/components/notification-listener";
-import { useGetDeltaConversations } from "../hooks/use-conversation";
+import { useGetDeltaConversations } from "../chat/hooks/use-conversation";
 
 type AppHubPayload = MessageResponseDto | SeenDto | NotificationDto;
 

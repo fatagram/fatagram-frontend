@@ -4,7 +4,7 @@ import PageNavbar from "@/components/ui/navigation/page-navbar/page-navbar";
 import { ChatList } from "../../components/chat-list";
 import { useNavigate } from "react-router-dom";
 import { MiniButton } from "@/components/atoms/button";
-import { useCreateGroupConversation, useConversations } from "@/features/hooks/use-conversation";
+import { useCreateGroupConversation } from "@/features/chat/hooks/use-conversation";
 import { useCallback, useState } from "react";
 import { CreateGroupChat } from "../../components/create-group-chat/create-group-chat";
 
@@ -20,8 +20,6 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
   const handleCreateConversation = useCallback(async () => {
     setTab("create");
   }, []);
-
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetching, isPending } = useConversations();
 
   const handleSelectConversation = (_conversationId: string) => {
     onConversationClick?.();
@@ -45,15 +43,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
     >
       {tab === "list" && (
         <div className="flex flex-col px-2 h-full overflow-hidden">
-          <ChatList
-            className="pt-0 h-full"
-            onConversationClick={handleSelectConversation}
-            data={data}
-            fetchNextPage={fetchNextPage}
-            hasNextPage={hasNextPage}
-            isLoading={isLoading || isPending}
-            isFetching={isFetching}
-          />
+          <ChatList className="pt-0 h-full" onConversationClick={handleSelectConversation} />
         </div>
       )}
       {tab === "create" && (

@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { MiniButton } from "@/components/atoms";
 import { ImageView } from "./image-view";
 import { VideoView } from "./video-view";
-import { useMediaAround, useMediaAroundAnchor } from "@/features/hooks/use-conversation";
+import { useMediaAround, useMediaAroundAnchor } from "@/features/chat/hooks/use-conversation";
 import { ComponentProps } from "@/components/common/component-type";
 import { MediaType } from "@/types/entities/message.type";
 

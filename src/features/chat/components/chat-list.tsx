@@ -6,30 +6,20 @@ import { useTranslation } from "react-i18next";
 import { useOpenChat } from "../hooks/use-open-chat";
 import InfiniteScrollFlex from "@/components/ui/utils/infinite-scroll-flex";
 import { ChatItem } from "./chat-item";
-import { CursorResult } from "@/api/common/result";
 import { NotFound } from "@/features/components/not-found";
+import { useGetConversations } from "../hooks/use-conversation";
+import { useConversationStore } from "../services/conversation-manager";
 
 interface ChatListProps extends ComponentProps {
   onConversationClick?: (conversationId: string) => void;
-  data?: { pages: Array<CursorResult<any, string>>; pageParams: unknown[] };
-  fetchNextPage?: () => void;
-  hasNextPage?: boolean;
-  isLoading?: boolean;
-  isFetching?: boolean;
 }
 
-export const ChatList: React.FC<ChatListProps> = ({
-  className,
-  onConversationClick,
-  data,
-  fetchNextPage,
-  hasNextPage,
-  isLoading,
-  isFetching,
-}) => {
+export const ChatList: React.FC<ChatListProps> = ({ className, onConversationClick }) => {
   const { t } = useTranslation();
   const { openChat } = useOpenChat();
-  const conversations = data?.pages.flatMap((page) => page.items) || [];
+
+  const { fetchNextPage, hasNextPage, isLoading, isFetching } = useGetConversations();
+  const conversations = useConversationStore((state) => state.conversations);
 
   const handleConversationClick = useCallback(
     async (conversationId: string) => {

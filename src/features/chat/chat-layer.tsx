@@ -4,7 +4,7 @@ import { BubbleChatList } from "./components/bubble-chat";
 import clsx from "clsx";
 import { useLocation } from "react-router-dom";
 import { useEffect } from "react";
-import { useChatStore } from "../hooks/use-chat-store";
+import { useChatStore } from "./hooks/use-floating-chat";
 
 interface ChatLayerProps extends ComponentProps {
   // Define any props you want to pass to the ChatLayer component

@@ -1,9 +1,9 @@
-import { useChatStore } from "@/features/hooks/use-chat-store";
-import { useFetchConversationWith } from "@/features/hooks/use-conversation";
+import { useFetchConversationWith } from "@/features/chat/hooks/use-conversation";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { useCallback } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useShallow } from "zustand/react/shallow";
+import { useChatStore } from "./use-floating-chat";
 
 export const useOpenChat = () => {
   const isMobile = useMediaQuery("(max-width: 640px)");

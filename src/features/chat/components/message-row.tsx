@@ -6,7 +6,7 @@ import { useTranslation } from "react-i18next";
 import { useEffect, useState, memo, useRef, useMemo } from "react";
 import { useFormatTime } from "@/utils/time";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
-import { useMessageStore } from "@/features/hooks/use-conversation";
+import { useMessageStore } from "@/features/chat/hooks/use-conversation";
 import {
   renderAudioMessage,
   renderFileMessage,

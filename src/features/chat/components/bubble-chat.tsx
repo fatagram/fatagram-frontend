@@ -1,11 +1,11 @@
 import { Avatar } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
-import { useGetConversation } from "@/features/hooks/use-conversation";
+import { useGetConversation } from "@/features/chat/hooks/use-conversation";
 import { useCallback } from "react";
 import { useShallow } from "zustand/react/shallow";
+import { useChatStore } from "../hooks/use-floating-chat";
 
 interface BubbleChatProps extends ComponentProps {
   conversationId: string;

@@ -10,8 +10,8 @@ import { Button, Text, Skeleton } from "@/components/atoms";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useGetNumberOfFriends } from "@/features/hooks/use-friend";
 import { useAuth } from "@/contexts";
-import { useChatStore } from "@/features/hooks/use-chat-store";
 import { useOpenChat } from "@/features/chat/hooks/use-open-chat";
+import { useChatStore } from "@/features/chat/hooks/use-floating-chat";
 
 export type ProfileHeaderProps = {
   className?: string;

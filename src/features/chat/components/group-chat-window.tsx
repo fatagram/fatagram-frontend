@@ -1,7 +1,7 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { ChatWindow } from "./chat-window";
-import { useChatStore } from "../../hooks/use-chat-store";
+import { useChatStore } from "../hooks/use-floating-chat";
 
 interface GroupChatWindowProps extends ComponentProps {}
 

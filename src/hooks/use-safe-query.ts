@@ -135,7 +135,7 @@ export function useSafeInfiniteQueryResult<TData, TCursor = string>(
     onErrorRef.current = options?.onError;
   });
 
-  const callbacksCalledRef = useRef(false);
+  const lastProcessedPageRef = useRef<TCursor | undefined | string>(null);
 
   const query = useInfiniteQuery<
     CursorResult<TData, TCursor>,
@@ -162,24 +162,24 @@ export function useSafeInfiniteQueryResult<TData, TCursor = string>(
 
   useEffect(() => {
     if (query.isSuccess && query.data) {
-      if (!callbacksCalledRef.current) {
-        const pages = query.data.pages;
-        const lastPage = pages[pages.length - 1];
-        if (lastPage) {
-          onSuccessRef.current?.(lastPage);
-        }
-        callbacksCalledRef.current = true;
+      const pages = query.data.pages;
+      const lastPage = pages[pages.length - 1];
+
+      const currentPageKey = lastPage.nextCursor?.toString() ?? "end-of-list";
+
+      if (lastPage && lastProcessedPageRef.current !== currentPageKey) {
+        onSuccessRef.current?.(lastPage);
+        lastProcessedPageRef.current = currentPageKey;
       }
     } else if (query.isError && query.error) {
-      if (!callbacksCalledRef.current) {
-        const errRes = query.error as unknown as Result<CursorResult<TData, TCursor>>;
-        onErrorRef.current?.(errRes.error, errRes.errors);
-        callbacksCalledRef.current = true;
-      }
-    } else if (query.isFetching) {
-      callbacksCalledRef.current = false;
+      const errRes = query.error as unknown as Result<CursorResult<TData, TCursor>>;
+      onErrorRef.current?.(errRes.error, errRes.errors);
     }
-  }, [query.status, query.isFetching]);
+
+    if (!query.data) {
+      lastProcessedPageRef.current = null;
+    }
+  }, [query.data, query.status]);
 
   return query;
 }

@@ -1,6 +1,6 @@
-import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { MessageResponseDto } from "@/api/message/dto/message.dto";
 import { useAuth } from "@/contexts";
+import { Conversation } from "@/types/entities/conversation.type";
 import { Message, MessageType } from "@/types/entities/message.type";
 import { useTranslation } from "react-i18next";
 
@@ -17,7 +17,7 @@ export const useRenderConversationContent = () => {
     }
   };
 
-  const renderConversationName = (conversation: ConversationDto) => {
+  const renderConversationName = (conversation: Conversation) => {
     if (conversation?.isGroup && !conversation.name) {
       const topName = conversation.topParticipantNames!;
       const total = conversation.participantCount!;

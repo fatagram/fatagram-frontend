@@ -1,6 +1,6 @@
 import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useChatStore } from "@/features/hooks/use-chat-store";
+import { useChatStore } from "../hooks/use-floating-chat";
 
 const getConversationIdsFromMessageQueries = (queryClient: ReturnType<typeof useQueryClient>) => {
   const ids = new Set<string>();

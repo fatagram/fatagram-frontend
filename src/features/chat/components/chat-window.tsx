@@ -1,7 +1,6 @@
 import { Text, Avatar, MiniButton, Skeleton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { useChatStore } from "../../hooks/use-chat-store";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageList } from "./message";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -11,10 +10,11 @@ import {
   useLocalMarkAsRead,
   useMarkConversationAsRead,
   useMessageStore,
-} from "@/features/hooks/use-conversation";
+} from "@/features/chat/hooks/use-conversation";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { ChatInput } from "./chat-input";
 import { useTranslation } from "react-i18next";
+import { useChatStore } from "../hooks/use-floating-chat";
 
 interface ChatWindowProps extends ComponentProps {
   conversationId: string;

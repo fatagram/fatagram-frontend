@@ -10,13 +10,14 @@ import React, {
   useReducer,
 } from "react";
 import { useQueryClient } from "@tanstack/react-query";
-import { useChatStore } from "@/features/hooks/use-chat-store";
 import { AuthState, initialAuthStatus } from "@/types/auth-state";
 import { LocaleKeys } from "@/hooks/use-trans";
 import { useResultFetcher } from "@/hooks/use-fetcher";
 import { useGoogleLogin } from "@/hooks/use-google-login";
 import { useNavigate } from "react-router-dom";
 import { authEvents } from "@/events/auth-event";
+import { useChatStore } from "@/features/chat/hooks/use-floating-chat";
+import { convManager } from "@/features/chat/services/conversation-manager";
 
 type AuthAction =
   | { type: "INITIALIZE"; payload: Omit<AuthState, "isAuthenticated"> }
@@ -126,6 +127,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({
       dispatch({ type: "LOGOUT" });
       try {
         localStorage.removeItem("fatagram:user");
+        convManager.clearAll();
+        // messageManager.clearAll();
       } catch (e) {
         /* ignore */
       }

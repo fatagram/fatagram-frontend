@@ -1,41 +1,34 @@
-import { useMessageCacheMutations } from "@/features/hooks/use-message-store";
 import { MessageResponseDto } from "@/api/message/dto/message.dto";
-import { useChatStore } from "@/features/hooks/use-chat-store";
 import { SocketMessage } from "@/api/common/socket-message";
 import {
-  useConversationCacheMutations,
   useLocalMarkAsRead,
   useMarkConversationAsRead,
   useMessageStore,
-  useUnreadMessageCountCacheMutations,
-} from "@/features/hooks/use-conversation";
+} from "@/features/chat/hooks/use-conversation";
 import { SeenDto } from "@/api/conversation/dto/conversation.dto";
 import { useAuth } from "@/contexts";
 import { useLocation, useNavigate } from "react-router-dom";
-import { useCallback, useRef } from "react";
+import { useCallback } from "react";
+import { useChatStore } from "./hooks/use-floating-chat";
+import { convManager } from "./services/conversation-manager";
+import { useMessageCacheMutations } from "./hooks/use-message";
+// import { messageManager } from "./services/message-manager";
 
 export type MessageHubEvent = SocketMessage<MessageResponseDto | SeenDto>;
 
 export function useMessageListenerHandler() {
-  const { addMessageToCache } = useMessageCacheMutations();
-  const { pushConversationToTop, updateConversationInCache } = useConversationCacheMutations();
-  const { setUnreadCount, setUnreadCountForConversation } = useUnreadMessageCountCacheMutations();
   const { setParticipantsSeen } = useMessageStore();
+  const { addMessageToCache } = useMessageCacheMutations();
   const { userId } = useAuth();
   const location = useLocation();
   const navigate = useNavigate();
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
-  const autoReadMessageKeysRef = useRef<Set<string>>(new Set());
-
-  const createAutoReadKey = (conversationId: string, messageSeq: number) =>
-    `${conversationId}:${messageSeq}`;
 
   const handleNewMessage = useCallback(
     async (message: SocketMessage<MessageResponseDto>) => {
       const data = message.payload;
       const conversationId = data.conversationId;
-      const isOwnMessage = data.senderId === userId;
 
       // If the message has a correlationId (temp conversation), replace the temp conversation with the real one
       if (data.correlationId && useChatStore.getState().registry[data.correlationId]) {
@@ -54,69 +47,11 @@ export function useMessageListenerHandler() {
       }
 
       // Set lastmessage for conversation
-      useMessageStore.getState().setLastMessage(conversationId, data.sequenceNumber);
-
-      addMessageToCache(conversationId, data, true);
-      pushConversationToTop(conversationId, data);
-
-      if (data.senderId === userId) {
-        updateConversationInCache(conversationId, (conv) => ({
-          ...conv,
-          myLastSeenMessageSeq: data.sequenceNumber,
-        }));
-
-        markAsReadLocal(conversationId, data.sequenceNumber);
-        try {
-          await markAsRead({
-            conversationId,
-            messageSeq: data.sequenceNumber,
-          });
-        } catch {
-          // ignore mark-as-read errors for own messages
-        }
-      }
-
-      const { focusOnId: currentFocusId, activeIds, minimizedIds } = useChatStore.getState();
-      const isActiveChat = activeIds.includes(conversationId);
-      const isMinimizedChat = minimizedIds.includes(conversationId);
-      const isDisplayedChat = isActiveChat && !isMinimizedChat;
-      const isDocumentFocused = document.hasFocus();
-
-      // Set unreadcount
-      if (currentFocusId !== conversationId || !isDisplayedChat || !isDocumentFocused) {
-        if (!isOwnMessage) {
-          if (data.shouldIncreaseUnreadCount) {
-            setUnreadCount((prev) => prev + 1);
-          }
-          setUnreadCountForConversation(conversationId, (prev) => prev + 1);
-        }
-      } else if (!isOwnMessage && isDisplayedChat && isDocumentFocused) {
-        const autoReadKey = createAutoReadKey(conversationId, data.sequenceNumber);
-        autoReadMessageKeysRef.current.add(autoReadKey);
-        markAsReadLocal(conversationId, data.sequenceNumber);
-        try {
-          await markAsRead({
-            conversationId: conversationId,
-            messageSeq: data.sequenceNumber,
-          });
-        } catch {
-          autoReadMessageKeysRef.current.delete(autoReadKey);
-        }
-      }
+      // messageManager.setMessages([data]);
+      addMessageToCache(conversationId, data);
+      convManager.addNewMessage(conversationId, userId!, data, data.shouldIncreaseUnreadCount);
     },
-    [
-      addMessageToCache,
-      location.pathname,
-      location.search,
-      markAsRead,
-      markAsReadLocal,
-      navigate,
-      pushConversationToTop,
-      setUnreadCount,
-      setUnreadCountForConversation,
-      updateConversationInCache,
-      userId,
-    ],
+    [location.pathname, location.search, markAsRead, markAsReadLocal, navigate, userId],
   );
 
   const handleSeenMessage = useCallback(
@@ -131,35 +66,21 @@ export function useMessageListenerHandler() {
       });
 
       if (otherUserId !== userId) {
-        updateConversationInCache(conversationId, (conv) => ({
-          ...conv,
+        convManager.updateConversation(conversationId, {
           otherLastSeenMessageSeq: data.messageSeq,
-        }));
+        });
       } else {
-        updateConversationInCache(conversationId, (conv) => ({
-          ...conv,
+        convManager.updateConversation(conversationId, {
           myLastSeenMessageSeq: data.messageSeq,
-        }));
-        const autoReadKey = createAutoReadKey(conversationId, data.messageSeq);
-        const isAutoReadAck = autoReadMessageKeysRef.current.has(autoReadKey);
+          unreadMessageCount: 0,
+        });
+      }
 
-        if (isAutoReadAck) {
-          autoReadMessageKeysRef.current.delete(autoReadKey);
-        }
-
-        if (data.shouldDecreaseUnreadCount && !isAutoReadAck) {
-          setUnreadCount((prev) => prev - 1);
-        }
-        setUnreadCountForConversation(conversationId, (_prev) => 0);
+      if (data.shouldDecreaseUnreadCount) {
+        convManager.updateUnreadCount("decrement");
       }
     },
-    [
-      setParticipantsSeen,
-      setUnreadCount,
-      setUnreadCountForConversation,
-      updateConversationInCache,
-      userId,
-    ],
+    [setParticipantsSeen, userId],
   );
 
   return useCallback(

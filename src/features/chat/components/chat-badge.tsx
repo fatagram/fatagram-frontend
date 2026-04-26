@@ -5,14 +5,13 @@ import { ChatMenu } from "./chat-menu";
 import { RefObject, useRef, useState } from "react";
 import clsx from "clsx";
 import useClickOutside from "@/hooks/use-click-outside";
-import { useGetUnreadMessageCount } from "@/features/hooks/use-conversation";
+import { useConversationStore } from "../services/conversation-manager";
 
 interface ChatBadgeProps extends ComponentProps {}
 
 export const ChatBadge: React.FC<ChatBadgeProps> = () => {
   const [isOpen, setIsOpen] = useState(false);
-  // const navigate = useNavigate();
-  const { data: count = 0 } = useGetUnreadMessageCount();
+  const totalUnreadCount = useConversationStore((state) => state.totalUnreadCount);
 
   // Refs for the menu and button
   const menuRef = useRef<HTMLDivElement>(null);
@@ -29,7 +28,7 @@ export const ChatBadge: React.FC<ChatBadgeProps> = () => {
 
   return (
     <div className="relative">
-      <Badge count={count} onClick={() => setIsOpen(!isOpen)} ref={btnRef}>
+      <Badge count={totalUnreadCount} onClick={() => setIsOpen(!isOpen)} ref={btnRef}>
         <i className="fa-solid fa-comment" />
       </Badge>
       {isOpen && (

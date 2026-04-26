@@ -1,4 +1,3 @@
-import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { Text, Avatar } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
@@ -9,10 +8,10 @@ import { useLocation } from "react-router-dom";
 import { isSystemMessage } from "../helpers/conversation-helpers";
 import { useFormatTime } from "@/utils/time";
 import { useAuth } from "@/contexts";
-import { useUnreadMessageCountCache } from "@/features/hooks/use-conversation";
+import { Conversation } from "@/types/entities/conversation.type";
 
 interface ChatItemProps extends ComponentProps {
-  conversation: ConversationDto;
+  conversation: Conversation;
   isActive?: boolean;
   onClick: () => void;
 }
@@ -26,7 +25,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
   const { renderConversationName, renderSystemMessage } = useRenderConversationContent();
   const { formatTime } = useFormatTime();
 
-  const unreadCount = useUnreadMessageCountCache(conversation.id);
+  const unreadCount = conversation.unreadMessageCount || 0;
   const isUnread = unreadCount > 0;
   const isOtherUserRead =
     conversation.otherLastSeenMessageSeq &&

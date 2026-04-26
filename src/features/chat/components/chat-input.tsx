@@ -1,9 +1,7 @@
 import { MiniButton, TextArea } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import { useAuth } from "@/contexts";
-import { useSendMessage } from "@/features/hooks/use-message";
-import { useMessageCacheMutations } from "@/features/hooks/use-message-store";
-import { useChatUpload } from "@/features/hooks/use-chat-upload";
+import { useChatUpload } from "@/features/chat/hooks/use-chat-upload";
 import { MediaType, MessageType } from "@/types/entities/message.type";
 import clsx from "clsx";
 import { useRef, useState } from "react";
@@ -11,6 +9,8 @@ import { useTranslation } from "react-i18next";
 import { useSnackbar } from "@/contexts";
 import { getMediaTypeFromFileType, MAX_FILE_SIZE, validateFileSize } from "@/utils/file";
 import { compressImage, compressVideo } from "@/utils/compression";
+import { useMessageCacheMutations, useSendMessage } from "../hooks/use-message";
+// import { useChatStore } from "../hooks/use-floating-chat";
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;
@@ -36,9 +36,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { fetch: send } = useSendMessage();
-  const { addMessageToCache } = useMessageCacheMutations();
   const { userId } = useAuth();
   const { upload, loading: _uploading } = useChatUpload();
+  const { addMessageToCache } = useMessageCacheMutations();
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
 
@@ -111,7 +111,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     if (imageMedia.length > 0) {
       tempImageId = crypto.randomUUID();
-      addMessageToCache(conversationId || "", {
+      addMessageToCache(conversationId!, {
         ...basePreviewBody,
         id: tempImageId,
         clientTempId: tempImageId,
@@ -128,7 +128,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const it = otherMedia[i];
       const tempId = tempOtherMediaIds[i];
       const url = URL.createObjectURL(it.file);
-      addMessageToCache(conversationId || "", {
+      addMessageToCache(conversationId!, {
         ...basePreviewBody,
         id: tempId,
         clientTempId: tempId,
@@ -144,7 +144,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
     if (textContent) {
       tempTextId = crypto.randomUUID();
-      addMessageToCache(conversationId || "", {
+      addMessageToCache(conversationId!, {
         ...basePreviewBody,
         id: tempTextId,
         clientTempId: tempTextId,

@@ -1,6 +1,6 @@
 import { Text, Avatar, MiniButton, Skeleton, Textbox } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
-import { useSendMessage } from "@/features/hooks/use-message";
+import { useSendMessage } from "@/features/chat/hooks/use-message";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import clsx from "clsx";
 import { useEffect, useState } from "react";

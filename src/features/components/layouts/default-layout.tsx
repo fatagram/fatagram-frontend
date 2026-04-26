@@ -12,16 +12,16 @@ import { Navbar } from "@/components/ui";
 import UserMenu from "../user-menu";
 import { ChatLayer } from "@/features/chat/chat-layer";
 import { ChatBadge } from "@/features/chat/components/chat-badge";
-import { useGetUnreadMessageCount } from "@/features/hooks/use-conversation";
 import { useUnreadCount } from "@/features/notifications/hooks/use-notification-store";
+import { useConversationStore } from "@/features/chat/services/conversation-manager";
 
 const MessageIconWithBadge = () => {
-  const { data: count = 0 } = useGetUnreadMessageCount();
+  const unreadCount = useConversationStore((state) => state.totalUnreadCount);
 
   return (
     <div className="relative">
       <i className="fa-solid fa-message" />
-      {count > 0 && (
+      {unreadCount > 0 && (
         <span
           className={clsx(
             "absolute -top-1 left-3",
@@ -32,7 +32,7 @@ const MessageIconWithBadge = () => {
             "ring-2 ring-bg-main",
           )}
         >
-          {count > 99 ? "99+" : count}
+          {unreadCount > 99 ? "99+" : unreadCount}
         </span>
       )}
     </div>

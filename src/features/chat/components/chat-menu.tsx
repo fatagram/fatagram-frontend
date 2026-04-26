@@ -1,5 +1,4 @@
 import { ComponentProps } from "@/components/common/component-type";
-import { useConversations } from "@/features/hooks/use-conversation";
 import { MiniButton, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -7,6 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { ChatList } from "./chat-list";
 import { useState } from "react";
 import { CreateGroupChat } from "./create-group-chat/create-group-chat";
+import { useConversationStore } from "../services/conversation-manager";
 
 interface ChatMenuProps extends ComponentProps {
   ref?: React.RefObject<HTMLDivElement | null>;
@@ -15,7 +15,6 @@ interface ChatMenuProps extends ComponentProps {
 
 export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationClick, ref }) => {
   const [tab, setTab] = useState<"list" | "create">("list");
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useConversations();
   const { t } = useTranslation();
   const navigate = useNavigate();
 
@@ -51,11 +50,6 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
         <ChatList
           className="overflow-y-auto pt-0 h-full"
           onConversationClick={handleSelectConversation}
-          data={data}
-          fetchNextPage={fetchNextPage}
-          hasNextPage={hasNextPage}
-          isLoading={isLoading}
-          isFetching={isFetching}
         />
       )}
       {tab === "create" && (
@@ -71,7 +65,7 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
           <button
             className="p-2 w-full rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center justify-center gap-2"
             onClick={() => {
-              const firstId = data?.pages[0]?.items[0]?.id || "";
+              const firstId = useConversationStore.getState().conversations?.[0]?.id;
               navigate(`/fatalk/${firstId}`);
             }}
             title={t("common:conversations.openFatalk")}
