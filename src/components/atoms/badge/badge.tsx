@@ -30,7 +30,7 @@ export function Badge({
       {count > 0 && (
         <div
           className={clsx(
-            "absolute -top-0 bg-red-500 text-text-main text-[10px] min-w-[16px]",
+            "absolute -top-0 bg-red-500 text-white text-[10px] min-w-[16px]",
             "h-[16px] px-[4px] rounded-full border-[2px] border-bg-main",
             "flex items-center justify-center",
             count > 99 ? "-right-2" : "-right-1",

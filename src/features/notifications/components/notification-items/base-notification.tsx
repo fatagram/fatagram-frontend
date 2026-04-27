@@ -4,7 +4,7 @@ import { renderContent } from "../../helper/render-content";
 import { getNotificationContent } from "../../helper/get-notification-content";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
-import { useFormatTime } from "../../../../utils/time";
+import { ClientTime } from "@/features/components/client-time";
 
 interface BaseNotificationProps {
   notificationDto: NotificationDto;
@@ -20,7 +20,6 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
 
   const content = getNotificationContent(notificationDto.type, notificationDto.content, t);
-  const { formatTime } = useFormatTime();
 
   return (
     <div className="flex gap-2 select-none" onClick={onClick}>
@@ -41,13 +40,12 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
             ),
           })}
         </Text>
-        <Text
+        <ClientTime
           sz="sm"
           color={notificationDto.isRead ? "primary" : "secondary"}
           className={clsx({ "opacity-70": notificationDto.isRead })}
-        >
-          {formatTime(notificationDto.createdAt)}
-        </Text>
+          time={notificationDto.createdAt}
+        />
         {children}
       </div>
       <div className="flex items-center">

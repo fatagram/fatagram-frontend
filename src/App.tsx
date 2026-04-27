@@ -50,7 +50,7 @@ function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userD
             const isSuccess = query.state.status === "success";
             const queryKey = query.queryKey as string[];
             const isManualManaged = queryKey.some((key) =>
-              ["friendship", "conversations"].includes(key),
+              ["friendship", "conversations", "friendshipStatus"].includes(key),
             );
 
             return isSuccess && !isManualManaged;

@@ -34,7 +34,7 @@ export default function InfiniteScrollGrid({
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
-    if (!sentinel || !hasMore || isLoading) return; // Không quan sát nếu đang load hoặc hết data
+    if (!sentinel || !hasMore || isLoading) return;
 
     const observer = new IntersectionObserver(
       async ([entry]) => {

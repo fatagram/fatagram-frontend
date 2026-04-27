@@ -1,9 +1,10 @@
 import React from "react";
 import clsx from "clsx";
-import { Option, OptionKey, SelectBox } from "@/components/atoms";
+import { Option, OptionKey } from "@/components/atoms";
 import { LocaleKeys, useLanguage } from "@/hooks/use-trans";
 import { useTranslation } from "react-i18next";
 import { useChangeLanguage } from "../hooks/use-change-language";
+import { SmartSelectBox } from "@/components/ui/smart-select-box";
 
 interface SelectLanguageProps {
   className?: string;
@@ -27,7 +28,7 @@ const SelectLanguage: React.FC<SelectLanguageProps> = ({ className }) => {
   };
 
   return (
-    <SelectBox
+    <SmartSelectBox
       showTitle={false}
       title={t("settings:language.yourLanguage")}
       className={clsx(className)}

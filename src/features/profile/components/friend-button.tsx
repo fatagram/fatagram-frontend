@@ -1,19 +1,19 @@
 import { friendshipService } from "@/api/user/friendship.api";
 import { Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
-import Dropdown from "@/components/atoms/dropdown";
 import useClickOutside from "@/hooks/use-click-outside";
 import clsx from "clsx";
 import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts";
 import { useFriendshipStatus } from "../hooks/use-friendship-status";
+import { SmartDropdown } from "@/components/ui/smart-dropdown";
 
 interface FriendButtonProps extends ComponentProps {
   uid?: string;
 }
 
-const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
+const FriendButton: React.FC<FriendButtonProps> = ({ uid }) => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   if (!useAuth().isAuthenticated) return null;
@@ -143,7 +143,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
 
   if (isLoading || isFetching) {
     return (
-      <Button sz={sz} disabled>
+      <Button sz="sm" disabled>
         <i className={clsx("fa-solid", "fa-spinner", "fa-spin")}></i>
       </Button>
     );
@@ -152,18 +152,18 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
   return (
     <div>
       {currentFriendshipStatus === "None" ? (
-        <Button sz={sz} onClick={handleSentAddFriendRequest}>
+        <Button sz="sm" onClick={handleSentAddFriendRequest}>
           <i className={clsx("fa-solid", "fa-plus")}></i> {t("user:profileHeader.addFriendButton")}
         </Button>
       ) : currentFriendshipStatus === "SentByMe" ? (
-        <Button sz={sz} onClick={handleCancelAddFriendRequest}>
+        <Button sz="sm" onClick={handleCancelAddFriendRequest}>
           <i className={clsx("fa-solid", "fa-xmark")}></i>{" "}
           {t("user:profileHeader.cancelRequestButton")}
         </Button>
       ) : currentFriendshipStatus === "SentByThem" ? (
         <div className={clsx("sm:relative", "z-50")}>
           <Button
-            sz={sz}
+            sz="sm"
             ref={btnRequestRef}
             onClick={() => {
               setIsShowRequestOptions(!isShowRequestOptions);
@@ -172,7 +172,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
             <i className={clsx("fa-solid", "fa-reply")}></i>{" "}
             {t("user:profileHeader.respondRequestButton")}
           </Button>
-          <Dropdown
+          <SmartDropdown
             ref={requestOptionsRef}
             isShow={isShowRequestOptions}
             className={clsx(
@@ -188,12 +188,13 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
               "w-[calc(100%-2%)]",
             )}
             items={requestOptions}
+            onClose={() => setIsShowRequestOptions(false)}
           />
         </div>
       ) : (
         <div className={clsx("sm:relative", "z-50")}>
           <Button
-            sz={sz}
+            sz="sm"
             ref={btnFriendRef}
             onClick={() => {
               setIsShowFriendOptions(!isShowFriendOptions);
@@ -202,7 +203,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
             <i className={clsx("fa-solid", "fa-user-check")}></i>{" "}
             {t("user:profileHeader.friendButton")}
           </Button>
-          <Dropdown
+          <SmartDropdown
             ref={friendOptionsRef}
             isShow={isShowFriendOptions}
             className={clsx(
@@ -219,6 +220,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, sz = "md-1" }) => {
               "w-[calc(100%-2%)]",
             )}
             items={friendOptions}
+            onClose={() => setIsShowFriendOptions(false)}
           />
         </div>
       )}

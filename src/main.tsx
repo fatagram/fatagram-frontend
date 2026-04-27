@@ -4,6 +4,7 @@ import { AppHubListener } from "./features/hub/app-hub-listener";
 import { OfflineStatusNotification } from "./components/common/offline-status-notification";
 import AppRoutes from "./routes";
 import { useGetTotalUnreadCount } from "./features/chat/hooks/use-conversation";
+import { GlobalBottomSheet } from "./features/components/global-bottom-sheet";
 
 export default function Main() {
   useGetTotalUnreadCount();
@@ -12,6 +13,7 @@ export default function Main() {
     <>
       <AppRoutes />
       <GlobalDialog />
+      <GlobalBottomSheet />
       <MediaViewer />
       <AppHubListener />
       <OfflineStatusNotification />

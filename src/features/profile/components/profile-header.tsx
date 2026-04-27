@@ -114,7 +114,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
 
                 {!isOwner && isAuthenticated && (
                   <Button sz="sm" variant="secondary" onClick={handleMessageClick}>
-                    {t("user:profileHeader.messageButton")}
+                    <i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}
                   </Button>
                 )}
                 <Button sz="sm" variant="secondary">

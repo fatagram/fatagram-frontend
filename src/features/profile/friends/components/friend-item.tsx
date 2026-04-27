@@ -5,9 +5,9 @@ import React, { RefObject, useCallback, useMemo, useRef, useState } from "react"
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import AddFriendButton from "../../components/friend-button";
-import Dropdown from "@/components/atoms/dropdown";
 import clsx from "clsx";
 import { Avatar, Text } from "@/components/atoms";
+import { SmartDropdown } from "@/components/ui/smart-dropdown";
 
 interface FriendItemProps {
   className?: string;
@@ -93,7 +93,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
             >
               <i className="fa-solid fa-ellipsis-v"></i>
             </button>
-            <Dropdown
+            <SmartDropdown
               isShow={isShowDrowdown}
               className={clsx(
                 "absolute flex sm:top-[130%] top-[110%] left-[1%] p-2",
@@ -101,6 +101,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
               )}
               ref={dropdownRef}
               items={requestOptions}
+              onClose={() => setIsShowDropdown(false)}
             />
           </>
         ) : (

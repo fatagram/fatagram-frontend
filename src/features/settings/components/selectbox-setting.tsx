@@ -1,6 +1,7 @@
 import React from "react";
 import clsx from "clsx";
-import { Option, Text, OptionKey, SelectBox } from "@/components/atoms";
+import { Option, Text, OptionKey } from "@/components/atoms";
+import { SmartSelectBox } from "@/components/ui/smart-select-box";
 
 interface SelectBoxSettingProps {
   options?: Option[];
@@ -27,7 +28,7 @@ const SelectBoxSetting: React.FC<SelectBoxSettingProps> = ({
       {selectBox ? (
         selectBox
       ) : (
-        <SelectBox
+        <SmartSelectBox
           showTitle={false}
           title={title}
           className="!min-w-[170px]"

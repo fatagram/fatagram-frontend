@@ -8,7 +8,7 @@ export interface DropdownItem {
   disabled?: boolean;
 }
 
-interface DropdownProps {
+export interface DropdownProps {
   items: DropdownItem[];
   isShow: boolean;
   onSelect?: (item: DropdownItem) => void;

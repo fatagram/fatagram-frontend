@@ -1,6 +1,7 @@
 import { useState, forwardRef, useImperativeHandle } from "react";
 import Cropper, { Area } from "react-easy-crop";
 import { Text } from "@/components/atoms";
+import clsx from "clsx";
 
 export interface BackgroundMetadata {
   x: number;
@@ -11,6 +12,7 @@ export interface BackgroundMetadata {
 
 interface UpdateBackgroundContentProps {
   imageSrc: string;
+  className?: string;
 }
 
 export interface UpdateBackgroundContentRef {
@@ -60,7 +62,7 @@ const ZoomInIcon = () => (
 export const UpdateBackgroundContent = forwardRef<
   UpdateBackgroundContentRef,
   UpdateBackgroundContentProps
->(({ imageSrc }, ref) => {
+>(({ imageSrc, className }, ref) => {
   const [crop, setCrop] = useState<{ x: number; y: number }>({ x: 0, y: 0 });
   const [zoom, setZoom] = useState(1);
   const [croppedArea, setCroppedArea] = useState<Area | null>(null);
@@ -79,7 +81,7 @@ export const UpdateBackgroundContent = forwardRef<
   }));
 
   return (
-    <div className="flex flex-col gap-4 w-full bg-bg-main rounded-xl box-border">
+    <div className={clsx("flex flex-col gap-4 w-full bg-bg-main rounded-xl box-border", className)}>
       <div className="relative w-full h-[250px] sm:h-[300px] rounded-xl overflow-hidden bg-bg-fourth/50 shadow-inner border border-bg-fourth group">
         <Cropper
           image={imageSrc}

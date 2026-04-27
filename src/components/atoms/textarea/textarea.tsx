@@ -49,7 +49,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       topContentClassName,
       placeholder,
       disabled,
-      value,
+      value = "",
       onChange,
       rows = 1,
       maxRows,

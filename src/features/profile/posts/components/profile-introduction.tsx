@@ -57,6 +57,14 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
     );
   };
 
+  const handleOnChangeBio = (isOpen: boolean) => {
+    setIsEditBio(isOpen);
+  };
+
+  const handleOnChangeDescription = (isOpen: boolean) => {
+    setIsEditDescription(isOpen);
+  };
+
   return (
     <Card
       title={t("user:profilePosts.overview")}
@@ -69,13 +77,12 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           editableMode="inline"
           isEdit={isEditBio}
           placeholder={t("user:profilePosts.bioPlaceholder")}
-          value={userProfile?.bio}
-          onChangeClick={() => setIsEditBio(true)}
+          value={userProfile?.bio || ""}
           onSaveClick={(value) => handleSaveBio(value)}
+          onOpenChange={handleOnChangeBio}
           valueClassName="text-[1.2rem] font-semibold"
           canEdit={canEdit || false}
           isLoading={updateProfileMutation.isFetching}
-          onCancelClick={() => setIsEditBio(false)}
           btnChildren={
             <Text sz="sm">
               <i className="fas fa-pencil-alt"></i> &nbsp; {t("user:profilePosts.bioBtn")}
@@ -94,13 +101,12 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           editableMode="inline"
           isEdit={isEditDescription}
           placeholder={t("user:profilePosts.descriptionPlaceholder")}
-          value={userProfile?.description}
+          value={userProfile?.description || ""}
           canEdit={canEdit || false}
           valueClassName="text-[1.1rem]"
           isLoading={updateProfileMutation.isFetching}
-          onChangeClick={() => setIsEditDescription(true)}
           onSaveClick={(value) => handleSaveDescription(value)}
-          onCancelClick={() => setIsEditDescription(false)}
+          onOpenChange={handleOnChangeDescription}
           btnChildren={
             <Text sz="sm">
               <i className="fas fa-pencil-alt"></i> &nbsp; {t("user:profilePosts.descriptionBtn")}

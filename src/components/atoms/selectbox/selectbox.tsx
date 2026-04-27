@@ -3,7 +3,6 @@ import useClickOutside from "@/hooks/use-click-outside";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
-import { useMediaQuery } from "@/hooks/use-media-query";
 
 export type OptionKey = string | number | boolean;
 
@@ -21,7 +20,7 @@ const sizeClasses: Record<Size, { main: string; text: string }> = {
   xl: { main: "px-8 py-5", text: "text-xl" },
 };
 
-interface SelectBoxProps extends Omit<ComponentProps<HTMLButtonElement>, "onSelect"> {
+export interface SelectBoxProps extends Omit<ComponentProps<HTMLButtonElement>, "onSelect"> {
   title?: string;
   showTitle?: boolean;
   isRequired?: boolean;
@@ -54,7 +53,6 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
 
   const desktopDropdownRef = useRef<HTMLElement>(null);
   const btnRef = useRef<HTMLButtonElement>(null);
-  const isMobile = useMediaQuery("(max-width: 640px)");
 
   useEffect(() => {
     if (isOpen) {
@@ -72,7 +70,6 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
     () => {
       if (isOpen) setIsOpen(false);
     },
-    !isMobile,
   );
 
   const selectedItem = options.find((opt) => opt.key === selectedOption);
@@ -120,7 +117,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
         animation={AnimationLib.DropdownSlide}
         show={isOpen}
         duration={100}
-        className="hidden sm:block absolute w-full z-50 mt-1"
+        className="block absolute w-full z-50 mt-1"
       >
         <div
           ref={desktopDropdownRef as RefObject<HTMLDivElement>}
@@ -150,62 +147,6 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
               </li>
             ))}
           </ul>
-        </div>
-      </Transition>
-
-      <Transition
-        animation={AnimationLib.SoftFade}
-        show={isOpen}
-        duration={200}
-        className="fixed inset-0 sm:hidden"
-      >
-        <div className="fixed inset-0 bg-black/50 z-[9999]" onClick={() => setIsOpen(false)} />
-      </Transition>
-
-      <Transition
-        animation={AnimationLib.SlideUp}
-        show={isOpen}
-        duration={200}
-        className="sm:hidden fixed inset-x-0 bottom-0 z-[9999]"
-      >
-        <div
-          onClick={(e) => e.stopPropagation()}
-          className={clsx(
-            "bg-bg-card rounded-t-2xl shadow-[0_-4px_16px_rgba(0,0,0,0.1)] border-t border-border-main",
-            "max-h-[72vh] flex flex-col",
-            dropdownClassName,
-          )}
-        >
-          <div className="w-12 h-1.5 bg-border-main/50 rounded-full mx-auto mt-3 mb-1 shrink-0" />
-
-          <div className="px-6 py-3 shrink-0 border-b border-border-main/30">
-            <div className="text-center text-lg font-semibold text-text-primary">
-              {title || "Select Option"}
-            </div>
-          </div>
-
-          <ul className="py-2 overflow-y-auto">
-            {options.map((item) => (
-              <li
-                key={String(item.key)}
-                className={clsx(
-                  "px-6 py-4 cursor-pointer transition-colors border-b border-border-main/10 last:border-none",
-                  sizeClasses[sz].text,
-                  optionClassName,
-                  selectedOption === item.key
-                    ? optionActiveClassName || "bg-primary-500/10 text-primary-600 font-medium"
-                    : "hover:bg-bg-hover/60",
-                )}
-                onClick={() => {
-                  onSelect(item.key);
-                  setIsOpen(false);
-                }}
-              >
-                {item.value}
-              </li>
-            ))}
-          </ul>
-          <div className="h-6 shrink-0" />
         </div>
       </Transition>
     </div>

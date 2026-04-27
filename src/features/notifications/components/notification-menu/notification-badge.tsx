@@ -1,6 +1,6 @@
 import useClickOutside from "@/hooks/use-click-outside";
-import React, { RefObject } from "react";
-import { useNavigate } from "react-router-dom";
+import React, { RefObject, useRef } from "react";
+import { useLocation, useNavigate } from "react-router-dom";
 import NotificationMenu from "./notification-menu";
 import { useNotificationUiState, useUnreadCount } from "../../hooks/use-notification-store";
 import clsx from "clsx";
@@ -12,12 +12,12 @@ const NotificationBadge: React.FC<NotificationButtonProps> = ({}) => {
   const navigate = useNavigate();
 
   const { unreadCount } = useUnreadCount();
-  const { isShowNotification, isInNotificationPage, setShowNotification } =
-    useNotificationUiState();
+  const { isShowNotification, setShowNotification } = useNotificationUiState();
+  const isInNotificationPage = useLocation().pathname === "/notifications";
 
-  // Refs for the menu and button
-  const menuRef = React.useRef<HTMLDivElement>(null);
-  const btnRef = React.useRef<HTMLDivElement>(null);
+  // Refs for the menu and butto
+  const menuRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLDivElement>(null);
 
   // Handle click outside to close the menu
   useClickOutside(menuRef as RefObject<HTMLDivElement>, btnRef as RefObject<HTMLDivElement>, () => {
