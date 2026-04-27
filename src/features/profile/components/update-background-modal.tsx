@@ -81,11 +81,12 @@ export const UpdateBackgroundContent = forwardRef<
   }));
 
   return (
-    <div
-      className={clsx("flex flex-col gap-4 w-full bg-bg-main rounded-xl box-border", className)}
-      onPointerDown={(e) => e.stopPropagation()}
-    >
-      <div className="relative w-full h-[250px] sm:h-[300px] rounded-xl overflow-hidden bg-bg-fourth/50 shadow-inner border border-bg-fourth group">
+    <div className={clsx("flex flex-col gap-4 w-full bg-bg-main rounded-xl box-border", className)}>
+      <div
+        className="relative w-full h-[250px] sm:h-[300px] rounded-xl overflow-hidden bg-bg-fourth/50 shadow-inner border border-bg-fourth group"
+        onPointerDown={(e) => e.stopPropagation()}
+        onTouchStart={(e) => e.stopPropagation()}
+      >
         <Cropper
           image={imageSrc}
           crop={crop}
