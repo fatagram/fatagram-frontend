@@ -133,12 +133,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
         onClick={() => setShowDropdown(!showDropdown)}
         ref={ref}
       >
-        <Text
-          className={clsx(
-            "whitespace-nowrap",
-            isChooseHiddenItem ? "!text-single-main" : "text-[var(--text-color)]",
-          )}
-        >
+        <Text className={clsx("whitespace-nowrap", isChooseHiddenItem ? "!text-primary-500" : "")}>
           More <i className="fa-solid fa-caret-down ml-1"></i>
         </Text>
         {isChooseHiddenItem && (
@@ -188,35 +183,33 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
         ))}
       </div>
       {hiddenItems.length > 0 && <ShowMoreButton ref={showMoreRef} />}
-      {showDropdown && (
-        <SmartDropdown
-          className={clsx(
-            "absolute z-[9999] top-[100%] m-0 bg-bg-second",
-            "shadow-lg rounded-md w-[95%] -translate-x-1/2 left-1/2 p-2",
-          )}
-          showPolygon={false}
-          isShow={showDropdown}
-          items={hiddenItems.map((item) => ({
-            id: item.name,
-            content: (
-              <div
-                className={clsx(
-                  "flex justify-between items-center",
-                  location.pathname === item.href ? "text-single-main" : "text-[var(--text-color)]",
-                )}
-              >
-                {item.name}
-                {location.pathname === item.href && <i className="fas fa-check"></i>}
-              </div>
-            ),
-            onClick: () => {
-              navigate(item.href ?? "/");
-              setShowDropdown(false);
-            },
-          }))}
-          onClose={() => setShowDropdown(false)}
-        />
-      )}
+      <SmartDropdown
+        className={clsx(
+          "absolute z-[9999] top-[100%] m-0 bg-bg-second",
+          "shadow-lg rounded-md w-[95%] -translate-x-1/2 left-1/2 p-2",
+        )}
+        showPolygon={false}
+        isShow={showDropdown}
+        items={hiddenItems.map((item) => ({
+          id: item.name,
+          content: (
+            <div
+              className={clsx(
+                "flex justify-between items-center",
+                location.pathname === item.href ? "text-primary-500" : "",
+              )}
+            >
+              {item.name}
+              {location.pathname === item.href && <i className="fas fa-check"></i>}
+            </div>
+          ),
+          onClick: () => {
+            navigate(item.href ?? "/");
+            setShowDropdown(false);
+          },
+        }))}
+        onClose={() => setShowDropdown(false)}
+      />
     </div>
   );
 };
