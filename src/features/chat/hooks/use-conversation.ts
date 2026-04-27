@@ -142,6 +142,7 @@ export const useGetDeltaConversations = () => {
   const fetcherDelta = async () => {
     const conversations = useConversationStore.getState().conversations;
     const lastConv = conversations[0];
+    if (!lastConv) return;
 
     const since = lastConv?.lastActiveAt ? new Date(lastConv.lastActiveAt) : new Date(0);
     return await fetcher.fetch(since, {
