@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import Transition, { AnimationLib } from "../utils/transition";
+import Transition, { AnimationLib } from "./utils/transition";
 
 interface SidebarLayoutProps extends ComponentProps {
   navbar?: React.ReactNode;

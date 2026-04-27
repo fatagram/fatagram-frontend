@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
-import Card from "@/components/ui/card/card";
-import { SidebarLayout } from "@/components/ui/sidebar-layout/sidebar-layout";
+import Card from "@/components/ui/card";
+import { SidebarLayout } from "@/components/ui/sidebar-layout";
 import clsx from "clsx";
 
 interface SidebarPageLayoutProps extends ComponentProps {

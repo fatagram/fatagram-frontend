@@ -1,4 +1,4 @@
-import { DialogBoxProps } from "@/components/ui/dialog/dialog";
+import { DialogBoxProps } from "@/components/ui/dialog";
 import React, { createContext } from "react";
 
 export interface DialogContextType {

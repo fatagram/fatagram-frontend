@@ -2,7 +2,7 @@ import { Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import { useState } from "react";
-import InfiniteScrollFlex from "../utils/infinite-scroll-flex";
+import InfiniteScrollFlex from "./utils/infinite-scroll-flex";
 
 interface MultiSelectProps extends ComponentProps {
   options?: { item: any; value: any }[];

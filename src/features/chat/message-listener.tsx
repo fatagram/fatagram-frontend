@@ -50,6 +50,15 @@ export function useMessageListenerHandler() {
       // messageManager.setMessages([data]);
       addMessageToCache(conversationId, data);
       convManager.addNewMessage(conversationId, userId!, data, data.shouldIncreaseUnreadCount);
+
+      const isFocusingThisConversation =
+        document.hasFocus() && useChatStore.getState().focusOnId === conversationId;
+
+      if (isFocusingThisConversation) {
+        const messageSeq = data.sequenceNumber;
+        markAsReadLocal(conversationId, messageSeq);
+        await markAsRead({ conversationId, messageSeq });
+      }
     },
     [location.pathname, location.search, markAsRead, markAsReadLocal, navigate, userId],
   );

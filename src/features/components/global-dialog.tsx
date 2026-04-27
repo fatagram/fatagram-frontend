@@ -1,5 +1,5 @@
 import clsx from "clsx";
-import { Dialog } from "../../components/ui/dialog/dialog";
+import { Dialog } from "../../components/ui/dialog";
 import { useDialog } from "@/contexts";
 
 export const GlobalDialog: React.FC = () => {

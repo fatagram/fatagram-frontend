@@ -1,7 +1,7 @@
 import { FriendDto } from "@/api/user/dto/friend.dto";
 import { friendshipService } from "@/api/user/friendship.api";
 import useClickOutside from "@/hooks/use-click-outside";
-import React, { RefObject } from "react";
+import React, { RefObject, useCallback, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import AddFriendButton from "../../components/friend-button";
@@ -15,13 +15,13 @@ interface FriendItemProps {
 }
 
 const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) => {
-  const [isShowDrowdown, setIsShowDropdown] = React.useState<boolean>(false);
-  const [isFriend, setIsFriend] = React.useState<boolean>(friendDto.isFriend);
+  const [isShowDrowdown, setIsShowDropdown] = useState<boolean>(false);
+  const [isFriend, setIsFriend] = useState<boolean>(friendDto.isFriend);
   const navigate = useNavigate();
   const { t } = useTranslation() as { t: (key: string) => string };
 
-  const dropdownRef = React.useRef<HTMLDivElement>(null);
-  const btnRef = React.useRef<HTMLButtonElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
+  const btnRef = useRef<HTMLButtonElement>(null);
 
   // Close dropdown when clicking outside
   useClickOutside(
@@ -33,7 +33,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
   );
 
   // Accept friend request
-  const handleUnfriend = React.useCallback(
+  const handleUnfriend = useCallback(
     async (id: string | undefined) => {
       const response = await friendshipService.Unfriend(id ? id : "");
       if (response.success) {
@@ -43,13 +43,13 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
     [friendshipService],
   );
 
-  const requestOptions = React.useMemo(
+  const requestOptions = useMemo(
     () => [
       {
         id: "unfriend",
         content: (
           <div>
-            <i className="fa-solid fa-user-xmark mr-2"></i> {t("user:profileHeader.unfriendButton")}
+            <i className="fa-solid fa-user-xmark mr-2" /> {t("user:profileHeader.unfriendButton")}
           </div>
         ),
         onClick: async () => await handleUnfriend?.(friendDto.id),
@@ -67,7 +67,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
       )}
     >
       <div
-        className="relative flex p-3 gap-4 items-center"
+        className="relative flex py-3 px-1 gap-4 items-center"
         onClick={() => navigate(`/${friendDto.id}`)}
       >
         <div>

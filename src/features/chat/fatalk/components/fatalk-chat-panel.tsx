@@ -80,6 +80,32 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       });
     };
 
+    const handleWindowFocus = async () => {
+      if (!document.hasFocus()) return;
+      const activeEl = document.activeElement;
+      if (!panelRef.current && !scrollRef.current) return;
+      const insidePanel =
+        (activeEl && panelRef.current?.contains(activeEl)) ||
+        (activeEl && scrollRef.current?.contains(activeEl));
+      if (!insidePanel) return;
+
+      // same logic as handleUserInteract
+      setFocusOn(conversationData.id);
+      const lastMsgSeq =
+        useConversationStore.getState().lastMessageSequenceMap[conversationData.id] ||
+        conversationData.lastMessageNumber;
+      const myLastSeenSeq = useConversationStore.getState().userSeenMap[conversationData.id] || 0;
+
+      if (!lastMsgSeq) return;
+      if (lastMsgSeq <= myLastSeenSeq) return;
+
+      markAsReadLocal(conversationData.id, lastMsgSeq);
+      await markAsRead({
+        conversationId: conversationData.id,
+        messageSeq: lastMsgSeq,
+      });
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
         setFocusOn(null);
@@ -96,6 +122,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     }
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focus", handleWindowFocus);
 
     return () => {
       if (messageArea) {
@@ -103,6 +130,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       }
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("focus", handleWindowFocus);
     };
   }, [conversationData?.id, markAsRead, markAsReadLocal, setFocusOn]);
 

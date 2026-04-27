@@ -1,6 +1,6 @@
 import { Text, Avatar, Textbox } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
-import { MultiSelect } from "@/components/ui/multi-select/multi-select";
+import { MultiSelect } from "@/components/ui/multi-select";
 import { useAuth } from "@/contexts";
 import { useCreateGroupConversation } from "@/features/chat/hooks/use-conversation";
 import { useGetInfiniteUsers } from "@/features/hooks/use-user";

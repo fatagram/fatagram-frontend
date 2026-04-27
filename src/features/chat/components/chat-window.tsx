@@ -91,6 +91,15 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
       void handleMarkAsReadOnFocus();
     };
 
+    const handleWindowFocus = () => {
+      const activeEl = document.activeElement;
+      const insidePanel =
+        (activeEl && panelRef.current?.contains(activeEl)) ||
+        (activeEl && scrollRef.current?.contains(activeEl));
+      if (!insidePanel) return;
+      void handleMarkAsReadOnFocus();
+    };
+
     const handleClickOutside = (event: MouseEvent) => {
       if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
         setFocusOn(null);
@@ -107,6 +116,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
     }
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("blur", handleWindowBlur);
+    window.addEventListener("focus", handleWindowFocus);
 
     return () => {
       if (messageArea) {
@@ -114,6 +124,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
       }
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("blur", handleWindowBlur);
+      window.removeEventListener("focus", handleWindowFocus);
     };
   }, [conversationData?.id, handleMarkAsReadOnFocus, setFocusOn]);
 
@@ -140,8 +151,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
   return (
     <div
       className={clsx(
-        "w-[330px] h-[450px] bg-bg-main rounded-xl shadow-lg flex flex-col",
-        "border border-bg-seventh shadow-xl",
+        "w-[330px] h-[450px] bg-bg-main rounded-xl overflow-hidden shadow-lg flex flex-col",
+        "shadow-xl",
         className,
       )}
       ref={panelRef}

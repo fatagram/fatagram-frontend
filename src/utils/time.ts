@@ -53,7 +53,18 @@ export const useFormatTime = () => {
       return `${t(`times:weekday:${_date.getDay()}`)} ${time}`;
     }
 
-    return _date.toLocaleDateString("vi-VN", { day: "2-digit", month: "2-digit", year: "numeric" });
+    const dayStr = _date.toLocaleDateString("vi-VN", {
+      day: "2-digit",
+      month: "2-digit",
+      year: "numeric",
+    });
+
+    // Hour, dayStr
+    return `${dayStr} ${_date.toLocaleTimeString("vi-VN", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: false,
+    })}`;
   };
 
   const getDiffBetween = (

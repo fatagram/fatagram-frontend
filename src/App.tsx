@@ -49,7 +49,9 @@ function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userD
           shouldDehydrateQuery: (query) => {
             const isSuccess = query.state.status === "success";
             const queryKey = query.queryKey as string[];
-            const isManualManaged = queryKey.some((key) => ["conversations"].includes(key));
+            const isManualManaged = queryKey.some((key) =>
+              ["friendship", "conversations"].includes(key),
+            );
 
             return isSuccess && !isManualManaged;
           },
