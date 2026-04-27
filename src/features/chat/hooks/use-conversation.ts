@@ -94,12 +94,18 @@ export const useGetConversations = (queryParams?: Omit<CursorQuery<string>, "cur
     const hydrateConversations = async () => {
       if (!userId || isHydrated) return;
 
+      const existingData = queryClient.getQueryData(queryKey);
+      if (existingData || isHydrated) {
+        setIsHydrated(true);
+        return;
+      }
+
       try {
         const localData = await convManager.getConversations();
 
         if (localData && localData.length > 0) {
           queryClient.setQueryData(queryKey, {
-            pages: [{ items: localData, nextCursor: await convManager.getCursor() }],
+            pages: [{ items: localData, nextCursor: await convManager.getCursor(), hasNext: true }],
             pageParams: [undefined],
           });
         }

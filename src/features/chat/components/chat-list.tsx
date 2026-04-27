@@ -18,7 +18,9 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   const { t } = useTranslation();
   const { openChat } = useOpenChat();
 
-  const { fetchNextPage, hasNextPage, isLoading, isFetching } = useGetConversations();
+  const { fetchNextPage, hasNextPage, isLoading, isFetching } = useGetConversations({
+    limit: 10,
+  });
   const conversations = useConversationStore((state) => state.conversations);
 
   const handleConversationClick = useCallback(
@@ -52,11 +54,11 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
           itemKey={(item) => item.id}
           isLoading={isLoading || isFetching}
           loadingSkeleton={
-            <div className={clsx("flex items-center my-2")}>
+            <div className={clsx("flex items-center my-8")}>
               <Skeleton sz="md" variant="circle" />
               <div className={clsx("flex flex-col w-full flex-1 gap-2 ml-2")}>
                 <Skeleton className={clsx("w-full")} sz="sm" />
-                <Skeleton className={clsx("w-[50%]")} sz="sm" />
+                <Skeleton className={clsx("!w-[50%]")} sz="sm" />
               </div>
             </div>
           }
