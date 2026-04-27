@@ -1,5 +1,4 @@
 import { Button, Text } from "@/components/atoms";
-import Dropdown from "@/components/atoms/dropdown";
 import { NavbarItem } from "@/components/ui/navigation/navbar";
 import { useSize } from "@/hooks/use-size";
 import { debounce } from "@/utils/debounce";
@@ -8,6 +7,7 @@ import { RefObject, useEffect, useMemo, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProfilePage } from "../hooks/use-profile-page";
+import { SmartDropdown } from "@/components/ui/smart-dropdown";
 
 interface ProfileNavbarProps {
   className?: string;
@@ -189,7 +189,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
       </div>
       {hiddenItems.length > 0 && <ShowMoreButton ref={showMoreRef} />}
       {showDropdown && (
-        <Dropdown
+        <SmartDropdown
           className={clsx(
             "absolute z-[9999] top-[100%] m-0 bg-bg-second",
             "shadow-lg rounded-md w-[95%] -translate-x-1/2 left-1/2 p-2",
@@ -214,6 +214,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
               setShowDropdown(false);
             },
           }))}
+          onClose={() => setShowDropdown(false)}
         />
       )}
     </div>
