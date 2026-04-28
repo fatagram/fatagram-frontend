@@ -95,3 +95,13 @@ export const createQueryPersister = (): Persister => {
     },
   };
 };
+
+export const shouldDehydrateQuery = (query: any) => {
+  const isSuccess = query.state.status === "success";
+  const queryKey = query.queryKey as string[];
+  const isManualManaged = queryKey.some((key) =>
+    ["friendship", "conversations", "friendshipStatus", "unread-count"].includes(key),
+  );
+
+  return isSuccess && !isManualManaged;
+};

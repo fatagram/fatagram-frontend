@@ -6,7 +6,7 @@ import Main from "./main";
 import { useEffect, useRef } from "react";
 import { ChatQueryNetworkSync } from "./features/chat/components/chat-query-network-sync";
 import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createQueryPersister } from "./utils/query-persist";
+import { createQueryPersister, shouldDehydrateQuery } from "./utils/query-persist";
 
 function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userData?: any } }) {
   const queryClientRef = useRef<QueryClient | null>(null);
@@ -46,15 +46,7 @@ function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userD
         buster: "fatagram-query-cache-v1",
         maxAge: 1000 * 60 * 60 * 24,
         dehydrateOptions: {
-          shouldDehydrateQuery: (query) => {
-            const isSuccess = query.state.status === "success";
-            const queryKey = query.queryKey as string[];
-            const isManualManaged = queryKey.some((key) =>
-              ["friendship", "conversations", "friendshipStatus"].includes(key),
-            );
-
-            return isSuccess && !isManualManaged;
-          },
+          shouldDehydrateQuery,
         },
       }}
     >

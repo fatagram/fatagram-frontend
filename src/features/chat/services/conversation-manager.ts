@@ -177,6 +177,11 @@ export class ConversationManager {
     try {
       const list = await db.conversations.orderBy("lastActiveAt").reverse().toArray();
       useConversationStore.getState().setConversations(list);
+
+      const meta = await db.table("metadata").get("totalUnreadCount");
+      if (meta) {
+        useConversationStore.getState().setTotalUnreadCount(meta.value);
+      }
     } catch (error) {
       console.error("Failed to hydrate conversations:", error);
     }

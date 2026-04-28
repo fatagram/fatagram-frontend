@@ -381,7 +381,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
                   style={{ willChange: "transform" }}
                 >
                   <div className="swiper-zoom-container h-full w-full flex items-center justify-center p-2 md:p-10">
-                    {m.type === MediaType.Image ? (
+                    {m.type === MediaType.Image || m.type === MediaType.Gif ? (
                       <ImageView
                         url={m.url}
                         className="max-h-full max-w-full object-contain select-none shadow-2xl"
@@ -432,7 +432,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
                     "select-none",
                   )}
                 >
-                  {m.type === MediaType.Image ? (
+                  {m.type === MediaType.Image || m.type === MediaType.Gif ? (
                     <img
                       src={m.url}
                       className="h-full w-full object-cover pointer-events-none"

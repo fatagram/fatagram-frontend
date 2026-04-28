@@ -274,3 +274,40 @@ export const renderSingleImageMessage = (
     </div>
   );
 };
+
+export const renderGifMessage = (
+  gif: {
+    id: string;
+    url: string;
+  },
+  messageBubbleShapeClass: string,
+  conversationId: string,
+  hasDelayed: boolean,
+) => {
+  const { onOpen: openMediaViewer } = useMediaViewer();
+
+  return (
+    <div
+      className={clsx(
+        "relative rounded-2xl h-fit overflow-hidden w-fit",
+        "select-none",
+        messageBubbleShapeClass,
+      )}
+    >
+      <img
+        src={gif.url}
+        alt="GIF"
+        className="max-w-full max-h-[330px] w-auto h-auto cursor-pointer"
+        onClick={() => {
+          openMediaViewer({
+            id: gif.id || "",
+            url: gif.url,
+            type: MediaType.Gif,
+            conversationId: conversationId!,
+          });
+        }}
+      />
+      {hasDelayed && <PendingIndicator />}
+    </div>
+  );
+};

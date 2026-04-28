@@ -20,6 +20,7 @@ export enum MessageRenderType {
   File = "File",
   System = "System",
   StackImage = "StackImage",
+  Gif = "Gif",
 }
 
 export enum MediaType {
@@ -27,6 +28,8 @@ export enum MediaType {
   Video = "Video",
   File = "File",
   Audio = "Audio",
+  Gif = "Gif",
+  Sticker = "Sticker",
 }
 
 export interface MessageMedia {

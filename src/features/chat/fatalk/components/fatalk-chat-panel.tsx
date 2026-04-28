@@ -15,6 +15,7 @@ import { NotFound } from "@/features/components/not-found";
 import { useNavigate } from "react-router-dom";
 import { useChatStore } from "../../hooks/use-floating-chat";
 import { useConversationStore } from "../../services/conversation-manager";
+import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
@@ -51,6 +52,8 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const scrollRef = useRef<HTMLDivElement | null>(null);
   const panelRef = useRef<HTMLDivElement | null>(null);
   const messageListRef = useRef<MessageListHandle | null>(null);
+
+  const unreadCount = useConversationStore((state) => state.totalUnreadCount);
 
   useEffect(() => {
     if (conversationData) {
@@ -188,9 +191,18 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
         ) : (
           <>
             {onTurnback && (
-              <MiniButton sz="sm" onClick={onTurnback} className="block lg:hidden">
-                <i className="fa-solid fa-arrow-left text-primary-400" />
-              </MiniButton>
+              <div className="flex items-center gap-1">
+                <MiniButton sz="sm" onClick={onTurnback} className="block lg:hidden">
+                  <i className="fa-solid fa-arrow-left text-primary-400" />
+                </MiniButton>
+                <Transition show={unreadCount > 0} animation={AnimationLib.Fade}>
+                  <div className="rounded-full bg-primary-500 px-2 text-white">
+                    <Text className="text-white" weight="bold">
+                      {unreadCount}
+                    </Text>
+                  </div>
+                </Transition>
+              </div>
             )}
             <Avatar src={chatAvatar} alt="Avatar" sz="sm" />
             <Text sz="md" weight="bold" className="flex-1 text-text-main truncate">

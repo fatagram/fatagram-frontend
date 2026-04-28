@@ -1,16 +1,17 @@
 import { MiniButton, TextArea } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
-import { useAuth } from "@/contexts";
-import { useChatUpload } from "@/features/chat/hooks/use-chat-upload";
+import { useAuth, useSnackbar, useTheme } from "@/contexts";
 import { MediaType, MessageType } from "@/types/entities/message.type";
 import clsx from "clsx";
 import { useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useSnackbar } from "@/contexts";
+import { Theme as EmojiTheme } from "emoji-picker-react";
 import { getMediaTypeFromFileType, MAX_FILE_SIZE, validateFileSize } from "@/utils/file";
 import { compressImage, compressVideo } from "@/utils/compression";
 import { useMessageCacheMutations, useSendMessage } from "../hooks/use-message";
-// import { useChatStore } from "../hooks/use-floating-chat";
+import { useChatUpload } from "../hooks/use-chat-upload";
+import { ChatAddonPicker } from "./chat-addon-picker";
+import { useMobile } from "@/hooks/use-mobile";
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;
@@ -36,11 +37,19 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { fetch: send } = useSendMessage();
+  const { addMessageToCache } = useMessageCacheMutations();
   const { userId } = useAuth();
   const { upload, loading: _uploading } = useChatUpload();
-  const { addMessageToCache } = useMessageCacheMutations();
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
+  const { theme } = useTheme();
+  const isMobile = useMobile();
+
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
+
+  const isDark =
+    theme !== "light" && theme !== "pastel-yellow-pink" && theme !== "light-yellow-pink";
+  const emojiTheme = isDark ? EmojiTheme.DARK : EmojiTheme.LIGHT;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
     setContent(e.target.value);
@@ -48,15 +57,66 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === "Enter") {
-      if (e.shiftKey) return;
-
-      const isTouchDevice = "ontouchstart" in window || navigator.maxTouchPoints > 0;
-
-      if (!isTouchDevice) {
+    if (e.key === "Enter" && !e.shiftKey) {
+      // On mobile/touch devices, we want Enter to be a new line
+      const isMobile = window.matchMedia("(pointer: coarse)").matches;
+      if (!isMobile) {
         e.preventDefault();
         handleSendMessage();
       }
+    }
+  };
+
+  const handleSendGif = async (gifUrl: string) => {
+    const tempId = crypto.randomUUID();
+    const basePreviewBody = {
+      conversationId: conversationId || "",
+      senderId: userId,
+      status: "pending" as const,
+      createdAt: new Date(),
+      sequenceNumber: -1,
+      isGroup: false,
+    };
+
+    const baseBody = {
+      conversationId: conversationId || undefined,
+      receiverId: receiverId || undefined,
+      correlationId: correlationId || undefined,
+      type: MessageType.Media,
+    };
+
+    // Add to cache
+    addMessageToCache(conversationId || correlationId || "", {
+      ...basePreviewBody,
+      id: tempId,
+      clientTempId: tempId,
+      conversationId: conversationId || correlationId || "",
+      type: MessageType.Media,
+      media: [
+        {
+          url: gifUrl,
+          type: MediaType.Gif,
+        },
+      ],
+    } as any);
+
+    setShowEmojiPicker(false);
+
+    // Send to backend
+    try {
+      await send({
+        ...baseBody,
+        clientTempId: tempId,
+        content: "",
+        media: [
+          {
+            url: gifUrl,
+            type: MediaType.Gif,
+          },
+        ],
+      });
+    } catch (error) {
+      console.error("Error sending GIF:", error);
     }
   };
 
@@ -111,7 +171,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
     if (imageMedia.length > 0) {
       tempImageId = crypto.randomUUID();
-      addMessageToCache(conversationId!, {
+      addMessageToCache(conversationId || "", {
         ...basePreviewBody,
         id: tempImageId,
         clientTempId: tempImageId,
@@ -128,7 +188,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const it = otherMedia[i];
       const tempId = tempOtherMediaIds[i];
       const url = URL.createObjectURL(it.file);
-      addMessageToCache(conversationId!, {
+      addMessageToCache(conversationId || "", {
         ...basePreviewBody,
         id: tempId,
         clientTempId: tempId,
@@ -144,7 +204,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
     if (textContent) {
       tempTextId = crypto.randomUUID();
-      addMessageToCache(conversationId!, {
+      addMessageToCache(conversationId || "", {
         ...basePreviewBody,
         id: tempTextId,
         clientTempId: tempTextId,
@@ -295,8 +355,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   };
 
   return (
-    <div className={clsx("flex flex-col w-full bg-bg-third", className)} ref={containerRef}>
-      <div className="w-full flex items-end gap-1">
+    <div
+      className={clsx("flex flex-col w-full bg-bg-third relative", className)}
+      ref={containerRef}
+    >
+      {showEmojiPicker && !isMobile && (
+        <div className="fixed inset-0 z-40" onClick={() => setShowEmojiPicker(false)} />
+      )}
+
+      <div className="w-full flex items-end gap-1 relative z-50">
         <input
           type="file"
           ref={imageInputRef}
@@ -329,47 +396,60 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <i className="fa-solid fa-image text-primary-500"></i>
         </MiniButton>
 
-        <TextArea
-          sz="sm"
-          className="!rounded-2xl"
-          wrapperClassName="flex-1 min-w-0"
-          placeholder="Tin nhắn của bạn"
-          onKeyDown={handleKeyDown}
-          ref={textboxRef}
-          value={content}
-          onChange={handleInputChange}
-          rows={0}
-          maxRows={5}
-          onFocus={() => {
-            onFocus?.();
-          }}
-          topContent={
-            <>
-              {fileUrls.length > 0 && (
-                <div className="flex items-center gap-2 overflow-x-auto py-2 px-2">
-                  {fileUrls.map((it) => (
-                    <div key={it.url} className="relative group flex-shrink-0">
-                      {renderFilePreview(it)}
-                      <button
-                        type="button"
-                        className={clsx(
-                          "absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5",
-                          "flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity",
-                        )}
-                        onClick={() => {
-                          URL.revokeObjectURL(it.url);
-                          setFileUrls((prev) => prev.filter((u) => u.url !== it.url));
-                        }}
-                      >
-                        <i className="fa-solid fa-xmark text-[10px]"></i>
-                      </button>
-                    </div>
-                  ))}
-                </div>
-              )}
-            </>
-          }
-        />
+        <div className="flex-1 min-w-0 relative flex items-end">
+          <TextArea
+            sz="sm"
+            className="!rounded-2xl"
+            textareaClassName="!pr-10"
+            wrapperClassName="flex-1"
+            placeholder="Tin nhắn của bạn"
+            onKeyDown={handleKeyDown}
+            ref={textboxRef}
+            value={content}
+            onChange={handleInputChange}
+            rows={0}
+            maxRows={5}
+            onFocus={() => {
+              onFocus?.();
+            }}
+            topContent={
+              <>
+                {fileUrls.length > 0 && (
+                  <div className="flex items-center gap-2 overflow-x-auto py-2 px-2">
+                    {fileUrls.map((it) => (
+                      <div key={it.url} className="relative group flex-shrink-0">
+                        {renderFilePreview(it)}
+                        <button
+                          type="button"
+                          className={clsx(
+                            "absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5",
+                            "flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity",
+                          )}
+                          onClick={() => {
+                            URL.revokeObjectURL(it.url);
+                            setFileUrls((prev) => prev.filter((u) => u.url !== it.url));
+                          }}
+                        >
+                          <i className="fa-solid fa-xmark text-[10px]"></i>
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </>
+            }
+          />
+
+          <div className="absolute right-1">
+            <MiniButton
+              onClick={() => setShowEmojiPicker((prev) => !prev)}
+              onPointerDown={(e) => e.preventDefault()}
+              className={clsx(showEmojiPicker && "bg-primary-500/10", "hover:bg-transparent")}
+            >
+              <i className="fa-solid fa-face-smile text-primary-500"></i>
+            </MiniButton>
+          </div>
+        </div>
 
         <MiniButton
           onClick={handleSendMessage}
@@ -379,6 +459,17 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           <i className="fa-solid fa-paper-plane text-primary-500"></i>
         </MiniButton>
       </div>
+
+      <ChatAddonPicker
+        show={showEmojiPicker}
+        onClose={() => setShowEmojiPicker(false)}
+        onEmojiClick={(emoji) => {
+          setContent((prev) => prev + emoji);
+          setHasInput(true);
+        }}
+        onGifClick={handleSendGif}
+        emojiTheme={emojiTheme}
+      />
     </div>
   );
 };

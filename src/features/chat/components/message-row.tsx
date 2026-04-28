@@ -10,6 +10,7 @@ import { useMessageStore } from "@/features/chat/hooks/use-conversation";
 import {
   renderAudioMessage,
   renderFileMessage,
+  renderGifMessage,
   renderImageStackMessage,
   renderOnlyEmojiMessage,
   renderSingleImageMessage,
@@ -202,6 +203,16 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               {
                 id: stackImage[0].id || "",
                 url: stackImage[0].url || "",
+              },
+              meta._messageBubbleShapeClass,
+              conversationId!,
+              hasDelayed,
+            )}
+          {meta._type === MessageRenderType.Gif &&
+            renderGifMessage(
+              {
+                id: message.media?.[0]?.id || "",
+                url: message.media?.[0]?.url || "",
               },
               meta._messageBubbleShapeClass,
               conversationId!,

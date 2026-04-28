@@ -32,6 +32,7 @@ export interface TextAreaProps extends ComponentProps<HTMLTextAreaElement> {
   placeholder?: string;
   sz?: Size;
   maxRows?: number;
+  textareaClassName?: string;
 }
 
 export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
@@ -53,6 +54,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
       onChange,
       rows = 1,
       maxRows,
+      textareaClassName,
       ...props
     },
     ref,
@@ -161,6 +163,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
               { "pt-0": rows > 0 },
               sizeClasses[sz].mainText,
               styles["custom-scrollbar"],
+              textareaClassName,
             )}
             enterKeyHint="enter"
             {...props}

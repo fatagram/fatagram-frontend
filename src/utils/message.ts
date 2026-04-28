@@ -20,6 +20,7 @@ export const getMessageBubbleShapeClass = (
 export const getMessageType = (msg: Message): MessageRenderType => {
   if (msg.type === MessageType.Text) return MessageRenderType.Text;
   if (msg.type === MessageType.Media) {
+    if (msg.media?.some((media) => media.type === MediaType.Gif)) return MessageRenderType.Gif;
     if (msg.media?.some((media) => media.type === MediaType.Image)) return MessageRenderType.Image;
     if (msg.media?.some((media) => media.type === MediaType.Video)) return MessageRenderType.Video;
     if (msg.media?.some((media) => media.type === MediaType.Audio)) return MessageRenderType.Audio;
