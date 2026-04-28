@@ -3,7 +3,7 @@ import { ComponentProps } from "@/components/common/component-type";
 import { useAuth, useSnackbar, useTheme } from "@/contexts";
 import { MediaType, MessageType } from "@/types/entities/message.type";
 import clsx from "clsx";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Theme as EmojiTheme } from "emoji-picker-react";
 import { getMediaTypeFromFileType, MAX_FILE_SIZE, validateFileSize } from "@/utils/file";
@@ -58,7 +58,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      // On mobile/touch devices, we want Enter to be a new line
       const isMobile = window.matchMedia("(pointer: coarse)").matches;
       if (!isMobile) {
         e.preventDefault();
@@ -66,6 +65,61 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       }
     }
   };
+
+  const closePicker = () => {
+    if (showEmojiPicker) {
+      setShowEmojiPicker(false);
+      if (window.history.state?.pickerOpen) {
+        window.history.back();
+      }
+    }
+  };
+
+  const togglePicker = () => {
+    if (showEmojiPicker) {
+      closePicker();
+    } else {
+      setShowEmojiPicker(true);
+      textboxRef.current?.blur();
+    }
+  };
+
+  useEffect(() => {
+    const handlePopState = () => {
+      if (showEmojiPicker) {
+        setShowEmojiPicker(false);
+      }
+    };
+
+    if (showEmojiPicker) {
+      window.history.pushState({ pickerOpen: true }, "");
+      window.addEventListener("popstate", handlePopState);
+    }
+
+    return () => {
+      window.removeEventListener("popstate", handlePopState);
+    };
+  }, [showEmojiPicker]);
+
+  useEffect(() => {
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+        if (showEmojiPicker) {
+          closePicker();
+        }
+      }
+    };
+
+    if (showEmojiPicker) {
+      document.addEventListener("mousedown", handleClickOutside);
+      document.addEventListener("touchstart", handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+      document.removeEventListener("touchstart", handleClickOutside);
+    };
+  }, [showEmojiPicker]);
 
   const handleSendGif = async (gifUrl: string) => {
     const tempId = crypto.randomUUID();
@@ -100,7 +154,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       ],
     } as any);
 
-    setShowEmojiPicker(false);
+    closePicker();
 
     // Send to backend
     try {
@@ -161,8 +215,6 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       (it) => getMediaTypeFromFileType(it.file.type) !== MediaType.Image,
     );
 
-    // Preserve original media types for otherMedia (audio/video/file)
-    // since Cloudinary returns "video" for both audio and video
     const otherMediaTypes = otherMedia.map((it) => getMediaTypeFromFileType(it.file.type));
 
     const tempOtherMediaIds = otherMedia.map(() => crypto.randomUUID());
@@ -442,7 +494,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
           <div className="absolute right-1">
             <MiniButton
-              onClick={() => setShowEmojiPicker((prev) => !prev)}
+              onClick={togglePicker}
               onPointerDown={(e) => e.preventDefault()}
               className={clsx(showEmojiPicker && "bg-primary-500/10", "hover:bg-transparent")}
             >
@@ -462,7 +514,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
       <ChatAddonPicker
         show={showEmojiPicker}
-        onClose={() => setShowEmojiPicker(false)}
+        onClose={closePicker}
         onEmojiClick={(emoji) => {
           setContent((prev) => prev + emoji);
           setHasInput(true);

@@ -15,6 +15,50 @@ interface ChatAddonPickerProps {
 
 type TabType = "emoji" | "gif" | "sticker";
 
+const GifItem = ({ gif, onClick }: { gif: any; onClick: (url: string) => void }) => {
+  const [isInView, setIsInView] = useState(false);
+  const [isLoaded, setIsLoaded] = useState(false);
+  const ref = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0].isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { threshold: 0.1 },
+    );
+
+    if (ref.current) observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, []);
+
+  return (
+    <button
+      ref={ref}
+      className="relative aspect-video bg-bg-second rounded-lg overflow-hidden hover:ring-2 hover:ring-primary-500 transition-all active:scale-95 group"
+      onClick={() => onClick(gif.url)}
+    >
+      {!isLoaded && <Skeleton className="w-full h-full absolute inset-0 z-0" />}
+      {isInView && (
+        <img
+          src={gif.previewUrl}
+          alt={gif.title}
+          className="w-full h-full object-cover transition-opacity duration-300 opacity-0 relative z-10"
+          loading="lazy"
+          onLoad={(e) => {
+            setIsLoaded(true);
+            e.currentTarget.style.opacity = "1";
+          }}
+        />
+      )}
+      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-colors z-20" />
+    </button>
+  );
+};
+
 export const ChatAddonPicker = ({
   show,
   onEmojiClick,
@@ -144,20 +188,7 @@ export const ChatAddonPicker = ({
             <div className="flex-1 overflow-y-auto p-2 scrollbar-hide">
               <div className="grid grid-cols-2 gap-2">
                 {gifData?.pages.map((page) =>
-                  page?.gifs?.map((gif) => (
-                    <button
-                      key={gif.id}
-                      className="relative aspect-video bg-bg-second rounded-lg overflow-hidden hover:ring-2 hover:ring-primary-500 transition-all active:scale-95"
-                      onClick={() => onGifClick(gif.url)}
-                    >
-                      <img
-                        src={gif.previewUrl}
-                        alt={gif.title}
-                        className="w-full h-full object-cover"
-                        loading="lazy"
-                      />
-                    </button>
-                  )),
+                  page?.gifs?.map((gif) => <GifItem key={gif.id} gif={gif} onClick={onGifClick} />),
                 )}
 
                 {(isLoadingGifs || isFetchingNextPage) &&

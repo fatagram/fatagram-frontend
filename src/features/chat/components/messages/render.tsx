@@ -1,5 +1,6 @@
 import clsx from "clsx";
-import { Text } from "@/components/atoms";
+import { Text, Skeleton } from "@/components/atoms";
+import { useState } from "react";
 import PendingIndicator from "./pending-indicator";
 import { VideoMessage } from "./video-message";
 import { useMediaViewer } from "../../context/media-viewer-context";
@@ -276,15 +277,13 @@ export const renderSingleImageMessage = (
 };
 
 export const renderGifMessage = (
-  gif: {
-    id: string;
-    url: string;
-  },
+  gif: { id?: string; url: string },
   messageBubbleShapeClass: string,
   conversationId: string,
   hasDelayed: boolean,
 ) => {
   const { onOpen: openMediaViewer } = useMediaViewer();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <div
@@ -294,10 +293,20 @@ export const renderGifMessage = (
         messageBubbleShapeClass,
       )}
     >
+      {!isLoaded && (
+        <Skeleton className="w-[250px] h-[200px] sm:w-[330px] sm:h-[250px] max-w-full rounded-2xl" />
+      )}
       <img
         src={gif.url}
         alt="GIF"
-        className="max-w-full max-h-[330px] w-auto h-auto cursor-pointer"
+        loading="lazy"
+        className={clsx(
+          "max-w-full max-h-[330px] w-auto h-auto cursor-pointer transition-opacity duration-300",
+          isLoaded ? "opacity-100" : "opacity-0 absolute inset-0",
+        )}
+        onLoad={(_e) => {
+          setIsLoaded(true);
+        }}
         onClick={() => {
           openMediaViewer({
             id: gif.id || "",
