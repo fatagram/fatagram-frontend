@@ -38,15 +38,14 @@ export const renderTextMessage = (
   );
 };
 
-export const VideoMessageRenderer = ({
-  media,
-  conversationId,
-  messageBubbleShapeClass,
-}: {
-  media: { id: string; url: string };
-  conversationId: string;
-  messageBubbleShapeClass: string;
-}) => {
+export const renderVideoMessage = (
+  media: {
+    id: string;
+    url: string;
+  },
+  conversationId: string,
+  messageBubbleShapeClass: string,
+) => {
   const { onOpen: openMediaViewer } = useMediaViewer();
 
   return (
@@ -173,19 +172,13 @@ export const renderAudioMessage = (
   />
 );
 
-export const ImageStackMessage = ({
-  isMyMessage,
-  messageBubbleShapeClass,
-  stackImage,
-  conversationId,
-  hasDelayed,
-}: {
-  isMyMessage: boolean;
-  messageBubbleShapeClass: string;
-  stackImage: MessageMedia[] | undefined;
-  conversationId: string;
-  hasDelayed: boolean;
-}) => {
+export const renderImageStackMessage = (
+  isMyMessage: boolean,
+  messageBubbleShapeClass: string,
+  stackImage: MessageMedia[] | undefined,
+  conversationId: string,
+  hasDelayed: boolean,
+) => {
   const { onOpen: openMediaViewer } = useMediaViewer();
   if (!stackImage) throw new Error("Stack image is required for rendering image stack message");
 
@@ -246,17 +239,15 @@ export const ImageStackMessage = ({
   );
 };
 
-export const SingleImageMessage = ({
-  image,
-  messageBubbleShapeClass,
-  conversationId,
-  hasDelayed,
-}: {
-  image: { id: string; url: string };
-  messageBubbleShapeClass: string;
-  conversationId: string;
-  hasDelayed: boolean;
-}) => {
+export const renderSingleImageMessage = (
+  image: {
+    id: string;
+    url: string;
+  },
+  messageBubbleShapeClass: string,
+  conversationId: string,
+  hasDelayed: boolean,
+) => {
   const { onOpen: openMediaViewer } = useMediaViewer();
 
   return (
