@@ -164,6 +164,7 @@ export const ChatAddonPicker = ({
                 height="100%"
                 theme={emojiTheme}
                 searchDisabled={false}
+                autoFocusSearch={false}
                 skinTonesDisabled
                 lazyLoadEmojis={true}
               />
