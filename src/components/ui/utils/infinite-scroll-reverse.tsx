@@ -41,7 +41,7 @@ export default function InfiniteScrollReverse<T>({
     count: reversedItems.length,
     getScrollElement: () => parentRef.current,
     estimateSize: () => 70,
-    overscan: 4,
+    overscan: 6,
     getItemKey: (index) => itemKey(reversedItems[index]),
   });
 
@@ -62,12 +62,12 @@ export default function InfiniteScrollReverse<T>({
         const delta = prevAnchor.start - anchorRef.current.start;
         if (delta !== 0) {
           el.scrollTop += delta;
+          anchorRef.current.start = prevAnchor.start;
         }
       }
     }
 
     const currentScrollTop = el.scrollTop;
-
     const stableItem = virtualItems.find((v) => v.start >= currentScrollTop) || virtualItems[0];
 
     anchorRef.current = {

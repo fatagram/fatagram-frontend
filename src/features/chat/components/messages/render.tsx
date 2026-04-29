@@ -249,19 +249,29 @@ export const renderSingleImageMessage = (
   hasDelayed: boolean,
 ) => {
   const { onOpen: openMediaViewer } = useMediaViewer();
+  const [isLoaded, setIsLoaded] = useState(false);
 
   return (
     <div
       className={clsx(
-        "relative rounded-2xl h-fit overflow-hidden w-fit",
-        "select-none",
+        "relative rounded-2xl overflow-hidden flex items-center justify-center bg-bg-fourth/50",
+        "select-none w-auto max-w-full h-auto min-h-[200px] min-w-[200px]", // Giữ trước layout (reserve space)
         messageBubbleShapeClass,
       )}
     >
+      {!isLoaded && (
+        <div className="absolute inset-0 flex items-center justify-center w-full h-full z-0">
+          <Skeleton className="w-full h-full rounded-2xl" />
+        </div>
+      )}
       <img
         src={image.url}
         alt="Image"
-        className="max-w-full max-h-[330px] w-auto h-auto cursor-pointer"
+        onLoad={() => setIsLoaded(true)}
+        className={clsx(
+          "max-w-full max-h-[330px] w-auto h-auto cursor-pointer transition-opacity duration-300 z-10 relative",
+          isLoaded ? "opacity-100" : "opacity-0",
+        )}
         onClick={() => {
           openMediaViewer({
             id: image.id || "",
@@ -288,23 +298,25 @@ export const renderGifMessage = (
   return (
     <div
       className={clsx(
-        "relative rounded-2xl h-fit overflow-hidden w-fit",
-        "select-none",
+        "relative rounded-2xl overflow-hidden flex items-center justify-center bg-bg-fourth/50",
+        "select-none w-auto max-w-full h-auto min-h-[200px] min-w-[250px]", // Tránh (prevent) overlap khi scroll nhanh
         messageBubbleShapeClass,
       )}
     >
       {!isLoaded && (
-        <Skeleton className="w-[250px] h-[200px] sm:w-[330px] sm:h-[250px] max-w-full rounded-2xl" />
+        <div className="absolute inset-0 flex items-center justify-center w-full h-full z-0">
+          <Skeleton className="w-full h-full rounded-2xl" />
+        </div>
       )}
       <img
         src={gif.url}
         alt="GIF"
         loading="lazy"
         className={clsx(
-          "max-w-full max-h-[330px] w-auto h-auto cursor-pointer transition-opacity duration-300",
-          isLoaded ? "opacity-100" : "opacity-0 absolute inset-0",
+          "max-w-full max-h-[330px] w-auto h-auto cursor-pointer transition-opacity duration-300 z-10 relative",
+          isLoaded ? "opacity-100" : "opacity-0",
         )}
-        onLoad={(_e) => {
+        onLoad={() => {
           setIsLoaded(true);
         }}
         onClick={() => {
