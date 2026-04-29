@@ -24,22 +24,22 @@ export const NavbarItem: React.FC<NavbarItemProps> = ({
     <Link
       className={clsx(
         className,
-        "relative flex items-center justify-center !text-[15px] whitespace-nowrap",
-        isFocused ? "!text-primary-500" : "!text-text-main",
-        "cursor-pointer",
-        "p-4 px-6 rounded-lg overflow-hidden",
-        {
-          "hover:bg-bg-third": !isFocused,
-          "active:bg-bg-third active:scale-95 transition-all duration-200 ease-in-out": !isFocused,
-        },
+        "group relative flex items-center justify-center !text-[15px] whitespace-nowrap",
+        "cursor-pointer p-4 px-6 transition-all duration-300",
+        isFocused ? "!text-primary-500" : "!text-text-main hover:!text-primary-400",
       )}
       to={path}
       onClick={onClick}
     >
-      {children}
-      {isFocused && (
-        <div className="absolute bg-primary-500 h-[2px] rounded-full w-full bottom-0 left-0" />
-      )}
+      <span className="relative z-10">{children}</span>
+
+      <div
+        className={clsx(
+          "absolute bottom-1 left-1/2 -translate-x-1/2 transform transition-all duration-300",
+          "h-[4px] rounded-full bg-primary-500",
+          isFocused ? "w-4 opacity-100" : "w-0 opacity-0 group-hover:w-2 group-hover:opacity-100",
+        )}
+      />
     </Link>
   );
 };

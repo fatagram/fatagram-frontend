@@ -150,14 +150,10 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
 
   return (
     <div
-      className={clsx(
-        "w-[330px] h-[450px] bg-bg-main rounded-xl overflow-hidden shadow-lg flex flex-col",
-        "shadow-xl",
-        className,
-      )}
+      className={clsx("w-[330px] h-[450px] shadow-lg flex flex-col", "shadow-xl", className)}
       ref={panelRef}
     >
-      <div className="flex items-center px-4 h-[13%] bg-bg-second">
+      <div className="flex items-center px-4 h-[13%] bg-bg-second rounded-t-xl">
         {isLoadingHeader ? (
           <>
             <Skeleton sz="md" variant="circle" className="w-8" />
@@ -187,7 +183,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
         </MiniButton>
       </div>
 
-      <div className="flex-1 min-h-0 flex flex-col bg-bg-second">
+      <div className="flex-1 min-h-0 flex flex-col bg-bg-second overflow-hidden">
         {tempTargetId ? (
           <div className="flex flex-col justify-center items-center h-full text-center px-4">
             <div className="relative mb-3">

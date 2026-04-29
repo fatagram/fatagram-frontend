@@ -37,7 +37,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const imageInputRef = useRef<HTMLInputElement | null>(null);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { fetch: send } = useSendMessage();
-  const { addMessageToCache } = useMessageCacheMutations();
+  const { addMessageToCache, updateMessageInCache } = useMessageCacheMutations();
   const { userId } = useAuth();
   const { upload, loading: _uploading } = useChatUpload();
   const { t } = useTranslation();
@@ -267,17 +267,27 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     if (imageMedia.length > 0) {
       try {
         const image = await upload(imageMedia.map((it) => it.file));
-        await send({
-          ...baseBody,
-          clientTempId: tempImageId,
-          content: "",
-          type: MessageType.Media,
-          media: image.map((url) => ({
-            url: url.url,
-            type: MediaType.Image,
-            metadata: { name: url.original_filename, size: url.bytes },
-          })),
-        });
+        await send(
+          {
+            ...baseBody,
+            clientTempId: tempImageId,
+            content: "",
+            type: MessageType.Media,
+            media: image.map((url) => ({
+              url: url.url,
+              type: MediaType.Image,
+              metadata: { name: url.original_filename, size: url.bytes },
+            })),
+          },
+          {
+            onError: (_error) => {
+              updateMessageInCache(conversationId!, tempImageId, (old) => ({
+                ...old,
+                status: "failed",
+              }));
+            },
+          },
+        );
       } catch (error) {
         console.error("Error uploading images:", error);
       }
@@ -287,29 +297,49 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       const otherMediaUrls = await upload(otherMedia.map((it) => it.file));
       for (let i = 0; i < otherMedia.length; i++) {
         const url = otherMediaUrls[i];
-        await send({
-          ...baseBody,
-          clientTempId: tempOtherMediaIds[i],
-          content: "",
-          type: MessageType.Media,
-          media: [
-            {
-              url: url.url,
-              type: otherMediaTypes[i],
-              metadata: { name: url.original_filename, size: url.bytes },
+        await send(
+          {
+            ...baseBody,
+            clientTempId: tempOtherMediaIds[i],
+            content: "",
+            type: MessageType.Media,
+            media: [
+              {
+                url: url.url,
+                type: otherMediaTypes[i],
+                metadata: { name: url.original_filename, size: url.bytes },
+              },
+            ],
+          },
+          {
+            onError: (_error) => {
+              updateMessageInCache(conversationId!, tempOtherMediaIds[i], (old) => ({
+                ...old,
+                status: "failed",
+              }));
             },
-          ],
-        });
+          },
+        );
       }
     }
 
     if (textContent) {
-      await send({
-        ...baseBody,
-        clientTempId: tempTextId,
-        content: textContent,
-        type: MessageType.Text,
-      });
+      await send(
+        {
+          ...baseBody,
+          clientTempId: tempTextId,
+          content: textContent,
+          type: MessageType.Text,
+        },
+        {
+          onError: (_error) => {
+            updateMessageInCache(conversationId!, tempTextId, (old) => ({
+              ...old,
+              status: "failed",
+            }));
+          },
+        },
+      );
     }
 
     fileUrls.forEach((it) => URL.revokeObjectURL(it.url));

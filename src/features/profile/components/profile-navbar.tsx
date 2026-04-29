@@ -129,21 +129,33 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
     return (
       <Button
         variant="secondary"
-        className={clsx("relative bg-transparent hover:bg-[var(--main-bg-color)]")}
+        className={clsx(
+          "group relative bg-transparent hover:bg-[var(--main-bg-color)]",
+          "flex items-center justify-center !text-[15px] whitespace-nowrap border-none shadow-none",
+          "cursor-pointer p-4 px-6 transition-all duration-300",
+          isChooseHiddenItem ? "!text-primary-500" : "!text-text-main hover:!text-primary-400",
+        )}
         onClick={() => setShowDropdown(!showDropdown)}
         ref={ref}
       >
-        <Text className={clsx("whitespace-nowrap", isChooseHiddenItem ? "!text-primary-500" : "")}>
+        <Text
+          className={clsx(
+            "relative z-10 whitespace-nowrap",
+            isChooseHiddenItem ? "!text-primary-500" : "",
+          )}
+        >
           More <i className="fa-solid fa-caret-down ml-1"></i>
         </Text>
-        {isChooseHiddenItem && (
-          <div
-            className={clsx(
-              "absolute bg-primary-500 h-[2px] rounded-full",
-              "w-full bottom-0 left-0",
-            )}
-          />
-        )}
+
+        <div
+          className={clsx(
+            "absolute bottom-1 left-1/2 -translate-x-1/2 transform transition-all duration-300",
+            "h-[4px] rounded-full bg-primary-500",
+            isChooseHiddenItem
+              ? "w-4 opacity-100"
+              : "w-0 opacity-0 group-hover:w-2 group-hover:opacity-100",
+          )}
+        />
       </Button>
     );
   };
