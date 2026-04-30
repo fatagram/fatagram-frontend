@@ -12,6 +12,7 @@ import {
   registerValidationSchema,
 } from "../validations/register.validation";
 import { SocialButtons } from "../../components/social-buttons";
+import { Error } from "@/api/common/result";
 
 type RegisterFormProps = {
   showLogo?: boolean;
@@ -41,27 +42,35 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
     onSuccess: () => {
       navigate("/login");
     },
-    onError: (err?: any, _errs?: any[]) => {
-      const errMap = registerErrorCodeMap[err?.code] ?? registerErrorCodeMap["UNKNOWN_ERROR"];
-      if (errMap) {
-        switch (errMap.type) {
-          case "username":
-            setUsernameError(errMap.message);
-            break;
-          case "email":
-            setEmailError(errMap.message);
-            break;
-          case "phoneNumber":
-            setPhoneNumberError(errMap.message);
-            break;
-          case "password":
-            setPasswordError(errMap.message);
-            break;
-          case "confirmPassword":
-            setConfirmPasswordError(errMap.message);
-            break;
+    onError: (err?: Error, errs?: Error[]) => {
+      console.log(errs);
+      const handleError = (err?: Error) => {
+        if (!err) return;
+        const errMap = registerErrorCodeMap[err?.code];
+        if (errMap) {
+          switch (errMap.type) {
+            case "username":
+              setUsernameError(errMap.message);
+              break;
+            case "email":
+              setEmailError(errMap.message);
+              break;
+            case "phoneNumber":
+              setPhoneNumberError(errMap.message);
+              break;
+            case "password":
+              setPasswordError(errMap.message);
+              break;
+            case "confirmPassword":
+              setConfirmPasswordError(errMap.message);
+              break;
+            default:
+              break;
+          }
         }
-      }
+      };
+
+      [err, ...(errs ?? [])].forEach((err) => handleError(err));
     },
   });
 

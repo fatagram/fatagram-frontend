@@ -16,7 +16,7 @@ export const SocialButtons: React.FC<SocialButtonsProps> = ({ disabled }) => {
         onClick={redirectToGoogle}
         disabled={disabled}
       />
-      <SocialButton name="Facebook" icon="/svgs/facebook-icon.svg" disabled={true} />
+      {/* <SocialButton name="Facebook" icon="/svgs/facebook-icon.svg" disabled={true} /> */}
     </div>
   );
 };

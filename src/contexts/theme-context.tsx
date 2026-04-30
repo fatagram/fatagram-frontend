@@ -41,9 +41,7 @@ function getInitialTheme(): Theme {
       if (stored && ThemeList.some((t) => t === stored)) {
         return stored as Theme;
       }
-    } catch {
-      // Ignore storage access issues (e.g. blocked cookies/storage).
-    }
+    } catch {}
 
     const domTheme = window.document?.documentElement?.getAttribute("data-theme");
     if (domTheme && ThemeList.some((t) => t === domTheme)) {

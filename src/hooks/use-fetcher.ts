@@ -59,17 +59,12 @@ export function useResultFetcher<TData, TParam = void>(
       let params: TParam | undefined;
       let opts: ResultFetcherOptions<TData> | undefined;
 
-      // If the underlying function does not declare any parameters,
-      // treat the first argument (if any) as options only.
       if (fn.length === 0) {
         params = undefined as TParam;
         if (args.length >= 1) {
           opts = args[0] as ResultFetcherOptions<TData>;
         }
       } else {
-        // Functions that expect a parameter:
-        // - fetch(param)
-        // - fetch(param, opts)
         if (args.length === 0) {
           params = undefined as TParam;
         } else if (args.length === 1) {
@@ -86,6 +81,7 @@ export function useResultFetcher<TData, TParam = void>(
 
       try {
         const result = await fn(params);
+        console.log(result);
         if (result.success) {
           setData(result.data);
           opts?.onSuccess?.(result.data);

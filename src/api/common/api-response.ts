@@ -1,7 +1,6 @@
 export type ApiError = {
-  code?: string;
-  message?: string;
-  codes?: string[];
+  code: string;
+  detail?: string;
 };
 
 export type ApiResponse<T> = {
@@ -9,6 +8,7 @@ export type ApiResponse<T> = {
   data?: T;
   message?: string;
   error?: ApiError;
+  errors?: ApiError[];
 };
 
 export type CursorResponse<TCursor, TData> = ApiResponse<TData[]> & {

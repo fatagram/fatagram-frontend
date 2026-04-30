@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { OptionKey, Option } from "@/components/atoms/selectbox/selectbox";
 import SelectBoxSetting from "../../components/selectbox-setting";
-import { Theme, useSnackbar, useTheme } from "@/contexts";
+import { Theme, useTheme } from "@/contexts";
 import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
 
 interface ThemeSettingsProps {}
@@ -11,11 +11,9 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = () => {
   const { availableThemes, theme, setTheme } = useTheme();
   const [themeOptions, setThemeOptions] = useState<Option[]>([]);
   const { t } = useTranslation() as { t: (key: string) => string };
-  const { showSnackbar } = useSnackbar();
 
   const selectTheme = (opt: OptionKey) => {
     setTheme(opt as Theme);
-    showSnackbar(t("settings:theme.themeChanged"), "info");
   };
 
   useEffect(() => {

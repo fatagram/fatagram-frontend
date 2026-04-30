@@ -40,6 +40,10 @@ export const registerErrorCodeMap: Record<
     message: "auth:register.errors.phoneNumber.alreadyExists",
     type: "phoneNumber",
   },
+  USERNAME_IS_NOT_VALID: {
+    message: "auth:register.errors.username.notCorrectFormat",
+    type: "username",
+  },
   PASSWORD_TOO_WEAK: { message: "auth:register.errors.password.tooWeak", type: "password" },
   UNKNOWN_ERROR: { message: "auth:register.errors.unknown", type: "username" },
 };

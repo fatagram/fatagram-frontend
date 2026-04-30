@@ -17,8 +17,9 @@ export const handleApiError = (error: any): Result<any> => {
       success: false,
       error: {
         code: err.error?.code || "UNKNOWN_ERROR",
-        detail: err.error?.message,
+        detail: err.error?.detail,
       },
+      errors: err.errors,
     };
   } else {
     return {

@@ -25,11 +25,11 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({ className, onSelect }) 
       name: t("settings:navbar.privacy.account"),
       path: "/settings",
     },
-    {
-      icon: <i className="fa-solid fa-shield-halved"></i>,
-      name: t("settings:navbar.privacy.privacy"),
-      path: "/settings/privacy",
-    },
+    // {
+    //   icon: <i className="fa-solid fa-shield-halved"></i>,
+    //   name: t("settings:navbar.privacy.privacy"),
+    //   path: "/settings/privacy",
+    // },
   ];
 
   // Route general settings
@@ -39,16 +39,16 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({ className, onSelect }) 
       name: t("settings:navbar.general.language"),
       path: "/settings/language",
     },
-    {
-      icon: <i className="fa-solid fa-bell"></i>,
-      name: t("settings:navbar.general.notifications"),
-      path: "/settings/notifications",
-    },
-    {
-      icon: <i className="fa-solid fa-circle-info"></i>,
-      name: t("settings:navbar.general.about"),
-      path: "/settings/about",
-    },
+    // {
+    //   icon: <i className="fa-solid fa-bell"></i>,
+    //   name: t("settings:navbar.general.notifications"),
+    //   path: "/settings/notifications",
+    // },
+    // {
+    //   icon: <i className="fa-solid fa-circle-info"></i>,
+    //   name: t("settings:navbar.general.about"),
+    //   path: "/settings/about",
+    // },
     {
       icon: <i className="fa-solid fa-palette"></i>,
       name: t("settings:navbar.general.theme"),

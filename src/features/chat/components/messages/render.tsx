@@ -299,7 +299,7 @@ export const renderGifMessage = (
     <div
       className={clsx(
         "relative rounded-2xl overflow-hidden flex items-center justify-center bg-bg-fourth/50",
-        "select-none w-auto max-w-full h-auto min-h-[200px] min-w-[250px]", // Tránh (prevent) overlap khi scroll nhanh
+        "select-none w-auto max-w-full h-auto min-h-[200px] min-w-[250px]",
         messageBubbleShapeClass,
       )}
     >
@@ -311,7 +311,6 @@ export const renderGifMessage = (
       <img
         src={gif.url}
         alt="GIF"
-        loading="lazy"
         className={clsx(
           "max-w-full max-h-[330px] w-auto h-auto cursor-pointer transition-opacity duration-300 z-10 relative",
           isLoaded ? "opacity-100" : "opacity-0",
