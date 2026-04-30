@@ -2,6 +2,7 @@ import { useRef, useState, useCallback, useEffect } from "react";
 import { ComponentProps } from "@/components/common/component-type";
 import { Button } from "@/components/atoms";
 import clsx from "clsx";
+import { useMediaBlob } from "@/hooks/use-media-blob";
 
 interface VideoMessageProps extends ComponentProps {
   url: string;
@@ -20,6 +21,8 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const videoRef = useRef<HTMLVideoElement>(null);
   const animationRef = useRef<number>(null);
+
+  const { blobUrl: posterBlobUrl } = useMediaBlob(url.replace(/\.[^/.]+$/, ".jpg"));
 
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasStarted, setHasStarted] = useState(false);
@@ -198,6 +201,8 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
       <video
         ref={videoRef}
         src={url}
+        poster={posterBlobUrl || url.replace(/\.[^/.]+$/, ".jpg")}
+        preload="none"
         className={`w-full h-full object-contain cursor-pointer ${!hasStarted ? "opacity-60" : "opacity-100"}`}
         onClick={() => {
           if (onFrameClick) {

@@ -22,7 +22,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
 
   const updateProfileMutation = useUpdateProfile(userId!);
 
-  const canEdit = useMemo(() => isAuthenticated && isOwner, [isAuthenticated, isOwner]);
+  const canEdit = useMemo(() => (isAuthenticated && isOwner) ?? false, [isAuthenticated, isOwner]);
 
   const { data } = useGetUserProfileDetails(targetId ?? "");
   const userProfile = data?.infos;
@@ -78,10 +78,12 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           isEdit={isEditBio}
           placeholder={t("user:profilePosts.bioPlaceholder")}
           value={userProfile?.bio || ""}
+          title="Bio"
+          showTitle={false}
           onSaveClick={(value) => handleSaveBio(value)}
           onOpenChange={handleOnChangeBio}
           valueClassName="text-[1.2rem] font-semibold"
-          canEdit={canEdit || false}
+          canEdit={canEdit}
           isLoading={updateProfileMutation.isFetching}
           btnChildren={
             <Text sz="sm">
@@ -101,8 +103,10 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           editableMode="inline"
           isEdit={isEditDescription}
           placeholder={t("user:profilePosts.descriptionPlaceholder")}
+          title={t("user:profilePosts.description")}
+          showTitle={false}
           value={userProfile?.description || ""}
-          canEdit={canEdit || false}
+          canEdit={canEdit}
           valueClassName="text-[1.1rem]"
           isLoading={updateProfileMutation.isFetching}
           onSaveClick={(value) => handleSaveDescription(value)}

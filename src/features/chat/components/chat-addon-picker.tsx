@@ -4,6 +4,7 @@ import clsx from "clsx";
 import { useGifs } from "../../hooks/use-gifs";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Skeleton } from "@/components/atoms";
+import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 
 interface ChatAddonPickerProps {
   show: boolean;
@@ -220,18 +221,16 @@ export const ChatAddonPicker = ({
   );
 
   return (
-    <div
+    <Transition
+      show={show}
+      animation={AnimationLib.SlideUp}
       className={clsx(
-        "bg-bg-main border-border-main overflow-hidden flex flex-col transition-all duration-300",
-        "w-full border-t flex-shrink-0",
-        show ? "h-[450px] opacity-100" : "h-0 opacity-0 pointer-events-none",
+        "bg-bg-main border-border-main overflow-hidden flex flex-col",
+        "w-full border-t flex-shrink-0 h-[450px]",
         "sm:absolute sm:bottom-full sm:right-0 sm:mb-2 sm:z-50 sm:border sm:rounded-xl sm:shadow-lg sm:w-80 sm:h-[400px] sm:origin-bottom-right",
-        show
-          ? "sm:opacity-100 sm:scale-100 sm:visible sm:pointer-events-auto"
-          : "sm:opacity-0 sm:scale-95 sm:invisible sm:pointer-events-none",
       )}
     >
       {renderContent()}
-    </div>
+    </Transition>
   );
 };

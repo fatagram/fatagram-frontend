@@ -9,6 +9,7 @@ type EditableTextAreaProps = {
   className?: string;
   valueClassName?: string;
   title?: string;
+  showTitle: boolean;
   value?: string;
   isEmpty?: boolean;
   placeholder?: string;
@@ -28,6 +29,7 @@ type EditableTextAreaProps = {
 const EditableTextArea: React.FC<EditableTextAreaProps> = ({
   editableMode = "none",
   title,
+  showTitle,
   value,
   placeholder,
   valueClassName,
@@ -94,7 +96,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
 
   return (
     <div className="flex justify-between items-center w-full">
-      {title && (
+      {showTitle && title && (
         <Text sz="lg" className="font-light">
           {title}
         </Text>

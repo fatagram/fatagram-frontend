@@ -7,6 +7,7 @@ import { VideoView } from "./video-view";
 import { useMediaAround, useMediaAroundAnchor } from "@/features/chat/hooks/use-conversation";
 import { ComponentProps } from "@/components/common/component-type";
 import { MediaType } from "@/types/entities/message.type";
+import { useMediaBlob } from "@/hooks/use-media-blob";
 
 import { Swiper, SwiperSlide } from "swiper/react";
 import type { Swiper as SwiperType } from "swiper";
@@ -19,63 +20,41 @@ interface MediaViewerProps extends ComponentProps {}
 const PREFETCH_DISTANCE = 3;
 const FETCH_BATCH_SIZE = 10;
 
-// Lazy video thumbnail: chỉ render <video> khi gần active, tránh load metadata hàng loạt
-const VideoThumbnail: React.FC<{ url: string; isNearActive: boolean }> = ({
-  url,
-  isNearActive,
-}) => {
-  if (!isNearActive) {
-    // Placeholder rất nhẹ, không trigger network request
-    return (
-      <div className="relative h-full w-full bg-black/60 flex items-center justify-center">
-        <i className="fa-solid fa-play text-white text-[10px]" />
-      </div>
-    );
-  }
+const VideoThumbnail: React.FC<{ url: string; isNearActive: boolean }> = ({ url }) => {
+  const thumbnailUrl = url.replace(/\.[^/.]+$/, ".jpg");
+  const { blobUrl } = useMediaBlob(thumbnailUrl);
   return (
     <div className="relative h-full w-full pointer-events-none">
-      <video
-        src={`${url}#t=0.1`}
+      <img
+        src={blobUrl || thumbnailUrl}
         className="h-full w-full object-cover"
-        preload="metadata"
-        muted
-        playsInline
+        alt="Video Thumbnail"
       />
-      <i className="fa-solid fa-play text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/20" />
+      <i className="fa-solid fa-play text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/40" />
     </div>
   );
 };
 
-// Slide video không active: chỉ render khi adjacent (1 slide cạnh), tránh decode nhiều video cùng lúc
+// Slide video không active: dùng ảnh thumbnail jpg do Cloudinary tạo
 const VideoSlideContent: React.FC<{ url: string; isActive: boolean; isAdjacent: boolean }> = ({
   url,
   isActive,
-  isAdjacent,
 }) => {
   if (isActive) {
     return <VideoView url={url} className="max-h-full max-w-full rounded-md" />;
   }
 
-  if (!isAdjacent) {
-    // Slide xa: placeholder tĩnh hoàn toàn, 0 cost
-    return (
-      <div className="relative max-h-full max-w-full aspect-video bg-black flex items-center justify-center">
-        <i className="fa-solid fa-play text-white text-6xl" />
-      </div>
-    );
-  }
+  const thumbnailUrl = url.replace(/\.[^/.]+$/, ".jpg");
+  const { blobUrl } = useMediaBlob(thumbnailUrl);
 
-  // Slide kế bên: load metadata nhưng không autoplay/decode
   return (
-    <div className="relative max-h-full max-w-full aspect-video bg-black flex items-center justify-center">
-      <video
-        src={`${url}#t=0.1`}
-        className="max-h-full max-w-full opacity-50"
-        preload="metadata"
-        muted
-        playsInline
+    <div className="relative max-h-full max-w-full aspect-video bg-black flex items-center justify-center overflow-hidden rounded-md">
+      <img
+        src={blobUrl || thumbnailUrl}
+        className="max-h-full max-w-full object-contain opacity-50 blur-[2px] pointer-events-none"
+        alt="Thumbnail"
       />
-      <i className="fa-solid fa-play text-white text-6xl absolute" />
+      <i className="fa-solid fa-play text-white text-6xl absolute z-10" />
     </div>
   );
 };
