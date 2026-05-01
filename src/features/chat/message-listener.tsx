@@ -25,7 +25,7 @@ export function useMessageListenerHandler() {
   const navigate = useNavigate();
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
-  const { addTypingUser, removeTypingUser } = useTypingStore();
+  const { addTypingUser, removeTypingUser, recordMessage } = useTypingStore();
 
   const handleNewMessage = useCallback(
     async (message: SocketMessage<MessageResponseDto>) => {
@@ -54,6 +54,7 @@ export function useMessageListenerHandler() {
       convManager.addNewMessage(conversationId, userId!, data, data.shouldIncreaseUnreadCount);
 
       if (data.senderId && data.senderId !== userId) {
+        recordMessage(conversationId, data.senderId);
         removeTypingUser(conversationId, data.senderId);
       }
 
@@ -66,7 +67,7 @@ export function useMessageListenerHandler() {
         await markAsRead({ conversationId, messageSeq });
       }
     },
-    [location.pathname, location.search, markAsRead, markAsReadLocal, navigate, userId, removeTypingUser],
+    [location.pathname, location.search, markAsRead, markAsReadLocal, navigate, userId, removeTypingUser, recordMessage],
   );
 
   const handleSeenMessage = useCallback(
