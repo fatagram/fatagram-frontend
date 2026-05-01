@@ -215,6 +215,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setFileUrls([]);
     setContent("");
     setHasInput(false);
+    stopTyping();
 
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
