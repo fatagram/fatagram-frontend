@@ -53,6 +53,10 @@ export function useMessageListenerHandler() {
       addMessageToCache(conversationId, data);
       convManager.addNewMessage(conversationId, userId!, data, data.shouldIncreaseUnreadCount);
 
+      if (data.senderId && data.senderId !== userId) {
+        removeTypingUser(conversationId, data.senderId);
+      }
+
       const isFocusingThisConversation =
         document.hasFocus() && useChatStore.getState().focusOnId === conversationId;
 
@@ -62,7 +66,7 @@ export function useMessageListenerHandler() {
         await markAsRead({ conversationId, messageSeq });
       }
     },
-    [location.pathname, location.search, markAsRead, markAsReadLocal, navigate, userId],
+    [location.pathname, location.search, markAsRead, markAsReadLocal, navigate, userId, removeTypingUser],
   );
 
   const handleSeenMessage = useCallback(
