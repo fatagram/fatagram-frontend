@@ -15,6 +15,8 @@ import { useRenderConversationContent } from "../hooks/use-render-conversation-c
 import { ChatInput } from "./chat-input";
 import { useTranslation } from "react-i18next";
 import { useChatStore } from "../hooks/use-floating-chat";
+import { TypingIndicator } from "./messages/typing";
+import { useAppHub } from "@/features/hub/use-app-hub";
 
 interface ChatWindowProps extends ComponentProps {
   conversationId: string;
@@ -55,6 +57,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
     isLoading: isLoadingConversation,
     isFetching: isFetchingConversation,
   } = useGetConversation(conversationId, undefined, !tempTargetId);
+
+  const { invoke, connectionState } = useAppHub();
 
   const isLoadingHeader =
     isLoadingConversation || isFetchingConversation || isLoadingTempUser || isFetchingTempUser;
@@ -138,6 +142,13 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
     }
   }, [tempUser, conversationData, renderConversationName]);
 
+  useEffect(() => {
+    invoke("JoinConversation", conversationId);
+    return () => {
+      invoke("LeaveConversation", conversationId);
+    };
+  }, [conversationId, connectionState]);
+
   const handleOnClose = useCallback(() => {
     setFocusOn(null);
     closeChat(conversationId);
@@ -199,8 +210,8 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
               Hai bạn chưa có tin nhắn nào
             </Text>
 
-            <div className="mt-4 px-3 py-2 bg-gray-700/30 rounded-full">
-              <Text sz="sm" className="text-gray-300">
+            <div className="mt-4 px-3 py-2 bg-bg-fourth rounded-full">
+              <Text sz="sm">
                 Gửi lời chào đầu tiên 👋
               </Text>
             </div>
@@ -227,6 +238,7 @@ export const ChatWindow: React.FC<ChatWindowProps> = ({ className, conversationI
             }
           />
         )}
+        <TypingIndicator conversationId={conversationId} />
       </div>
 
       <ChatInput

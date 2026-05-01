@@ -190,14 +190,7 @@ export class ConversationManager {
   public async getConversations(): Promise<Conversation[]> {
     try {
       const convs = useConversationStore.getState().conversations;
-      console.log("Getting conversations from manager, current count:", convs.length);
-      if (convs.length === 0) {
-        await this.hydrate();
-        console.log(
-          "After hydration, conversations count:",
-          useConversationStore.getState().conversations.length,
-        );
-      }
+      if (convs.length === 0) await this.hydrate();
       return useConversationStore.getState().conversations;
     } catch (error) {
       console.error("Failed to get conversations from DB:", error);
@@ -230,7 +223,6 @@ export class ConversationManager {
 
   public async updateConversation(id: string, updatedData: Partial<Conversation>) {
     try {
-      console.log("Updating conversation in manager:", id, updatedData);
       useConversationStore.getState().updateConversation(id, updatedData);
       const conv = await db.conversations.get(id);
       if (!conv) return;

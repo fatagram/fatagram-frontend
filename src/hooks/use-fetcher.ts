@@ -81,7 +81,6 @@ export function useResultFetcher<TData, TParam = void>(
 
       try {
         const result = await fn(params);
-        console.log(result);
         if (result.success) {
           setData(result.data);
           opts?.onSuccess?.(result.data);

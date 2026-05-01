@@ -5,16 +5,17 @@ import {
   useMarkConversationAsRead,
   useMessageStore,
 } from "@/features/chat/hooks/use-conversation";
-import { SeenDto } from "@/api/conversation/dto/conversation.dto";
+import { SeenDto, TypingDto } from "@/api/conversation/dto/conversation.dto";
 import { useAuth } from "@/contexts";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useCallback } from "react";
 import { useChatStore } from "./hooks/use-floating-chat";
 import { convManager } from "./services/conversation-manager";
 import { useMessageCacheMutations } from "./hooks/use-message";
+import { useTypingStore } from "./hooks/use-typing-store";
 // import { messageManager } from "./services/message-manager";
 
-export type MessageHubEvent = SocketMessage<MessageResponseDto | SeenDto>;
+export type MessageHubEvent = SocketMessage<MessageResponseDto | SeenDto | TypingDto>;
 
 export function useMessageListenerHandler() {
   const { setParticipantsSeen } = useMessageStore();
@@ -24,6 +25,7 @@ export function useMessageListenerHandler() {
   const navigate = useNavigate();
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
+  const { addTypingUser, removeTypingUser } = useTypingStore();
 
   const handleNewMessage = useCallback(
     async (message: SocketMessage<MessageResponseDto>) => {
@@ -92,6 +94,22 @@ export function useMessageListenerHandler() {
     [setParticipantsSeen, userId],
   );
 
+  const handleTypingEvent = useCallback(
+    (message: SocketMessage<TypingDto>) => {
+      const { userId: incomingUserId, conversationId } = message.payload;
+
+      // Không xử lý nếu là chính mình (ignore self)
+      if (incomingUserId === userId) return;
+
+      if (message.event === "UserIsTyping") {
+        addTypingUser(conversationId, incomingUserId);
+      } else {
+        removeTypingUser(conversationId, incomingUserId);
+      }
+    },
+    [userId, addTypingUser, removeTypingUser],
+  );
+
   return useCallback(
     async (message: MessageHubEvent) => {
       switch (message.event) {
@@ -101,11 +119,15 @@ export function useMessageListenerHandler() {
         case "SeenMessage":
           handleSeenMessage(message as SocketMessage<SeenDto>);
           break;
+        case "UserIsTyping":
+        case "UserStoppedTyping":
+          handleTypingEvent(message as SocketMessage<TypingDto>);
+          break;
         default:
           break;
       }
     },
-    [handleNewMessage, handleSeenMessage],
+    [handleNewMessage, handleSeenMessage, handleTypingEvent],
   );
 }
 

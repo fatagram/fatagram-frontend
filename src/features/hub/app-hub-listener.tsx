@@ -1,5 +1,5 @@
 import { SocketMessage } from "@/api/common/socket-message";
-import { SeenDto } from "@/api/conversation/dto/conversation.dto";
+import { SeenDto, TypingDto } from "@/api/conversation/dto/conversation.dto";
 import { MessageResponseDto } from "@/api/message/dto/message.dto";
 import { NotificationDto } from "@/api/notification/dto/notification.dto";
 import { useAppHub } from "@/features/hub/use-app-hub";
@@ -16,10 +16,19 @@ export function AppHubListener() {
 
   useAppHub<AppHubPayload>(
     async (message: SocketMessage<AppHubPayload>) => {
+      console.log("MSG: ", message);
       switch (message.event) {
         case "NewMessage":
         case "SeenMessage":
-          await handleMessageEvent(message as SocketMessage<MessageResponseDto | SeenDto>);
+          await handleMessageEvent(
+            message as SocketMessage<MessageResponseDto | SeenDto | TypingDto>,
+          );
+          break;
+        case "UserIsTyping":
+        case "UserStoppedTyping":
+          await handleMessageEvent(
+            message as SocketMessage<MessageResponseDto | SeenDto | TypingDto>,
+          );
           break;
         case "NewNotification":
           handleNotificationEvent(message as SocketMessage<NotificationDto>);

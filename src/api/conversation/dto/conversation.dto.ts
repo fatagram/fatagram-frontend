@@ -32,3 +32,8 @@ export interface ParticipantsSeenDto {
     };
   };
 }
+
+export interface TypingDto {
+  userId: string;
+  conversationId: string;
+}

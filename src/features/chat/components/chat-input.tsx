@@ -12,6 +12,8 @@ import { useMessageCacheMutations, useSendMessage } from "../hooks/use-message";
 import { useChatUpload } from "../hooks/use-chat-upload";
 import { ChatAddonPicker } from "./chat-addon-picker";
 import { useMobile } from "@/hooks/use-mobile";
+import { useTyping } from "../hooks/use-typing";
+import { useAppHub } from "@/features/hub/use-app-hub";
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;
@@ -43,6 +45,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const { t } = useTranslation();
   const { showSnackbar } = useSnackbar();
   const { theme } = useTheme();
+  const { invoke } = useAppHub();
+  const { handleTyping, stopTyping } = useTyping({
+    onStart: () => invoke("StartTyping", conversationId),
+    onStop: () => invoke("StopTyping", conversationId),
+    debounceTime: 1000,
+  });
   const isMobile = useMobile();
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -52,8 +60,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
   const emojiTheme = isDark ? EmojiTheme.DARK : EmojiTheme.LIGHT;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
-    setContent(e.target.value);
-    setHasInput(e.target.value.trim() !== "");
+    const value = e.target.value;
+    setContent(value);
+    setHasInput(value.trim() !== "");
+    if (value.trim() === "") {
+      stopTyping();
+    } else {
+      handleTyping();
+    }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {

@@ -16,6 +16,8 @@ import { useNavigate } from "react-router-dom";
 import { useChatStore } from "../../hooks/use-floating-chat";
 import { useConversationStore } from "../../services/conversation-manager";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
+import { useAppHub } from "@/features/hub/use-app-hub";
+import { TypingIndicator } from "../../components/messages/typing";
 
 interface FatalkChatPanelProps extends ComponentProps {
   conversationId: string;
@@ -36,6 +38,7 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const markAsReadLocal = useLocalMarkAsRead();
 
   const setFocusOn = useChatStore((state) => state.setFocusOn);
+  const { invoke, connectionState } = useAppHub();
 
   const {
     data: conversationData,
@@ -142,6 +145,13 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       setFocusOn(null);
     };
   }, [setFocusOn]);
+
+  useEffect(() => {
+    invoke("JoinConversation", conversationId);
+    return () => {
+      invoke("LeaveConversation", conversationId);
+    };
+  }, [conversationId, connectionState]);
 
   if (
     !isLoadingConversation &&
@@ -257,6 +267,8 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
           }
         />
       </div>
+
+      <TypingIndicator conversationId={conversationId} />
 
       <ChatInput
         className="!bg-bg-main h-auto py-2 px-1 touch-none"

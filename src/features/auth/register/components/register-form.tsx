@@ -43,7 +43,6 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       navigate("/login");
     },
     onError: (err?: Error, errs?: Error[]) => {
-      console.log(errs);
       const handleError = (err?: Error) => {
         if (!err) return;
         const errMap = registerErrorCodeMap[err?.code];

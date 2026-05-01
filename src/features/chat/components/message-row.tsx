@@ -77,7 +77,6 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const hasSeenByOther = seenBy?.length > 1 || (seenBy.length === 1 && seenBy[0].userId !== userId);
 
   useEffect(() => {
-    console.log("Message: ", message);
     if (!isPending) {
       setHasDelayed(false);
       return;

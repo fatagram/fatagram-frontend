@@ -1,5 +1,5 @@
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { authEvents } from "@/events/auth-event";
 import { useAuth } from "@/contexts";
 import { createSignalRConnection } from "../../api/socket/app-hub-client";
@@ -7,11 +7,25 @@ import { SocketMessage } from "@/api/common/socket-message";
 
 const MAX_RETRY = 5;
 
+let _sharedConnection: HubConnection | null = null;
+const _stateListeners = new Set<(state: HubConnectionState) => void>();
+
+function broadcastState(state: HubConnectionState) {
+  _stateListeners.forEach((fn) => fn(state));
+}
+
+interface AppHubReturn {
+  invoke: (methodName: string, ...args: any[]) => Promise<any>;
+  connectionState?: HubConnectionState;
+}
+
 export function useAppHub<T>(
-  onReceiveMessage: (message: SocketMessage<T>) => void,
+  onReceiveMessage?: (message: SocketMessage<T>) => void,
   onConnected?: () => void,
-) {
-  const connectionRef = useRef<HubConnection | null>(null);
+): AppHubReturn {
+  const [connectionState, setConnectionState] = useState<HubConnectionState>(
+    _sharedConnection?.state ?? HubConnectionState.Disconnected,
+  );
   const onReceiveMessageRef = useRef(onReceiveMessage);
   const onConnectedRef = useRef(onConnected);
   const { isAuthenticated } = useAuth();
@@ -22,23 +36,37 @@ export function useAppHub<T>(
   }, [onReceiveMessage, onConnected]);
 
   useEffect(() => {
-    if (!isAuthenticated) return;
+    const listener = (state: HubConnectionState) => setConnectionState(state);
+    _stateListeners.add(listener);
+    if (_sharedConnection) {
+      setConnectionState(_sharedConnection.state);
+    }
+    return () => {
+      _stateListeners.delete(listener);
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated || !onReceiveMessage) return;
+
     let isMounted = true;
     let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 
     const receiveMessageHandler = (message: SocketMessage<T>) => {
       if (isMounted) {
-        onReceiveMessageRef.current(message);
+        onReceiveMessageRef.current?.(message);
       }
     };
 
     const tryConnect = async (retry: number = 0, isTriggerConnectedCallback: boolean = false) => {
-      const conn = connectionRef.current;
+      const conn = _sharedConnection;
       if (!conn) return;
 
       try {
         if (conn.state === HubConnectionState.Disconnected) {
           await conn.start();
+          broadcastState(conn.state);
+
           conn.off("ReceiveMessage", receiveMessageHandler);
           conn.on("ReceiveMessage", receiveMessageHandler);
 
@@ -59,15 +87,15 @@ export function useAppHub<T>(
     };
 
     const handleSignalRReconnected = () => {
+      broadcastState(HubConnectionState.Connected);
       if (onConnectedRef.current) {
         onConnectedRef.current();
       }
     };
 
     const startConnection = async () => {
-      connectionRef.current = createSignalRConnection();
-      connectionRef.current.onreconnected(handleSignalRReconnected);
-
+      _sharedConnection = createSignalRConnection();
+      _sharedConnection.onreconnected(handleSignalRReconnected);
       await tryConnect(0, true);
     };
 
@@ -79,7 +107,7 @@ export function useAppHub<T>(
 
     const handleNetworkOrVisibilityChange = async () => {
       if (document.visibilityState === "visible" && navigator.onLine) {
-        const conn = connectionRef.current;
+        const conn = _sharedConnection;
 
         if (conn?.state === HubConnectionState.Disconnected) {
           await tryConnect(0, true);
@@ -104,15 +132,35 @@ export function useAppHub<T>(
         clearTimeout(reconnectTimer);
         reconnectTimer = null;
       }
-      if (connectionRef.current) {
-        connectionRef.current.off("ReceiveMessage", receiveMessageHandler);
-        connectionRef.current.onreconnected(() => {});
-        connectionRef.current.stop();
-        connectionRef.current = null;
+      if (_sharedConnection) {
+        _sharedConnection.off("ReceiveMessage", receiveMessageHandler);
+        _sharedConnection.onreconnected(() => {});
+        _sharedConnection.stop();
+        _sharedConnection = null;
+        broadcastState(HubConnectionState.Disconnected);
       }
       authEvents.off("onboardingCompleted", handleOnboardingCompleted);
       window.removeEventListener("online", handleNetworkOrVisibilityChange);
       document.removeEventListener("visibilitychange", handleNetworkOrVisibilityChange);
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
+
+  const invoke = async (methodName: string, ...args: any[]) => {
+    const conn = _sharedConnection;
+    if (conn && conn.state === HubConnectionState.Connected) {
+      try {
+        await conn.invoke("HandleAction", methodName, args[0], args[1] || null);
+      } catch (err) {
+        console.error(`Error invoking ${methodName}:`, err);
+      }
+    } else {
+      console.warn("SignalR: Connection is not in Connected state.");
+    }
+  };
+
+  return {
+    invoke,
+    connectionState,
+  };
 }
