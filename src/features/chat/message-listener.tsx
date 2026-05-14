@@ -67,7 +67,16 @@ export function useMessageListenerHandler() {
         await markAsRead({ conversationId, messageSeq });
       }
     },
-    [location.pathname, location.search, markAsRead, markAsReadLocal, navigate, userId, removeTypingUser, recordMessage],
+    [
+      location.pathname,
+      location.search,
+      markAsRead,
+      markAsReadLocal,
+      navigate,
+      userId,
+      removeTypingUser,
+      recordMessage,
+    ],
   );
 
   const handleSeenMessage = useCallback(

@@ -15,6 +15,12 @@ export const useRenderConversationContent = () => {
           userId === creatorId ? t("common:conversations.you") : creatorName || "Unknown",
       });
     }
+    if (message.type === MessageType.ChangeGroupAvatar) {
+      const { actorName, actorId } = message.metadata || {};
+      return t("common:conversations.systemMessage.changeGroupAvatar", {
+        actorName: userId === actorId ? t("common:conversations.you") : actorName || "Unknown",
+      });
+    }
   };
 
   const renderConversationName = (conversation: Conversation) => {

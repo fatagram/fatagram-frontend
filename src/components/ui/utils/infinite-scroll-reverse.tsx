@@ -85,9 +85,9 @@ export default function InfiniteScrollReverse<T>({
     let rafId: number;
     let isScrolling = false;
 
-    const FRICTION = 0.055;
-    const MAX_VELOCITY = 80;
-    const MULTIPLIER = 0.8;
+    const FRICTION = 0.045;
+    const MAX_VELOCITY = 130;
+    const MULTIPLIER = 1.2;
     const STOP_THRESHOLD = 0.1;
 
     const animate = (timestamp: number) => {
@@ -109,6 +109,7 @@ export default function InfiniteScrollReverse<T>({
         return;
       }
 
+      // REVERSED: Sử dụng dấu trừ để đảo ngược hướng cuộn
       el.scrollTop -= velocity;
       rafId = requestAnimationFrame(animate);
     };
@@ -116,20 +117,23 @@ export default function InfiniteScrollReverse<T>({
     const onWheel = (e: WheelEvent) => {
       e.preventDefault();
 
-      const isTrackpad = e.deltaMode === 0 && Math.abs(e.deltaY) < 50;
-      const isLineMode = e.deltaMode === 1;
+      let delta = e.deltaY;
 
-      let delta: number;
-      if (isLineMode) {
-        delta = e.deltaY * 35;
-      } else if (isTrackpad) {
-        el.scrollTop -= e.deltaY;
-        return;
-      } else {
-        delta = e.deltaY * MULTIPLIER;
+      if (e.deltaMode === 1) {
+        delta *= 35;
+      } else if (e.deltaMode === 2) {
+        delta *= el.clientHeight;
       }
 
-      velocity = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, velocity + delta));
+      const isTrackpad = Math.abs(e.deltaY) < 50 && e.deltaMode === 0;
+      if (isTrackpad) {
+        // REVERSED: Đảo ngược cho cả trackpad
+        el.scrollTop -= delta;
+        return;
+      }
+
+      const impulse = delta * MULTIPLIER;
+      velocity = Math.max(-MAX_VELOCITY, Math.min(MAX_VELOCITY, velocity + impulse));
 
       if (!isScrolling) {
         isScrolling = true;

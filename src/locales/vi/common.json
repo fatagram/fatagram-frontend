@@ -65,7 +65,8 @@
     "no-conversations": "Không có cuộc trò chuyện",
     "sent": "Đã gửi",
     "systemMessage": {
-      "createGroup": "{{creatorName}} đã tạo nhóm"
+      "createGroup": "{{creatorName}} đã tạo nhóm",
+      "changeGroupAvatar": "{{actorName}} đã thay đổi ảnh đại diện nhóm"
     },
     "sentImageMessage": "Đã gửi {{count}} hình ảnh",
     "sentMediaMessage": "Đã gửi một tệp đính kèm",

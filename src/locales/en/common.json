@@ -68,7 +68,8 @@
     "noSelectConversationMessage": "Select a conversation to start chatting",
     "sent": "Sent",
     "systemMessage": {
-      "createGroup": "{{creatorName}} created the group"
+      "createGroup": "{{creatorName}} created the group",
+      "changeGroupAvatar": "{{actorName}} changed the group avatar"
     },
     "sentImageMessage": "Sent {{count}} images",
     "sentMediaMessage": "Sent a attached file",

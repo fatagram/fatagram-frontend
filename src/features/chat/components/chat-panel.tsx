@@ -1,33 +1,37 @@
-import { Text, Avatar, Skeleton, MiniButton, Button } from "@/components/atoms";
+import { Text, Avatar, Skeleton, Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { MessageList, MessageListHandle } from "../../components/message";
 import { useEffect, useRef, useState } from "react";
 import {
   useGetConversation,
   useLocalMarkAsRead,
   useMarkConversationAsRead,
 } from "@/features/chat/hooks/use-conversation";
-import { ChatInput } from "../../components/chat-input";
-import { useRenderConversationContent } from "../../hooks/use-render-conversation-content";
 import { useTranslation } from "react-i18next";
 import { NotFound } from "@/features/components/not-found";
 import { useNavigate } from "react-router-dom";
-import { useChatStore } from "../../hooks/use-floating-chat";
-import { useConversationStore } from "../../services/conversation-manager";
-import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 import { useAppHub } from "@/features/hub/use-app-hub";
-import { TypingIndicator } from "../../components/messages/typing";
+import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
+import { MessageList, MessageListHandle } from "./message";
+import { convManager, useConversationStore } from "../services/conversation-manager";
+import { TypingIndicator } from "./messages/typing";
+import { ChatInput } from "./chat-input";
+import { useChatStore } from "../hooks/use-floating-chat";
 
-interface FatalkChatPanelProps extends ComponentProps {
+interface Props extends ComponentProps {
   conversationId: string;
   onTurnback?: () => void;
+  headerRight?: React.ReactNode;
+  headerLeft?: React.ReactNode;
+  onClickTitle?: () => void;
 }
 
-export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
+export const ChatPanel: React.FC<Props> = ({
   className,
   conversationId,
-  onTurnback,
+  headerRight,
+  headerLeft,
+  onClickTitle,
 }) => {
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
@@ -47,6 +51,8 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
     isPending: isPendingConversation,
   } = useGetConversation(conversationId, undefined, true);
 
+  const conv = conversationData ?? convManager.getConversation(conversationId);
+
   const navigate = useNavigate();
 
   const isLoadingHeader =
@@ -56,32 +62,30 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
   const panelRef = useRef<HTMLDivElement | null>(null);
   const messageListRef = useRef<MessageListHandle | null>(null);
 
-  const unreadCount = useConversationStore((state) => state.totalUnreadCount);
-
   useEffect(() => {
-    if (conversationData) {
-      setChatTitle(renderConversationName(conversationData));
-      setChatAvatar(conversationData.avatarUrl || "");
+    if (conv) {
+      setChatTitle(renderConversationName(conv));
+      setChatAvatar(conv.avatarUrl ?? "");
     }
-  }, [conversationData, renderConversationName]);
+  }, [conv]);
 
   useEffect(() => {
-    if (!conversationData?.id) return;
+    if (!conv?.id) return;
 
     const handleUserInteract = async () => {
       if (!document.hasFocus()) return;
-      setFocusOn(conversationData.id);
+      setFocusOn(conv.id);
       const lastMsgSeq =
-        useConversationStore.getState().lastMessageSequenceMap[conversationData.id] ||
-        conversationData.lastMessageNumber;
-      const myLastSeenSeq = useConversationStore.getState().userSeenMap[conversationData.id] || 0;
+        useConversationStore.getState().lastMessageSequenceMap[conv.id] ||
+        conversationData?.lastMessageNumber;
+      const myLastSeenSeq = useConversationStore.getState().userSeenMap[conv.id] || 0;
 
       if (!lastMsgSeq) return;
       if (lastMsgSeq <= myLastSeenSeq) return;
 
-      markAsReadLocal(conversationData.id, lastMsgSeq);
+      markAsReadLocal(conv.id, lastMsgSeq);
       await markAsRead({
-        conversationId: conversationData.id,
+        conversationId: conv.id,
         messageSeq: lastMsgSeq,
       });
     };
@@ -96,18 +100,18 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
       if (!insidePanel) return;
 
       // same logic as handleUserInteract
-      setFocusOn(conversationData.id);
+      setFocusOn(conv.id);
       const lastMsgSeq =
-        useConversationStore.getState().lastMessageSequenceMap[conversationData.id] ||
-        conversationData.lastMessageNumber;
-      const myLastSeenSeq = useConversationStore.getState().userSeenMap[conversationData.id] || 0;
+        useConversationStore.getState().lastMessageSequenceMap[conv.id] ||
+        conv.lastMessage?.sequenceNumber;
+      const myLastSeenSeq = useConversationStore.getState().userSeenMap[conv.id] || 0;
 
       if (!lastMsgSeq) return;
       if (lastMsgSeq <= myLastSeenSeq) return;
 
-      markAsReadLocal(conversationData.id, lastMsgSeq);
+      markAsReadLocal(conv.id, lastMsgSeq);
       await markAsRead({
-        conversationId: conversationData.id,
+        conversationId: conv.id,
         messageSeq: lastMsgSeq,
       });
     };
@@ -200,35 +204,21 @@ export const FatalkChatPanel: React.FC<FatalkChatPanelProps> = ({
           </>
         ) : (
           <>
-            {onTurnback && (
-              <div className="flex items-center gap-1">
-                <MiniButton sz="sm" onClick={onTurnback} className="block lg:hidden">
-                  <i className="fa-solid fa-arrow-left text-primary-400" />
-                </MiniButton>
-                <Transition show={unreadCount > 0} animation={AnimationLib.Fade}>
-                  <div className="rounded-full bg-primary-500 px-2 text-white">
-                    <Text className="text-white" weight="bold">
-                      {unreadCount}
-                    </Text>
-                  </div>
-                </Transition>
-              </div>
-            )}
-            <Avatar src={chatAvatar} alt="Avatar" sz="sm" />
-            <Text sz="md" weight="bold" className="flex-1 text-text-main truncate">
+            {headerLeft}
+            <Avatar className="shrink-0" src={chatAvatar} alt="Avatar" sz="sm" />
+            <Text
+              sz="md"
+              weight="bold"
+              className={clsx(
+                "mr-1 flex-1 text-text-main truncate ",
+                onClickTitle && "transition-all duration-100 cursor-pointer py-2",
+                onClickTitle && "hover:bg-black/10 rounded-lg active:scale-[98%]",
+              )}
+              onClick={onClickTitle}
+            >
               {chatTitle}
             </Text>
-            {/* <div className="flex items-center gap-1">
-              <MiniButton sz="sm">
-                <i className="fa-solid fa-phone text-primary-400" />
-              </MiniButton>
-              <MiniButton sz="sm">
-                <i className="fa-solid fa-video text-primary-400" />
-              </MiniButton>
-              <MiniButton sz="sm">
-                <i className="fa-solid fa-circle-info text-primary-400" />
-              </MiniButton>
-            </div> */}
+            <div className="mr-auto">{headerRight}</div>
           </>
         )}
       </div>

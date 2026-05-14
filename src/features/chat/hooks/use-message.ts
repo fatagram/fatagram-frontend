@@ -20,6 +20,10 @@ export const useMessages = (
       return await conversationService.getMessages(conversationId, { ...queryParams, cursor });
     },
     enabled: !!conversationId,
+    staleTime: 0,
+    fetchOptions: {
+      refetchOnMount: true,
+    },
   });
 };
 

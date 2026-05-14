@@ -15,6 +15,11 @@ export interface ConversationDto {
   myLastSeenMessageSeq?: number;
 }
 
+export interface UpdateConversationDto {
+  name?: string | null;
+  avatarUrl?: string | null;
+}
+
 export interface SeenDto {
   conversationId: string;
   messageSeq: number;

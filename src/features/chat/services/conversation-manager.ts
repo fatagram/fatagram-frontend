@@ -4,7 +4,7 @@ import { db } from "@/utils/database";
 import { QueryClient } from "@tanstack/react-query";
 import { create } from "zustand";
 import { CONVERSATION_KEYS } from "../hooks/use-conversation";
-import { Message } from "@/types/entities/message.type";
+import { Message, MessageType } from "@/types/entities/message.type";
 
 interface ConversationState {
   conversations: Conversation[];
@@ -198,6 +198,10 @@ export class ConversationManager {
     }
   }
 
+  public getConversation(id: string) {
+    return useConversationStore.getState().conversations.find((conv) => conv.id === id);
+  }
+
   public async appendConversations(convs: Conversation[], isFirstPage: boolean) {
     try {
       await db.conversations.bulkPut(convs);
@@ -253,6 +257,10 @@ export class ConversationManager {
 
       conv.lastMessage = newMsg;
       conv.lastActiveAt = new Date().toISOString();
+
+      if (newMsg.type === MessageType.ChangeGroupAvatar) {
+        conv.avatarUrl = newMsg.metadata?.avatarUrl || conv.avatarUrl;
+      }
 
       if (isMine) {
         this.markAsSeen(convId, newMsg.sequenceNumber!);

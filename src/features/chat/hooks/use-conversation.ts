@@ -35,7 +35,15 @@ export const useGetConversation = (
     queryKey: CONVERSATION_KEYS.detail(conversationId),
     fn: async () => await conversationService.getConversation(conversationId),
     enabled: enabled ?? false,
-    options: config,
+    options: {
+      onSuccess: (data) => {
+        convManager.updateConversation(data.id, {
+          avatarUrl: data.avatarUrl,
+          name: data.name,
+        });
+        config?.onSuccess?.(data);
+      },
+    },
   });
 };
 
@@ -174,6 +182,19 @@ export const useGetTotalUnreadCount = () => {
     },
     refetchOnReconnect: true,
   });
+};
+
+export const useUpdateConversationAvatar = (conversationId: string) => {
+  const queryClient = useQueryClient();
+  return useResultFetcher(
+    async ({ file }: { file: File }) =>
+      await conversationService.updateConversationAvatar(conversationId, file),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
+      },
+    },
+  );
 };
 
 interface MessageState {

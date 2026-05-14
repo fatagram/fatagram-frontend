@@ -1,5 +1,5 @@
 import { CursorResult, Result } from "@/api/common/result";
-import { buildApiPath, apiGet, apiPost } from "../common/api-helpers";
+import { buildApiPath, apiGet, apiPost, apiPatchFormData } from "../common/api-helpers";
 import { CursorQuery } from "@/types/query";
 import { ConversationDto, ParticipantsSeenDto } from "./dto/conversation.dto";
 import {
@@ -84,6 +84,12 @@ export class ConversationService {
     count: number = 10,
   ): Promise<Result<MessageMediaAroundAnchorDto>> {
     return await apiGet(`${PREFIX}/${conversationId}/media/around-anchor/${mediaId}`, { count });
+  }
+
+  public async updateConversationAvatar(conversationId: string, file: File): Promise<Result<void>> {
+    const formData = new FormData();
+    formData.append("file", file);
+    return await apiPatchFormData(`${PREFIX}/${conversationId}/avatar`, formData);
   }
 }
 
