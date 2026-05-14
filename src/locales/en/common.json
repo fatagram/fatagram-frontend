@@ -77,7 +77,19 @@
     "openFatalk": "Open Fatalk",
     "enterGroupNameOptional": "Enter group name (optional)",
     "loadingOldMessages": "Loading messages...",
-    "createGroupChat": "Create group chat"
+    "createGroupChat": "Create group chat",
+    "settings": {
+      "info": "Conversation Info",
+      "members": "{{count}} members",
+      "changeAvatar": "Avatar",
+      "changeName": "Name",
+      "search": "Search",
+      "notification": "Notifications",
+      "notificationDescription": "Turn conversation notifications on/off",
+      "viewMembers": "Members",
+      "viewMembersDescription": "View list of members",
+      "leaveGroup": "Leave group"
+    }
   },
   "chat": {
     "upload": {

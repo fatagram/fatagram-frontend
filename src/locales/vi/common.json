@@ -74,7 +74,19 @@
     "openFatalk": "Mở Fatalk",
     "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)",
     "loadingOldMessages": "Đang tải tin nhắn...",
-    "createGroupChat": "Tạo nhóm chat"
+    "createGroupChat": "Tạo nhóm chat",
+    "settings": {
+      "info": "Thông tin hội thoại",
+      "members": "{{count}} thành viên",
+      "changeAvatar": "Ảnh",
+      "changeName": "Tên",
+      "search": "Tìm",
+      "notification": "Thông báo",
+      "notificationDescription": "Bật/Tắt thông báo cuộc trò chuyện",
+      "viewMembers": "Thành viên",
+      "viewMembersDescription": "Xem danh sách thành viên",
+      "leaveGroup": "Rời khỏi nhóm"
+    }
   },
   "chat": {
     "upload": {
