@@ -262,6 +262,10 @@ export class ConversationManager {
         conv.avatarUrl = newMsg.metadata?.avatarUrl || conv.avatarUrl;
       }
 
+      if (newMsg.type === MessageType.RenameGroup) {
+        conv.name = newMsg.metadata?.newName || conv.name;
+      }
+
       if (isMine) {
         this.markAsSeen(convId, newMsg.sequenceNumber!);
       } else {

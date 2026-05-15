@@ -7,7 +7,12 @@ import RouteWrapper from "../features/components/routes/route-wrapper";
 const AppRoutes: React.FC = () => {
   const generateRoutes = useCallback((routes: RouteType[]) => {
     return routes.map((route, idx) => {
-      const key = route.path ?? `route-${idx}`;
+      const key = route.path ?? (route.index ? "index" : `route-${idx}`);
+
+      if (route.index) {
+        return <Route key={key} index element={<RouteWrapper {...route} />} />;
+      }
+
       return (
         <Route key={key} path={route.path} element={<RouteWrapper {...route} />}>
           {route.children && generateRoutes(route.children)}

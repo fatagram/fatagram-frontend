@@ -1,4 +1,64 @@
 {
-  "title": "Trang chủ",
-  "description": "Welcome to the home page! This is where you can find the latest updates and news."
+  "hero": {
+    "title1": "Chia sẻ",
+    "title2": "khoảnh khắc",
+    "title3": "Kết nối",
+    "title4": "mọi nơi",
+    "subtitle": "Fatagram là nền tảng nhắn tin thế hệ mới, nơi bạn có thể lưu giữ và chia sẻ những kỷ niệm tuyệt vời nhất với bạn bè qua giao diện hiện đại, mượt mà và an toàn.",
+    "cta": "Bắt đầu ngay",
+    "login": "Đăng nhập"
+  },
+  "features": {
+    "speed": {
+      "title": "Tốc độ cực nhanh",
+      "desc": "Tin nhắn được truyền tải tức thì, mượt mà không độ trễ"
+    },
+    "security": {
+      "title": "Bảo mật & Riêng tư",
+      "desc": "Dữ liệu và khoảnh khắc của bạn luôn được bảo vệ an toàn"
+    },
+    "ui": {
+      "title": "Giao diện hiện đại",
+      "desc": "Trải nghiệm hình ảnh cao cấp trên mọi thiết bị"
+    }
+  },
+  "footer": {
+    "cta": {
+      "title": "Sẵn sàng kết nối cùng Fatagram?",
+      "desc": "Tham gia ngay hôm nay để trải nghiệm không gian trò chuyện hiện đại và bảo mật nhất.",
+      "signup": "Đăng ký miễn phí",
+      "learnMore": "Tìm hiểu thêm"
+    },
+    "branding": "Fatagram - Nơi lưu giữ những khoảnh khắc quý giá và kết nối mọi người ở bất cứ đâu. Giao diện mượt mà, bảo mật tuyệt đối.",
+    "categories": {
+      "products": "Sản phẩm",
+      "company": "Công ty",
+      "support": "Hỗ trợ",
+      "legal": "Pháp lý"
+    },
+    "links": {
+      "features": "Tính năng",
+      "security": "Bảo mật",
+      "mobile": "Ứng dụng di động",
+      "integrations": "Tích hợp",
+      "updates": "Cập nhật mới",
+      "about": "Về chúng tôi",
+      "careers": "Tuyển dụng",
+      "blog": "Blog",
+      "press": "Báo chí",
+      "partners": "Đối tác",
+      "help": "Trung tâm trợ giúp",
+      "community": "Cộng đồng",
+      "guides": "Hướng dẫn sử dụng",
+      "status": "Trạng thái hệ thống",
+      "contact": "Liên hệ",
+      "terms": "Điều khoản sử dụng",
+      "privacy": "Chính sách bảo mật",
+      "cookies": "Cookie",
+      "copyright": "Bản quyền",
+      "privacySettings": "Cài đặt quyền riêng tư"
+    },
+    "copyright": "© {{year}} Fatagram Team. Nơi lưu giữ thanh xuân.",
+    "language": "Tiếng Việt"
+  }
 }

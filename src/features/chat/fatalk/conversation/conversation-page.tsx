@@ -1,14 +1,30 @@
-import { ComponentProps } from "@/components/common/component-type";
 import { useNavigate, useParams } from "react-router-dom";
 import clsx from "clsx";
 import { ChatPanel } from "../../components/chat-panel";
-import { Avatar, MiniButton, Skeleton, Text } from "@/components/atoms";
+import {
+  Avatar,
+  AvatarSkeletonLoading,
+  MiniButton,
+  Skeleton,
+  Text,
+  Button,
+  Textbox,
+} from "@/components/atoms";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 import { convManager, useConversationStore } from "../../services/conversation-manager";
 import { useRef, useState } from "react";
-import { useGetConversation, useUpdateConversationAvatar } from "../../hooks/use-conversation";
+import {
+  useGetConversation,
+  useUpdateConversationAvatar,
+  useUpdateConversationName,
+} from "../../hooks/use-conversation";
 import { useRenderConversationContent } from "../../hooks/use-render-conversation-content";
 import { useTranslation } from "react-i18next";
+import { Menu, MenuItem } from "@/components/ui/menu";
+import { ComponentProps } from "@/components/common/component-type";
+import { useMobile } from "@/hooks/use-mobile";
+import { useDialog } from "@/contexts";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
 
 interface ConversationPageProps extends ComponentProps {}
 
@@ -17,16 +33,25 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   const { conversationId } = useParams<{ conversationId: string }>();
   const [openSetting, setOpenSetting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const renameInputRef = useRef<HTMLInputElement>(null);
 
   const unreadCount = useConversationStore((state) => state.totalUnreadCount);
   const { t } = useTranslation();
   const { renderConversationName } = useRenderConversationContent();
-  const { fetch: updateAvatar } = useUpdateConversationAvatar(conversationId!);
+  const { fetch: updateAvatar, isFetching } = useUpdateConversationAvatar(conversationId!);
 
   const { data: conversationData, isPending: isPendingConversation } = useGetConversation(
     conversationId!,
     undefined,
     true,
+  );
+
+  const isMobile = useMobile();
+  const { openDialog, closeDialog } = useDialog();
+  const [isRenaming, setIsRenaming] = useState(false);
+  const [newName, setNewName] = useState("");
+  const { fetch: updateName, isFetching: isRenamingLoading } = useUpdateConversationName(
+    conversationId!,
   );
 
   const handleTurnBack = () => {
@@ -50,6 +75,54 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
       },
     );
     e.target.value = "";
+  };
+
+  const handleUpdateName = async () => {
+    const nameToUpdate = isMobile ? newName : renameInputRef.current?.value;
+    if (!nameToUpdate?.trim() || !conversationId) return;
+
+    await updateName(
+      { name: nameToUpdate },
+      {
+        onSuccess: () => {
+          convManager.updateConversation(conversationId, { name: nameToUpdate });
+          setIsRenaming(false);
+          closeDialog();
+        },
+      },
+    );
+  };
+
+  const openRenameFlow = () => {
+    const currentName = conversationData?.name || "";
+    if (isMobile) {
+      setNewName(currentName);
+      setIsRenaming(true);
+    } else {
+      openDialog({
+        title: t("common:conversations.settings.changeName"),
+        content: (
+          <div className="flex flex-col gap-4 min-w-[300px]">
+            <Textbox
+              ref={renameInputRef}
+              defaultValue={currentName}
+              placeholder={t("common:conversations.settings.changeNamePlaceholder")}
+              autoFocus
+              sz="md"
+              type="text"
+            />
+          </div>
+        ),
+        primaryButton: {
+          text: t("settings:editableField.saveButton"),
+          onClick: handleUpdateName,
+        },
+        secondaryButton: {
+          text: t("settings:editableField.cancelButton"),
+          onClick: closeDialog,
+        },
+      });
+    }
   };
 
   return (
@@ -91,12 +164,11 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
         duration={150}
         className={clsx(
           "bg-bg-main border-l border-bg-third h-[calc(100dvh-var(--header-height))]",
-          "lg:w-[380px] lg:min-w-[380px] lg:!relative",
+          "lg:w-[380px] lg:min-w-[380px] lg:relative lg:z-0",
           "fixed inset-0 z-50 shadow-2xl lg:shadow-none",
         )}
       >
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide">
-          {/* Header Mobile */}
           <div className="flex items-center gap-3 px-4 h-[60px] border-b border-bg-fourth shrink-0 lg:hidden">
             <MiniButton sz="sm" onClick={() => setOpenSetting(false)}>
               <i className="fa-solid fa-arrow-left text-primary-400" />
@@ -108,21 +180,26 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
 
           {conversationData && !isPendingConversation ? (
             <div className="flex flex-col flex-1 pb-10">
-              {/* Profile Section */}
               <div className="flex flex-col items-center px-4 py-8 gap-3">
                 <div className="relative group">
-                  <Avatar
-                    src={conversationData.avatarUrl || ""}
-                    alt="Avatar"
-                    sz="lg"
-                    className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-bg-third shadow-lg"
-                  />
-                  <button
-                    onClick={triggerFileInput}
-                    className="absolute bottom-1 right-1 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform active:scale-95"
-                  >
-                    <i className="fa-solid fa-camera text-xs" />
-                  </button>
+                  {!isFetching ? (
+                    <Avatar
+                      src={conversationData.avatarUrl || ""}
+                      alt="Avatar"
+                      sz="lg"
+                      className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-bg-third shadow-lg"
+                    />
+                  ) : (
+                    <AvatarSkeletonLoading alt={""} />
+                  )}
+                  {conversationData.isGroup && (
+                    <button
+                      onClick={triggerFileInput}
+                      className="absolute bottom-1 right-1 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform active:scale-95"
+                    >
+                      <i className="fa-solid fa-camera text-xs" />
+                    </button>
+                  )}
                 </div>
                 <div className="flex flex-col items-center gap-1">
                   <Text sz="lg" weight="bold" wrap="whitespace-pre-wrap" className="text-center">
@@ -137,84 +214,60 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                   )}
                 </div>
 
-                <div className="flex justify-center w-full gap-10 mt-6 px-4">
-                  <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
-                    <MiniButton
-                      sz="md"
-                      className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
-                      onClick={triggerFileInput}
-                    >
-                      <i className="fa-solid fa-image" />
-                    </MiniButton>
-                    <Text sz="xs" weight="medium" className="text-center">
-                      {t("common:conversations.settings.changeAvatar")}
-                    </Text>
+                {conversationData.isGroup && (
+                  <div className="flex justify-center w-full gap-10 mt-6 px-4">
+                    <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                      <MiniButton
+                        sz="md"
+                        className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
+                        onClick={triggerFileInput}
+                      >
+                        <i className="fa-solid fa-image" />
+                      </MiniButton>
+                      <Text sz="xs" weight="medium" className="text-center">
+                        {t("common:conversations.settings.changeAvatar")}
+                      </Text>
+                    </div>
+                    <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                      <MiniButton
+                        sz="md"
+                        className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
+                        onClick={openRenameFlow}
+                      >
+                        <i className="fa-solid fa-pen-to-square" />
+                      </MiniButton>
+                      <Text sz="xs" weight="medium" className="text-center">
+                        {t("common:conversations.settings.changeName")}
+                      </Text>
+                    </div>
                   </div>
-                  <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
-                    <MiniButton
-                      sz="md"
-                      className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
-                    >
-                      <i className="fa-solid fa-pen-to-square" />
-                    </MiniButton>
-                    <Text sz="xs" weight="medium" className="text-center">
-                      {t("common:conversations.settings.changeName")}
-                    </Text>
-                  </div>
-                  <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
-                    <MiniButton
-                      sz="md"
-                      className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
-                    >
-                      <i className="fa-solid fa-magnifying-glass" />
-                    </MiniButton>
-                    <Text sz="xs" weight="medium" className="text-center">
-                      {t("common:conversations.settings.search")}
-                    </Text>
-                  </div>
-                </div>
+                )}
               </div>
 
               <div className="h-2 bg-bg-secondary w-full" />
 
-              <div className="flex flex-col p-2 gap-1">
-                <button className="flex items-center gap-4 p-3 hover:bg-bg-secondary rounded-xl transition-colors text-left w-full">
-                  <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 shrink-0">
-                    <i className="fa-solid fa-bell" />
-                  </div>
-                  <div className="flex-1 flex flex-col">
-                    <Text weight="medium">{t("common:conversations.settings.notification")}</Text>
-                    <Text sz="xs" className="text-text-third leading-tight">
-                      {t("common:conversations.settings.notificationDescription")}
-                    </Text>
-                  </div>
-                  <i className="fa-solid fa-chevron-right text-text-fourth text-[10px] shrink-0" />
-                </button>
+              <Menu className="p-2">
+                {/* <MenuItem
+                  icon="fa-solid fa-bell"
+                  title={t("common:conversations.settings.notification")}
+                  description={t("common:conversations.settings.notificationDescription")}
+                /> */}
 
-                <button className="flex items-center gap-4 p-3 hover:bg-bg-secondary rounded-xl transition-colors text-left w-full">
-                  <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 shrink-0">
-                    <i className="fa-solid fa-user-group" />
-                  </div>
-                  <div className="flex-1 flex flex-col">
-                    <Text weight="medium">{t("common:conversations.settings.viewMembers")}</Text>
-                    <Text sz="xs" className="text-text-third leading-tight">
-                      {t("common:conversations.settings.viewMembersDescription")}
-                    </Text>
-                  </div>
-                  <i className="fa-solid fa-chevron-right text-text-fourth text-[10px] shrink-0" />
-                </button>
+                {conversationData.isGroup && (
+                  <MenuItem
+                    icon="fa-solid fa-user-group"
+                    title={t("common:conversations.settings.viewMembers")}
+                    description={t("common:conversations.settings.viewMembersDescription")}
+                  />
+                )}
 
-                <button className="flex items-center gap-4 p-3 hover:bg-bg-secondary rounded-xl transition-colors text-left w-full">
-                  <div className="w-10 h-10 rounded-full bg-red-500/10 flex items-center justify-center text-red-500 shrink-0">
-                    <i className="fa-solid fa-right-from-bracket" />
-                  </div>
-                  <div className="flex-1 flex flex-col">
-                    <Text weight="medium" className="text-red-500">
-                      {t("common:conversations.settings.leaveGroup")}
-                    </Text>
-                  </div>
-                </button>
-              </div>
+                {/* <MenuItem
+                  icon="fa-solid fa-right-from-bracket"
+                  title={t("common:conversations.settings.leaveGroup")}
+                  variant="danger"
+                  rightElement={null}
+                /> */}
+              </Menu>
             </div>
           ) : (
             <div className="px-4 py-8">
@@ -230,6 +283,41 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
           )}
         </div>
       </Transition>
+
+      <BottomSheet
+        open={isRenaming && isMobile}
+        onOpenChange={setIsRenaming}
+        title={t("common:conversations.settings.changeName")}
+        trigger={<div className="hidden" />}
+      >
+        <div className="p-4 flex flex-col gap-6 pb-10">
+          <Textbox
+            value={newName}
+            onChange={(e) => setNewName(e.target.value)}
+            placeholder={t("common:conversations.settings.changeNamePlaceholder")}
+            autoFocus
+            sz="md"
+            type="text"
+          />
+          <div className="flex gap-3">
+            <Button
+              className="flex-1"
+              variant="secondary"
+              onClick={() => setIsRenaming(false)}
+              disabled={isRenamingLoading}
+            >
+              {t("settings:editableField.cancelButton")}
+            </Button>
+            <Button
+              className="flex-1"
+              onClick={handleUpdateName}
+              disabled={!newName.trim() || isRenamingLoading}
+            >
+              {t("settings:editableField.saveButton")}
+            </Button>
+          </div>
+        </div>
+      </BottomSheet>
     </div>
   );
 };

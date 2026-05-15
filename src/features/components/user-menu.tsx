@@ -3,8 +3,8 @@ import clsx from "clsx";
 import useClickOutside from "@/hooks/use-click-outside";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { List } from "@/components/atoms/list";
-import { Avatar, Button, Text } from "@/components/atoms";
+import { Avatar, Button } from "@/components/atoms";
+import { Menu, MenuItem, MenuSection } from "@/components/ui/menu";
 import { useGetUserAvatar, useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useAuth } from "@/contexts";
 
@@ -88,62 +88,41 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
           style={menuStyle}
           ref={menuRef}
         >
-          <List className={clsx("flex flex-col gap-2 w-full")}>
-            <List.Item>
-              <Button
-                sz="md"
-                variant="secondary"
-                className={clsx(
-                  "flex items-center justify-start gap-3 w-full !pl-3 py-3",
-                  "hover:!bg-bg-fourth transition-all duration-200",
-                  "hover:scale-[1.02] active:scale-[0.98]",
-                )}
+          <Menu className="min-w-[280px]">
+            <MenuSection>
+              <MenuItem
+                icon={
+                  <Avatar
+                    src={avatarProfile?.infos.avatar ?? ""}
+                    alt="avatar"
+                    sz="md"
+                    className="border-2 border-primary-500/20"
+                  />
+                }
+                title={userProfile?.infos.fullName ?? ""}
+                description={t("navbar.profileMenu.personalPage")}
                 onClick={handlePersonalPage}
-              >
-                <Avatar src={avatarProfile?.infos.avatar ?? ""} alt="avatar" sz="md"></Avatar>
-                <Text sz="lg" weight="bold">
-                  {userProfile?.infos.fullName ?? ""}
-                </Text>
-              </Button>
-            </List.Item>
-            <List.Item
-              className={clsx("items-center mx-auto w-[95%] h-[1px] bg-text-main/10 rounded-full")}
-            />
-            <List.Item>
-              <Button
-                sz="md"
-                variant="secondary"
-                className={clsx(
-                  "flex items-center justify-start w-full gap-3",
-                  "hover:!bg-bg-fourth transition-all duration-200",
-                  "hover:scale-[1.02] active:scale-[0.98]",
-                )}
+                className="mb-2"
+                hideIconContainer={true}
+              />
+            </MenuSection>
+
+            <div className="h-[1px] bg-text-main/5 my-1 mx-2" />
+
+            <MenuSection>
+              <MenuItem
+                icon="fa-solid fa-gear"
+                title={t("navbar.profileMenu.settings")}
                 onClick={handleSettings}
-              >
-                <Text className={clsx("flex items-center gap-3")} sz="md">
-                  <i className="fa-solid fa-gear"></i>
-                  {t("navbar.profileMenu.settings")}
-                </Text>
-              </Button>
-            </List.Item>
-            <List.Item>
-              <Button
-                sz="md"
-                variant="secondary"
-                className={clsx(
-                  "flex items-center justify-start w-full gap-3 text-red-400",
-                  "hover:!bg-bg-fourth transition-all duration-200",
-                  "hover:scale-[1.02] active:scale-[0.98]",
-                )}
+              />
+              <MenuItem
+                icon="fa-solid fa-right-from-bracket"
+                title={t("navbar.profileMenu.logout")}
+                variant="danger"
                 onClick={handleLogout}
-              >
-                <Text sz="md" className={clsx("flex items-center gap-3")} color="danger">
-                  <i className="fa-solid fa-right-from-bracket"></i>
-                  {t("navbar.profileMenu.logout")}
-                </Text>
-              </Button>
-            </List.Item>
-          </List>
+              />
+            </MenuSection>
+          </Menu>
         </div>
       )}
     </div>

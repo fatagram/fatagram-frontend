@@ -197,6 +197,19 @@ export const useUpdateConversationAvatar = (conversationId: string) => {
   );
 };
 
+export const useUpdateConversationName = (conversationId: string) => {
+  const queryClient = useQueryClient();
+  return useResultFetcher(
+    async ({ name }: { name: string }) =>
+      await conversationService.updateConversationName(conversationId, name),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
+      },
+    },
+  );
+};
+
 interface MessageState {
   lastMessageMap: Record<string, number>;
   messageUserSeenMap?: Record<string, Record<number, { userId: string; seenAt: string }[]>>;

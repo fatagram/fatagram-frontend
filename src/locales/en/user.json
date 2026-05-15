@@ -8,6 +8,7 @@
     "addFriendButton": "Add friend",
     "acceptButton": "Accept",
     "cancelRequestButton": "Cancel request",
+    "pendingButton": "Pending",
     "respondRequestButton": "Respond",
     "friendButton": "Friend",
     "declineButton": "Decline",

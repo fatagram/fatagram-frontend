@@ -22,7 +22,7 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({ className, onSelect }) =>
   const friendPageItems: { icon: React.ReactNode; name: string; path: string }[] = [
     {
       icon: <i className="fa-solid fa-user-plus"></i>,
-      name: t("friends:navbar.suggestedFriends"),
+      name: t("friends:navbar.addFriends"),
       path: "/friends",
     },
     {

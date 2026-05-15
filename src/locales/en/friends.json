@@ -3,12 +3,16 @@
   "description": "Welcome to the home page! This is where you can find the latest updates and news.",
   "navbar": {
     "title": "Friends",
-    "suggestedFriends": "Suggested Friends",
+    "addFriends": "Search Friends",
     "invite": "Friend Requests"
   },
   "requests": {
     "title": "Friend Requests",
     "noRequests": "No friend requests",
     "noRequestsDescription": "You're all caught up! When friends send requests, you'll see them here."
+  },
+  "search": {
+    "noResults": "No users found",
+    "noResultsDescription": "We couldn't find any results matching your search."
   }
 }

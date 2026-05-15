@@ -11,23 +11,34 @@ import { SmartDropdown } from "@/components/ui/smart-dropdown";
 
 interface FriendButtonProps extends ComponentProps {
   uid?: string;
+  initialStatus?: string;
 }
 
-const FriendButton: React.FC<FriendButtonProps> = ({ uid }) => {
+const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus }) => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   if (!useAuth().isAuthenticated) return null;
 
   const [isShowFriendOptions, setIsShowFriendOptions] = useState<boolean>(false);
   const [isShowRequestOptions, setIsShowRequestOptions] = useState<boolean>(false);
-  const { data: friendshipStatus, isLoading, isFetching } = useFriendshipStatus(uid ? uid : "");
-  const [currentFriendshipStatus, setFriendshipStatus] = useState<string>("None");
+  const {
+    data: friendshipStatus,
+    isLoading,
+    isFetching,
+  } = useFriendshipStatus(uid && !initialStatus ? uid : "");
+  const [currentFriendshipStatus, setFriendshipStatus] = useState<string>(initialStatus || "None");
 
   useEffect(() => {
     if (friendshipStatus) {
       setFriendshipStatus(friendshipStatus.status);
     }
   }, [friendshipStatus]);
+
+  useEffect(() => {
+    if (initialStatus) {
+      setFriendshipStatus(initialStatus);
+    }
+  }, [initialStatus]);
 
   const btnFriendRef = useRef<HTMLButtonElement>(null);
   const btnRequestRef = useRef<HTMLButtonElement>(null);

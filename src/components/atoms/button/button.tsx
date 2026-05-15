@@ -37,7 +37,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
           buttonSizes[sz],
           disabled
             ? "bg-bg-disabled text-text-fourth cursor-not-allowed opacity-60"
-            : [buttonVariants[variant], "active:scale-[0.98] active:opacity-80 cursor-pointer"],
+            : [buttonVariants[variant], "active:scale-[0.99] active:opacity-80 cursor-pointer"],
           className,
         )}
         {...props}

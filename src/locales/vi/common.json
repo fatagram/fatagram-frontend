@@ -6,7 +6,8 @@
   "navbar": {
     "profileMenu": {
       "settings": "Cài đặt",
-      "logout": "Đăng xuất"
+      "logout": "Đăng xuất",
+      "personalPage": "Xem trang cá nhân"
     }
   },
   "notFound": {
@@ -66,7 +67,8 @@
     "sent": "Đã gửi",
     "systemMessage": {
       "createGroup": "{{creatorName}} đã tạo nhóm",
-      "changeGroupAvatar": "{{actorName}} đã thay đổi ảnh đại diện nhóm"
+      "changeGroupAvatar": "{{actorName}} đã thay đổi ảnh đại diện nhóm",
+      "renameGroup": "{{actorName}} đã đổi tên nhóm thành \"{{newName}}\""
     },
     "sentImageMessage": "Đã gửi {{count}} hình ảnh",
     "sentMediaMessage": "Đã gửi một tệp đính kèm",
@@ -80,6 +82,7 @@
       "members": "{{count}} thành viên",
       "changeAvatar": "Ảnh",
       "changeName": "Tên",
+      "changeNamePlaceholder": "Nhập tên cuộc trò chuyện",
       "search": "Tìm",
       "notification": "Thông báo",
       "notificationDescription": "Bật/Tắt thông báo cuộc trò chuyện",

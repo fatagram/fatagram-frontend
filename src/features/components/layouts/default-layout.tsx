@@ -176,7 +176,10 @@ const DefaultLayout = () => {
   return (
     <Layout>
       <Layout.Header
-        className={clsx(isMobile && conversationId && "hidden", "sticky top-0 z-40")}
+        className={clsx(
+          isMobile && conversationId && "hidden",
+          "sticky top-0 z-40 sm:!shadow-[0_1px_0_0_rgb(var(--bg-fourth))] shadow-none",
+        )}
         ref={headerRef}
       >
         <div

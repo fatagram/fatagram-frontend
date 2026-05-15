@@ -21,6 +21,13 @@ export const useRenderConversationContent = () => {
         actorName: userId === actorId ? t("common:conversations.you") : actorName || "Unknown",
       });
     }
+    if (message.type === MessageType.RenameGroup) {
+      const { actorName, actorId, newName } = message.metadata || {};
+      return t("common:conversations.systemMessage.renameGroup", {
+        actorName: userId === actorId ? t("common:conversations.you") : actorName || "Unknown",
+        newName: newName || "",
+      });
+    }
   };
 
   const renderConversationName = (conversation: Conversation) => {

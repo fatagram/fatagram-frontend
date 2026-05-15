@@ -42,9 +42,8 @@ export const mainRoutes: RouteType[] = [
       {
         path: "/",
         element: withFallback(<HomePage />),
-        type: "private",
+        type: "public",
         index: true,
-        keepAlive: true,
       },
       friendsRoutes,
       settingRoutes,

@@ -1,5 +1,5 @@
 import { CursorResult, Result } from "@/api/common/result";
-import { buildApiPath, apiGet, apiPost, apiPatchFormData } from "../common/api-helpers";
+import { buildApiPath, apiGet, apiPost, apiPatchFormData, apiPatch } from "../common/api-helpers";
 import { CursorQuery } from "@/types/query";
 import { ConversationDto, ParticipantsSeenDto } from "./dto/conversation.dto";
 import {
@@ -90,6 +90,10 @@ export class ConversationService {
     const formData = new FormData();
     formData.append("file", file);
     return await apiPatchFormData(`${PREFIX}/${conversationId}/avatar`, formData);
+  }
+
+  public async updateConversationName(conversationId: string, name: string): Promise<Result<void>> {
+    return await apiPatch(`${PREFIX}/${conversationId}/name`, { name });
   }
 }
 

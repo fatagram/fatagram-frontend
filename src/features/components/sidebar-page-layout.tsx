@@ -36,20 +36,26 @@ export const SidebarPageLayout: React.FC<SidebarPageLayoutProps> = ({
 
 interface SidebarPageProps extends ComponentProps {}
 
-export const SidebarPage: React.FC<SidebarPageProps> = ({ children }) => {
-  return <div className="flex justify-center w-full">{children}</div>;
+export const SidebarPage: React.FC<SidebarPageProps> = ({ children, className }) => {
+  return <div className={clsx("flex justify-center w-full", className)}>{children}</div>;
 };
 
 interface SidebarPageCardProps extends ComponentProps {
   title?: string;
+  childrenClassName?: string;
 }
-export const SidebarPageCard: React.FC<SidebarPageCardProps> = ({ title, children, className }) => {
+export const SidebarPageCard: React.FC<SidebarPageCardProps> = ({
+  title,
+  children,
+  className,
+  childrenClassName,
+}) => {
   return (
     <Card
       title={title}
       className={clsx("w-full !p-0 sm:!p-8 shadow-none sm:shadow-lg", className)}
       titleClassName="mb-5"
-      childrenClassName="flex flex-col gap-7"
+      childrenClassName={clsx("flex flex-col gap-7", childrenClassName)}
     >
       {children}
     </Card>

@@ -15,3 +15,13 @@ export const useGetInfiniteUsers = (queryParams?: Omit<CursorQuery<string>, "cur
     enabled: true,
   });
 };
+
+export const useSearchUsers = (
+  queryParams?: Omit<CursorQuery<string>, "cursor"> & { keyword?: string },
+) => {
+  return useSafeInfiniteQueryResult({
+    queryKey: [...userKeys.all, "search", queryParams],
+    fn: async (cursor?: string) => await userService.searchUsers({ ...queryParams, cursor }),
+    enabled: true,
+  });
+};

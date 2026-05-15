@@ -6,7 +6,8 @@
   "navbar": {
     "profileMenu": {
       "settings": "Settings",
-      "logout": "Logout"
+      "logout": "Logout",
+      "personalPage": "View personal page"
     }
   },
   "notFound": {
@@ -69,7 +70,8 @@
     "sent": "Sent",
     "systemMessage": {
       "createGroup": "{{creatorName}} created the group",
-      "changeGroupAvatar": "{{actorName}} changed the group avatar"
+      "changeGroupAvatar": "{{actorName}} changed the group avatar",
+      "renameGroup": "{{actorName}} changed the group name to \"{{newName}}\""
     },
     "sentImageMessage": "Sent {{count}} images",
     "sentMediaMessage": "Sent a attached file",

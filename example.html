@@ -1,0 +1,2785 @@
+<!doctype html>
+<html lang="vi">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Momento — Social</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap"
+      rel="stylesheet"
+    />
+    <style>
+      *,
+      *::before,
+      *::after {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      :root {
+        --bg: #0a0a0a;
+        --s1: #141414;
+        --s2: #1c1c1c;
+        --s3: #262626;
+        --b1: rgba(255, 255, 255, 0.07);
+        --b2: rgba(255, 255, 255, 0.14);
+        --p1: #ff6b35;
+        --p2: #ff1b6b;
+        --bl: #1877f2;
+        --bld: #1260cc;
+        --gr: #22c55e;
+        --t1: #fff;
+        --t2: rgba(255, 255, 255, 0.62);
+        --t3: rgba(255, 255, 255, 0.32);
+      }
+      body {
+        font-family: "Plus Jakarta Sans", sans-serif;
+        background: var(--bg);
+        color: var(--t1);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+        overflow: hidden;
+      }
+
+      /* ── NAVBAR ─────────────────────────────────────── */
+      .navbar {
+        height: 72px;
+        background: var(--s1);
+        border-bottom: 1px solid var(--b1);
+        display: flex;
+        align-items: center;
+        padding: 0 24px;
+        flex-shrink: 0;
+        z-index: 100;
+      }
+      .logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 0;
+        margin-right: 40px;
+      }
+      .logo-icon {
+        width: 38px;
+        height: 38px;
+        border-radius: 11px;
+        background: linear-gradient(135deg, var(--p1), var(--p2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .logo-icon svg {
+        width: 22px;
+        height: 22px;
+        fill: white;
+      }
+      .logo-name {
+        font-size: 21px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        background: linear-gradient(135deg, var(--p1), var(--p2));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+      }
+      .nav {
+        flex: 1;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+      }
+      .nav-item {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        padding: 8px 16px;
+        border-radius: 10px;
+        cursor: pointer;
+        color: var(--t2);
+        font-size: 14px;
+        font-weight: 600;
+        transition: all 0.15s;
+        position: relative;
+        white-space: nowrap;
+      }
+      .nav-item:hover {
+        background: var(--s2);
+        color: var(--t1);
+      }
+      .nav-item.active {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.18), rgba(255, 27, 107, 0.18));
+        color: var(--p1);
+      }
+      .nav-item svg {
+        width: 20px;
+        height: 20px;
+        flex-shrink: 0;
+      }
+      .nb {
+        margin-left: 6px;
+        background: var(--p1);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 800;
+        padding: 2px 6px;
+        border-radius: 20px;
+      }
+      .navbar-right {
+        margin-left: auto;
+        display: flex;
+        align-items: center;
+        gap: 15px;
+      }
+      .me-card {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 6px 12px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.15s;
+        background: var(--s2);
+        border: 1px solid var(--b1);
+      }
+      .me-card:hover {
+        background: var(--s3);
+      }
+      .av {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, var(--p1), var(--p2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        flex-shrink: 0;
+        overflow: hidden;
+      }
+      .av img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .me-info .mn {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .me-info .mh {
+        display: none;
+      }
+
+      /* ── MAIN ─────────────────────────────────────────── */
+      .main {
+        flex: 1;
+        display: flex;
+        overflow: hidden;
+      }
+      .view {
+        display: none;
+        flex: 1;
+        overflow: hidden;
+      }
+      .view.active {
+        display: flex;
+      }
+
+      /* ── FEED ─────────────────────────────────────────── */
+      #vf {
+        flex-direction: row;
+      }
+      .feed-col {
+        flex: 1;
+        overflow-y: auto;
+        padding: 22px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+      }
+      .feed-col::-webkit-scrollbar {
+        width: 3px;
+      }
+      .feed-col::-webkit-scrollbar-thumb {
+        background: var(--s3);
+        border-radius: 3px;
+      }
+
+      /* Create Post */
+      .create-post {
+        background: var(--s1);
+        border: 1px solid var(--b1);
+        border-radius: 14px;
+        padding: 14px 16px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+      }
+      .cp-input {
+        flex: 1;
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 100px;
+        padding: 10px 16px;
+        font-size: 14px;
+        color: var(--t3);
+        cursor: pointer;
+        transition: all 0.15s;
+      }
+      .cp-input:hover {
+        border-color: var(--b2);
+        color: var(--t2);
+      }
+      .cp-actions {
+        display: flex;
+        gap: 7px;
+      }
+      .cp-btn {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        padding: 7px 13px;
+        border-radius: 100px;
+        border: none;
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 700;
+        font-family: inherit;
+        transition: all 0.15s;
+      }
+      .cp-btn.ph {
+        background: rgba(24, 119, 242, 0.15);
+        color: #60a5fa;
+      }
+      .cp-btn.ph:hover {
+        background: rgba(24, 119, 242, 0.25);
+      }
+      .cp-btn.lk {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.18), rgba(255, 27, 107, 0.18));
+        color: var(--p1);
+      }
+      .cp-btn.lk:hover {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.28), rgba(255, 27, 107, 0.28));
+      }
+
+      /* Stories */
+      .stories {
+        display: flex;
+        gap: 10px;
+        overflow-x: auto;
+        padding-bottom: 4px;
+      }
+      .stories::-webkit-scrollbar {
+        display: none;
+      }
+      .st-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 5px;
+        cursor: pointer;
+        flex-shrink: 0;
+      }
+      .st-ring {
+        width: 66px;
+        height: 66px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #ff6b35, #ff1b6b, #9b27ff);
+        padding: 2.5px;
+        transition: transform 0.15s;
+      }
+      .st-ring:hover {
+        transform: scale(1.06);
+      }
+      .st-ring.seen {
+        background: var(--s3);
+      }
+      .st-inner {
+        width: 100%;
+        height: 100%;
+        border-radius: 50%;
+        border: 2.5px solid var(--bg);
+        overflow: hidden;
+        background: var(--s2);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 11px;
+        font-weight: 700;
+        color: var(--t3);
+      }
+      .st-inner img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .st-add-ring {
+        background: none;
+        border: none;
+      }
+      .st-add-inner {
+        background: var(--s2);
+        border: 1px solid var(--b2);
+        font-size: 22px;
+        color: var(--p1);
+      }
+      .st-name {
+        font-size: 11px;
+        color: var(--t2);
+        max-width: 66px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        text-align: center;
+      }
+
+      /* Post Card */
+      .post {
+        background: var(--s1);
+        border: 1px solid var(--b1);
+        border-radius: 14px;
+        overflow: hidden;
+        transition: border-color 0.18s;
+      }
+      .post:hover {
+        border-color: var(--b2);
+      }
+      .post-head {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 13px 15px;
+      }
+      .post-av {
+        position: relative;
+      }
+      .post-av .av {
+        width: 42px;
+        height: 42px;
+        font-size: 15px;
+      }
+      .online {
+        position: absolute;
+        bottom: 0;
+        right: 0;
+        width: 12px;
+        height: 12px;
+        background: var(--gr);
+        border-radius: 50%;
+        border: 2px solid var(--s1);
+      }
+      .post-ui .un {
+        font-size: 14px;
+        font-weight: 700;
+      }
+      .post-ui .ts {
+        font-size: 12px;
+        color: var(--t3);
+      }
+      .post-ui .loc {
+        font-size: 12px;
+        color: var(--p1);
+      }
+      .more-btn {
+        margin-left: auto;
+        background: none;
+        border: none;
+        color: var(--t3);
+        cursor: pointer;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.15s;
+      }
+      .more-btn:hover {
+        background: var(--s2);
+        color: var(--t1);
+      }
+      .more-btn svg {
+        width: 18px;
+        height: 18px;
+      }
+
+      /* Photo area – Locket style */
+      .post-img {
+        width: 100%;
+        aspect-ratio: 1/1;
+        overflow: hidden;
+        position: relative;
+      }
+      .post-img img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        display: block;
+        transition: transform 0.3s;
+      }
+      .post:hover .post-img img {
+        transform: scale(1.02);
+      }
+      .img-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to top, rgba(0, 0, 0, 0.65) 0%, transparent 55%);
+      }
+      .locket-badge {
+        position: absolute;
+        top: 12px;
+        right: 12px;
+        background: linear-gradient(135deg, var(--p1), var(--p2));
+        border-radius: 8px;
+        padding: 4px 10px;
+        font-size: 11px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .img-bottom {
+        position: absolute;
+        bottom: 14px;
+        left: 14px;
+        right: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .sender-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .sender-row .av {
+        width: 30px;
+        height: 30px;
+        font-size: 11px;
+        border: 2px solid rgba(255, 255, 255, 0.5);
+      }
+      .sender-name {
+        font-size: 13px;
+        font-weight: 700;
+        color: #fff;
+      }
+      .heart-float {
+        font-size: 22px;
+        cursor: pointer;
+        transition: transform 0.15s;
+      }
+      .heart-float:hover {
+        transform: scale(1.3);
+      }
+      .post-caption {
+        padding: 13px 15px 0;
+        font-size: 14px;
+        color: var(--t2);
+        line-height: 1.55;
+      }
+      .post-caption b {
+        color: var(--t1);
+      }
+
+      .post-react {
+        display: flex;
+        align-items: center;
+        padding: 10px 12px 13px;
+        gap: 2px;
+      }
+      .rb {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        background: none;
+        border: none;
+        color: var(--t3);
+        font-size: 13px;
+        font-weight: 600;
+        cursor: pointer;
+        padding: 6px 9px;
+        border-radius: 8px;
+        transition: all 0.15s;
+        font-family: inherit;
+      }
+      .rb:hover {
+        background: var(--s2);
+        color: var(--t1);
+      }
+      .rb.liked {
+        color: #ff1b6b;
+      }
+      .rb svg {
+        width: 17px;
+        height: 17px;
+      }
+      .rb.sbk {
+        margin-left: auto;
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.15), rgba(255, 27, 107, 0.15));
+        color: var(--p1);
+        border: 1px solid rgba(255, 107, 53, 0.3);
+        border-radius: 100px;
+        padding: 6px 14px;
+      }
+      .rb.sbk:hover {
+        background: linear-gradient(135deg, rgba(255, 107, 53, 0.25), rgba(255, 27, 107, 0.25));
+      }
+
+      /* Right panel */
+      .feed-right {
+        width: 295px;
+        border-left: 1px solid var(--b1);
+        padding: 20px 14px;
+        overflow-y: auto;
+        flex-shrink: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 22px;
+      }
+      .feed-right::-webkit-scrollbar {
+        width: 3px;
+      }
+      .feed-right::-webkit-scrollbar-thumb {
+        background: var(--s3);
+        border-radius: 3px;
+      }
+      .rp-title {
+        font-size: 11px;
+        font-weight: 800;
+        color: var(--t3);
+        letter-spacing: 0.6px;
+        text-transform: uppercase;
+        margin-bottom: 10px;
+      }
+      .fr-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 8px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.15s;
+      }
+      .fr-item:hover {
+        background: var(--s2);
+      }
+      .fr-item .av {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+      }
+      .fr-info .fn {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .fr-info .fs {
+        font-size: 11px;
+        color: var(--gr);
+      }
+      .fr-info .ft {
+        font-size: 11px;
+        color: var(--t3);
+      }
+      .fr-btn {
+        margin-left: auto;
+        background: var(--s2);
+        border: 1px solid var(--b2);
+        border-radius: 8px;
+        padding: 5px 11px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--t2);
+        cursor: pointer;
+        font-family: inherit;
+        transition: all 0.15s;
+      }
+      .fr-btn:hover {
+        background: var(--s3);
+        color: var(--t1);
+      }
+      .req-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        padding: 7px 8px;
+        border-radius: 10px;
+      }
+      .req-item .av {
+        width: 44px;
+        height: 44px;
+        font-size: 15px;
+      }
+      .req-item-info {
+        flex: 1;
+      }
+      .req-item-info .rn {
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .req-item-info .rm {
+        font-size: 11px;
+        color: var(--t3);
+      }
+      .req-actions {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .btn-acc {
+        background: var(--bl);
+        border: none;
+        border-radius: 7px;
+        padding: 6px 13px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .btn-dec {
+        background: var(--s2);
+        border: none;
+        border-radius: 7px;
+        padding: 6px 13px;
+        font-size: 12px;
+        font-weight: 700;
+        color: var(--t2);
+        cursor: pointer;
+        font-family: inherit;
+      }
+
+      /* ── MESSAGES ─────────────────────────────────────── */
+      #vm {
+        flex-direction: row;
+      }
+      .msg-side {
+        width: 340px;
+        border-right: 1px solid var(--b1);
+        display: flex;
+        flex-direction: column;
+        flex-shrink: 0;
+      }
+      .msg-head {
+        padding: 18px 14px 12px;
+        border-bottom: 1px solid var(--b1);
+      }
+      .msg-head h2 {
+        font-size: 20px;
+        font-weight: 800;
+        margin-bottom: 10px;
+      }
+      .srch {
+        display: flex;
+        align-items: center;
+        gap: 9px;
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 100px;
+        padding: 8px 13px;
+      }
+      .srch svg {
+        width: 15px;
+        height: 15px;
+        color: var(--t3);
+        flex-shrink: 0;
+      }
+      .srch input {
+        background: none;
+        border: none;
+        outline: none;
+        font-size: 13px;
+        color: var(--t1);
+        font-family: inherit;
+        flex: 1;
+      }
+      .srch input::placeholder {
+        color: var(--t3);
+      }
+      .msg-filter {
+        display: flex;
+        gap: 6px;
+        padding: 10px 12px 0;
+        overflow-x: auto;
+      }
+      .msg-filter::-webkit-scrollbar {
+        display: none;
+      }
+      .mf {
+        border: 1px solid var(--b2);
+        border-radius: 100px;
+        padding: 5px 13px;
+        font-size: 12px;
+        font-weight: 600;
+        color: var(--t2);
+        cursor: pointer;
+        white-space: nowrap;
+        background: none;
+        font-family: inherit;
+        transition: all 0.15s;
+        flex-shrink: 0;
+      }
+      .mf.active,
+      .mf:hover {
+        background: rgba(24, 119, 242, 0.15);
+        color: #60a5fa;
+        border-color: rgba(24, 119, 242, 0.3);
+      }
+      .conv-list {
+        flex: 1;
+        overflow-y: auto;
+        padding: 6px;
+      }
+      .conv-list::-webkit-scrollbar {
+        width: 3px;
+      }
+      .conv-list::-webkit-scrollbar-thumb {
+        background: var(--s3);
+        border-radius: 3px;
+      }
+      .ci {
+        display: flex;
+        align-items: center;
+        gap: 11px;
+        padding: 10px 10px;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: background 0.15s;
+        position: relative;
+      }
+      .ci:hover {
+        background: var(--s2);
+      }
+      .ci.active {
+        background: rgba(24, 119, 242, 0.12);
+      }
+      .ci .av {
+        width: 50px;
+        height: 50px;
+        font-size: 17px;
+      }
+      .ci-body {
+        flex: 1;
+        min-width: 0;
+      }
+      .ci-name {
+        font-size: 14px;
+        font-weight: 700;
+        margin-bottom: 2px;
+      }
+      .ci-prev {
+        font-size: 12px;
+        color: var(--t3);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .ci-prev.unr {
+        color: var(--t1);
+        font-weight: 600;
+      }
+      .ci-meta {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-end;
+        gap: 4px;
+      }
+      .ci-time {
+        font-size: 10px;
+        color: var(--t3);
+      }
+      .ci-unr {
+        width: 18px;
+        height: 18px;
+        background: var(--bl);
+        border-radius: 50%;
+        font-size: 10px;
+        font-weight: 800;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .chat-win {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+      }
+      .chat-head {
+        padding: 13px 18px;
+        border-bottom: 1px solid var(--b1);
+        display: flex;
+        align-items: center;
+        gap: 11px;
+      }
+      .chat-head .av {
+        width: 40px;
+        height: 40px;
+        font-size: 14px;
+      }
+      .ch-info .cn {
+        font-size: 15px;
+        font-weight: 800;
+      }
+      .ch-info .cs {
+        font-size: 12px;
+        color: var(--gr);
+      }
+      .ch-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 4px;
+      }
+      .ib {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: none;
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: var(--bl);
+        transition: background 0.15s;
+      }
+      .ib:hover {
+        background: var(--s2);
+      }
+      .ib svg {
+        width: 19px;
+        height: 19px;
+      }
+      .chat-msgs {
+        flex: 1;
+        overflow-y: auto;
+        padding: 18px 20px;
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .chat-msgs::-webkit-scrollbar {
+        width: 3px;
+      }
+      .chat-msgs::-webkit-scrollbar-thumb {
+        background: var(--s3);
+        border-radius: 3px;
+      }
+      .mg {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+      .mg.mine {
+        align-items: flex-end;
+      }
+      .mg.theirs {
+        align-items: flex-start;
+      }
+      .bub {
+        max-width: 64%;
+        padding: 9px 13px;
+        border-radius: 18px;
+        font-size: 14px;
+        line-height: 1.45;
+      }
+      .mg.mine .bub {
+        background: var(--bl);
+        color: #fff;
+        border-bottom-right-radius: 5px;
+      }
+      .mg.theirs .bub {
+        background: var(--s2);
+        color: var(--t1);
+        border-bottom-left-radius: 5px;
+      }
+      .mg.theirs .multi-av {
+        width: 24px;
+        height: 24px;
+        font-size: 10px;
+        margin-right: 4px;
+        align-self: flex-end;
+        margin-bottom: 2px;
+      }
+      .theirs-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 6px;
+      }
+      .bub.img-bub {
+        padding: 3px;
+        background: transparent;
+      }
+      .bub.img-bub img {
+        width: 200px;
+        height: 190px;
+        object-fit: cover;
+        border-radius: 14px;
+        display: block;
+      }
+      .lk-widget {
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 14px;
+        overflow: hidden;
+        width: 220px;
+      }
+      .lk-widget-img {
+        width: 100%;
+        aspect-ratio: 1;
+        object-fit: cover;
+        display: block;
+      }
+      .lk-widget-foot {
+        padding: 9px 12px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+      }
+      .lkwt {
+        font-size: 12px;
+        color: var(--t2);
+      }
+      .lkwr {
+        background: linear-gradient(135deg, var(--p1), var(--p2));
+        border: none;
+        border-radius: 100px;
+        padding: 5px 12px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+      }
+      .msg-t {
+        font-size: 10px;
+        color: var(--t3);
+        padding: 0 3px;
+      }
+      .dd {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin: 6px 0;
+      }
+      .dd::before,
+      .dd::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--b1);
+      }
+      .dd span {
+        font-size: 11px;
+        color: var(--t3);
+        font-weight: 500;
+        white-space: nowrap;
+      }
+      .typing {
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        padding: 8px 14px;
+        background: var(--s2);
+        border-radius: 18px;
+        border-bottom-left-radius: 5px;
+        width: fit-content;
+      }
+      .typing span {
+        width: 7px;
+        height: 7px;
+        background: var(--t3);
+        border-radius: 50%;
+        animation: bounce 0.9s infinite;
+      }
+      .typing span:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .typing span:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      @keyframes bounce {
+        0%,
+        60%,
+        100% {
+          transform: translateY(0);
+        }
+        30% {
+          transform: translateY(-5px);
+        }
+      }
+      .chat-inp {
+        padding: 12px 18px;
+        border-top: 1px solid var(--b1);
+        display: flex;
+        align-items: center;
+        gap: 9px;
+      }
+      .chat-inp-actions {
+        display: flex;
+        gap: 2px;
+      }
+      .chat-input {
+        flex: 1;
+        background: var(--s2);
+        border: 1px solid var(--b1);
+        border-radius: 100px;
+        padding: 9px 15px;
+        font-size: 14px;
+        color: var(--t1);
+        font-family: inherit;
+        outline: none;
+        transition: border-color 0.15s;
+      }
+      .chat-input:focus {
+        border-color: var(--bl);
+      }
+      .chat-input::placeholder {
+        color: var(--t3);
+      }
+      .send-btn {
+        width: 34px;
+        height: 34px;
+        border-radius: 50%;
+        background: var(--bl);
+        border: none;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+        transition: all 0.15s;
+      }
+      .send-btn:hover {
+        background: var(--bld);
+        transform: scale(1.06);
+      }
+      .send-btn svg {
+        width: 15px;
+        height: 15px;
+        fill: #fff;
+      }
+
+      /* ── PROFILE ──────────────────────────────────────── */
+      #vp {
+        flex-direction: column;
+        overflow-y: auto;
+      }
+      #vp::-webkit-scrollbar {
+        width: 3px;
+      }
+      #vp::-webkit-scrollbar-thumb {
+        background: var(--s3);
+        border-radius: 3px;
+      }
+      .cover {
+        position: relative;
+        height: 270px;
+        flex-shrink: 0;
+        overflow: hidden;
+      }
+      .cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .cover-gradient {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(to bottom, transparent 40%, rgba(10, 10, 10, 0.85));
+      }
+      .cover-edit {
+        position: absolute;
+        bottom: 14px;
+        right: 16px;
+        background: rgba(0, 0, 0, 0.55);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        border-radius: 8px;
+        padding: 7px 13px;
+        font-size: 12px;
+        font-weight: 700;
+        color: #fff;
+        cursor: pointer;
+        backdrop-filter: blur(8px);
+        font-family: inherit;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .cover-edit svg {
+        width: 15px;
+        height: 15px;
+      }
+      .pinfo {
+        padding: 0 32px 24px;
+      }
+      .pav-row {
+        display: flex;
+        align-items: flex-end;
+        gap: 18px;
+        margin-top: -50px;
+        margin-bottom: 14px;
+      }
+      .p-avatar {
+        width: 110px;
+        height: 110px;
+        border-radius: 50%;
+        border: 4px solid var(--bg);
+        flex-shrink: 0;
+        font-size: 34px;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff6b35, #ff1b6b);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+      }
+      .p-avatar img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        border-radius: 50%;
+      }
+      .p-actions {
+        margin-left: auto;
+        display: flex;
+        gap: 8px;
+        padding-bottom: 6px;
+      }
+      .btn-prim {
+        background: linear-gradient(135deg, var(--p1), var(--p2));
+        border: none;
+        border-radius: 9px;
+        padding: 9px 20px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+        cursor: pointer;
+        font-family: inherit;
+        transition: opacity 0.15s;
+      }
+      .btn-prim:hover {
+        opacity: 0.85;
+      }
+      .btn-sec {
+        background: var(--s2);
+        border: 1px solid var(--b2);
+        border-radius: 9px;
+        padding: 9px 16px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--t1);
+        cursor: pointer;
+        font-family: inherit;
+        transition: background 0.15s;
+        display: flex;
+        align-items: center;
+        gap: 7px;
+      }
+      .btn-sec svg {
+        width: 16px;
+        height: 16px;
+      }
+      .btn-sec:hover {
+        background: var(--s3);
+      }
+      .p-name {
+        font-size: 26px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+        margin-bottom: 3px;
+      }
+      .p-handle {
+        font-size: 13px;
+        color: var(--t3);
+        margin-bottom: 9px;
+      }
+      .p-bio {
+        font-size: 14px;
+        color: var(--t2);
+        line-height: 1.55;
+        margin-bottom: 13px;
+        max-width: 520px;
+      }
+      .p-bio a {
+        color: var(--p1);
+        text-decoration: none;
+      }
+      .p-meta {
+        display: flex;
+        gap: 14px;
+        margin-bottom: 14px;
+        flex-wrap: wrap;
+      }
+      .p-meta-item {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        font-size: 13px;
+        color: var(--t3);
+      }
+      .p-meta-item svg {
+        width: 14px;
+        height: 14px;
+        color: var(--t3);
+      }
+      .p-meta-item b {
+        color: var(--t2);
+      }
+      .p-stats {
+        display: flex;
+        gap: 28px;
+        margin-bottom: 18px;
+      }
+      .stat-item {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        cursor: pointer;
+        padding: 4px 0;
+      }
+      .stat-num {
+        font-size: 19px;
+        font-weight: 800;
+        letter-spacing: -0.5px;
+      }
+      .stat-lbl {
+        font-size: 11px;
+        color: var(--t3);
+      }
+      .p-tabs {
+        border-top: 1px solid var(--b1);
+        display: flex;
+        margin: 0 0 0;
+      }
+      .p-tab {
+        padding: 13px 18px;
+        font-size: 14px;
+        font-weight: 700;
+        color: var(--t3);
+        cursor: pointer;
+        border-bottom: 2.5px solid transparent;
+        transition: all 0.15s;
+      }
+      .p-tab:hover {
+        color: var(--t1);
+      }
+      .p-tab.active {
+        color: var(--p1);
+        border-bottom-color: var(--p1);
+      }
+      .p-content {
+        flex: 1;
+      }
+      .p-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 3px;
+      }
+      .gi {
+        aspect-ratio: 1;
+        overflow: hidden;
+        cursor: pointer;
+        position: relative;
+      }
+      .gi img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.25s;
+      }
+      .gi:hover img {
+        transform: scale(1.06);
+      }
+      .gi-ov {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 0, 0, 0.45);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 18px;
+        opacity: 0;
+        transition: opacity 0.2s;
+      }
+      .gi:hover .gi-ov {
+        opacity: 1;
+      }
+      .gi-stat {
+        display: flex;
+        align-items: center;
+        gap: 5px;
+        color: #fff;
+        font-size: 14px;
+        font-weight: 800;
+      }
+      .gi-stat svg {
+        width: 17px;
+        height: 17px;
+        fill: #fff;
+      }
+
+      /* Friends tab */
+      .friends-grid {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 12px;
+        padding: 16px;
+      }
+      .fg-card {
+        background: var(--s1);
+        border: 1px solid var(--b1);
+        border-radius: 12px;
+        overflow: hidden;
+        cursor: pointer;
+        transition: border-color 0.15s;
+      }
+      .fg-card:hover {
+        border-color: var(--b2);
+      }
+      .fg-card img,
+      .fg-card .av {
+        width: 100%;
+        height: 120px;
+        border-radius: 0;
+        display: block;
+        font-size: 28px;
+        font-weight: 800;
+      }
+      .fg-name {
+        padding: 8px 10px;
+        font-size: 13px;
+        font-weight: 700;
+      }
+      .fg-btn {
+        margin: 0 10px 10px;
+        width: calc(100% - 20px);
+        border-radius: 8px;
+        padding: 7px;
+        font-size: 12px;
+        font-weight: 700;
+      }
+
+      /* Stories viewer */
+      #vs {
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background: #000;
+        position: relative;
+      }
+      .sv {
+        width: 380px;
+        height: calc(100% - 40px);
+        max-height: 780px;
+        border-radius: 16px;
+        overflow: hidden;
+        position: relative;
+        cursor: pointer;
+      }
+      .sv > img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+      }
+      .sv-prog {
+        position: absolute;
+        top: 14px;
+        left: 14px;
+        right: 14px;
+        display: flex;
+        gap: 4px;
+      }
+      .sv-bar {
+        flex: 1;
+        height: 3px;
+        background: rgba(255, 255, 255, 0.28);
+        border-radius: 2px;
+        overflow: hidden;
+      }
+      .sv-fill {
+        height: 100%;
+        background: #fff;
+        border-radius: 2px;
+        animation: sp 5s linear forwards;
+      }
+      @keyframes sp {
+        from {
+          width: 0;
+        }
+        to {
+          width: 100%;
+        }
+      }
+      .sv-head {
+        position: absolute;
+        top: 30px;
+        left: 14px;
+        right: 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .sv-av {
+        width: 38px;
+        height: 38px;
+        border-radius: 50%;
+        border: 2.5px solid rgba(255, 255, 255, 0.7);
+        flex-shrink: 0;
+        font-size: 13px;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--p1), var(--p2));
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+      }
+      .sv-name {
+        font-size: 14px;
+        font-weight: 800;
+        color: #fff;
+      }
+      .sv-time {
+        font-size: 11px;
+        color: rgba(255, 255, 255, 0.65);
+      }
+      .sv-close {
+        margin-left: auto;
+        background: rgba(0, 0, 0, 0.4);
+        border: none;
+        color: #fff;
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        cursor: pointer;
+        font-size: 18px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+      }
+      .sv-txt {
+        position: absolute;
+        bottom: 80px;
+        left: 14px;
+        right: 14px;
+        background: rgba(0, 0, 0, 0.5);
+        border-radius: 10px;
+        padding: 10px 14px;
+        font-size: 14px;
+        color: #fff;
+        backdrop-filter: blur(4px);
+      }
+      .sv-foot {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        padding: 16px 14px;
+        display: flex;
+        gap: 10px;
+      }
+      .sv-input {
+        flex: 1;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1.5px solid rgba(255, 255, 255, 0.35);
+        border-radius: 100px;
+        padding: 11px 18px;
+        font-size: 14px;
+        color: #fff;
+        font-family: inherit;
+        outline: none;
+      }
+      .sv-input::placeholder {
+        color: rgba(255, 255, 255, 0.55);
+      }
+      .sv-send {
+        background: linear-gradient(135deg, var(--p1), var(--p2));
+        border: none;
+        border-radius: 50%;
+        width: 44px;
+        height: 44px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-shrink: 0;
+      }
+      .sv-send svg {
+        width: 18px;
+        height: 18px;
+        fill: #fff;
+      }
+      .sv-side {
+        position: absolute;
+        top: 50%;
+        right: -80px;
+        transform: translateY(-50%);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      .sv-action {
+        background: rgba(255, 255, 255, 0.12);
+        border: 1px solid rgba(255, 255, 255, 0.18);
+        border-radius: 50%;
+        width: 46px;
+        height: 46px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: #fff;
+        transition: background 0.15s;
+        flex-direction: column;
+        font-size: 18px;
+        gap: 2px;
+      }
+      .sv-action:hover {
+        background: rgba(255, 255, 255, 0.22);
+      }
+      .sv-action span {
+        font-size: 10px;
+        color: rgba(255, 255, 255, 0.65);
+      }
+
+      /* Responsive */
+      @media (max-width: 1200px) {
+        .feed-right {
+          display: none;
+        }
+      }
+      @media (max-width: 900px) {
+        .nav span {
+          display: none;
+        }
+        .logo-name {
+          display: none;
+        }
+        .me-info {
+          display: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <!-- ═══ NAVBAR ═══ -->
+    <header class="navbar">
+      <div class="logo">
+        <div class="logo-icon">
+          <svg viewBox="0 0 24 24">
+            <path
+              d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"
+            />
+          </svg>
+        </div>
+        <span class="logo-name">Momento</span>
+      </div>
+
+      <nav class="nav">
+        <div class="nav-item active" onclick="show('vf')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+            <polyline points="9 22 9 12 15 12 15 22" />
+          </svg>
+          <span>Trang chủ</span>
+        </div>
+        <div class="nav-item" onclick="show('vm')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+          </svg>
+          <span>Tin nhắn</span>
+          <span class="nb">5</span>
+        </div>
+        <div class="nav-item" onclick="show('vs')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="10" />
+            <polygon points="10 8 16 12 10 16 10 8" />
+          </svg>
+          <span>Stories</span>
+        </div>
+        <div class="nav-item">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="11" cy="11" r="8" />
+            <line x1="21" y1="21" x2="16.65" y2="16.65" />
+          </svg>
+          <span>Khám phá</span>
+        </div>
+        <div class="nav-item" onclick="show('vp')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+            <circle cx="12" cy="7" r="4" />
+          </svg>
+          <span>Cá nhân</span>
+        </div>
+      </nav>
+
+      <div class="navbar-right">
+        <div class="nav-item" style="padding: 10px">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9" />
+            <path d="M13.73 21a2 2 0 0 1-3.46 0" />
+          </svg>
+          <span class="nb">12</span>
+        </div>
+        <div class="me-card">
+          <div class="av" style="background: linear-gradient(135deg, #06b6d4, #3b82f6)">MN</div>
+          <div class="me-info">
+            <div class="mn">Minh Nguyễn</div>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- ═══ MAIN ═══ -->
+    <div class="main">
+      <!-- ── FEED VIEW ── -->
+      <div class="view active" id="vf">
+        <div class="feed-col">
+          <!-- Create Post -->
+          <div class="create-post">
+            <div class="av" style="background: linear-gradient(135deg, #06b6d4, #3b82f6)">MN</div>
+            <div class="cp-input">Chia sẻ khoảnh khắc của bạn...</div>
+            <div class="cp-actions">
+              <button class="cp-btn ph">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2.5"
+                >
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+                Ảnh
+              </button>
+              <button class="cp-btn lk">📸 Locket</button>
+            </div>
+          </div>
+
+          <!-- Stories -->
+          <div class="stories">
+            <div class="st-item">
+              <div class="st-ring st-add-ring">
+                <div class="st-inner st-add-inner">+</div>
+              </div>
+              <span class="st-name">Story của bạn</span>
+            </div>
+            <div class="st-item">
+              <div class="st-ring">
+                <div class="st-inner"><img src="https://i.pravatar.cc/80?img=11" alt="" /></div>
+              </div>
+              <span class="st-name">Linh Trần</span>
+            </div>
+            <div class="st-item">
+              <div class="st-ring">
+                <div class="st-inner"><img src="https://i.pravatar.cc/80?img=5" alt="" /></div>
+              </div>
+              <span class="st-name">Huy Phạm</span>
+            </div>
+            <div class="st-item">
+              <div class="st-ring">
+                <div class="st-inner"><img src="https://i.pravatar.cc/80?img=47" alt="" /></div>
+              </div>
+              <span class="st-name">Thảo Lê</span>
+            </div>
+            <div class="st-item">
+              <div class="st-ring seen">
+                <div class="st-inner"><img src="https://i.pravatar.cc/80?img=32" alt="" /></div>
+              </div>
+              <span class="st-name">Khoa Bùi</span>
+            </div>
+            <div class="st-item">
+              <div class="st-ring seen">
+                <div class="st-inner"><img src="https://i.pravatar.cc/80?img=60" alt="" /></div>
+              </div>
+              <span class="st-name">An Vũ</span>
+            </div>
+            <div class="st-item">
+              <div class="st-ring seen">
+                <div class="st-inner"><img src="https://i.pravatar.cc/80?img=29" alt="" /></div>
+              </div>
+              <span class="st-name">Tú Ngô</span>
+            </div>
+          </div>
+
+          <!-- Post 1 – Locket Style -->
+          <div class="post">
+            <div class="post-head">
+              <div class="post-av">
+                <div class="av" style="background: linear-gradient(135deg, #f59e0b, #ef4444)">
+                  <img src="https://i.pravatar.cc/80?img=11" alt="" />
+                </div>
+                <span class="online"></span>
+              </div>
+              <div class="post-ui">
+                <div class="un">Linh Trần</div>
+                <div class="ts">2 phút trước · <span class="loc">📍 TP.HCM</span></div>
+              </div>
+              <button class="more-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </div>
+            <div class="post-img">
+              <img src="https://picsum.photos/seed/cafe01/600/600" alt="Khoảnh khắc" />
+              <div class="img-overlay"></div>
+              <div class="locket-badge">📸 Locket</div>
+              <div class="img-bottom">
+                <div class="sender-row">
+                  <div
+                    class="av"
+                    style="
+                      background: linear-gradient(135deg, #f59e0b, #ef4444);
+                      border: 2px solid rgba(255, 255, 255, 0.6);
+                    "
+                  >
+                    <img src="https://i.pravatar.cc/80?img=11" alt="" />
+                  </div>
+                  <span class="sender-name">Linh Trần</span>
+                </div>
+                <div
+                  class="heart-float"
+                  onclick="this.textContent = this.textContent == '🤍' ? '❤️' : '🤍'"
+                >
+                  🤍
+                </div>
+              </div>
+            </div>
+            <div class="post-caption">
+              <b>Linh Trần</b> Buổi sáng bắt đầu với ly cà phê yêu thích ☕ Ai uống cùng mình không?
+              😄
+            </div>
+            <div class="post-react">
+              <button
+                class="rb"
+                onclick="
+                  this.classList.toggle('liked');
+                  this.querySelector('span').textContent = this.classList.contains('liked')
+                    ? '124'
+                    : '123';
+                "
+              >
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                  />
+                </svg>
+                <span>123</span>
+              </button>
+              <button class="rb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                <span>34</span>
+              </button>
+              <button class="rb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+                </svg>
+                Share
+              </button>
+              <button class="rb sbk">📸 Gửi ảnh lại</button>
+            </div>
+          </div>
+
+          <!-- Post 2 -->
+          <div class="post">
+            <div class="post-head">
+              <div class="post-av">
+                <div class="av" style="background: linear-gradient(135deg, #8b5cf6, #06b6d4)">
+                  <img src="https://i.pravatar.cc/80?img=5" alt="" />
+                </div>
+              </div>
+              <div class="post-ui">
+                <div class="un">Huy Phạm</div>
+                <div class="ts">15 phút trước</div>
+              </div>
+              <button class="more-btn">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                  <circle cx="12" cy="5" r="1" />
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="12" cy="19" r="1" />
+                </svg>
+              </button>
+            </div>
+            <div class="post-img">
+              <img src="https://picsum.photos/seed/beach22/600/600" alt="" />
+              <div class="img-overlay"></div>
+              <div class="locket-badge">📸 Locket</div>
+              <div class="img-bottom">
+                <div class="sender-row">
+                  <div
+                    class="av"
+                    style="
+                      background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+                      border: 2px solid rgba(255, 255, 255, 0.6);
+                    "
+                  >
+                    <img src="https://i.pravatar.cc/80?img=5" alt="" />
+                  </div>
+                  <span class="sender-name">Huy Phạm</span>
+                </div>
+                <div
+                  class="heart-float"
+                  onclick="this.textContent = this.textContent == '🤍' ? '❤️' : '🤍'"
+                >
+                  ❤️
+                </div>
+              </div>
+            </div>
+            <div class="post-caption">
+              <b>Huy Phạm</b> Cuối tuần ra biển thôi anh em ơi 🌊🏖️ Vũng Tàu gọi tên ~
+            </div>
+            <div class="post-react">
+              <button class="rb liked">
+                <svg viewBox="0 0 24 24" fill="#FF1B6B" stroke="#FF1B6B" stroke-width="2">
+                  <path
+                    d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                  />
+                </svg>
+                <span>247</span>
+              </button>
+              <button class="rb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                ><span>56</span>
+              </button>
+              <button class="rb">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="18" cy="5" r="3" />
+                  <circle cx="6" cy="12" r="3" />
+                  <circle cx="18" cy="19" r="3" />
+                  <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+                  <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" /></svg
+                >Share
+              </button>
+              <button class="rb sbk">📸 Gửi ảnh lại</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Right Panel -->
+        <aside class="feed-right">
+          <div>
+            <div class="rp-title">Lời mời kết bạn</div>
+            <div class="req-item">
+              <div
+                class="av"
+                style="background: linear-gradient(135deg, #ec4899, #f43f5e); font-size: 15px"
+              >
+                <img src="https://i.pravatar.cc/80?img=47" alt="" />
+              </div>
+              <div class="req-item-info">
+                <div class="rn">Thảo Lê</div>
+                <div class="rm">7 bạn chung</div>
+                <div class="req-actions">
+                  <button class="btn-acc">Xác nhận</button>
+                  <button class="btn-dec">Xóa</button>
+                </div>
+              </div>
+            </div>
+            <div class="req-item" style="margin-top: 8px">
+              <div
+                class="av"
+                style="background: linear-gradient(135deg, #10b981, #059669); font-size: 15px"
+              >
+                <img src="https://i.pravatar.cc/80?img=32" alt="" />
+              </div>
+              <div class="req-item-info">
+                <div class="rn">Khoa Bùi</div>
+                <div class="rm">3 bạn chung</div>
+                <div class="req-actions">
+                  <button class="btn-acc">Xác nhận</button>
+                  <button class="btn-dec">Xóa</button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <div class="rp-title">Đang online</div>
+            <div class="fr-item">
+              <div class="av" style="background: linear-gradient(135deg, #f59e0b, #ef4444)">
+                <img src="https://i.pravatar.cc/80?img=11" alt="" />
+              </div>
+              <div class="fr-info">
+                <div class="fn">Linh Trần</div>
+                <div class="fs">● Đang hoạt động</div>
+              </div>
+              <button class="fr-btn" onclick="show('vm')">Nhắn</button>
+            </div>
+            <div class="fr-item">
+              <div class="av" style="background: linear-gradient(135deg, #8b5cf6, #06b6d4)">
+                <img src="https://i.pravatar.cc/80?img=5" alt="" />
+              </div>
+              <div class="fr-info">
+                <div class="fn">Huy Phạm</div>
+                <div class="fs">● Đang hoạt động</div>
+              </div>
+              <button class="fr-btn" onclick="show('vm')">Nhắn</button>
+            </div>
+            <div class="fr-item">
+              <div class="av" style="background: linear-gradient(135deg, #ec4899, #f43f5e)">
+                <img src="https://i.pravatar.cc/80?img=47" alt="" />
+              </div>
+              <div class="fr-info">
+                <div class="fn">Thảo Lê</div>
+                <div class="ft">5 phút trước</div>
+              </div>
+              <button class="fr-btn" onclick="show('vm')">Nhắn</button>
+            </div>
+            <div class="fr-item">
+              <div class="av" style="background: linear-gradient(135deg, #10b981, #059669)">
+                <img src="https://i.pravatar.cc/80?img=60" alt="" />
+              </div>
+              <div class="fr-info">
+                <div class="fn">An Vũ</div>
+                <div class="ft">12 phút trước</div>
+              </div>
+              <button class="fr-btn" onclick="show('vm')">Nhắn</button>
+            </div>
+            <div class="fr-item">
+              <div class="av" style="background: linear-gradient(135deg, #f97316, #dc2626)">
+                <img src="https://i.pravatar.cc/80?img=29" alt="" />
+              </div>
+              <div class="fr-info">
+                <div class="fn">Tú Ngô</div>
+                <div class="ft">1 giờ trước</div>
+              </div>
+              <button class="fr-btn" onclick="show('vm')">Nhắn</button>
+            </div>
+          </div>
+        </aside>
+      </div>
+
+      <!-- ── MESSAGES VIEW ── -->
+      <div class="view" id="vm">
+        <!-- Conversation list -->
+        <div class="msg-side">
+          <div class="msg-head">
+            <h2>Đoạn chat</h2>
+            <div class="srch">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                <circle cx="11" cy="11" r="8" />
+                <line x1="21" y1="21" x2="16.65" y2="16.65" />
+              </svg>
+              <input type="text" placeholder="Tìm kiếm trên Messenger" />
+            </div>
+          </div>
+          <div class="msg-filter">
+            <button class="mf active">Tất cả</button>
+            <button class="mf">Chưa đọc</button>
+            <button class="mf">Nhóm</button>
+            <button class="mf">Locket</button>
+          </div>
+          <div class="conv-list">
+            <div class="ci active">
+              <div class="conv-avatar">
+                <div
+                  class="av"
+                  style="
+                    width: 50px;
+                    height: 50px;
+                    font-size: 17px;
+                    background: linear-gradient(135deg, #f59e0b, #ef4444);
+                  "
+                >
+                  <img src="https://i.pravatar.cc/80?img=11" alt="" />
+                </div>
+                <span class="online" style="border-color: var(--s2)"></span>
+              </div>
+              <div class="ci-body">
+                <div class="ci-name">Linh Trần</div>
+                <div class="ci-prev unr">📸 Gửi một Locket cho bạn</div>
+              </div>
+              <div class="ci-meta">
+                <span class="ci-time">2 ph</span><span class="ci-unr">3</span>
+              </div>
+            </div>
+            <div class="ci">
+              <div class="conv-avatar">
+                <div
+                  class="av"
+                  style="
+                    width: 50px;
+                    height: 50px;
+                    font-size: 17px;
+                    background: linear-gradient(135deg, #8b5cf6, #06b6d4);
+                  "
+                >
+                  <img src="https://i.pravatar.cc/80?img=5" alt="" />
+                </div>
+              </div>
+              <div class="ci-body">
+                <div class="ci-name">Huy Phạm</div>
+                <div class="ci-prev">Bạn: ok bro 👌</div>
+              </div>
+              <div class="ci-meta"><span class="ci-time">15 ph</span></div>
+            </div>
+            <div class="ci">
+              <div class="conv-avatar">
+                <div
+                  class="av"
+                  style="
+                    width: 50px;
+                    height: 50px;
+                    font-size: 17px;
+                    background: linear-gradient(135deg, #3b82f6, #8b5cf6);
+                  "
+                >
+                  HN
+                </div>
+              </div>
+              <div class="ci-body">
+                <div class="ci-name">Hội nhóm CF ☕</div>
+                <div class="ci-prev unr">Khoa: Đi cafe không mọi người?</div>
+              </div>
+              <div class="ci-meta">
+                <span class="ci-time">34 ph</span><span class="ci-unr">7</span>
+              </div>
+            </div>
+            <div class="ci">
+              <div class="conv-avatar">
+                <div
+                  class="av"
+                  style="
+                    width: 50px;
+                    height: 50px;
+                    font-size: 17px;
+                    background: linear-gradient(135deg, #ec4899, #f43f5e);
+                  "
+                >
+                  <img src="https://i.pravatar.cc/80?img=47" alt="" />
+                </div>
+              </div>
+              <div class="ci-body">
+                <div class="ci-name">Thảo Lê</div>
+                <div class="ci-prev">Bạn: hehe 😁</div>
+              </div>
+              <div class="ci-meta"><span class="ci-time">1 giờ</span></div>
+            </div>
+            <div class="ci">
+              <div class="conv-avatar">
+                <div
+                  class="av"
+                  style="
+                    width: 50px;
+                    height: 50px;
+                    font-size: 17px;
+                    background: linear-gradient(135deg, #10b981, #059669);
+                  "
+                >
+                  <img src="https://i.pravatar.cc/80?img=60" alt="" />
+                </div>
+              </div>
+              <div class="ci-body">
+                <div class="ci-name">An Vũ</div>
+                <div class="ci-prev">ok nha bạn ơi</div>
+              </div>
+              <div class="ci-meta"><span class="ci-time">3 giờ</span></div>
+            </div>
+            <div class="ci">
+              <div class="conv-avatar">
+                <div
+                  class="av"
+                  style="
+                    width: 50px;
+                    height: 50px;
+                    font-size: 17px;
+                    background: linear-gradient(135deg, #f97316, #dc2626);
+                  "
+                >
+                  <img src="https://i.pravatar.cc/80?img=29" alt="" />
+                </div>
+              </div>
+              <div class="ci-body">
+                <div class="ci-name">Tú Ngô</div>
+                <div class="ci-prev">😂😂😂</div>
+              </div>
+              <div class="ci-meta"><span class="ci-time">hôm qua</span></div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Chat Window -->
+        <div class="chat-win">
+          <div class="chat-head">
+            <div
+              class="av"
+              style="
+                width: 40px;
+                height: 40px;
+                font-size: 14px;
+                background: linear-gradient(135deg, #f59e0b, #ef4444);
+              "
+            >
+              <img src="https://i.pravatar.cc/80?img=11" alt="" />
+            </div>
+            <div class="ch-info">
+              <div class="cn">Linh Trần</div>
+              <div class="cs">● Đang hoạt động</div>
+            </div>
+            <div class="ch-actions">
+              <button class="ib">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07A19.5 19.5 0 0 1 4.99 12a19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 3.9 1.27h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9a16 16 0 0 0 6.93 6.93l1.09-1.09a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"
+                  />
+                </svg>
+              </button>
+              <button class="ib">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polygon points="23 7 16 12 23 17 23 7" />
+                  <rect x="1" y="5" width="15" height="14" rx="2" ry="2" />
+                </svg>
+              </button>
+              <button class="ib">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="19" cy="12" r="1" />
+                  <circle cx="5" cy="12" r="1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="chat-msgs">
+            <div class="dd"><span>Hôm nay</span></div>
+
+            <div class="mg theirs">
+              <div class="theirs-row">
+                <div
+                  class="av multi-av"
+                  style="background: linear-gradient(135deg, #f59e0b, #ef4444)"
+                >
+                  <img src="https://i.pravatar.cc/80?img=11" alt="" />
+                </div>
+                <div class="bub">Chào bạn! Hôm nay bạn thế nào rồi? 😊</div>
+              </div>
+              <span class="msg-t">10:24</span>
+            </div>
+
+            <div class="mg mine">
+              <div class="bub">Mình ổn bạn ơi! Bạn gửi ảnh Locket kìa 😁</div>
+              <span class="msg-t">10:25</span>
+            </div>
+
+            <!-- Locket widget in chat -->
+            <div class="mg theirs">
+              <div class="theirs-row">
+                <div
+                  class="av multi-av"
+                  style="background: linear-gradient(135deg, #f59e0b, #ef4444)"
+                >
+                  <img src="https://i.pravatar.cc/80?img=11" alt="" />
+                </div>
+                <div class="lk-widget">
+                  <img
+                    class="lk-widget-img"
+                    src="https://picsum.photos/seed/locket1/300/300"
+                    alt="Locket"
+                  />
+                  <div class="lk-widget-foot">
+                    <span class="lkwt">📸 Locket · 2 ph trước</span>
+                    <button class="lkwr">Gửi lại ↩</button>
+                  </div>
+                </div>
+              </div>
+              <span class="msg-t">10:26</span>
+            </div>
+
+            <div class="mg mine">
+              <div class="bub">Wow đẹp quá 😍 Ở đâu vậy bạn?</div>
+              <span class="msg-t">10:28</span>
+            </div>
+
+            <div class="mg theirs">
+              <div class="theirs-row">
+                <div
+                  class="av multi-av"
+                  style="background: linear-gradient(135deg, #f59e0b, #ef4444)"
+                >
+                  <img src="https://i.pravatar.cc/80?img=11" alt="" />
+                </div>
+                <div class="bub">Mình ở quán cafe gần nhà thôi haha ☕</div>
+              </div>
+            </div>
+            <div class="mg theirs">
+              <div class="theirs-row">
+                <div class="av multi-av" style="opacity: 0"></div>
+                <div class="bub img-bub">
+                  <img src="https://picsum.photos/seed/cafe88/300/300" alt="" />
+                </div>
+              </div>
+              <span class="msg-t">10:29</span>
+            </div>
+
+            <div class="mg mine">
+              <div class="bub">Thích thật! Hôm nào rủ mình cùng nhé 🙌</div>
+              <span class="msg-t">10:31</span>
+            </div>
+
+            <div class="mg theirs">
+              <div class="theirs-row">
+                <div
+                  class="av multi-av"
+                  style="background: linear-gradient(135deg, #f59e0b, #ef4444)"
+                >
+                  <img src="https://i.pravatar.cc/80?img=11" alt="" />
+                </div>
+                <div class="typing"><span></span><span></span><span></span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="chat-inp">
+            <div class="chat-inp-actions">
+              <button class="ib" style="color: var(--p1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <polyline points="21 15 16 10 5 21" />
+                </svg>
+              </button>
+              <button class="ib" style="color: var(--p1)">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path
+                    d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+                  />
+                  <circle cx="12" cy="13" r="4" />
+                </svg>
+              </button>
+              <button class="ib">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <circle cx="12" cy="12" r="10" />
+                  <path d="M8 14s1.5 2 4 2 4-2 4-2" />
+                  <line x1="9" y1="9" x2="9.01" y2="9" />
+                  <line x1="15" y1="9" x2="15.01" y2="9" />
+                </svg>
+              </button>
+            </div>
+            <input class="chat-input" type="text" placeholder="Aa" />
+            <button class="send-btn">
+              <svg viewBox="0 0 24 24">
+                <path d="M22 2L11 13" />
+                <path d="M22 2L15 22 11 13 2 9l20-7z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ── STORIES VIEW ── -->
+      <div class="view" id="vs">
+        <div class="sv">
+          <img src="https://picsum.photos/seed/story99/600/900" alt="Story" />
+          <div class="sv-prog">
+            <div class="sv-bar"><div class="sv-fill"></div></div>
+            <div class="sv-bar" style="background: rgba(255, 255, 255, 0.28)"></div>
+            <div class="sv-bar" style="background: rgba(255, 255, 255, 0.28)"></div>
+          </div>
+          <div class="sv-head">
+            <div class="sv-av">
+              <img
+                src="https://i.pravatar.cc/80?img=11"
+                alt=""
+                style="border-radius: 50%; width: 100%; height: 100%; object-fit: cover"
+              />
+            </div>
+            <div>
+              <div class="sv-name">Linh Trần</div>
+              <div class="sv-time">2 phút trước · 🌆 TP.HCM</div>
+            </div>
+            <button class="sv-close" onclick="show('vf')">✕</button>
+          </div>
+          <div class="sv-txt">Buổi chiều đẹp quá 🌅✨</div>
+          <div class="sv-foot">
+            <input class="sv-input" type="text" placeholder="Trả lời Linh Trần..." />
+            <button class="sv-send">
+              <svg viewBox="0 0 24 24">
+                <path d="M22 2L11 13" />
+                <path d="M22 2L15 22 11 13 2 9l20-7z" />
+              </svg>
+            </button>
+          </div>
+        </div>
+        <div class="sv-side">
+          <button class="sv-action">❤️<span>2.4k</span></button>
+          <button class="sv-action" style="font-size: 14px">📸<span>Locket</span></button>
+          <button class="sv-action">
+            <svg
+              width="20"
+              height="20"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              stroke-width="2"
+            >
+              <circle cx="18" cy="5" r="3" />
+              <circle cx="6" cy="12" r="3" />
+              <circle cx="18" cy="19" r="3" />
+              <line x1="8.59" y1="13.51" x2="15.42" y2="17.49" />
+              <line x1="15.41" y1="6.51" x2="8.59" y2="10.49" />
+            </svg>
+            <span>Share</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ── PROFILE VIEW ── -->
+      <div class="view" id="vp">
+        <div class="cover">
+          <img src="https://picsum.photos/seed/cover01/1200/400" alt="Cover" />
+          <div class="cover-gradient"></div>
+          <button class="cover-edit">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+              <path
+                d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"
+              />
+              <circle cx="12" cy="13" r="4" />
+            </svg>
+            Chỉnh ảnh bìa
+          </button>
+        </div>
+
+        <div class="pinfo">
+          <div class="pav-row">
+            <div class="p-avatar">
+              <img
+                src="https://i.pravatar.cc/150?img=5"
+                alt=""
+                style="width: 100%; height: 100%; object-fit: cover; border-radius: 50%"
+              />
+            </div>
+            <div class="p-actions">
+              <button class="btn-prim">+ Thêm vào story</button>
+              <button class="btn-sec">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+                </svg>
+                Nhắn tin
+              </button>
+              <button class="btn-sec" style="padding: 9px 10px">
+                <svg
+                  viewBox="0 0 24 24"
+                  width="16"
+                  height="16"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <circle cx="12" cy="12" r="1" />
+                  <circle cx="19" cy="12" r="1" />
+                  <circle cx="5" cy="12" r="1" />
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="p-name">Huy Phạm</div>
+          <div class="p-handle">@huypham · <span style="color: var(--bl)">Theo dõi</span></div>
+          <div class="p-bio">
+            Nhiếp ảnh 📸 | Travel 🌏 | Coffee addict ☕<br />📍 TP.Hồ Chí Minh ·
+            <a href="#">linktr.ee/huypham</a>
+          </div>
+
+          <div class="p-meta">
+            <div class="p-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2" />
+                <circle cx="9" cy="7" r="4" />
+                <path d="M23 21v-2a4 4 0 0 0-3-3.87" />
+                <path d="M16 3.13a4 4 0 0 1 0 7.75" /></svg
+              ><b>248</b> bạn chung
+            </div>
+            <div class="p-meta-item">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                <circle cx="12" cy="10" r="3" /></svg
+              ><b>TP.HCM</b>
+            </div>
+          </div>
+
+          <div class="p-stats">
+            <div class="stat-item">
+              <span class="stat-num">1.2K</span><span class="stat-lbl">Bài viết</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">48.6K</span><span class="stat-lbl">Người theo dõi</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">312</span><span class="stat-lbl">Đang theo dõi</span>
+            </div>
+            <div class="stat-item">
+              <span class="stat-num">892</span><span class="stat-lbl">Bạn bè</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="p-tabs" style="margin: 0 32px">
+          <div class="p-tab active" onclick="switchTab(this, 'pt-posts')">Bài viết</div>
+          <div class="p-tab" onclick="switchTab(this, 'pt-reels')">Reels</div>
+          <div class="p-tab" onclick="switchTab(this, 'pt-photos')">Ảnh</div>
+          <div class="p-tab" onclick="switchTab(this, 'pt-friends')">Bạn bè</div>
+          <div class="p-tab" onclick="switchTab(this, 'pt-about')">Giới thiệu</div>
+        </div>
+
+        <div class="p-content">
+          <div id="pt-posts" class="p-grid">
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg1/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >2.4K</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >134</span
+                >
+              </div>
+            </div>
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg2/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >1.8K</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >89</span
+                >
+              </div>
+            </div>
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg3/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >3.1K</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >201</span
+                >
+              </div>
+            </div>
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg4/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >987</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >67</span
+                >
+              </div>
+            </div>
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg5/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >1.5K</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >112</span
+                >
+              </div>
+            </div>
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg6/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >2.2K</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >178</span
+                >
+              </div>
+            </div>
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg7/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >4.7K</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >320</span
+                >
+              </div>
+            </div>
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg8/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >1.1K</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >55</span
+                >
+              </div>
+            </div>
+            <div class="gi">
+              <img src="https://picsum.photos/seed/pg9/400/400" alt="" />
+              <div class="gi-ov">
+                <span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path
+                      d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"
+                    /></svg
+                  >863</span
+                ><span class="gi-stat"
+                  ><svg viewBox="0 0 24 24">
+                    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" /></svg
+                  >44</span
+                >
+              </div>
+            </div>
+          </div>
+          <div
+            id="pt-reels"
+            style="display: none; padding: 32px; color: var(--t3); text-align: center"
+          >
+            Reels sẽ hiển thị ở đây
+          </div>
+          <div
+            id="pt-photos"
+            style="display: none; padding: 32px; color: var(--t3); text-align: center"
+          >
+            Thư viện ảnh
+          </div>
+          <div id="pt-friends" style="display: none" class="friends-grid">
+            <div class="fg-card">
+              <div
+                class="av"
+                style="
+                  height: 120px;
+                  width: 100%;
+                  border-radius: 0;
+                  font-size: 28px;
+                  font-weight: 800;
+                  background: linear-gradient(135deg, #f59e0b, #ef4444);
+                "
+              >
+                <img
+                  src="https://i.pravatar.cc/150?img=11"
+                  alt=""
+                  style="width: 100%; height: 100%; object-fit: cover"
+                />
+              </div>
+              <div class="fg-name">Linh Trần</div>
+              <button
+                class="fg-btn btn-sec"
+                style="
+                  margin: 0 10px 10px;
+                  width: calc(100% - 20px);
+                  padding: 7px 0;
+                  font-size: 12px;
+                  font-weight: 700;
+                "
+              >
+                Nhắn tin
+              </button>
+            </div>
+            <div class="fg-card">
+              <div
+                class="av"
+                style="
+                  height: 120px;
+                  width: 100%;
+                  border-radius: 0;
+                  font-size: 28px;
+                  font-weight: 800;
+                  background: linear-gradient(135deg, #ec4899, #f43f5e);
+                "
+              >
+                <img
+                  src="https://i.pravatar.cc/150?img=47"
+                  alt=""
+                  style="width: 100%; height: 100%; object-fit: cover"
+                />
+              </div>
+              <div class="fg-name">Thảo Lê</div>
+              <button
+                class="fg-btn btn-sec"
+                style="
+                  margin: 0 10px 10px;
+                  width: calc(100% - 20px);
+                  padding: 7px 0;
+                  font-size: 12px;
+                  font-weight: 700;
+                "
+              >
+                Nhắn tin
+              </button>
+            </div>
+            <div class="fg-card">
+              <div
+                class="av"
+                style="
+                  height: 120px;
+                  width: 100%;
+                  border-radius: 0;
+                  font-size: 28px;
+                  font-weight: 800;
+                  background: linear-gradient(135deg, #10b981, #059669);
+                "
+              >
+                <img
+                  src="https://i.pravatar.cc/150?img=60"
+                  alt=""
+                  style="width: 100%; height: 100%; object-fit: cover"
+                />
+              </div>
+              <div class="fg-name">An Vũ</div>
+              <button
+                class="fg-btn btn-sec"
+                style="
+                  margin: 0 10px 10px;
+                  width: calc(100% - 20px);
+                  padding: 7px 0;
+                  font-size: 12px;
+                  font-weight: 700;
+                "
+              >
+                Nhắn tin
+              </button>
+            </div>
+          </div>
+          <div id="pt-about" style="display: none; padding: 24px 32px; max-width: 600px">
+            <div style="font-size: 16px; font-weight: 700; margin-bottom: 16px">Giới thiệu</div>
+            <div
+              style="
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+                font-size: 14px;
+                color: var(--t2);
+              "
+            >
+              <div style="display: flex; gap: 12px; align-items: center">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z" />
+                  <circle cx="12" cy="10" r="3" /></svg
+                >Sống tại <b style="color: var(--t1)">TP.Hồ Chí Minh</b>
+              </div>
+              <div style="display: flex; gap: 12px; align-items: center">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
+                  <polyline points="9 22 9 12 15 12 15 22" /></svg
+                >Đến từ <b style="color: var(--t1)">Đà Nẵng</b>
+              </div>
+              <div style="display: flex; gap: 12px; align-items: center">
+                <svg
+                  width="18"
+                  height="18"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  stroke-width="2"
+                >
+                  <rect x="2" y="7" width="20" height="14" rx="2" ry="2" />
+                  <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16" /></svg
+                >Làm việc tại <b style="color: var(--t1)">Freelance Photographer</b>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <!-- /main -->
+
+    <script>
+      function show(id) {
+        document.querySelectorAll(".view").forEach((v) => v.classList.remove("active"));
+        document.getElementById(id).classList.add("active");
+        document.querySelectorAll(".nav-item").forEach((n) => n.classList.remove("active"));
+        const map = { vf: 0, vm: 1, vs: 2, vp: 4 };
+        const items = document.querySelectorAll(".nav-item");
+        if (map[id] !== undefined) items[map[id]].classList.add("active");
+      }
+
+      function switchTab(el, targetId) {
+        el.closest(".p-tabs")
+          .querySelectorAll(".p-tab")
+          .forEach((t) => t.classList.remove("active"));
+        el.classList.add("active");
+        const tabs = ["pt-posts", "pt-reels", "pt-photos", "pt-friends", "pt-about"];
+        tabs.forEach((t) => {
+          const el = document.getElementById(t);
+          if (el)
+            el.style.display = t === targetId ? (t === "pt-friends" ? "grid" : "block") : "none";
+        });
+      }
+
+      document.querySelector(".msg-filter").addEventListener("click", (e) => {
+        if (e.target.classList.contains("mf")) {
+          document.querySelectorAll(".mf").forEach((f) => f.classList.remove("active"));
+          e.target.classList.add("active");
+        }
+      });
+    </script>
+  </body>
+</html>

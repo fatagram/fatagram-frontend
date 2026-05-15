@@ -3,12 +3,16 @@
   "description": "Welcome to the home page! This is where you can find the latest updates and news.",
   "navbar": {
     "title": "Bạn bè",
-    "suggestedFriends": "Bạn bè được gợi ý",
+    "addFriends": "Tìm kiếm bạn bè",
     "invite": "Lời mời kết bạn"
   },
   "requests": {
     "title": "Lời mời kết bạn",
     "noRequests": "Không có lời mời kết bạn",
     "noRequestsDescription": "Bạn đã xử lý hết lời mời. Khi có người muốn kết bạn, họ sẽ xuất hiện ở đây."
+  },
+  "search": {
+    "noResults": "Không tìm thấy người dùng",
+    "noResultsDescription": "Chúng tôi không tìm thấy kết quả nào phù hợp với tìm kiếm của bạn."
   }
 }
