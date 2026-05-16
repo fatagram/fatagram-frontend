@@ -21,7 +21,11 @@ export const useSearchUsers = (
 ) => {
   return useSafeInfiniteQueryResult({
     queryKey: [...userKeys.all, "search", queryParams],
-    fn: async (cursor?: string) => await userService.searchUsers({ ...queryParams, cursor }),
+    fn: async (cursor?: string) => {
+      // delay 1s
+      await new Promise((resolve) => setTimeout(resolve, 500));
+      return await userService.searchUsers({ ...queryParams, cursor });
+    },
     enabled: true,
   });
 };

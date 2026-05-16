@@ -21,7 +21,7 @@ const SettingPage: React.FC<SettingPageProps> = () => {
       title={t("settings:title")}
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
-      navbar={<SettingsNavbar className="h-full" onSelect={() => setShowSidebar(false)} />}
+      navbar={<SettingsNavbar className="h-full w-full" onSelect={() => setShowSidebar(false)} />}
     >
       <Outlet />
     </SidebarPageLayout>

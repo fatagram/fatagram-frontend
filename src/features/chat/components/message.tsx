@@ -166,7 +166,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       renderItem={(item) => {
         const isSystemMsg = isSystemMessage(item.type);
 
-        if (isSystemMsg) return <SystemMessageRow message={item} />;
+        if (isSystemMsg) return <SystemMessageRow message={item} meta={item.meta} />;
 
         return (
           <MessageRow

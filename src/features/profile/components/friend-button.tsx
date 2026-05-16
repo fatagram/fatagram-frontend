@@ -14,7 +14,7 @@ interface FriendButtonProps extends ComponentProps {
   initialStatus?: string;
 }
 
-const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus }) => {
+const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, className }) => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   if (!useAuth().isAuthenticated) return null;
@@ -161,13 +161,13 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus }) => {
   }
 
   return (
-    <div>
+    <div className={className}>
       {currentFriendshipStatus === "None" ? (
-        <Button sz="sm" onClick={handleSentAddFriendRequest}>
+        <Button sz="sm" onClick={handleSentAddFriendRequest} className="w-full">
           <i className={clsx("fa-solid", "fa-plus")}></i> {t("user:profileHeader.addFriendButton")}
         </Button>
       ) : currentFriendshipStatus === "SentByMe" ? (
-        <Button sz="sm" onClick={handleCancelAddFriendRequest}>
+        <Button sz="sm" onClick={handleCancelAddFriendRequest} className="w-full">
           <i className={clsx("fa-solid", "fa-xmark")}></i>{" "}
           {t("user:profileHeader.cancelRequestButton")}
         </Button>
@@ -179,6 +179,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus }) => {
             onClick={() => {
               setIsShowRequestOptions(!isShowRequestOptions);
             }}
+            className="w-full"
           >
             <i className={clsx("fa-solid", "fa-reply")}></i>{" "}
             {t("user:profileHeader.respondRequestButton")}
@@ -210,6 +211,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus }) => {
             onClick={() => {
               setIsShowFriendOptions(!isShowFriendOptions);
             }}
+            className="w-full"
           >
             <i className={clsx("fa-solid", "fa-user-check")}></i>{" "}
             {t("user:profileHeader.friendButton")}

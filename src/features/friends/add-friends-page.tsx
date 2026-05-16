@@ -18,7 +18,7 @@ const AddFriendsPage: React.FC = () => {
   useEffect(() => {
     const timer = setTimeout(() => {
       setDebouncedQuery(searchQuery);
-    }, 400);
+    }, 500);
     return () => clearTimeout(timer);
   }, [searchQuery]);
 

@@ -2,12 +2,11 @@ import React from "react";
 import { Logo, Text, Button } from "@/components/atoms";
 import { useAuth } from "@/contexts";
 import { useTranslation } from "react-i18next";
-import clsx from "clsx";
 
 export const FullFooter: React.FC = () => {
   const { isAuthenticated } = useAuth();
   const { t } = useTranslation("home");
-  
+
   const footerLinks = [
     {
       title: t("footer.categories.products"),
@@ -16,7 +15,7 @@ export const FullFooter: React.FC = () => {
         t("footer.links.security"),
         t("footer.links.mobile"),
         t("footer.links.integrations"),
-        t("footer.links.updates")
+        t("footer.links.updates"),
       ],
     },
     {
@@ -26,7 +25,7 @@ export const FullFooter: React.FC = () => {
         t("footer.links.careers"),
         t("footer.links.blog"),
         t("footer.links.press"),
-        t("footer.links.partners")
+        t("footer.links.partners"),
       ],
     },
     {
@@ -36,7 +35,7 @@ export const FullFooter: React.FC = () => {
         t("footer.links.community"),
         t("footer.links.guides"),
         t("footer.links.status"),
-        t("footer.links.contact")
+        t("footer.links.contact"),
       ],
     },
     {
@@ -46,7 +45,7 @@ export const FullFooter: React.FC = () => {
         t("footer.links.privacy"),
         t("footer.links.cookies"),
         t("footer.links.copyright"),
-        t("footer.links.privacySettings")
+        t("footer.links.privacySettings"),
       ],
     },
   ];
@@ -76,11 +75,19 @@ export const FullFooter: React.FC = () => {
           </div>
           <div className="flex w-full md:w-auto gap-3">
             {!isAuthenticated && (
-              <Button variant="primary" sz="lg" className="w-full md:w-auto px-8 shadow-lg shadow-primary-500/20">
+              <Button
+                variant="primary"
+                sz="lg"
+                className="w-full md:w-auto px-8 shadow-lg shadow-primary-500/20"
+              >
                 {t("footer.cta.signup")}
               </Button>
             )}
-            <Button variant="secondary" sz="lg" className="w-full md:w-auto px-8 bg-bg-main border-bg-third">
+            <Button
+              variant="secondary"
+              sz="lg"
+              className="w-full md:w-auto px-8 bg-bg-main border-bg-third"
+            >
               {t("footer.cta.learnMore")}
             </Button>
           </div>
@@ -91,7 +98,11 @@ export const FullFooter: React.FC = () => {
           {/* Brand Column */}
           <div className="col-span-2 lg:col-span-2 flex flex-col items-start gap-6">
             <Logo sz="lg" hasSlogan={false} />
-            <Text sz="sm" wrap="whitespace-normal" className="text-text-third leading-relaxed max-w-xs text-left">
+            <Text
+              sz="sm"
+              wrap="whitespace-normal"
+              className="text-text-third leading-relaxed max-w-xs text-left"
+            >
               {t("footer.branding")}
             </Text>
             {/* Social Icons */}

@@ -37,17 +37,16 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
         height: 100,
       };
 
+      closeFn();
       await fetch(
         { file, metadata },
         {
           onSuccess: () => {
             showSnackbar("Background updated successfully", "success");
             URL.revokeObjectURL(objectUrl);
-            closeFn();
           },
           onError: () => {
             URL.revokeObjectURL(objectUrl);
-            closeFn();
           },
         },
       );

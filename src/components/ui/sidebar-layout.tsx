@@ -30,7 +30,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
     <div className={clsx("flex flex-1 items-stretch", className)}>
       <aside
         className={clsx(
-          "z-30 max-w-[300px] shrink-0 overflow-y-auto ",
+          "z-30 w-full max-w-[300px] shrink-0 overflow-y-auto",
           "fixed lg:sticky top-[var(--header-height)] h-[calc(100dvh-var(--header-height))] transition-transform duration-300",
           showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
           sidebarClassName,

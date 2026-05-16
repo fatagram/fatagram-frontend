@@ -250,10 +250,16 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   );
 };
 
-export const SystemMessageRow = memo(({ message }: { message: Message }) => {
+export const SystemMessageRow = memo(({ message, meta }: { message: Message; meta: any }) => {
   const { renderSystemMessage } = useRenderConversationContent();
+  const { formatSmartTimestamp } = useFormatTime();
   return (
-    <div className="flex justify-center w-full my-2">
+    <div className="flex flex-col items-center w-full my-2">
+      {meta?._isShowTime && (
+        <Text sz="xs" className="text-center my-2">
+          {formatSmartTimestamp(message.createdAt)}
+        </Text>
+      )}
       <Text sz="sm" className="opacity-80">
         {renderSystemMessage(message)}
       </Text>

@@ -18,6 +18,13 @@ export class ConversationService {
     return res;
   }
 
+  public async searchConversations(
+    query: CursorQuery<string>,
+  ): Promise<Result<CursorResult<ConversationDto, string>>> {
+    const res = await apiGet(`${PREFIX}/search`, query);
+    return res;
+  }
+
   public async getDeltaConversations(since: Date): Promise<Result<ConversationDto[]>> {
     return await apiGet(`${PREFIX}/delta`, { since });
   }

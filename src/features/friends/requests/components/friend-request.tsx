@@ -3,7 +3,7 @@ import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
 import { NotFound } from "@/features/components/not-found";
 import { useTranslation } from "react-i18next";
-import React from "react";
+import React, { useMemo, useState } from "react";
 import clsx from "clsx";
 import {
   useAcceptFriendRequest,
@@ -18,17 +18,16 @@ type FriendRequestsProps = {
 
 const FriendRequests: React.FC<FriendRequestsProps> = () => {
   const { t } = useTranslation();
-  const [_total, _setTotal] = React.useState(0);
+  const [_total, _setTotal] = useState(0);
 
   const { data, fetchNextPage, hasNextPage, isFetching, isPending } = useListFriendRequests({
     limit: 20,
   });
-  const requestsData = React.useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
+  const requestsData = useMemo(() => data?.pages.flatMap((page) => page.items) || [], [data]);
 
   const { fetch: acceptFriendRequest } = useAcceptFriendRequest();
   const { fetch: rejectFriendRequest } = useDeclineFriendRequest();
 
-  // render
   return (
     <SidebarPageCard title={t("friends:requests.title") || "Lời mời kết bạn"}>
       <InfiniteScrollGrid

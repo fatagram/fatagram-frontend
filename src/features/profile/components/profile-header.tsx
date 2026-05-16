@@ -62,7 +62,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
 
   return (
     <div className={clsx("relative w-full flex flex-col items-center", className)}>
-      <div className="relative w-full">
+      <div className="relative w-full sm:mt-2 mt-0">
         <ProfileBackground />
       </div>
 

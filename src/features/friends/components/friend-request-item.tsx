@@ -46,7 +46,9 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
         sz="md"
         weight="bold"
         onClick={handleNavigate}
-        className={clsx("truncate overflow-hidden w-full")}
+        className={clsx(
+          "truncate overflow-hidden w-full mt-1 hover:text-primary-500 cursor-pointer",
+        )}
       >
         {name}
       </Text>

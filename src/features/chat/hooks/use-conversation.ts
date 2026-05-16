@@ -148,6 +148,22 @@ export const useGetConversations = (queryParams?: Omit<CursorQuery<string>, "cur
   };
 };
 
+export const useSearchConversations = (queryParams: CursorQuery<string>) => {
+  const infiniteQuery = useSafeInfiniteQueryResult({
+    queryKey: ["conversations", "search", queryParams.keyword, queryParams.limit],
+    fn: async (cursor?: string) => {
+      return await conversationService.searchConversations({
+        ...queryParams,
+        cursor,
+      });
+    },
+    enabled: !!queryParams.keyword,
+    staleTime: 1000 * 60 * 5,
+  });
+
+  return infiniteQuery;
+};
+
 export const useGetDeltaConversations = () => {
   const fetcher = useResultFetcher(
     async (since: Date) => await conversationService.getDeltaConversations(since),

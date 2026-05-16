@@ -43,7 +43,7 @@ const SearchUserItem: React.FC<SearchUserItemProps> = ({ id, avatar, name, statu
           </Text>
         </div>
         <div className="shrink-0 min-w-[120px] flex justify-end">
-          <FriendButton uid={id} initialStatus={status} />
+          <FriendButton uid={id} initialStatus={status} className="w-full" />
         </div>
       </div>
     );
