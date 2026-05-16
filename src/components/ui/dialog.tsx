@@ -30,8 +30,8 @@ export const Dialog: React.FC<DialogBoxProps> = ({
   return (
     <div
       className={clsx(
-        "relative flex flex-col gap-4 bg-bg-main p-4",
-        "rounded-lg shadow-lg",
+        "relative flex flex-col gap-4 bg-bg-second p-4",
+        "rounded-2xl shadow-lg",
         className,
       )}
     >
@@ -43,12 +43,12 @@ export const Dialog: React.FC<DialogBoxProps> = ({
       {content && <div>{content}</div>}
       <div className="flex justify-end space-x-2">
         {tertiaryButton && (
-          <Button onClick={tertiaryButton.onClick} variant="secondary" sz="sm">
+          <Button onClick={tertiaryButton.onClick} variant="third" sz="sm">
             {tertiaryButton.text}
           </Button>
         )}
         {secondaryButton && (
-          <Button onClick={secondaryButton.onClick} variant="secondary" sz="sm">
+          <Button onClick={secondaryButton.onClick} variant="third" sz="sm">
             {secondaryButton.text}
           </Button>
         )}

@@ -17,6 +17,7 @@ import { convManager, useConversationStore } from "../services/conversation-mana
 import { TypingIndicator } from "./messages/typing";
 import { ChatInput } from "./chat-input";
 import { useChatStore } from "../hooks/use-floating-chat";
+import { TempChat } from "./temp-chat";
 
 interface Props extends ComponentProps {
   conversationId: string;
@@ -32,7 +33,19 @@ export const ChatPanel: React.FC<Props> = ({
   headerRight,
   headerLeft,
   onClickTitle,
+  onTurnback,
 }) => {
+  if (conversationId.startsWith("temp-")) {
+    return (
+      <TempChat
+        conversationId={conversationId}
+        className={className}
+        onTurnBack={onTurnback}
+        headerRight={headerRight}
+        headerLeft={headerLeft}
+      />
+    );
+  }
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
   const { renderConversationName } = useRenderConversationContent();
@@ -249,8 +262,18 @@ export const ChatPanel: React.FC<Props> = ({
                     {chatTitle}
                   </Text>
                   <Text sz="xs" wrap="whitespace-normal">
-                    {t("common:conversations:privacyDescription")}
+                    {t("common:conversations.privacyDescription")}
                   </Text>
+                  {!conv?.isGroup && conv?.otherUserId && (
+                    <Button
+                      sz="sm"
+                      variant="third"
+                      className="mt-4"
+                      onClick={() => navigate(`/${conv.otherUserId}`)}
+                    >
+                      {t("common:conversations.settings.viewProfile")}
+                    </Button>
+                  )}
                 </>
               )}
             </div>

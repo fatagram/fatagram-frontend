@@ -25,6 +25,7 @@ import { ComponentProps } from "@/components/common/component-type";
 import { useMobile } from "@/hooks/use-mobile";
 import { useDialog } from "@/contexts";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { ParticipantList } from "../../components/participant-list";
 
 interface ConversationPageProps extends ComponentProps {}
 
@@ -49,6 +50,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   const isMobile = useMobile();
   const { openDialog, closeDialog } = useDialog();
   const [isRenaming, setIsRenaming] = useState(false);
+  const [viewMode, setViewMode] = useState<"main" | "members">("main");
   const [newName, setNewName] = useState("");
   const { fetch: updateName, isFetching: isRenamingLoading } = useUpdateConversationName(
     conversationId!,
@@ -125,6 +127,18 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
     }
   };
 
+  const openMembersFlow = () => {
+    setViewMode("members");
+  };
+
+  const handleBackSetting = () => {
+    if (viewMode === "members") {
+      setViewMode("main");
+    } else {
+      setOpenSetting(false);
+    }
+  };
+
   return (
     <div className="flex relative">
       <input
@@ -169,105 +183,128 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
         )}
       >
         <div className="flex flex-col h-full overflow-y-auto scrollbar-hide">
-          <div className="flex items-center gap-3 px-4 h-[60px] border-b border-bg-fourth shrink-0 lg:hidden">
-            <MiniButton sz="sm" onClick={() => setOpenSetting(false)}>
+          <div className="flex items-center gap-3 px-4 h-[60px] border-b border-bg-fourth shrink-0">
+            <MiniButton
+              sz="sm"
+              onClick={handleBackSetting}
+              className={clsx(!isMobile && viewMode === "main" && "hidden")}
+            >
               <i className="fa-solid fa-arrow-left text-primary-400" />
             </MiniButton>
             <Text weight="bold" sz="md">
-              {t("common:conversations.settings.info")}
+              {viewMode === "members"
+                ? t("common:conversations.settings.viewMembers")
+                : t("common:conversations.settings.info")}
             </Text>
           </div>
 
           {conversationData && !isPendingConversation ? (
-            <div className="flex flex-col flex-1 pb-10">
-              <div className="flex flex-col items-center px-4 py-8 gap-3">
-                <div className="relative group">
-                  {!isFetching ? (
-                    <Avatar
-                      src={conversationData.avatarUrl || ""}
-                      alt="Avatar"
-                      sz="lg"
-                      className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-bg-third shadow-lg"
-                    />
-                  ) : (
-                    <AvatarSkeletonLoading alt={""} />
-                  )}
-                  {conversationData.isGroup && (
-                    <button
-                      onClick={triggerFileInput}
-                      className="absolute bottom-1 right-1 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform active:scale-95"
-                    >
-                      <i className="fa-solid fa-camera text-xs" />
-                    </button>
-                  )}
-                </div>
-                <div className="flex flex-col items-center gap-1">
-                  <Text sz="lg" weight="bold" wrap="whitespace-pre-wrap" className="text-center">
-                    {renderConversationName(conversationData)}
-                  </Text>
-                  {conversationData.isGroup && (
-                    <Text sz="xs" className="text-text-third">
-                      {t("common:conversations.settings.members", {
-                        count: conversationData.participantCount,
-                      })}
-                    </Text>
-                  )}
-                </div>
+            <div className="flex flex-col flex-1 overflow-hidden">
+              {viewMode === "main" ? (
+                <div className="flex flex-col flex-1 pb-10 overflow-y-auto scrollbar-hide">
+                  <div className="flex flex-col items-center px-4 py-8 gap-3">
+                    <div className="relative group">
+                      {!isFetching ? (
+                        <Avatar
+                          src={conversationData.avatarUrl || ""}
+                          alt="Avatar"
+                          sz="lg"
+                          className="w-24 h-24 sm:w-32 sm:h-32 border-4 border-bg-third shadow-lg"
+                        />
+                      ) : (
+                        <AvatarSkeletonLoading alt={""} />
+                      )}
+                      {conversationData.isGroup && (
+                        <button
+                          onClick={triggerFileInput}
+                          className="absolute bottom-1 right-1 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform active:scale-95"
+                        >
+                          <i className="fa-solid fa-camera text-xs" />
+                        </button>
+                      )}
+                    </div>
+                    <div className="flex flex-col items-center gap-1">
+                      <Text
+                        sz="lg"
+                        weight="bold"
+                        wrap="whitespace-pre-wrap"
+                        className="text-center"
+                      >
+                        {renderConversationName(conversationData)}
+                      </Text>
+                      {conversationData.isGroup && (
+                        <Text sz="xs" className="text-text-third">
+                          {t("common:conversations.settings.members", {
+                            count: conversationData.participantCount,
+                          })}
+                        </Text>
+                      )}
+                    </div>
 
-                {conversationData.isGroup && (
-                  <div className="flex justify-center w-full gap-10 mt-6 px-4">
-                    <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
-                      <MiniButton
-                        sz="md"
-                        className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
-                        onClick={triggerFileInput}
-                      >
-                        <i className="fa-solid fa-image" />
-                      </MiniButton>
-                      <Text sz="xs" weight="medium" className="text-center">
-                        {t("common:conversations.settings.changeAvatar")}
-                      </Text>
-                    </div>
-                    <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
-                      <MiniButton
-                        sz="md"
-                        className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
-                        onClick={openRenameFlow}
-                      >
-                        <i className="fa-solid fa-pen-to-square" />
-                      </MiniButton>
-                      <Text sz="xs" weight="medium" className="text-center">
-                        {t("common:conversations.settings.changeName")}
-                      </Text>
-                    </div>
+                    {conversationData.isGroup && (
+                      <div className="flex justify-center w-full gap-10 mt-6 px-4">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                          <MiniButton
+                            sz="md"
+                            className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
+                            onClick={triggerFileInput}
+                          >
+                            <i className="fa-solid fa-image" />
+                          </MiniButton>
+                          <Text sz="xs" weight="medium" className="text-center">
+                            {t("common:conversations.settings.changeAvatar")}
+                          </Text>
+                        </div>
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                          <MiniButton
+                            sz="md"
+                            className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
+                            onClick={openRenameFlow}
+                          >
+                            <i className="fa-solid fa-pen-to-square" />
+                          </MiniButton>
+                          <Text sz="xs" weight="medium" className="text-center">
+                            {t("common:conversations.settings.changeName")}
+                          </Text>
+                        </div>
+                      </div>
+                    )}
+                    {!conversationData.isGroup && conversationData.otherUserId && (
+                      <div className="flex justify-center w-full gap-10 mt-6 px-4">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[120px]">
+                          <MiniButton
+                            sz="md"
+                            className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
+                            onClick={() => navigate(`/${conversationData.otherUserId}`)}
+                          >
+                            <i className="fa-solid fa-user" />
+                          </MiniButton>
+                          <Text sz="xs" weight="medium" className="text-center">
+                            {t("common:conversations.settings.viewProfile")}
+                          </Text>
+                        </div>
+                      </div>
+                    )}
                   </div>
-                )}
-              </div>
 
-              <div className="h-2 bg-bg-secondary w-full" />
+                  <div className="h-2 bg-bg-secondary w-full" />
 
-              <Menu className="p-2">
-                {/* <MenuItem
-                  icon="fa-solid fa-bell"
-                  title={t("common:conversations.settings.notification")}
-                  description={t("common:conversations.settings.notificationDescription")}
-                /> */}
-
-                {conversationData.isGroup && (
-                  <MenuItem
-                    icon="fa-solid fa-user-group"
-                    title={t("common:conversations.settings.viewMembers")}
-                    description={t("common:conversations.settings.viewMembersDescription")}
-                  />
-                )}
-
-                {/* <MenuItem
-                  icon="fa-solid fa-right-from-bracket"
-                  title={t("common:conversations.settings.leaveGroup")}
-                  variant="danger"
-                  rightElement={null}
-                /> */}
-              </Menu>
+                  <Menu className="p-2">
+                    {conversationData.isGroup && (
+                      <MenuItem
+                        icon="fa-solid fa-user-group"
+                        title={t("common:conversations.settings.viewMembers")}
+                        description={t("common:conversations.settings.viewMembersDescription")}
+                        onClick={openMembersFlow}
+                      />
+                    )}
+                  </Menu>
+                </div>
+              ) : (
+                <div className="flex-1 overflow-hidden">
+                  <ParticipantList conversationId={conversationId!} />
+                </div>
+              )}
             </div>
           ) : (
             <div className="px-4 py-8">

@@ -12,4 +12,5 @@ export interface Conversation {
   participantCount?: number;
   otherLastSeenMessageSeq?: number;
   myLastSeenMessageSeq?: number;
+  otherUserId?: string | null;
 }

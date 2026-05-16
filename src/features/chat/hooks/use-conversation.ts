@@ -392,3 +392,15 @@ export const useMediaAround = () => {
     }) => await conversationService.getMediaAround(data.conversationId, data.mediaId, data.config),
   );
 };
+export const useGetParticipants = (conversationId: string, queryParams?: { limit?: number }) => {
+  return useSafeInfiniteQueryResult({
+    queryKey: ["conversation", conversationId, "participants"],
+    fn: async (cursor?: string) => {
+      return await conversationService.getParticipants(conversationId, {
+        ...queryParams,
+        cursor,
+      });
+    },
+    enabled: !!conversationId,
+  });
+};

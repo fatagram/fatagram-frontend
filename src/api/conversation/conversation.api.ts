@@ -2,6 +2,7 @@ import { CursorResult, Result } from "@/api/common/result";
 import { buildApiPath, apiGet, apiPost, apiPatchFormData, apiPatch } from "../common/api-helpers";
 import { CursorQuery } from "@/types/query";
 import { ConversationDto, ParticipantsSeenDto } from "./dto/conversation.dto";
+import { ParticipantDto } from "./dto/participant.dto";
 import {
   MessageMediaAroundAnchorDto,
   MessageMediaDto,
@@ -16,6 +17,13 @@ export class ConversationService {
   ): Promise<Result<CursorResult<ConversationDto, string>>> {
     const res = await apiGet(`${PREFIX}`, query);
     return res;
+  }
+
+  public async getParticipants(
+    conversationId: string,
+    query: CursorQuery<string>,
+  ): Promise<Result<CursorResult<ParticipantDto, string>>> {
+    return await apiGet(`${PREFIX}/${conversationId}/participants`, query);
   }
 
   public async searchConversations(

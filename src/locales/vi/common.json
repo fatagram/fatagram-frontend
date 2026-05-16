@@ -63,7 +63,8 @@
     "notFound": "Không tìm thấy cuộc trò chuyện",
     "notFoundMessage": "Chọn một cuộc trò chuyện hoặc bắt đầu một cuộc trò chuyện mới",
     "you": "Bạn",
-    "no-conversations": "Không có cuộc trò chuyện",
+    "noConversations": "Không có cuộc trò chuyện",
+    "noConversationsMessage": "Cuộc trò chuyện của bạn sẽ xuất hiện ở đây",
     "sent": "Đã gửi",
     "systemMessage": {
       "createGroup": "{{creatorName}} đã tạo nhóm",
@@ -77,6 +78,8 @@
     "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)",
     "loadingOldMessages": "Đang tải tin nhắn...",
     "createGroupChat": "Tạo nhóm chat",
+    "noSearchResults": "Không tìm thấy kết quả",
+    "noSearchResultsMessage": "Thử tìm kiếm với từ khóa khác",
     "settings": {
       "info": "Thông tin hội thoại",
       "members": "{{count}} thành viên",
@@ -88,7 +91,16 @@
       "notificationDescription": "Bật/Tắt thông báo cuộc trò chuyện",
       "viewMembers": "Thành viên",
       "viewMembersDescription": "Xem danh sách thành viên",
+      "viewProfile": "Xem trang cá nhân",
+      "messagePrivately": "Nhắn tin riêng",
       "leaveGroup": "Rời khỏi nhóm"
+    },
+    "messageOptions": {
+      "reply": "Phản hồi",
+      "copy": "Sao chép",
+      "forward": "Chuyển tiếp",
+      "delete": "Xóa",
+      "pin": "Ghim"
     }
   },
   "chat": {
@@ -103,5 +115,6 @@
   "offline": {
     "message": "Bạn đang ngoại tuyến",
     "retry": "Thử lại"
-  }
+  },
+  "loadMore": "Xem thêm"
 }

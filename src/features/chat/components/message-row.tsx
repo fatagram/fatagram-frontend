@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
 import { MediaType, Message, MessageRenderType } from "@/types/entities/message.type";
-import { Avatar, Text } from "@/components/atoms";
+import { Avatar, MiniButton, Text } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState, memo, useRef, useMemo } from "react";
@@ -18,6 +18,12 @@ import {
   renderVideoMessage,
 } from "./messages/render";
 import { useShallow } from "zustand/react/shallow";
+import { useMobile } from "@/hooks/use-mobile";
+import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { Menu, MenuItem } from "@/components/ui/menu";
+import { useDialog } from "@/contexts";
+import { useLongPress } from "@/hooks/use-long-press";
+import { UserOptionTrigger } from "./user-option-trigger";
 
 const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
@@ -55,6 +61,11 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   meta,
 }) => {
   const { t } = useTranslation();
+  const isMobile = useMobile();
+  const { openDialog, closeDialog } = useDialog();
+  const [showOptionsSheet, setShowOptionsSheet] = useState(false);
+  const [copied, setCopied] = useState(false);
+
   const [hasDelayed, setHasDelayed] = useState(false);
   const { formatTime, formatSmartTimestamp } = useFormatTime();
   const isPending = message.status === "pending";
@@ -94,6 +105,49 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     };
   }, [isPending]);
 
+  const MessageOptionsContent = ({ isSheet = false }: { isSheet?: boolean }) => (
+    <div
+      className={clsx("flex flex-col", isSheet ? "gap-2 pb-10 px-4" : "gap-2 p-2 min-w-[220px]")}
+    >
+      <Menu>
+        <MenuItem
+          icon="fa-solid fa-copy"
+          title={t("common:conversations.messageOptions.copy")}
+          onClick={() => {
+            navigator.clipboard.writeText(message.content || "");
+            isSheet ? setShowOptionsSheet(false) : closeDialog();
+          }}
+        />
+      </Menu>
+    </div>
+  );
+
+  const handleShowOptions = () => {
+    if (isMobile) {
+      setShowOptionsSheet(true);
+    } else {
+      openDialog({
+        title: "",
+        content: <MessageOptionsContent />,
+      });
+    }
+  };
+
+  const longPressProps = useLongPress(() => {
+    if (isMobile) handleShowOptions();
+  });
+
+  const handleContextMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    handleShowOptions();
+  };
+
+  const handleCopy = () => {
+    navigator.clipboard.writeText(message.content || "");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
+
   return (
     <div
       className={clsx(
@@ -110,42 +164,69 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       )}
       <div
         className={clsx(
-          "flex gap-2 w-full",
+          "flex gap-2 w-full group relative",
           meta._isMyMessage ? "flex-row-reverse" : "flex-row",
           hasDelayed && "opacity-50",
         )}
       >
         {!meta._isMyMessage && (
-          <Avatar
-            className={clsx(
-              "flex-shrink-0 self-end",
-              meta._isMyMessage && "order-2",
-              !meta._isShowAvatar && "invisible",
-            )}
-            src={message.senderAvatarUrl}
-            alt="Avatar"
-            sz="sm"
-          />
+          <div className="flex self-end relative">
+            <UserOptionTrigger
+              user={{
+                userId: message.senderId!,
+                fullName: userInfo?.fullName,
+                avatarUrl: message.senderAvatarUrl,
+              }}
+            >
+              <Avatar
+                className={clsx(
+                  "flex-shrink-0 hover:scale-110 active:scale-95 transition-transform",
+                  !meta._isShowAvatar && "invisible",
+                )}
+                src={message.senderAvatarUrl}
+                alt="Avatar"
+                sz="sm"
+              />
+            </UserOptionTrigger>
+          </div>
         )}
         <div
           className={clsx(
-            "flex flex-col",
-            "max-w-[75%]",
+            "flex flex-col select-none",
+            "max-w-[75%] active:scale-[0.98] transition-transform cursor-pointer",
             meta._shouldAnimate && "bubble",
             meta._isMyMessage ? "me" : "them",
           )}
+          {...longPressProps}
+          onContextMenu={handleContextMenu}
         >
           {meta._isShowName && (
-            <Text
-              sz="xs"
-              className={clsx(
-                "mb-1 min-h-[1rem]",
-                meta._isMyMessage ? "text-right mr-1" : "text-left ml-1",
-              )}
+            <UserOptionTrigger
+              user={{
+                userId: message.senderId!,
+                fullName: userInfo?.fullName,
+                avatarUrl: message.senderAvatarUrl,
+              }}
             >
-              {userInfo?.fullName}
-            </Text>
+              <Text
+                sz="xs"
+                className={clsx(
+                  "mb-1 min-h-[1rem] hover:text-primary-500 transition-colors inline-block w-full",
+                  meta._isMyMessage ? "text-right mr-1" : "text-left ml-1",
+                )}
+              >
+                {userInfo?.fullName}
+              </Text>
+            </UserOptionTrigger>
           )}
+          <BottomSheet
+            open={showOptionsSheet}
+            onOpenChange={setShowOptionsSheet}
+            title={t("common:conversations.messageOptions.copy")}
+            trigger={<div className="hidden" />}
+          >
+            <MessageOptionsContent isSheet />
+          </BottomSheet>
           {meta._isOnlyEmoji ? renderOnlyEmojiMessage(meta._isMyMessage, message.content) : null}
           {isTextMessage &&
             !meta._isOnlyEmoji &&
@@ -219,6 +300,38 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               hasDelayed,
             )}
         </div>
+
+        {!isMobile && (
+          <div
+            className={clsx(
+              "opacity-0 group-hover:opacity-100 transition-opacity flex items-center px-1 gap-1",
+              meta._isMyMessage ? "mr-1" : "ml-1",
+            )}
+          >
+            <MiniButton
+              sz="sm"
+              className="!w-7 !h-7 !min-w-0 !p-0 bg-bg-second hover:bg-bg-third shadow-sm"
+              onClick={handleCopy}
+              title={t("common:conversations.messageOptions.copy")}
+            >
+              <i
+                className={clsx(
+                  "fa-solid text-[10px] transition-all duration-200",
+                  copied ? "fa-check text-primary-500 scale-125 opacity-100" : "fa-copy opacity-60",
+                )}
+              ></i>
+            </MiniButton>
+
+            <MiniButton
+              sz="sm"
+              className="!w-7 !h-7 !min-w-0 !p-0 bg-bg-second hover:bg-bg-third shadow-sm"
+              onClick={handleShowOptions}
+            >
+              <i className="fa-solid fa-ellipsis text-[10px] opacity-60"></i>
+            </MiniButton>
+          </div>
+        )}
+
         {isFailed && (
           <div className="flex items-center justify-center">
             <i className="fa-solid fa-circle-exclamation text-red-500"></i>
@@ -260,7 +373,7 @@ export const SystemMessageRow = memo(({ message, meta }: { message: Message; met
           {formatSmartTimestamp(message.createdAt)}
         </Text>
       )}
-      <Text sz="sm" className="opacity-80">
+      <Text sz="sm" className="opacity-80 text-center px-10" wrap="whitespace-normal">
         {renderSystemMessage(message)}
       </Text>
     </div>

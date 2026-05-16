@@ -80,17 +80,29 @@
     "enterGroupNameOptional": "Enter group name (optional)",
     "loadingOldMessages": "Loading messages...",
     "createGroupChat": "Create group chat",
+    "noSearchResults": "No results found",
+    "noSearchResultsMessage": "Try searching with a different keyword",
     "settings": {
       "info": "Conversation Info",
       "members": "{{count}} members",
       "changeAvatar": "Avatar",
       "changeName": "Name",
+      "changeNamePlaceholder": "Enter conversation name",
       "search": "Search",
       "notification": "Notifications",
       "notificationDescription": "Turn conversation notifications on/off",
       "viewMembers": "Members",
       "viewMembersDescription": "View list of members",
+      "viewProfile": "View personal page",
+      "messagePrivately": "Message privately",
       "leaveGroup": "Leave group"
+    },
+    "messageOptions": {
+      "reply": "Reply",
+      "copy": "Copy",
+      "forward": "Forward",
+      "delete": "Delete",
+      "pin": "Pin"
     }
   },
   "chat": {
@@ -105,5 +117,6 @@
   "offline": {
     "message": "You are offline",
     "retry": "Retry"
-  }
+  },
+  "loadMore": "Load more"
 }

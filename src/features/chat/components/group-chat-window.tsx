@@ -15,10 +15,10 @@ export const GroupChatWindow: React.FC<GroupChatWindowProps> = ({ className }) =
     <div className={clsx("flex gap-3", className)}>
       {activeIds.map((id) => {
         return (
-          <div key={id}>
+          <div key={id} className="w-[350px] flex-shrink-0">
             <ChatPanel
               conversationId={id}
-              className="h-[500px] w-[380px] rounded-t-xl"
+              className="h-[500px] w-[350px] rounded-t-xl"
               headerRight={
                 <div className="flex gap-2">
                   <MiniButton sz="sm" onClick={() => toggleMinimize(id)}>

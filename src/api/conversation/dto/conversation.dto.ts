@@ -13,6 +13,7 @@ export interface ConversationDto {
   participantCount?: number;
   otherLastSeenMessageSeq?: number;
   myLastSeenMessageSeq?: number;
+  otherUserId?: string | null;
 }
 
 export interface UpdateConversationDto {
