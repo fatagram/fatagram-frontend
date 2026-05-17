@@ -142,6 +142,8 @@ export const ChatPanel: React.FC<Props> = ({
     const messageArea = scrollRef.current;
     if (messageArea) {
       messageArea.addEventListener("click", handleUserInteract);
+      messageArea.addEventListener("touchstart", handleUserInteract, { passive: true });
+      messageArea.addEventListener("scroll", handleUserInteract, { passive: true });
     }
     document.addEventListener("mousedown", handleClickOutside);
     window.addEventListener("blur", handleWindowBlur);
@@ -150,6 +152,8 @@ export const ChatPanel: React.FC<Props> = ({
     return () => {
       if (messageArea) {
         messageArea.removeEventListener("click", handleUserInteract);
+        messageArea.removeEventListener("touchstart", handleUserInteract);
+        messageArea.removeEventListener("scroll", handleUserInteract);
       }
       document.removeEventListener("mousedown", handleClickOutside);
       window.removeEventListener("blur", handleWindowBlur);
