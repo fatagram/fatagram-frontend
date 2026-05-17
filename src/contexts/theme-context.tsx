@@ -6,6 +6,8 @@ const ThemeList = [
   "dark",
   "light-old",
   "dark-old",
+  "pastel-yellow-pink",
+  "pastel-peach-red",
 ] as const;
 
 export type Theme = (typeof ThemeList)[number];
@@ -53,6 +55,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
     { key: "dark", label: t("common:themes:dark") },
     { key: "light-old", label: t("common:themes:lightOld") },
     { key: "dark-old", label: t("common:themes:darkOld") },
+    { key: "pastel-yellow-pink", label: t("common:themes:pastelYellowPink") },
+    { key: "pastel-peach-red", label: t("common:themes:pastelPeachRed") },
   ];
 
   useEffect(() => {

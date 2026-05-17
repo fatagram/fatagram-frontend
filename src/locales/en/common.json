@@ -46,8 +46,10 @@
   "themes": {
     "light": "Light",
     "dark": "Dark",
-    "lightOld": "Light (old version)",
-    "darkOld": "Dark (old version)"
+    "lightOld": "Light (old)",
+    "darkOld": "Dark (old)",
+    "pastelYellowPink": "Pastel Yellow Pink",
+    "pastelPeachRed": "Pastel Peach Red"
   },
   "conversations": {
     "title": "Conversations",

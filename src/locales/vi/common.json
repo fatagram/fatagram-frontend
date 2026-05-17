@@ -47,7 +47,9 @@
     "light": "Sáng",
     "dark": "Tối",
     "lightOld": "Sáng (bản cũ)",
-    "darkOld": "Tối (bản cũ)"
+    "darkOld": "Tối (bản cũ)",
+    "pastelYellowPink": "Vàng Hồng Pastel",
+    "pastelPeachRed": "Đỏ Cam Pastel"
   },
   "conversations": {
     "title": "Cuộc trò chuyện",
