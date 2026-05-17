@@ -77,7 +77,7 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
             autoComplete={autoComplete}
             className={clsx(
               "w-full border-[2px] text-text-main",
-              "font-normal rounded-xl outline-none caret-primary-500 selection:!bg-primary-600",
+              "font-normal rounded-xl outline-none caret-primary-500",
               "transition-all duration-300 ease-out",
               sizeClasses[sz].mainText,
               {

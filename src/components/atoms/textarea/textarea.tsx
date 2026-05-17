@@ -157,7 +157,7 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
             rows={rows}
             className={clsx(
               "w-full bg-transparent text-text-main resize-none",
-              "outline-none caret-primary-500 selection:!bg-primary-600",
+              "outline-none caret-primary-500",
               "rounded-b-[inherit]",
               "block",
               { "pt-0": rows > 0 },

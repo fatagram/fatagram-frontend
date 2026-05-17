@@ -96,9 +96,9 @@ const DefaultLayout = () => {
     },
   ];
 
-  const pathHasTopBar = ["/", "/friends"].some(
-    (path) => pathname === path || pathname.startsWith(path + "/"),
-  );
+  // const pathHasTopBar = ["/", "/friends"].some(
+  //   (path) => pathname === path || pathname.startsWith(path + "/"),
+  // );
 
   const { conversationId } = useParams();
   // Initialize to a stable value to avoid SSR/CSR hydration mismatch.
@@ -184,12 +184,12 @@ const DefaultLayout = () => {
       >
         <div
           className={clsx(
-            "flex items-center px-4 h-[25px] bg-bg-main",
-            isMobile && (pathHasTopBar || !isAuthenticated) ? "block" : "hidden",
+            "flex items-center justify-center px-4 h-[44px] bg-bg-main border-b border-bg-fourth",
+            isMobile && pathname === "/" ? "flex" : "hidden",
           )}
         >
-          <div onClick={handleGoToHome}>
-            <Logo sz="sm" hasSlogan={false} />
+          <div onClick={handleGoToHome} className="cursor-pointer">
+            <Logo sz="md" hasSlogan={false} />
           </div>
         </div>
         <Navbar
@@ -244,7 +244,7 @@ const DefaultLayout = () => {
         <Outlet />
 
         {!isMobile && (
-          <div className="fixed inset-0 pointer-events-none z-50">
+          <div className="fixed inset-0 pointer-events-none z-30">
             <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
           </div>
         )}
@@ -257,7 +257,7 @@ const DefaultLayout = () => {
           )}
         >
           <Text sz="sm" className="text-center" wrap="whitespace-normal">
-            Join Fatagram to connect with your friends and the world around you!
+            Join Fawe to connect with your friends and the world around you!
           </Text>
           <div className="flex items-center justify-center h-full">
             <Button

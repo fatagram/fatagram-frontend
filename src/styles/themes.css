@@ -4,7 +4,207 @@
     --font-size: 16px;
     --border-radius: 8px;
 
-    /* Signature Gradients (Default for Light/Dark) */
+    /* Signature Gradients (Unique Dual-Tone Honey Gold & Sunset Pink) */
+    --gradient-main: repeating-linear-gradient(
+      45deg,
+      #ffc75f 0%,
+      #ff5d8f 35%,
+      #ffbe0b 70%,
+      #ff5d8f 85%,
+      #ffc75f 100%
+    );
+
+    --gradient-second: repeating-linear-gradient(45deg, #ffc75f 0%, #ff87ab 50%, #ffc75f 100%);
+
+    /* Semantic (status colors) - RGB format for alpha support */
+    --success: 34 197 94;
+    --warning: 245 190 73;
+    --error: 239 68 68;
+    --info: 59 130 246;
+
+    --text-message: 229 229 229;
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 17 24 39;
+  }
+
+  /* ========================================================== */
+  /* NEW LIGHT THEME - Warm Alabaster (2% Yellow) & Coral Pink  */
+  /* ========================================================== */
+  :root,
+  [data-theme="light"] {
+    /* Signature Gradients */
+    --gradient-main: repeating-linear-gradient(
+      45deg,
+      #ffc75f 0%,
+      #ff5d8f 35%,
+      #ffbe0b 70%,
+      #ff5d8f 85%,
+      #ffc75f 100%
+    );
+    --gradient-second: repeating-linear-gradient(45deg, #ffc75f 0%, #ff87ab 50%, #ffc75f 100%);
+
+    /* Primary colors - Sunset Coral Pink (Hồng San Hô Hoàng Hôn cực nét) */
+    --primary-50: 255 238 241;
+    --primary-100: 255 214 221;
+    --primary-200: 254 178 193;
+    --primary-300: 252 135 156;
+    --primary-400: 245 92 120;
+    --primary-500: 242 92 126;
+    --primary-600: 214 62 94;
+    --primary-700: 184 40 68;
+    --primary-800: 153 24 49;
+    --primary-900: 122 12 33;
+
+    /* Secondary colors - Premium Honey Gold/Champagne */
+    --secondary-50: 255 253 245;
+    --secondary-100: 255 248 220;
+    --secondary-200: 255 238 186;
+    --secondary-300: 255 224 130;
+    --secondary-400: 252 205 98;
+    --secondary-500: 245 190 73;
+    --secondary-600: 212 159 47;
+
+    /* Text colors */
+    --text-main: 31 23 26;
+    --text-second: 69 57 60;
+    --text-third: 117 106 109;
+    --text-fourth: 166 154 157;
+
+    /* Chat message text colors */
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 31 23 26;
+
+    --text-reverse-main: 255 255 255;
+
+    /* Background colors - Neutralized Warm Alabaster (Ám Vàng Cực Nhẹ 2%, không bị vàng chè) */
+    --bg-main: 255 253 250;
+    --bg-second: 252 250 246;
+    --bg-third: 248 245 240;
+    --bg-fourth: 242 238 232;
+    --bg-fifth: 228 223 215;
+    --bg-sixth: 255 253 250;
+    --bg-seventh: 252 249 244;
+    --bg-eighth: 247 243 237;
+    --bg-ninth: 238 233 225;
+    --bg-tenth: 218 212 202;
+
+    --bg-overlay: rgba(0, 0, 0, 0.4);
+    --bg-modal: rgba(255, 255, 255, 0.95);
+    --bg-glass: rgba(255, 255, 255, 0.8);
+
+    --bg-card: 255 255 255;
+    --bg-sidebar: 252 250 246;
+    --bg-header: 255 253 250;
+    --bg-footer: 252 250 246;
+    --bg-hover: 248 245 240;
+    --bg-active: 242 238 232;
+    --bg-disabled: 242 238 232;
+
+    /* Button colors */
+    --btn-main: 242 92 126;
+    --btn-second: 248 245 240;
+    --btn-third: 242 238 232;
+    --btn-fourth: 228 223 215;
+
+    /* Border colors */
+    --border-main: 242 238 232;
+    --border-second: 228 223 215;
+    --border-focus: 242 92 126;
+
+    --login-image: url("/images/auth_image_light.png");
+  }
+
+  /* ========================================================= */
+  /* NEW DARK THEME - Dark Charcoal with Sunset Coral Accent   */
+  /* ========================================================= */
+  [data-theme="dark"] {
+    /* Signature Gradients */
+    --gradient-main: repeating-linear-gradient(
+      45deg,
+      #ffc75f 0%,
+      #ff5d8f 35%,
+      #ffbe0b 70%,
+      #ff5d8f 85%,
+      #ffc75f 100%
+    );
+    --gradient-second: repeating-linear-gradient(45deg, #ffc75f 0%, #ff87ab 50%, #ffc75f 100%);
+
+    /* Primary colors - Sunset Coral Pink (Hồng San Hô Hoàng Hôn cực nét) */
+    --primary-50: 255 238 241;
+    --primary-100: 255 214 221;
+    --primary-200: 254 178 193;
+    --primary-300: 252 135 156;
+    --primary-400: 245 92 120;
+    --primary-500: 242 92 126;
+    --primary-600: 214 62 94;
+    --primary-700: 184 40 68;
+    --primary-800: 153 24 49;
+    --primary-900: 122 12 33;
+
+    /* Secondary colors - Premium Honey Gold/Champagne */
+    --secondary-50: 255 253 245;
+    --secondary-100: 255 248 220;
+    --secondary-200: 255 238 186;
+    --secondary-300: 255 224 130;
+    --secondary-400: 252 205 98;
+    --secondary-500: 245 190 73;
+    --secondary-600: 212 159 47;
+
+    /* Text colors */
+    --text-main: 250 242 244;
+    --text-second: 224 212 215;
+    --text-third: 163 150 153;
+    --text-fourth: 115 102 105;
+
+    --text-reverse-main: 17 24 39;
+
+    /* Chat message text colors */
+    --text-my-msg: 255 255 255;
+    --text-other-msg: 224 212 215;
+
+    /* Background colors - Sleek Dark with subtle gold/rose hues */
+    --bg-main: 15 13 13;
+    --bg-second: 24 20 20;
+    --bg-third: 34 29 29;
+    --bg-fourth: 44 38 38;
+    --bg-fifth: 54 47 47;
+    --bg-sixth: 10 9 9;
+    --bg-seventh: 20 17 17;
+    --bg-eighth: 30 26 26;
+    --bg-ninth: 40 35 35;
+    --bg-tenth: 50 44 44;
+
+    --bg-overlay: rgba(0, 0, 0, 0.85);
+    --bg-modal: rgba(24, 20, 20, 0.98);
+    --bg-glass: rgba(24, 20, 20, 0.8);
+
+    --bg-card: 24 20 20;
+    --bg-sidebar: 15 13 13;
+    --bg-header: 24 20 20;
+    --bg-footer: 15 13 13;
+    --bg-hover: 34 29 29;
+    --bg-active: 44 38 38;
+    --bg-disabled: 34 29 29;
+
+    /* Button colors */
+    --btn-main: 242 92 126;
+    --btn-second: 34 29 29;
+    --btn-third: 44 38 38;
+    --btn-fourth: 54 47 47;
+
+    /* Border colors */
+    --border-main: 44 38 38;
+    --border-second: 54 47 47;
+    --border-focus: 242 92 126;
+
+    --login-image: url("/images/auth_image_dark.png");
+  }
+
+  /* ========================================== */
+  /* LIGHT OLD THEME - Teal (Old Version)       */
+  /* ========================================== */
+  [data-theme="light-old"] {
+    /* Signature Gradients */
     --gradient-main: repeating-linear-gradient(
       45deg,
       #8dfeda 0%,
@@ -13,7 +213,6 @@
       #36bcbf 75%,
       #8fffd0 100%
     );
-
     --gradient-second: repeating-linear-gradient(
       45deg,
       #8de8f0 0%,
@@ -23,20 +222,6 @@
       #8fe8ff 100%
     );
 
-    /* Semantic (status colors) - RGB format for alpha support */
-    --success: 34 197 94;
-    --warning: 234 179 8;
-    --error: 239 68 68;
-    --info: 59 130 246;
-
-    --text-message: 229 229 229;
-    --text-my-msg: 255 255 255;
-    --text-other-msg: 17 24 39;
-  }
-
-  /* Light Theme (Preserved Signature Colors) */
-  :root,
-  [data-theme="light"] {
     /* Primary colors - Teal */
     --primary-50: 240 253 250;
     --primary-100: 204 251 241;
@@ -102,14 +287,35 @@
 
     /* Border colors */
     --border-main: 229 231 235;
-    --border-second: 209 213 219;
+    --border-second: 209 225 212;
     --border-focus: 20 184 166;
 
-    --login-image: url("/images/auth_image_light.jpg");
+    --login-image: url("/images/auth_image_light.png");
   }
 
-  /* Dark Theme - Pure Black (Preserved Signature Colors) */
-  [data-theme="dark"] {
+  /* ========================================== */
+  /* DARK OLD THEME - Teal (Old Version)        */
+  /* ========================================== */
+  [data-theme="dark-old"] {
+    /* Signature Gradients */
+    --gradient-main: repeating-linear-gradient(
+      45deg,
+      #8dfeda 0%,
+      #3dba84 25%,
+      #2aacb0 50%,
+      #36bcbf 75%,
+      #8fffd0 100%
+    );
+    --gradient-second: repeating-linear-gradient(
+      45deg,
+      #8de8f0 0%,
+      #3da8ba 25%,
+      #36b0bc 50%,
+      #47b5c4 75%,
+      #8fe8ff 100%
+    );
+
+    /* Primary colors - Teal */
     --primary-50: 240 253 250;
     --primary-100: 204 251 241;
     --primary-200: 153 246 228;
@@ -121,6 +327,7 @@
     --primary-800: 17 94 89;
     --primary-900: 19 78 74;
 
+    /* Secondary colors - Blue */
     --secondary-50: 240 249 255;
     --secondary-100: 224 242 254;
     --secondary-200: 186 230 253;
@@ -129,6 +336,7 @@
     --secondary-500: 14 165 233;
     --secondary-600: 2 132 199;
 
+    /* Text colors */
     --text-main: 255 255 255;
     --text-second: 229 229 229;
     --text-third: 163 163 163;
@@ -163,859 +371,17 @@
     --bg-active: 38 38 38;
     --bg-disabled: 28 28 28;
 
+    /* Button colors */
     --btn-main: 20 184 166;
     --btn-second: 28 28 28;
     --btn-third: 38 38 38;
     --btn-fourth: 48 48 48;
 
+    /* Border colors */
     --border-main: 38 38 38;
     --border-second: 48 48 48;
     --border-focus: 20 184 166;
 
-    --login-image: url("/images/auth_image_dark.jpg");
-  }
-
-  /* Universe Theme - Cosmic Purple & Deep Blue 🌌 */
-  [data-theme="universe"] {
-    /* Custom Gradients for Universe */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #d8b4fe 0%,
-      #a855f7 25%,
-      #7e22ce 50%,
-      #6366f1 75%,
-      #c084fc 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #bfdbfe 0%,
-      #60a5fa 25%,
-      #3b82f6 50%,
-      #8b5cf6 75%,
-      #a78bfa 100%
-    );
-
-    --primary-50: 250 245 255;
-    --primary-100: 243 232 255;
-    --primary-200: 233 213 255;
-    --primary-300: 216 180 254;
-    --primary-400: 192 132 252;
-    --primary-500: 168 85 247;
-    --primary-600: 147 51 234;
-    --primary-700: 126 34 206;
-    --primary-800: 107 33 168;
-    --primary-900: 88 28 135;
-
-    --secondary-50: 240 249 255;
-    --secondary-100: 224 242 254;
-    --secondary-200: 186 230 253;
-    --secondary-300: 125 211 252;
-    --secondary-400: 56 189 248;
-    --secondary-500: 14 165 233;
-    --secondary-600: 2 132 199;
-
-    --text-main: 248 250 252;
-    --text-second: 226 232 240;
-    --text-third: 148 163 184;
-    --text-fourth: 100 116 139;
-
-    --text-reverse-main: 17 24 39;
-
-    /* Chat message text colors */
-    --text-my-msg: 255 255 255;
-    --text-other-msg: 248 250 252;
-
-    --bg-main: 15 23 42;
-    --bg-second: 30 41 59;
-    --bg-third: 51 65 85;
-    --bg-fourth: 71 85 105;
-    --bg-fifth: 100 116 139;
-    --bg-sixth: 20 28 47;
-    --bg-seventh: 25 33 52;
-    --bg-eighth: 35 45 64;
-    --bg-ninth: 45 55 74;
-    --bg-tenth: 55 65 84;
-
-    --bg-overlay: rgba(15, 23, 42, 0.9);
-    --bg-modal: rgba(30, 41, 59, 0.98);
-    --bg-glass: rgba(30, 41, 59, 0.85);
-
-    --bg-card: 30 41 59;
-    --bg-sidebar: 15 23 42;
-    --bg-header: 30 41 59;
-    --bg-footer: 15 23 42;
-    --bg-hover: 51 65 85;
-    --bg-active: 71 85 105;
-    --bg-disabled: 51 65 85;
-
-    --btn-main: 168 85 247;
-    --btn-second: 51 65 85;
-    --btn-third: 71 85 105;
-    --btn-fourth: 100 116 139;
-
-    --border-main: 71 85 105;
-    --border-second: 100 116 139;
-    --border-focus: 168 85 247;
-
-    --login-image: url("/images/auth_image_dark.jpg");
-  }
-
-  /* Neon Theme */
-  [data-theme="neon"] {
-    /* Custom Gradients for Neon */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #86efac 0%,
-      #22c55e 25%,
-      #16a34a 50%,
-      #10b981 75%,
-      #4ade80 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #f9a8d4 0%,
-      #ec4899 25%,
-      #db2777 50%,
-      #d946ef 75%,
-      #f472b6 100%
-    );
-
-    --primary-50: 240 253 244;
-    --primary-100: 220 252 231;
-    --primary-200: 187 247 208;
-    --primary-300: 134 239 172;
-    --primary-400: 74 222 128;
-    --primary-500: 34 197 94;
-    --primary-600: 22 163 74;
-    --primary-700: 21 128 61;
-    --primary-800: 22 101 52;
-    --primary-900: 20 83 45;
-
-    --secondary-50: 253 242 248;
-    --secondary-100: 252 231 243;
-    --secondary-200: 251 207 232;
-    --secondary-300: 249 168 212;
-    --secondary-400: 244 114 182;
-    --secondary-500: 236 72 153;
-    --secondary-600: 219 39 119;
-
-    --text-main: 255 255 255;
-    --text-second: 209 213 219;
-    --text-third: 156 163 175;
-    --text-fourth: 107 114 128;
-    --text-reverse-main: 17 24 39;
-
-    /* Chat message text colors */
-    --text-my-msg: 255 255 255;
-    --text-other-msg: 255 255 255;
-
-    --bg-main: 10 10 10;
-    --bg-second: 23 23 23;
-    --bg-third: 38 38 38;
-    --bg-fourth: 64 64 64;
-    --bg-fifth: 82 82 82;
-    --bg-sixth: 23 23 23;
-    --bg-seventh: 10 10 10;
-    --bg-eighth: 38 38 38;
-    --bg-ninth: 64 64 64;
-    --bg-tenth: 82 82 82;
-
-    --bg-overlay: rgba(0, 0, 0, 0.8);
-    --bg-modal: rgba(23, 23, 23, 0.95);
-    --bg-glass: rgba(23, 23, 23, 0.8);
-
-    --bg-card: 23 23 23;
-    --bg-sidebar: 10 10 10;
-    --bg-header: 10 10 10;
-    --bg-footer: 10 10 10;
-    --bg-hover: 38 38 38;
-    --bg-active: 64 64 64;
-    --bg-disabled: 64 64 64;
-
-    --btn-main: 34 197 94;
-    --btn-second: 38 38 38;
-    --btn-third: 64 64 64;
-    --btn-fourth: 82 82 82;
-
-    --border-main: 64 64 64;
-    --border-second: 82 82 82;
-    --border-focus: 34 197 94;
-
-    --login-image: url("/images/auth_image_neon.jpg");
-  }
-
-  /* Dark Sea Theme */
-  [data-theme="dark-sea"] {
-    /* Custom Gradients for Dark Sea */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #67e8f9 0%,
-      #06b6d4 25%,
-      #0891b2 50%,
-      #0284c7 75%,
-      #22d3ee 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #93c5fd 0%,
-      #3b82f6 25%,
-      #2563eb 50%,
-      #1d4ed8 75%,
-      #60a5fa 100%
-    );
-
-    --primary-50: 236 254 255;
-    --primary-100: 207 250 254;
-    --primary-200: 165 243 252;
-    --primary-300: 103 232 249;
-    --primary-400: 34 211 238;
-    --primary-500: 6 182 212;
-    --primary-600: 8 145 178;
-    --primary-700: 14 116 144;
-    --primary-800: 21 94 117;
-    --primary-900: 22 78 99;
-
-    --secondary-50: 239 246 255;
-    --secondary-100: 219 234 254;
-    --secondary-200: 191 219 254;
-    --secondary-300: 147 197 253;
-    --secondary-400: 96 165 250;
-    --secondary-500: 59 130 246;
-    --secondary-600: 37 99 235;
-
-    --text-main: 240 253 250;
-    --text-second: 204 251 241;
-    --text-third: 153 246 228;
-    --text-fourth: 94 234 212;
-    --text-reverse-main: 17 24 39;
-
-    /* Chat message text colors */
-    --text-my-msg: 255 255 255;
-    --text-other-msg: 240 253 250;
-    --bg-main: 2 44 34;
-    --bg-second: 4 47 46;
-    --bg-third: 17 94 89;
-    --bg-fourth: 19 78 74;
-    --bg-fifth: 15 118 110;
-    --bg-sixth: 4 47 46;
-    --bg-seventh: 2 44 34;
-    --bg-eighth: 17 94 89;
-    --bg-ninth: 19 78 74;
-    --bg-tenth: 15 118 110;
-
-    --bg-overlay: rgba(2, 44, 34, 0.8);
-    --bg-modal: rgba(4, 47, 46, 0.95);
-    --bg-glass: rgba(4, 47, 46, 0.8);
-
-    --bg-card: 4 47 46;
-    --bg-sidebar: 2 44 34;
-    --bg-header: 2 44 34;
-    --bg-footer: 2 44 34;
-    --bg-hover: 17 94 89;
-    --bg-active: 19 78 74;
-    --bg-disabled: 19 78 74;
-
-    --btn-main: 6 182 212;
-    --btn-second: 17 94 89;
-    --btn-third: 19 78 74;
-    --btn-fourth: 15 118 110;
-
-    --border-main: 19 78 74;
-    --border-second: 15 118 110;
-    --border-focus: 6 182 212;
-
-    --login-image: url("/images/auth_image_sea.jpg");
-  }
-
-  /* Dark Blue Theme */
-  [data-theme="dark-blue"] {
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #0ea5e9 0%,
-      #0284c7 25%,
-      #0369a1 50%,
-      #075985 75%,
-      #0ea5e9 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #bfdbfe 0%,
-      #60a5fa 25%,
-      #3b82f6 50%,
-      #1e40af 75%,
-      #93c5fd 100%
-    );
-
-    --primary-50: 240 249 255;
-    --primary-100: 224 242 254;
-    --primary-200: 186 230 253;
-    --primary-300: 125 211 252;
-    --primary-400: 56 189 248;
-    --primary-500: 14 165 233;
-    --primary-600: 2 132 199;
-    --primary-700: 3 105 161;
-    --primary-800: 2 81 128;
-    --primary-900: 2 61 91;
-
-    --secondary-50: 245 249 255;
-    --secondary-100: 229 241 255;
-    --secondary-200: 203 229 255;
-    --secondary-300: 165 211 255;
-    --secondary-400: 125 181 255;
-    --secondary-500: 75 141 240;
-    --secondary-600: 45 101 200;
-
-    --text-main: 243 244 246;
-    --text-second: 226 232 240;
-    --text-third: 148 163 184;
-    --text-fourth: 100 116 139;
-    --text-reverse-main: 17 24 39;
-
-    /* Chat message text colors */
-    --text-my-msg: 255 255 255;
-    --text-other-msg: 243 244 246;
-
-    --bg-main: 4 12 30;
-    --bg-second: 6 16 40;
-    --bg-third: 12 24 48;
-    --bg-fourth: 20 34 60;
-    --bg-fifth: 34 51 84;
-    --bg-sixth: 8 20 36;
-    --bg-seventh: 10 22 38;
-    --bg-eighth: 18 30 54;
-    --bg-ninth: 28 44 76;
-    --bg-tenth: 42 64 96;
-
-    --bg-overlay: rgba(4, 12, 30, 0.9);
-    --bg-modal: rgba(6, 16, 40, 0.98);
-    --bg-glass: rgba(6, 16, 40, 0.85);
-
-    --bg-card: 6 16 40;
-    --bg-sidebar: 4 12 30;
-    --bg-header: 6 16 40;
-    --bg-footer: 4 12 30;
-    --bg-hover: 12 24 48;
-    --bg-active: 20 34 60;
-    --bg-disabled: 12 24 48;
-
-    --btn-main: 14 165 233;
-    --btn-second: 12 24 48;
-    --btn-third: 20 34 60;
-    --btn-fourth: 34 51 84;
-
-    --border-main: 20 34 60;
-    --border-second: 34 51 84;
-    --border-focus: 14 165 233;
-
-    --login-image: url("/images/auth_image_dark.jpg");
-  }
-
-  /* Dark Yellow Theme */
-  [data-theme="dark-yellow"] {
-    /* Custom Gradients for Dark Yellow */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #fde047 0%,
-      #eab308 25%,
-      #ca8a04 50%,
-      #d97706 75%,
-      #facc15 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #fdba74 0%,
-      #f97316 25%,
-      #ea580c 50%,
-      #c2410c 75%,
-      #fb923c 100%
-    );
-
-    --primary-50: 254 252 232;
-    --primary-100: 254 249 195;
-    --primary-200: 254 240 138;
-    --primary-300: 253 224 71;
-    --primary-400: 250 204 21;
-    --primary-500: 234 179 8;
-    --primary-600: 202 138 4;
-    --primary-700: 161 98 7;
-    --primary-800: 133 77 14;
-    --primary-900: 113 63 18;
-
-    --secondary-50: 255 247 237;
-    --secondary-100: 255 237 213;
-    --secondary-200: 254 215 170;
-    --secondary-300: 253 186 116;
-    --secondary-400: 251 146 60;
-    --secondary-500: 249 115 22;
-    --secondary-600: 234 88 12;
-
-    --text-main: 255 255 255;
-    --text-second: 254 252 232;
-    --text-third: 254 249 195;
-    --text-fourth: 254 240 138;
-    --text-reverse-main: 17 24 39;
-
-    --bg-main: 28 25 23;
-    --bg-second: 41 37 36;
-    --bg-third: 68 64 60;
-    --bg-fourth: 87 83 78;
-    --bg-fifth: 120 113 108;
-    --bg-sixth: 41 37 36;
-    --bg-seventh: 28 25 23;
-    --bg-eighth: 68 64 60;
-    --bg-ninth: 87 83 78;
-    --bg-tenth: 120 113 108;
-
-    --bg-overlay: rgba(28, 25, 23, 0.8);
-    --bg-modal: rgba(41, 37, 36, 0.95);
-    --bg-glass: rgba(41, 37, 36, 0.8);
-
-    --bg-card: 41 37 36;
-    --bg-sidebar: 28 25 23;
-    --bg-header: 28 25 23;
-    --bg-footer: 28 25 23;
-    --bg-hover: 68 64 60;
-    --bg-active: 87 83 78;
-    --bg-disabled: 87 83 78;
-
-    --btn-main: 234 179 8;
-    --btn-second: 68 64 60;
-    --btn-third: 87 83 78;
-    --btn-fourth: 120 113 108;
-
-    --border-main: 87 83 78;
-    --border-second: 120 113 108;
-    --border-focus: 234 179 8;
-
-    --login-image: url("/images/auth_image_yellow.jpg");
-  }
-
-  /* Light Yellow Pink Theme */
-  [data-theme="light-yellow-pink"] {
-    /* Custom Gradients for Yellow Pink */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #f9a8d4 0%,
-      #ec4899 25%,
-      #be185d 50%,
-      #e11d48 75%,
-      #f472b6 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #fde047 0%,
-      #eab308 25%,
-      #d97706 50%,
-      #f59e0b 75%,
-      #facc15 100%
-    );
-
-    --primary-50: 253 242 248;
-    --primary-100: 252 231 243;
-    --primary-200: 251 207 232;
-    --primary-300: 249 168 212;
-    --primary-400: 244 114 182;
-    --primary-500: 236 72 153;
-    --primary-600: 219 39 119;
-    --primary-700: 190 24 93;
-    --primary-800: 157 23 77;
-    --primary-900: 131 24 67;
-
-    --secondary-50: 254 252 232;
-    --secondary-100: 254 249 195;
-    --secondary-200: 254 240 138;
-    --secondary-300: 253 224 71;
-    --secondary-400: 250 204 21;
-    --secondary-500: 234 179 8;
-    --secondary-600: 202 138 4;
-
-    --text-main: 131 24 67;
-    --text-second: 157 23 77;
-    --text-third: 190 24 93;
-    --text-fourth: 219 39 119;
-    --text-reverse-main: 17 24 39;
-
-    --bg-main: 255 255 255;
-    --bg-second: 255 251 235;
-    --bg-third: 254 243 199;
-    --bg-fourth: 253 230 138;
-    --bg-fifth: 252 211 77;
-    --bg-sixth: 255 251 235;
-    --bg-seventh: 255 255 255;
-    --bg-eighth: 254 243 199;
-    --bg-ninth: 253 230 138;
-    --bg-tenth: 252 211 77;
-
-    --bg-overlay: rgba(255, 255, 255, 0.5);
-    --bg-modal: rgba(255, 251, 235, 0.95);
-    --bg-glass: rgba(255, 251, 235, 0.8);
-
-    --bg-card: 255 251 235;
-    --bg-sidebar: 255 255 255;
-    --bg-header: 255 255 255;
-    --bg-footer: 255 251 235;
-    --bg-hover: 254 243 199;
-    --bg-active: 253 230 138;
-    --bg-disabled: 253 230 138;
-
-    --btn-main: 236 72 153;
-    --btn-second: 254 243 199;
-    --btn-third: 253 230 138;
-    --btn-fourth: 252 211 77;
-
-    --border-main: 253 230 138;
-    --border-second: 252 211 77;
-    --border-focus: 236 72 153;
-
-    --login-image: url("/images/auth_image_pink.jpg");
-  }
-
-  /* Pastel Yellow-Pink Theme - Cute */
-  [data-theme="pastel-yellow-pink"] {
-    /* Custom Gradients - Darker pastel blend */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #ffc0d4 0%,
-      #ff9ec8 25%,
-      #ffa366 50%,
-      #ffb844 75%,
-      #ffd44d 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #ffd9ad 0%,
-      #ffcc77 25%,
-      #ffb366 50%,
-      #ffb366 75%,
-      #ffca88 100%
-    );
-
-    /* Primary colors - Pastel Yellow (50 → 900) */
-    --primary-50: 255 250 230;
-    --primary-100: 255 244 200;
-    --primary-200: 255 236 160;
-    --primary-300: 255 224 120;
-    --primary-400: 255 208 80;
-    --primary-500: 255 180 40;
-    --primary-600: 240 160 20;
-    --primary-700: 210 130 16;
-    --primary-800: 170 100 12;
-    --primary-900: 130 70 8;
-
-    /* Secondary colors - Pastel Pink (50 → 600) */
-    --secondary-50: 255 235 245;
-    --secondary-100: 255 210 235;
-    --secondary-200: 255 180 220;
-    --secondary-300: 255 150 205;
-    --secondary-400: 255 110 185;
-    --secondary-500: 255 70 160;
-    --secondary-600: 235 40 130;
-
-    /* Text colors */
-    --text-main: 80 32 56;
-    --text-second: 110 48 76;
-    --text-third: 140 70 100;
-    --text-fourth: 170 100 130;
-    --text-reverse-main: 17 24 39;
-
-    /* Background colors */
-    --bg-main: 255 240 248;
-    --bg-second: 255 235 245;
-    --bg-third: 255 228 240;
-    --bg-fourth: 255 216 234;
-    --bg-fifth: 255 200 225;
-    --bg-sixth: 255 240 248;
-    --bg-seventh: 255 245 250;
-    --bg-eighth: 255 235 245;
-    --bg-ninth: 255 228 240;
-    --bg-tenth: 255 216 234;
-
-    --bg-overlay: rgba(0, 0, 0, 0.3);
-    --bg-modal: rgba(255, 248, 252, 0.98);
-    --bg-glass: rgba(255, 248, 252, 0.85);
-
-    --bg-card: 255 250 255;
-    --bg-sidebar: 255 240 248;
-    --bg-header: 255 250 255;
-    --bg-footer: 255 240 248;
-    --bg-hover: 255 228 240;
-    --bg-active: 255 216 234;
-    --bg-disabled: 255 216 234;
-
-    /* Button colors */
-    --btn-main: 255 70 160;
-    --btn-second: 255 228 240;
-    --btn-third: 255 216 234;
-    --btn-fourth: 255 200 225;
-
-    /* Border colors */
-    --border-main: 255 216 234;
-    --border-second: 255 200 225;
-    --border-focus: 255 70 160;
-
-    --login-image: url("/images/auth_image_light.jpg");
-  }
-
-  /* Crimson Night Theme - Dark Red */
-  [data-theme="dark-red"] {
-    /* Custom Gradients for Dark Red */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #fda4af 0%,
-      #f43f5e 25%,
-      #be123c 50%,
-      #e11d48 75%,
-      #fb7185 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #fca5a5 0%,
-      #ef4444 25%,
-      #991b1b 50%,
-      #dc2626 75%,
-      #f87171 100%
-    );
-
-    /* Primary colors - Crimson/Rose */
-    --primary-50: 255 241 242;
-    --primary-100: 255 228 230;
-    --primary-200: 254 205 211;
-    --primary-300: 253 164 175;
-    --primary-400: 251 113 133;
-    --primary-500: 244 63 94;
-    --primary-600: 225 29 72;
-    --primary-700: 190 18 60;
-    --primary-800: 159 18 57;
-    --primary-900: 136 19 55;
-
-    /* Secondary colors - Zinc with slight red tint */
-    --secondary-50: 250 250 250;
-    --secondary-100: 244 244 245;
-    --secondary-200: 228 228 231;
-    --secondary-300: 212 212 216;
-    --secondary-400: 161 161 170;
-    --secondary-500: 113 113 122;
-    --secondary-600: 82 82 91;
-
-    /* Text colors */
-    --text-reverse-main: 17 24 39;
-    --text-main: 255 255 255;
-    --text-second: 228 228 231;
-    --text-third: 161 161 170;
-    --text-fourth: 113 113 122;
-
-    --text-my-msg: 255 255 255;
-    --text-other-msg: 228 228 231;
-
-    /* Background colors - Deep dark with crimson undertones */
-    --bg-main: 12 10 10;
-    --bg-second: 24 18 20;
-    --bg-third: 38 28 32;
-    --bg-fourth: 63 46 53;
-    --bg-fifth: 88 64 74;
-    --bg-sixth: 24 18 20;
-    --bg-seventh: 12 10 10;
-    --bg-eighth: 38 28 32;
-    --bg-ninth: 63 46 53;
-    --bg-tenth: 88 64 74;
-
-    --bg-overlay: rgba(12, 10, 10, 0.85);
-    --bg-modal: rgba(24, 18, 20, 0.95);
-    --bg-glass: rgba(24, 18, 20, 0.8);
-
-    --bg-card: 24 18 20;
-    --bg-sidebar: 12 10 10;
-    --bg-header: 12 10 10;
-    --bg-footer: 12 10 10;
-    --bg-hover: 38 28 32;
-    --bg-active: 63 46 53;
-    --bg-disabled: 63 46 53;
-
-    /* Button colors */
-    --btn-main: 225 29 72;
-    --btn-second: 38 28 32;
-    --btn-third: 63 46 53;
-    --btn-fourth: 88 64 74;
-
-    /* Border colors */
-    --border-main: 63 46 53;
-    --border-second: 88 64 74;
-    --border-focus: 225 29 72;
-
-    --login-image: url("/images/auth_image_dark_red.jpg");
-  }
-
-  /* Emerald Jade Theme - Xanh ngọc bích */
-  [data-theme="emerald"] {
-    /* Custom Gradients for Emerald */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #6ee7b7 0%,
-      #10b981 25%,
-      #059669 50%,
-      #047857 75%,
-      #34d399 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #a7f3d0 0%,
-      #34d399 25%,
-      #10b981 50%,
-      #059669 75%,
-      #6ee7b7 100%
-    );
-
-    /* Primary colors - Emerald */
-    --primary-50: 236 253 245;
-    --primary-100: 209 250 229;
-    --primary-200: 167 243 208;
-    --primary-300: 110 231 183;
-    --primary-400: 52 211 153;
-    --primary-500: 16 185 129;
-    --primary-600: 5 150 105;
-    --primary-700: 4 120 87;
-    --primary-800: 6 95 70;
-    --primary-900: 6 78 59;
-
-    /* Secondary colors - Teal */
-    --secondary-50: 240 253 250;
-    --secondary-100: 204 251 241;
-    --secondary-200: 153 246 228;
-    --secondary-300: 94 234 212;
-    --secondary-400: 45 212 191;
-    --secondary-500: 20 184 166;
-    --secondary-600: 13 148 136;
-
-    /* Text colors */
-    --text-main: 255 255 255;
-    --text-second: 209 250 229;
-    --text-third: 167 243 208;
-    --text-fourth: 110 231 183;
-    --text-reverse-main: 17 24 39;
-    --text-my-msg: 255 255 255;
-    --text-other-msg: 228 228 231;
-
-    /* Background colors - Deep Jade */
-    --bg-main: 2 44 34;
-    --bg-second: 6 78 59;
-    --bg-third: 6 95 70;
-    --bg-fourth: 4 120 87;
-    --bg-fifth: 5 150 105;
-    --bg-sixth: 6 78 59;
-    --bg-seventh: 2 44 34;
-    --bg-eighth: 6 95 70;
-    --bg-ninth: 4 120 87;
-    --bg-tenth: 5 150 105;
-
-    --bg-overlay: rgba(2, 44, 34, 0.85);
-    --bg-modal: rgba(6, 78, 59, 0.95);
-    --bg-glass: rgba(6, 78, 59, 0.8);
-
-    --bg-card: 6 78 59;
-    --bg-sidebar: 2 44 34;
-    --bg-header: 2 44 34;
-    --bg-footer: 2 44 34;
-    --bg-hover: 6 95 70;
-    --bg-active: 4 120 87;
-    --bg-disabled: 4 120 87;
-
-    /* Button colors */
-    --btn-main: 16 185 129;
-    --btn-second: 6 95 70;
-    --btn-third: 4 120 87;
-    --btn-fourth: 5 150 105;
-
-    /* Border colors */
-    --border-main: 4 120 87;
-    --border-second: 5 150 105;
-    --border-focus: 16 185 129;
-
-    --login-image: url("/images/auth_image_emerald.jpg");
-  }
-
-  /* Aurora Theme - Cực Quang (Northern Lights) */
-  [data-theme="aurora"] {
-    /* Custom Gradients for Aurora - vibrant greens, cyans, purples */
-    --gradient-main: repeating-linear-gradient(
-      45deg,
-      #4ade80 0%,
-      #22d3ee 25%,
-      #06b6d4 50%,
-      #8b5cf6 75%,
-      #a78bfa 100%
-    );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #10b981 0%,
-      #14b8a6 25%,
-      #0891b2 50%,
-      #6366f1 75%,
-      #7c3aed 100%
-    );
-
-    /* Primary colors - Aurora Green */
-    --primary-50: 236 253 245;
-    --primary-100: 209 250 229;
-    --primary-200: 167 243 208;
-    --primary-300: 110 231 183;
-    --primary-400: 52 211 153;
-    --primary-500: 16 185 129;
-    --primary-600: 5 150 105;
-    --primary-700: 4 120 87;
-    --primary-800: 6 95 70;
-    --primary-900: 6 78 59;
-
-    /* Secondary colors - Aurora Cyan & Purple */
-    --secondary-50: 240 249 255;
-    --secondary-100: 224 242 254;
-    --secondary-200: 186 230 253;
-    --secondary-300: 125 211 252;
-    --secondary-400: 56 189 248;
-    --secondary-500: 14 165 233;
-    --secondary-600: 2 132 199;
-
-    /* Text colors */
-    --text-main: 248 250 252;
-    --text-second: 226 232 240;
-    --text-third: 148 163 184;
-    --text-fourth: 100 116 139;
-    --text-reverse-main: 17 24 39;
-
-    /* Background colors - Deep Arctic Blue/Purple */
-    --bg-main: 3 18 32;
-    --bg-second: 15 32 52;
-    --bg-third: 25 48 72;
-    --bg-fourth: 40 68 100;
-    --bg-fifth: 60 100 140;
-    --bg-sixth: 15 32 52;
-    --bg-seventh: 8 25 42;
-    --bg-eighth: 20 42 66;
-    --bg-ninth: 35 60 90;
-    --bg-tenth: 55 90 130;
-
-    --bg-overlay: rgba(3, 18, 32, 0.85);
-    --bg-modal: rgba(15, 32, 52, 0.98);
-    --bg-glass: rgba(15, 32, 52, 0.8);
-
-    --bg-card: 15 32 52;
-    --bg-sidebar: 3 18 32;
-    --bg-header: 15 32 52;
-    --bg-footer: 3 18 32;
-    --bg-hover: 25 48 72;
-    --bg-active: 40 68 100;
-    --bg-disabled: 25 48 72;
-
-    /* Button colors */
-    --btn-main: 16 185 129;
-    --btn-second: 25 48 72;
-    --btn-third: 40 68 100;
-    --btn-fourth: 60 100 140;
-
-    /* Border colors */
-    --border-main: 40 68 100;
-    --border-second: 60 100 140;
-    --border-focus: 16 185 129;
-
-    --login-image: url("/images/auth_image_aurora.jpg");
+    --login-image: url("/images/auth_image_dark.png");
   }
 }

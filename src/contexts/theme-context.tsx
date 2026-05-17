@@ -4,16 +4,8 @@ import { useTranslation } from "react-i18next";
 const ThemeList = [
   "light",
   "dark",
-  "universe",
-  "neon",
-  "dark-sea",
-  "dark-yellow",
-  "light-yellow-pink",
-  "pastel-yellow-pink",
-  "dark-red",
-  "emerald",
-  "aurora",
-  "dark-blue",
+  "light-old",
+  "dark-old",
 ] as const;
 
 export type Theme = (typeof ThemeList)[number];
@@ -59,16 +51,8 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const availableThemes: { key: Theme; label: string }[] = [
     { key: "light", label: t("common:themes:light") },
     { key: "dark", label: t("common:themes:dark") },
-    { key: "universe", label: t("common:themes:universe") },
-    { key: "neon", label: t("common:themes:neon") },
-    { key: "dark-sea", label: t("common:themes:darkSea") },
-    { key: "dark-yellow", label: t("common:themes:darkYellow") },
-    { key: "dark-blue", label: t("common:themes:darkBlue") },
-    { key: "light-yellow-pink", label: t("common:themes:lightYellowPink") },
-    { key: "pastel-yellow-pink", label: t("common:themes:pastelYellowPink") },
-    { key: "dark-red", label: t("common:themes:darkRed") },
-    { key: "emerald", label: t("common:themes:emerald") },
-    { key: "aurora", label: t("common:themes:aurora") },
+    { key: "light-old", label: t("common:themes:lightOld") },
+    { key: "dark-old", label: t("common:themes:darkOld") },
   ];
 
   useEffect(() => {

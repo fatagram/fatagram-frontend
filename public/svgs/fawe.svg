@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
+  <defs>
+    <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#ffceaa" />
+      <stop offset="45%" stop-color="#ff6e9a" />
+      <stop offset="100%" stop-color="#c56bfa" />
+    </linearGradient>
+
+    <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#a83566" flood-opacity="0.3" />
+    </filter>
+  </defs>
+
+
+  <rect x="46" y="46" width="308" height="308" rx="76" fill="url(#bgGrad)" />
+
+  <!-- Chữ W nét đơn đặc thanh đậm siêu mượt (giảm 10% ở đỉnh), bo tròn sinusoidal hoàn hảo không tì vết -->
+  <path
+    transform="translate(20, 0)"
+    d="M 94 160 
+           C 94 210, 115 281, 150 281 
+           C 165 281, 175 202, 190 202 
+           C 200 202, 205 281, 230 281 
+           C 245 281, 272 220, 272 175 
+           C 272 160, 234 160, 234 175 
+           C 234 210, 232 243, 230 243 
+           C 215 243, 205 164, 190 164 
+           C 175 164, 165 243, 150 243 
+           C 141 243, 132 210, 132 160 
+           C 132 145, 94 145, 94 160 Z"
+    fill="#ffffff"
+    stroke="#ffffff"
+    stroke-width="1.5"
+    stroke-linejoin="round"
+    filter="url(#softShadow)"
+  />
+
+  <!-- Trái tim được đặt nằm ngay bên trên râu phải của chữ W, căn giữa hoàn hảo không lệch -->
+  <g transform="translate(262, 104) rotate(15) scale(2.0)">
+    <path
+      d="M 10 20 
+             Q 0 12 0 5 
+             A 5 5 0 0 1 10 5 
+             A 5 5 0 0 1 20 5 
+             Q 20 12 10 20 Z"
+      fill="#ffffff"
+      filter="url(#softShadow)"
+    />
+  </g>
+</svg>

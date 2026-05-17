@@ -15,7 +15,7 @@ function NotFoundPage() {
   useEffect(() => {
     document.title = "Page Not Found";
     return () => {
-      document.title = "Fatagram";
+      document.title = "Fawe";
     };
   });
 

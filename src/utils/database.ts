@@ -7,7 +7,7 @@ export class Database extends Dexie {
   messages!: Table<Message>;
 
   constructor() {
-    super("FatagramDB");
+    super("FaweDB");
 
     this.version(2).stores({
       conversations: "id, lastActiveAt",

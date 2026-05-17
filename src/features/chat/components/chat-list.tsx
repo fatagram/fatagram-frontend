@@ -19,7 +19,7 @@ interface ChatListProps extends ComponentProps {
 export const ChatList: React.FC<ChatListProps> = ({ className, onConversationClick }) => {
   const { t } = useTranslation();
   const { openChat } = useOpenChat();
-  
+
   const [keyword, setKeyword] = useState("");
   const debouncedKeyword = useDebounce(keyword, 500);
 
@@ -39,7 +39,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className={clsx("flex flex-col p-2 h-full", className)}>
+    <div className={clsx("flex flex-col px-3 pb-3 pt-1 h-full", className)}>
       <Textbox
         placeholder={t("common:conversations.search")}
         sz="sm"
@@ -47,12 +47,10 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
         type="search"
         value={keyword}
         onChange={(e) => setKeyword(e.target.value)}
+        wrapperClassName="pt-[6px] pb-[2px] px-[3px]"
       />
       {debouncedKeyword ? (
-        <ChatSearchList 
-          keyword={debouncedKeyword} 
-          onConversationClick={onConversationClick} 
-        />
+        <ChatSearchList keyword={debouncedKeyword} onConversationClick={onConversationClick} />
       ) : (
         <div ref={scrollWrapperRef} className="flex-1 overflow-y-auto mt-2 ">
           <InfiniteScrollFlex
@@ -90,4 +88,3 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
     </div>
   );
 };
-

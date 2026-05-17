@@ -1,7 +1,7 @@
 {
   "register": {
     "title": "Đăng ký",
-    "slogan": "Chào mừng đến với Fatagram",
+    "slogan": "Chào mừng đến với Fawe",
     "firstName": "Họ",
     "lastName": "Tên",
     "username": "Tên đăng nhập",
@@ -49,7 +49,14 @@
     "noFriendsCount": "Không có bạn bè",
     "oversizeErrorTitle": "Tệp quá lớn",
     "oversizeErrorMessage": "Kích thước tệp vượt quá giới hạn 2MB",
-    "oversizeErrorButton": "OK"
+    "oversizeErrorButton": "OK",
+    "infoTitle": "Thông tin người dùng",
+    "urlNameLabel": "URL Name",
+    "profileUrlLabel": "URL cá nhân",
+    "userIdLabel": "ID người dùng",
+    "notSet": "Chưa thiết lập",
+    "copiedSuccess": "Đã sao chép {{label}}!",
+    "closeButton": "Đóng"
   },
   "profileMenu": {
     "posts": "Bài viết",

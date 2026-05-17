@@ -12,13 +12,12 @@ import {
 } from "@/components/atoms";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 import { convManager, useConversationStore } from "../../services/conversation-manager";
-import { useRef, useState } from "react";
+import { useRef, useState, useEffect } from "react";
 import {
   useGetConversation,
   useUpdateConversationAvatar,
   useUpdateConversationName,
 } from "../../hooks/use-conversation";
-import { useRenderConversationContent } from "../../hooks/use-render-conversation-content";
 import { useTranslation } from "react-i18next";
 import { Menu, MenuItem } from "@/components/ui/menu";
 import { ComponentProps } from "@/components/common/component-type";
@@ -26,6 +25,7 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useDialog } from "@/contexts";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ParticipantList } from "../../components/participant-list";
+import { useRenderConversationContent } from "../../hooks/use-render-conversation-content";
 
 interface ConversationPageProps extends ComponentProps {}
 
@@ -35,6 +35,11 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   const [openSetting, setOpenSetting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    setOpenSetting(false);
+    setViewMode("main");
+  }, [conversationId]);
 
   const unreadCount = useConversationStore((state) => state.totalUnreadCount);
   const { t } = useTranslation();

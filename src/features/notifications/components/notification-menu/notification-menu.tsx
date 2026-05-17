@@ -73,7 +73,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
       )}
       ref={ref}
     >
-      <div className="flex items-center justify-between px-2 pt-2">
+      <div className="flex items-center justify-between px-5 pt-4 pb-1">
         <Text sz="lg" weight="bold">
           {t("notifications:notifications.title")}
         </Text>
@@ -104,7 +104,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
           )}
         </ClientOnly>
       </div>
-      <div className="relative py-1 max-h-[500px] overflow-y-auto scrollbar-hide">
+      <div className="relative px-3 max-h-[650px] overflow-y-auto scrollbar-hide">
         <ClientOnly fallback={<NotificationSkeletonLoading />}>
           <InfiniteScrollGrid
             itemMinWidth={"300px"}
@@ -152,7 +152,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
       </div>
 
       {isInNotificationPage || (
-        <div className="flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2">
+        <div className="flex justify-center border-t border-text-main/10 pt-2 pb-2 px-3">
           <button
             className="p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2"
             onClick={() => navigate("/notifications")}

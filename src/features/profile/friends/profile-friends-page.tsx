@@ -9,7 +9,7 @@ const ProfileFriendsPage = () => {
   return (
     <Card
       title={t("user:profileFriends.friends")}
-      className={clsx("sm:rounded-2xl rounded-none sm:mt-2")}
+      className={clsx("bg-bg-main sm:rounded-2xl rounded-none sm:mt-2")}
     >
       <ProfileFriends />
     </Card>

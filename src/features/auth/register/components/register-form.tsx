@@ -103,7 +103,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       )}
       onSubmit={formik.submitForm}
     >
-      {isShowLogo && <Logo sz="md" />}
+      {isShowLogo && <Logo sz="lg" />}
 
       <Text
         weight="extrabold"

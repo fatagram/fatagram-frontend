@@ -1,4 +1,4 @@
-import { Avatar, MiniButton, Skeleton, Text, Textbox } from "@/components/atoms";
+import { Avatar, MiniButton, Skeleton, Text, TextArea, Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import React, { useState, useEffect } from "react";
@@ -7,6 +7,8 @@ import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { MessageType } from "@/types/entities/message.type";
 import { useOpenChat } from "../hooks/use-open-chat";
 import { MessageDto } from "@/api/message/dto/message.dto";
+import { useTranslation } from "react-i18next";
+import { useNavigate } from "react-router-dom";
 
 interface Props extends ComponentProps {
   conversationId: string;
@@ -33,6 +35,8 @@ export const TempChat: React.FC<Props> = ({
   const { data: tempUser, isLoading, isFetching } = useGetUserProfile(tempId);
   const { checkConversationWith } = useOpenChat();
   const { fetch: sendMessage } = useSendMessage();
+  const { t } = useTranslation();
+  const navigate = useNavigate();
 
   useEffect(() => {
     const checkConversation = async () => {
@@ -41,8 +45,7 @@ export const TempChat: React.FC<Props> = ({
 
       const hasConversation = await checkConversationWith(tempId);
       if (hasConversation) {
-        // If it's a floating window, we might want to handle it differently,
-        // but for now, redirecting/switching is handled by the parent or listener as per user.
+        // Handled by parent or listener
       }
     };
     checkConversation();
@@ -68,17 +71,25 @@ export const TempChat: React.FC<Props> = ({
     setMessage("");
   };
 
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
     if (e.key === "Enter" && !e.shiftKey) {
-      e.preventDefault();
-      handleSendMessage();
+      const isMobile = window.matchMedia("(pointer: coarse)").matches;
+      if (!isMobile) {
+        e.preventDefault();
+        handleSendMessage();
+      }
     }
   };
 
   return (
-    <div className={clsx("relative flex flex-col bg-bg-main overflow-hidden w-full", className)}>
+    <div
+      className={clsx(
+        "relative flex flex-col bg-bg-main overflow-hidden overscroll-none",
+        className,
+      )}
+    >
       {!hideHeader && (
-        <div className="flex items-center gap-3 px-2 h-[60px] bg-bg-second border-b border-gray-700/50 shrink-0">
+        <div className="flex items-center gap-3 px-2 h-[60px] bg-bg-main border-b border-bg-fourth shrink-0 sticky top-0">
           {isLoading || isFetching ? (
             <>
               <Skeleton sz="md" variant="circle" className="w-10" />
@@ -92,7 +103,7 @@ export const TempChat: React.FC<Props> = ({
                   <i className="fa-solid fa-arrow-left text-primary-400" />
                 </MiniButton>
               )}
-              <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="sm" />
+              <Avatar className="shrink-0" src={tempUser?.infos.avatar} alt="Avatar" sz="sm" />
               <Text sz="md" weight="bold" className="flex-1 text-text-main truncate">
                 {tempUser?.infos.fullName}
               </Text>
@@ -103,39 +114,66 @@ export const TempChat: React.FC<Props> = ({
       )}
 
       <div
-        className="flex-1 overflow-y-auto px-4 py-2 bg-bg-seventh flex flex-col"
+        className="flex-1 overflow-y-auto px-4 py-2 bg-bg-main flex flex-col min-h-0"
         data-chat-scrollable="true"
       >
         <div className="flex-1 flex flex-col justify-center items-center text-center px-4">
-          <div className="relative mb-4">
-            <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="md" />
-          </div>
-          <Text sz="md" weight="bold">
-            {tempUser?.infos.fullName}
-          </Text>
-          <Text sz="sm" className="text-gray-400 mt-1">
-            Hai bạn chưa có tin nhắn nào
-          </Text>
-          <div className="mt-5 px-4 py-2 bg-gray-700/30 rounded-full">
-            <Text sz="sm" className="text-gray-300">
-              Gửi lời chào đầu tiên 👋
-            </Text>
-          </div>
+          {isLoading || isFetching ? (
+            <>
+              <div className="relative mb-4">
+                <Skeleton variant="circle" sz="md" />
+              </div>
+              <Skeleton sz="sm" className="w-[150px] mb-2" />
+              <Skeleton sz="sm" className="w-[200px]" />
+            </>
+          ) : (
+            <>
+              <div className="relative mb-4">
+                <Avatar src={tempUser?.infos.avatar} alt="Avatar" sz="md" />
+              </div>
+              <Text sz="sm" weight="bold">
+                {tempUser?.infos.fullName}
+              </Text>
+              <Text sz="xs" wrap="whitespace-normal" className="text-gray-400 mt-1 max-w-[320px]">
+                {t("common:conversations.privacyDescription")}
+              </Text>
+              {tempUser && (
+                <Button
+                  sz="sm"
+                  variant="third"
+                  className="mt-4"
+                  onClick={() => navigate(`/${tempUser.infos.urlName || tempId}`)}
+                >
+                  {t("common:conversations.settings.viewProfile")}
+                </Button>
+              )}
+            </>
+          )}
         </div>
       </div>
 
-      <div className="px-4 py-3 bg-bg-second border-t border-gray-700/50 flex items-center gap-2">
-        <Textbox
-          sz="sm"
-          className="!rounded-full w-full"
-          wrapperClassName="flex-1"
-          placeholder="Aa"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          type={"text"}
-        />
-        <MiniButton sz="sm" onClick={handleSendMessage} disabled={!message.trim() || isFetching}>
+      <div className="px-4 py-3 bg-bg-main flex items-center gap-1 relative z-50">
+        <div className="flex-1 min-w-0 relative flex items-end">
+          <TextArea
+            sz="sm"
+            className="!rounded-2xl"
+            textareaClassName="!pr-10"
+            wrapperClassName="flex-1"
+            placeholder={t("chat.placeholder", { defaultValue: "Tin nhắn của bạn" })}
+            value={message}
+            onChange={(e) => setMessage(e.target.value)}
+            onKeyDown={handleKeyDown}
+            rows={0}
+            maxRows={5}
+          />
+          <div className="absolute right-1">
+            <MiniButton className="hover:bg-transparent">
+              <i className="fa-solid fa-face-smile text-primary-500"></i>
+            </MiniButton>
+          </div>
+        </div>
+
+        <MiniButton onClick={handleSendMessage} disabled={!message.trim() || isFetching}>
           <i
             className={clsx(
               "fa-solid",

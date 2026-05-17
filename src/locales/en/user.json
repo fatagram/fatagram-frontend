@@ -17,7 +17,14 @@
     "noFriendsCount": "No friends",
     "oversizeErrorTitle": "File too large",
     "oversizeErrorMessage": "File size exceeds the limit of 2MB",
-    "oversizeErrorButton": "OK"
+    "oversizeErrorButton": "OK",
+    "infoTitle": "User Information",
+    "urlNameLabel": "URL Name",
+    "profileUrlLabel": "Personal URL",
+    "userIdLabel": "User ID",
+    "notSet": "Not set",
+    "copiedSuccess": "Copied {{label}}!",
+    "closeButton": "Close"
   },
   "profileMenu": {
     "posts": "Posts",

@@ -6,22 +6,30 @@ export type Size = "sm" | "md" | "lg" | "xl";
 
 export const sizeClasses: Record<Size, { logo: string; slogan: string }> = {
   sm: {
-    logo: "text-base sm:text-lg", // Khoảng 16-18px
-    slogan: "text-xs", // 12px (Giới hạn tối thiểu an toàn)
+    logo: "text-base sm:text-lg",
+    slogan: "text-[10px] sm:text-xs",
   },
   md: {
-    logo: "text-xl sm:text-2xl", // Khoảng 20-24px (Vừa vặn cho thanh điều hướng)
-    slogan: "text-xs", // 12px
+    logo: "text-lg sm:text-xl",
+    slogan: "text-[11px] sm:text-xs",
   },
   lg: {
-    logo: "text-3xl sm:text-4xl", // Khoảng 30-36px (Phù hợp trang giới thiệu)
-    slogan: "text-sm", // 14px
+    logo: "text-2xl sm:text-3xl",
+    slogan: "text-xs sm:text-sm",
   },
   xl: {
-    logo: "text-4xl sm:text-5xl", // Khoảng 36-48px (Vừa phải cho màn hình đăng nhập)
-    slogan: "text-base text-gray-400", // 16px
+    logo: "text-3xl sm:text-4xl",
+    slogan: "text-sm sm:text-base",
   },
 };
+
+export const sizeSpecs: Record<Size, { dimension: number; margin: number; sloganMargin: number }> =
+  {
+    sm: { dimension: 36, margin: -5, sloganMargin: 2 },
+    md: { dimension: 56, margin: -8, sloganMargin: 4 },
+    lg: { dimension: 96, margin: -14, sloganMargin: 8 },
+    xl: { dimension: 144, margin: -20, sloganMargin: 12 },
+  };
 
 export interface LogoProps extends ComponentProps<HTMLDivElement> {
   hasSlogan?: boolean;
@@ -29,21 +37,49 @@ export interface LogoProps extends ComponentProps<HTMLDivElement> {
 }
 
 export const Logo: React.FC<LogoProps> = ({ hasSlogan = true, sz = "md", className, ...props }) => {
+  const specs = sizeSpecs[sz];
+
   return (
     <div className={clsx("flex flex-col items-center", className)} {...props}>
-      <h1
-        className={clsx("font-bagel_fat_one text-gradient-main select-none", sizeClasses[sz].logo)}
-      >
-        Fatagram
-      </h1>
+      <div className="flex items-end justify-center leading-none gap-1">
+        <div
+          className="bg-gradient-main filter drop-shadow-md flex-shrink-0"
+          style={{
+            width: `${specs.dimension}px`,
+            height: `${specs.dimension}px`,
+            WebkitMaskImage: "url('/svgs/logo-nobg.svg')",
+            maskImage: "url('/svgs/logo-nobg.svg')",
+            WebkitMaskSize: "contain",
+            maskSize: "contain",
+            WebkitMaskRepeat: "no-repeat",
+            maskRepeat: "no-repeat",
+            WebkitMaskPosition: "bottom center",
+            maskPosition: "bottom center",
+          }}
+          aria-label="Fawe"
+        />
+        {hasSlogan && (
+          <span
+            className={clsx(
+              "text-gradient-main font-bagel_fat_one select-none tracking-wide font-bold leading-none",
+              sizeClasses[sz].logo,
+            )}
+          >
+            FaWe
+          </span>
+        )}
+      </div>
       {hasSlogan && (
         <p
           className={clsx(
             "text-gradient-second font-light font-bagel_fat_one select-none whitespace-nowrap",
             sizeClasses[sz].slogan,
           )}
+          style={{
+            marginTop: `${specs.sloganMargin}px`,
+          }}
         >
-          Share your fun moments with the world!
+          We are Fantastic!
         </p>
       )}
     </div>

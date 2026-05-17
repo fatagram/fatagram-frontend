@@ -76,7 +76,7 @@ export function getThemeScript() {
 (function() {
   try {
     var theme = localStorage.getItem('theme');
-    var validThemes = ['light', 'dark', 'universe', 'neon', 'dark-sea', 'dark-yellow', 'light-yellow-pink', 'pastel-yellow-pink', 'dark-red', 'emerald', 'aurora', 'dark-blue'];
+    var validThemes = ['light', 'dark', 'light-old', 'dark-old'];
     if (!theme || validThemes.indexOf(theme) === -1) {
       var prefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
       theme = prefersDark ? 'dark' : 'light';
@@ -84,18 +84,10 @@ export function getThemeScript() {
     document.documentElement.setAttribute('data-theme', theme);
 
     var themeToColor = {
-      'light': '#ffffff',
-      'dark': '#000000',
-      'universe': '#0f172a',
-      'neon': '#0a0a0a',
-      'dark-sea': '#022c22',
-      'dark-yellow': '#1c1917',
-      'light-yellow-pink': '#ffffff',
-      'pastel-yellow-pink': '#fff7d9',
-      'dark-red': '#0c0a0a',
-      'emerald': '#022c22',
-      'aurora': '#031220',
-      'dark-blue': '#071633'
+      'light': '#fff8f5',
+      'dark': '#181416',
+      'light-old': '#ffffff',
+      'dark-old': '#000000'
     };
     var color = themeToColor[theme] || '#ffffff';
     var meta = document.querySelector('meta[name="theme-color"]');

@@ -17,10 +17,15 @@ const Card: React.FC<CardProps> = ({
   titleClassName,
   childrenClassName,
 }) => {
+  const hasBg = className?.includes("bg-");
+  const hasShadow = className?.includes("shadow-");
+
   return (
     <div
       className={clsx(
-        "flex flex-col items-start bg-bg-second p-7 rounded-2xl shadow-lg",
+        "flex flex-col items-start p-7 rounded-2xl",
+        !hasBg && "bg-bg-second",
+        !hasShadow && "shadow-lg",
         className,
       )}
     >

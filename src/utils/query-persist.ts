@@ -1,6 +1,6 @@
 import { PersistedClient, Persister } from "@tanstack/react-query-persist-client";
 
-const DB_NAME = "fatagram-query-cache";
+const DB_NAME = "fawe-query-cache";
 const STORE_NAME = "tanstack-query";
 const DB_VERSION = 2;
 const CLIENT_KEY = "client";

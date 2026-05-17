@@ -168,6 +168,7 @@ export const ChatAddonPicker = ({
                 autoFocusSearch={false}
                 skinTonesDisabled
                 lazyLoadEmojis={true}
+                previewConfig={{ showPreview: false }}
               />
             )}
           </div>

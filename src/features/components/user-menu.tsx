@@ -3,10 +3,12 @@ import clsx from "clsx";
 import useClickOutside from "@/hooks/use-click-outside";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
-import { Avatar, Button } from "@/components/atoms";
+import { Avatar, Button, Text, BackButton } from "@/components/atoms";
 import { Menu, MenuItem, MenuSection } from "@/components/ui/menu";
 import { useGetUserAvatar, useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useAuth } from "@/contexts";
+import { useMobile } from "@/hooks/use-mobile";
+import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 
 interface UserMenuProps {
   menuClassName?: string;
@@ -27,6 +29,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
   const { t } = useTranslation() as { t: (key: string) => string };
 
   const navigate = useNavigate();
+  const isMobile = useMobile();
 
   const { data: userProfile } = useGetUserProfile(userId!);
   const { data: avatarProfile } = useGetUserAvatar(userId!);
@@ -78,17 +81,43 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
           className="border-4 border-bg-third"
         />
       </Button>
-      {isOpenMenu && (
-        <div
-          className={clsx(
-            "absolute top-[120%] right-0 bg-bg-second shadow-xl rounded-xl",
-            "p-3 z-10 flex flex-col gap-2 min-w-[300px] min-h-[100px]",
-            menuClassName,
-          )}
-          style={menuStyle}
-          ref={menuRef}
-        >
-          <Menu className="min-w-[280px]">
+      <Transition
+        show={isOpenMenu}
+        animation={AnimationLib.DropdownSlide}
+        duration={isMobile ? 180 : 150}
+        className={clsx(
+          "fixed inset-0 bg-bg-main z-50 flex flex-col p-6 w-full h-[100dvh] overflow-y-auto scrollbar-hide",
+          "sm:absolute sm:inset-auto sm:top-[120%] sm:right-0 sm:bg-bg-second sm:shadow-xl sm:rounded-xl",
+          "sm:p-3 sm:z-10 sm:flex sm:flex-col sm:gap-2 sm:min-w-[300px] sm:min-h-[100px] sm:w-auto sm:h-auto",
+          menuClassName,
+        )}
+        style={menuStyle}
+      >
+        <div ref={menuRef} className="flex flex-col w-full h-full">
+          <div className="flex items-center justify-between w-full mb-8 sm:hidden shrink-0">
+            <BackButton sz="md" onClick={() => setIsOpenMenu(false)} />
+            <Text weight="bold" sz="lg" className="text-text-main font-semibold">
+              {t("navbar.profileMenu.title") || "Tài khoản"}
+            </Text>
+            <div className="w-10" />
+          </div>
+
+          <div className="flex flex-col items-center text-center mb-8 sm:hidden shrink-0">
+            <Avatar
+              src={avatarProfile?.infos.avatar ?? ""}
+              alt="Profile"
+              sz="xl"
+              className="border-4 border-primary-500/20 shadow-lg mb-3"
+            />
+            <Text weight="bold" sz="xl" className="text-text-main">
+              {userProfile?.infos.fullName ?? ""}
+            </Text>
+            <Text sz="sm" className="text-text-third mt-1">
+              @{urlName || userId}
+            </Text>
+          </div>
+
+          <Menu className="w-full bg-bg-second border border-bg-fourth rounded-2xl p-2 shadow-sm sm:bg-transparent sm:border-none sm:rounded-none sm:p-0 sm:shadow-none sm:min-w-[280px]">
             <MenuSection>
               <MenuItem
                 icon={
@@ -102,14 +131,19 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
                 title={userProfile?.infos.fullName ?? ""}
                 description={t("navbar.profileMenu.personalPage")}
                 onClick={handlePersonalPage}
-                className="mb-2"
+                className="hidden sm:flex mb-1"
                 hideIconContainer={true}
               />
-            </MenuSection>
 
-            <div className="h-[1px] bg-text-main/5 my-1 mx-2" />
+              <div className="hidden sm:block h-[1px] bg-text-main/5 my-1 mx-2" />
 
-            <MenuSection>
+              <MenuItem
+                icon="fa-solid fa-user"
+                title={t("navbar.profileMenu.personalPage")}
+                onClick={handlePersonalPage}
+                className="sm:hidden flex"
+              />
+
               <MenuItem
                 icon="fa-solid fa-gear"
                 title={t("navbar.profileMenu.settings")}
@@ -124,7 +158,7 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
             </MenuSection>
           </Menu>
         </div>
-      )}
+      </Transition>
     </div>
   );
 };

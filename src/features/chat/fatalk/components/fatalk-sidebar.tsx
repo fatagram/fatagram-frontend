@@ -27,19 +27,21 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
 
   return (
     <PageNavbar
-      title="Fatalk"
+      title={tab === "list" ? "Fatalk" : ""}
       className={clsx(
         "flex flex-col relative !h-[calc(100dvh-var(--header-height))] !overflow-hidden !rounded-none",
         className,
       )}
       header={
-        <div className="flex ">
-          <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
-            <i className="fa-regular fa-pen-to-square" />
-          </MiniButton>
-        </div>
+        tab === "list" ? (
+          <div className="flex ">
+            <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
+              <i className="fa-regular fa-pen-to-square" />
+            </MiniButton>
+          </div>
+        ) : null
       }
-      headerClassName="justify-between !flex-row pr-3 "
+      headerClassName={clsx("justify-between !flex-row pr-3", tab === "create" && "!hidden")}
     >
       {tab === "list" && (
         <div className="flex flex-col px-2 h-full overflow-hidden">

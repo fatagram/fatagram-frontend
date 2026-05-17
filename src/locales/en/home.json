@@ -4,7 +4,7 @@
     "title2": "moments",
     "title3": "Connect",
     "title4": "everywhere",
-    "subtitle": "Fatagram is a next-generation messaging platform where you can preserve and share your best memories with friends through a modern, smooth, and secure interface.",
+    "subtitle": "Fawe is a next-generation messaging platform where you can preserve and share your best memories with friends through a modern, smooth, and secure interface.",
     "cta": "Get Started",
     "login": "Login"
   },
@@ -24,12 +24,12 @@
   },
   "footer": {
     "cta": {
-      "title": "Ready to connect with Fatagram?",
+      "title": "Ready to connect with Fawe?",
       "desc": "Join today to experience the most modern and secure chat environment.",
       "signup": "Sign up for free",
       "learnMore": "Learn more"
     },
-    "branding": "Fatagram - A place to preserve precious moments and connect people anywhere. Smooth interface, absolute security.",
+    "branding": "Fawe - A place to preserve precious moments and connect people anywhere. Smooth interface, absolute security.",
     "categories": {
       "products": "Products",
       "company": "Company",
@@ -58,7 +58,7 @@
       "copyright": "Copyright",
       "privacySettings": "Privacy Settings"
     },
-    "copyright": "© {{year}} Fatagram Team. Preserving youth.",
+    "copyright": "© {{year}} Fawe Team. Preserving youth.",
     "language": "English"
   }
 }

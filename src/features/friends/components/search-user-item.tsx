@@ -23,7 +23,7 @@ const SearchUserItem: React.FC<SearchUserItemProps> = ({ id, avatar, name, statu
 
   if (isMobile) {
     return (
-      <div className="flex items-center gap-3 p-3 bg-bg-second sm:bg-bg-main rounded-2xl shadow-sm w-full border border-border-main/10">
+      <div className="flex items-center gap-3 p-3 bg-bg-second sm:bg-bg-main rounded-2xl w-full border border-bg-fourth">
         <div className="cursor-pointer shrink-0" onClick={handleNavigate}>
           <Avatar
             src={avatar || undefined}
@@ -54,7 +54,8 @@ const SearchUserItem: React.FC<SearchUserItemProps> = ({ id, avatar, name, statu
       className={clsx(
         "flex flex-col items-start bg-bg-main",
         "h-auto",
-        "rounded-2xl shadow-lg p-4 gap-1",
+        "rounded-2xl border-2 border-bg-fourth p-4 gap-1",
+        "hover:border-primary-500/40 transition-colors duration-300",
       )}
     >
       <div className="w-full cursor-pointer aspect-square mb-2" onClick={handleNavigate}>
@@ -84,11 +85,9 @@ const SearchUserItem: React.FC<SearchUserItemProps> = ({ id, avatar, name, statu
 };
 
 export const SearchUserSkeleton: React.FC = () => {
-  const isMobile = useMobile();
-
-  if (isMobile) {
-    return (
-      <div className="flex items-center gap-3 p-3 bg-bg-second sm:bg-bg-main rounded-2xl shadow-sm w-full border border-border-main/10 animate-pulse">
+  return (
+    <>
+      <div className="flex sm:hidden items-center gap-3 p-3 bg-bg-second sm:bg-bg-main rounded-2xl w-full border border-bg-fourth animate-pulse">
         <div className="w-16 h-16 bg-bg-fourth rounded-2xl shrink-0" />
         <div className="flex-1">
           <div className="h-4 bg-bg-fourth rounded w-3/4 mb-2" />
@@ -96,15 +95,13 @@ export const SearchUserSkeleton: React.FC = () => {
         </div>
         <div className="w-[100px] h-8 bg-bg-fourth rounded-lg shrink-0" />
       </div>
-    );
-  }
 
-  return (
-    <div className="flex flex-col items-start bg-bg-main rounded-2xl shadow-lg p-4 gap-2 w-full animate-pulse">
-      <div className="w-full aspect-square bg-bg-fourth rounded-2xl mb-2" />
-      <div className="h-5 bg-bg-fourth rounded w-3/4 mb-1" />
-      <div className="w-full h-8 bg-bg-fourth rounded-lg mt-2" />
-    </div>
+      <div className="hidden sm:flex flex-col items-start bg-bg-main rounded-2xl border-2 border-bg-fourth p-4 gap-2 w-full animate-pulse">
+        <div className="w-full aspect-square bg-bg-fourth rounded-2xl mb-2" />
+        <div className="h-5 bg-bg-fourth rounded w-3/4 mb-1" />
+        <div className="w-full h-8 bg-bg-fourth rounded-lg mt-2" />
+      </div>
+    </>
   );
 };
 

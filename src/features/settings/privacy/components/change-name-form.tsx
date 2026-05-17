@@ -169,7 +169,9 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
         </Text>
         <Button
           disabled={
+            isLoading ||
             isSubmitting ||
+            !userProfile ||
             (newFirstName === userProfile?.infos.firstName &&
               newMiddleName === (userProfile?.infos.middleName || "") &&
               newLastName === userProfile?.infos.lastName)

@@ -1,7 +1,7 @@
 import { ChatMeta } from "@/types/chat-meta";
 import { create } from "zustand";
 
-const CHAT_STORAGE_KEY = "fatagram_open_chats";
+const CHAT_STORAGE_KEY = "fawe_open_chats";
 
 interface ChatWindowState {
   focusOnId: string | null;

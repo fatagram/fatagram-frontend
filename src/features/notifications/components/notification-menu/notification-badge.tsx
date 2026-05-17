@@ -5,6 +5,7 @@ import NotificationMenu from "./notification-menu";
 import { useNotificationUiState, useUnreadCount } from "../../hooks/use-notification-store";
 import clsx from "clsx";
 import { Text, Badge } from "@/components/atoms";
+import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 
 interface NotificationButtonProps {}
 
@@ -53,19 +54,21 @@ const NotificationBadge: React.FC<NotificationButtonProps> = ({}) => {
           <i className="fa-solid fa-bell"></i>
         </Text>
       </Badge>
-      {isShowNotification && !isInNotificationPage && (
-        <div onClick={() => setShowNotification(false)}>
-          <NotificationMenu
-            className={clsx(
-              "!absolute max-h-[600px] z-10 min-w-[350px] min-h-[100px]",
-              "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
-              "top-[108%] -right-[70px] w-screen h-screen p-6",
-            )}
-            onClick={() => setShowNotification(!isShowNotification)}
-            ref={menuRef}
-          />
-        </div>
-      )}
+      <Transition
+        show={isShowNotification && !isInNotificationPage}
+        animation={AnimationLib.DropdownSlide}
+        duration={150}
+        className={clsx(
+          "!absolute max-h-[750px] z-10 min-w-[350px] min-h-[100px]",
+          "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
+          "top-[108%] -right-[70px] w-screen h-screen p-6",
+        )}
+      >
+        <NotificationMenu
+          onClick={() => setShowNotification(!isShowNotification)}
+          ref={menuRef}
+        />
+      </Transition>
     </div>
   );
 };

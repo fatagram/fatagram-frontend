@@ -5,6 +5,7 @@
   },
   "navbar": {
     "profileMenu": {
+      "title": "Tài khoản",
       "settings": "Cài đặt",
       "logout": "Đăng xuất",
       "personalPage": "Xem trang cá nhân"
@@ -16,7 +17,7 @@
     "backButton": "Quay lại trang chủ"
   },
   "onboarding": {
-    "welcome": "Chào mừng đến với Fatagram!",
+    "welcome": "Chào mừng đến với Fawe!",
     "description": "Khám phá cách mới để kết nối và chia sẻ với bạn bè của bạn. Hãy bắt đầu hành trình trải nghiệm xã hội sôi động hơn của bạn!",
     "getStarted": "Bắt đầu",
     "completeInfo": "Hãy hoàn tất thông tin cần thiết",
@@ -45,16 +46,8 @@
   "themes": {
     "light": "Sáng",
     "dark": "Tối",
-    "universe": "Vũ trụ",
-    "neon": "Neon",
-    "darkSea": "Biển đêm",
-    "darkBlue": "Xanh đậm",
-    "darkYellow": "Vàng tối",
-    "lightYellowPink": "Vàng hồng",
-    "pastelYellowPink": "Vàng - Hồng Pastel (Cute)",
-    "darkRed": "Đỏ tối",
-    "emerald": "Ngọc lục bảo",
-    "aurora": "Cực Quang (Aurora Borealis)"
+    "lightOld": "Sáng (bản cũ)",
+    "darkOld": "Tối (bản cũ)"
   },
   "conversations": {
     "title": "Cuộc trò chuyện",
@@ -78,6 +71,8 @@
     "enterGroupNameOptional": "Nhập tên nhóm chat (Không bắt buộc)",
     "loadingOldMessages": "Đang tải tin nhắn...",
     "createGroupChat": "Tạo nhóm chat",
+    "searchPlaceholder": "Tìm kiếm...",
+    "noUsersFound": "Không tìm thấy user nào",
     "noSearchResults": "Không tìm thấy kết quả",
     "noSearchResultsMessage": "Thử tìm kiếm với từ khóa khác",
     "settings": {

@@ -1,12 +1,12 @@
-import { Text, Avatar, Textbox } from "@/components/atoms";
+import { Text, Avatar, Textbox, BackButton } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import { MultiSelect } from "@/components/ui/multi-select";
 import { useAuth } from "@/contexts";
 import { useCreateGroupConversation } from "@/features/chat/hooks/use-conversation";
-import { useGetInfiniteUsers } from "@/features/hooks/use-user";
+import { useGetInfiniteUsers, useSearchUsers } from "@/features/hooks/use-user";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import clsx from "clsx";
-import { useCallback, useRef } from "react";
+import { useCallback, useRef, useState } from "react";
 import { t } from "i18next";
 
 interface CreateGroupChatProps extends ComponentProps {
@@ -19,9 +19,25 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
   onTurnBack,
   onCreateSuccess,
 }) => {
+  const [keyword, setKeyword] = useState("");
   const { userId } = useAuth();
   const { data: me } = useGetUserProfile(userId!);
-  const { data: users, fetchNextPage, hasNextPage } = useGetInfiniteUsers();
+
+  const {
+    data: allUsers,
+    fetchNextPage: fetchNextAll,
+    hasNextPage: hasNextAll,
+  } = useGetInfiniteUsers();
+  const {
+    data: searchResult,
+    fetchNextPage: fetchNextSearch,
+    hasNextPage: hasNextSearch,
+  } = useSearchUsers({ keyword });
+
+  const users = keyword ? searchResult : allUsers;
+  const fetchNextPage = keyword ? fetchNextSearch : fetchNextAll;
+  const hasNextPage = keyword ? hasNextSearch : hasNextAll;
+
   const { fetch: createGroupChat, isFetching } = useCreateGroupConversation();
   const textboxRef = useRef<HTMLInputElement | null>(null);
 
@@ -59,9 +75,10 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
   );
 
   return (
-    <div className={clsx("flex flex-col h-full overflow-hidden px-2 pb-4", className)}>
-      <div className="ml-1">
-        <Text weight="bold" sz="md">
+    <div className={clsx("flex flex-col h-full overflow-hidden px-2 pt-4 pb-4", className)}>
+      <div className="flex items-center gap-2 ml-1">
+        {onTurnBack && <BackButton onClick={onTurnBack} />}
+        <Text weight="bold" sz="md" className="flex-1">
           {t("common:conversations.createGroupChat")}
         </Text>
       </div>
@@ -125,7 +142,7 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
         hasMore={hasNextPage}
         selectClassName={clsx(
           "flex flex-wrap gap-1 border-2 border-bg-third bg-bg-sixth rounded-lg px-2 py-2",
-          "min-h-[50px] max-h-[300px] overflow-y-auto scrollbar-hide",
+          "min-h-[50px] max-h-[90px] overflow-y-auto scrollbar-hide",
         )}
         optionClassName="h-full overflow-y-auto pr-1 border-2 rounded-md border-bg-third"
         className="flex-1"
@@ -133,6 +150,22 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
         onAccept={handleCreateGroupChat}
         onCancel={onTurnBack}
         isLoading={isFetching}
+        emptyComponent={
+          <div className="flex flex-col items-center justify-center py-8 text-center">
+            <span className="text-sm text-text-main/60">
+              {t("common:conversations.noUsersFound") || "Không tìm thấy user nào"}
+            </span>
+          </div>
+        }
+        searchElement={
+          <input
+            type="text"
+            className="flex-1 min-w-[80px] bg-transparent border-0 outline-none text-xs text-text-main py-1 px-1 placeholder-text-secondary/50 caret-primary-500"
+            placeholder={t("common:conversations.searchPlaceholder") || "Tìm kiếm..."}
+            value={keyword}
+            onChange={(e) => setKeyword(e.target.value)}
+          />
+        }
       />
     </div>
   );

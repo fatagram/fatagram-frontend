@@ -49,7 +49,7 @@ export const MenuItem: React.FC<MenuItemProps> = ({
       onClick={onClick}
       className={clsx(
         "flex items-center gap-4 p-3 rounded-xl transition-all duration-200 text-left w-full group",
-        "hover:bg-bg-third hover:scale-[1.01] hover:shadow-lg",
+        "hover:bg-bg-third hover:scale-[1.01]",
         "active:scale-[0.99]",
         className,
       )}

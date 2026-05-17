@@ -158,9 +158,13 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       )}
     >
       {meta._isShowTime && (
-        <Text sz="xs" className="text-center my-2">
-          {formatSmartTimestamp(message.createdAt)}
-        </Text>
+        <div className="flex items-center justify-center w-full my-4 select-none">
+          <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent to-text-main/10" />
+          <span className="mx-3 px-3 py-1 bg-bg-third/40 border border-bg-fourth/30 rounded-full text-[10px] font-medium tracking-wide text-text-secondary uppercase">
+            {formatSmartTimestamp(message.createdAt)}
+          </span>
+          <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent to-text-main/10" />
+        </div>
       )}
       <div
         className={clsx(
@@ -339,7 +343,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         )}
       </div>
       {(isFooterVisible || hasSeenByOther) && (
-        <div className="flex justify-end items-center m-1">
+        <div className="flex justify-end items-center gap-1 m-1">
           {!hasSeenByOther && (
             <Text sz="xs">
               {t("conversations.sent")}{" "}
@@ -367,15 +371,21 @@ export const SystemMessageRow = memo(({ message, meta }: { message: Message; met
   const { renderSystemMessage } = useRenderConversationContent();
   const { formatSmartTimestamp } = useFormatTime();
   return (
-    <div className="flex flex-col items-center w-full my-2">
+    <div className="flex flex-col items-center w-full my-3">
       {meta?._isShowTime && (
-        <Text sz="xs" className="text-center my-2">
-          {formatSmartTimestamp(message.createdAt)}
-        </Text>
+        <div className="flex items-center justify-center w-full my-4 select-none">
+          <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent to-text-main/10" />
+          <span className="mx-3 px-3 py-1 bg-bg-third/40 border border-bg-fourth/30 rounded-full text-[10px] font-medium tracking-wide text-text-secondary uppercase">
+            {formatSmartTimestamp(message.createdAt)}
+          </span>
+          <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent to-text-main/10" />
+        </div>
       )}
-      <Text sz="sm" className="opacity-80 text-center px-10" wrap="whitespace-normal">
-        {renderSystemMessage(message)}
-      </Text>
+      <div className="flex justify-center w-full my-1">
+        <span className="inline-flex items-center justify-center px-4 py-1.5 bg-bg-third/20 border border-bg-fourth/10 backdrop-blur-sm rounded-full text-center text-xs text-text-secondary max-w-[80%] break-words shadow-sm">
+          {renderSystemMessage(message)}
+        </span>
+      </div>
     </div>
   );
 });

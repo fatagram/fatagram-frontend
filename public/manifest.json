@@ -1,7 +1,7 @@
 {
-  "name": "Fatagram - Social App",
-  "short_name": "Fatagram",
-  "description": "Fatagram - Connect with your friends and share moments",
+  "name": "Fawe - Social App",
+  "short_name": "Fawe",
+  "description": "Fawe - Connect with your friends and share moments",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
@@ -11,7 +11,7 @@
   "categories": ["social", "lifestyle"],
   "screenshots": [
     {
-      "src": "/vite.svg",
+      "src": "/svgs/fawe.svg",
       "sizes": "540x720",
       "type": "image/svg+xml",
       "form_factor": "narrow"
@@ -19,25 +19,25 @@
   ],
   "icons": [
     {
-      "src": "/vite.svg",
+      "src": "/svgs/fawe.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/vite.svg",
+      "src": "/svgs/fawe.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "any"
     },
     {
-      "src": "/vite.svg",
+      "src": "/svgs/fawe.svg",
       "sizes": "192x192",
       "type": "image/svg+xml",
       "purpose": "maskable"
     },
     {
-      "src": "/vite.svg",
+      "src": "/svgs/fawe.svg",
       "sizes": "512x512",
       "type": "image/svg+xml",
       "purpose": "maskable"
@@ -51,7 +51,7 @@
       "url": "/chat",
       "icons": [
         {
-          "src": "/vite.svg",
+          "src": "/svgs/fawe.svg",
           "sizes": "192x192",
           "type": "image/svg+xml"
         }

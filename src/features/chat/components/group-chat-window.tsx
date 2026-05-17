@@ -18,7 +18,7 @@ export const GroupChatWindow: React.FC<GroupChatWindowProps> = ({ className }) =
           <div key={id} className="w-[350px] flex-shrink-0">
             <ChatPanel
               conversationId={id}
-              className="h-[500px] w-[350px] rounded-t-xl"
+              className="h-[500px] w-[350px] rounded-t-xl border border-bg-fourth border-b-0 shadow-lg"
               headerRight={
                 <div className="flex gap-2">
                   <MiniButton sz="sm" onClick={() => toggleMinimize(id)}>

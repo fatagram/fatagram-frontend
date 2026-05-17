@@ -114,7 +114,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
           };
           dispatch({ type: "LOGIN", payload });
           try {
-            localStorage.setItem("fatagram:user", JSON.stringify(payload));
+            localStorage.setItem("fawe:user", JSON.stringify(payload));
           } catch (e) {
             /* ignore storage errors */
           }
@@ -126,7 +126,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
     onSuccess: () => {
       dispatch({ type: "LOGOUT" });
       try {
-        localStorage.removeItem("fatagram:user");
+        localStorage.removeItem("fawe:user");
         convManager.clearAll();
         // messageManager.clearAll();
       } catch (e) {
@@ -150,7 +150,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
             };
             dispatch({ type: "LOGIN", payload });
             try {
-              localStorage.setItem("fatagram:user", JSON.stringify(payload));
+              localStorage.setItem("fawe:user", JSON.stringify(payload));
             } catch (e) {
               /* ignore */
             }
@@ -205,7 +205,7 @@ export const AuthProvider: FC<AuthProviderProps> = ({
   useEffect(() => {
     if (!state.userId) {
       try {
-        const raw = localStorage.getItem("fatagram:user");
+        const raw = localStorage.getItem("fawe:user");
         if (raw) {
           const parsed = JSON.parse(raw) as { userId?: string; urlName?: string; lang?: string };
           if (parsed?.userId) {

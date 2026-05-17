@@ -2,12 +2,12 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8" />
-    <link rel="icon" type="image/svg+xml" href="/vite.svg" />
+    <link rel="icon" type="image/svg+xml" href="/svgs/logo-nobg-color.svg" />
     <meta
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no"
     />
-    <title>Fatagram</title>
+    <title>Fawe</title>
     <meta name="theme-color" content="#ffffff" />
     <meta name="mobile-web-app-capable" content="yes" />
     <meta name="apple-mobile-web-app-capable" content="yes" />
@@ -15,19 +15,7 @@
     <script>
       (function () {
         try {
-          var validThemes = [
-            "light",
-            "dark",
-            "universe",
-            "neon",
-            "dark-sea",
-            "dark-yellow",
-            "light-yellow-pink",
-            "pastel-yellow-pink",
-            "dark-red",
-            "emerald",
-            "aurora",
-          ];
+          var validThemes = ["light", "dark", "light-old", "dark-old"];
           var theme = localStorage.getItem("theme");
           if (!theme || validThemes.indexOf(theme) === -1) {
             var prefersDark =
@@ -40,17 +28,10 @@
 
           // Set status bar color to match navbar/background (bg-main)
           var themeToColor = {
-            light: "#ffffff",
-            dark: "#000000",
-            universe: "#0f172a",
-            neon: "#0a0a0a",
-            "dark-sea": "#022c22",
-            "dark-yellow": "#1c1917",
-            "light-yellow-pink": "#ffffff",
-            "pastel-yellow-pink": "#fff7d9",
-            "dark-red": "#0c0a0a",
-            emerald: "#022c22",
-            aurora: "#031220",
+            light: "#fff8f5",
+            dark: "#181416",
+            "light-old": "#ffffff",
+            "dark-old": "#000000",
           };
           var color = themeToColor[theme] || "#ffffff";
           var meta = document.querySelector('meta[name="theme-color"]');

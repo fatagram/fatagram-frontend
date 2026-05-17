@@ -4,7 +4,7 @@
     "title2": "khoảnh khắc",
     "title3": "Kết nối",
     "title4": "mọi nơi",
-    "subtitle": "Fatagram là nền tảng nhắn tin thế hệ mới, nơi bạn có thể lưu giữ và chia sẻ những kỷ niệm tuyệt vời nhất với bạn bè qua giao diện hiện đại, mượt mà và an toàn.",
+    "subtitle": "Fawe là nền tảng nhắn tin thế hệ mới, nơi bạn có thể lưu giữ và chia sẻ những kỷ niệm tuyệt vời nhất với bạn bè qua giao diện hiện đại, mượt mà và an toàn.",
     "cta": "Bắt đầu ngay",
     "login": "Đăng nhập"
   },
@@ -24,12 +24,12 @@
   },
   "footer": {
     "cta": {
-      "title": "Sẵn sàng kết nối cùng Fatagram?",
+      "title": "Sẵn sàng kết nối cùng Fawe?",
       "desc": "Tham gia ngay hôm nay để trải nghiệm không gian trò chuyện hiện đại và bảo mật nhất.",
       "signup": "Đăng ký miễn phí",
       "learnMore": "Tìm hiểu thêm"
     },
-    "branding": "Fatagram - Nơi lưu giữ những khoảnh khắc quý giá và kết nối mọi người ở bất cứ đâu. Giao diện mượt mà, bảo mật tuyệt đối.",
+    "branding": "Fawe - Nơi lưu giữ những khoảnh khắc quý giá và kết nối mọi người ở bất cứ đâu. Giao diện mượt mà, bảo mật tuyệt đối.",
     "categories": {
       "products": "Sản phẩm",
       "company": "Công ty",
@@ -58,7 +58,7 @@
       "copyright": "Bản quyền",
       "privacySettings": "Cài đặt quyền riêng tư"
     },
-    "copyright": "© {{year}} Fatagram Team. Nơi lưu giữ thanh xuân.",
+    "copyright": "© {{year}} Fawe Team. Nơi lưu giữ thanh xuân.",
     "language": "Tiếng Việt"
   }
 }

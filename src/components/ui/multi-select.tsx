@@ -1,7 +1,7 @@
 import { Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { useState } from "react";
+import { useState, useEffect, useRef } from "react";
 import InfiniteScrollFlex from "./utils/infinite-scroll-flex";
 
 interface MultiSelectProps extends ComponentProps {
@@ -18,6 +18,8 @@ interface MultiSelectProps extends ComponentProps {
   optionClassName?: string;
   canRemoveDefaultSelected?: boolean;
   isLoading?: boolean;
+  searchElement?: React.ReactNode;
+  emptyComponent?: React.ReactNode;
 }
 
 export const MultiSelect: React.FC<MultiSelectProps> = ({
@@ -35,11 +37,20 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
   optionClassName,
   canRemoveDefaultSelected = false,
   isLoading,
+  searchElement,
+  emptyComponent,
 }) => {
+  const selectedContainerRef = useRef<HTMLDivElement | null>(null);
   const [selected, setSelected] = useState<{ item: any; value: any }[]>([]);
   const [defaultSelected, setDefaultSelected] = useState<{ item: any; value: any }[]>(
     _defaultSelected || [],
   );
+
+  useEffect(() => {
+    if (selectedContainerRef.current) {
+      selectedContainerRef.current.scrollTop = selectedContainerRef.current.scrollHeight;
+    }
+  }, [selected, defaultSelected]);
 
   const handleRemoveSelected = (value: any) => {
     if (canRemoveDefaultSelected) {
@@ -56,7 +67,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
         className,
       )}
     >
-      <div className={clsx("mb-2 gap-4", selectClassName)}>
+      <div ref={selectedContainerRef} className={clsx("mb-2 gap-4", selectClassName)}>
         {[...defaultSelected, ...selected].map((item, index) => {
           const isDefault = defaultSelected.some((s) => s.value === item.value);
           return (
@@ -67,6 +78,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
             </div>
           );
         })}
+        {searchElement}
       </div>
       <div className={clsx("flex flex-col flex-1 gap-1 overflow-y-auto", optionClassName)}>
         <InfiniteScrollFlex
@@ -74,6 +86,7 @@ export const MultiSelect: React.FC<MultiSelectProps> = ({
           onLoadMore={onLoadMore}
           hasMore={hasMore}
           itemKey={(item) => item.value}
+          emptyComponent={emptyComponent}
           itemTemplate={(option, index) => {
             const isSelected =
               selected.some((s) => s.value === option.value) ||

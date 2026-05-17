@@ -68,42 +68,76 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
     <div
       key={conversation.id}
       className={clsx(
-        "flex gap-2 px-1 py-3",
-        "hover:bg-bg-fourth rounded-lg transition-colors",
-        "cursor-pointer",
-        conversation.id === currentConversationId && "bg-bg-fourth",
+        "group flex gap-3 p-3 my-1",
+        "hover:bg-bg-third/60 rounded-xl transition-all duration-300 ease-out",
+        "cursor-pointer select-none",
+        conversation.id === currentConversationId && "bg-bg-third",
       )}
       onClick={() => onClick()}
     >
-      <Avatar src={conversation.avatarUrl ?? ""} alt="Conversation Avatar" sz="md" />
-      <div className="flex flex-col gap-1 min-w-0 justify-center">
-        <Text
-          sz="sm"
-          weight={isUnread ? "bold" : "regular"}
-          className={clsx("line-clamp-1 truncate max-w-full")}
-        >
-          {renderConversationName(conversation)}
-        </Text>
-        <div className="flex items-center opacity-80">
-          <Text sz="xs" className="truncate max-w-full" weight={isUnread ? "bold" : "regular"}>
-            {renderMessagePreview()}
+      <div className="relative shrink-0">
+        <Avatar
+          src={conversation.avatarUrl ?? ""}
+          alt="Conversation Avatar"
+          sz="md"
+          className="group-hover:scale-105 transition-transform duration-300 border border-bg-fourth/30"
+        />
+      </div>
+
+      <div className="flex flex-col flex-1 min-w-0 justify-between py-[2px]">
+        <div className="flex justify-between items-baseline gap-2">
+          <Text
+            sz="sm"
+            weight={isUnread ? "bold" : "medium"}
+            className={clsx(
+              "line-clamp-1 truncate max-w-full font-semibold",
+              isUnread ? "text-text-main" : "text-text-main/90",
+            )}
+          >
+            {renderConversationName(conversation)}
           </Text>
-          <Text sz="xs" className="mx-2 shrink-0" weight={isUnread ? "bold" : "regular"}>
-            •
-          </Text>
-          <Text sz="xs" className="shrink-0" weight={isUnread ? "bold" : "regular"}>
+          <Text
+            sz="xs"
+            className={clsx(
+              "shrink-0 font-normal",
+              isUnread ? "text-primary-500 font-semibold" : "text-text-third",
+            )}
+          >
             {formatTime(conversation.lastMessage?.createdAt ?? "")}
           </Text>
         </div>
-      </div>
-      <div className="flex-1 flex items-center justify-end gap-2">
-        {!conversation.isGroup && isOtherUserRead && !isUnread ? (
-          <Avatar sz="xs" src={conversation.avatarUrl || ""} alt={"seen"} className="my-auto" />
-        ) : null}
 
-        {Boolean(isUnread) === true && (
-          <div aria-hidden className={clsx("w-2 h-2 rounded-full", "my-auto", "bg-primary-500")} />
-        )}
+        <div className="flex justify-between items-center gap-2 mt-1">
+          <Text
+            sz="xs"
+            className={clsx(
+              "truncate max-w-full leading-normal",
+              isUnread ? "text-text-main font-semibold" : "text-text-third",
+            )}
+          >
+            {renderMessagePreview()}
+          </Text>
+
+          <div className="shrink-0 flex items-center justify-end min-w-[20px]">
+            {Boolean(isUnread) === true ? (
+              <div
+                aria-hidden
+                className={clsx(
+                  "w-[18px] h-[18px] rounded-full bg-primary-500 flex items-center justify-center shadow-sm",
+                )}
+              >
+                <span className="text-[10px] font-bold text-white leading-none">{unreadLabel}</span>
+              </div>
+            ) : !conversation.isGroup && isOtherUserRead && !isUnread ? (
+              <Avatar
+                sz="xs"
+                src={conversation.avatarUrl || ""}
+                alt="seen"
+                className="opacity-80 border border-bg-fourth/50 shadow-sm"
+              />
+            ) : null}
+          </div>
+        </div>
       </div>
     </div>
   );

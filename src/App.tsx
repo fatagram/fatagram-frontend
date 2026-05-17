@@ -43,7 +43,7 @@ function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userD
       client={queryClientRef.current}
       persistOptions={{
         persister: persisterRef.current,
-        buster: "fatagram-query-cache-v1",
+        buster: "fawe-query-cache-v1",
         maxAge: 1000 * 60 * 60 * 24,
         dehydrateOptions: {
           shouldDehydrateQuery,

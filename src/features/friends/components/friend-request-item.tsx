@@ -36,7 +36,8 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
       className={clsx(
         "flex flex-col items-start bg-bg-main",
         "h-auto",
-        "rounded-2xl shadow-lg p-4 gap-1",
+        "rounded-2xl border-2 border-bg-fourth p-4 gap-1",
+        "hover:border-primary-500/40 transition-colors duration-300",
       )}
     >
       <div className="w-full cursor-pointer" onClick={handleNavigate}>

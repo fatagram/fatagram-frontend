@@ -31,21 +31,25 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
       className={clsx(
         "relative bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
         "animate-dropdown-slide origin-top scrollbar-hide !w-[380px]",
-        "max-h-[500px]",
+        "max-h-[650px]",
         className,
       )}
       ref={ref}
     >
-      <div className="absolute top-0 right-0 flex mt-3 mr-3 gap-2">
-        <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
-          <i className="fa-regular fa-pen-to-square" />
-        </MiniButton>
-      </div>
-      <div className="flex items-center justify-between px-2 pt-2">
-        <Text sz="lg" weight="bold">
-          {t("common:conversations.title")}
-        </Text>
-      </div>
+      {tab === "list" && (
+        <>
+          <div className="absolute top-0 right-0 flex mt-4 mr-4 gap-2">
+            <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
+              <i className="fa-regular fa-pen-to-square" />
+            </MiniButton>
+          </div>
+          <div className="flex items-center justify-between px-5 pt-4 pb-1">
+            <Text sz="lg" weight="bold">
+              {t("common:conversations.title")}
+            </Text>
+          </div>
+        </>
+      )}
       {tab === "list" && (
         <ChatList
           className="overflow-y-auto pt-0 h-full"
@@ -54,16 +58,16 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
       )}
       {tab === "create" && (
         <CreateGroupChat
-          className="overflow-hidden h-full max-h-[90%] w-full"
+          className="overflow-hidden h-full max-h-[90%] w-full pt-4"
           onTurnBack={() => setTab("list")}
           onCreateSuccess={() => setTab("list")}
         />
       )}
 
       {tab === "list" && (
-        <div className="flex justify-center border-t border-text-main/10 pt-2 pb-1 px-2 mt-auto">
+        <div className="flex justify-center border-t border-text-main/10 pt-2 pb-2 px-3 mt-auto">
           <button
-            className="p-2 w-full rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center justify-center gap-2"
+            className="p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2"
             onClick={() => {
               const firstId = useConversationStore.getState().conversations?.[0]?.id;
               navigate(`/fatalk/${firstId}`);

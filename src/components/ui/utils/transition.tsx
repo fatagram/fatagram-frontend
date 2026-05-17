@@ -11,7 +11,9 @@ export enum AnimationName {
   SoftFade = "SoftFade",
   Fade = "Fade",
   SlideRightToLeft = "SlideRightToLeft",
+  SlideRightToLeftFull = "SlideRightToLeftFull",
   SlideLeftToRight = "SlideLeftToRight",
+  SlideLeftToRightFull = "SlideLeftToRightFull",
   DropdownSlide = "DropdownSlide",
   SlideUp = "SlideUp",
   Opacity = "Opacity",
@@ -35,9 +37,19 @@ export const AnimationLib: Record<AnimationName, AnimationType> = {
     out: "animate-right-to-left-out",
     duration: 300,
   },
+  SlideRightToLeftFull: {
+    in: "animate-slide-in-right-full",
+    out: "animate-slide-out-left-full",
+    duration: 300,
+  },
   SlideLeftToRight: {
     in: "animate-left-to-right-in",
     out: "animate-left-to-right-out",
+    duration: 300,
+  },
+  SlideLeftToRightFull: {
+    in: "animate-slide-in-left-full",
+    out: "animate-slide-out-right-full",
     duration: 300,
   },
   DropdownSlide: {
@@ -102,7 +114,15 @@ export default function Transition({
     }, animDuration);
   }, [show]);
 
-  const onAnimationEnd = () => {
+  const onAnimationEnd = (e: React.AnimationEvent) => {
+    if (e.target !== e.currentTarget) return;
+
+    // Ignore ending events of IN animations when we are transitioning out
+    const animName = e.animationName.toLowerCase();
+    if (animName.includes("in")) {
+      return;
+    }
+
     if (!show) {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
       setRender(false);

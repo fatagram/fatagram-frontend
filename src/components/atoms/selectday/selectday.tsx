@@ -56,7 +56,7 @@ export const SelectDay = forwardRef<HTMLInputElement, SelectDayProps>(
           disabled={disabled}
           className={clsx(
             "w-full border-[2px] text-text-main font-normal rounded-xl outline-none",
-            "caret-primary-500 selection:!bg-primary-600 shadow-sm",
+            "caret-primary-500 shadow-sm",
             "transition-all duration-300 ease-out",
             sizeClasses[sz].mainText,
             disabled

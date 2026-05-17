@@ -7,6 +7,7 @@ import { useTranslation } from "react-i18next";
 export const useRenderConversationContent = () => {
   const { t } = useTranslation();
   const { userId } = useAuth();
+
   const renderSystemMessage = (message: Message | MessageResponseDto) => {
     if (message.type === MessageType.CreateGroup) {
       const { creatorName, creatorId } = message.metadata || {};

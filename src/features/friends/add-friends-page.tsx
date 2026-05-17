@@ -5,7 +5,6 @@ import { Textbox } from "@/components/atoms";
 import SearchUserItem, { SearchUserSkeleton } from "./components/search-user-item";
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { NotFound } from "@/features/components/not-found";
-import clsx from "clsx";
 import { useMobile } from "@/hooks/use-mobile";
 import { useSearchUsers } from "@/features/hooks/use-user";
 
@@ -47,19 +46,14 @@ const AddFriendsPage: React.FC = () => {
             sz="sm"
             className="bg-bg-second"
           />
-          {isFetching && !isFetchingNextPage && (
-            <div className="absolute right-4 top-1/2 -translate-y-1/2">
-              <i className="fa-solid fa-spinner fa-spin text-primary-500 text-sm" />
-            </div>
-          )}
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-hide px-1 min-h-0">
+        <div className="flex-1 overflow-y-auto scrollbar-hide px-1 min-h-0 [--item-min-width:100%] sm:[--item-min-width:200px]">
           <InfiniteScrollGrid
-            itemMinWidth={isMobile ? "100%" : "200px"}
+            itemMinWidth="var(--item-min-width)"
             items={showSkeletons ? [] : users}
             onLoadMore={fetchNextPage}
-            className={clsx("w-full", isMobile ? "gap-2" : "gap-4")}
+            className="w-full gap-2 sm:gap-4"
             itemTemplate={(item: any) => (
               <SearchUserItem
                 id={item.id}

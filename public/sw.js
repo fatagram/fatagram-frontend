@@ -1,5 +1,12 @@
-const CACHE_NAME = "fatagram-cache-v3";
-const ASSETS_TO_CACHE = ["/", "/index.html", "/manifest.json", "/vite.svg"];
+const CACHE_NAME = "fawe-cache-v3";
+const ASSETS_TO_CACHE = [
+  "/",
+  "/index.html",
+  "/manifest.json",
+  "/svgs/fawe.svg",
+  "/svgs/logo-nobg.svg",
+  "/svgs/logo-nobg-color.svg"
+];
 
 self.addEventListener("install", (event) => {
   self.skipWaiting();

@@ -5,6 +5,7 @@
   },
   "navbar": {
     "profileMenu": {
+      "title": "Account",
       "settings": "Settings",
       "logout": "Logout",
       "personalPage": "View personal page"
@@ -45,16 +46,8 @@
   "themes": {
     "light": "Light",
     "dark": "Dark",
-    "universe": "Universe",
-    "neon": "Neon",
-    "darkSea": "Dark Sea",
-    "darkBlue": "Dark Blue",
-    "darkYellow": "Dark Yellow",
-    "lightYellowPink": "Light Yellow Pink",
-    "pastelYellowPink": "Pastel Yellow & Pink (Cute)",
-    "darkRed": "Dark Red",
-    "emerald": "Emerald",
-    "aurora": "Aurora (Northern Lights)"
+    "lightOld": "Light (old version)",
+    "darkOld": "Dark (old version)"
   },
   "conversations": {
     "title": "Conversations",
@@ -80,6 +73,8 @@
     "enterGroupNameOptional": "Enter group name (optional)",
     "loadingOldMessages": "Loading messages...",
     "createGroupChat": "Create group chat",
+    "searchPlaceholder": "Search...",
+    "noUsersFound": "No users found",
     "noSearchResults": "No results found",
     "noSearchResultsMessage": "Try searching with a different keyword",
     "settings": {
