@@ -69,7 +69,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
         className,
       )}
     >
-      {isShowLogo && <Logo sz="md" />}
+      {isShowLogo && <Logo sz="xl" />}
       <Text
         weight="extrabold"
         className={clsx(

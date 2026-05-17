@@ -25,10 +25,10 @@ export const sizeClasses: Record<Size, { logo: string; slogan: string }> = {
 
 export const sizeSpecs: Record<Size, { dimension: number; margin: number; sloganMargin: number }> =
   {
-    sm: { dimension: 36, margin: -5, sloganMargin: 2 },
-    md: { dimension: 56, margin: -8, sloganMargin: 4 },
-    lg: { dimension: 96, margin: -14, sloganMargin: 8 },
-    xl: { dimension: 144, margin: -20, sloganMargin: 12 },
+    sm: { dimension: 20, margin: -5, sloganMargin: 2 },
+    md: { dimension: 28, margin: -8, sloganMargin: 4 },
+    lg: { dimension: 48, margin: -14, sloganMargin: 8 },
+    xl: { dimension: 72, margin: -20, sloganMargin: 12 },
   };
 
 export interface LogoProps extends ComponentProps<HTMLDivElement> {
