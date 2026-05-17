@@ -252,7 +252,7 @@ const DefaultLayout = () => {
       {isMobile && !isAuthenticated && (
         <div
           className={clsx(
-            "flex flex-col fixed bottom-0 left-0 right-0 bg-bg-sixth/80 backdrop-blur-sm py-12 px-6",
+            "flex flex-col fixed bottom-0 left-0 right-0 bg-bg-sixth/80 backdrop-blur-sm py-12 px-6 z-[9999]",
             "gap-6 border-t-2 border-primary-500/50 rounded-t-2xl shadow-lg",
           )}
         >
