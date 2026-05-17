@@ -13,7 +13,7 @@
     {
       "src": "/logo-nobg-color-512.png",
       "sizes": "540x720",
-      "type": "image/svg+xml",
+      "type": "image/png",
       "form_factor": "narrow"
     }
   ],
