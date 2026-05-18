@@ -266,7 +266,9 @@ export class ConversationManager {
       }
 
       if (isMine) {
-        this.markAsSeen(convId, newMsg.sequenceNumber!);
+        conv.myLastSeenMessageSeq = newMsg.sequenceNumber!;
+        conv.unreadMessageCount = 0;
+        useConversationStore.getState().updateUserSeenSequence(convId, newMsg.sequenceNumber!);
       } else {
         conv.unreadMessageCount = (conv.unreadMessageCount || 0) + 1;
       }
