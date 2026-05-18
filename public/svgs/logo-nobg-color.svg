@@ -1,16 +1,15 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="100 70 220 220" width="100%" height="100%">
   <defs>
-    <linearGradient id="logoGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffc75f" />
-      <stop offset="45%" stop-color="#ff5d8f" />
-      <stop offset="100%" stop-color="#ffbe0b" />
+    <linearGradient id="logoGrad" x1="0%" y1="100%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#ff6b8b" />
+      <stop offset="50%" stop-color="#ff6b8b" />
+      <stop offset="100%" stop-color="#3ebf6a" />
     </linearGradient>
     <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#e69d00" flood-opacity="0.3" />
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#ff6b8b" flood-opacity="0.25" />
     </filter>
   </defs>
 
-  <!-- Chữ W nét đơn đặc thanh đậm siêu mượt, bo tròn sinusoidal hoàn hảo -->
   <path
     transform="translate(20, 0)"
     d="M 94 160 
@@ -31,7 +30,6 @@
     filter="url(#softShadow)"
   />
 
-  <!-- Trái tim được đặt nằm ngay bên trên râu phải của chữ W -->
   <g transform="translate(262, 104) rotate(15) scale(2.0)">
     <path
       d="M 10 20 
@@ -39,7 +37,7 @@
              A 5 5 0 0 1 10 5 
              A 5 5 0 0 1 20 5 
              Q 20 12 10 20 Z"
-      fill="url(#logoGrad)"
+      fill="#3ebf6a"
       filter="url(#softShadow)"
     />
   </g>

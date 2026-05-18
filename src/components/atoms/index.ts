@@ -15,3 +15,5 @@ export * from "./footer";
 export * from "./selectday";
 export * from "./select-file";
 export * from "./dropdown";
+export * from "./tooltip";
+export type { Size } from "../common/size";

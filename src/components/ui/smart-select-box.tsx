@@ -39,7 +39,7 @@ export function SmartSelectBox({
     const selectedItem = options.find((opt) => opt.key === selectedOption);
 
     return (
-      <div className="relative w-fit">
+      <div className="relative w-fit select-none">
         {showTitle && title && (
           <label
             className={clsx(

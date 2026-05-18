@@ -69,6 +69,7 @@ export const ChatAddonPicker = ({
   const [activeTab, setActiveTab] = useState<TabType>("emoji");
   const [mounted, setMounted] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
+  const [shouldRenderEmoji, setShouldRenderEmoji] = useState(false);
   const debouncedSearch = useDebounce(searchTerm, 500);
 
   const {
@@ -84,6 +85,17 @@ export const ChatAddonPicker = ({
   useEffect(() => {
     setMounted(true);
   }, []);
+
+  useEffect(() => {
+    if (show) {
+      const timer = setTimeout(() => {
+        setShouldRenderEmoji(true);
+      }, 250);
+      return () => clearTimeout(timer);
+    } else {
+      setShouldRenderEmoji(false);
+    }
+  }, [show]);
 
   useEffect(() => {
     if (!show || activeTab !== "gif" || !hasNextPage || isFetchingNextPage) return;
@@ -134,7 +146,7 @@ export const ChatAddonPicker = ({
   ];
 
   const renderContent = () => (
-    <div className="flex flex-col h-full w-full flex-1 min-h-0">
+    <div className="flex flex-col h-full w-full flex-1 min-h-0 select-none">
       <div className="flex border-b border-border-main bg-bg-secondary p-1 gap-1 flex-shrink-0">
         {tabs.map((tab) => (
           <button
@@ -154,22 +166,33 @@ export const ChatAddonPicker = ({
 
       <div className="flex-1 w-full relative bg-bg-main min-h-0 overflow-hidden flex flex-col">
         {activeTab === "emoji" && (
-          <div className="absolute inset-0">
-            {mounted && (
-              <EmojiPicker
-                onEmojiClick={(emojiData) => {
-                  onEmojiClick(emojiData.emoji);
-                }}
-                style={emojiStyle}
-                width="100%"
-                height="100%"
-                theme={emojiTheme}
-                searchDisabled={false}
-                autoFocusSearch={false}
-                skinTonesDisabled
-                lazyLoadEmojis={true}
-                previewConfig={{ showPreview: false }}
-              />
+          <div className="absolute inset-0 flex items-center justify-center">
+            {mounted && shouldRenderEmoji ? (
+              <>
+                <style>{`
+                  .EmojiPickerReact, .EmojiPickerReact * {
+                    font-family: var(--font-sans) !important;
+                  }
+                `}</style>
+                <EmojiPicker
+                  onEmojiClick={(emojiData) => {
+                    onEmojiClick(emojiData.emoji);
+                  }}
+                  style={emojiStyle}
+                  width="100%"
+                  height="100%"
+                  theme={emojiTheme}
+                  searchDisabled={false}
+                  autoFocusSearch={false}
+                  skinTonesDisabled
+                  lazyLoadEmojis={true}
+                  previewConfig={{ showPreview: false }}
+                />
+              </>
+            ) : (
+              <div style={{ color: "rgb(var(--primary-500))" }} className="text-lg">
+                <i className="fa-solid fa-circle-notch animate-spin" />
+              </div>
             )}
           </div>
         )}
@@ -226,7 +249,7 @@ export const ChatAddonPicker = ({
       show={show}
       animation={AnimationLib.SlideUp}
       className={clsx(
-        "bg-bg-main border-border-main overflow-hidden flex flex-col",
+        "bg-bg-main border-border-main overflow-hidden flex flex-col select-none",
         "w-full border-t flex-shrink-0 h-[450px]",
         "sm:absolute sm:bottom-full sm:right-0 sm:mb-2 sm:z-50 sm:border sm:rounded-xl sm:shadow-lg sm:w-80 sm:h-[400px] sm:origin-bottom-right",
       )}

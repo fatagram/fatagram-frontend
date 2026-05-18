@@ -296,11 +296,11 @@
   }
 
   .animate-slide-up-in {
-    animation: slide-up-in ease-out forwards;
+    animation: slide-up-in 250ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 
   .animate-slide-up-out {
-    animation: slide-up-out ease-out forwards;
+    animation: slide-up-out 200ms cubic-bezier(0.4, 0, 0.2, 1) forwards;
   }
 }
 

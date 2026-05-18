@@ -2,6 +2,7 @@ import { createContext, useContext, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 
 const ThemeList = [
+  "system",
   "light",
   "dark",
   "light-old",
@@ -20,7 +21,7 @@ export interface ThemeContextType {
 
 const ThemeContext = createContext<ThemeContextType>({
   availableThemes: [],
-  theme: "light",
+  theme: "system",
   setTheme: () => {},
 });
 
@@ -43,7 +44,7 @@ function getInitialTheme(): Theme {
     }
   }
 
-  return "light";
+  return "system";
 }
 
 export function ThemeProvider({ children }: ThemeProviderProps) {
@@ -51,6 +52,7 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
   const t = useTranslation().t;
 
   const availableThemes: { key: Theme; label: string }[] = [
+    { key: "system", label: t("common:themes:system") },
     { key: "light", label: t("common:themes:light") },
     { key: "dark", label: t("common:themes:dark") },
     { key: "light-old", label: t("common:themes:lightOld") },
@@ -61,35 +63,63 @@ export function ThemeProvider({ children }: ThemeProviderProps) {
 
   useEffect(() => {
     const root = window.document.documentElement;
-    root.setAttribute("data-theme", theme);
-    localStorage.setItem("theme", theme);
 
-    // Keep PWA status bar color (meta theme-color) in sync with navbar/theme.
-    // Navbar uses `bg-bg-main` => CSS var `--bg-main`.
-    const updateThemeColor = () => {
-      let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
-      if (!meta) {
-        meta = document.createElement("meta");
-        meta.setAttribute("name", "theme-color");
-        document.head.appendChild(meta);
+    const resolveAndApplyTheme = () => {
+      let resolvedTheme = theme;
+      if (theme === "system") {
+        const isDarkSystem = window.matchMedia("(prefers-color-scheme: dark)").matches;
+        resolvedTheme = isDarkSystem ? "dark" : "light";
       }
 
-      const raw = getComputedStyle(root).getPropertyValue("--bg-main").trim();
-      // Expected formats: "255 255 255" (preferred) or "255, 255, 255"
-      const parts = raw.includes(",") ? raw.split(",") : raw.split(/\s+/);
-      const nums = parts
-        .map((p) => Number.parseInt(p.trim(), 10))
-        .filter((n) => Number.isFinite(n));
+      root.setAttribute("data-theme", resolvedTheme);
 
-      if (nums.length < 3) return;
-      const [r, g, b] = nums;
-      const toHex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, "0");
-      const hex = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
-      meta.setAttribute("content", hex);
+      const updateThemeColor = () => {
+        let meta = document.querySelector('meta[name="theme-color"]') as HTMLMetaElement | null;
+        if (!meta) {
+          meta = document.createElement("meta");
+          meta.setAttribute("name", "theme-color");
+          document.head.appendChild(meta);
+        }
+
+        const raw = getComputedStyle(root).getPropertyValue("--bg-main").trim();
+        const parts = raw.includes(",") ? raw.split(",") : raw.split(/\s+/);
+        const nums = parts
+          .map((p) => Number.parseInt(p.trim(), 10))
+          .filter((n) => Number.isFinite(n));
+
+        if (nums.length < 3) return;
+        const [r, g, b] = nums;
+        const toHex = (n: number) => Math.max(0, Math.min(255, n)).toString(16).padStart(2, "0");
+        const hex = `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+        meta.setAttribute("content", hex);
+      };
+
+      requestAnimationFrame(updateThemeColor);
     };
 
-    // Allow CSS variables to apply after data-theme is set.
-    requestAnimationFrame(updateThemeColor);
+    resolveAndApplyTheme();
+    localStorage.setItem("theme", theme);
+
+    if (theme === "system") {
+      const mediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
+      const listener = () => {
+        resolveAndApplyTheme();
+      };
+
+      if (mediaQuery.addEventListener) {
+        mediaQuery.addEventListener("change", listener);
+      } else {
+        mediaQuery.addListener(listener);
+      }
+
+      return () => {
+        if (mediaQuery.removeEventListener) {
+          mediaQuery.removeEventListener("change", listener);
+        } else {
+          mediaQuery.removeListener(listener);
+        }
+      };
+    }
   }, [theme]);
 
   return (

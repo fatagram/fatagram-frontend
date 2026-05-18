@@ -1,7 +1,7 @@
 {
   "language": {
-    "en": "EN Tiếng Anh",
-    "vi": "VN Tiếng Việt"
+    "en": "Tiếng Anh",
+    "vi": "Tiếng Việt"
   },
   "navbar": {
     "profileMenu": {
@@ -44,6 +44,7 @@
     }
   },
   "themes": {
+    "system": "Hệ thống",
     "light": "Sáng",
     "dark": "Tối",
     "lightOld": "Sáng (bản cũ)",

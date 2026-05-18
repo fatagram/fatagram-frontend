@@ -68,10 +68,13 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
     <div
       key={conversation.id}
       className={clsx(
-        "group flex gap-3 p-3 my-1",
-        "hover:bg-bg-third/60 rounded-xl transition-all duration-300 ease-out",
+        "group flex gap-3 p-3 pl-0 sm:pl-3 my-1 rounded-xl transition-all duration-300 ease-out",
         "cursor-pointer select-none",
-        conversation.id === currentConversationId && "bg-bg-third",
+        conversation.id === currentConversationId
+          ? "bg-bg-third"
+          : isUnread
+            ? "bg-primary-500/[0.04] hover:bg-bg-third/60"
+            : "hover:bg-bg-third/60",
       )}
       onClick={() => onClick()}
     >
@@ -96,15 +99,14 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
           >
             {renderConversationName(conversation)}
           </Text>
-          <Text
-            sz="xs"
+          <span
             className={clsx(
-              "shrink-0 font-normal",
-              isUnread ? "text-primary-500 font-semibold" : "text-text-third",
+              "text-xs shrink-0 font-normal",
+              isUnread ? "text-primary-500 font-semibold" : "text-text-secondary",
             )}
           >
             {formatTime(conversation.lastMessage?.createdAt ?? "")}
-          </Text>
+          </span>
         </div>
 
         <div className="flex justify-between items-center gap-2 mt-1">

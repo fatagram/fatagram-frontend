@@ -1,22 +1,19 @@
 @layer base {
   :root {
-    /* Base */
     --font-size: 16px;
     --border-radius: 8px;
 
-    /* Signature Gradients (Unique Dual-Tone Honey Gold & Sunset Pink) */
     --gradient-main: repeating-linear-gradient(
       45deg,
-      #ffc75f 0%,
-      #ff5d8f 35%,
-      #ffbe0b 70%,
-      #ff5d8f 85%,
-      #ffc75f 100%
+      #ff6b8b 0%,
+      #ff9ebb 25%,
+      #86e39c 50%,
+      #3ebf6a 75%,
+      #ff6b8b 100%
     );
 
-    --gradient-second: repeating-linear-gradient(45deg, #ffc75f 0%, #ff87ab 50%, #ffc75f 100%);
+    --gradient-second: repeating-linear-gradient(45deg, #ff8aa3 0%, #a8f5b8 50%, #ff8aa3 100%);
 
-    /* Semantic (status colors) - RGB format for alpha support */
     --success: 34 197 94;
     --warning: 245 190 73;
     --error: 239 68 68;
@@ -27,175 +24,153 @@
     --text-other-msg: 17 24 39;
   }
 
-  /* ========================================================== */
-  /* NEW LIGHT THEME - Warm Alabaster (2% Yellow) & Coral Pink  */
-  /* ========================================================== */
   :root,
   [data-theme="light"] {
-    /* Signature Gradients */
     --gradient-main: repeating-linear-gradient(
       45deg,
-      #ffc75f 0%,
-      #ff5d8f 35%,
-      #ffbe0b 70%,
-      #ff5d8f 85%,
-      #ffc75f 100%
+      #ff6b8b 0%,
+      #ff9ebb 25%,
+      #86e39c 50%,
+      #3ebf6a 75%,
+      #ff6b8b 100%
     );
-    --gradient-second: repeating-linear-gradient(45deg, #ffc75f 0%, #ff87ab 50%, #ffc75f 100%);
+    --gradient-second: repeating-linear-gradient(45deg, #ff8aa3 0%, #a8f5b8 50%, #ff8aa3 100%);
 
-    /* Primary colors - Sunset Coral Pink (Hồng San Hô Hoàng Hôn cực nét) */
-    --primary-50: 255 238 241;
-    --primary-100: 255 214 221;
-    --primary-200: 254 178 193;
-    --primary-300: 252 135 156;
-    --primary-400: 245 92 120;
-    --primary-500: 242 92 126;
-    --primary-600: 214 62 94;
-    --primary-700: 184 40 68;
-    --primary-800: 153 24 49;
-    --primary-900: 122 12 33;
+    --primary-50: 255 240 243;
+    --primary-100: 255 220 227;
+    --primary-200: 255 186 199;
+    --primary-300: 255 143 165;
+    --primary-400: 255 125 150;
+    --primary-500: 255 107 139;
+    --primary-600: 230 78 111;
+    --primary-700: 199 50 81;
+    --primary-800: 168 25 56;
+    --primary-900: 138 8 35;
 
-    /* Secondary colors - Premium Honey Gold/Champagne */
-    --secondary-50: 255 253 245;
-    --secondary-100: 255 248 220;
-    --secondary-200: 255 238 186;
-    --secondary-300: 255 224 130;
-    --secondary-400: 252 205 98;
-    --secondary-500: 245 190 73;
-    --secondary-600: 212 159 47;
+    --secondary-50: 240 252 243;
+    --secondary-100: 215 247 223;
+    --secondary-200: 179 237 194;
+    --secondary-300: 135 222 156;
+    --secondary-400: 92 201 122;
+    --secondary-500: 46 179 81;
+    --secondary-600: 32 150 63;
 
-    /* Text colors */
-    --text-main: 31 23 26;
-    --text-second: 69 57 60;
-    --text-third: 117 106 109;
-    --text-fourth: 166 154 157;
+    --text-main: 41 24 29;
+    --text-second: 77 54 60;
+    --text-third: 122 92 100;
+    --text-fourth: 168 138 146;
 
-    /* Chat message text colors */
     --text-my-msg: 255 255 255;
-    --text-other-msg: 31 23 26;
+    --text-other-msg: 41 24 29;
 
     --text-reverse-main: 255 255 255;
 
-    /* Background colors - Neutralized Warm Alabaster (Ám Vàng Cực Nhẹ 2%, không bị vàng chè) */
-    --bg-main: 255 253 250;
-    --bg-second: 252 250 246;
-    --bg-third: 248 245 240;
-    --bg-fourth: 242 238 232;
-    --bg-fifth: 228 223 215;
-    --bg-sixth: 255 253 250;
-    --bg-seventh: 252 249 244;
-    --bg-eighth: 247 243 237;
-    --bg-ninth: 238 233 225;
-    --bg-tenth: 218 212 202;
+    --bg-main: 255 250 251;
+    --bg-second: 252 244 246;
+    --bg-third: 247 236 239;
+    --bg-fourth: 240 224 228;
+    --bg-fifth: 224 200 206;
+    --bg-sixth: 255 252 253;
+    --bg-seventh: 252 246 248;
+    --bg-eighth: 247 238 241;
+    --bg-ninth: 238 222 227;
+    --bg-tenth: 218 194 202;
 
     --bg-overlay: rgba(0, 0, 0, 0.4);
     --bg-modal: rgba(255, 255, 255, 0.95);
     --bg-glass: rgba(255, 255, 255, 0.8);
 
     --bg-card: 255 255 255;
-    --bg-sidebar: 252 250 246;
-    --bg-header: 255 253 250;
-    --bg-footer: 252 250 246;
-    --bg-hover: 248 245 240;
-    --bg-active: 242 238 232;
-    --bg-disabled: 242 238 232;
+    --bg-sidebar: 252 244 246;
+    --bg-header: 255 250 251;
+    --bg-footer: 252 244 246;
+    --bg-hover: 247 236 239;
+    --bg-active: 240 224 228;
+    --bg-disabled: 240 224 228;
 
-    /* Button colors */
-    --btn-main: 242 92 126;
-    --btn-second: 248 245 240;
-    --btn-third: 242 238 232;
-    --btn-fourth: 228 223 215;
+    --btn-main: 255 107 139;
+    --btn-second: 247 236 239;
+    --btn-third: 240 224 228;
+    --btn-fourth: 224 200 206;
 
-    /* Border colors */
-    --border-main: 242 238 232;
-    --border-second: 228 223 215;
-    --border-focus: 242 92 126;
+    --border-main: 240 224 228;
+    --border-second: 224 200 206;
+    --border-focus: 255 107 139;
 
     --login-image: url("/images/auth_image_light.png");
   }
 
-  /* ========================================================= */
-  /* NEW DARK THEME - Dark Charcoal with Sunset Coral Accent   */
-  /* ========================================================= */
   [data-theme="dark"] {
-    /* Signature Gradients */
     --gradient-main: repeating-linear-gradient(
       45deg,
-      #ffc75f 0%,
-      #ff5d8f 35%,
-      #ffbe0b 70%,
-      #ff5d8f 85%,
-      #ffc75f 100%
+      #f25c7e 0%,
+      #f27092 25%,
+      #4cb96a 50%,
+      #30af5c 75%,
+      #f25c7e 100%
     );
-    --gradient-second: repeating-linear-gradient(45deg, #ffc75f 0%, #ff87ab 50%, #ffc75f 100%);
+    --gradient-second: repeating-linear-gradient(45deg, #f26e95 0%, #7ad18f 50%, #f26e95 100%);
 
-    /* Primary colors - Sunset Coral Pink (Hồng San Hô Hoàng Hôn cực nét) */
-    --primary-50: 255 238 241;
-    --primary-100: 255 214 221;
-    --primary-200: 254 178 193;
-    --primary-300: 252 135 156;
-    --primary-400: 245 92 120;
-    --primary-500: 242 92 126;
-    --primary-600: 214 62 94;
-    --primary-700: 184 40 68;
-    --primary-800: 153 24 49;
-    --primary-900: 122 12 33;
+    --primary-50: 255 240 243;
+    --primary-100: 255 220 227;
+    --primary-200: 255 186 199;
+    --primary-300: 255 143 165;
+    --primary-400: 255 125 150;
+    --primary-500: 255 107 139;
+    --primary-600: 230 78 111;
+    --primary-700: 199 50 81;
+    --primary-800: 168 25 56;
+    --primary-900: 138 8 35;
 
-    /* Secondary colors - Premium Honey Gold/Champagne */
-    --secondary-50: 255 253 245;
-    --secondary-100: 255 248 220;
-    --secondary-200: 255 238 186;
-    --secondary-300: 255 224 130;
-    --secondary-400: 252 205 98;
-    --secondary-500: 245 190 73;
-    --secondary-600: 212 159 47;
+    --secondary-50: 240 252 243;
+    --secondary-100: 215 247 223;
+    --secondary-200: 179 237 194;
+    --secondary-300: 135 222 156;
+    --secondary-400: 92 201 122;
+    --secondary-500: 46 179 81;
+    --secondary-600: 32 150 63;
 
-    /* Text colors */
-    --text-main: 250 242 244;
-    --text-second: 224 212 215;
-    --text-third: 163 150 153;
-    --text-fourth: 115 102 105;
+    --text-main: 253 242 245;
+    --text-second: 227 210 215;
+    --text-third: 171 148 155;
+    --text-fourth: 122 99 106;
 
     --text-reverse-main: 17 24 39;
 
-    /* Chat message text colors */
     --text-my-msg: 255 255 255;
-    --text-other-msg: 224 212 215;
+    --text-other-msg: 227 210 215;
 
-    /* Background colors - Sleek Dark with subtle gold/rose hues */
-    --bg-main: 15 13 13;
-    --bg-second: 24 20 20;
-    --bg-third: 34 29 29;
-    --bg-fourth: 44 38 38;
-    --bg-fifth: 54 47 47;
-    --bg-sixth: 10 9 9;
-    --bg-seventh: 20 17 17;
-    --bg-eighth: 30 26 26;
-    --bg-ninth: 40 35 35;
-    --bg-tenth: 50 44 44;
+    --bg-main: 20 16 18;
+    --bg-second: 28 22 25;
+    --bg-third: 38 30 34;
+    --bg-fourth: 48 38 43;
+    --bg-fifth: 58 46 52;
+    --bg-sixth: 15 12 13;
+    --bg-seventh: 24 19 21;
+    --bg-eighth: 32 26 28;
+    --bg-ninth: 42 34 37;
+    --bg-tenth: 52 42 46;
 
     --bg-overlay: rgba(0, 0, 0, 0.85);
-    --bg-modal: rgba(24, 20, 20, 0.98);
-    --bg-glass: rgba(24, 20, 20, 0.8);
+    --bg-modal: rgba(28, 22, 25, 0.98);
+    --bg-glass: rgba(28, 22, 25, 0.8);
 
-    --bg-card: 24 20 20;
-    --bg-sidebar: 15 13 13;
-    --bg-header: 24 20 20;
-    --bg-footer: 15 13 13;
-    --bg-hover: 34 29 29;
-    --bg-active: 44 38 38;
-    --bg-disabled: 34 29 29;
+    --bg-card: 28 22 25;
+    --bg-sidebar: 20 16 18;
+    --bg-header: 28 22 25;
+    --bg-footer: 20 16 18;
+    --bg-hover: 38 30 34;
+    --bg-active: 48 38 43;
+    --bg-disabled: 38 30 34;
 
-    /* Button colors */
-    --btn-main: 242 92 126;
-    --btn-second: 34 29 29;
-    --btn-third: 44 38 38;
-    --btn-fourth: 54 47 47;
+    --btn-main: 255 107 139;
+    --btn-second: 38 30 34;
+    --btn-third: 48 38 43;
+    --btn-fourth: 58 46 52;
 
-    /* Border colors */
-    --border-main: 44 38 38;
-    --border-second: 54 47 47;
-    --border-focus: 242 92 126;
+    --border-main: 48 38 43;
+    --border-second: 58 46 52;
+    --border-focus: 255 107 139;
 
     --login-image: url("/images/auth_image_dark.png");
   }
@@ -480,12 +455,7 @@
       #ff7f50 75%,
       #ff6b81 100%
     );
-    --gradient-second: repeating-linear-gradient(
-      45deg,
-      #ff6b81 0%,
-      #ff8c69 50%,
-      #ff9f43 100%
-    );
+    --gradient-second: repeating-linear-gradient(45deg, #ff6b81 0%, #ff8c69 50%, #ff9f43 100%);
 
     /* Primary colors - Pastel Coral / Red-Orange (50 → 900) */
     --primary-50: 255 245 240;

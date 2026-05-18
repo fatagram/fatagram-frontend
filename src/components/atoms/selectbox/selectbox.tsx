@@ -75,7 +75,7 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
   const selectedItem = options.find((opt) => opt.key === selectedOption);
 
   return (
-    <div className="relative">
+    <div className="relative select-none">
       {showTitle && title && (
         <label
           htmlFor={selectId}

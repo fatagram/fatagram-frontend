@@ -6,7 +6,7 @@ import clsx from "clsx";
 export type Size = "xs" | "sm" | "md" | "lg" | "xl";
 export type Shape = "circle" | "square" | "rounded";
 
-export const sizeClasses: Record<Size, string> = {
+const sizeClasses: Record<Size, string> = {
   xs: "w-3 h-3",
   sm: "w-8 h-8",
   md: "w-12 h-12",

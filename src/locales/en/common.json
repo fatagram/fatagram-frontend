@@ -1,7 +1,7 @@
 {
   "language": {
-    "en": "EN English",
-    "vi": "VN Vietnamese"
+    "en": "English",
+    "vi": "Vietnamese"
   },
   "navbar": {
     "profileMenu": {
@@ -44,6 +44,7 @@
     }
   },
   "themes": {
+    "system": "System default",
     "light": "Light",
     "dark": "Dark",
     "lightOld": "Light (old)",

@@ -1,6 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
 import { MediaType, Message, MessageRenderType } from "@/types/entities/message.type";
-import { Avatar, MiniButton, Text } from "@/components/atoms";
+import { Avatar, MiniButton, Text, Tooltip } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
 import { useEffect, useState, memo, useRef, useMemo } from "react";
@@ -65,6 +65,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   const { openDialog, closeDialog } = useDialog();
   const [showOptionsSheet, setShowOptionsSheet] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [showTimestamp, setShowTimestamp] = useState(false);
 
   const [hasDelayed, setHasDelayed] = useState(false);
   const { formatTime, formatSmartTimestamp } = useFormatTime();
@@ -203,6 +204,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           )}
           {...longPressProps}
           onContextMenu={handleContextMenu}
+          onClick={() => setShowTimestamp((prev) => !prev)}
         >
           {meta._isShowName && (
             <UserOptionTrigger
@@ -303,6 +305,16 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               conversationId!,
               hasDelayed,
             )}
+          {showTimestamp && (
+            <div
+              className={clsx(
+                "text-[10px] text-text-third mt-1 mx-2 select-none animate-slide-up-in overflow-hidden",
+                meta._isMyMessage ? "text-right self-end" : "text-left self-start",
+              )}
+            >
+              {formatTime(message.createdAt)}
+            </div>
+          )}
         </div>
 
         {!isMobile && (
@@ -392,23 +404,21 @@ export const SystemMessageRow = memo(({ message, meta }: { message: Message; met
 
 export const MiniAvatar = memo(
   ({ uid, seenAt, userInfo }: { uid: string; seenAt: string; userInfo?: any }) => {
-    const [showTooltip, setShowTooltip] = useState(false);
     const { formatSmartTimestamp } = useFormatTime();
 
-    return (
-      <div
-        className="relative"
-        onMouseEnter={() => setShowTooltip(true)}
-        onMouseLeave={() => setShowTooltip(false)}
-      >
-        <Avatar sz="xs" src={userInfo?.avatar} alt="mini" />
-        {showTooltip && (
-          <div className="absolute right-full mr-2 -top-7 px-2 py-1 bg-bg-main text-text-main text-xs rounded shadow-md z-50 whitespace-nowrap border border-border-main">
-            <div className="font-semibold">{userInfo?.fullName || uid}</div>
-            <div className="text-xs opacity-75">{formatSmartTimestamp(seenAt)}</div>
-          </div>
-        )}
+    const tooltipContent = (
+      <div className="flex flex-col text-left">
+        <div className="font-semibold text-text-main text-xs">{userInfo?.fullName || uid}</div>
+        <div className="text-[10px] text-text-third mt-[2px] leading-normal font-normal">
+          {formatSmartTimestamp(seenAt)}
+        </div>
       </div>
+    );
+
+    return (
+      <Tooltip position="left" content={tooltipContent}>
+        <Avatar sz="xs" src={userInfo?.avatar} alt="mini" />
+      </Tooltip>
     );
   },
 );

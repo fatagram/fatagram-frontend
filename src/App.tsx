@@ -27,6 +27,16 @@ function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userD
 
   if (authContext?.userData?.languageCode) {
     i18next.changeLanguage(authContext.userData.languageCode);
+  } else {
+    if (typeof window !== "undefined" && window.navigator) {
+      const browserLang =
+        window.navigator.language || (window.navigator as any).userLanguage || "en";
+      const shortLang = browserLang.split("-")[0];
+      const targetLang = shortLang === "vi" || shortLang === "en" ? shortLang : "en";
+      if (i18next.language !== targetLang) {
+        i18next.changeLanguage(targetLang);
+      }
+    }
   }
 
   useEffect(() => {
