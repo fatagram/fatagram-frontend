@@ -1,11 +1,11 @@
-const CACHE_NAME = "fawe-cache-v4";
+const CACHE_NAME = "fawe-cache-v5";
 const ASSETS_TO_CACHE = [
   "/",
   "/index.html",
   "/manifest.json",
   "/svgs/fawe.svg",
   "/svgs/logo-nobg.svg",
-  "/svgs/logo-nobg-color.svg"
+  "/svgs/logo-nobg-color.svg",
 ];
 
 self.addEventListener("install", (event) => {
