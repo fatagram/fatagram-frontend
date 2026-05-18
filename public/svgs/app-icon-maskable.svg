@@ -1,13 +1,14 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 400 400" width="100%" height="100%">
   <defs>
     <linearGradient id="bgGrad" x1="0%" y1="0%" x2="100%" y2="100%">
-      <stop offset="0%" stop-color="#ffceaa" />
-      <stop offset="45%" stop-color="#ff6e9a" />
-      <stop offset="100%" stop-color="#c56bfa" />
+      <stop offset="0%" stop-color="#ff6b8b" />
+      <stop offset="33%" stop-color="#ff9ebb" />
+      <stop offset="66%" stop-color="#86e39c" />
+      <stop offset="100%" stop-color="#3ebf6a" />
     </linearGradient>
 
     <filter id="softShadow" x="-30%" y="-30%" width="160%" height="160%">
-      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#a83566" flood-opacity="0.3" />
+      <feDropShadow dx="0" dy="5" stdDeviation="6" flood-color="#ff6b8b" flood-opacity="0.25" />
     </filter>
   </defs>
 

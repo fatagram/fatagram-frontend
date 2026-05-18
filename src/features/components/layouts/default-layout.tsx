@@ -8,7 +8,7 @@ import { Button } from "@/components/atoms";
 import { useAuth, useDialog } from "@/contexts";
 import { LoginForm } from "@/features/auth/login/components/login-form";
 import { RegisterForm } from "@/features/auth/register/components/register-form";
-import { Navbar } from "@/components/ui";
+import { Navbar, BadgeCount } from "@/components/ui";
 import UserMenu from "../user-menu";
 import { ChatLayer } from "@/features/chat/chat-layer";
 import { ChatBadge } from "@/features/chat/components/chat-badge";
@@ -22,18 +22,13 @@ const MessageIconWithBadge = () => {
     <div className="relative">
       <i className="fa-solid fa-message" />
       {unreadCount > 0 && (
-        <span
-          className={clsx(
-            "absolute -top-1 left-3",
-            "text-xs h-3 min-w-[12px]",
-            "px-1",
-            "flex items-center justify-center",
-            "text-white bg-red-500 rounded-full",
-            "ring-2 ring-bg-main",
-          )}
-        >
-          {unreadCount > 99 ? "99+" : unreadCount}
-        </span>
+        <BadgeCount
+          count={unreadCount}
+          max={99}
+          size="xs"
+          variant="primary"
+          className="absolute -top-1 left-3"
+        />
       )}
     </div>
   );
@@ -46,18 +41,13 @@ const NotificationIconWithBadge = () => {
     <div className="relative">
       <i className="fa-solid fa-bell" />
       {unreadCount > 0 && (
-        <span
-          className={clsx(
-            "absolute -top-1 left-2",
-            "text-xs h-3 min-w-[12px]",
-            "px-1",
-            "flex items-center justify-center",
-            "text-white bg-red-500 rounded-full",
-            "ring-2 ring-bg-main",
-          )}
-        >
-          {unreadCount > 99 ? "99+" : unreadCount}
-        </span>
+        <BadgeCount
+          count={unreadCount}
+          max={99}
+          size="xs"
+          variant="primary"
+          className="absolute -top-1 left-2"
+        />
       )}
     </div>
   );
