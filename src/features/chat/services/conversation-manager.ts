@@ -238,7 +238,6 @@ export class ConversationManager {
     }
   }
 
-  // Receive a new message, update the conversation's last message and unread count
   public async addNewMessage(
     convId: string,
     userId: string,

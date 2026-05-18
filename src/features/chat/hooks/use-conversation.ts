@@ -71,8 +71,8 @@ export const useMarkConversationAsRead = () => {
 };
 
 export const useLocalMarkAsRead = () => {
-  return (conversationId: string, messageSeq: number) => {
-    convManager.markAsSeen(conversationId, messageSeq);
+  return async (conversationId: string, messageSeq: number) => {
+    await convManager.markAsSeen(conversationId, messageSeq);
   };
 };
 

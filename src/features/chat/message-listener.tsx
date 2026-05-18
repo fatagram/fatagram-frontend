@@ -32,7 +32,6 @@ export function useMessageListenerHandler() {
       const data = message.payload;
       const conversationId = data.conversationId;
 
-      // If the message has a correlationId (temp conversation), replace the temp conversation with the real one
       if (data.correlationId && useChatStore.getState().registry[data.correlationId]) {
         useChatStore.getState().replaceChat(data.correlationId, conversationId);
       } else {
@@ -48,10 +47,13 @@ export function useMessageListenerHandler() {
           .openChat(conversationId, { type: "conversation", conversationId: conversationId });
       }
 
-      // Set lastmessage for conversation
-      // messageManager.setMessages([data]);
       addMessageToCache(conversationId, data);
-      convManager.addNewMessage(conversationId, userId!, data, data.shouldIncreaseUnreadCount);
+      await convManager.addNewMessage(
+        conversationId,
+        userId!,
+        data,
+        data.shouldIncreaseUnreadCount,
+      );
 
       if (data.senderId && data.senderId !== userId) {
         recordMessage(conversationId, data.senderId);
@@ -63,7 +65,7 @@ export function useMessageListenerHandler() {
 
       if (isFocusingThisConversation) {
         const messageSeq = data.sequenceNumber;
-        markAsReadLocal(conversationId, messageSeq);
+        await markAsReadLocal(conversationId, messageSeq);
         await markAsRead({ conversationId, messageSeq });
       }
     },
@@ -80,7 +82,7 @@ export function useMessageListenerHandler() {
   );
 
   const handleSeenMessage = useCallback(
-    (message: SocketMessage<SeenDto>) => {
+    async (message: SocketMessage<SeenDto>) => {
       const data = message.payload;
       const conversationId = data.conversationId;
       const otherUserId = data.userId;
@@ -91,18 +93,18 @@ export function useMessageListenerHandler() {
       });
 
       if (otherUserId !== userId) {
-        convManager.updateConversation(conversationId, {
+        await convManager.updateConversation(conversationId, {
           otherLastSeenMessageSeq: data.messageSeq,
         });
       } else {
-        convManager.updateConversation(conversationId, {
+        await convManager.updateConversation(conversationId, {
           myLastSeenMessageSeq: data.messageSeq,
           unreadMessageCount: 0,
         });
       }
 
       if (data.shouldDecreaseUnreadCount) {
-        convManager.updateUnreadCount("decrement");
+        await convManager.updateUnreadCount("decrement");
       }
     },
     [setParticipantsSeen, userId],
@@ -112,7 +114,6 @@ export function useMessageListenerHandler() {
     (message: SocketMessage<TypingDto>) => {
       const { userId: incomingUserId, conversationId } = message.payload;
 
-      // Không xử lý nếu là chính mình (ignore self)
       if (incomingUserId === userId) return;
 
       if (message.event === "UserIsTyping") {
@@ -131,7 +132,7 @@ export function useMessageListenerHandler() {
           await handleNewMessage(message as SocketMessage<MessageResponseDto>);
           break;
         case "SeenMessage":
-          handleSeenMessage(message as SocketMessage<SeenDto>);
+          await handleSeenMessage(message as SocketMessage<SeenDto>);
           break;
         case "UserIsTyping":
         case "UserStoppedTyping":

@@ -55,8 +55,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
 
-  const isDark =
-    theme !== "light" && theme !== "pastel-yellow-pink" && theme !== "light-yellow-pink";
+  const isDark = theme !== "light" && theme !== "pastel-yellow-pink";
   const emojiTheme = isDark ? EmojiTheme.DARK : EmojiTheme.LIGHT;
 
   const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
