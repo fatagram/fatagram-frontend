@@ -1,6 +1,6 @@
-export const isOnlyEmoji = (text: string): boolean => {
+export const isOnlyEmoji = (text?: string): boolean => {
+  if (!text) return false;
   const trimmed = text.trim();
-  if (!trimmed) return false;
 
   try {
     const segmenter = new Intl.Segmenter("en", { granularity: "grapheme" });
