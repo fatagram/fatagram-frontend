@@ -28,7 +28,7 @@ function bgFor(variant: BadgeCountProps["variant"]) {
       return "rgba(var(--text-reverse-main), 0.12)";
     case "primary":
     default:
-      return "rgb(var(--btn-main))";
+      return "rgb(var(--primary-700))";
   }
 }
 

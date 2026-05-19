@@ -28,12 +28,15 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ className }) => {
     <div className={clsx("relative group", className)}>
       {isLoading || isFetching || isUpdating ? (
         <div className="bg-bg-main rounded-full">
-          <Skeleton className="border-4 border-bg-main h-[192px]" variant="circle" />
+          <Skeleton
+            className="border-4 border-bg-main h-20 w-20 sm:h-[188px] sm:w-[188px]"
+            variant="circle"
+          />
         </div>
       ) : (
         <div
           className={clsx(
-            "relative rounded-full p-[4px] bg-bg-main",
+            "relative rounded-full p-[3px] bg-bg-main",
             "transition-all duration-500 ease-out",
             isOwner && "hover:scale-[1.04] hover:shadow-2xl cursor-pointer",
           )}
@@ -51,7 +54,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ className }) => {
           <Avatar
             src={data?.infos.avatar}
             alt="Avatar"
-            className="w-[184px] h-[184px] border-2 border-bg-main flex-shrink-0 relative z-10 overflow-hidden rounded-full"
+            className="w-20 h-20 sm:w-[180px] sm:h-[180px] flex-shrink-0 relative z-10 overflow-hidden rounded-full"
           >
             {isOwner && (
               <SelectFile

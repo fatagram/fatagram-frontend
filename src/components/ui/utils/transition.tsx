@@ -18,6 +18,7 @@ export enum AnimationName {
   SlideUp = "SlideUp",
   Opacity = "Opacity",
   SlideSnappy = "SlideSnappy",
+  DialogZoom = "DialogZoom",
   None = "None",
 }
 
@@ -71,6 +72,11 @@ export const AnimationLib: Record<AnimationName, AnimationType> = {
     in: "animate-slide-in-right",
     out: "animate-slide-out-left",
     duration: 250,
+  },
+  DialogZoom: {
+    in: "animate-dialog-zoom-in",
+    out: "animate-dialog-zoom-out",
+    duration: 150,
   },
   None: {
     in: "",

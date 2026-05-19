@@ -104,15 +104,15 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
 
   return (
     <div
-      className={clsx("relative aspect-[16/6] w-full overflow-hidden sm:rounded-xl rounded-none")}
+      className={clsx("relative h-full w-full overflow-hidden rounded-none")}
     >
       {isLoading || isFetching || isUpdating ? (
-        <Skeleton className="h-full w-full" />
+        <Skeleton className="h-full w-full !rounded-none" />
       ) : (
         <BackgroundImage
           src={data?.infos.background}
           alt="Background Image"
-          className={clsx("relative h-full w-full sm:rounded-xl rounded-none")}
+          className={clsx("relative h-full w-full !rounded-none")}
           metadata={
             typeof data?.infos.backgroundMetadata === "string"
               ? JSON.parse(data?.infos.backgroundMetadata || "{}")
@@ -125,7 +125,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
               accept="image/*"
               multiple={false}
               className={clsx(
-                "absolute flex items-center right-2 bottom-2 z-10",
+                "absolute flex items-center right-2 sm:bottom-2 bottom-8 z-30",
                 "opacity-40 hover:opacity-70 gap-2",
               )}
             >

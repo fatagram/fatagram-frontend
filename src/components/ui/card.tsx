@@ -19,13 +19,15 @@ const Card: React.FC<CardProps> = ({
 }) => {
   const hasBg = className?.includes("bg-");
   const hasShadow = className?.includes("shadow-");
+  const hasBorder = className?.includes("border");
 
   return (
     <div
       className={clsx(
         "flex flex-col items-start p-7 rounded-2xl",
         !hasBg && "bg-bg-second",
-        !hasShadow && "shadow-lg",
+        !hasShadow && "shadow-none",
+        !hasBorder && "border-none sm:border border-bg-fourth",
         className,
       )}
     >

@@ -11,7 +11,6 @@ import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useGetNumberOfFriends } from "@/features/hooks/use-friend";
 import { useAuth, useDialog } from "@/contexts";
 import { useOpenChat } from "@/features/chat/hooks/use-open-chat";
-import { useChatStore } from "@/features/chat/hooks/use-floating-chat";
 import UserInfoDialog from "./user-info-dialog";
 import { createPortal } from "react-dom";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
@@ -21,16 +20,7 @@ export type ProfileHeaderProps = {
   onUserNotFound?: () => void;
 };
 
-/**
- * ProfileHeader component displays the user's profile header with avatar, background image, and action buttons.
- * It allows the user to change their avatar and background image if they are the owner of the profile.
- * @param {string} className - Additional CSS classes for styling.
- * @param {string} userId - The ID of the user whose profile is being displayed.
- * @param {boolean} isOwner - Indicates if the current authenticated user is the owner of the profile.
- * @param {function} onUserNotFound - Callback function to handle when a user is not found.
- */
-const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
-  // Auth info hook
+const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound }) => {
   const t = useLanguage();
   const navigate = useNavigate();
   const { targetId, isOwner } = useProfilePage();
@@ -39,7 +29,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
 
   const { data, isLoading, isFetching } = useGetUserProfile(targetId);
   const userProfile = data?.infos;
-  const { openChat } = useChatStore();
   const [isMobile, setIsMobile] = useState(false);
   const [showMobileInfoPage, setShowMobileInfoPage] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -65,7 +54,13 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
   const handleMessageClick = useCallback(async () => {
     if (!targetId) return;
     await openChatWithTarget(targetId);
-  }, [isMobile, targetId, openChatWithTarget, openChat]);
+  }, [targetId, openChatWithTarget]);
+
+  useEffect(() => {
+    if (!isLoading && !isFetching && !userProfile && onUserNotFound) {
+      onUserNotFound();
+    }
+  }, [isLoading, isFetching, userProfile, onUserNotFound]);
 
   const handleOpenInfoDialog = useCallback(() => {
     if (isMobile) {
@@ -86,71 +81,211 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
 
   return (
     <div className={clsx("relative w-full flex flex-col items-center", className)}>
-      <div className="relative w-full sm:mt-2 mt-0">
+      <div className="relative w-full aspect-[16/6] sm:aspect-[16/5] overflow-hidden">
         <ProfileBackground />
+        <div className="absolute inset-0 bg-black/10 z-5 pointer-events-none" />
       </div>
 
-      <div className="-mt-[80px] flex w-[85%] flex-col lg:flex-row items-center justify-center lg:items-end mb-5 lg:gap-0 gap-3">
-        <ProfileAvatar />
-        <div className="flex flex-col gap-2 items-start flex-1 lg:mb-3 lg:ml-4">
-          {isLoading || isFetching ? (
-            <Skeleton sz="md" className="!w-56" />
-          ) : (
-            <Text weight="bold" className="!text-2xl text-center break-words w-full lg:w-auto">
-              {userProfile?.fullName}
-              {userProfile?.nickname && (
-                <Text sz="lg" weight="light" className="lg:text-left text-center ml-2">
-                  ({userProfile?.nickname})
-                </Text>
-              )}
-            </Text>
-          )}
+      <div className="hidden sm:flex relative z-20 w-full max-w-[930px] bg-bg-main/95 backdrop-blur-md rounded-2xl p-7 shadow-md border border-bg-fourth/50 gap-8 items-start -mt-[110px] mb-2 transition-all duration-300 hover:bg-bg-main">
+        <div className="shrink-0 rounded-full shadow-md -mt-[98px] relative z-20">
+          <ProfileAvatar />
+        </div>
 
-          <div className="flex flex-col items-center w-full lg:flex-row">
+        <div className="flex-1 flex flex-col gap-5 pt-2">
+          <div className="flex items-center gap-6 flex-wrap">
+            {isLoading || isFetching ? (
+              <Skeleton sz="md" className="!w-48 !h-8" />
+            ) : (
+              <div className="flex items-baseline gap-2 flex-wrap">
+                <Text weight="bold" className="!text-2xl text-text-main">
+                  {userProfile?.fullName}
+                </Text>
+                {userProfile?.nickname && (
+                  <Text sz="lg" weight="light" className="text-text-third">
+                    ({userProfile.nickname})
+                  </Text>
+                )}
+              </div>
+            )}
+
             {!numberOfFriendsFetching ? (
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-bg-third/80 border border-border-main/50 backdrop-blur-sm shadow-sm transition-all duration-300 hover:bg-bg-third select-none">
-                <i className="fa-solid fa-users text-primary-500 text-sm" />
-                <span className="text-sm font-bold text-text-main">{numberOfFriends || 0}</span>
-                <span className="text-xs text-text-third font-semibold">
+              <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-bg-third/80 border border-border-main/50 backdrop-blur-sm transition-all duration-300 hover:bg-bg-third select-none h-8">
+                <i className="fa-solid fa-users text-primary-500 text-sm leading-none" />
+                <span className="text-sm font-bold text-text-main leading-none flex items-center">
+                  {numberOfFriends || 0}
+                </span>
+                <span className="text-xs text-text-third font-semibold leading-none flex items-center">
                   {t("user:profileHeader.friendsCount")}
                 </span>
               </div>
             ) : (
               <Skeleton sz="md" className="!w-36 !h-8 !rounded-full" />
             )}
-            {!isLoading || !isFetching ? (
-              <div className="flex flex-wrap flex-row gap-2 mt-2 lg:ml-auto lg:mt-0">
+
+            {userProfile?.nickname && (
+              <div className="flex gap-1.5 items-center">
+                <span className="text-text-third text-sm">Biệt danh:</span>
+                <span className="text-sm font-bold text-text-main truncate max-w-[150px]">
+                  {userProfile.nickname}
+                </span>
+              </div>
+            )}
+          </div>
+
+          <div className="flex items-center gap-2.5">
+            {!isLoading && !isFetching ? (
+              <div className="flex items-center gap-2.5">
                 {isAuthenticated && (
                   <>
                     {isOwner ? (
                       <Button
                         sz="sm"
-                        onClick={() => {
-                          navigate(`/settings`);
-                        }}
+                        className="!h-9 text-xs font-semibold rounded-lg bg-bg-third border border-bg-fourth hover:bg-bg-hover transition-colors px-4 justify-center"
+                        onClick={() => navigate(`/settings`)}
                       >
-                        <i className="fa-solid fa-user-pen"></i>{" "}
-                        {t("user:profileHeader.editButton")}
+                        <i className="fa-solid fa-user-pen mr-2"></i> Chỉnh sửa
                       </Button>
                     ) : (
-                      <AddFriendButton sz="sm" uid={targetId} />
+                      <>
+                        <AddFriendButton
+                          className="!h-9 text-xs font-semibold rounded-lg"
+                          sz="sm"
+                          uid={targetId}
+                        />
+                        <Button
+                          sz="sm"
+                          variant="secondary"
+                          className="!h-9 text-xs font-semibold rounded-lg justify-center border border-bg-fourth hover:bg-bg-hover transition-colors px-4"
+                          onClick={handleMessageClick}
+                        >
+                          <i className="fa-solid fa-comment mr-2"></i>{" "}
+                          {t("user:profileHeader.messageButton")}
+                        </Button>
+                      </>
                     )}
                   </>
                 )}
-
-                {!isOwner && isAuthenticated && (
-                  <Button sz="sm" variant="secondary" onClick={handleMessageClick}>
-                    <i className="fa-solid fa-comment"></i> {t("user:profileHeader.messageButton")}
-                  </Button>
-                )}
-                <Button sz="sm" variant="secondary" onClick={handleOpenInfoDialog}>
-                  <i className="fa-solid fa-circle-info"></i>
+                <Button
+                  sz="sm"
+                  variant="secondary"
+                  className="w-10 !h-9 flex items-center justify-center rounded-lg border border-bg-fourth shrink-0 hover:bg-bg-hover transition-colors group"
+                  onClick={handleOpenInfoDialog}
+                >
+                  <i className="fa-solid fa-circle-info text-text-second group-hover:text-text-main transition-colors"></i>
                 </Button>
               </div>
             ) : (
-              <Skeleton sz="md" className="!w-[250px] lg:ml-auto mb-1" />
+              <Skeleton sz="md" className="!w-[250px] !h-9 rounded-lg" />
             )}
           </div>
+
+          <div className="flex flex-col gap-1">
+            {userProfile?.bio && (
+              <Text
+                sz="sm"
+                className="text-text-second leading-relaxed break-words whitespace-pre-line max-w-[550px]"
+              >
+                {userProfile?.bio}
+              </Text>
+            )}
+          </div>
+        </div>
+      </div>
+
+      <div className="w-full px-4 pt-5 pb-2 flex flex-col gap-3.5 sm:hidden relative bg-bg-main rounded-t-2xl -mt-6 z-20">
+        <div className="flex items-end gap-4 -mt-[56px] relative z-10">
+          <div className="shrink-0 rounded-full shadow-sm">
+            <ProfileAvatar />
+          </div>
+
+          <div className="flex-1 pb-1 flex flex-row items-baseline gap-2 flex-wrap min-w-0">
+            {isLoading || isFetching ? (
+              <Skeleton sz="md" className="!w-32 !h-6" />
+            ) : (
+              <Text weight="bold" className="!text-xl text-text-main truncate">
+                {userProfile?.fullName}
+              </Text>
+            )}
+            {userProfile?.nickname && (
+              <Text sz="sm" className="text-text-third font-medium truncate">
+                ({userProfile.nickname})
+              </Text>
+            )}
+          </div>
+        </div>
+
+        <div className="flex items-center gap-3 flex-wrap">
+          {!numberOfFriendsFetching ? (
+            <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-bg-third/80 border border-border-main/50 backdrop-blur-sm transition-all duration-300 hover:bg-bg-third select-none h-7">
+              <i className="fa-solid fa-users text-primary-500 text-xs leading-none" />
+              <span className="text-xs font-bold text-text-main leading-none flex items-center">
+                {numberOfFriends || 0}
+              </span>
+              <span className="text-[10px] text-text-third font-semibold leading-none flex items-center">
+                {t("user:profileHeader.friendsCount")}
+              </span>
+            </div>
+          ) : (
+            <Skeleton sz="sm" className="!w-24 !h-6 !rounded-full" />
+          )}
+
+          {userProfile?.nickname && (
+            <span className="text-xs text-text-third font-medium ml-1">
+              Biệt danh: <span className="font-bold text-text-main">{userProfile.nickname}</span>
+            </span>
+          )}
+        </div>
+
+        {userProfile?.bio && (
+          <Text
+            sz="sm"
+            className="text-text-second leading-relaxed break-words whitespace-pre-line"
+          >
+            {userProfile?.bio}
+          </Text>
+        )}
+
+        <div className="flex gap-2 w-full mt-1">
+          {isAuthenticated && (
+            <>
+              {isOwner ? (
+                <Button
+                  sz="sm"
+                  className="flex-1 !h-9 text-xs font-semibold rounded-lg justify-center bg-bg-third border border-bg-fourth"
+                  onClick={() => navigate(`/settings`)}
+                >
+                  <i className="fa-solid fa-user-pen mr-1.5"></i> Chỉnh sửa
+                </Button>
+              ) : (
+                <div className="flex-1 flex gap-2">
+                  <div className="flex-1">
+                    <AddFriendButton
+                      className="w-full !h-9 text-xs font-semibold rounded-lg"
+                      sz="sm"
+                      uid={targetId}
+                    />
+                  </div>
+                  <Button
+                    sz="sm"
+                    variant="secondary"
+                    className="flex-1 !h-9 text-xs font-semibold rounded-lg justify-center border border-bg-fourth"
+                    onClick={handleMessageClick}
+                  >
+                    <i className="fa-solid fa-comment mr-1.5"></i>{" "}
+                    {t("user:profileHeader.messageButton")}
+                  </Button>
+                </div>
+              )}
+            </>
+          )}
+          <Button
+            sz="sm"
+            variant="secondary"
+            className="w-10 !h-9 flex items-center justify-center rounded-lg border border-bg-fourth shrink-0 group"
+            onClick={handleOpenInfoDialog}
+          >
+            <i className="fa-solid fa-circle-info text-text-second group-hover:text-text-main transition-colors"></i>
+          </Button>
         </div>
       </div>
 
@@ -164,7 +299,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
             className="fixed inset-0 bg-bg-main z-[9999] flex flex-col p-6 w-full h-[100dvh] overflow-y-auto scrollbar-hide sm:hidden"
           >
             <div className="flex flex-col w-full h-full">
-              {/* Header */}
               <div className="flex items-center justify-between w-full mb-8 shrink-0">
                 <BackButton sz="md" onClick={() => setShowMobileInfoPage(false)} />
                 <Text weight="bold" sz="lg" className="text-text-main font-semibold">
@@ -173,7 +307,6 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className }) => {
                 <div className="w-10" />
               </div>
 
-              {/* Content */}
               <div className="flex-1 overflow-y-auto">
                 <UserInfoDialog userProfile={userProfile} targetId={targetId || ""} />
               </div>

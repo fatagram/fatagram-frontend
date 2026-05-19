@@ -10,7 +10,7 @@ type ProfileBodyProps = {
 const ProfileBody: React.FC<ProfileBodyProps> = ({ className }) => {
   return (
     <div className={clsx("w-full flex flex-col", className)}>
-      <ProfileNavbar className="bg-bg-main justify-start sm:rounded-2xl shadow-md sm:mt-2 p-2 w-full" />
+      <ProfileNavbar className="bg-bg-main justify-start sm:rounded-2xl border-b sm:border border-bg-fourth sm:mt-2 p-2 w-full" />
       <div className="w-full">
         <Outlet />
       </div>
