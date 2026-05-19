@@ -13,11 +13,12 @@ import { useNavigate } from "react-router-dom";
 import { useAppHub } from "@/features/hub/use-app-hub";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { MessageList, MessageListHandle } from "./message";
-import { convManager, useConversationStore } from "../services/conversation-manager";
+import { useConversationStore } from "../services/conversation-manager";
 import { TypingIndicator } from "./messages/typing";
 import { ChatInput } from "./chat-input";
 import { useChatStore } from "../hooks/use-floating-chat";
 import { TempChat } from "./temp-chat";
+import { useShallow } from "zustand/react/shallow";
 
 interface Props extends ComponentProps {
   conversationId: string;
@@ -64,7 +65,12 @@ export const ChatPanel: React.FC<Props> = ({
     isPending: isPendingConversation,
   } = useGetConversation(conversationId, undefined, true);
 
-  const conv = conversationData ?? convManager.getConversation(conversationId);
+  const storeConv = useConversationStore(
+    useShallow((state) => state.conversations.find((c) => c.id === conversationId)),
+  );
+  const conv = conversationData ?? storeConv;
+
+  const activeTheme = conv?.theme || undefined;
 
   const navigate = useNavigate();
 
@@ -159,7 +165,7 @@ export const ChatPanel: React.FC<Props> = ({
       window.removeEventListener("blur", handleWindowBlur);
       window.removeEventListener("focus", handleWindowFocus);
     };
-  }, [conversationData?.id, markAsRead, markAsReadLocal, setFocusOn]);
+  }, [conv?.id, markAsRead, markAsReadLocal, setFocusOn]);
 
   useEffect(() => {
     return () => {
@@ -174,12 +180,7 @@ export const ChatPanel: React.FC<Props> = ({
     };
   }, [conversationId, connectionState]);
 
-  if (
-    !isLoadingConversation &&
-    !isFetchingConversation &&
-    !isPendingConversation &&
-    !conversationData
-  ) {
+  if (!isLoadingConversation && !isFetchingConversation && !isPendingConversation && !conv) {
     return (
       <div
         className={clsx(
@@ -207,6 +208,7 @@ export const ChatPanel: React.FC<Props> = ({
         className,
       )}
       ref={panelRef}
+      data-chat-theme={activeTheme}
     >
       <div
         className={clsx(
@@ -240,13 +242,24 @@ export const ChatPanel: React.FC<Props> = ({
         )}
       </div>
 
-      <div className="flex-1 py-2 bg-bg-main min-h-0" ref={scrollRef} data-chat-scrollable="true">
+      <div
+        className="flex-1 py-2 bg-bg-main min-h-0"
+        ref={scrollRef}
+        data-chat-scrollable="true"
+        style={
+          conv?.backgroundUrl
+            ? ({
+                "--chat-custom-bg": `url(${conv.backgroundUrl})`,
+              } as React.CSSProperties)
+            : undefined
+        }
+      >
         <MessageList
           ref={messageListRef}
           key={conversationId}
           conversationId={conversationId}
           parentRef={scrollRef}
-          isGroup={conversationData?.isGroup}
+          isGroup={conv?.isGroup}
           lastSeen={
             <div className="flex flex-col justify-center items-center h-full text-center px-4">
               {isLoadingHeader ? (
@@ -260,7 +273,7 @@ export const ChatPanel: React.FC<Props> = ({
               ) : (
                 <>
                   <div className="relative mb-4">
-                    <Avatar src={conversationData?.avatarUrl || ""} alt="Avatar" sz="md" />
+                    <Avatar src={conv?.avatarUrl || ""} alt="Avatar" sz="md" />
                   </div>
                   <Text sz="sm" weight="bold">
                     {chatTitle}
@@ -291,15 +304,15 @@ export const ChatPanel: React.FC<Props> = ({
         className="!bg-bg-main h-auto py-2 px-1 touch-none"
         conversationId={conversationId}
         onFocus={() => {
-          if (!conversationData?.id || !document.hasFocus()) return;
-          setFocusOn(conversationData.id);
-          const lastMsgSeq = conversationData.lastMessage?.sequenceNumber;
-          const myLastSeenSeq = conversationData.myLastSeenMessageSeq || 0;
+          if (!conv?.id || !document.hasFocus()) return;
+          setFocusOn(conv.id);
+          const lastMsgSeq = conv.lastMessage?.sequenceNumber;
+          const myLastSeenSeq = conv.myLastSeenMessageSeq || 0;
           if (!lastMsgSeq) return;
           if (lastMsgSeq <= myLastSeenSeq) return;
-          markAsReadLocal(conversationData.id, lastMsgSeq);
+          markAsReadLocal(conv.id, lastMsgSeq);
           void markAsRead({
-            conversationId: conversationData.id,
+            conversationId: conv.id,
             messageSeq: lastMsgSeq,
           });
         }}

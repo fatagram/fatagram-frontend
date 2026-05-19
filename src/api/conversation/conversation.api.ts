@@ -110,6 +110,20 @@ export class ConversationService {
   public async updateConversationName(conversationId: string, name: string): Promise<Result<void>> {
     return await apiPatch(`${PREFIX}/${conversationId}/name`, { name });
   }
+
+  public async updateConversationTheme(
+    conversationId: string,
+    theme: string | null,
+  ): Promise<Result<void>> {
+    return await apiPatch(`${PREFIX}/${conversationId}/theme`, { theme });
+  }
+
+  public async updateConversationBackground(
+    conversationId: string,
+    backgroundUrl: string | null,
+  ): Promise<Result<void>> {
+    return await apiPatch(`${PREFIX}/${conversationId}/background`, { backgroundUrl });
+  }
 }
 
 export const conversationService = new ConversationService();

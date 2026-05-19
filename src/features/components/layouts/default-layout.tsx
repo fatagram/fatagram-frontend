@@ -127,6 +127,7 @@ const DefaultLayout = () => {
     }
     openDialog({
       content: <LoginForm showLogo={false} />,
+      className: "w-[400px] max-w-[95vw]",
     });
   }, [isMobile, openDialog]);
 
@@ -137,6 +138,7 @@ const DefaultLayout = () => {
     }
     openDialog({
       content: <RegisterForm showLogo={false} />,
+      className: "w-[400px] max-w-[95vw]",
     });
   }, [isMobile, openDialog]);
 

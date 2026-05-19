@@ -265,6 +265,14 @@ export class ConversationManager {
         conv.name = newMsg.metadata?.newName || conv.name;
       }
 
+      if (newMsg.type === MessageType.ChangeTheme) {
+        conv.theme = newMsg.metadata?.theme || null;
+      }
+
+      if (newMsg.type === MessageType.ChangeBackgroundUrl) {
+        conv.backgroundUrl = newMsg.metadata?.backgroundUrl || null;
+      }
+
       if (isMine) {
         conv.myLastSeenMessageSeq = newMsg.sequenceNumber!;
         conv.unreadMessageCount = 0;

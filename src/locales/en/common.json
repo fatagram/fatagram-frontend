@@ -67,7 +67,9 @@
     "systemMessage": {
       "createGroup": "{{creatorName}} created the group",
       "changeGroupAvatar": "{{actorName}} changed the group avatar",
-      "renameGroup": "{{actorName}} changed the group name to \"{{newName}}\""
+      "renameGroup": "{{actorName}} changed the group name to \"{{newName}}\"",
+      "changeTheme": "{{actorName}} changed the conversation theme to {{theme}}",
+      "changeBackgroundUrl": "{{actorName}} changed the conversation background"
     },
     "sentImageMessage": "Sent {{count}} images",
     "sentMediaMessage": "Sent a attached file",

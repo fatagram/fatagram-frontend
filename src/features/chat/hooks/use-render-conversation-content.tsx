@@ -3,6 +3,7 @@ import { useAuth } from "@/contexts";
 import { Conversation } from "@/types/entities/conversation.type";
 import { Message, MessageType } from "@/types/entities/message.type";
 import { useTranslation } from "react-i18next";
+import { themeDetails } from "@/features/chat/fatalk/conversation/chat-themes.config";
 
 export const useRenderConversationContent = () => {
   const { t } = useTranslation();
@@ -29,6 +30,25 @@ export const useRenderConversationContent = () => {
         newName: newName || "",
       });
     }
+    if (message.type === MessageType.ChangeTheme) {
+      const { actorName, actorId, theme } = message.metadata || {};
+      const actor = userId === actorId ? t("common:conversations.you") : actorName || "Unknown";
+
+      const themeKey = theme || "default";
+      const foundThemeObj = themeDetails.find((item: any) => item.key === themeKey);
+      const themeName = foundThemeObj ? foundThemeObj.label : "Mặc định";
+
+      return t("common:conversations.systemMessage.changeTheme", {
+        actorName: actor,
+        theme: themeName,
+      });
+    }
+    if (message.type === MessageType.ChangeBackgroundUrl) {
+      const { actorName, actorId } = message.metadata || {};
+      const actor = userId === actorId ? t("common:conversations.you") : actorName || "Unknown";
+      return t("common:conversations.systemMessage.changeBackgroundUrl", { actorName: actor });
+    }
+    return message.content;
   };
 
   const renderConversationName = (conversation: Conversation) => {

@@ -35,11 +35,14 @@ export const useGetConversation = (
     queryKey: CONVERSATION_KEYS.detail(conversationId),
     fn: async () => await conversationService.getConversation(conversationId),
     enabled: enabled ?? false,
+    staleTime: 0,
     options: {
       onSuccess: (data) => {
         convManager.updateConversation(data.id, {
           avatarUrl: data.avatarUrl,
           name: data.name,
+          theme: data.theme,
+          backgroundUrl: data.backgroundUrl,
         });
         config?.onSuccess?.(data);
       },
@@ -218,6 +221,32 @@ export const useUpdateConversationName = (conversationId: string) => {
   return useResultFetcher(
     async ({ name }: { name: string }) =>
       await conversationService.updateConversationName(conversationId, name),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
+      },
+    },
+  );
+};
+
+export const useUpdateConversationTheme = (conversationId: string) => {
+  const queryClient = useQueryClient();
+  return useResultFetcher(
+    async ({ theme }: { theme: string }) =>
+      await conversationService.updateConversationTheme(conversationId, theme),
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
+      },
+    },
+  );
+};
+
+export const useUpdateConversationBackground = (conversationId: string) => {
+  const queryClient = useQueryClient();
+  return useResultFetcher(
+    async ({ backgroundUrl }: { backgroundUrl: string | null }) =>
+      await conversationService.updateConversationBackground(conversationId, backgroundUrl),
     {
       onSuccess: () => {
         queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });

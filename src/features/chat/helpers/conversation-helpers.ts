@@ -11,5 +11,7 @@ export function isSystemMessage(messageType: MessageType) {
     MessageType.ChangeGroupAvatar,
     MessageType.RemoveParticipant,
     MessageType.AddParticipant,
+    MessageType.ChangeTheme,
+    MessageType.ChangeBackgroundUrl,
   ].includes(messageType);
 }

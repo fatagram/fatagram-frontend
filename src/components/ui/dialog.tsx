@@ -36,12 +36,12 @@ export const Dialog: React.FC<DialogBoxProps> = ({
       )}
     >
       {title && (
-        <Text weight="bold" sz="lg">
+        <Text weight="bold" sz="lg" className="shrink-0">
           {title}
         </Text>
       )}
-      {content && <div>{content}</div>}
-      <div className="flex justify-end space-x-2">
+      {content && <div className="flex-1 min-h-0 flex flex-col">{content}</div>}
+      <div className="flex justify-end space-x-2 shrink-0">
         {tertiaryButton && (
           <Button onClick={tertiaryButton.onClick} variant="third" sz="sm">
             {tertiaryButton.text}

@@ -1,0 +1,375 @@
+@layer base {
+  /* ==================== EMERALD ==================== */
+  [data-chat-theme="chat-emerald"] {
+    --bg-main: 240 248 245;
+    --bg-second: 230 244 238;
+    --bg-fourth: 215 240 228;
+    --primary-600: 16 122 81;
+    --primary-500: 20 150 100;
+    --primary-800: 10 80 50;
+    --text-main: 15 45 35;
+    --text-second: 40 80 65;
+    --text-third: 80 120 105;
+    --border-main: 215 240 228;
+    --border-second: 200 230 215;
+    --gradient-main: linear-gradient(45deg, #107a51 0%, #20b2aa 50%, #85e3ad 100%);
+    --gradient-second: linear-gradient(45deg, #20b2aa 0%, #85e3ad 50%, #20b2aa 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-emerald"],
+  [data-theme="dark-old"] [data-chat-theme="chat-emerald"] {
+    --bg-main: 10 24 18;
+    --bg-second: 15 32 25;
+    --bg-fourth: 25 45 35;
+    --primary-600: 20 150 100;
+    --primary-500: 34 197 94;
+    --primary-800: 12 74 40;
+    --text-main: 235 250 242;
+    --text-second: 175 220 195;
+    --text-third: 120 160 140;
+    --border-main: 25 45 35;
+    --border-second: 35 60 48;
+    --gradient-main: linear-gradient(45deg, #0f766e 0%, #10b981 50%, #34d399 100%);
+    --gradient-second: linear-gradient(45deg, #10b981 0%, #34d399 50%, #10b981 100%);
+  }
+
+  /* ==================== SUNSET ==================== */
+  [data-chat-theme="chat-sunset"] {
+    --bg-main: 255 248 243;
+    --bg-second: 255 240 230;
+    --bg-fourth: 255 228 210;
+    --primary-600: 242 108 79;
+    --primary-500: 245 130 95;
+    --primary-800: 200 70 50;
+    --text-main: 60 25 15;
+    --text-second: 120 65 45;
+    --text-third: 160 105 85;
+    --border-main: 255 228 210;
+    --border-second: 255 210 185;
+    --gradient-main: linear-gradient(45deg, #f26c4f 0%, #ff8c00 50%, #ffd700 100%);
+    --gradient-second: linear-gradient(45deg, #ff8c00 0%, #f5af19 50%, #ff8c00 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-sunset"],
+  [data-theme="dark-old"] [data-chat-theme="chat-sunset"] {
+    --bg-main: 24 16 12;
+    --bg-second: 32 22 17;
+    --bg-fourth: 48 32 25;
+    --primary-600: 245 130 95;
+    --primary-500: 249 115 22;
+    --primary-800: 154 52 18;
+    --text-main: 255 240 235;
+    --text-second: 220 180 160;
+    --text-third: 170 130 110;
+    --border-main: 48 32 25;
+    --border-second: 65 45 35;
+    --gradient-main: linear-gradient(45deg, #9a3412 0%, #ea580c 50%, #f97316 100%);
+    --gradient-second: linear-gradient(45deg, #ea580c 0%, #f97316 50%, #ea580c 100%);
+  }
+
+  /* ==================== CYBERPUNK ==================== */
+  [data-chat-theme="chat-cyberpunk"] {
+    --bg-main: 253 244 255;
+    --bg-second: 245 235 250;
+    --bg-fourth: 235 220 245;
+    --primary-600: 219 39 119;
+    --primary-500: 236 72 153;
+    --primary-800: 157 23 77;
+    --text-main: 46 16 58;
+    --text-second: 100 50 120;
+    --text-third: 150 100 170;
+    --border-main: 235 220 245;
+    --border-second: 220 200 235;
+    --gradient-main: linear-gradient(45deg, #db2777 0%, #a855f7 50%, #06b6d4 100%);
+    --gradient-second: linear-gradient(45deg, #a855f7 0%, #06b6d4 50%, #a855f7 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-cyberpunk"],
+  [data-theme="dark-old"] [data-chat-theme="chat-cyberpunk"] {
+    --bg-main: 18 16 26;
+    --bg-second: 25 22 36;
+    --bg-fourth: 35 32 50;
+    --primary-600: 255 0 127;
+    --primary-500: 0 242 254;
+    --primary-800: 180 0 90;
+    --text-main: 240 235 255;
+    --text-second: 180 170 210;
+    --text-third: 120 110 150;
+    --border-main: 35 32 50;
+    --border-second: 50 45 70;
+    --gradient-main: linear-gradient(45deg, #ff007f 0%, #7b2cbf 50%, #00f2fe 100%);
+    --gradient-second: linear-gradient(45deg, #7b2cbf 0%, #00f2fe 50%, #7b2cbf 100%);
+  }
+
+  /* ==================== LAVENDER ==================== */
+  [data-chat-theme="chat-lavender"] {
+    --bg-main: 248 246 254;
+    --bg-second: 240 236 252;
+    --bg-fourth: 230 224 248;
+    --primary-600: 114 85 222;
+    --primary-500: 135 110 235;
+    --primary-800: 80 50 170;
+    --text-main: 41 32 74;
+    --text-second: 80 68 122;
+    --text-third: 130 120 168;
+    --border-main: 230 224 248;
+    --border-second: 215 208 240;
+    --gradient-main: linear-gradient(45deg, #7255de 0%, #a78bfa 50%, #c4b5fd 100%);
+    --gradient-second: linear-gradient(45deg, #a78bfa 0%, #c4b5fd 50%, #a78bfa 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-lavender"],
+  [data-theme="dark-old"] [data-chat-theme="chat-lavender"] {
+    --bg-main: 15 13 22;
+    --bg-second: 21 18 30;
+    --bg-fourth: 32 28 45;
+    --primary-600: 139 92 246;
+    --primary-500: 167 139 250;
+    --primary-800: 109 40 217;
+    --text-main: 243 244 246;
+    --text-second: 196 181 253;
+    --text-third: 139 92 246;
+    --border-main: 32 28 45;
+    --border-second: 48 40 68;
+    --gradient-main: linear-gradient(45deg, #6d28d9 0%, #8b5cf6 50%, #c4b5fd 100%);
+    --gradient-second: linear-gradient(45deg, #8b5cf6 0%, #c4b5fd 50%, #8b5cf6 100%);
+  }
+
+  /* ==================== OCEAN ==================== */
+  [data-chat-theme="chat-ocean"] {
+    --bg-main: 242 248 252;
+    --bg-second: 230 242 250;
+    --bg-fourth: 215 235 248;
+    --primary-600: 14 116 181;
+    --primary-500: 30 144 255;
+    --primary-800: 10 80 130;
+    --text-main: 10 35 55;
+    --text-second: 40 75 105;
+    --text-third: 90 120 145;
+    --border-main: 215 235 248;
+    --border-second: 195 220 240;
+    --gradient-main: linear-gradient(45deg, #0e74b5 0%, #00b4d8 50%, #90e0ef 100%);
+    --gradient-second: linear-gradient(45deg, #00b4d8 0%, #90e0ef 50%, #00b4d8 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-ocean"],
+  [data-theme="dark-old"] [data-chat-theme="chat-ocean"] {
+    --bg-main: 8 18 26;
+    --bg-second: 12 26 38;
+    --bg-fourth: 20 40 58;
+    --primary-600: 2 132 199;
+    --primary-500: 56 189 248;
+    --primary-800: 3 105 161;
+    --text-main: 240 249 255;
+    --text-second: 186 230 253;
+    --text-third: 125 211 252;
+    --border-main: 20 40 58;
+    --border-second: 30 58 84;
+    --gradient-main: linear-gradient(45deg, #0369a1 0%, #0284c7 50%, #38bdf8 100%);
+    --gradient-second: linear-gradient(45deg, #0284c7 0%, #38bdf8 50%, #0284c7 100%);
+  }
+
+  /* ==================== BUBBLEGUM ==================== */
+  [data-chat-theme="chat-bubblegum"] {
+    --bg-main: 254 246 248;
+    --bg-second: 252 236 240;
+    --bg-fourth: 249 220 230;
+    --primary-600: 236 72 135;
+    --primary-500: 245 110 165;
+    --primary-800: 180 40 90;
+    --text-main: 62 16 35;
+    --text-second: 120 50 80;
+    --text-third: 170 100 130;
+    --border-main: 249 220 230;
+    --border-second: 240 200 215;
+    --gradient-main: linear-gradient(45deg, #ec4887 0%, #f472b6 50%, #fbcfe8 100%);
+    --gradient-second: linear-gradient(45deg, #f472b6 0%, #fbcfe8 50%, #f472b6 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-bubblegum"],
+  [data-theme="dark-old"] [data-chat-theme="chat-bubblegum"] {
+    --bg-main: 24 12 18;
+    --bg-second: 34 16 24;
+    --bg-fourth: 50 24 36;
+    --primary-600: 219 39 119;
+    --primary-500: 244 63 94;
+    --primary-800: 157 23 77;
+    --text-main: 255 241 245;
+    --text-second: 244 143 177;
+    --text-third: 240 98 146;
+    --border-main: 50 24 36;
+    --border-second: 70 34 50;
+    --gradient-main: linear-gradient(45deg, #be185d 0%, #db2777 50%, #f472b6 100%);
+    --gradient-second: linear-gradient(45deg, #db2777 0%, #f472b6 50%, #db2777 100%);
+  }
+
+  /* ==================== WORLD CUP ==================== */
+  [data-chat-theme="chat-worldcup"] {
+    --bg-main: 240 248 245;
+    --bg-second: 230 244 238;
+    --bg-fourth: 215 240 228;
+    --primary-600: 21 128 61;
+    --primary-500: 34 197 94;
+    --primary-800: 22 101 52;
+    --text-main: 15 45 35;
+    --text-second: 40 80 65;
+    --text-third: 80 120 105;
+    --border-main: 215 240 228;
+    --border-second: 200 230 215;
+    --gradient-main: linear-gradient(45deg, #15803d 0%, #22c55e 50%, #4ade80 100%);
+    --gradient-second: linear-gradient(45deg, #22c55e 0%, #4ade80 50%, #22c55e 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-worldcup"],
+  [data-theme="dark-old"] [data-chat-theme="chat-worldcup"] {
+    --bg-main: 10 24 18;
+    --bg-second: 15 32 25;
+    --bg-fourth: 25 45 35;
+    --primary-600: 34 197 94;
+    --primary-500: 74 222 128;
+    --primary-800: 20 83 45;
+    --text-main: 235 250 242;
+    --text-second: 175 220 195;
+    --text-third: 120 160 140;
+    --border-main: 25 45 35;
+    --border-second: 35 60 48;
+    --gradient-main: linear-gradient(45deg, #166534 0%, #15803d 50%, #22c55e 100%);
+    --gradient-second: linear-gradient(45deg, #15803d 0%, #22c55e 50%, #15803d 100%);
+  }
+
+  [data-chat-theme="chat-worldcup"] [data-chat-scrollable="true"] {
+    position: relative;
+    background-color: #cdead5 !important;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-worldcup"] [data-chat-scrollable="true"],
+  [data-theme="dark-old"] [data-chat-theme="chat-worldcup"] [data-chat-scrollable="true"] {
+    background-color: #041009 !important;
+  }
+  [data-chat-theme="chat-worldcup"] [data-chat-scrollable="true"]::before {
+    background-image: var(--chat-custom-bg, url("/images/worldcup_bg.png")) !important;
+    opacity: 0.3;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-worldcup"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-theme="chat-worldcup"] [data-chat-scrollable="true"]::before {
+    opacity: 0.2;
+  }
+
+  /* ==================== VIỆT NAM ==================== */
+  [data-chat-theme="chat-vietnam"] {
+    --bg-main: 254 242 242;
+    --bg-second: 254 226 226;
+    --bg-fourth: 252 165 165;
+    --primary-600: 220 38 38;
+    --primary-500: 239 68 68;
+    --primary-800: 153 27 27;
+    --text-main: 67 20 20;
+    --text-second: 127 29 29;
+    --text-third: 185 28 28;
+    --border-main: 254 226 226;
+    --border-second: 252 165 165;
+    --gradient-main: linear-gradient(45deg, #da251d 0%, #ffcd00 50%, #da251d 100%);
+    --gradient-second: linear-gradient(45deg, #ffcd00 0%, #da251d 50%, #ffcd00 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-vietnam"],
+  [data-theme="dark-old"] [data-chat-theme="chat-vietnam"] {
+    --bg-main: 24 10 10;
+    --bg-second: 36 15 15;
+    --bg-fourth: 54 20 20;
+    --primary-600: 239 68 68;
+    --primary-500: 248 113 113;
+    --primary-800: 185 28 28;
+    --text-main: 254 242 242;
+    --text-second: 252 165 165;
+    --text-third: 239 68 68;
+    --border-main: 54 20 20;
+    --border-second: 76 30 30;
+    --gradient-main: linear-gradient(45deg, #991b1b 0%, #da251d 50%, #ffcd00 100%);
+    --gradient-second: linear-gradient(45deg, #da251d 0%, #ffcd00 50%, #da251d 100%);
+  }
+
+  [data-chat-theme="chat-vietnam"] [data-chat-scrollable="true"] {
+    position: relative;
+    background-color: #fbcdcd !important;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-vietnam"] [data-chat-scrollable="true"],
+  [data-theme="dark-old"] [data-chat-theme="chat-vietnam"] [data-chat-scrollable="true"] {
+    background-color: #240404 !important;
+  }
+  [data-chat-theme="chat-vietnam"] [data-chat-scrollable="true"]::before {
+    background-image: var(--chat-custom-bg, url("/images/vietnam_bg.png")) !important;
+    opacity: 0.3;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-vietnam"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-theme="chat-vietnam"] [data-chat-scrollable="true"]::before {
+    opacity: 0.2;
+  }
+
+  /* ==================== VŨ TRỤ ==================== */
+  [data-chat-theme="chat-vutru"] {
+    --bg-main: 245 243 255;
+    --bg-second: 237 233 254;
+    --bg-fourth: 221 214 254;
+    --primary-600: 109 40 217;
+    --primary-500: 139 92 246;
+    --primary-800: 92 33 186;
+    --text-main: 46 16 101;
+    --text-second: 76 29 149;
+    --text-third: 109 40 217;
+    --border-main: 221 214 254;
+    --border-second: 196 181 253;
+    --gradient-main: linear-gradient(45deg, #6366f1 0%, #8b5cf6 50%, #ec4899 100%);
+    --gradient-second: linear-gradient(45deg, #8b5cf6 0%, #ec4899 50%, #8b5cf6 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-vutru"],
+  [data-theme="dark-old"] [data-chat-theme="chat-vutru"] {
+    --bg-main: 10 7 24;
+    --bg-second: 16 12 36;
+    --bg-fourth: 25 18 54;
+    --primary-600: 139 92 246;
+    --primary-500: 167 139 250;
+    --primary-800: 109 40 217;
+    --text-main: 243 244 246;
+    --text-second: 196 181 253;
+    --text-third: 139 92 246;
+    --border-main: 25 18 54;
+    --border-second: 38 28 80;
+    --gradient-main: linear-gradient(45deg, #312e81 0%, #4c1d95 50%, #831843 100%);
+    --gradient-second: linear-gradient(45deg, #4c1d95 0%, #831843 50%, #4c1d95 100%);
+  }
+
+  [data-chat-theme="chat-vutru"] [data-chat-scrollable="true"] {
+    position: relative;
+    background-color: #dfd7ff !important;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-vutru"] [data-chat-scrollable="true"],
+  [data-theme="dark-old"] [data-chat-theme="chat-vutru"] [data-chat-scrollable="true"] {
+    background-color: #04030a !important;
+  }
+  [data-chat-theme="chat-vutru"] [data-chat-scrollable="true"]::before {
+    background-image: var(--chat-custom-bg, url("/images/vutru_bg.png")) !important;
+    opacity: 0.35;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-vutru"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-theme="chat-vutru"] [data-chat-scrollable="true"]::before {
+    opacity: 0.25;
+  }
+
+  /* ==================== GLOBAL SETTINGS ==================== */
+  [data-chat-scrollable="true"] {
+    position: relative;
+  }
+  [data-chat-scrollable="true"]::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image: var(--chat-custom-bg);
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 0;
+  }
+  [data-theme="dark"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-scrollable="true"]::before {
+    opacity: 0.2;
+  }
+
+  [data-chat-scrollable="true"] > * {
+    position: relative;
+    z-index: 10;
+  }
+}

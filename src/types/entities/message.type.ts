@@ -10,6 +10,8 @@ export enum MessageType {
   ChangeGroupAvatar = "ChangeGroupAvatar",
   RemoveParticipant = "RemoveParticipant",
   AddParticipant = "AddParticipant",
+  ChangeTheme = "ChangeTheme",
+  ChangeBackgroundUrl = "ChangeBackgroundUrl",
 }
 
 export enum MessageRenderType {

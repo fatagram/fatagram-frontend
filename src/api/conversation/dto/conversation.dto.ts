@@ -14,6 +14,8 @@ export interface ConversationDto {
   otherLastSeenMessageSeq?: number;
   myLastSeenMessageSeq?: number;
   otherUserId?: string | null;
+  theme?: string | null;
+  backgroundUrl?: string | null;
 }
 
 export interface UpdateConversationDto {

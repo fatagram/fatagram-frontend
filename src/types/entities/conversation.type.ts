@@ -13,4 +13,6 @@ export interface Conversation {
   otherLastSeenMessageSeq?: number;
   myLastSeenMessageSeq?: number;
   otherUserId?: string | null;
+  theme?: string | null;
+  backgroundUrl?: string | null;
 }

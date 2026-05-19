@@ -282,7 +282,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
   return (
     <div
       className={clsx(
-        "fixed inset-0 z-50 flex flex-col bg-black/95 backdrop-blur-md transition-opacity overscroll-none touch-none",
+        "fixed inset-0 z-[9999] flex flex-col bg-black/95 backdrop-blur-md transition-opacity overscroll-none touch-none",
         className,
       )}
       onClick={onClose}

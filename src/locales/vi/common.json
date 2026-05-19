@@ -65,7 +65,9 @@
     "systemMessage": {
       "createGroup": "{{creatorName}} đã tạo nhóm",
       "changeGroupAvatar": "{{actorName}} đã thay đổi ảnh đại diện nhóm",
-      "renameGroup": "{{actorName}} đã đổi tên nhóm thành \"{{newName}}\""
+      "renameGroup": "{{actorName}} đã đổi tên nhóm thành \"{{newName}}\"",
+      "changeTheme": "{{actorName}} đã đổi chủ đề cuộc trò chuyện thành {{theme}}",
+      "changeBackgroundUrl": "{{actorName}} đã cập nhật hình nền cuộc trò chuyện"
     },
     "sentImageMessage": "Đã gửi {{count}} hình ảnh",
     "sentMediaMessage": "Đã gửi một tệp đính kèm",
