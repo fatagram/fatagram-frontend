@@ -4,6 +4,8 @@ import clsx from "clsx";
 import { Button, Textbox, Text } from "@/components/atoms";
 import { useMobile } from "@/hooks/use-mobile";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 
 interface EditableFieldProps {
   className?: string;
@@ -78,7 +80,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
         onClick={() => onSaveClick?.(inputValue)}
         className="flex-1 whitespace-nowrap"
       >
-        <i className="fa-solid fa-floppy-disk mr-2" />
+        <FontAwesomeIcon icon={faFloppyDisk} className="mr-2"  />
         {t("settings:editableField.saveButton")}
       </Button>
       <Button

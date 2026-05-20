@@ -13,6 +13,8 @@ import {
 } from "../validations/register.validation";
 import { SocialButtons } from "../../components/social-buttons";
 import { Error } from "@/api/common/result";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 type RegisterFormProps = {
   showLogo?: boolean;
@@ -235,7 +237,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
           )}
           onClick={onClose}
         >
-          <i className="fa-solid fa-xmark"></i>
+          <FontAwesomeIcon icon={faXmark} />
         </Text>
       )}
     </div>

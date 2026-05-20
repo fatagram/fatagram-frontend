@@ -14,6 +14,8 @@ import { useFormatTime } from "@/utils/time";
 import { isOnlyEmoji } from "@/utils/string";
 import { getMessageBubbleShapeClass, getMessageType } from "@/utils/message";
 import { isSystemMessage } from "../helpers/conversation-helpers";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 
 interface MessageListProps extends ComponentProps {
   isGroup?: boolean;
@@ -193,7 +195,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
               "w-fit min-w-[100px]",
             )}
           >
-            <i className="fa-solid fa-circle-notch animate-spin" />
+            <FontAwesomeIcon icon={faCircleNotch} className="animate-spin"  />
             <Text sz="sm" className="!text-primary-500">
               {t("common:conversations.loadingOldMessages")}
             </Text>

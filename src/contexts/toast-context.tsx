@@ -2,6 +2,8 @@ import { Button, Text } from "@/components/atoms";
 import NotificationFactory from "@/features/notifications/components/notification-factory";
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 // Toast item type
 interface ToastItem {
@@ -83,7 +85,7 @@ const ToastManager: React.FC<ToastManagerProps> = React.memo(function ToastManag
             className="absolute top-2 right-2"
             onClick={() => setToast(null)}
           >
-            <i className="fa-solid fa-xmark"></i>
+            <FontAwesomeIcon icon={faXmark} />
           </Button>
         </div>
       )}

@@ -14,13 +14,15 @@ import { ChatLayer } from "@/features/chat/chat-layer";
 import { ChatBadge } from "@/features/chat/components/chat-badge";
 import { useUnreadCount } from "@/features/notifications/hooks/use-notification-store";
 import { useConversationStore } from "@/features/chat/services/conversation-manager";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMessage, faBell, faHouse, faUserGroup } from "@fortawesome/free-solid-svg-icons";
 
 const MessageIconWithBadge = () => {
   const unreadCount = useConversationStore((state) => state.totalUnreadCount);
 
   return (
     <div className="relative">
-      <i className="fa-solid fa-message" />
+      <FontAwesomeIcon icon={faMessage} />
       {unreadCount > 0 && (
         <BadgeCount
           count={unreadCount}
@@ -39,7 +41,7 @@ const NotificationIconWithBadge = () => {
 
   return (
     <div className="relative">
-      <i className="fa-solid fa-bell" />
+      <FontAwesomeIcon icon={faBell} />
       {unreadCount > 0 && (
         <BadgeCount
           count={unreadCount}
@@ -65,9 +67,9 @@ const DefaultLayout = () => {
   const headerRef = useRef<HTMLDivElement>(null);
 
   const items = [
-    { icon: <i className="fa-solid fa-house" />, path: "/", isIndex: true, showOnDesktop: true },
+    { icon: <FontAwesomeIcon icon={faHouse} />, path: "/", isIndex: true, showOnDesktop: true },
     {
-      icon: <i className="fa-solid fa-user-group" />,
+      icon: <FontAwesomeIcon icon={faUserGroup} />,
       path: "/friends",
       isIndex: false,
       showOnDesktop: true,

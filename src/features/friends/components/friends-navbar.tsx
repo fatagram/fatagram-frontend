@@ -2,6 +2,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import PageNavbar from "@/components/ui/navigation/page-navbar/page-navbar";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserPlus, faUserCheck } from "@fortawesome/free-solid-svg-icons";
 
 interface FriendsNavbarProps {
   className?: string;
@@ -21,12 +23,12 @@ const FriendsNavbar: React.FC<FriendsNavbarProps> = ({ className, onSelect }) =>
   // Route auth settings
   const friendPageItems: { icon: React.ReactNode; name: string; path: string }[] = [
     {
-      icon: <i className="fa-solid fa-user-plus"></i>,
+      icon: <FontAwesomeIcon icon={faUserPlus} />,
       name: t("friends:navbar.addFriends"),
       path: "/friends",
     },
     {
-      icon: <i className="fa-solid fa-user-check"></i>,
+      icon: <FontAwesomeIcon icon={faUserCheck} />,
       name: t("friends:navbar.invite"),
       path: "requests",
     },

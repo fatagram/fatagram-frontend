@@ -6,6 +6,8 @@ import EditableTextArea from "@/features/settings/components/editable-textarea";
 import { useProfilePage } from "../../hooks/use-profile-page";
 import { Text } from "@/components/atoms";
 import { useAuth } from "@/contexts";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPencilAlt } from "@fortawesome/free-solid-svg-icons";
 
 interface ProfileIntroductionProps {
   className?: string;
@@ -87,7 +89,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           isLoading={updateProfileMutation.isFetching}
           btnChildren={
             <Text sz="sm">
-              <i className="fas fa-pencil-alt"></i> &nbsp; {t("user:profilePosts.bioBtn")}
+              <FontAwesomeIcon icon={faPencilAlt} /> &nbsp; {t("user:profilePosts.bioBtn")}
             </Text>
           }
         />
@@ -113,7 +115,7 @@ const ProfileIntroduction: React.FC<ProfileIntroductionProps> = ({ className }) 
           onOpenChange={handleOnChangeDescription}
           btnChildren={
             <Text sz="sm">
-              <i className="fas fa-pencil-alt"></i> &nbsp; {t("user:profilePosts.descriptionBtn")}
+              <FontAwesomeIcon icon={faPencilAlt} /> &nbsp; {t("user:profilePosts.descriptionBtn")}
             </Text>
           }
         />

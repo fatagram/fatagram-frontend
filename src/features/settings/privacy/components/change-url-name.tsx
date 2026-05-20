@@ -6,6 +6,8 @@ import { useState } from "react";
 import { useGetUserProfile, useUpdateUrlName } from "@/features/hooks/use-user-profile";
 import { ErrorCodes } from "@/api/user/dto/change-url-name.dto";
 import { useAuth } from "@/contexts";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 
 interface ChangeUrlNameProps {
   userId: string;
@@ -58,7 +60,7 @@ export const ChangeUrlName: React.FC<ChangeUrlNameProps> = ({ userId }) => {
       valueClassName={clsx(!userProfile?.infos.urlName && "!opacity-50")}
       btnChildren={
         <Text>
-          <i className="fa-solid fa-pen mr-2"></i>
+          <FontAwesomeIcon icon={faPen} className="mr-2" />
           {t("settings:account.personalInfo.changeButton")}
         </Text>
       }

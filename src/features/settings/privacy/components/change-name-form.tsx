@@ -6,6 +6,8 @@ import clsx from "clsx";
 import { useGetUserProfile, useUpdateName } from "@/features/hooks/use-user-profile";
 import { ErrorCodes } from "@/api/user/dto/change-name.dto";
 import { useAuth } from "@/contexts";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 type ChangeNameFormProps = {
   className?: string;
@@ -189,7 +191,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
           className={clsx("absolute top-5 right-8 hover:text-primary-500 cursor-pointer")}
           onClick={handleClose}
         >
-          <i className="fa-solid fa-xmark"></i>
+          <FontAwesomeIcon icon={faXmark} />
         </Text>
       </div>
     </div>

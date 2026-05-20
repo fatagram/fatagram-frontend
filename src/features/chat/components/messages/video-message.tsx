@@ -3,6 +3,16 @@ import { ComponentProps } from "@/components/common/component-type";
 import { Button } from "@/components/atoms";
 import clsx from "clsx";
 import { useMediaBlob } from "@/hooks/use-media-blob";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faPlay,
+  faSpinner,
+  faPause,
+  faVolumeMute,
+  faVolumeDown,
+  faVolumeUp,
+  faExpand,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface VideoMessageProps extends ComponentProps {
   url: string;
@@ -241,13 +251,13 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
             "w-16 h-16 !rounded-full text-white flex items-center justify-center transition-all active:scale-98",
           )}
         >
-          <i className="fa-solid fa-play text-2xl pl-[2px]" />
+          <FontAwesomeIcon icon={faPlay} className="text-2xl pl-[2px]" />
         </Button>
       )}
 
       {isWaiting && hasStarted && (
         <div className="absolute inset-0 flex items-center justify-center z-10 pointer-events-none">
-          <i className="fa-solid fa-spinner fa-spin text-white text-4xl opacity-80" />
+          <FontAwesomeIcon icon={faSpinner} spin className="text-white text-4xl opacity-80" />
         </div>
       )}
 
@@ -281,7 +291,7 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
           <div className="flex items-center justify-between text-white drop-shadow-md">
             <div className="flex items-center gap-6">
               <button onClick={togglePlay} className="hover:text-primary-400 transition-colors w-5">
-                <i className={`fas ${isPlaying ? "fa-pause" : "fa-play"} text-xl`}></i>
+                <FontAwesomeIcon icon={isPlaying ? faPause : faPlay} className="text-xl" />
               </button>
 
               <div className="flex items-center relative">
@@ -292,15 +302,15 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
                   }}
                   className="hover:text-primary-400 transition-colors w-5 shrink-0"
                 >
-                  <i
-                    className={`fas ${
+                  <FontAwesomeIcon
+                    icon={
                       isMuted || volume === 0
-                        ? "fa-volume-mute"
+                        ? faVolumeMute
                         : volume < 0.5
-                          ? "fa-volume-down"
-                          : "fa-volume-up"
-                    }`}
-                  ></i>
+                          ? faVolumeDown
+                          : faVolumeUp
+                    }
+                  />
                 </button>
 
                 <div
@@ -344,7 +354,7 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
                   onClick={onFullscreenToggle}
                   className="hover:text-primary-400 transition-colors w-5 text-right"
                 >
-                  <i className={`fas fa-expand`}></i>
+                  <FontAwesomeIcon icon={faExpand} />
                 </button>
               )}
             </div>

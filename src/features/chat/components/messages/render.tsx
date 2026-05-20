@@ -9,6 +9,8 @@ import { useTranslation } from "react-i18next";
 import { formatFileSize } from "@/utils/file";
 import { AudioMessage } from "./audio-message";
 import { useMediaBlob } from "@/hooks/use-media-blob";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlay } from "@fortawesome/free-solid-svg-icons";
 
 export const MediaBlobImage = ({ url, className, alt, onClick, onLoad, style }: any) => {
   const { blobUrl } = useMediaBlob(url);
@@ -131,7 +133,7 @@ export const renderVideoMessage = (
               setIsInlinePlaying(true);
             }}
           >
-            <i className="fa-solid fa-play text-xl pl-[3px]" />
+            <FontAwesomeIcon icon={faPlay} className="text-xl pl-[3px]"  />
           </div>
         </div>
       )}

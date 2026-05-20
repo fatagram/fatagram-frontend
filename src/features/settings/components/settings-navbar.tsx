@@ -2,6 +2,8 @@ import React from "react";
 import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import PageNavbar from "@/components/ui/navigation/page-navbar/page-navbar";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faShieldHalved, faLanguage, faBell, faCircleInfo, faPalette } from "@fortawesome/free-solid-svg-icons";
 
 type SettingsNavbarProps = {
   className?: string;
@@ -21,12 +23,12 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({ className, onSelect }) 
   // Route auth settings
   const authSettings: { icon: React.ReactNode; name: string; path: string }[] = [
     {
-      icon: <i className="fa-solid fa-user"></i>,
+      icon: <FontAwesomeIcon icon={faUser} />,
       name: t("settings:navbar.privacy.account"),
       path: "/settings",
     },
     // {
-    //   icon: <i className="fa-solid fa-shield-halved"></i>,
+    //   icon: <FontAwesomeIcon icon={faShieldHalved} />,
     //   name: t("settings:navbar.privacy.privacy"),
     //   path: "/settings/privacy",
     // },
@@ -35,22 +37,22 @@ const SettingsNavbar: React.FC<SettingsNavbarProps> = ({ className, onSelect }) 
   // Route general settings
   const generalSettings: { icon: React.ReactNode; name: string; path: string }[] = [
     {
-      icon: <i className="fa-solid fa-language"></i>,
+      icon: <FontAwesomeIcon icon={faLanguage} />,
       name: t("settings:navbar.general.language"),
       path: "/settings/language",
     },
     // {
-    //   icon: <i className="fa-solid fa-bell"></i>,
+    //   icon: <FontAwesomeIcon icon={faBell} />,
     //   name: t("settings:navbar.general.notifications"),
     //   path: "/settings/notifications",
     // },
     // {
-    //   icon: <i className="fa-solid fa-circle-info"></i>,
+    //   icon: <FontAwesomeIcon icon={faCircleInfo} />,
     //   name: t("settings:navbar.general.about"),
     //   path: "/settings/about",
     // },
     {
-      icon: <i className="fa-solid fa-palette"></i>,
+      icon: <FontAwesomeIcon icon={faPalette} />,
       name: t("settings:navbar.general.theme"),
       path: "/settings/theme",
     },

@@ -1,6 +1,8 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import Transition, { AnimationLib } from "./utils/transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBars } from "@fortawesome/free-solid-svg-icons";
 
 interface SidebarLayoutProps extends ComponentProps {
   navbar?: React.ReactNode;
@@ -59,7 +61,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
             className="self-start m-3 text-2xl font-bold lg:hidden"
             onClick={() => setShowSidebar?.(!showSidebar)}
           >
-            <i className="fa-solid fa-bars mr-2" />
+            <FontAwesomeIcon icon={faBars} className="mr-2"  />
             <span>{title}</span>
           </button>
         )}

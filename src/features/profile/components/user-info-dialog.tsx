@@ -2,6 +2,8 @@ import React, { useCallback } from "react";
 import { useSnackbar } from "@/contexts";
 import { Menu, MenuItem, MenuSection } from "@/components/ui/menu";
 import useLanguage from "@/utils/i18n";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCopy } from "@fortawesome/free-solid-svg-icons";
 
 interface UserInfoDialogProps {
   userProfile?: {
@@ -33,7 +35,7 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({ userProfile, tar
 
   const copyIcon = (
     <div className="w-8 h-8 rounded-full flex items-center justify-center bg-bg-third text-text-third group-hover:text-primary-500 group-hover:bg-bg-hover transition-all duration-200 shrink-0">
-      <i className="fa-solid fa-copy text-xs"></i>
+      <FontAwesomeIcon icon={faCopy} className="text-xs" />
     </div>
   );
 

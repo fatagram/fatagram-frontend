@@ -5,6 +5,8 @@ import { Avatar, Skeleton } from "@/components/atoms";
 import SelectFile from "@/components/atoms/select-file";
 import { useGetUserAvatar, useSelectAvatar } from "@/features/hooks/use-user-profile";
 import { useSnackbar } from "@/contexts";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCamera } from "@fortawesome/free-solid-svg-icons";
 
 interface ProfileAvatarProps {
   className?: string;
@@ -64,7 +66,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ className }) => {
                   flex justify-center items-center opacity-0 group-hover:opacity-90 active:opacity-100
                   transition-all duration-300 ease-out"
               >
-                <i className="fa-solid fa-camera text-white text-2xl"></i>
+                <FontAwesomeIcon icon={faCamera} className="text-white text-2xl" />
               </SelectFile>
             )}
           </Avatar>

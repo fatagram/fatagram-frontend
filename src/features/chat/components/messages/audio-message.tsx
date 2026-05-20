@@ -1,6 +1,8 @@
 import { useRef, useState } from "react";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPause, faPlay } from "@fortawesome/free-solid-svg-icons";
 
 interface AudioMessageProps extends ComponentProps {
   url: string;
@@ -54,9 +56,9 @@ export const AudioMessage: React.FC<AudioMessageProps> = ({ url, className, isMy
           className={clsx(isMyMessage ? "text-text-my-msg" : "text-text-other-msg", "w-8")}
         >
           {playing ? (
-            <i className="fa-solid fa-pause text-lg" />
+            <FontAwesomeIcon icon={faPause} className="text-lg"  />
           ) : (
-            <i className="fa-solid fa-play text-lg pl-[2px]" />
+            <FontAwesomeIcon icon={faPlay} className="text-lg pl-[2px]"  />
           )}
         </button>
 

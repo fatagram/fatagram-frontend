@@ -4,6 +4,8 @@ import { useTheme } from "@/contexts";
 import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck } from "@fortawesome/free-solid-svg-icons";
 
 interface ThemeSettingsProps {}
 
@@ -133,7 +135,7 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = () => {
                 </Text>
                 {isActive && (
                   <div className="absolute top-2 right-2 bg-primary-500 text-white w-5 h-5 rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                    <i className="fa-solid fa-check text-[10px]" />
+                    <FontAwesomeIcon icon={faCheck} className="text-[10px]"  />
                   </div>
                 )}
               </button>

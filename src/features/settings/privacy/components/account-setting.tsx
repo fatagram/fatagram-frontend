@@ -8,6 +8,8 @@ import { ChangeNickname } from "./change-nickname";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useAuth } from "@/contexts";
 import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 
 type AccountSettingProps = {};
 
@@ -29,7 +31,7 @@ const AccountSetting: React.FC<AccountSettingProps> = () => {
           value={userProfile?.infos.fullName}
           btnChildren={
             <Text>
-              <i className="fa-solid fa-pen mr-2" />{" "}
+              <FontAwesomeIcon icon={faPen} className="mr-2"  />{" "}
               {t("settings:account.personalInfo.changeButton")}
             </Text>
           }

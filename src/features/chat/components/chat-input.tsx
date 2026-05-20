@@ -14,6 +14,8 @@ import { ChatAddonPicker } from "./chat-addon-picker";
 import { useMobile } from "@/hooks/use-mobile";
 import { useTyping } from "../hooks/use-typing";
 import { useAppHub } from "@/features/hub/use-app-hub";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faVideo, faMicrophone, faFileLines, faPaperclip, faImage, faXmark, faFaceSmile, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;
@@ -426,7 +428,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       case MediaType.Video:
         return (
           <div className="h-16 w-16 bg-black rounded-xl flex items-center justify-center relative">
-            <i className="fa-solid fa-video text-white/50 text-xl"></i>
+            <FontAwesomeIcon icon={faVideo} className="text-white/50 text-xl" />
             <video
               src={it.url}
               className="absolute inset-0 h-full w-full object-cover opacity-30 rounded-xl"
@@ -436,14 +438,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       case MediaType.Audio:
         return (
           <div className="h-16 w-32 bg-primary-100 rounded-xl flex flex-col items-center justify-center px-2">
-            <i className="fa-solid fa-microphone text-primary-500 mb-1"></i>
+            <FontAwesomeIcon icon={faMicrophone} className="text-primary-500 mb-1" />
             <span className="text-[10px] truncate w-full text-center">{it.file.name}</span>
           </div>
         );
       default:
         return (
           <div className="h-16 w-32 bg-bg-main border border-border-main rounded-xl flex flex-col items-center justify-center px-2">
-            <i className="fa-solid fa-file-lines text-primary-500 mb-1"></i>
+            <FontAwesomeIcon icon={faFileLines} className="text-primary-500 mb-1" />
             <span className="text-[10px] truncate w-full text-center">{it.file.name}</span>
           </div>
         );
@@ -482,14 +484,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           onClick={() => fileInputRef.current?.click()}
           onPointerDown={(e) => e.preventDefault()}
         >
-          <i className="fa-solid fa-paperclip text-primary-500"></i>
+          <FontAwesomeIcon icon={faPaperclip} className="text-primary-500" />
         </MiniButton>
 
         <MiniButton
           onClick={() => imageInputRef.current?.click()}
           onPointerDown={(e) => e.preventDefault()}
         >
-          <i className="fa-solid fa-image text-primary-500"></i>
+          <FontAwesomeIcon icon={faImage} className="text-primary-500" />
         </MiniButton>
 
         <div className="flex-1 min-w-0 relative flex items-end">
@@ -526,7 +528,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
                             setFileUrls((prev) => prev.filter((u) => u.url !== it.url));
                           }}
                         >
-                          <i className="fa-solid fa-xmark text-[10px]"></i>
+                          <FontAwesomeIcon icon={faXmark} className="text-[10px]" />
                         </button>
                       </div>
                     ))}
@@ -542,7 +544,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
               onPointerDown={(e) => e.preventDefault()}
               className={clsx(showEmojiPicker && "bg-primary-500/10", "hover:bg-transparent")}
             >
-              <i className="fa-solid fa-face-smile text-primary-500"></i>
+              <FontAwesomeIcon icon={faFaceSmile} className="text-primary-500" />
             </MiniButton>
           </div>
         </div>
@@ -552,7 +554,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           disabled={!hasInput && fileUrls.length === 0}
           onPointerDown={(e) => e.preventDefault()}
         >
-          <i className="fa-solid fa-paper-plane text-primary-500"></i>
+          <FontAwesomeIcon icon={faPaperPlane} className="text-primary-500" />
         </MiniButton>
       </div>
 

@@ -5,6 +5,8 @@ import clsx from "clsx";
 import useLanguage from "@/utils/i18n";
 import { useGetUserProfile, useUpdateNickname } from "@/features/hooks/use-user-profile";
 import { ErrorCodes } from "@/api/user/dto/change-nickname.dto";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPen } from "@fortawesome/free-solid-svg-icons";
 
 interface ChangeNicknameProps {
   userId: string;
@@ -58,7 +60,7 @@ export const ChangeNickname: FC<ChangeNicknameProps> = ({ userId }) => {
       valueClassName={clsx(!userProfile?.infos.nickname && "!opacity-50")}
       btnChildren={
         <Text>
-          <i className="fa-solid fa-pen mr-2"></i>
+          <FontAwesomeIcon icon={faPen} className="mr-2" />
           {t("settings:account.personalInfo.changeButton")}
         </Text>
       }

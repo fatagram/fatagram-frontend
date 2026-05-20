@@ -7,6 +7,8 @@ import clsx from "clsx";
 import { useProfilePage } from "../../hooks/use-profile-page";
 import { Text, Textbox } from "@/components/atoms";
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserXmark } from "@fortawesome/free-solid-svg-icons";
 
 interface ProfileFriendsProps {
   className?: string;
@@ -59,7 +61,7 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
           <div className="flex w-full justify-center mb-10 mt-10">
             <div className="flex flex-col items-center text-[var(--text-color)] opacity-30">
               <Text sz="xl" weight="bold">
-                <i className="fa-solid fa-user-xmark"></i>
+                <FontAwesomeIcon icon={faUserXmark} />
               </Text>
               <Text sz="md" className="mt-2">
                 {t("user:profileFriends.noFriends")}

@@ -7,6 +7,9 @@ import { ChatList } from "./chat-list";
 import { useState } from "react";
 import { CreateGroupChat } from "./create-group-chat/create-group-chat";
 import { useConversationStore } from "../services/conversation-manager";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
 
 interface ChatMenuProps extends ComponentProps {
   ref?: React.RefObject<HTMLDivElement | null>;
@@ -40,7 +43,7 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
         <>
           <div className="absolute top-0 right-0 flex mt-4 mr-4 gap-2">
             <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
-              <i className="fa-regular fa-pen-to-square" />
+              <FontAwesomeIcon icon={faPenToSquare}  />
             </MiniButton>
           </div>
           <div className="flex items-center justify-between px-5 pt-4 pb-1">
@@ -78,7 +81,7 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
               {t("common:conversations.openFatalk")}
             </Text>
             <Text sz="sm" color="secondary">
-              <i className="fa-solid fa-arrow-up-right-from-square" />
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare}  />
             </Text>
           </button>
         </div>

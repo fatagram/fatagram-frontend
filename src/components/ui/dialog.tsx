@@ -1,6 +1,8 @@
 import React from "react";
 import clsx from "clsx";
 import { Button, Text } from "@/components/atoms";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 ("@/components/atoms");
 
 interface ButtonProps {
@@ -66,7 +68,7 @@ export const Dialog: React.FC<DialogBoxProps> = ({
         )}
         onClick={onClose}
       >
-        <i className="fa-solid fa-xmark"></i>
+        <FontAwesomeIcon icon={faXmark} />
       </Text>
     </div>
   );

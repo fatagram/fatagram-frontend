@@ -8,6 +8,8 @@ import { useTranslation } from "react-i18next";
 import { useLocation, useNavigate } from "react-router-dom";
 import { useProfilePage } from "../hooks/use-profile-page";
 import { SmartDropdown } from "@/components/ui/smart-dropdown";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretDown, faCheck } from "@fortawesome/free-solid-svg-icons";
 
 interface ProfileNavbarProps {
   className?: string;
@@ -144,7 +146,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
             isChooseHiddenItem ? "!text-primary-500" : "",
           )}
         >
-          More <i className="fa-solid fa-caret-down ml-1"></i>
+          More <FontAwesomeIcon icon={faCaretDown} className="ml-1" />
         </Text>
 
         <div
@@ -212,7 +214,7 @@ const ProfileNavbar: React.FC<ProfileNavbarProps> = ({ className = "" }) => {
               )}
             >
               {item.name}
-              {location.pathname === item.href && <i className="fas fa-check"></i>}
+              {location.pathname === item.href && <FontAwesomeIcon icon={faCheck} />}
             </div>
           ),
           onClick: () => {

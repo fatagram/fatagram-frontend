@@ -1,3 +1,6 @@
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
+
 import { renderToPipeableStream } from "react-dom/server";
 import { StaticRouter } from "react-router-dom";
 import { PassThrough } from "node:stream";

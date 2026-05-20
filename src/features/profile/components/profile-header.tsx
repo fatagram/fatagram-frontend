@@ -14,6 +14,8 @@ import { useOpenChat } from "@/features/chat/hooks/use-open-chat";
 import UserInfoDialog from "./user-info-dialog";
 import { createPortal } from "react-dom";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUsers, faUserPen, faComment, faCircleInfo } from "@fortawesome/free-solid-svg-icons";
 
 export type ProfileHeaderProps = {
   className?: string;
@@ -110,7 +112,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
 
             {!numberOfFriendsFetching ? (
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-bg-third/80 border border-border-main/50 backdrop-blur-sm transition-all duration-300 hover:bg-bg-third select-none h-8">
-                <i className="fa-solid fa-users text-primary-500 text-sm leading-none" />
+                <FontAwesomeIcon icon={faUsers} className="text-primary-500 text-sm leading-none"  />
                 <span className="text-sm font-bold text-text-main leading-none flex items-center">
                   {numberOfFriends || 0}
                 </span>
@@ -143,7 +145,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                         className="!h-9 text-xs font-semibold rounded-lg bg-bg-third border border-bg-fourth hover:bg-bg-hover transition-colors px-4 justify-center"
                         onClick={() => navigate(`/settings`)}
                       >
-                        <i className="fa-solid fa-user-pen mr-2"></i> Chỉnh sửa
+                        <FontAwesomeIcon icon={faUserPen} className="mr-2" /> Chỉnh sửa
                       </Button>
                     ) : (
                       <>
@@ -158,7 +160,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                           className="!h-9 text-xs font-semibold rounded-lg justify-center border border-bg-fourth hover:bg-bg-hover transition-colors px-4"
                           onClick={handleMessageClick}
                         >
-                          <i className="fa-solid fa-comment mr-2"></i>{" "}
+                          <FontAwesomeIcon icon={faComment} className="mr-2" />{" "}
                           {t("user:profileHeader.messageButton")}
                         </Button>
                       </>
@@ -171,7 +173,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                   className="w-10 !h-9 flex items-center justify-center rounded-lg border border-bg-fourth shrink-0 hover:bg-bg-hover transition-colors group"
                   onClick={handleOpenInfoDialog}
                 >
-                  <i className="fa-solid fa-circle-info text-text-second group-hover:text-text-main transition-colors"></i>
+                  <FontAwesomeIcon icon={faCircleInfo} className="text-text-second group-hover:text-text-main transition-colors" />
                 </Button>
               </div>
             ) : (
@@ -217,7 +219,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         <div className="flex items-center gap-3 flex-wrap">
           {!numberOfFriendsFetching ? (
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-bg-third/80 border border-border-main/50 backdrop-blur-sm transition-all duration-300 hover:bg-bg-third select-none h-7">
-              <i className="fa-solid fa-users text-primary-500 text-xs leading-none" />
+              <FontAwesomeIcon icon={faUsers} className="text-primary-500 text-xs leading-none"  />
               <span className="text-xs font-bold text-text-main leading-none flex items-center">
                 {numberOfFriends || 0}
               </span>
@@ -254,7 +256,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                   className="flex-1 !h-9 text-xs font-semibold rounded-lg justify-center bg-bg-third border border-bg-fourth"
                   onClick={() => navigate(`/settings`)}
                 >
-                  <i className="fa-solid fa-user-pen mr-1.5"></i> Chỉnh sửa
+                  <FontAwesomeIcon icon={faUserPen} className="mr-1.5" /> Chỉnh sửa
                 </Button>
               ) : (
                 <div className="flex-1 flex gap-2">
@@ -271,7 +273,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                     className="flex-1 !h-9 text-xs font-semibold rounded-lg justify-center border border-bg-fourth"
                     onClick={handleMessageClick}
                   >
-                    <i className="fa-solid fa-comment mr-1.5"></i>{" "}
+                    <FontAwesomeIcon icon={faComment} className="mr-1.5" />{" "}
                     {t("user:profileHeader.messageButton")}
                   </Button>
                 </div>
@@ -284,7 +286,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
             className="w-10 !h-9 flex items-center justify-center rounded-lg border border-bg-fourth shrink-0 group"
             onClick={handleOpenInfoDialog}
           >
-            <i className="fa-solid fa-circle-info text-text-second group-hover:text-text-main transition-colors"></i>
+            <FontAwesomeIcon icon={faCircleInfo} className="text-text-second group-hover:text-text-main transition-colors" />
           </Button>
         </div>
       </div>

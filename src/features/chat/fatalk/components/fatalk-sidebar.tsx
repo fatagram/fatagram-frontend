@@ -7,6 +7,8 @@ import { MiniButton } from "@/components/atoms/button";
 import { useCreateGroupConversation } from "@/features/chat/hooks/use-conversation";
 import { useCallback, useState } from "react";
 import { CreateGroupChat } from "../../components/create-group-chat/create-group-chat";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPenToSquare } from "@fortawesome/free-regular-svg-icons";
 
 interface FatalkSidebarProps extends ComponentProps {
   onConversationClick?: () => void;
@@ -36,7 +38,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
         tab === "list" ? (
           <div className="flex ">
             <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
-              <i className="fa-regular fa-pen-to-square" />
+              <FontAwesomeIcon icon={faPenToSquare}  />
             </MiniButton>
           </div>
         ) : null

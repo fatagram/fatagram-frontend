@@ -2,6 +2,8 @@ import React from "react";
 import { Logo, Text, Button } from "@/components/atoms";
 import { useAuth } from "@/contexts";
 import { useTranslation } from "react-i18next";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faGlobe, faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 export const FullFooter: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -149,9 +151,9 @@ export const FullFooter: React.FC = () => {
           </Text>
           <div className="flex gap-6 items-center">
             <div className="flex items-center gap-2 text-text-fourth text-sm cursor-pointer hover:text-text-main transition-colors">
-              <i className="fa-solid fa-globe" />
+              <FontAwesomeIcon icon={faGlobe}  />
               <span>{t("footer.language")}</span>
-              <i className="fa-solid fa-chevron-down text-xs ml-1" />
+              <FontAwesomeIcon icon={faChevronDown} className="text-xs ml-1"  />
             </div>
           </div>
         </div>

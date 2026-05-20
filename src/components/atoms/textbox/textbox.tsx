@@ -2,6 +2,8 @@ import { useId, useState, forwardRef } from "react";
 import clsx from "clsx";
 import styles from "./textbox.module.css";
 import { ComponentProps } from "@/components/common/component-type";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 // Thu gọn hệ thống kích thước
 export type Size = "sm" | "md" | "lg" | "xl";
@@ -63,7 +65,7 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
 
         <div className="relative w-full">
           {type === "search" && (
-            <i className="fa-solid fa-magnifying-glass absolute left-4 top-1/2 -translate-y-1/2 text-primary-500 z-10" />
+            <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-500 z-10"  />
           )}
 
           <input

@@ -16,6 +16,8 @@ import { useNotificationCacheMutations, useUnreadCount } from "../../hooks/use-n
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { NotFound } from "@/features/components/not-found";
 import ClientOnly from "@/features/components/client-only";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheckDouble, faTrashCan, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
 
 type NotificationMenuProps = {
   className?: string;
@@ -87,7 +89,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
                   title={t("notifications:notifications.mark-all-read")}
                 >
                   <Text sz="md" color="secondary">
-                    <i className="fa-solid fa-check-double"></i>
+                    <FontAwesomeIcon icon={faCheckDouble} />
                   </Text>
                 </button>
               )}
@@ -97,7 +99,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
                 title={t("notifications:notifications.delete-all")}
               >
                 <Text sz="md" color="secondary">
-                  <i className="fa-solid fa-trash-can"></i>
+                  <FontAwesomeIcon icon={faTrashCan} />
                 </Text>
               </button>
             </div>
@@ -162,7 +164,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
               {t("notifications:notifications.open-notifications")}
             </Text>
             <Text sz="sm" color="secondary">
-              <i className="fa-solid fa-arrow-up-right-from-square"></i>
+              <FontAwesomeIcon icon={faArrowUpRightFromSquare} />
             </Text>
           </button>
         </div>

@@ -1,3 +1,6 @@
+import { config } from "@fortawesome/fontawesome-svg-core";
+config.autoAddCss = false;
+
 import "./index.css";
 import { hydrateRoot, createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";

@@ -8,6 +8,8 @@ import { useRenderConversationContent } from "../hooks/use-render-conversation-c
 import { useCallback, useMemo } from "react";
 import { useShallow } from "zustand/react/shallow";
 import { useChatStore } from "../hooks/use-floating-chat";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 interface BubbleChatProps extends ComponentProps {
   conversationId: string;
@@ -96,7 +98,7 @@ export const BubbleChat: React.FC<BubbleChatProps> = ({ className, conversationI
         )}
         onClick={handleOnClose}
       >
-        <i className="fa-solid fa-xmark" />
+        <FontAwesomeIcon icon={faXmark}  />
       </button>
     </div>
   );

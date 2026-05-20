@@ -3,6 +3,8 @@ import useClickOutside from "@/hooks/use-click-outside";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCaretDown } from "@fortawesome/free-solid-svg-icons";
 
 export type OptionKey = string | number | boolean;
 
@@ -108,8 +110,9 @@ export const SelectBox: React.FC<SelectBoxProps> = ({
         {...props}
       >
         <span className="truncate">{selectedItem ? selectedItem.value : "Select..."}</span>
-        <i
-          className={clsx("fa-solid fa-caret-down transition-transform", isOpen && "rotate-180")}
+        <FontAwesomeIcon
+          icon={faCaretDown}
+          className={clsx("transition-transform", isOpen && "rotate-180")}
         />
       </button>
 

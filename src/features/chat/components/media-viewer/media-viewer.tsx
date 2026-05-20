@@ -14,6 +14,8 @@ import type { Swiper as SwiperType } from "swiper";
 import { Zoom, Navigation, Mousewheel } from "swiper/modules";
 
 import "swiper/swiper-bundle.css";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faPlay, faXmark, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 interface MediaViewerProps extends ComponentProps {}
 
@@ -30,7 +32,7 @@ const VideoThumbnail: React.FC<{ url: string; isNearActive: boolean }> = ({ url 
         className="h-full w-full object-cover"
         alt="Video Thumbnail"
       />
-      <i className="fa-solid fa-play text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/40" />
+      <FontAwesomeIcon icon={faPlay} className="text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/40"  />
     </div>
   );
 };
@@ -54,7 +56,7 @@ const VideoSlideContent: React.FC<{ url: string; isActive: boolean; isAdjacent: 
         className="max-h-full max-w-full object-contain opacity-50 blur-[2px] pointer-events-none"
         alt="Thumbnail"
       />
-      <i className="fa-solid fa-play text-white text-6xl absolute z-10" />
+      <FontAwesomeIcon icon={faPlay} className="text-white text-6xl absolute z-10"  />
     </div>
   );
 };
@@ -305,7 +307,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
             />
           </MiniButton>
           <MiniButton className="!text-white/70 hover:!text-white" onClick={onClose}>
-            <i className="fa-solid fa-xmark text-2xl" />
+            <FontAwesomeIcon icon={faXmark} className="text-2xl"  />
           </MiniButton>
         </div>
       </div>
@@ -319,7 +321,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
           }}
           disabled={activeIndex <= 0}
         >
-          <i className="fa-solid fa-chevron-left text-3xl" />
+          <FontAwesomeIcon icon={faChevronLeft} className="text-3xl"  />
         </button>
 
         <div
@@ -383,7 +385,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
           }}
           disabled={activeIndex >= allMedia.length - 1}
         >
-          <i className="fa-solid fa-chevron-right text-3xl" />
+          <FontAwesomeIcon icon={faChevronRight} className="text-3xl"  />
         </button>
       </div>
 

@@ -8,6 +8,16 @@ import { useTranslation } from "react-i18next";
 import { useAuth } from "@/contexts";
 import { useFriendshipStatus } from "../hooks/use-friendship-status";
 import { SmartDropdown } from "@/components/ui/smart-dropdown";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import {
+  faUserXmark,
+  faCheck,
+  faXmark,
+  faSpinner,
+  faPlus,
+  faReply,
+  faUserCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface FriendButtonProps extends ComponentProps {
   uid?: string;
@@ -113,7 +123,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
         id: "unfriend",
         content: (
           <div>
-            <i className={clsx("fa-solid", "fa-user-xmark", "mr-2")}></i>{" "}
+            <FontAwesomeIcon icon={faUserXmark} className={clsx("mr-2")} />{" "}
             {t("user:profileHeader.unfriendButton")}
           </div>
         ),
@@ -132,7 +142,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
         id: "acceptRequest",
         content: (
           <div>
-            <i className={clsx("fa-solid", "fa-check", "mr-2")}></i>{" "}
+            <FontAwesomeIcon icon={faCheck} className={clsx("mr-2")} />{" "}
             {t("user:profileHeader.acceptButton")}
           </div>
         ),
@@ -142,7 +152,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
         id: "cancelRequest",
         content: (
           <div>
-            <i className={clsx("fa-solid", "fa-xmark", "mr-2")}></i>{" "}
+            <FontAwesomeIcon icon={faXmark} className={clsx("mr-2")} />{" "}
             {t("user:profileHeader.declineButton")}
           </div>
         ),
@@ -155,7 +165,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
   if (isLoading || isFetching) {
     return (
       <Button sz="sm" disabled>
-        <i className={clsx("fa-solid", "fa-spinner", "fa-spin")}></i>
+        <FontAwesomeIcon icon={faSpinner} spin />
       </Button>
     );
   }
@@ -164,12 +174,11 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
     <div className={className}>
       {currentFriendshipStatus === "None" ? (
         <Button sz="sm" onClick={handleSentAddFriendRequest} className="w-full">
-          <i className={clsx("fa-solid", "fa-plus")}></i> {t("user:profileHeader.addFriendButton")}
+          <FontAwesomeIcon icon={faPlus} /> {t("user:profileHeader.addFriendButton")}
         </Button>
       ) : currentFriendshipStatus === "SentByMe" ? (
         <Button sz="sm" onClick={handleCancelAddFriendRequest} className="w-full">
-          <i className={clsx("fa-solid", "fa-xmark")}></i>{" "}
-          {t("user:profileHeader.cancelRequestButton")}
+          <FontAwesomeIcon icon={faXmark} /> {t("user:profileHeader.cancelRequestButton")}
         </Button>
       ) : currentFriendshipStatus === "SentByThem" ? (
         <div className={clsx("sm:relative", "z-50")}>
@@ -181,8 +190,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
             }}
             className="w-full"
           >
-            <i className={clsx("fa-solid", "fa-reply")}></i>{" "}
-            {t("user:profileHeader.respondRequestButton")}
+            <FontAwesomeIcon icon={faReply} /> {t("user:profileHeader.respondRequestButton")}
           </Button>
           <SmartDropdown
             ref={requestOptionsRef}
@@ -213,8 +221,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
             }}
             className="w-full"
           >
-            <i className={clsx("fa-solid", "fa-user-check")}></i>{" "}
-            {t("user:profileHeader.friendButton")}
+            <FontAwesomeIcon icon={faUserCheck} /> {t("user:profileHeader.friendButton")}
           </Button>
           <SmartDropdown
             ref={friendOptionsRef}

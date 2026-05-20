@@ -24,6 +24,8 @@ import { Menu, MenuItem } from "@/components/ui/menu";
 import { useDialog } from "@/contexts";
 import { useLongPress } from "@/hooks/use-long-press";
 import { UserOptionTrigger } from "./user-option-trigger";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEllipsis, faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
 
 const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
@@ -346,14 +348,14 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               className="!w-7 !h-7 !min-w-0 !p-0 bg-bg-second hover:bg-bg-third shadow-sm"
               onClick={handleShowOptions}
             >
-              <i className="fa-solid fa-ellipsis text-[10px] opacity-60"></i>
+              <FontAwesomeIcon icon={faEllipsis} className="text-[10px] opacity-60" />
             </MiniButton>
           </div>
         )}
 
         {isFailed && (
           <div className="flex items-center justify-center">
-            <i className="fa-solid fa-circle-exclamation text-red-500"></i>
+            <FontAwesomeIcon icon={faCircleExclamation} className="text-red-500" />
           </div>
         )}
       </div>

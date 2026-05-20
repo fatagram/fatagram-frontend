@@ -3,6 +3,8 @@ import clsx from "clsx";
 import { useChatStore } from "../hooks/use-floating-chat";
 import { ChatPanel } from "./chat-panel";
 import { MiniButton } from "@/components/atoms";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMinus, faTimes } from "@fortawesome/free-solid-svg-icons";
 
 interface GroupChatWindowProps extends ComponentProps {}
 
@@ -22,10 +24,10 @@ export const GroupChatWindow: React.FC<GroupChatWindowProps> = ({ className }) =
               headerRight={
                 <div className="flex gap-2">
                   <MiniButton sz="sm" onClick={() => toggleMinimize(id)}>
-                    <i className="fa-solid fa-minus text-primary-400" />
+                    <FontAwesomeIcon icon={faMinus} className="text-primary-400"  />
                   </MiniButton>
                   <MiniButton sz="sm" onClick={() => closeChat(id)}>
-                    <i className="fa-solid fa-times text-primary-400" />
+                    <FontAwesomeIcon icon={faTimes} className="text-primary-400"  />
                   </MiniButton>
                 </div>
               }

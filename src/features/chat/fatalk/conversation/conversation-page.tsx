@@ -33,6 +33,8 @@ import { useRenderConversationContent } from "../../hooks/use-render-conversatio
 import { themeDetails } from "./chat-themes.config";
 import { dataURLtoFile } from "./chat-theme-utils";
 import { uploadService } from "@/api/upload/upload.api";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCheck, faCloudArrowUp, faTrashCan, faArrowLeft, faEllipsis, faCamera, faImage, faPenToSquare, faPalette, faUser, faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 interface ConversationPageProps extends ComponentProps {}
 
@@ -160,7 +162,7 @@ const ChatThemePicker: React.FC<{
             </Text>
             {isActive && (
               <div className="absolute top-1 right-1 bg-primary-500 text-white w-4 h-4 rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                <i className="fa-solid fa-check text-[9px]" />
+                <FontAwesomeIcon icon={faCheck} className="text-[9px]"  />
               </div>
             )}
             {(item as any).isEvent && (
@@ -297,7 +299,7 @@ const ChatThemeDialogContent: React.FC<{
               className=" bg-black/40 hover:bg-black/60 text-white border-none shadow-md"
               onClick={() => fileInputRef.current?.click()}
             >
-              <i className="fa-solid fa-cloud-arrow-up text-xs"></i>
+              <FontAwesomeIcon icon={faCloudArrowUp} className="text-xs" />
             </MiniButton>
             {backgroundUrl && (
               <MiniButton
@@ -305,7 +307,7 @@ const ChatThemeDialogContent: React.FC<{
                 className="bg-red-600/50 hover:bg-red-600/35 text-white border-none shadow-md animate-fade-in"
                 onClick={handleRemoveBackground}
               >
-                <i className="fa-solid fa-trash-can text-xs"></i>
+                <FontAwesomeIcon icon={faTrashCan} className="text-xs" />
               </MiniButton>
             )}
           </div>
@@ -603,7 +605,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
         headerLeft={
           <div className="flex items-center gap-1">
             <MiniButton sz="sm" onClick={handleTurnBack} className="block lg:hidden">
-              <i className="fa-solid fa-arrow-left text-primary-400" />
+              <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400"  />
             </MiniButton>
             <Transition show={unreadCount > 0} animation={AnimationLib.Fade}>
               <div className="rounded-full bg-primary-500 px-2 text-white">
@@ -616,7 +618,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
         }
         headerRight={
           <MiniButton sz="sm" onClick={() => setOpenSetting((prev) => !prev)}>
-            <i className="fa-solid fa-ellipsis text-primary-400" />
+            <FontAwesomeIcon icon={faEllipsis} className="text-primary-400"  />
           </MiniButton>
         }
       />
@@ -637,7 +639,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
               onClick={handleBackSetting}
               className={clsx(!isMobile && viewMode === "main" && "hidden")}
             >
-              <i className="fa-solid fa-arrow-left text-primary-400" />
+              <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400"  />
             </MiniButton>
             <Text weight="bold" sz="md">
               {viewMode === "members"
@@ -669,7 +671,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                           onClick={triggerFileInput}
                           className="absolute bottom-1 right-1 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform active:scale-95"
                         >
-                          <i className="fa-solid fa-camera text-xs" />
+                          <FontAwesomeIcon icon={faCamera} className="text-xs"  />
                         </button>
                       )}
                     </div>
@@ -699,7 +701,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={triggerFileInput}
                           >
-                            <i className="fa-solid fa-image" />
+                            <FontAwesomeIcon icon={faImage}  />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeAvatar")}
@@ -711,7 +713,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={openRenameFlow}
                           >
-                            <i className="fa-solid fa-pen-to-square" />
+                            <FontAwesomeIcon icon={faPenToSquare}  />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeName")}
@@ -723,7 +725,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={openThemePickerFlow}
                           >
-                            <i className="fa-solid fa-palette" />
+                            <FontAwesomeIcon icon={faPalette}  />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeTheme", "Chủ đề")}
@@ -739,7 +741,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={() => navigate(`/${conv.otherUserId}`)}
                           >
-                            <i className="fa-solid fa-user" />
+                            <FontAwesomeIcon icon={faUser}  />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.viewProfile")}
@@ -751,7 +753,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={openThemePickerFlow}
                           >
-                            <i className="fa-solid fa-palette" />
+                            <FontAwesomeIcon icon={faPalette}  />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeTheme", "Chủ đề")}
@@ -788,7 +790,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                           >
                             {currentThemeLabel}
                           </Text>
-                          <i className="fa-solid fa-chevron-right text-[10px] text-text-fourth" />
+                          <FontAwesomeIcon icon={faChevronRight} className="text-[10px] text-text-fourth"  />
                         </div>
                       }
                       onClick={openThemePickerFlow}

@@ -3,6 +3,8 @@ import ProfileAboutSection from "./profile-about-section";
 import clsx from "clsx";
 import { useProfilePage } from "../../hooks/use-profile-page";
 import { useGetUserProfileDetails } from "@/features/hooks/use-user-profile";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faEnvelope, faPencilAlt, faPhone } from "@fortawesome/free-solid-svg-icons";
 
 type ProfileOverviewProps = {};
 
@@ -18,7 +20,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
       {emails.length > 0 && (
         <div className={clsx("flex", "items-start", "w-full", "gap-4", "mb-6", "mt-4")}>
           <Text sz="lg" className={clsx("opacity-50")}>
-            <i className="fa-solid fa-envelope"></i>
+            <FontAwesomeIcon icon={faEnvelope} />
           </Text>
           <div>
             {emails.map((email, index) => (
@@ -33,7 +35,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
           {isOwner && (
             <div className={clsx("ml-auto")}>
               <Button variant="secondary" className={clsx("!rounded-full", "!p-0", "w-10", "h-10")}>
-                <i className="fa-solid fa-pencil-alt"></i>
+                <FontAwesomeIcon icon={faPencilAlt} />
               </Button>
             </div>
           )}
@@ -42,7 +44,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
       {phoneNumbers.length > 0 && (
         <div className={clsx("flex", "items-start", "gap-4")}>
           <Text sz="lg" className={clsx("opacity-50")}>
-            <i className="fa-solid fa-phone"></i>
+            <FontAwesomeIcon icon={faPhone} />
           </Text>
           <div>
             {phoneNumbers.map((phone, index) => (
@@ -57,7 +59,7 @@ const ProfileOverview: React.FC<ProfileOverviewProps> = ({}) => {
           {isOwner && (
             <div className={clsx("ml-auto")}>
               <Button variant="secondary" className={clsx("!rounded-full", "!p-0", "w-10", "h-10")}>
-                <i className="fa-solid fa-pencil-alt"></i>
+                <FontAwesomeIcon icon={faPencilAlt} />
               </Button>
             </div>
           )}

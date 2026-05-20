@@ -4,6 +4,8 @@ import clsx from "clsx";
 import { Button, TextArea, Text } from "@/components/atoms";
 import { useMediaQuery } from "@/hooks/use-media-query";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
 
 type EditableTextAreaProps = {
   className?: string;
@@ -85,7 +87,7 @@ const EditableTextArea: React.FC<EditableTextAreaProps> = ({
         onClick={() => onSaveClick?.(inputValue)}
         className="flex-1"
       >
-        <i className="fa-solid fa-floppy-disk mr-2" />
+        <FontAwesomeIcon icon={faFloppyDisk} className="mr-2"  />
         {t("settings:editableField.saveButton")}
       </Button>
       <Button sz="sm" variant="fourth" onClick={() => onOpenChange(false)} className="flex-1">

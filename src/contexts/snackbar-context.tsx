@@ -1,5 +1,7 @@
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 import React, { createContext, useCallback, useMemo, useState } from "react";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleCheck, faCircleXmark, faTriangleExclamation, faCircleInfo, faXmark } from "@fortawesome/free-solid-svg-icons";
 
 export type SnackbarType = "success" | "error" | "warning" | "info";
 
@@ -60,14 +62,14 @@ export const SnackbarProvider = React.memo(function SnackbarProvider({
   const getIcon = (type: SnackbarType) => {
     switch (type) {
       case "success":
-        return <i className="fa-solid fa-circle-check text-green-500"></i>;
+        return <FontAwesomeIcon icon={faCircleCheck} className="text-green-500" />;
       case "error":
-        return <i className="fa-solid fa-circle-xmark text-red-500"></i>;
+        return <FontAwesomeIcon icon={faCircleXmark} className="text-red-500" />;
       case "warning":
-        return <i className="fa-solid fa-triangle-exclamation text-yellow-500"></i>;
+        return <FontAwesomeIcon icon={faTriangleExclamation} className="text-yellow-500" />;
       case "info":
       default:
-        return <i className="fa-solid fa-circle-info text-blue-500"></i>;
+        return <FontAwesomeIcon icon={faCircleInfo} className="text-blue-500" />;
     }
   };
 
@@ -92,7 +94,7 @@ export const SnackbarProvider = React.memo(function SnackbarProvider({
             onClick={() => setVisibleSnackbar(false)}
             className="text-text-third hover:text-text-main transition-colors"
           >
-            <i className="fa-solid fa-xmark"></i>
+            <FontAwesomeIcon icon={faXmark} />
           </button>
         </div>
       </Transition>

@@ -11,6 +11,8 @@ import {
   loginValidationSchema,
 } from "../validations/login.validation";
 import { useAuth } from "@/contexts/auth-context";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faXmark } from "@fortawesome/free-solid-svg-icons";
 
 interface LoginFormProps extends ComponentProps {
   switchForgotPassword?: () => void;
@@ -169,7 +171,7 @@ export const LoginForm: React.FC<LoginFormProps> = ({
           )}
           onClick={onClose}
         >
-          <i className="fa-solid fa-xmark"></i>
+          <FontAwesomeIcon icon={faXmark} />
         </Text>
       )}
     </div>

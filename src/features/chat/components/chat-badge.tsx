@@ -7,6 +7,8 @@ import clsx from "clsx";
 import useClickOutside from "@/hooks/use-click-outside";
 import { useConversationStore } from "../services/conversation-manager";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faComment } from "@fortawesome/free-solid-svg-icons";
 
 interface ChatBadgeProps extends ComponentProps {}
 
@@ -30,7 +32,7 @@ export const ChatBadge: React.FC<ChatBadgeProps> = () => {
   return (
     <div className="relative">
       <Badge count={totalUnreadCount} onClick={() => setIsOpen(!isOpen)} ref={btnRef}>
-        <i className="fa-solid fa-comment" />
+        <FontAwesomeIcon icon={faComment}  />
       </Badge>
       <Transition
         show={isOpen}

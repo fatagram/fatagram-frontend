@@ -6,6 +6,8 @@ import { useNotificationUiState, useUnreadCount } from "../../hooks/use-notifica
 import clsx from "clsx";
 import { Text, Badge } from "@/components/atoms";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faBell } from "@fortawesome/free-solid-svg-icons";
 
 interface NotificationButtonProps {}
 
@@ -51,7 +53,7 @@ const NotificationBadge: React.FC<NotificationButtonProps> = ({}) => {
             "!text-primary-500": isActive,
           })}
         >
-          <i className="fa-solid fa-bell"></i>
+          <FontAwesomeIcon icon={faBell} />
         </Text>
       </Badge>
       <Transition

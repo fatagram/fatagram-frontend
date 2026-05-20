@@ -2,6 +2,8 @@ import { Logo, Text } from "@/components/atoms";
 import { OnboardingForm } from "@/features/onboarding/components/onboarding-form";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faShieldHalved } from "@fortawesome/free-solid-svg-icons";
 
 export default function OnboardingPage() {
   const { t } = useTranslation();
@@ -40,7 +42,7 @@ export default function OnboardingPage() {
         <OnboardingForm />
 
         <div className="flex items-center gap-2 text-text-third">
-          <i className="fa-solid fa-shield-halved text-primary-500" />
+          <FontAwesomeIcon icon={faShieldHalved} className="text-primary-500"  />
           <Text sz="sm">{t("onboarding.privacy")}</Text>
         </div>
       </div>

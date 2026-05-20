@@ -8,6 +8,8 @@ import AddFriendButton from "../../components/friend-button";
 import clsx from "clsx";
 import { Avatar, Text } from "@/components/atoms";
 import { SmartDropdown } from "@/components/ui/smart-dropdown";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserXmark, faEllipsisV } from "@fortawesome/free-solid-svg-icons";
 
 interface FriendItemProps {
   className?: string;
@@ -49,7 +51,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
         id: "unfriend",
         content: (
           <div>
-            <i className="fa-solid fa-user-xmark mr-2" /> {t("user:profileHeader.unfriendButton")}
+            <FontAwesomeIcon icon={faUserXmark} className="mr-2"  /> {t("user:profileHeader.unfriendButton")}
           </div>
         ),
         onClick: async () => await handleUnfriend?.(friendDto.id),
@@ -91,7 +93,7 @@ const FriendItem: React.FC<FriendItemProps> = ({ className = "", friendDto }) =>
                 setIsShowDropdown(!isShowDrowdown);
               }}
             >
-              <i className="fa-solid fa-ellipsis-v"></i>
+              <FontAwesomeIcon icon={faEllipsisV} />
             </button>
             <SmartDropdown
               isShow={isShowDrowdown}

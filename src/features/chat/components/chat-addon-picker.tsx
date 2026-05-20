@@ -5,6 +5,8 @@ import { useGifs } from "../../hooks/use-gifs";
 import { useDebounce } from "@/hooks/use-debounce";
 import { Skeleton } from "@/components/atoms";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleNotch, faMagnifyingGlass, faFaceFrown, faNoteSticky } from "@fortawesome/free-solid-svg-icons";
 
 interface ChatAddonPickerProps {
   show: boolean;
@@ -191,7 +193,7 @@ export const ChatAddonPicker = ({
               </>
             ) : (
               <div style={{ color: "rgb(var(--primary-500))" }} className="text-lg">
-                <i className="fa-solid fa-circle-notch animate-spin" />
+                <FontAwesomeIcon icon={faCircleNotch} className="animate-spin"  />
               </div>
             )}
           </div>
@@ -200,7 +202,7 @@ export const ChatAddonPicker = ({
           <div className="flex flex-col h-full w-full">
             <div className="p-2 border-b border-border-main">
               <div className="relative">
-                <i className="fa-solid fa-magnifying-glass absolute left-3 top-1/2 -translate-y-1/2 text-text-third text-xs"></i>
+                <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-3 top-1/2 -translate-y-1/2 text-text-third text-xs" />
                 <input
                   type="text"
                   placeholder="Tìm kiếm GIF..."
@@ -225,7 +227,7 @@ export const ChatAddonPicker = ({
 
               {!isLoadingGifs && (gifData?.pages?.[0]?.gifs?.length ?? 0) === 0 && (
                 <div className="flex flex-col items-center justify-center py-10 text-text-third">
-                  <i className="fa-solid fa-face-frown text-3xl mb-2"></i>
+                  <FontAwesomeIcon icon={faFaceFrown} className="text-3xl mb-2" />
                   <span className="text-sm">Không tìm thấy GIF nào</span>
                 </div>
               )}
@@ -236,7 +238,7 @@ export const ChatAddonPicker = ({
         )}
         {activeTab === "sticker" && (
           <div className="flex flex-col items-center justify-center h-full text-text-secondary space-y-2">
-            <i className="fa-solid fa-note-sticky text-3xl"></i>
+            <FontAwesomeIcon icon={faNoteSticky} className="text-3xl" />
             <span>Tính năng đang phát triển...</span>
           </div>
         )}

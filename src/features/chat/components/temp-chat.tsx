@@ -9,6 +9,8 @@ import { useOpenChat } from "../hooks/use-open-chat";
 import { MessageDto } from "@/api/message/dto/message.dto";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faArrowLeft, faFaceSmile } from "@fortawesome/free-solid-svg-icons";
 
 interface Props extends ComponentProps {
   conversationId: string;
@@ -100,7 +102,7 @@ export const TempChat: React.FC<Props> = ({
               {headerLeft}
               {onTurnBack && (
                 <MiniButton sz="sm" onClick={onTurnBack} className="block lg:hidden">
-                  <i className="fa-solid fa-arrow-left text-primary-400" />
+                  <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400"  />
                 </MiniButton>
               )}
               <Avatar className="shrink-0" src={tempUser?.infos.avatar} alt="Avatar" sz="sm" />
@@ -168,7 +170,7 @@ export const TempChat: React.FC<Props> = ({
           />
           <div className="absolute right-1">
             <MiniButton className="hover:bg-transparent">
-              <i className="fa-solid fa-face-smile text-primary-500"></i>
+              <FontAwesomeIcon icon={faFaceSmile} className="text-primary-500" />
             </MiniButton>
           </div>
         </div>

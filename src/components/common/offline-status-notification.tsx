@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { useSnackbar } from "@/contexts";
 import { WifiOff, Wifi } from "lucide-react";
 import Transition from "@/components/ui/utils/transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
 
 const ToastSlideUpAnimation = {
   in: "animate-toast-slide-up-in",
@@ -126,7 +128,7 @@ export const OfflineStatusNotification = () => {
             className="flex-shrink-0 px-4 py-2 h-9 rounded-xl border border-warning/40 hover:border-warning text-warning hover:bg-warning/10 active:scale-95 disabled:opacity-50 disabled:scale-100 disabled:pointer-events-none transition-all duration-200 text-xs font-semibold flex items-center justify-center gap-1.5 min-w-[80px] bg-warning/5"
           >
             {status === "reconnecting" ? (
-              <i className="fa-solid fa-circle-notch animate-spin text-xs" />
+              <FontAwesomeIcon icon={faCircleNotch} className="animate-spin text-xs"  />
             ) : (
               t("offline.retry")
             )}

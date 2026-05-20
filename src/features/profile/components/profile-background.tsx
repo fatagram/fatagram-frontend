@@ -11,6 +11,8 @@ import { useSnackbar, useDialog } from "@/contexts";
 import { UpdateBackgroundContent, UpdateBackgroundContentRef } from "./update-background-modal";
 import { useMobile } from "@/hooks/use-mobile";
 import { useBottomSheetStore } from "@/features/hooks/use-bottom-sheet-store";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCamera } from "@fortawesome/free-solid-svg-icons";
 
 type ProfileBackgroundProps = {};
 
@@ -103,9 +105,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
   };
 
   return (
-    <div
-      className={clsx("relative h-full w-full overflow-hidden rounded-none")}
-    >
+    <div className={clsx("relative h-full w-full overflow-hidden rounded-none")}>
       {isLoading || isFetching || isUpdating ? (
         <Skeleton className="h-full w-full !rounded-none" />
       ) : (
@@ -129,7 +129,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
                 "opacity-40 hover:opacity-70 gap-2",
               )}
             >
-              <i className={clsx("fa-solid fa-camera")}></i>
+              <FontAwesomeIcon icon={faCamera} />
               <Text className={clsx("sm:flex hidden")} sz="md">
                 {data?.infos.background
                   ? t("user:profileHeader.changeButton")
