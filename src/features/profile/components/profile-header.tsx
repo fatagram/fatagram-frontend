@@ -48,7 +48,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
     };
   }, []);
 
-  const { data: numberOfFriends, isFetching: numberOfFriendsFetching } =
+  const { data: numberOfFriends, isLoading: numberOfFriendsLoading } =
     useGetNumberOfFriends(targetId);
 
   const { openChatWithTarget } = useOpenChat();
@@ -95,7 +95,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
 
         <div className="flex-1 flex flex-col gap-5 pt-2">
           <div className="flex items-center gap-6 flex-wrap">
-            {isLoading || isFetching ? (
+            {isLoading ? (
               <Skeleton sz="md" className="!w-48 !h-8" />
             ) : (
               <div className="flex items-baseline gap-2 flex-wrap">
@@ -110,9 +110,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
               </div>
             )}
 
-            {!numberOfFriendsFetching ? (
+            {!numberOfFriendsLoading ? (
               <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-bg-third/80 border border-border-main/50 backdrop-blur-sm transition-all duration-300 hover:bg-bg-third select-none h-8">
-                <FontAwesomeIcon icon={faUsers} className="text-primary-500 text-sm leading-none"  />
+                <FontAwesomeIcon icon={faUsers} className="text-primary-500 text-sm leading-none" />
                 <span className="text-sm font-bold text-text-main leading-none flex items-center">
                   {numberOfFriends || 0}
                 </span>
@@ -135,7 +135,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
           </div>
 
           <div className="flex items-center gap-2.5">
-            {!isLoading && !isFetching ? (
+            {!isLoading ? (
               <div className="flex items-center gap-2.5">
                 {isAuthenticated && (
                   <>
@@ -173,7 +173,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
                   className="w-10 !h-9 flex items-center justify-center rounded-lg border border-bg-fourth shrink-0 hover:bg-bg-hover transition-colors group"
                   onClick={handleOpenInfoDialog}
                 >
-                  <FontAwesomeIcon icon={faCircleInfo} className="text-text-second group-hover:text-text-main transition-colors" />
+                  <FontAwesomeIcon
+                    icon={faCircleInfo}
+                    className="text-text-second group-hover:text-text-main transition-colors"
+                  />
                 </Button>
               </div>
             ) : (
@@ -201,7 +204,7 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
           </div>
 
           <div className="flex-1 pb-1 flex flex-row items-baseline gap-2 flex-wrap min-w-0">
-            {isLoading || isFetching ? (
+            {isLoading ? (
               <Skeleton sz="md" className="!w-32 !h-6" />
             ) : (
               <Text weight="bold" className="!text-xl text-text-main truncate">
@@ -217,9 +220,9 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
         </div>
 
         <div className="flex items-center gap-3 flex-wrap">
-          {!numberOfFriendsFetching ? (
+          {!numberOfFriendsLoading ? (
             <div className="inline-flex items-center gap-1.5 px-3.5 py-1.5 rounded-full bg-bg-third/80 border border-border-main/50 backdrop-blur-sm transition-all duration-300 hover:bg-bg-third select-none h-7">
-              <FontAwesomeIcon icon={faUsers} className="text-primary-500 text-xs leading-none"  />
+              <FontAwesomeIcon icon={faUsers} className="text-primary-500 text-xs leading-none" />
               <span className="text-xs font-bold text-text-main leading-none flex items-center">
                 {numberOfFriends || 0}
               </span>
@@ -286,7 +289,10 @@ const ProfileHeader: React.FC<ProfileHeaderProps> = ({ className, onUserNotFound
             className="w-10 !h-9 flex items-center justify-center rounded-lg border border-bg-fourth shrink-0 group"
             onClick={handleOpenInfoDialog}
           >
-            <FontAwesomeIcon icon={faCircleInfo} className="text-text-second group-hover:text-text-main transition-colors" />
+            <FontAwesomeIcon
+              icon={faCircleInfo}
+              className="text-text-second group-hover:text-text-main transition-colors"
+            />
           </Button>
         </div>
       </div>

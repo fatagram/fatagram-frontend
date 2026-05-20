@@ -14,7 +14,7 @@ interface ProfileAvatarProps {
 
 const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ className }) => {
   const { targetId, isOwner } = useProfilePage();
-  const { data, isLoading, isFetching } = useGetUserAvatar(targetId);
+  const { data, isLoading } = useGetUserAvatar(targetId);
   const { fetch, isFetching: isUpdating } = useSelectAvatar(targetId);
   const { showSnackbar } = useSnackbar();
 
@@ -28,7 +28,7 @@ const ProfileAvatar: React.FC<ProfileAvatarProps> = ({ className }) => {
 
   return (
     <div className={clsx("relative group", className)}>
-      {isLoading || isFetching || isUpdating ? (
+      {isLoading || isUpdating ? (
         <div className="bg-bg-main rounded-full">
           <Skeleton
             className="border-4 border-bg-main h-20 w-20 sm:h-[188px] sm:w-[188px]"

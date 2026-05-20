@@ -26,9 +26,11 @@ export const usePageTransition = () => {
     if (prevPath === currentPath) return;
 
     const direction: TransitionDirection = getTransitionDirection(prevPath, currentPath);
-    const enterClass = getPageEnterClass(direction);
-
     prevPathRef.current = currentPath;
+
+    if (direction === "none") return;
+
+    const enterClass = getPageEnterClass(direction);
     setState({ key: currentPath, enterClass });
   }, [location.pathname]);
 

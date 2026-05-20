@@ -19,7 +19,7 @@ type ProfileBackgroundProps = {};
 const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
   const { t } = useTranslation() as { t: (key: string) => string };
   const { targetId, isOwner } = useProfilePage();
-  const { data, isLoading, isFetching } = useGetUserBackground(targetId);
+  const { data, isLoading } = useGetUserBackground(targetId);
   const { fetch, isFetching: isUpdating } = useSelectBackground(targetId);
   const { showSnackbar } = useSnackbar();
   const { openDialog, closeDialog } = useDialog();
@@ -106,7 +106,7 @@ const ProfileBackground: React.FC<ProfileBackgroundProps> = ({}) => {
 
   return (
     <div className={clsx("relative h-full w-full overflow-hidden rounded-none")}>
-      {isLoading || isFetching || isUpdating ? (
+      {isLoading || isUpdating ? (
         <Skeleton className="h-full w-full !rounded-none" />
       ) : (
         <BackgroundImage
