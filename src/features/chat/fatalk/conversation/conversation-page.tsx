@@ -611,30 +611,64 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
         accept="image/*"
         className="hidden"
       />
-      <ChatPanel
-        conversationId={conversationId!}
-        className="w-full h-[calc(100dvh-var(--header-height))]"
-        onTurnback={() => navigate("/fatalk")}
-        headerLeft={
-          <div className="flex items-center gap-1">
-            <MiniButton sz="sm" onClick={handleTurnBack} className="block lg:hidden">
-              <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400" />
-            </MiniButton>
-            <Transition show={unreadCount > 0} animation={AnimationLib.Fade}>
-              <div className="rounded-full bg-primary-500 px-2 text-white">
-                <Text className="text-white" weight="bold">
-                  {unreadCount}
-                </Text>
+      {isMobile ? (
+        <Transition
+          key={conversationId}
+          show={true}
+          animation={AnimationLib.SlideRightToLeftFull}
+          className="w-full"
+        >
+          <ChatPanel
+            conversationId={conversationId!}
+            className="w-full h-[calc(100dvh-var(--header-height))]"
+            onTurnback={() => navigate("/fatalk")}
+            headerLeft={
+              <div className="flex items-center gap-1">
+                <MiniButton sz="sm" onClick={handleTurnBack} className="block lg:hidden">
+                  <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400" />
+                </MiniButton>
+                <Transition show={unreadCount > 0} animation={AnimationLib.Fade}>
+                  <div className="rounded-full bg-primary-500 px-2 text-white">
+                    <Text className="text-white" weight="bold">
+                      {unreadCount}
+                    </Text>
+                  </div>
+                </Transition>
               </div>
-            </Transition>
-          </div>
-        }
-        headerRight={
-          <MiniButton sz="sm" onClick={() => setOpenSetting((prev) => !prev)}>
-            <FontAwesomeIcon icon={faEllipsis} className="text-primary-400" />
-          </MiniButton>
-        }
-      />
+            }
+            headerRight={
+              <MiniButton sz="sm" onClick={() => setOpenSetting((prev) => !prev)}>
+                <FontAwesomeIcon icon={faEllipsis} className="text-primary-400" />
+              </MiniButton>
+            }
+          />
+        </Transition>
+      ) : (
+        <ChatPanel
+          conversationId={conversationId!}
+          className="w-full h-[calc(100dvh-var(--header-height))]"
+          onTurnback={() => navigate("/fatalk")}
+          headerLeft={
+            <div className="flex items-center gap-1">
+              <MiniButton sz="sm" onClick={handleTurnBack} className="block lg:hidden">
+                <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400" />
+              </MiniButton>
+              <Transition show={unreadCount > 0} animation={AnimationLib.Fade}>
+                <div className="rounded-full bg-primary-500 px-2 text-white">
+                  <Text className="text-white" weight="bold">
+                    {unreadCount}
+                  </Text>
+                </div>
+              </Transition>
+            </div>
+          }
+          headerRight={
+            <MiniButton sz="sm" onClick={() => setOpenSetting((prev) => !prev)}>
+              <FontAwesomeIcon icon={faEllipsis} className="text-primary-400" />
+            </MiniButton>
+          }
+        />
+      )}
       <Transition
         show={openSetting}
         animation={AnimationLib.SoftFade}

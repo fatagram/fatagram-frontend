@@ -17,7 +17,11 @@ import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { NotFound } from "@/features/components/not-found";
 import ClientOnly from "@/features/components/client-only";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheckDouble, faTrashCan, faArrowUpRightFromSquare } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheckDouble,
+  faTrashCan,
+  faArrowUpRightFromSquare,
+} from "@fortawesome/free-solid-svg-icons";
 
 type NotificationMenuProps = {
   className?: string;
@@ -69,7 +73,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
   return (
     <div
       className={clsx(
-        "bg-bg-main sm:bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
+        "bg-bg-main border-2 border-bg-fourth/80 shadow-none rounded-xl flex flex-col gap-2 select-none",
         "animate-dropdown-slide origin-top scrollbar-hide",
         className,
       )}

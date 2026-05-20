@@ -17,21 +17,23 @@ export const GroupChatWindow: React.FC<GroupChatWindowProps> = ({ className }) =
     <div className={clsx("flex gap-3", className)}>
       {activeIds.map((id) => {
         return (
-          <div key={id} className="w-[350px] flex-shrink-0">
-            <ChatPanel
-              conversationId={id}
-              className="h-[500px] w-[350px] rounded-t-xl border border-bg-fourth border-b-0 shadow-lg"
-              headerRight={
-                <div className="flex gap-2">
-                  <MiniButton sz="sm" onClick={() => toggleMinimize(id)}>
-                    <FontAwesomeIcon icon={faMinus} className="text-primary-400"  />
-                  </MiniButton>
-                  <MiniButton sz="sm" onClick={() => closeChat(id)}>
-                    <FontAwesomeIcon icon={faTimes} className="text-primary-400"  />
-                  </MiniButton>
-                </div>
-              }
-            />
+          <div key={id} className="w-[350px] flex-shrink-0 overflow-hidden animate-chat-grow-in">
+            <div className="w-[350px]">
+              <ChatPanel
+                conversationId={id}
+                className="h-[500px] w-[350px] rounded-t-xl border border-bg-fourth border-b-0 shadow-lg"
+                headerRight={
+                  <div className="flex gap-2">
+                    <MiniButton sz="sm" onClick={() => toggleMinimize(id)}>
+                      <FontAwesomeIcon icon={faMinus} className="text-primary-400" />
+                    </MiniButton>
+                    <MiniButton sz="sm" onClick={() => closeChat(id)}>
+                      <FontAwesomeIcon icon={faTimes} className="text-primary-400" />
+                    </MiniButton>
+                  </div>
+                }
+              />
+            </div>
           </div>
         );
       })}

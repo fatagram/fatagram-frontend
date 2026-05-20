@@ -235,7 +235,7 @@ const DefaultLayout = () => {
           }
         />
       </Layout.Header>
-      <Layout.Main className="flex-1 flex flex-col scrollbar-hide sm:scrollbar-default">
+      <Layout.Main className="flex-1 flex flex-col overflow-x-hidden scrollbar-hide sm:scrollbar-default">
         <PageTransition />
 
         {!isMobile && (

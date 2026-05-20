@@ -22,7 +22,7 @@ export const SidebarPageLayout: React.FC<SidebarPageLayoutProps> = ({
   return (
     <SidebarLayout
       title={title}
-      className={clsx("bg-bg-second sm:bg-bg-fourth", className)}
+      className={className}
       navbar={navbar}
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
@@ -53,7 +53,10 @@ export const SidebarPageCard: React.FC<SidebarPageCardProps> = ({
   return (
     <Card
       title={title}
-      className={clsx("w-full !p-0 sm:!p-8 shadow-none sm:shadow-lg", className)}
+      className={clsx(
+        "w-full !p-0 sm:!p-8 bg-bg-main !border-2 border-bg-fourth shadow-none",
+        className,
+      )}
       titleClassName="mb-5"
       childrenClassName={clsx("flex flex-col gap-7", childrenClassName)}
     >
