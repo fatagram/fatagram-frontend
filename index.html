@@ -16,7 +16,14 @@
     <script>
       (function () {
         try {
-          var validThemes = ["light", "dark", "light-old", "dark-old", "pastel-yellow-pink", "pastel-peach-red"];
+          var validThemes = [
+            "light",
+            "dark",
+            "light-old",
+            "dark-old",
+            "pastel-yellow-pink",
+            "pastel-peach-red",
+          ];
           var theme = localStorage.getItem("theme");
           if (!theme || validThemes.indexOf(theme) === -1) {
             var prefersDark =

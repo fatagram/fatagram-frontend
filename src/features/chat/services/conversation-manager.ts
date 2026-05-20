@@ -243,15 +243,22 @@ export class ConversationManager {
     userId: string,
     newMsg: Message,
     shouldUpdateUnreadCount: boolean = true,
+    isFocusing: boolean = false,
   ) {
     try {
       let conv = await db.conversations.get(convId);
       const isMine = newMsg.senderId === userId;
+      let wasUnread = false;
+
+      if (conv) {
+        wasUnread = (conv.unreadMessageCount || 0) > 0;
+      }
 
       if (!conv) {
         const result = await conversationService.getConversation(convId);
         if (!result.success || !result.data) return;
         conv = result.data;
+        wasUnread = false;
       }
 
       conv.lastMessage = newMsg;
@@ -273,16 +280,18 @@ export class ConversationManager {
         conv.backgroundUrl = newMsg.metadata?.backgroundUrl || null;
       }
 
-      if (isMine) {
+      if (isMine || isFocusing) {
         conv.myLastSeenMessageSeq = newMsg.sequenceNumber!;
         conv.unreadMessageCount = 0;
         useConversationStore.getState().updateUserSeenSequence(convId, newMsg.sequenceNumber!);
+        if (wasUnread) {
+          await this.updateUnreadCount("decrement");
+        }
       } else {
         conv.unreadMessageCount = (conv.unreadMessageCount || 0) + 1;
-      }
-
-      if (!isMine && shouldUpdateUnreadCount) {
-        await this.updateUnreadCount("increment");
+        if (!wasUnread) {
+          await this.updateUnreadCount("increment");
+        }
       }
 
       await db.conversations.put(conv);
@@ -299,11 +308,22 @@ export class ConversationManager {
       const conv = await db.conversations.get(convId);
       if (!conv) return;
 
+      const wasUnread = (conv.unreadMessageCount || 0) > 0;
+
       conv.myLastSeenMessageSeq = messageSeq;
       conv.unreadMessageCount = (conv.lastMessage?.sequenceNumber || 0) - messageSeq || 0;
+      if (conv.unreadMessageCount < 0) {
+        conv.unreadMessageCount = 0;
+      }
+      const isNowRead = conv.unreadMessageCount === 0;
+
       await db.conversations.put(conv);
 
       useConversationStore.getState().updateUserSeenSequence(convId, messageSeq);
+
+      if (wasUnread && isNowRead) {
+        await this.updateUnreadCount("decrement");
+      }
     } catch (error) {
       console.error("Failed to mark conversation as seen:", error);
     }

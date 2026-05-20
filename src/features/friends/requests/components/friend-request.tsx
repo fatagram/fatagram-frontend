@@ -11,6 +11,8 @@ import {
   useListFriendRequests,
 } from "@/features/hooks/use-friend";
 import { Skeleton } from "@/components/atoms";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUserPlus } from "@fortawesome/free-solid-svg-icons";
 
 type FriendRequestsProps = {
   className?: string;
@@ -50,7 +52,7 @@ const FriendRequests: React.FC<FriendRequestsProps> = () => {
         itemKey={(item: any) => item.senderId}
         emptyComponent={
           <NotFound
-            icon="fa-solid fa-user-plus text-3xl"
+            icon={<FontAwesomeIcon icon={faUserPlus} className="text-3xl" />}
             title={t("friends:requests.noRequests") || "Không có lời mời nào"}
             description={
               t("friends:requests.noRequestsDescription") ||

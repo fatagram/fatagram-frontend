@@ -238,7 +238,7 @@ const DefaultLayout = () => {
         <Outlet />
 
         {!isMobile && (
-          <div className="fixed inset-0 pointer-events-none z-30">
+          <div className="fixed inset-0 pointer-events-none z-[90]">
             <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
           </div>
         )}

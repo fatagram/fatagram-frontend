@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import { useNavigate } from "react-router-dom";
 import { useOpenChat } from "../hooks/use-open-chat";
 import clsx from "clsx";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faCommentDots, faUser } from "@fortawesome/free-solid-svg-icons";
 
 interface UserOptionsMenuProps {
   userId: string;
@@ -52,7 +54,7 @@ export const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({
       <Menu className={isSheet ? "px-4" : "min-w-[320px]"}>
         {showMessagePrivately && (
           <MenuItem
-            icon="fa-solid fa-comment-dots"
+            icon={<FontAwesomeIcon icon={faCommentDots} />}
             title={t("common:conversations.settings.messagePrivately")}
             onClick={() => {
               openChatWithTarget(userId);
@@ -61,7 +63,7 @@ export const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({
           />
         )}
         <MenuItem
-          icon="fa-solid fa-user"
+          icon={<FontAwesomeIcon icon={faUser} />}
           title={t("common:conversations.settings.viewProfile")}
           onClick={() => {
             navigate(`/${userId}`);

@@ -12,6 +12,11 @@ export async function handleSSR(req, res, vite, templateHtml) {
   try {
     const url = req.originalUrl.replace(base, "");
 
+    // Skip SSR for static assets that fell through Vite middleware (prevents JSON parse errors etc)
+    if (url.match(/\.(json|png|jpg|jpeg|gif|css|js|ico|svg|map|woff2?|ttf)$/i)) {
+      return res.status(404).end();
+    }
+
     const { isAuthenticated, refreshedCookie } = await auth(req, res);
     const redirected = handleRouteProtection(url, { isAuthenticated }, res);
     if (redirected) {

@@ -7,6 +7,8 @@ import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { NotFound } from "@/features/components/not-found";
 import { useMobile } from "@/hooks/use-mobile";
 import { useSearchUsers } from "@/features/hooks/use-user";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 const AddFriendsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -69,7 +71,7 @@ const AddFriendsPage: React.FC = () => {
             itemKey={(item: any) => item.id}
             emptyComponent={
               <NotFound
-                icon="fa-solid fa-magnifying-glass text-3xl"
+                icon={<FontAwesomeIcon icon={faMagnifyingGlass} className="text-3xl" />}
                 title={t("friends:search.noResults")}
                 description={t("friends:search.noResultsDescription")}
               />

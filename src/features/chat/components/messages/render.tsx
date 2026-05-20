@@ -10,7 +10,7 @@ import { formatFileSize } from "@/utils/file";
 import { AudioMessage } from "./audio-message";
 import { useMediaBlob } from "@/hooks/use-media-blob";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay } from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faFile, faDownload } from "@fortawesome/free-solid-svg-icons";
 
 export const MediaBlobImage = ({ url, className, alt, onClick, onLoad, style }: any) => {
   const { blobUrl } = useMediaBlob(url);
@@ -133,7 +133,7 @@ export const renderVideoMessage = (
               setIsInlinePlaying(true);
             }}
           >
-            <FontAwesomeIcon icon={faPlay} className="text-xl pl-[3px]"  />
+            <FontAwesomeIcon icon={faPlay} className="text-xl pl-[3px]" />
           </div>
         </div>
       )}
@@ -166,12 +166,10 @@ export const renderFileMessage = (
       )}
     >
       <div className="flex-shrink-0">
-        <i
-          className={clsx(
-            "fa-solid fa-file text-2xl",
-            isMyMessage ? "text-text-reverse-main" : "text-text-main",
-          )}
-        ></i>
+        <FontAwesomeIcon
+          icon={faFile}
+          className={clsx("text-2xl", isMyMessage ? "text-text-reverse-main" : "text-text-main")}
+        />
       </div>
 
       <div className="flex flex-col min-w-0 flex-1">
@@ -205,11 +203,9 @@ export const renderFileMessage = (
           document.body.removeChild(anchor);
         }}
       >
-        <i
-          className={clsx(
-            "fa-solid fa-download",
-            isMyMessage ? "text-text-reverse-main" : "text-text-main",
-          )}
+        <FontAwesomeIcon
+          icon={faDownload}
+          className={clsx(isMyMessage ? "text-text-reverse-main" : "text-text-main")}
         />
       </button>
 

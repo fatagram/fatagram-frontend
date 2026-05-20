@@ -1,6 +1,8 @@
 import React from "react";
 import clsx from "clsx";
 import { Text } from "../atoms";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronRight } from "@fortawesome/free-solid-svg-icons";
 
 interface MenuProps {
   children: React.ReactNode;
@@ -36,9 +38,10 @@ export const MenuItem: React.FC<MenuItemProps> = ({
   const isStringIcon = typeof icon === "string";
 
   const defaultRightElement = (
-    <i
+    <FontAwesomeIcon
+      icon={faChevronRight}
       className={clsx(
-        "fa-solid fa-chevron-right text-[10px] shrink-0 transition-colors",
+        "text-[10px] shrink-0 transition-colors",
         isDanger ? "text-red-500/50" : "text-text-fourth",
       )}
     />

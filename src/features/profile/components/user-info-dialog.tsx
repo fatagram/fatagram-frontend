@@ -3,7 +3,7 @@ import { useSnackbar } from "@/contexts";
 import { Menu, MenuItem, MenuSection } from "@/components/ui/menu";
 import useLanguage from "@/utils/i18n";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCopy } from "@fortawesome/free-solid-svg-icons";
+import { faCopy, faAt, faLink, faIdCard } from "@fortawesome/free-solid-svg-icons";
 
 interface UserInfoDialogProps {
   userProfile?: {
@@ -44,21 +44,21 @@ export const UserInfoDialog: React.FC<UserInfoDialogProps> = ({ userProfile, tar
       <Menu className="w-full bg-bg-second border border-bg-fourth rounded-2xl p-2 shadow-sm">
         <MenuSection>
           <MenuItem
-            icon="fa-solid fa-at"
+            icon={<FontAwesomeIcon icon={faAt} />}
             title={t("user:profileHeader.urlNameLabel")}
             description={urlNameValue}
             onClick={() => handleCopy(nickname || "", t("user:profileHeader.urlNameLabel"))}
             rightElement={nickname ? copyIcon : <div />}
           />
           <MenuItem
-            icon="fa-solid fa-link"
+            icon={<FontAwesomeIcon icon={faLink} />}
             title={t("user:profileHeader.profileUrlLabel")}
             description={profileUrl}
             onClick={() => handleCopy(profileUrl, t("user:profileHeader.profileUrlLabel"))}
             rightElement={copyIcon}
           />
           <MenuItem
-            icon="fa-solid fa-id-card"
+            icon={<FontAwesomeIcon icon={faIdCard} />}
             title={t("user:profileHeader.userIdLabel")}
             description={targetId}
             onClick={() => handleCopy(targetId, t("user:profileHeader.userIdLabel"))}

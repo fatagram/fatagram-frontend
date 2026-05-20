@@ -8,7 +8,7 @@ import { useProfilePage } from "../../hooks/use-profile-page";
 import { Text, Textbox } from "@/components/atoms";
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUserXmark } from "@fortawesome/free-solid-svg-icons";
+import { faUserXmark, faSpinner } from "@fortawesome/free-solid-svg-icons";
 
 interface ProfileFriendsProps {
   className?: string;
@@ -50,7 +50,9 @@ const ProfileFriends: React.FC<ProfileFriendsProps> = ({ className = "" }) => {
         onLoadMore={fetchNextPage}
         className="relative flex flex-wrap gap-2 w-full mt-2"
         loadingSkeleton={
-          <div className="fa-solid fa-spinner animate-spin text-2xl text-single-main" />
+          <div className="flex justify-center w-full mt-4">
+            <FontAwesomeIcon icon={faSpinner} className="animate-spin text-2xl text-single-main" />
+          </div>
         }
         numberOfSkeletons={1}
         itemTemplate={(item: any) => (

@@ -13,7 +13,7 @@ import { useChatStore } from "./hooks/use-floating-chat";
 import { convManager } from "./services/conversation-manager";
 import { useMessageCacheMutations } from "./hooks/use-message";
 import { useTypingStore } from "./hooks/use-typing-store";
-// import { messageManager } from "./services/message-manager";
+import { db } from "@/utils/database";
 
 export type MessageHubEvent = SocketMessage<MessageResponseDto | SeenDto | TypingDto>;
 
@@ -47,21 +47,22 @@ export function useMessageListenerHandler() {
           .openChat(conversationId, { type: "conversation", conversationId: conversationId });
       }
 
+      const isFocusingThisConversation =
+        document.hasFocus() && useChatStore.getState().focusOnId === conversationId;
+
       addMessageToCache(conversationId, data);
       await convManager.addNewMessage(
         conversationId,
         userId!,
         data,
         data.shouldIncreaseUnreadCount,
+        isFocusingThisConversation,
       );
 
       if (data.senderId && data.senderId !== userId) {
         recordMessage(conversationId, data.senderId);
         removeTypingUser(conversationId, data.senderId);
       }
-
-      const isFocusingThisConversation =
-        document.hasFocus() && useChatStore.getState().focusOnId === conversationId;
 
       if (isFocusingThisConversation) {
         const messageSeq = data.sequenceNumber;
@@ -97,14 +98,17 @@ export function useMessageListenerHandler() {
           otherLastSeenMessageSeq: data.messageSeq,
         });
       } else {
+        const conv = await db.conversations.get(conversationId);
+        const wasUnread = conv && (conv.unreadMessageCount || 0) > 0;
+
         await convManager.updateConversation(conversationId, {
           myLastSeenMessageSeq: data.messageSeq,
           unreadMessageCount: 0,
         });
-      }
 
-      if (data.shouldDecreaseUnreadCount) {
-        await convManager.updateUnreadCount("decrement");
+        if (wasUnread) {
+          await convManager.updateUnreadCount("decrement");
+        }
       }
     },
     [setParticipantsSeen, userId],

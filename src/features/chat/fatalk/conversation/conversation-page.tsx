@@ -34,7 +34,20 @@ import { themeDetails } from "./chat-themes.config";
 import { dataURLtoFile } from "./chat-theme-utils";
 import { uploadService } from "@/api/upload/upload.api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCheck, faCloudArrowUp, faTrashCan, faArrowLeft, faEllipsis, faCamera, faImage, faPenToSquare, faPalette, faUser, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faCloudArrowUp,
+  faTrashCan,
+  faArrowLeft,
+  faEllipsis,
+  faCamera,
+  faImage,
+  faPenToSquare,
+  faPalette,
+  faUser,
+  faChevronRight,
+  faUserGroup,
+} from "@fortawesome/free-solid-svg-icons";
 
 interface ConversationPageProps extends ComponentProps {}
 
@@ -162,7 +175,7 @@ const ChatThemePicker: React.FC<{
             </Text>
             {isActive && (
               <div className="absolute top-1 right-1 bg-primary-500 text-white w-4 h-4 rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                <FontAwesomeIcon icon={faCheck} className="text-[9px]"  />
+                <FontAwesomeIcon icon={faCheck} className="text-[9px]" />
               </div>
             )}
             {(item as any).isEvent && (
@@ -605,7 +618,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
         headerLeft={
           <div className="flex items-center gap-1">
             <MiniButton sz="sm" onClick={handleTurnBack} className="block lg:hidden">
-              <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400"  />
+              <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400" />
             </MiniButton>
             <Transition show={unreadCount > 0} animation={AnimationLib.Fade}>
               <div className="rounded-full bg-primary-500 px-2 text-white">
@@ -618,7 +631,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
         }
         headerRight={
           <MiniButton sz="sm" onClick={() => setOpenSetting((prev) => !prev)}>
-            <FontAwesomeIcon icon={faEllipsis} className="text-primary-400"  />
+            <FontAwesomeIcon icon={faEllipsis} className="text-primary-400" />
           </MiniButton>
         }
       />
@@ -639,7 +652,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
               onClick={handleBackSetting}
               className={clsx(!isMobile && viewMode === "main" && "hidden")}
             >
-              <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400"  />
+              <FontAwesomeIcon icon={faArrowLeft} className="text-primary-400" />
             </MiniButton>
             <Text weight="bold" sz="md">
               {viewMode === "members"
@@ -671,7 +684,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                           onClick={triggerFileInput}
                           className="absolute bottom-1 right-1 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform active:scale-95"
                         >
-                          <FontAwesomeIcon icon={faCamera} className="text-xs"  />
+                          <FontAwesomeIcon icon={faCamera} className="text-xs" />
                         </button>
                       )}
                     </div>
@@ -701,7 +714,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={triggerFileInput}
                           >
-                            <FontAwesomeIcon icon={faImage}  />
+                            <FontAwesomeIcon icon={faImage} />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeAvatar")}
@@ -713,7 +726,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={openRenameFlow}
                           >
-                            <FontAwesomeIcon icon={faPenToSquare}  />
+                            <FontAwesomeIcon icon={faPenToSquare} />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeName")}
@@ -725,7 +738,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={openThemePickerFlow}
                           >
-                            <FontAwesomeIcon icon={faPalette}  />
+                            <FontAwesomeIcon icon={faPalette} />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeTheme", "Chủ đề")}
@@ -741,7 +754,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={() => navigate(`/${conv.otherUserId}`)}
                           >
-                            <FontAwesomeIcon icon={faUser}  />
+                            <FontAwesomeIcon icon={faUser} />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.viewProfile")}
@@ -753,7 +766,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
                             onClick={openThemePickerFlow}
                           >
-                            <FontAwesomeIcon icon={faPalette}  />
+                            <FontAwesomeIcon icon={faPalette} />
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeTheme", "Chủ đề")}
@@ -768,7 +781,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                   <Menu className="p-2">
                     {conv.isGroup && (
                       <MenuItem
-                        icon="fa-solid fa-user-group"
+                        icon={<FontAwesomeIcon icon={faUserGroup} />}
                         title={t("common:conversations.settings.viewMembers")}
                         description={t("common:conversations.settings.viewMembersDescription")}
                         onClick={openMembersFlow}
@@ -790,7 +803,10 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                           >
                             {currentThemeLabel}
                           </Text>
-                          <FontAwesomeIcon icon={faChevronRight} className="text-[10px] text-text-fourth"  />
+                          <FontAwesomeIcon
+                            icon={faChevronRight}
+                            className="text-[10px] text-text-fourth"
+                          />
                         </div>
                       }
                       onClick={openThemePickerFlow}

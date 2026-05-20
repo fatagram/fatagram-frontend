@@ -4,6 +4,8 @@ import { SidebarLayout } from "@/components/ui/sidebar-layout";
 import clsx from "clsx";
 import { NotFound } from "../../components/not-found";
 import { useTranslation } from "react-i18next";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMessage } from "@fortawesome/free-solid-svg-icons";
 
 const FatalkPage = () => {
   const { pathname } = useLocation();
@@ -32,7 +34,7 @@ const FatalkPage = () => {
           >
             <NotFound
               title={t("common:conversations.noSelectConversation")}
-              icon={"fa-solid fa-message"}
+              icon={<FontAwesomeIcon icon={faMessage} />}
               description={t("common:conversations.noSelectConversationMessage")}
             />
           </div>

@@ -25,7 +25,12 @@ import { useDialog } from "@/contexts";
 import { useLongPress } from "@/hooks/use-long-press";
 import { UserOptionTrigger } from "./user-option-trigger";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faEllipsis, faCircleExclamation } from "@fortawesome/free-solid-svg-icons";
+import {
+  faEllipsis,
+  faCircleExclamation,
+  faCopy,
+  faCheck,
+} from "@fortawesome/free-solid-svg-icons";
 
 const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
@@ -110,13 +115,12 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   }, [isPending]);
 
   const MessageOptionsContent = ({ isSheet = false }: { isSheet?: boolean }) => (
-    <div
-      className={clsx("flex flex-col", isSheet ? "gap-2 pb-10 px-4" : "gap-2 p-2 min-w-[220px]")}
-    >
+    <div className={clsx("flex flex-col", isSheet ? "gap-2 pb-10 px-4" : "gap-2 min-w-[220px]")}>
       <Menu>
         <MenuItem
-          icon="fa-solid fa-copy"
+          icon={<FontAwesomeIcon icon={faCopy} />}
           title={t("common:conversations.messageOptions.copy")}
+          rightElement={<div />}
           onClick={() => {
             navigator.clipboard.writeText(message.content || "");
             isSheet ? setShowOptionsSheet(false) : closeDialog();
@@ -131,7 +135,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
       setShowOptionsSheet(true);
     } else {
       openDialog({
-        title: "",
+        title: t("common:conversations.messageOptions.title", "Tùy chọn"),
         content: <MessageOptionsContent />,
       });
     }
@@ -335,12 +339,13 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               onClick={handleCopy}
               title={t("common:conversations.messageOptions.copy")}
             >
-              <i
+              <FontAwesomeIcon
+                icon={copied ? faCheck : faCopy}
                 className={clsx(
-                  "fa-solid text-[10px] transition-all duration-200",
-                  copied ? "fa-check text-primary-500 scale-125 opacity-100" : "fa-copy opacity-60",
+                  "text-[10px] transition-all duration-200",
+                  copied ? "text-primary-500 scale-125 opacity-100" : "opacity-60",
                 )}
-              ></i>
+              />
             </MiniButton>
 
             <MiniButton

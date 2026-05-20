@@ -62,9 +62,9 @@ export const Dialog: React.FC<DialogBoxProps> = ({
       </div>
       <Text
         className={clsx(
-          "absolute top-3 right-5 text-[20px]",
-          "text-gradient-main hover:text-single-main",
-          "cursor-pointer",
+          "absolute top-3 right-4 text-[20px]",
+          "text-text-third hover:text-text-main transition-colors",
+          "cursor-pointer z-10 p-1",
         )}
         onClick={onClose}
       >

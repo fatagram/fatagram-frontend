@@ -9,6 +9,8 @@ import { useGetUserAvatar, useGetUserProfile } from "@/features/hooks/use-user-p
 import { useAuth } from "@/contexts";
 import { useMobile } from "@/hooks/use-mobile";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faUser, faGear, faRightFromBracket } from "@fortawesome/free-solid-svg-icons";
 
 interface UserMenuProps {
   menuClassName?: string;
@@ -138,19 +140,19 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
               <div className="hidden sm:block h-[1px] bg-text-main/5 my-1 mx-2" />
 
               <MenuItem
-                icon="fa-solid fa-user"
+                icon={<FontAwesomeIcon icon={faUser} />}
                 title={t("navbar.profileMenu.personalPage")}
                 onClick={handlePersonalPage}
                 className="sm:hidden flex"
               />
 
               <MenuItem
-                icon="fa-solid fa-gear"
+                icon={<FontAwesomeIcon icon={faGear} />}
                 title={t("navbar.profileMenu.settings")}
                 onClick={handleSettings}
               />
               <MenuItem
-                icon="fa-solid fa-right-from-bracket"
+                icon={<FontAwesomeIcon icon={faRightFromBracket} />}
                 title={t("navbar.profileMenu.logout")}
                 variant="danger"
                 onClick={handleLogout}

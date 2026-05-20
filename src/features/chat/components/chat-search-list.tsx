@@ -9,6 +9,8 @@ import { NotFound } from "@/features/components/not-found";
 import { useSearchConversations } from "../hooks/use-conversation";
 import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 interface ChatSearchListProps extends ComponentProps {
   keyword: string;
@@ -97,7 +99,7 @@ export const ChatSearchList: React.FC<ChatSearchListProps> = ({
         emptyComponent={
           !isLoading && !isFetching ? (
             <NotFound
-              icon="fa-solid fa-magnifying-glass"
+              icon={<FontAwesomeIcon icon={faMagnifyingGlass} />}
               title={t("common:conversations.noSearchResults", "Không tìm thấy kết quả")}
               description={t(
                 "common:conversations.noSearchResultsMessage",
