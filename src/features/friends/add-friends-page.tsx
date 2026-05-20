@@ -13,8 +13,13 @@ import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 const AddFriendsPage: React.FC = () => {
   const { t } = useTranslation();
   const isMobile = useMobile();
+  const [mounted, setMounted] = React.useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -70,13 +75,15 @@ const AddFriendsPage: React.FC = () => {
             loadingSkeleton={<SearchUserSkeleton />}
             itemKey={(item: any) => item.id}
             emptyComponent={
-              <NotFound
-                icon={<FontAwesomeIcon icon={faMagnifyingGlass} className="text-3xl" />}
-                title={t("friends:search.noResults")}
-                description={t("friends:search.noResultsDescription")}
-              />
+              debouncedQuery ? (
+                <NotFound
+                  icon={<FontAwesomeIcon icon={faMagnifyingGlass} className="text-3xl" />}
+                  title={t("friends:search.noResults")}
+                  description={t("friends:search.noResultsDescription")}
+                />
+              ) : null
             }
-            numberOfSkeletons={isMobile ? 6 : 12}
+            numberOfSkeletons={mounted ? (isMobile ? 6 : 12) : 6}
           />
         </div>
       </div>

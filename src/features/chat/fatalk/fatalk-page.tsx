@@ -17,6 +17,7 @@ const FatalkPage = () => {
       title="Fatalk"
       navbar={<FatalkSidebar className="h-full" />}
       showMenuButton={false}
+      mobileSticky={true}
       sidebarClassName={clsx("lg:w-[400px] w-full", "max-w-full !transition-none")}
       showSidebar={isExactPath}
       showOverlay={false}

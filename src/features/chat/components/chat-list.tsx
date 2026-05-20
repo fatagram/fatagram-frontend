@@ -50,7 +50,11 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
         wrapperClassName="pt-[6px] pb-[2px] px-[3px]"
       />
       {debouncedKeyword ? (
-        <ChatSearchList keyword={debouncedKeyword} onConversationClick={onConversationClick} />
+        <ChatSearchList
+          keyword={debouncedKeyword}
+          onConversationClick={onConversationClick}
+          className="w-full"
+        />
       ) : (
         <div ref={scrollWrapperRef} className="flex-1 overflow-y-auto mt-2 ">
           <InfiniteScrollFlex

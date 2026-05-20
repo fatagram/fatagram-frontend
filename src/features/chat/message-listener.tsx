@@ -56,7 +56,6 @@ export function useMessageListenerHandler() {
         userId!,
         data,
         data.shouldIncreaseUnreadCount,
-        isFocusingThisConversation,
       );
 
       if (data.senderId && data.senderId !== userId) {

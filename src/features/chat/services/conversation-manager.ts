@@ -242,7 +242,6 @@ export class ConversationManager {
     convId: string,
     userId: string,
     newMsg: Message,
-    shouldUpdateUnreadCount: boolean = true,
     isFocusing: boolean = false,
   ) {
     try {

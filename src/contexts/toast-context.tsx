@@ -64,7 +64,7 @@ const ToastManager: React.FC<ToastManagerProps> = React.memo(function ToastManag
       {children}
       {toast && (
         <div
-          className={`animate-left-to-right fixed bottom-8 left-8 rounded-2xl shadow-2xl
+          className={`animate-slide-partial-from-left fixed bottom-8 left-8 rounded-2xl shadow-2xl
                     bg-bg-second max-w-full z-50
                      ${className}`}
         >

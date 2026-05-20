@@ -1,6 +1,7 @@
 import Layout from "@/components/ui/layout";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { Outlet, useNavigate, useLocation, useParams } from "react-router-dom";
+import { useNavigate, useLocation, useParams } from "react-router-dom";
+import { PageTransition } from "../page-transition";
 import { Text, Logo } from "@/components/atoms";
 import { NotificationBadge } from "@/features/notifications/components/notification-menu";
 import clsx from "clsx";
@@ -235,7 +236,7 @@ const DefaultLayout = () => {
         />
       </Layout.Header>
       <Layout.Main className="flex-1 flex flex-col scrollbar-hide sm:scrollbar-default">
-        <Outlet />
+        <PageTransition />
 
         {!isMobile && (
           <div className="fixed inset-0 pointer-events-none z-[90]">

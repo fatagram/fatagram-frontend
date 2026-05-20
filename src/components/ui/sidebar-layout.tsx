@@ -13,6 +13,7 @@ interface SidebarLayoutProps extends ComponentProps {
   showOverlay?: boolean;
   showMenuButton?: boolean;
   showSidebar?: boolean;
+  mobileSticky?: boolean;
   setShowSidebar?: (show: boolean) => void;
 }
 
@@ -24,6 +25,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   title,
   showMenuButton = true,
   showSidebar = false,
+  mobileSticky = false,
   setShowSidebar,
   showOverlay = true,
   children,
@@ -33,8 +35,11 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
       <aside
         className={clsx(
           "z-30 w-full max-w-[300px] shrink-0 overflow-y-auto",
-          "fixed lg:sticky top-[var(--header-height)] h-[calc(100dvh-var(--header-height))] transition-transform duration-300",
-          showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0",
+          mobileSticky
+            ? "sticky top-[var(--header-height)] h-[calc(100dvh-var(--header-height))]"
+            : "fixed lg:sticky top-[var(--header-height)] h-[calc(100dvh-var(--header-height))] transition-transform duration-300",
+          !mobileSticky && (showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"),
+          mobileSticky && !showSidebar && "hidden lg:flex",
           sidebarClassName,
         )}
       >
@@ -61,7 +66,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
             className="self-start m-3 text-2xl font-bold lg:hidden"
             onClick={() => setShowSidebar?.(!showSidebar)}
           >
-            <FontAwesomeIcon icon={faBars} className="mr-2"  />
+            <FontAwesomeIcon icon={faBars} className="mr-2" />
             <span>{title}</span>
           </button>
         )}

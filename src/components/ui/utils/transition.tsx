@@ -34,23 +34,23 @@ export const AnimationLib: Record<AnimationName, AnimationType> = {
     duration: 100,
   },
   SlideRightToLeft: {
-    in: "animate-right-to-left-in",
-    out: "animate-right-to-left-out",
+    in: "animate-slide-partial-from-right",
+    out: "animate-slide-partial-to-left",
     duration: 300,
   },
   SlideRightToLeftFull: {
-    in: "animate-slide-in-right-full",
-    out: "animate-slide-out-left-full",
+    in: "animate-slide-from-right",
+    out: "animate-slide-to-left",
     duration: 300,
   },
   SlideLeftToRight: {
-    in: "animate-left-to-right-in",
-    out: "animate-left-to-right-out",
+    in: "animate-slide-partial-from-left",
+    out: "animate-slide-partial-to-right",
     duration: 300,
   },
   SlideLeftToRightFull: {
-    in: "animate-slide-in-left-full",
-    out: "animate-slide-out-right-full",
+    in: "animate-slide-from-left",
+    out: "animate-slide-to-right",
     duration: 300,
   },
   DropdownSlide: {
@@ -69,8 +69,8 @@ export const AnimationLib: Record<AnimationName, AnimationType> = {
     duration: 300,
   },
   SlideSnappy: {
-    in: "animate-slide-in-right",
-    out: "animate-slide-out-left",
+    in: "animate-slide-from-left",
+    out: "animate-slide-to-left",
     duration: 250,
   },
   DialogZoom: {

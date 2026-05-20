@@ -89,7 +89,7 @@ export default function InfiniteScrollGrid({
           Đã xem hết kết quả.
         </div>
       )}
-      {items.length === 0 && !isLoading && (
+      {items.length === 0 && !isLoading && emptyComponent != null && (
         <div
           style={{
             gridColumn: "1 / -1",
@@ -98,7 +98,7 @@ export default function InfiniteScrollGrid({
             color: "var(--text-third-color)",
           }}
         >
-          {emptyComponent ?? "Không có dữ liệu nào."}
+          {emptyComponent}
         </div>
       )}
     </div>
