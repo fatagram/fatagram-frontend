@@ -54,10 +54,11 @@ export const ChatSearchList: React.FC<ChatSearchListProps> = ({
   const { t } = useTranslation();
   const { openChat } = useOpenChat();
 
-  const { data, fetchNextPage, hasNextPage, isLoading, isFetching } = useSearchConversations({
-    keyword,
-    limit: 10,
-  });
+  const { data, fetchNextPage, hasNextPage, isLoading, isFetchingNextPage, isFetching } =
+    useSearchConversations({
+      keyword,
+      limit: 10,
+    });
 
   const handleConversationClick = useCallback(
     async (conversationId: string) => {
@@ -82,7 +83,7 @@ export const ChatSearchList: React.FC<ChatSearchListProps> = ({
           <ChatSearchItem conversation={item} onClick={() => handleConversationClick(item.id)} />
         )}
         itemKey={(item) => item.id}
-        isLoading={isLoading || isFetching}
+        isLoading={isLoading || isFetchingNextPage}
         loadingSkeleton={
           <div className={clsx("flex items-center my-4")}>
             <Skeleton sz="md" variant="circle" />

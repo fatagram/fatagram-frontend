@@ -30,8 +30,22 @@ const TempConversation = lazy(() =>
 );
 const ThuNghiemCuon = lazy(() => import("@/features/tests/tests-infinity-scroll-page"));
 
+import { Logo } from "@/components/atoms";
+
+const ContentLoading = () => (
+  <div className="flex-1 flex justify-center items-center h-full min-h-[50vh]">
+    <div className="animate-pulse">
+      <Logo sz="lg" hasSlogan={false} />
+    </div>
+  </div>
+);
+
 const withFallback = (element: ReactNode) => (
   <Suspense fallback={<LoadingPage />}>{element}</Suspense>
+);
+
+const withContentFallback = (element: ReactNode) => (
+  <Suspense fallback={<ContentLoading />}>{element}</Suspense>
 );
 
 export const mainRoutes: RouteType[] = [
@@ -41,7 +55,7 @@ export const mainRoutes: RouteType[] = [
     children: [
       {
         path: "/",
-        element: withFallback(<HomePage />),
+        element: withContentFallback(<HomePage />),
         type: "public",
         index: true,
       },
@@ -50,7 +64,7 @@ export const mainRoutes: RouteType[] = [
       userRoute,
       {
         path: "/notifications",
-        element: withFallback(<NotificationPage />),
+        element: withContentFallback(<NotificationPage />),
         type: "private",
       },
       {

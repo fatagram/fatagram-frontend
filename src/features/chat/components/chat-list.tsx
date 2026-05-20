@@ -23,7 +23,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   const [keyword, setKeyword] = useState("");
   const debouncedKeyword = useDebounce(keyword, 500);
 
-  const { fetchNextPage, hasNextPage, isLoading, isFetching } = useGetConversations({
+  const { fetchNextPage, hasNextPage, isLoading, isFetchingNextPage } = useGetConversations({
     limit: 10,
   });
   const conversations = useConversationStore((state) => state.conversations);
@@ -63,7 +63,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
               <ChatItem conversation={item} onClick={() => handleConversationClick(item.id)} />
             )}
             itemKey={(item) => item.id}
-            isLoading={isLoading || isFetching}
+            isLoading={isLoading || isFetchingNextPage}
             loadingSkeleton={
               <div className={clsx("flex items-center my-8")}>
                 <Skeleton sz="md" variant="circle" />

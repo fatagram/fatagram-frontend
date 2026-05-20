@@ -1,5 +1,5 @@
 import React from "react";
-import { useActiveRoute } from "@/hooks/use-active-route";
+import { useActiveRoute, useNavigationStore } from "@/hooks/use-active-route";
 import { Link } from "@/components/atoms";
 import clsx from "clsx";
 
@@ -19,6 +19,14 @@ export const NavbarItem: React.FC<NavbarItemProps> = ({
   onClick,
 }) => {
   const isFocused = useActiveRoute(path, activeRoute);
+  const setPendingPath = useNavigationStore((state) => state.setPendingPath);
+
+  const handleClick = () => {
+    setPendingPath(path);
+    if (onClick) {
+      onClick();
+    }
+  };
 
   return (
     <Link
@@ -29,7 +37,7 @@ export const NavbarItem: React.FC<NavbarItemProps> = ({
         isFocused ? "!text-primary-500" : "!text-text-main hover:!text-primary-400",
       )}
       to={path}
-      onClick={onClick}
+      onClick={handleClick}
     >
       <span className="relative z-10">{children}</span>
 
