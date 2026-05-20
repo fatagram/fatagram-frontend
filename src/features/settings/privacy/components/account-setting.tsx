@@ -26,10 +26,9 @@ const AccountSetting: React.FC<AccountSettingProps> = () => {
       title={t("settings:account.personalInfo.title")}
       description={t("settings:account.personalInfo.description")}
     >
-      {isLoading ? (
-        <div className="p-4">
+      {!userProfile || isLoading ? (
+        <div className="flex p-4">
           <Skeleton sz="md" className="w-full mb-2" />
-          <Skeleton sz="sm" className="w-2/3" />
         </div>
       ) : (
         <EditableField

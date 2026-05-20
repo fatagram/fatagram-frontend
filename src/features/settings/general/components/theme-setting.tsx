@@ -15,7 +15,7 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = () => {
 
   return (
     <List title={t("settings:theme.title")} description={t("settings:theme.selectTheme")}>
-      <div className="p-4 w-full">
+      <div className="sm:p-4 w-full">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full">
           {availableThemes.map((tOpt) => {
             const isActive = currentGlobalTheme === tOpt.key;

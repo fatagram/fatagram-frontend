@@ -78,7 +78,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
   return createPortal(
     <div
       className={clsx(
-        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50",
+        "fixed inset-0 bg-bg-overlay flex items-center justify-center z-[9999]",
         className,
       )}
     >
@@ -196,7 +196,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
         </Text>
       </div>
     </div>,
-    document.body
+    document.body,
   );
 };
 

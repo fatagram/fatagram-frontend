@@ -20,16 +20,17 @@ const ListSection: React.FC<ListProps> = ({
   description,
 }) => {
   return (
-    <div className={clsx("flex flex-col w-full mb-6", className)}>
+    <div className={clsx("flex flex-col w-full", className)}>
       <div
         className={clsx(
           "flex flex-col",
           "bg-transparent sm:bg-bg-main sm:rounded-2xl sm:border sm:border-bg-fourth/80 sm:shadow-sm",
+          "p-1",
           cardClassName,
         )}
       >
         {(title || description) && (
-          <div className="flex flex-col px-0 sm:px-6 pt-4 pb-2">
+          <div className="flex flex-col px-0 sm:px-6 sm:pt-4 pb-2">
             {title && (
               <Text sz="lg" weight="bold" className="text-text-main mb-1">
                 {title}

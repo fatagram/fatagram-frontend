@@ -8,7 +8,7 @@ import { Text } from "@/components/atoms";
 interface SidebarLayoutProps extends ComponentProps {
   navbar?: React.ReactNode;
   sidebarClassName?: string;
-  childrenWrapperCalssName?: string;
+  childrenWrapperClassName?: string;
   children: React.ReactNode;
   title?: string;
   showOverlay?: boolean;
@@ -22,7 +22,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   className,
   navbar,
   sidebarClassName,
-  childrenWrapperCalssName,
+  childrenWrapperClassName,
   title,
   showMenuButton = true,
   showSidebar = false,
@@ -32,15 +32,17 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className={clsx("flex flex-1 items-stretch ", className)}>
+    <div className={clsx("flex flex-1", className)}>
       <aside
         className={clsx(
-          "z-30 w-full max-w-[300px] shrink-0 overflow-y-auto",
-          mobileSticky
-            ? "sticky top-[var(--header-height)] h-[calc(100dvh-var(--header-height))]"
-            : "fixed lg:sticky top-[var(--header-height)] h-[calc(100dvh-var(--header-height))] transition-transform duration-300",
-          !mobileSticky && (showSidebar ? "translate-x-0" : "-translate-x-full lg:translate-x-0"),
-          mobileSticky && !showSidebar && "hidden lg:flex",
+          "z-30 w-full max-w-[300px] shrink-0 overflow-y-auto [will-change:transform]",
+          "fixed top-[var(--header-height)] h-[calc(100dvh-var(--header-height))] transition-transform duration-300 ease-in-out",
+          "-translate-x-full lg:translate-x-0 w-[var(--sidebar-width)] bg-bg-main",
+          showSidebar && "translate-x-0",
+          mobileSticky && [
+            "sticky h-[calc(100dvh-var(--header-height))]",
+            !showSidebar && "hidden lg:flex",
+          ],
           sidebarClassName,
         )}
       >
@@ -61,7 +63,12 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
         </Transition>
       )}
 
-      <div className={clsx("flex-1 flex flex-col min-w-0 h-full", childrenWrapperCalssName)}>
+      <div
+        className={clsx(
+          "flex-1 flex flex-col min-w-0 h-full lg:ml-[var(--sidebar-width)]",
+          childrenWrapperClassName,
+        )}
+      >
         {showMenuButton && (
           <button
             className="self-start m-3 text-2xl font-bold lg:hidden flex items-center"

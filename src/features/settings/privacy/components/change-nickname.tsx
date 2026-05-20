@@ -47,8 +47,12 @@ export const ChangeNickname: FC<ChangeNicknameProps> = ({ userId }) => {
     );
   };
 
-  if (isLoading) {
-    return <Skeleton sz="md" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />;
+  if (!userProfile || isLoading) {
+    return (
+      <div className="flex p-4">
+        <Skeleton sz="md" className="w-full mb-2" />
+      </div>
+    );
   }
 
   return (

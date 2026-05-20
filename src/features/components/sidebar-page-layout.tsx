@@ -27,8 +27,8 @@ export const SidebarPageLayout: React.FC<SidebarPageLayoutProps> = ({
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
     >
-      <div className={clsx("flex items-center justify-center flex-1 mt-1")}>
-        <div className="w-full sm:max-w-[800px] px-3">{children}</div>
+      <div className={clsx("flex items-center justify-center flex-1")}>
+        <div className="w-full sm:max-w-[800px] px-3 h-full box-border pt-1">{children}</div>
       </div>
     </SidebarLayout>
   );
@@ -57,7 +57,7 @@ export const SidebarPageCard: React.FC<SidebarPageCardProps> = ({
         "w-full !p-0 sm:!p-8 bg-transparent sm:bg-bg-main border-none sm:border-solid sm:!border-2 border-bg-fourth shadow-none",
         className,
       )}
-      titleClassName="mb-5"
+      titleClassName="mb-2"
       childrenClassName={clsx("flex flex-col gap-7", childrenClassName)}
     >
       {children}

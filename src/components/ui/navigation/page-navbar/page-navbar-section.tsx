@@ -2,6 +2,8 @@ import { useState } from "react";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
 import HeightTransition from "@/components/ui/utils/height-transition";
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faChevronDown } from "@fortawesome/free-solid-svg-icons";
 
 type PageNavbarSectionProps = {
   title?: string;
@@ -40,9 +42,10 @@ export const PageNavbarSection: React.FC<PageNavbarSectionProps> = ({
           >
             {title}
           </Text>
-          <i
+          <FontAwesomeIcon
+            icon={faChevronDown}
             className={clsx(
-              "fas fa-chevron-down text-text-third text-sm",
+              "text-text-third text-sm",
               "transition-transform duration-300",
               "group-hover:text-primary-500",
               showChildren ? "rotate-180" : "rotate-0",

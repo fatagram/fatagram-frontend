@@ -21,6 +21,7 @@ const FatalkPage = () => {
       sidebarClassName={clsx("lg:w-[400px] w-full", "max-w-full !transition-none")}
       showSidebar={isExactPath}
       showOverlay={false}
+      childrenWrapperClassName="!ml-0"
     >
       <div className="flex flex-col w-full h-[calc(100dvh-var(--header-height))] overscroll-y-contain">
         <Outlet />

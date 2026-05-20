@@ -26,7 +26,7 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
     >
       <div className={clsx("flex flex-col relative bg-transparent pt-6 pb-2", headerClassName)}>
         {title && (
-          <Text weight="extrabold" className="px-6 text-text-main !text-2xl mb-2">
+          <Text weight="extrabold" className="px-6 text-gradient-main !text-2xl mb-2">
             {title}
           </Text>
         )}

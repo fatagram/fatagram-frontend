@@ -1,4 +1,4 @@
-export const TAB_ORDER = ["/", "/friends", "/fatalk", "/notifications"];
+export const TAB_ORDER = ["/", "/friends", "/fatalk", "/notifications", "/settings"];
 
 export const getTabBase = (path: string): string => {
   if (path === "/") return "/";

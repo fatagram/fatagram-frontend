@@ -9,6 +9,7 @@
 
 :root {
   --header-height: 56px;
+  --sidebar-width: 300px;
 }
 
 html {
