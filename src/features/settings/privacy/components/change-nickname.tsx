@@ -1,12 +1,12 @@
 import { FC, useState } from "react";
-import { Skeleton, Text } from "@/components/atoms";
+import { Skeleton } from "@/components/atoms";
 import EditableField from "../../components/editable-field";
 import clsx from "clsx";
 import useLanguage from "@/utils/i18n";
 import { useGetUserProfile, useUpdateNickname } from "@/features/hooks/use-user-profile";
 import { ErrorCodes } from "@/api/user/dto/change-nickname.dto";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen } from "@fortawesome/free-solid-svg-icons";
+import { faTag } from "@fortawesome/free-solid-svg-icons";
 
 interface ChangeNicknameProps {
   userId: string;
@@ -53,17 +53,13 @@ export const ChangeNickname: FC<ChangeNicknameProps> = ({ userId }) => {
 
   return (
     <EditableField
+      icon={<FontAwesomeIcon icon={faTag} />}
       title={t("settings:account.personalInfo.nickname")}
+      description={t("settings:account.personalInfo.nicknameDescription")}
       value={userProfile?.infos.nickname}
       noDataValue={t("settings:account.personalInfo.noNickname")}
       placeholder={t("settings:account.personalInfo.nicknamePlaceholder")}
       valueClassName={clsx(!userProfile?.infos.nickname && "!opacity-50")}
-      btnChildren={
-        <Text>
-          <FontAwesomeIcon icon={faPen} className="mr-2" />
-          {t("settings:account.personalInfo.changeButton")}
-        </Text>
-      }
       editableMode="inline"
       isEdit={isEditNickname}
       isError={isEditNicknameFailed}

@@ -8,6 +8,7 @@ import { ErrorCodes } from "@/api/user/dto/change-name.dto";
 import { useAuth } from "@/contexts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
+import { createPortal } from "react-dom";
 
 type ChangeNameFormProps = {
   className?: string;
@@ -74,7 +75,7 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
     );
   };
 
-  return (
+  return createPortal(
     <div
       className={clsx(
         "fixed inset-0 bg-bg-overlay flex items-center justify-center z-50",
@@ -194,7 +195,8 @@ const ChangeNameForm: React.FC<ChangeNameFormProps> = ({ className }) => {
           <FontAwesomeIcon icon={faXmark} />
         </Text>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 };
 

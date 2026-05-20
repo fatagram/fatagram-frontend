@@ -3,7 +3,7 @@ import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import PageNavbar from "@/components/ui/navigation/page-navbar/page-navbar";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faUser, faShieldHalved, faLanguage, faBell, faCircleInfo, faPalette } from "@fortawesome/free-solid-svg-icons";
+import { faUser, faLanguage, faPalette } from "@fortawesome/free-solid-svg-icons";
 
 type SettingsNavbarProps = {
   className?: string;

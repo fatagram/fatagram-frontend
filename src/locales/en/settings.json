@@ -21,10 +21,14 @@
   },
   "account": {
     "personalInfo": {
-      "title": "Personal Informations",
+      "title": "Personal Information",
+      "description": "Manage your personal information, username, and nickname.",
       "yourName": "Your Name",
+      "yourNameDescription": "Your display name visible to others.",
       "urlName": "URL Name",
+      "urlNameDescription": "A unique identifier for your profile.",
       "nickname": "Nickname",
+      "nicknameDescription": "An optional nickname for your friends to see.",
       "changeButton": "Change",
       "noUrlName": "No URL Name",
       "noNickname": "No Nickname",
@@ -69,6 +73,7 @@
   },
   "language": {
     "title": "Language Settings",
+    "description": "Choose the display language for the application.",
     "yourLanguage": "Your language"
   },
   "theme": {

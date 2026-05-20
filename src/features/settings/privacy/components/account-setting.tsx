@@ -1,5 +1,5 @@
 import EditableField from "@/features/settings/components/editable-field";
-import { Skeleton, Text } from "@/components/atoms";
+import { Skeleton } from "@/components/atoms";
 import React from "react";
 import { useNavigate } from "react-router-dom";
 import useLanguage from "@/utils/i18n";
@@ -7,9 +7,9 @@ import { ChangeUrlName } from "./change-url-name";
 import { ChangeNickname } from "./change-nickname";
 import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import { useAuth } from "@/contexts";
-import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
+import { List } from "@/components/ui/list";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen } from "@fortawesome/free-solid-svg-icons";
+import { faUser } from "@fortawesome/free-solid-svg-icons";
 
 type AccountSettingProps = {};
 
@@ -22,25 +22,27 @@ const AccountSetting: React.FC<AccountSettingProps> = () => {
   const handleChangeName = () => navigate("name");
 
   return (
-    <SidebarPageCard title={t("settings:account.personalInfo.title")}>
+    <List
+      title={t("settings:account.personalInfo.title")}
+      description={t("settings:account.personalInfo.description")}
+    >
       {isLoading ? (
-        <Skeleton sz="md" className="w-full lg:ml-auto mb-7 mt-2 lg:mt-0" />
+        <div className="p-4">
+          <Skeleton sz="md" className="w-full mb-2" />
+          <Skeleton sz="sm" className="w-2/3" />
+        </div>
       ) : (
         <EditableField
+          icon={<FontAwesomeIcon icon={faUser} />}
           title={t("settings:account.personalInfo.yourName")}
+          description={t("settings:account.personalInfo.yourNameDescription")}
           value={userProfile?.infos.fullName}
-          btnChildren={
-            <Text>
-              <FontAwesomeIcon icon={faPen} className="mr-2"  />{" "}
-              {t("settings:account.personalInfo.changeButton")}
-            </Text>
-          }
           onChangeClick={handleChangeName}
         />
       )}
       <ChangeUrlName userId={userId!} />
       <ChangeNickname userId={userId!} />
-    </SidebarPageCard>
+    </List>
   );
 };
 

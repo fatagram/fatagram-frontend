@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useRef } from "react";
 import { useLocation } from "react-router-dom";
 import {
   getTransitionDirection,
@@ -6,33 +6,21 @@ import {
   type TransitionDirection,
 } from "@/utils/navigation-transition";
 
-interface PageTransitionState {
-  key: string;
-  enterClass: string;
-}
-
 export const usePageTransition = () => {
   const location = useLocation();
   const prevPathRef = useRef<string>(location.pathname);
-  const [state, setState] = useState<PageTransitionState>({
-    key: location.pathname,
-    enterClass: "",
-  });
+  const enterClassRef = useRef<string>("");
 
-  useEffect(() => {
-    const prevPath = prevPathRef.current;
-    const currentPath = location.pathname;
+  const currentPath = location.pathname;
 
-    if (prevPath === currentPath) return;
-
-    const direction: TransitionDirection = getTransitionDirection(prevPath, currentPath);
+  if (prevPathRef.current !== currentPath) {
+    const direction: TransitionDirection = getTransitionDirection(prevPathRef.current, currentPath);
     prevPathRef.current = currentPath;
+    enterClassRef.current = direction !== "none" ? getPageEnterClass(direction) : "";
+  }
 
-    if (direction === "none") return;
-
-    const enterClass = getPageEnterClass(direction);
-    setState({ key: currentPath, enterClass });
-  }, [location.pathname]);
-
-  return state;
+  return {
+    key: currentPath,
+    enterClass: enterClassRef.current,
+  };
 };

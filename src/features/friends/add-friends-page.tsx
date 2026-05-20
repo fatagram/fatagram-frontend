@@ -1,6 +1,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import { useTranslation } from "react-i18next";
-import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
+import { List } from "@/components/ui/list";
 import { Textbox } from "@/components/atoms";
 import SearchUserItem, { SearchUserSkeleton } from "./components/search-user-item";
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
@@ -38,13 +38,17 @@ const AddFriendsPage: React.FC = () => {
   const showSkeletons = isLoading || (isFetching && !isFetchingNextPage);
 
   return (
-    <SidebarPageCard
+    <List
       title={t("friends:navbar.addFriends") || "Tìm kiếm bạn bè"}
+      description={t(
+        "friends:search.description",
+        "Tìm kiếm và kết bạn với mọi người trên Fatagram.",
+      )}
       className="h-[calc(100dvh-var(--header-height)-1rem)] flex flex-col"
-      childrenClassName="flex-1 h-full min-h-0"
+      cardClassName="flex-1 min-h-0"
     >
-      <div className="flex flex-col gap-6 h-full min-h-0">
-        <div className="px-1 shrink-0 relative">
+      <div className="flex flex-col gap-6 h-full min-h-0 px-0 sm:px-6 pb-6">
+        <div className="shrink-0 relative">
           <Textbox
             type="search"
             placeholder={t("friends:navbar.addFriends") || "Tìm kiếm bạn bè..."}
@@ -55,7 +59,7 @@ const AddFriendsPage: React.FC = () => {
           />
         </div>
 
-        <div className="flex-1 overflow-y-auto scrollbar-hide px-1 min-h-0 [--item-min-width:100%] sm:[--item-min-width:200px]">
+        <div className="flex-1 overflow-y-auto scrollbar-hide min-h-0 [--item-min-width:100%] sm:[--item-min-width:200px]">
           <InfiniteScrollGrid
             itemMinWidth="var(--item-min-width)"
             items={showSkeletons ? [] : users}
@@ -87,7 +91,7 @@ const AddFriendsPage: React.FC = () => {
           />
         </div>
       </div>
-    </SidebarPageCard>
+    </List>
   );
 };
 

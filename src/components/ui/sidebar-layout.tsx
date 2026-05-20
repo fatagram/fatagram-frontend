@@ -3,6 +3,7 @@ import clsx from "clsx";
 import Transition, { AnimationLib } from "./utils/transition";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faBars } from "@fortawesome/free-solid-svg-icons";
+import { Text } from "@/components/atoms";
 
 interface SidebarLayoutProps extends ComponentProps {
   navbar?: React.ReactNode;
@@ -31,7 +32,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className={clsx("flex flex-1 items-stretch", className)}>
+    <div className={clsx("flex flex-1 items-stretch ", className)}>
       <aside
         className={clsx(
           "z-30 w-full max-w-[300px] shrink-0 overflow-y-auto",
@@ -63,11 +64,13 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
       <div className={clsx("flex-1 flex flex-col min-w-0 h-full", childrenWrapperCalssName)}>
         {showMenuButton && (
           <button
-            className="self-start m-3 text-2xl font-bold lg:hidden"
+            className="self-start m-3 text-2xl font-bold lg:hidden flex items-center"
             onClick={() => setShowSidebar?.(!showSidebar)}
           >
-            <FontAwesomeIcon icon={faBars} className="mr-2" />
-            <span>{title}</span>
+            <FontAwesomeIcon icon={faBars} className="mr-3" />
+            <Text sz="lg" weight="bold">
+              {title}
+            </Text>
           </button>
         )}
         {children}

@@ -22,9 +22,13 @@
   "account": {
     "personalInfo": {
       "title": "Thông tin cá nhân",
+      "description": "Quản lý thông tin cá nhân, tên người dùng và biệt danh của bạn.",
       "yourName": "Tên của bạn",
+      "yourNameDescription": "Tên hiển thị của bạn để mọi người có thể thấy.",
       "urlName": "Tên URL",
+      "urlNameDescription": "Định danh duy nhất cho hồ sơ của bạn.",
       "nickname": "Biệt danh",
+      "nicknameDescription": "Biệt danh tùy chọn để bạn bè của bạn có thể thấy.",
       "changeButton": "Thay đổi",
       "noUrlName": "Không có tên URL",
       "noNickname": "Không có biệt danh",
@@ -69,6 +73,7 @@
   },
   "language": {
     "title": "Ngôn ngữ",
+    "description": "Chọn ngôn ngữ hiển thị cho ứng dụng.",
     "yourLanguage": "Ngôn ngữ của bạn"
   },
   "theme": {

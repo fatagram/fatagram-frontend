@@ -284,10 +284,12 @@
 
   .page-enter-forward {
     animation: page-enter-forward 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
   }
 
   .page-enter-backward {
     animation: page-enter-backward 280ms cubic-bezier(0.16, 1, 0.3, 1) forwards;
+    will-change: transform, opacity;
   }
 }
 

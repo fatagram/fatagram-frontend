@@ -1,14 +1,21 @@
 import { usePageTransition } from "@/hooks/use-page-transition";
 import { Outlet } from "react-router-dom";
 import clsx from "clsx";
+import { useState } from "react";
 
 export const PageTransition = () => {
   const { key, enterClass } = usePageTransition();
+  const [finishedKey, setFinishedKey] = useState("");
 
   return (
     <div
       key={key}
-      className={clsx("flex-1 flex flex-col", enterClass)}
+      className={clsx("flex-1 flex flex-col", key !== finishedKey && enterClass)}
+      onAnimationEnd={(e) => {
+        if (e.target === e.currentTarget) {
+          setFinishedKey(key);
+        }
+      }}
     >
       <Outlet />
     </div>

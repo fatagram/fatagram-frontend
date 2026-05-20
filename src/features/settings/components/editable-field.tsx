@@ -6,11 +6,15 @@ import { useMobile } from "@/hooks/use-mobile";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faFloppyDisk } from "@fortawesome/free-solid-svg-icons";
+import { List } from "@/components/ui/list";
 
 interface EditableFieldProps {
   className?: string;
   valueClassName?: string;
-  title?: string;
+  title: string;
+  description?: string;
+  icon?: React.ReactNode;
+  iconClassName?: string;
   value?: string;
   placeholder?: string;
   editableMode?: "inline" | "none";
@@ -29,10 +33,12 @@ const EditableField: React.FC<EditableFieldProps> = ({
   className,
   editableMode = "none",
   title,
+  description,
+  icon,
+  iconClassName,
   value,
   placeholder,
   valueClassName,
-  btnChildren,
   isEdit = false,
   isError = false,
   errorMessage,
@@ -54,7 +60,7 @@ const EditableField: React.FC<EditableFieldProps> = ({
   const isSaveDisabled = value === inputValue;
 
   const editForm = (
-    <div className="relative flex flex-col gap-1 w-full ">
+    <div className="relative flex flex-col gap-1 w-full flex-1">
       <Textbox
         sz="sm"
         placeholder={placeholder}
@@ -62,9 +68,10 @@ const EditableField: React.FC<EditableFieldProps> = ({
         type="text"
         value={inputValue}
         onChange={(e) => setInputValue(e.target.value)}
+        className="w-full"
       />
       {isError && (
-        <Text sz="sm" className="!text-red-500 ml-0">
+        <Text sz="sm" className="!text-red-500 ml-0 mt-1">
           {errorMessage}
         </Text>
       )}
@@ -72,78 +79,62 @@ const EditableField: React.FC<EditableFieldProps> = ({
   );
 
   const actionButtons = (
-    <div className="flex flex-nowrap gap-1 w-full">
+    <div className="flex flex-row gap-2 mt-2 sm:mt-0 sm:w-auto w-full">
+      <Button
+        sz="sm"
+        variant="fourth"
+        onClick={() => onCancelClick?.()}
+        className="flex-1 sm:flex-none whitespace-nowrap"
+      >
+        {t("settings:editableField.cancelButton")}
+      </Button>
       <Button
         disabled={isSaveDisabled}
         sz="sm"
         variant="primary"
         onClick={() => onSaveClick?.(inputValue)}
-        className="flex-1 whitespace-nowrap"
+        className="flex-1 sm:flex-none whitespace-nowrap"
       >
-        <FontAwesomeIcon icon={faFloppyDisk} className="mr-2"  />
+        <FontAwesomeIcon icon={faFloppyDisk} className="mr-2" />
         {t("settings:editableField.saveButton")}
-      </Button>
-      <Button
-        sz="sm"
-        variant="fourth"
-        onClick={() => onCancelClick?.()}
-        className="flex-1 whitespace-nowrap"
-      >
-        {t("settings:editableField.cancelButton")}
       </Button>
     </div>
   );
 
   return (
-    <div
-      className={clsx(
-        "flex flex-col sm:flex-row sm:justify-between sm:items-center w-full",
-        className,
+    <>
+      <List.Item
+        title={title}
+        description={description}
+        icon={icon}
+        iconClassName={iconClassName}
+        value={<span className={clsx(valueClassName, "opacity-80")}>{value ?? noDataValue}</span>}
+        onClick={canEdit && !isEdit ? onChangeClick : undefined}
+        className={className}
+        hideChevron={!canEdit || isEdit}
+      >
+        {canEdit && isInlineMode && isEdit && !isMobile && (
+          <div className="flex flex-col sm:flex-row gap-3 items-start sm:items-center mt-3 bg-bg-third/30 p-3 rounded-xl border border-bg-fourth/50 animate-slide-up-in">
+            {editForm}
+            {actionButtons}
+          </div>
+        )}
+      </List.Item>
+
+      {canEdit && isInlineMode && isMobile && (
+        <BottomSheet
+          open={isEdit}
+          onOpenChange={(open) => !open && onCancelClick?.()}
+          trigger={<span className="hidden" />}
+          title={title}
+        >
+          <div className="flex flex-col w-full px-4 pt-2 pb-6 gap-4">
+            {editForm}
+            <div className="w-full">{actionButtons}</div>
+          </div>
+        </BottomSheet>
       )}
-    >
-      <Text sz="lg" className="font-semibold mb-0">
-        {title}
-      </Text>
-
-      <div className="flex sm:items-center gap-4 justify-between">
-        {(!isEdit || (isEdit && isMobile)) && (
-          <Text sz="lg" className={clsx(valueClassName)}>
-            {value ?? noDataValue}
-          </Text>
-        )}
-
-        {canEdit && (
-          <>
-            {isInlineMode && isEdit && !isMobile && (
-              <div className="flex justify-center gap-1 items-center">
-                {editForm}
-                {actionButtons}
-              </div>
-            )}
-
-            {isInlineMode && isMobile && (
-              <BottomSheet
-                open={isEdit}
-                onOpenChange={(open) => !open && onCancelClick?.()}
-                trigger={<span className="hidden" />}
-                title={title}
-              >
-                <div className="flex flex-col w-full px-2 pt-2 pb-4 gap-2">
-                  {editForm}
-                  {actionButtons}
-                </div>
-              </BottomSheet>
-            )}
-
-            {!(isInlineMode && isEdit && !isMobile) && (
-              <Button sz="sm" variant="fourth" onClick={() => onChangeClick?.()}>
-                {btnChildren}
-              </Button>
-            )}
-          </>
-        )}
-      </div>
-    </div>
+    </>
   );
 };
 

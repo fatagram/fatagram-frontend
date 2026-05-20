@@ -31,52 +31,41 @@ export const PageNavbarItem: React.FC<PageNavbarItemProps> = ({
         onClick?.();
       }}
       className={clsx(
-        "w-full text-left px-3 py-3 rounded-xl",
-        "transition-all duration-300 ease-out",
-        "relative overflow-hidden group",
+        "w-full text-left px-4 py-3 rounded-xl",
+        "transition-all duration-200 ease-out",
+        "relative group flex items-center gap-4",
         {
-          "bg-bg-fourth border-l-4 border-l-primary-500 shadow-sm": isFocused,
-          "hover:bg-bg-third hover:shadow-sm hover:translate-x-1": !isFocused,
+          "bg-primary-500/10": isFocused,
+          "hover:bg-bg-second": !isFocused,
         },
         className,
       )}
     >
-      {/* Active indicator glow */}
-      {isFocused && (
-        <div className="absolute inset-0 bg-gradient-to-r from-primary-500/5 to-transparent pointer-events-none" />
-      )}
-
-      <div className={clsx("grid grid-cols-10 relative z-10")}>
+      <Text
+        sz="lg"
+        className={clsx(
+          "flex justify-center items-center shrink-0 transition-all duration-200",
+          isFocused ? "text-primary-500" : "text-text-second group-hover:text-text-main",
+        )}
+      >
+        {icon}
+      </Text>
+      <div className="flex flex-col flex-1 min-w-0">
         <Text
           sz="md"
+          weight={isFocused ? "bold" : "medium"}
           className={clsx(
-            "flex justify-center items-center h-full col-span-2",
-            "transition-all duration-300",
-            isFocused
-              ? "text-primary-500 scale-110"
-              : "text-text-second group-hover:text-primary-500 group-hover:scale-105",
+            "truncate transition-colors duration-200",
+            isFocused ? "text-primary-500" : "text-text-main group-hover:text-text-main",
           )}
         >
-          {icon}
+          {title}
         </Text>
-        <div className="col-span-8 flex flex-col justify-center">
-          <Text
-            sz="md"
-            className={clsx(
-              "transition-colors duration-300",
-              isFocused
-                ? "text-primary-600 font-semibold"
-                : "text-text-main group-hover:text-primary-600",
-            )}
-          >
-            {title}
+        {description && (
+          <Text sz="sm" className="text-text-third truncate mt-0.5">
+            {description}
           </Text>
-          {description && (
-            <Text sz="sm" weight="light" className="text-text-second mt-0.5">
-              {description}
-            </Text>
-          )}
-        </div>
+        )}
       </div>
     </button>
   );

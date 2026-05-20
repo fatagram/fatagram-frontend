@@ -1,4 +1,4 @@
-import { Skeleton, Text } from "@/components/atoms";
+import { Skeleton } from "@/components/atoms";
 import EditableField from "../../components/editable-field";
 import useLanguage from "@/utils/i18n";
 import clsx from "clsx";
@@ -7,7 +7,7 @@ import { useGetUserProfile, useUpdateUrlName } from "@/features/hooks/use-user-p
 import { ErrorCodes } from "@/api/user/dto/change-url-name.dto";
 import { useAuth } from "@/contexts";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPen } from "@fortawesome/free-solid-svg-icons";
+import { faAt } from "@fortawesome/free-solid-svg-icons";
 
 interface ChangeUrlNameProps {
   userId: string;
@@ -53,17 +53,13 @@ export const ChangeUrlName: React.FC<ChangeUrlNameProps> = ({ userId }) => {
 
   return (
     <EditableField
+      icon={<FontAwesomeIcon icon={faAt} />}
       title={t("settings:account.personalInfo.urlName")}
+      description={t("settings:account.personalInfo.urlNameDescription")}
       value={userProfile?.infos.urlName}
       noDataValue={t("settings:account.personalInfo.noUrlName")}
       placeholder={t("settings:account.personalInfo.urlNamePlaceholder")}
       valueClassName={clsx(!userProfile?.infos.urlName && "!opacity-50")}
-      btnChildren={
-        <Text>
-          <FontAwesomeIcon icon={faPen} className="mr-2" />
-          {t("settings:account.personalInfo.changeButton")}
-        </Text>
-      }
       editableMode="inline"
       isEdit={isEditUrlName}
       isError={isEditUrlNameFailed}

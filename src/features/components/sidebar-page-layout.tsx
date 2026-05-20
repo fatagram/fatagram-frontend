@@ -54,7 +54,7 @@ export const SidebarPageCard: React.FC<SidebarPageCardProps> = ({
     <Card
       title={title}
       className={clsx(
-        "w-full !p-0 sm:!p-8 bg-bg-main !border-2 border-bg-fourth shadow-none",
+        "w-full !p-0 sm:!p-8 bg-transparent sm:bg-bg-main border-none sm:border-solid sm:!border-2 border-bg-fourth shadow-none",
         className,
       )}
       titleClassName="mb-5"

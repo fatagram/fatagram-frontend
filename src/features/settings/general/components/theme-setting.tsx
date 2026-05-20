@@ -1,7 +1,7 @@
 import React from "react";
 import { useTranslation } from "react-i18next";
 import { useTheme } from "@/contexts";
-import { SidebarPageCard } from "@/features/components/sidebar-page-layout";
+import { List } from "@/components/ui/list";
 import { Text } from "@/components/atoms";
 import clsx from "clsx";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
@@ -14,11 +14,8 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = () => {
   const { t } = useTranslation();
 
   return (
-    <SidebarPageCard title={t("settings:theme.title")}>
-      <div className="flex flex-col gap-4 w-full">
-        <Text sz="lg" className="font-semibold text-text-main pl-1">
-          {t("settings:theme.selectTheme")}
-        </Text>
+    <List title={t("settings:theme.title")} description={t("settings:theme.selectTheme")}>
+      <div className="p-4 w-full">
         <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 w-full">
           {availableThemes.map((tOpt) => {
             const isActive = currentGlobalTheme === tOpt.key;
@@ -135,7 +132,7 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = () => {
                 </Text>
                 {isActive && (
                   <div className="absolute top-2 right-2 bg-primary-500 text-white w-5 h-5 rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                    <FontAwesomeIcon icon={faCheck} className="text-[10px]"  />
+                    <FontAwesomeIcon icon={faCheck} className="text-[10px]" />
                   </div>
                 )}
               </button>
@@ -143,7 +140,7 @@ const ThemeSettings: React.FC<ThemeSettingsProps> = () => {
           })}
         </div>
       </div>
-    </SidebarPageCard>
+    </List>
   );
 };
 
