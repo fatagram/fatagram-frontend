@@ -114,7 +114,12 @@
   },
   "offline": {
     "message": "Bạn đang ngoại tuyến",
-    "retry": "Thử lại"
+    "retry": "Thử lại",
+    "connecting": "Đang thử kết nối lại...",
+    "check_connection": "Không có kết nối Internet",
+    "online_message": "Đã kết nối lại",
+    "connected_back": "Đã khôi phục kết nối thành công",
+    "still_offline": "Vẫn chưa có kết nối internet"
   },
   "loadMore": "Xem thêm"
 }

@@ -173,6 +173,7 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
             message={item}
             userId={userId}
             conversationId={conversationId}
+            isGroup={isGroup}
             userInfo={userProfileMap[item?.senderId || ""]}
             userProfileMap={userProfileMap}
             className="py-[0.5px] px-1"

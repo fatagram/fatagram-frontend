@@ -217,7 +217,14 @@ export const renderFileMessage = (
 };
 
 export const renderOnlyEmojiMessage = (isMyMessage: boolean, content: string) => (
-  <div className={clsx("text-4xl", isMyMessage ? "text-white" : "text-text-main")}>{content}</div>
+  <div
+    className={clsx(
+      "text-4xl break-words select-text w-full",
+      isMyMessage ? "text-text-main text-right self-end" : "text-text-main text-left self-start",
+    )}
+  >
+    {content}
+  </div>
 );
 
 export const renderAudioMessage = (

@@ -55,6 +55,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   message,
   userId,
   conversationId,
+  isGroup,
   className,
   userInfo,
   userProfileMap,
@@ -177,6 +178,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         {!meta._isMyMessage && (
           <div className="flex self-end relative">
             <UserOptionTrigger
+              isGroup={isGroup}
               user={{
                 userId: message.senderId!,
                 fullName: userInfo?.fullName,
@@ -200,7 +202,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
             "flex flex-col select-none",
             "max-w-[75%] active:scale-[0.98] transition-transform cursor-pointer",
             meta._shouldAnimate && "bubble",
-            meta._isMyMessage ? "me" : "them",
+            meta._isMyMessage ? "me items-end" : "them items-start",
           )}
           {...longPressProps}
           onContextMenu={handleContextMenu}
@@ -208,6 +210,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
         >
           {meta._isShowName && (
             <UserOptionTrigger
+              isGroup={isGroup}
               user={{
                 userId: message.senderId!,
                 fullName: userInfo?.fullName,

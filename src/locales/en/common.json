@@ -116,7 +116,12 @@
   },
   "offline": {
     "message": "You are offline",
-    "retry": "Retry"
+    "retry": "Retry",
+    "connecting": "Reconnecting...",
+    "check_connection": "No Internet connection",
+    "online_message": "Connected",
+    "connected_back": "Connection successfully restored",
+    "still_offline": "Still no internet connection"
   },
   "loadMore": "Load more"
 }

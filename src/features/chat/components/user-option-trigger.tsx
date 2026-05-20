@@ -6,6 +6,7 @@ import { UserOptionsMenu } from "./user-options-menu";
 
 interface UserOptionTriggerProps {
   children: React.ReactNode;
+  isGroup?: boolean;
   user: {
     userId: string;
     fullName: string;
@@ -13,7 +14,11 @@ interface UserOptionTriggerProps {
   };
 }
 
-export const UserOptionTrigger: React.FC<UserOptionTriggerProps> = ({ children, user }) => {
+export const UserOptionTrigger: React.FC<UserOptionTriggerProps> = ({
+  children,
+  isGroup,
+  user,
+}) => {
   const isMobile = useMobile();
   const { openDialog, closeDialog } = useDialog();
   const [showSheet, setShowSheet] = useState(false);
@@ -30,6 +35,7 @@ export const UserOptionTrigger: React.FC<UserOptionTriggerProps> = ({ children, 
             userId={user.userId}
             fullName={user.fullName}
             avatarUrl={user.avatarUrl}
+            showMessagePrivately={isGroup}
             onClose={closeDialog}
           />
         ),
@@ -53,6 +59,7 @@ export const UserOptionTrigger: React.FC<UserOptionTriggerProps> = ({ children, 
           fullName={user.fullName}
           avatarUrl={user.avatarUrl}
           isSheet
+          showMessagePrivately={isGroup}
           onClose={() => setShowSheet(false)}
         />
       </BottomSheet>

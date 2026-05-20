@@ -12,6 +12,7 @@ interface UserOptionsMenuProps {
   fullName: string;
   avatarUrl?: string;
   isSheet?: boolean;
+  showMessagePrivately?: boolean;
   onClose: () => void;
 }
 
@@ -20,6 +21,7 @@ export const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({
   fullName,
   avatarUrl,
   isSheet = false,
+  showMessagePrivately = true,
   onClose,
 }) => {
   const { t } = useTranslation();
@@ -48,14 +50,16 @@ export const UserOptionsMenu: React.FC<UserOptionsMenuProps> = ({
         </div>
       </div>
       <Menu className={isSheet ? "px-4" : "min-w-[320px]"}>
-        <MenuItem
-          icon="fa-solid fa-comment-dots"
-          title={t("common:conversations.settings.messagePrivately")}
-          onClick={() => {
-            openChatWithTarget(userId);
-            onClose();
-          }}
-        />
+        {showMessagePrivately && (
+          <MenuItem
+            icon="fa-solid fa-comment-dots"
+            title={t("common:conversations.settings.messagePrivately")}
+            onClick={() => {
+              openChatWithTarget(userId);
+              onClose();
+            }}
+          />
+        )}
         <MenuItem
           icon="fa-solid fa-user"
           title={t("common:conversations.settings.viewProfile")}

@@ -98,6 +98,23 @@
     --gradient-second: linear-gradient(45deg, #7b2cbf 0%, #00f2fe 50%, #7b2cbf 100%);
   }
 
+  [data-chat-theme="chat-cyberpunk"] [data-chat-scrollable="true"] {
+    position: relative;
+    background-color: #fce7f3 !important;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-cyberpunk"] [data-chat-scrollable="true"],
+  [data-theme="dark-old"] [data-chat-theme="chat-cyberpunk"] [data-chat-scrollable="true"] {
+    background-color: #0c0812 !important;
+  }
+  [data-chat-theme="chat-cyberpunk"] [data-chat-scrollable="true"]::before {
+    background-image: var(--chat-custom-bg, url("/images/cyberpunk_bg.png")) !important;
+    opacity: 0.35;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-cyberpunk"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-theme="chat-cyberpunk"] [data-chat-scrollable="true"]::before {
+    opacity: 0.25;
+  }
+
   /* ==================== LAVENDER ==================== */
   [data-chat-theme="chat-lavender"] {
     --bg-main: 248 246 254;
@@ -345,6 +362,536 @@
   [data-theme="dark"] [data-chat-theme="chat-vutru"] [data-chat-scrollable="true"]::before,
   [data-theme="dark-old"] [data-chat-theme="chat-vutru"] [data-chat-scrollable="true"]::before {
     opacity: 0.25;
+  }
+
+  /* ==================== HALLOWEEN SPOOKY ==================== */
+  [data-chat-theme="chat-halloween"] {
+    --bg-main: 255 247 237;
+    --bg-second: 255 237 213;
+    --bg-fourth: 254 215 170;
+    --primary-600: 234 88 12;
+    --primary-500: 249 115 22;
+    --primary-800: 154 52 18;
+    --text-main: 124 45 18;
+    --text-second: 154 52 18;
+    --text-third: 234 88 12;
+    --border-main: 254 215 170;
+    --border-second: 253 186 116;
+    --gradient-main: linear-gradient(45deg, #7c2d12 0%, #c2410c 50%, #f97316 100%);
+    --gradient-second: linear-gradient(45deg, #c2410c 0%, #f97316 50%, #c2410c 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-halloween"],
+  [data-theme="dark-old"] [data-chat-theme="chat-halloween"] {
+    --bg-main: 9 2 18;
+    --bg-second: 20 5 38;
+    --bg-fourth: 38 12 71;
+    --primary-600: 168 85 247;
+    --primary-500: 192 132 252;
+    --primary-800: 107 33 168;
+    --text-main: 243 232 255;
+    --text-second: 192 132 252;
+    --text-third: 168 85 247;
+    --border-main: 38 12 71;
+    --border-second: 59 28 92;
+    --gradient-main: linear-gradient(45deg, #3b0764 0%, #a855f7 50%, #f97316 100%);
+    --gradient-second: linear-gradient(45deg, #a855f7 0%, #f97316 50%, #a855f7 100%);
+  }
+
+  [data-chat-theme="chat-halloween"] [data-chat-scrollable="true"] {
+    position: relative;
+    background-color: #ffe4d6 !important;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-halloween"] [data-chat-scrollable="true"],
+  [data-theme="dark-old"] [data-chat-theme="chat-halloween"] [data-chat-scrollable="true"] {
+    background-color: #05010b !important;
+  }
+  [data-chat-theme="chat-halloween"] [data-chat-scrollable="true"]::before {
+    background-image: var(--chat-custom-bg, url("/images/halloween_bg.png")) !important;
+    opacity: 0.35;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-halloween"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-theme="chat-halloween"] [data-chat-scrollable="true"]::before {
+    opacity: 0.25;
+  }
+
+  /* ==================== CHRISTMAS SPARKLE ==================== */
+  [data-chat-theme="chat-christmas"] {
+    --bg-main: 254 242 242;
+    --bg-second: 254 226 226;
+    --bg-fourth: 254 202 202;
+    --primary-600: 220 38 38;
+    --primary-500: 239 68 68;
+    --primary-800: 153 27 27;
+    --text-main: 127 29 29;
+    --text-second: 153 27 27;
+    --text-third: 220 38 38;
+    --border-main: 254 202 202;
+    --border-second: 252 165 165;
+    --gradient-main: linear-gradient(45deg, #991b1b 0%, #dc2626 50%, #f59e0b 100%);
+    --gradient-second: linear-gradient(45deg, #dc2626 0%, #f59e0b 50%, #dc2626 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-christmas"],
+  [data-theme="dark-old"] [data-chat-theme="chat-christmas"] {
+    --bg-main: 24 4 4;
+    --bg-second: 38 8 8;
+    --bg-fourth: 64 12 12;
+    --primary-600: 185 28 28;
+    --primary-500: 220 38 38;
+    --primary-800: 153 27 27;
+    --text-main: 254 242 242;
+    --text-second: 252 165 165;
+    --text-third: 220 38 38;
+    --border-main: 64 12 12;
+    --border-second: 96 16 16;
+    --gradient-main: linear-gradient(45deg, #14532d 0%, #16a34a 50%, #b91c1c 100%);
+    --gradient-second: linear-gradient(45deg, #16a34a 0%, #b91c1c 50%, #16a34a 100%);
+  }
+
+  [data-chat-theme="chat-christmas"] [data-chat-scrollable="true"] {
+    position: relative;
+    background-color: #fddbd9 !important;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-christmas"] [data-chat-scrollable="true"],
+  [data-theme="dark-old"] [data-chat-theme="chat-christmas"] [data-chat-scrollable="true"] {
+    background-color: #0c0202 !important;
+  }
+  [data-chat-theme="chat-christmas"] [data-chat-scrollable="true"]::before {
+    background-image: var(--chat-custom-bg, url("/images/christmas_bg.png")) !important;
+    opacity: 0.35;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-christmas"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-theme="chat-christmas"] [data-chat-scrollable="true"]::before {
+    opacity: 0.25;
+  }
+
+  /* ==================== SUMMER BEACH ==================== */
+  [data-chat-theme="chat-summer"] {
+    --bg-main: 240 249 255;
+    --bg-second: 224 242 254;
+    --bg-fourth: 186 230 253;
+    --primary-600: 2 132 199;
+    --primary-500: 14 165 233;
+    --primary-800: 3 105 161;
+    --text-main: 12 74 110;
+    --text-second: 3 105 161;
+    --text-third: 2 132 199;
+    --border-main: 186 230 253;
+    --border-second: 125 211 252;
+    --gradient-main: linear-gradient(45deg, #0284c7 0%, #0284c7 50%, #f59e0b 100%);
+    --gradient-second: linear-gradient(45deg, #0284c7 0%, #f59e0b 50%, #0284c7 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-summer"],
+  [data-theme="dark-old"] [data-chat-theme="chat-summer"] {
+    --bg-main: 6 16 30;
+    --bg-second: 10 25 46;
+    --bg-fourth: 18 45 80;
+    --primary-600: 2 132 199;
+    --primary-500: 14 165 233;
+    --primary-800: 3 105 161;
+    --text-main: 240 249 255;
+    --text-second: 125 211 252;
+    --text-third: 14 165 233;
+    --border-main: 18 45 80;
+    --border-second: 25 60 110;
+    --gradient-main: linear-gradient(45deg, #0369a1 0%, #0284c7 50%, #ca8a04 100%);
+    --gradient-second: linear-gradient(45deg, #0284c7 0%, #ca8a04 50%, #0284c7 100%);
+  }
+
+  [data-chat-theme="chat-summer"] [data-chat-scrollable="true"] {
+    position: relative;
+    background-color: #d1ecfc !important;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-summer"] [data-chat-scrollable="true"],
+  [data-theme="dark-old"] [data-chat-theme="chat-summer"] [data-chat-scrollable="true"] {
+    background-color: #040a13 !important;
+  }
+  [data-chat-theme="chat-summer"] [data-chat-scrollable="true"]::before {
+    background-image: var(--chat-custom-bg, url("/images/summer_bg.png")) !important;
+    opacity: 0.35;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-summer"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-theme="chat-summer"] [data-chat-scrollable="true"]::before {
+    opacity: 0.25;
+  }
+
+  /* ==================== CR7 SPORT ==================== */
+  [data-chat-theme="chat-cr7"] {
+    --bg-main: 240 253 244;
+    --bg-second: 220 252 231;
+    --bg-fourth: 187 247 208;
+    --primary-600: 22 128 61;
+    --primary-500: 250 204 21;
+    --primary-800: 21 128 61;
+    --text-main: 20 83 45;
+    --text-second: 21 128 61;
+    --text-third: 22 163 74;
+    --border-main: 187 247 208;
+    --border-second: 134 239 172;
+    --gradient-main: linear-gradient(45deg, #15803d 0%, #22c55e 50%, #facc15 100%);
+    --gradient-second: linear-gradient(45deg, #22c55e 0%, #facc15 50%, #22c55e 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-cr7"],
+  [data-theme="dark-old"] [data-chat-theme="chat-cr7"] {
+    --bg-main: 2 16 8;
+    --bg-second: 5 32 16;
+    --bg-fourth: 10 50 26;
+    --primary-600: 22 163 74;
+    --primary-500: 234 179 8;
+    --primary-800: 21 128 61;
+    --text-main: 240 253 244;
+    --text-second: 134 239 172;
+    --text-third: 34 197 94;
+    --border-main: 10 50 26;
+    --border-second: 15 70 36;
+    --gradient-main: linear-gradient(45deg, #052e16 0%, #16a34a 50%, #eab308 100%);
+    --gradient-second: linear-gradient(45deg, #16a34a 0%, #eab308 50%, #16a34a 100%);
+  }
+
+  [data-chat-theme="chat-cr7"] [data-chat-scrollable="true"] {
+    position: relative;
+    background-color: #dcfce7 !important;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-cr7"] [data-chat-scrollable="true"],
+  [data-theme="dark-old"] [data-chat-theme="chat-cr7"] [data-chat-scrollable="true"] {
+    background-color: #010804 !important;
+  }
+  [data-chat-theme="chat-cr7"] [data-chat-scrollable="true"]::before {
+    background-image: var(--chat-custom-bg, url("/images/cr7_bg.png")) !important;
+    opacity: 0.35;
+  }
+  [data-theme="dark"] [data-chat-theme="chat-cr7"] [data-chat-scrollable="true"]::before,
+  [data-theme="dark-old"] [data-chat-theme="chat-cr7"] [data-chat-scrollable="true"]::before {
+    opacity: 0.25;
+  }
+
+  /* ==================== MIDNIGHT BLOSSOM ==================== */
+  [data-chat-theme="chat-midnight"] {
+    --bg-main: 250 245 255;
+    --bg-second: 243 232 255;
+    --bg-fourth: 233 213 255;
+    --primary-600: 124 58 237;
+    --primary-500: 244 114 182;
+    --primary-800: 91 33 182;
+    --text-main: 46 8 84;
+    --text-second: 88 28 135;
+    --text-third: 112 26 117;
+    --border-main: 233 213 255;
+    --border-second: 216 180 254;
+    --gradient-main: linear-gradient(45deg, #2e0854 0%, #7c3aed 50%, #f472b6 100%);
+    --gradient-second: linear-gradient(45deg, #7c3aed 0%, #f472b6 50%, #7c3aed 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-midnight"],
+  [data-theme="dark-old"] [data-chat-theme="chat-midnight"] {
+    --bg-main: 13 5 21;
+    --bg-second: 22 10 34;
+    --bg-fourth: 42 18 64;
+    --primary-600: 219 39 119;
+    --primary-500: 236 72 153;
+    --primary-800: 157 23 77;
+    --text-main: 243 232 255;
+    --text-second: 192 132 252;
+    --text-third: 168 85 247;
+    --border-main: 42 18 64;
+    --border-second: 59 28 92;
+    --gradient-main: linear-gradient(45deg, #1e053a 0%, #8b5cf6 50%, #db2777 100%);
+    --gradient-second: linear-gradient(45deg, #8b5cf6 0%, #db2777 50%, #8b5cf6 100%);
+  }
+
+  /* ==================== GOLDEN AUTUMN ==================== */
+  [data-chat-theme="chat-autumn"] {
+    --bg-main: 255 251 235;
+    --bg-second: 254 243 199;
+    --bg-fourth: 253 230 138;
+    --primary-600: 217 119 6;
+    --primary-500: 245 158 11;
+    --primary-800: 180 83 9;
+    --text-main: 69 26 3;
+    --text-second: 120 53 15;
+    --text-third: 154 52 18;
+    --border-main: 253 230 138;
+    --border-second: 252 211 77;
+    --gradient-main: linear-gradient(45deg, #b45309 0%, #d97706 50%, #fcd34d 100%);
+    --gradient-second: linear-gradient(45deg, #d97706 0%, #fcd34d 50%, #d97706 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-autumn"],
+  [data-theme="dark-old"] [data-chat-theme="chat-autumn"] {
+    --bg-main: 23 15 10;
+    --bg-second: 34 22 15;
+    --bg-fourth: 54 34 22;
+    --primary-600: 245 158 11;
+    --primary-500: 251 191 36;
+    --primary-800: 217 119 6;
+    --text-main: 254 243 199;
+    --text-second: 251 191 36;
+    --text-third: 245 158 11;
+    --border-main: 54 34 22;
+    --border-second: 79 50 32;
+    --gradient-main: linear-gradient(45deg, #78350f 0%, #d97706 50%, #f59e0b 100%);
+    --gradient-second: linear-gradient(45deg, #d97706 0%, #f59e0b 50%, #d97706 100%);
+  }
+
+  /* ==================== FROSTY GLACIER ==================== */
+  [data-chat-theme="chat-glacier"] {
+    --bg-main: 240 249 255;
+    --bg-second: 224 242 254;
+    --bg-fourth: 186 230 253;
+    --primary-600: 2 132 199;
+    --primary-500: 56 189 248;
+    --primary-800: 3 105 161;
+    --text-main: 12 74 110;
+    --text-second: 3 105 161;
+    --text-third: 2 132 199;
+    --border-main: 186 230 253;
+    --border-second: 125 211 252;
+    --gradient-main: linear-gradient(45deg, #0369a1 0%, #0284c7 50%, #e0f2fe 100%);
+    --gradient-second: linear-gradient(45deg, #0284c7 0%, #38bdf8 50%, #0284c7 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-glacier"],
+  [data-theme="dark-old"] [data-chat-theme="chat-glacier"] {
+    --bg-main: 8 19 26;
+    --bg-second: 12 29 41;
+    --bg-fourth: 23 51 71;
+    --primary-600: 56 189 248;
+    --primary-500: 125 211 252;
+    --primary-800: 2 132 199;
+    --text-main: 240 249 255;
+    --text-second: 125 211 252;
+    --text-third: 56 189 248;
+    --border-main: 23 51 71;
+    --border-second: 36 75 102;
+    --gradient-main: linear-gradient(45deg, #075985 0%, #0284c7 50%, #38bdf8 100%);
+    --gradient-second: linear-gradient(45deg, #0284c7 0%, #38bdf8 50%, #0284c7 100%);
+  }
+
+  /* ==================== NEON OASIS ==================== */
+  [data-chat-theme="chat-neon"] {
+    --bg-main: 248 250 252;
+    --bg-second: 241 245 249;
+    --bg-fourth: 226 232 240;
+    --primary-600: 15 23 42;
+    --primary-500: 16 185 129;
+    --primary-800: 2 6 23;
+    --text-main: 15 23 42;
+    --text-second: 51 65 85;
+    --text-third: 71 85 105;
+    --border-main: 226 232 240;
+    --border-second: 203 213 225;
+    --gradient-main: linear-gradient(45deg, #0f172a 0%, #1e293b 50%, #10b981 100%);
+    --gradient-second: linear-gradient(45deg, #1e293b 0%, #10b981 50%, #1e293b 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-neon"],
+  [data-theme="dark-old"] [data-chat-theme="chat-neon"] {
+    --bg-main: 5 8 20;
+    --bg-second: 11 16 33;
+    --bg-fourth: 23 32 59;
+    --primary-600: 34 197 94;
+    --primary-500: 74 222 128;
+    --primary-800: 16 185 129;
+    --text-main: 248 250 252;
+    --text-second: 74 222 128;
+    --text-third: 16 185 129;
+    --border-main: 23 32 59;
+    --border-second: 37 50 92;
+    --gradient-main: linear-gradient(45deg, #020617 0%, #0f172a 50%, #22c55e 100%);
+    --gradient-second: linear-gradient(45deg, #0f172a 0%, #22c55e 50%, #0f172a 100%);
+  }
+
+  /* ==================== ROSE QUARTZ ==================== */
+  [data-chat-theme="chat-rose"] {
+    --bg-main: 255 241 242;
+    --bg-second: 255 228 230;
+    --bg-fourth: 254 205 211;
+    --primary-600: 225 29 72;
+    --primary-500: 251 113 133;
+    --primary-800: 190 18 60;
+    --text-main: 76 5 25;
+    --text-second: 136 19 55;
+    --text-third: 159 18 57;
+    --border-main: 254 205 211;
+    --border-second: 253 164 175;
+    --gradient-main: linear-gradient(45deg, #be123c 0%, #e11d48 50%, #ffe4e6 100%);
+    --gradient-second: linear-gradient(45deg, #e11d48 0%, #fb7185 50%, #e11d48 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-rose"],
+  [data-theme="dark-old"] [data-chat-theme="chat-rose"] {
+    --bg-main: 24 11 14;
+    --bg-second: 36 16 20;
+    --bg-fourth: 61 27 34;
+    --primary-600: 251 113 133;
+    --primary-500: 254 205 211;
+    --primary-800: 225 29 72;
+    --text-main: 255 241 242;
+    --text-second: 253 164 175;
+    --text-third: 251 113 133;
+    --border-main: 61 27 34;
+    --border-second: 92 40 51;
+    --gradient-main: linear-gradient(45deg, #9f1239 0%, #e11d48 50%, #fb7185 100%);
+    --gradient-second: linear-gradient(45deg, #e11d48 0%, #fb7185 50%, #e11d48 100%);
+  }
+
+  /* ==================== FOREST MIST ==================== */
+  [data-chat-theme="chat-forest"] {
+    --bg-main: 240 253 244;
+    --bg-second: 220 252 231;
+    --bg-fourth: 187 247 208;
+    --primary-600: 22 163 74;
+    --primary-500: 74 222 128;
+    --primary-800: 22 101 52;
+    --text-main: 20 83 45;
+    --text-second: 22 101 52;
+    --text-third: 21 128 61;
+    --border-main: 187 247 208;
+    --border-second: 134 239 172;
+    --gradient-main: linear-gradient(45deg, #166534 0%, #16a34a 50%, #dcfce7 100%);
+    --gradient-second: linear-gradient(45deg, #16a34a 0%, #4ade80 50%, #16a34a 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-forest"],
+  [data-theme="dark-old"] [data-chat-theme="chat-forest"] {
+    --bg-main: 9 20 14;
+    --bg-second: 14 31 21;
+    --bg-fourth: 23 51 34;
+    --primary-600: 74 222 128;
+    --primary-500: 134 239 172;
+    --primary-800: 22 163 74;
+    --text-main: 240 253 244;
+    --text-second: 134 239 172;
+    --text-third: 74 222 128;
+    --border-main: 23 51 34;
+    --border-second: 37 77 52;
+    --gradient-main: linear-gradient(45deg, #14532d 0%, #16a34a 50%, #4ade80 100%);
+    --gradient-second: linear-gradient(45deg, #16a34a 0%, #4ade80 50%, #16a34a 100%);
+  }
+
+  /* ==================== ROYAL AMBER ==================== */
+  [data-chat-theme="chat-royal"] {
+    --bg-main: 239 246 255;
+    --bg-second: 219 234 254;
+    --bg-fourth: 191 219 254;
+    --primary-600: 37 99 235;
+    --primary-500: 250 204 21;
+    --primary-800: 30 58 138;
+    --text-main: 30 58 138;
+    --text-second: 29 78 216;
+    --text-third: 37 99 235;
+    --border-main: 191 219 254;
+    --border-second: 147 197 253;
+    --gradient-main: linear-gradient(45deg, #1e3a8a 0%, #2563eb 50%, #fef08a 100%);
+    --gradient-second: linear-gradient(45deg, #2563eb 0%, #facc15 50%, #2563eb 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-royal"],
+  [data-theme="dark-old"] [data-chat-theme="chat-royal"] {
+    --bg-main: 6 11 24;
+    --bg-second: 10 18 38;
+    --bg-fourth: 19 34 71;
+    --primary-600: 234 179 8;
+    --primary-500: 250 204 21;
+    --primary-800: 202 138 4;
+    --text-main: 239 246 255;
+    --text-second: 250 204 21;
+    --text-third: 234 179 8;
+    --border-main: 19 34 71;
+    --border-second: 30 52 102;
+    --gradient-main: linear-gradient(45deg, #172554 0%, #2563eb 50%, #eab308 100%);
+    --gradient-second: linear-gradient(45deg, #2563eb 0%, #eab308 50%, #2563eb 100%);
+  }
+
+  /* ==================== TOKYO DRIFT ==================== */
+  [data-chat-theme="chat-tokyo"] {
+    --bg-main: 238 242 255;
+    --bg-second: 224 231 255;
+    --bg-fourth: 199 210 254;
+    --primary-600: 79 70 229;
+    --primary-500: 244 114 182;
+    --primary-800: 55 48 163;
+    --text-main: 49 46 129;
+    --text-second: 67 56 202;
+    --text-third: 219 39 119;
+    --border-main: 199 210 254;
+    --border-second: 165 180 252;
+    --gradient-main: linear-gradient(45deg, #4f46e5 0%, #a855f7 50%, #f472b6 100%);
+    --gradient-second: linear-gradient(45deg, #a855f7 0%, #f472b6 50%, #a855f7 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-tokyo"],
+  [data-theme="dark-old"] [data-chat-theme="chat-tokyo"] {
+    --bg-main: 9 8 22;
+    --bg-second: 14 13 36;
+    --bg-fourth: 26 23 66;
+    --primary-600: 236 72 153;
+    --primary-500: 244 114 182;
+    --primary-800: 217 70 239;
+    --text-main: 238 242 255;
+    --text-second: 244 114 182;
+    --text-third: 236 72 153;
+    --border-main: 26 23 66;
+    --border-second: 41 36 102;
+    --gradient-main: linear-gradient(45deg, #312e81 0%, #6366f1 50%, #ec4899 100%);
+    --gradient-second: linear-gradient(45deg, #6366f1 0%, #ec4899 50%, #6366f1 100%);
+  }
+
+  /* ==================== MATCHA LATTE ==================== */
+  [data-chat-theme="chat-matcha"] {
+    --bg-main: 247 254 231;
+    --bg-second: 236 252 203;
+    --bg-fourth: 217 249 157;
+    --primary-600: 77 124 15;
+    --primary-500: 163 230 53;
+    --primary-800: 63 98 18;
+    --text-main: 26 46 5;
+    --text-second: 63 98 18;
+    --text-third: 77 124 15;
+    --border-main: 217 249 157;
+    --border-second: 190 242 100;
+    --gradient-main: linear-gradient(45deg, #3f6212 0%, #4d7c0f 50%, #d9f99d 100%);
+    --gradient-second: linear-gradient(45deg, #4d7c0f 0%, #a3e635 50%, #4d7c0f 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-matcha"],
+  [data-theme="dark-old"] [data-chat-theme="chat-matcha"] {
+    --bg-main: 14 21 7;
+    --bg-second: 22 34 11;
+    --bg-fourth: 36 54 18;
+    --primary-600: 163 230 53;
+    --primary-500: 190 242 100;
+    --primary-800: 132 204 22;
+    --text-main: 247 254 231;
+    --text-second: 190 242 100;
+    --text-third: 163 230 53;
+    --border-main: 36 54 18;
+    --border-second: 54 82 27;
+    --gradient-main: linear-gradient(45deg, #365314 0%, #4d7c0f 50%, #a3e635 100%);
+    --gradient-second: linear-gradient(45deg, #4d7c0f 0%, #a3e635 50%, #4d7c0f 100%);
+  }
+
+  /* ==================== SAKURA CHERRY ==================== */
+  [data-chat-theme="chat-sakura"] {
+    --bg-main: 255 245 247;
+    --bg-second: 255 228 230;
+    --bg-fourth: 255 209 217;
+    --primary-600: 219 39 119;
+    --primary-500: 244 114 182;
+    --primary-800: 157 23 77;
+    --text-main: 76 5 25;
+    --text-second: 157 23 77;
+    --text-third: 219 39 119;
+    --border-main: 255 209 217;
+    --border-second: 251 207 232;
+    --gradient-main: linear-gradient(45deg, #db2777 0%, #ec4899 50%, #fdf2f8 100%);
+    --gradient-second: linear-gradient(45deg, #ec4899 0%, #f472b6 50%, #ec4899 100%);
+  }
+  [data-theme="dark"] [data-chat-theme="chat-sakura"],
+  [data-theme="dark-old"] [data-chat-theme="chat-sakura"] {
+    --bg-main: 28 13 20;
+    --bg-second: 42 19 30;
+    --bg-fourth: 68 30 48;
+    --primary-600: 244 114 182;
+    --primary-500: 251 207 232;
+    --primary-800: 219 39 119;
+    --text-main: 255 245 247;
+    --text-second: 251 207 232;
+    --text-third: 244 114 182;
+    --border-main: 68 30 48;
+    --border-second: 102 44 72;
+    --gradient-main: linear-gradient(45deg, #9d174d 0%, #db2777 50%, #f472b6 100%);
+    --gradient-second: linear-gradient(45deg, #db2777 0%, #f472b6 50%, #db2777 100%);
   }
 
   /* ==================== GLOBAL SETTINGS ==================== */

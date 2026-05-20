@@ -14,7 +14,7 @@ import {
 } from "@/components/atoms";
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 import { convManager, useConversationStore } from "../../services/conversation-manager";
-import { useRef, useState, useEffect } from "react";
+import { useRef, useState, useEffect, useMemo } from "react";
 import {
   useGetConversation,
   useUpdateConversationAvatar,
@@ -48,6 +48,14 @@ const renderThemeIconCircle = (item: (typeof themeDetails)[0], isDark: boolean) 
       </div>
     );
   }
+  if ((item as any).bgImage) {
+    return (
+      <div
+        className="w-10 h-10 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0 bg-cover bg-center"
+        style={{ backgroundImage: `url(${(item as any).bgImage})` }}
+      />
+    );
+  }
   const colors = isDark ? item.dark : item.light;
   if (!colors) return null;
   return (
@@ -78,9 +86,21 @@ const ChatThemePicker: React.FC<{
       ? typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
       : currentGlobalTheme === "dark" || currentGlobalTheme === "dark-old";
 
+  const sortedThemes = useMemo(() => {
+    const defaultTheme = themeDetails.filter((t) => t.isDefault);
+    const eventThemes = themeDetails.filter((t) => !t.isDefault && (t as any).isEvent);
+    const hasBgThemes = themeDetails.filter(
+      (t) => !t.isDefault && !(t as any).isEvent && (t as any).bgImage,
+    );
+    const normalThemes = themeDetails.filter(
+      (t) => !t.isDefault && !(t as any).isEvent && !(t as any).bgImage,
+    );
+    return [...defaultTheme, ...eventThemes, ...hasBgThemes, ...normalThemes];
+  }, []);
+
   return (
     <div className="grid grid-cols-3 gap-3 w-full p-1 overflow-y-auto flex-1 min-h-[160px] scrollbar-thin">
-      {themeDetails.map((item) => {
+      {sortedThemes.map((item) => {
         const isActive = selectedTheme === item.key;
         return (
           <button
@@ -94,13 +114,18 @@ const ChatThemePicker: React.FC<{
                 : "border-border-main/20 hover:border-border-main/50 bg-bg-third/10",
             )}
           >
-            <div className="w-12 h-12 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0">
+            <div className="w-12 h-12 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0 bg-cover bg-center relative">
               {item.isDefault ? (
                 <svg viewBox="0 0 56 56" className="w-full h-full flex-shrink-0">
                   <path d="M28,0 A28,28 0 0,0 28,56 Z" fill="#ffffff" />
                   <path d="M28,0 A28,28 0 0,1 28,56 Z" fill="#1f2937" />
                   <circle cx="28" cy="28" r="12" fill="#ff6b8b" />
                 </svg>
+              ) : (item as any).bgImage ? (
+                <div
+                  className="w-full h-full bg-cover bg-center"
+                  style={{ backgroundImage: `url(${(item as any).bgImage})` }}
+                />
               ) : (
                 (() => {
                   const colors = isSystemDark ? item.dark : item.light;
@@ -159,6 +184,8 @@ const ChatThemeDialogContent: React.FC<{
 }> = ({ initialTheme, initialBackgroundUrl, onSelect, onBackgroundUrlChange }) => {
   const [selectedTheme, setSelectedTheme] = useState(initialTheme);
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(initialBackgroundUrl);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const isMobile = useMobile();
 
   const handleSelectTheme = (themeName: string) => {
     setSelectedTheme(themeName);
@@ -252,13 +279,44 @@ const ChatThemeDialogContent: React.FC<{
           className="relative flex flex-col bg-bg-main rounded-xl border border-border-main/60 shadow-inner overflow-hidden min-h-[240px] transition-colors duration-200"
         >
           <div
+            className={clsx(
+              "absolute top-2 right-2 z-30 flex items-center pointer-events-auto",
+              isMobile ? "gap-2" : "gap-1.5",
+            )}
+          >
+            <input
+              type="file"
+              ref={fileInputRef}
+              accept="image/*"
+              className="hidden"
+              onChange={handleFileChange}
+            />
+            <MiniButton
+              sz={isMobile ? "md" : "sm"}
+              variant="secondary"
+              className=" bg-black/40 hover:bg-black/60 text-white border-none shadow-md"
+              onClick={() => fileInputRef.current?.click()}
+            >
+              <i className="fa-solid fa-cloud-arrow-up text-xs"></i>
+            </MiniButton>
+            {backgroundUrl && (
+              <MiniButton
+                sz={isMobile ? "md" : "sm"}
+                className="bg-red-600/50 hover:bg-red-600/35 text-white border-none shadow-md animate-fade-in"
+                onClick={handleRemoveBackground}
+              >
+                <i className="fa-solid fa-trash-can text-xs"></i>
+              </MiniButton>
+            )}
+          </div>
+          <div
             data-chat-scrollable="true"
             style={
               backgroundUrl
                 ? ({ "--chat-custom-bg": `url(${backgroundUrl})` } as React.CSSProperties)
                 : undefined
             }
-            className="flex-1 py-2 overflow-y-auto flex flex-col justify-end px-2 pb-4"
+            className="flex-1 py-2 overflow-y-auto flex flex-col justify-end px-2 pb-4 pointer-events-none select-none"
           >
             <MessageRow
               message={mockMsg1 as any}
@@ -284,29 +342,6 @@ const ChatThemeDialogContent: React.FC<{
               conversationId="mock-conv"
             />
           </div>
-        </div>
-      </div>
-
-      <div className="flex flex-col gap-2 shrink-0">
-        <Text sz="sm" weight="bold" className="text-text-second pl-1">
-          Hình nền tùy chỉnh (Tùy chọn)
-        </Text>
-        <div className="flex items-center gap-3 px-1">
-          <label className="shrink-0 px-4 py-2 text-sm bg-primary-600 hover:bg-primary-500 text-white rounded-lg cursor-pointer transition-all hover:scale-[1.02] active:scale-95 duration-150 font-medium inline-flex items-center gap-1.5 shadow-sm">
-            <i className="fa-solid fa-cloud-arrow-up"></i>
-            Tải ảnh lên
-            <input type="file" accept="image/*" className="hidden" onChange={handleFileChange} />
-          </label>
-          {backgroundUrl && (
-            <button
-              type="button"
-              onClick={handleRemoveBackground}
-              className="shrink-0 px-4 py-2 text-sm bg-red-100 dark:bg-red-950/40 hover:bg-red-200 dark:hover:bg-red-950/60 text-red-600 dark:text-red-400 rounded-lg transition-all hover:scale-[1.02] active:scale-95 duration-150 font-medium inline-flex items-center gap-1.5 shadow-sm"
-            >
-              <i className="fa-solid fa-trash-can"></i>
-              Xóa nền
-            </button>
-          )}
         </div>
       </div>
 
@@ -349,7 +384,6 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
     state.conversations.find((c) => c.id === conversationId),
   );
   const conv = conversationData ?? storeConv;
-  console.log("CCC", conversationData);
 
   const { theme: currentGlobalTheme } = useTheme();
   const isSystemDark =
@@ -397,7 +431,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
     const originalBackgroundUrl = conv?.backgroundUrl || null;
 
     if (selectedThemeKey !== originalTheme) {
-      const finalTheme = selectedThemeKey === "default" ? null : selectedThemeKey;
+      const finalTheme = selectedThemeKey === "default" ? "default" : selectedThemeKey;
       await updateTheme({ theme: finalTheme as any });
     }
 
