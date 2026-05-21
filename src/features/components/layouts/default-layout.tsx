@@ -170,6 +170,13 @@ const DefaultLayout = () => {
 
   return (
     <Layout>
+      {isMobile && pathname === "/" && (
+        <div className="flex items-center justify-center px-4 h-[44px] bg-bg-main border-b border-bg-fourth">
+          <div onClick={handleGoToHome} className="cursor-pointer">
+            <Logo sz="md" hasSlogan={false} />
+          </div>
+        </div>
+      )}
       <Layout.Header
         className={clsx(
           isMobile && conversationId && "hidden",
@@ -177,16 +184,6 @@ const DefaultLayout = () => {
         )}
         ref={headerRef}
       >
-        <div
-          className={clsx(
-            "flex items-center justify-center px-4 h-[44px] bg-bg-main border-b border-bg-fourth",
-            isMobile && pathname === "/" ? "flex" : "hidden",
-          )}
-        >
-          <div onClick={handleGoToHome} className="cursor-pointer">
-            <Logo sz="md" hasSlogan={false} />
-          </div>
-        </div>
         <Navbar
           isAuthenticated={isAuthed}
           items={items}
