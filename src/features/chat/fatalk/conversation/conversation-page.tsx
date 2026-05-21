@@ -190,7 +190,7 @@ const ChatThemePicker: React.FC<{
   );
 };
 
-const ChatThemeDialogContent: React.FC<{
+export const ChatThemeDialogContent: React.FC<{
   initialTheme: string;
   initialBackgroundUrl: string | null;
   conversationId: string;

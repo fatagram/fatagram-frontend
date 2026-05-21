@@ -173,11 +173,11 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
   return (
     <div className={className}>
       {currentFriendshipStatus === "None" ? (
-        <Button sz="sm" onClick={handleSentAddFriendRequest} className="w-full">
+        <Button sz="sm" onClick={handleSentAddFriendRequest} className="w-full whitespace-nowrap">
           <FontAwesomeIcon icon={faPlus} /> {t("user:profileHeader.addFriendButton")}
         </Button>
       ) : currentFriendshipStatus === "SentByMe" ? (
-        <Button sz="sm" onClick={handleCancelAddFriendRequest} className="w-full">
+        <Button sz="sm" onClick={handleCancelAddFriendRequest} className="w-full whitespace-nowrap">
           <FontAwesomeIcon icon={faXmark} /> {t("user:profileHeader.cancelRequestButton")}
         </Button>
       ) : currentFriendshipStatus === "SentByThem" ? (
@@ -188,7 +188,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
             onClick={() => {
               setIsShowRequestOptions(!isShowRequestOptions);
             }}
-            className="w-full"
+            className="w-full whitespace-nowrap"
           >
             <FontAwesomeIcon icon={faReply} /> {t("user:profileHeader.respondRequestButton")}
           </Button>
@@ -219,7 +219,7 @@ const FriendButton: React.FC<FriendButtonProps> = ({ uid, initialStatus, classNa
             onClick={() => {
               setIsShowFriendOptions(!isShowFriendOptions);
             }}
-            className="w-full"
+            className="w-full whitespace-nowrap"
           >
             <FontAwesomeIcon icon={faUserCheck} /> {t("user:profileHeader.friendButton")}
           </Button>

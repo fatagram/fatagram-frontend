@@ -38,7 +38,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
         tab === "list" ? (
           <div className="flex ">
             <MiniButton sz="sm" className="bg-bg-fifth" onClick={handleCreateConversation}>
-              <FontAwesomeIcon icon={faPenToSquare}  />
+              <FontAwesomeIcon icon={faPenToSquare} />
             </MiniButton>
           </div>
         ) : null

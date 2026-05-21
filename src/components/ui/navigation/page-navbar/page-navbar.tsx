@@ -18,7 +18,7 @@ const PageNavbar: React.FC<PageNavbarProps> & { Section: typeof PageNavbarSectio
   return (
     <div
       className={clsx(
-        "flex flex-col gap-3 w-full h-full",
+        "flex flex-col w-full h-full",
         "bg-bg-main shadow-none sm:border-r border-bg-fourth/50",
         "overflow-y-auto",
         className,
