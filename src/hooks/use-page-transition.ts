@@ -10,17 +10,23 @@ export const usePageTransition = () => {
   const location = useLocation();
   const prevPathRef = useRef<string>(location.pathname);
   const enterClassRef = useRef<string>("");
+  const keyRef = useRef<string>(location.pathname);
 
   const currentPath = location.pathname;
 
   if (prevPathRef.current !== currentPath) {
     const direction: TransitionDirection = getTransitionDirection(prevPathRef.current, currentPath);
     prevPathRef.current = currentPath;
-    enterClassRef.current = direction !== "none" ? getPageEnterClass(direction) : "";
+    if (direction !== "none") {
+      enterClassRef.current = getPageEnterClass(direction);
+      keyRef.current = currentPath;
+    } else {
+      enterClassRef.current = "";
+    }
   }
 
   return {
-    key: currentPath,
+    key: keyRef.current,
     enterClass: enterClassRef.current,
   };
 };
