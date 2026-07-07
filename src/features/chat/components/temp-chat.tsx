@@ -47,7 +47,7 @@ export const TempChat: React.FC<Props> = ({
 
       const hasConversation = await checkConversationWith(tempId);
       if (hasConversation) {
-        // Handled by parent or listener
+        navigate(`/fatalk/${hasConversation}`, { replace: true });
       }
     };
     checkConversation();

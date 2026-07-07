@@ -39,7 +39,12 @@ export function useMessageListenerHandler() {
         const currentTempId = queryParams.get("tempId");
         if (useChatStore.getState().registry["temp-" + data.senderId]) {
           useChatStore.getState().replaceChat("temp-" + data.senderId, conversationId);
-        } else if (location.pathname === "/fatalk/temp" && currentTempId === data.senderId) {
+        } else if (
+          location.pathname === "/fatalk/temp" &&
+          currentTempId != null &&
+          (currentTempId === data.senderId ||
+            data.correlationId === `temp-${currentTempId}`)
+        ) {
           navigate(`/fatalk/${conversationId}`, { replace: true });
         }
         useChatStore
