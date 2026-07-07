@@ -30,6 +30,8 @@ export class UploadService {
       type: string;
       original_filename: string;
       bytes: number;
+      width?: number;
+      height?: number;
     }>
   > {
     const signatureData = (await this.getSignature("chat-messages", resourceType)).data;
@@ -83,6 +85,8 @@ export class UploadService {
           type: _res.resource_type,
           original_filename: `${_res.original_filename}.${extension}`,
           bytes: _res.bytes,
+          width: _res.width,
+          height: _res.height,
         },
       };
     } catch (err) {

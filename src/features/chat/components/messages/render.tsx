@@ -312,6 +312,8 @@ export const renderSingleImageMessage = (
   image: {
     id: string;
     url: string;
+    width?: number;
+    height?: number;
   },
   messageBubbleShapeClass: string,
   conversationId: string,
@@ -320,13 +322,19 @@ export const renderSingleImageMessage = (
   const { onOpen: openMediaViewer } = useMediaViewer();
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const hasDimensions = image.width && image.height;
+  const containerStyle = hasDimensions
+    ? { aspectRatio: `${image.width}/${image.height}`, maxWidth: "300px", width: "100%" }
+    : { width: "240px", height: "200px" };
+
   return (
     <div
       className={clsx(
         "relative rounded-2xl overflow-hidden bg-bg-fourth/50",
-        "select-none w-full max-w-[280px] h-[200px] cursor-pointer",
+        "select-none cursor-pointer",
         messageBubbleShapeClass,
       )}
+      style={containerStyle}
       onClick={() => {
         openMediaViewer({
           id: image.id || "",

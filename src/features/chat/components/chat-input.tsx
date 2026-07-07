@@ -35,7 +35,9 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [hasInput, setHasInput] = useState(false);
   const [content, setContent] = useState("");
-  const [fileUrls, setFileUrls] = useState<{ url: string; file: File }[]>([]);
+  const [fileUrls, setFileUrls] = useState<
+    { url: string; file: File; width?: number; height?: number }[]
+  >([]);
   const textboxRef = useRef<HTMLTextAreaElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
@@ -247,7 +249,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
         media: imageMedia.map((it) => ({
           url: it.url,
           type: getMediaTypeFromFileType(it.file.type),
-          metadata: { name: it.file.name, size: it.file.size },
+          metadata: { name: it.file.name, size: it.file.size, width: it.width, height: it.height },
         })),
       });
     }
@@ -289,10 +291,15 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             clientTempId: tempImageId,
             content: "",
             type: MessageType.Media,
-            media: image.map((url) => ({
+            media: image.map((url, i) => ({
               url: url.url,
               type: MediaType.Image,
-              metadata: { name: url.original_filename, size: url.bytes },
+              metadata: {
+                name: url.original_filename,
+                size: url.bytes,
+                width: url.width ?? imageMedia[i]?.width,
+                height: url.height ?? imageMedia[i]?.height,
+              },
             })),
           },
           {
@@ -403,7 +410,22 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           }
         }
 
-        newItems.push({ url: URL.createObjectURL(fileToAdd), file: fileToAdd });
+        const blobUrl = URL.createObjectURL(fileToAdd);
+        let width: number | undefined;
+        let height: number | undefined;
+        if (fileToAdd.type.startsWith("image/")) {
+          await new Promise<void>((resolve) => {
+            const img = new Image();
+            img.onload = () => {
+              width = img.naturalWidth;
+              height = img.naturalHeight;
+              resolve();
+            };
+            img.onerror = () => resolve();
+            img.src = blobUrl;
+          });
+        }
+        newItems.push({ url: blobUrl, file: fileToAdd, width, height });
       }
 
       if (newItems.length > 0) {

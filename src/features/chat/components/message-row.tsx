@@ -299,6 +299,8 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               {
                 id: stackImage[0].id || "",
                 url: stackImage[0].url || "",
+                width: stackImage[0].metadata?.width,
+                height: stackImage[0].metadata?.height,
               },
               meta._messageBubbleShapeClass,
               conversationId!,
