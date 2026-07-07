@@ -26,25 +26,29 @@ apiClientFormData.interceptors.request.use((config: InternalAxiosRequestConfig) 
   return config;
 });
 
+const tryRefreshToken = async (): Promise<boolean> => {
+  try {
+    const result = await axios.post(
+      `${appConfig.apiUrl}/api/v1/auth/refresh-token`,
+      {},
+      { withCredentials: true },
+    );
+    return result.status === 200;
+  } catch {
+    return false;
+  }
+};
+
 // Error Authorization
 apiClient.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      try {
-        // Refresh token
-        const refreshResult = await axios.post(
-          `${appConfig.apiUrl}/api/v1/auth/refreshToken`,
-          {},
-          {
-            withCredentials: true,
-          },
-        );
-
-        if (refreshResult.status === 200) {
-          return await apiClient.request(error.config);
-        }
-      } catch (error) {}
+      const refreshed = await tryRefreshToken();
+      if (refreshed) {
+        return await apiClient.request(error.config);
+      }
+      authEvents.emit("logout");
     } else if (
       error.response?.status === 403 &&
       error.response?.data?.error?.code === "ONBOARDING_NOT_COMPLETED"
@@ -61,22 +65,11 @@ apiClientFormData.interceptors.response.use(
   (response: AxiosResponse) => response,
   async (error) => {
     if (error.response?.status === 401) {
-      try {
-        // Refresh token
-        const refreshResult = await axios.post(
-          `${appConfig.apiUrl}/api/v1/auth/refreshToken`,
-          {},
-          {
-            withCredentials: true,
-          },
-        );
-
-        if (refreshResult.status === 200) {
-          return await apiClient.request(error.config);
-        }
-      } catch (error) {
-        // Handle error if needed
+      const refreshed = await tryRefreshToken();
+      if (refreshed) {
+        return await apiClient.request(error.config);
       }
+      authEvents.emit("logout");
     } else if (error.response?.status === 413) {
       // Custom error
       const err = new Error("File size is too large. Please upload a smaller file.");

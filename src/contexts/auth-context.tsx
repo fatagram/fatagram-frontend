@@ -176,13 +176,18 @@ export const AuthProvider: FC<AuthProviderProps> = ({
     const handleRedirectToOnboarding = () => {
       navigate("/onboarding");
     };
+    const handleLogout = () => {
+      logout();
+    };
 
     authEvents.on("redirectToOnboarding", handleRedirectToOnboarding);
+    authEvents.on("logout", handleLogout);
 
     return () => {
       authEvents.off("redirectToOnboarding", handleRedirectToOnboarding);
+      authEvents.off("logout", handleLogout);
     };
-  }, [navigate]);
+  }, [navigate, logout]);
 
   useEffect(() => {
     if (state.isAuthenticated && !state.userId) {
