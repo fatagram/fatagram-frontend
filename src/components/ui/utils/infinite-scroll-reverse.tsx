@@ -10,6 +10,7 @@ interface Props<T> extends ComponentProps {
   loadMore: () => Promise<any>;
   renderItem: (item: T, index: number) => React.ReactNode;
   itemKey: (item: T) => string | number;
+  estimateSize?: (item: T) => number;
   end?: React.ReactNode;
   spinner?: React.ReactNode;
   scrollRef?: React.RefObject<HTMLDivElement | null>;
@@ -21,6 +22,7 @@ export default function InfiniteScrollReverse<T>({
   loadMore,
   renderItem,
   itemKey,
+  estimateSize,
   className,
   end,
   spinner,
@@ -40,8 +42,10 @@ export default function InfiniteScrollReverse<T>({
   const rowVirtualizer = useVirtualizer({
     count: reversedItems.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: () => 70,
-    overscan: 6,
+    estimateSize: estimateSize
+      ? (index) => estimateSize(reversedItems[index])
+      : () => 70,
+    overscan: 8,
     getItemKey: (index) => itemKey(reversedItems[index]),
   });
 

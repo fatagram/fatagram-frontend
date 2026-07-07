@@ -13,6 +13,7 @@ import { Text } from "@/components/atoms";
 import { useFormatTime } from "@/utils/time";
 import { isOnlyEmoji } from "@/utils/string";
 import { getMessageBubbleShapeClass, getMessageType } from "@/utils/message";
+import { MessageRenderType } from "@/types/entities/message.type";
 import { isSystemMessage } from "../helpers/conversation-helpers";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faCircleNotch } from "@fortawesome/free-solid-svg-icons";
@@ -165,6 +166,19 @@ export const MessageList = forwardRef<MessageListHandle, MessageListProps>(funct
       items={messagesWithMetadata}
       loadMore={fetchNextPage}
       className={clsx("px-1 sm:scrollbar-default scrollbar-hide", className)}
+      estimateSize={(item) => {
+        const t = item.meta._type;
+        if (
+          t === MessageRenderType.Image ||
+          t === MessageRenderType.StackImage ||
+          t === MessageRenderType.Video ||
+          t === MessageRenderType.Gif
+        )
+          return 240;
+        if (t === MessageRenderType.Audio || t === MessageRenderType.File) return 90;
+        if (t === MessageRenderType.System) return 50;
+        return 70;
+      }}
       renderItem={(item) => {
         const isSystemMsg = isSystemMessage(item.type);
 

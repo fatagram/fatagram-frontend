@@ -97,8 +97,8 @@ export const renderVideoMessage = (
   return (
     <div
       className={clsx(
-        "relative rounded-2xl overflow-hidden flex items-center justify-center bg-bg-fourth/50 cursor-pointer",
-        "select-none w-fit max-w-full h-auto",
+        "relative rounded-2xl overflow-hidden bg-bg-fourth/50 cursor-pointer",
+        "select-none w-full max-w-[280px] h-[200px]",
         messageBubbleShapeClass,
       )}
       onClick={() => {
@@ -111,7 +111,7 @@ export const renderVideoMessage = (
       }}
     >
       {!isLoaded && (
-        <div className="w-40 h-40 z-0">
+        <div className="absolute inset-0 z-10">
           <Skeleton className="w-full h-full rounded-2xl" />
         </div>
       )}
@@ -119,13 +119,11 @@ export const renderVideoMessage = (
         url={thumbnailUrl}
         alt="Video Thumbnail"
         onLoad={() => setIsLoaded(true)}
-        className={clsx(
-          "max-w-full max-h-[330px] w-auto h-auto transition-opacity duration-300 z-10 relative object-contain",
-          isLoaded ? "opacity-100 block" : "opacity-0 hidden",
-        )}
+        className="w-full h-full object-cover"
+        style={{ opacity: isLoaded ? 1 : 0, transition: "opacity 0.2s" }}
       />
       {isLoaded && (
-        <div className="absolute z-20 pointer-events-auto">
+        <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-auto">
           <div
             className="w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-sm shadow-md hover:bg-primary-500/80 transition-colors"
             onClick={(e) => {
@@ -325,13 +323,21 @@ export const renderSingleImageMessage = (
   return (
     <div
       className={clsx(
-        "relative rounded-2xl overflow-hidden flex items-center justify-center bg-bg-fourth/50",
-        "select-none w-fit max-w-full h-auto",
+        "relative rounded-2xl overflow-hidden bg-bg-fourth/50",
+        "select-none w-full max-w-[280px] h-[200px] cursor-pointer",
         messageBubbleShapeClass,
       )}
+      onClick={() => {
+        openMediaViewer({
+          id: image.id || "",
+          url: image.url,
+          type: MediaType.Image,
+          conversationId: conversationId!,
+        });
+      }}
     >
       {!isLoaded && (
-        <div className="w-40 h-40 z-0">
+        <div className="absolute inset-0 z-10">
           <Skeleton className="w-full h-full rounded-2xl" />
         </div>
       )}
@@ -339,18 +345,8 @@ export const renderSingleImageMessage = (
         url={image.url}
         alt="Image"
         onLoad={() => setIsLoaded(true)}
-        className={clsx(
-          "max-w-full max-h-[330px] w-auto h-auto cursor-pointer transition-opacity duration-300 z-10 relative object-contain",
-          isLoaded ? "opacity-100 block" : "opacity-0 hidden",
-        )}
-        onClick={() => {
-          openMediaViewer({
-            id: image.id || "",
-            url: image.url,
-            type: MediaType.Image,
-            conversationId: conversationId!,
-          });
-        }}
+        className="w-full h-full object-contain"
+        style={{ opacity: isLoaded ? 1 : 0, transition: "opacity 0.2s" }}
       />
       {hasDelayed && <PendingIndicator />}
     </div>
@@ -369,34 +365,30 @@ export const renderGifMessage = (
   return (
     <div
       className={clsx(
-        "relative rounded-2xl overflow-hidden flex items-center justify-center bg-bg-fourth/50",
-        "select-none w-fit max-w-full h-auto",
+        "relative rounded-2xl overflow-hidden bg-bg-fourth/50",
+        "select-none w-full max-w-[280px] h-[200px] cursor-pointer",
         messageBubbleShapeClass,
       )}
+      onClick={() => {
+        openMediaViewer({
+          id: gif.id || "",
+          url: gif.url,
+          type: MediaType.Gif,
+          conversationId: conversationId!,
+        });
+      }}
     >
       {!isLoaded && (
-        <div className="w-40 h-40 z-0">
+        <div className="absolute inset-0 z-10">
           <Skeleton className="w-full h-full rounded-2xl" />
         </div>
       )}
       <MediaBlobImage
         url={gif.url}
         alt="GIF"
-        className={clsx(
-          "max-w-full max-h-[330px] w-auto h-auto cursor-pointer transition-opacity duration-300 z-10 relative object-contain",
-          isLoaded ? "opacity-100 block" : "opacity-0 hidden",
-        )}
-        onLoad={() => {
-          setIsLoaded(true);
-        }}
-        onClick={() => {
-          openMediaViewer({
-            id: gif.id || "",
-            url: gif.url,
-            type: MediaType.Gif,
-            conversationId: conversationId!,
-          });
-        }}
+        className="w-full h-full object-contain"
+        onLoad={() => setIsLoaded(true)}
+        style={{ opacity: isLoaded ? 1 : 0, transition: "opacity 0.2s" }}
       />
       {hasDelayed && <PendingIndicator />}
     </div>
