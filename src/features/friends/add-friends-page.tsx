@@ -5,21 +5,14 @@ import { Textbox } from "@/components/atoms";
 import SearchUserItem, { SearchUserSkeleton } from "./components/search-user-item";
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { NotFound } from "@/features/components/not-found";
-import { useMobile } from "@/hooks/use-mobile";
 import { useSearchUsers } from "@/features/hooks/use-user";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
 
 const AddFriendsPage: React.FC = () => {
   const { t } = useTranslation();
-  const isMobile = useMobile();
-  const [mounted, setMounted] = React.useState(false);
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   useEffect(() => {
     const timer = setTimeout(() => {
@@ -87,7 +80,7 @@ const AddFriendsPage: React.FC = () => {
                 />
               ) : null
             }
-            numberOfSkeletons={mounted ? (isMobile ? 6 : 12) : 6}
+            numberOfSkeletons={8}
           />
         </div>
       </div>

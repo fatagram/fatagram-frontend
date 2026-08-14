@@ -32,7 +32,7 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
   children,
 }) => {
   return (
-    <div className={clsx("flex flex-1", className)}>
+    <div className={clsx("flex flex-1 h-full overflow-hidden", className)}>
       <aside
         className={clsx(
           "z-30 w-full max-w-[300px] shrink-0 overflow-y-auto [will-change:transform]",
@@ -56,8 +56,10 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
           className="fixed inset-0 z-20 lg:hidden"
           duration={300}
         >
-          <div
-            className="absolute inset-0 bg-black opacity-50"
+          <button
+            type="button"
+            aria-label="Close sidebar"
+            className="absolute inset-0 bg-black opacity-50 appearance-none border-none cursor-default"
             onClick={() => setShowSidebar?.(false)}
           />
         </Transition>
@@ -65,13 +67,15 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
 
       <div
         className={clsx(
-          "flex-1 flex flex-col min-w-0 h-full lg:ml-[var(--sidebar-width)]",
+          "flex-1 flex flex-col min-w-0 min-h-0 h-full overflow-hidden lg:ml-[var(--sidebar-width)]",
           childrenWrapperClassName,
         )}
       >
         {showMenuButton && (
           <button
-            className="self-start m-3 text-2xl font-bold lg:hidden flex items-center"
+            type="button"
+            aria-label="Toggle sidebar menu"
+            className="shrink-0 self-start m-3 text-2xl font-bold lg:hidden flex items-center"
             onClick={() => setShowSidebar?.(!showSidebar)}
           >
             <FontAwesomeIcon icon={faBars} className="mr-3" />
@@ -80,7 +84,9 @@ export const SidebarLayout: React.FC<SidebarLayoutProps> = ({
             </Text>
           </button>
         )}
-        {children}
+        <div className="flex-1 min-h-0 flex flex-col">
+          {children}
+        </div>
       </div>
     </div>
   );

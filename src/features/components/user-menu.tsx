@@ -63,9 +63,9 @@ const UserMenu: React.FC<UserMenuProps> = ({ menuClassName, menuStyle }) => {
 
   // Logout function
   const handleLogout = useCallback(async () => {
+    setIsOpenMenu(false);
     await logOut?.();
-    navigate("/login", { replace: true });
-  }, [logOut, navigate]);
+  }, [logOut]);
 
   return (
     <div className={clsx("flex items-center justify-center relative")} ref={btnRef}>

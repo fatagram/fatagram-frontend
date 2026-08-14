@@ -1,16 +1,13 @@
 import "./i18n";
 import i18next from "i18next";
 import ContextTree from "./context-tree";
-import { QueryClient } from "@tanstack/react-query";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import Main from "./main";
 import { useEffect, useRef } from "react";
 import { ChatQueryNetworkSync } from "./features/chat/components/chat-query-network-sync";
-import { PersistQueryClientProvider } from "@tanstack/react-query-persist-client";
-import { createQueryPersister, shouldDehydrateQuery } from "./utils/query-persist";
 
 function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userData?: any } }) {
   const queryClientRef = useRef<QueryClient | null>(null);
-  const persisterRef = useRef(createQueryPersister());
 
   if (!queryClientRef.current) {
     queryClientRef.current = new QueryClient({
@@ -43,28 +40,17 @@ function App({ authContext }: { authContext?: { isAuthenticated?: boolean; userD
     if (queryClientRef.current) {
       import("./features/chat/services/conversation-manager").then(({ convManager }) => {
         convManager.setQueryClient(queryClientRef.current!);
-        convManager.hydrate();
       });
     }
   }, []);
 
   return (
-    <PersistQueryClientProvider
-      client={queryClientRef.current}
-      persistOptions={{
-        persister: persisterRef.current,
-        buster: "fawe-query-cache-v1",
-        maxAge: 1000 * 60 * 60 * 24,
-        dehydrateOptions: {
-          shouldDehydrateQuery,
-        },
-      }}
-    >
+    <QueryClientProvider client={queryClientRef.current}>
       <ContextTree authContext={authContext}>
         <ChatQueryNetworkSync />
         <Main />
       </ContextTree>
-    </PersistQueryClientProvider>
+    </QueryClientProvider>
   );
 }
 

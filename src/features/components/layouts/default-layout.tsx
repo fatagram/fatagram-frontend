@@ -150,14 +150,14 @@ const DefaultLayout = () => {
   useEffect(() => {
     if (isAuthed) {
       closeDialog();
-    } else if (isDefinitelyGuest) {
-      // Only open overlay when we're sure the user is NOT authenticated (not null/loading)
+    } else if (isDefinitelyGuest && pathname === "/") {
+      // Only open overlay on home page when we're sure the user is NOT authenticated (not null/loading)
       if (isMobile) return;
       openLoginOverlay();
     }
 
     return () => closeDialog();
-  }, [isMobile, isAuthenticated, isDefinitelyGuest, closeDialog, openLoginOverlay]);
+  }, [isMobile, isAuthenticated, isDefinitelyGuest, pathname, closeDialog, openLoginOverlay]);
 
   const handleGoToHome = useCallback(() => {
     if (isAuthed) {
@@ -244,7 +244,7 @@ const DefaultLayout = () => {
           </div>
         )}
       </Layout.Main>
-      {isMobile && isDefinitelyGuest && (
+      {isMobile && isDefinitelyGuest && pathname === "/" && (
         <div
           className={clsx(
             "flex flex-col fixed bottom-0 left-0 right-0 bg-bg-sixth/80 backdrop-blur-sm py-12 px-6 z-[9999]",

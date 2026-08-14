@@ -31,8 +31,23 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
     }
   };
 
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+    if (e.key === "Enter" || e.key === " ") {
+      if (e.target === e.currentTarget) {
+        e.preventDefault();
+        handleClick();
+      }
+    }
+  };
+
   return (
-    <div className="flex gap-2 select-none" onClick={handleClick}>
+    <div
+      role="button"
+      tabIndex={0}
+      className="flex gap-2 select-none cursor-pointer"
+      onClick={handleClick}
+      onKeyDown={handleKeyDown}
+    >
       <div className="flex items-start">
         <Avatar src={notificationDto.actorImageUrl} alt="Avatar" sz="md" />
       </div>

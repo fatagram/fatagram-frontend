@@ -81,23 +81,25 @@ body {
   max-width: 900px !important;
 }
 
-/* Chrome, Safari, Edge */
-*::-webkit-scrollbar {
-  width: 3px;
-  height: 3px;
-}
+/* Custom scrollbar cho Desktop */
+@media (min-width: 769px) {
+  *::-webkit-scrollbar {
+    width: 4px;
+    height: 4px;
+  }
 
-*::-webkit-scrollbar-track {
-  background: transparent;
-}
+  *::-webkit-scrollbar-track {
+    background: transparent;
+  }
 
-*::-webkit-scrollbar-thumb {
-  background-color: rgb(var(--primary-500));
-  border-radius: 6px;
-}
+  *::-webkit-scrollbar-thumb {
+    background-color: rgb(var(--primary-500));
+    border-radius: 6px;
+  }
 
-*::-webkit-scrollbar-thumb:hover {
-  background-color: rgb(var(--primary-600));
+  *::-webkit-scrollbar-thumb:hover {
+    background-color: rgb(var(--primary-600));
+  }
 }
 
 .scroll-container {
@@ -105,26 +107,17 @@ body {
   touch-action: none;
 }
 
-/* Ẩn scrollbar chỉ trên màn hình nhỏ (<640px), vẫn giữ khả năng cuộn */
-@media (max-width: 639px) {
-  :root,
-  html,
-  body,
-  #root,
-  .app {
-    -ms-overflow-style: none; /* IE 10+ */
-    scrollbar-width: none; /* Firefox */
+/* Ẩn hoàn toàn scrollbar trên thiết bị di động / màn hình nhỏ (<= 768px) & màn hình cảm ứng, vẫn giữ nguyên khả năng cuộn */
+@media (max-width: 768px), (pointer: coarse) {
+  * {
+    -ms-overflow-style: none !important; /* IE 10+ */
+    scrollbar-width: none !important; /* Firefox */
   }
 
-  /* WebKit (Chrome, Safari, Edge) */
-  :root::-webkit-scrollbar,
-  html::-webkit-scrollbar,
-  body::-webkit-scrollbar,
-  #root::-webkit-scrollbar,
-  .app::-webkit-scrollbar {
+  *::-webkit-scrollbar {
     display: none !important;
-    width: 0;
-    height: 0;
+    width: 0 !important;
+    height: 0 !important;
   }
 }
 

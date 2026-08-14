@@ -97,36 +97,6 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
 
 export const useGetConversations = (queryParams?: Omit<CursorQuery<string>, "cursor">) => {
   const { userId } = useAuth();
-  const queryClient = useQueryClient();
-  const [isHydrated, setIsHydrated] = useState(false);
-  const queryKey = useMemo(() => CONVERSATION_KEYS.list(queryParams), [queryParams]);
-
-  useEffect(() => {
-    const hydrateConversations = async () => {
-      if (!userId || isHydrated) return;
-
-      const existingData = queryClient.getQueryData(queryKey);
-      if (existingData || isHydrated) {
-        setIsHydrated(true);
-        return;
-      }
-
-      try {
-        const localData = await convManager.getConversations();
-
-        if (localData && localData.length > 0) {
-          queryClient.setQueryData(queryKey, {
-            pages: [{ items: localData, nextCursor: await convManager.getCursor(), hasNext: true }],
-            pageParams: [undefined],
-          });
-        }
-      } finally {
-        setIsHydrated(true);
-      }
-    };
-
-    hydrateConversations();
-  }, [queryKey, userId]);
 
   const infiniteQuery = useSafeInfiniteQueryResult({
     queryKey: CONVERSATION_KEYS.list(queryParams),
@@ -136,8 +106,8 @@ export const useGetConversations = (queryParams?: Omit<CursorQuery<string>, "cur
         cursor,
       });
     },
-    enabled: !!userId && isHydrated,
-    staleTime: Infinity,
+    enabled: !!userId,
+    staleTime: 1000 * 60 * 5,
     options: {
       onSuccess: (data) => {
         convManager.appendConversations(data.items, !data.nextCursor);
@@ -145,10 +115,7 @@ export const useGetConversations = (queryParams?: Omit<CursorQuery<string>, "cur
     },
   });
 
-  return {
-    ...infiniteQuery,
-    isLoading: !isHydrated || infiniteQuery.isLoading,
-  };
+  return infiniteQuery;
 };
 
 export const useSearchConversations = (queryParams: CursorQuery<string>) => {

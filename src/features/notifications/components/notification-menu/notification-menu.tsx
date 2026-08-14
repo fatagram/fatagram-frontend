@@ -12,7 +12,11 @@ import {
   useMarkNotificationAsRead,
   useNotifications,
 } from "../../hooks/use-notification";
-import { useNotificationCacheMutations, useUnreadCount } from "../../hooks/use-notification-store";
+import {
+  useNotificationCacheMutations,
+  useNotificationUiState,
+  useUnreadCount,
+} from "../../hooks/use-notification-store";
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { NotFound } from "@/features/components/not-found";
 import ClientOnly from "@/features/components/client-only";

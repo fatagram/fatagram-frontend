@@ -116,12 +116,15 @@
   },
   "offline": {
     "message": "You are offline",
-    "retry": "Retry",
+    "fullTitle": "No Internet Connection",
+    "fullDescription": "Fawe requires an active internet connection to work. Please check your Wi-Fi or mobile data to continue.",
+    "retry": "Try Again",
     "connecting": "Reconnecting...",
+    "checking": "Checking connection...",
     "check_connection": "No Internet connection",
     "online_message": "Connected",
     "connected_back": "Connection successfully restored",
-    "still_offline": "Still no internet connection"
+    "still_offline": "Still no internet connection. Please try again."
   },
   "loadMore": "Load more"
 }

@@ -1,6 +1,5 @@
 import { conversationService } from "@/api/conversation/conversation.api";
 import { Conversation } from "@/types/entities/conversation.type";
-import { db } from "@/utils/database";
 import { QueryClient } from "@tanstack/react-query";
 import { create } from "zustand";
 import { CONVERSATION_KEYS } from "../hooks/use-conversation";
@@ -174,68 +173,31 @@ export class ConversationManager {
   }
 
   public async hydrate() {
-    try {
-      const list = await db.conversations.orderBy("lastActiveAt").reverse().toArray();
-      useConversationStore.getState().setConversations(list);
-
-      const meta = await db.table("metadata").get("totalUnreadCount");
-      if (meta) {
-        useConversationStore.getState().setTotalUnreadCount(meta.value);
-      }
-    } catch (error) {
-      console.error("Failed to hydrate conversations:", error);
-    }
+    // In-memory mode: no-op
   }
 
   public async getConversations(): Promise<Conversation[]> {
-    try {
-      const convs = useConversationStore.getState().conversations;
-      if (convs.length === 0) await this.hydrate();
-      return useConversationStore.getState().conversations;
-    } catch (error) {
-      console.error("Failed to get conversations from DB:", error);
-      return [];
-    }
+    return useConversationStore.getState().conversations;
   }
 
   public getConversation(id: string) {
     return useConversationStore.getState().conversations.find((conv) => conv.id === id);
   }
 
-  public async appendConversations(convs: Conversation[], isFirstPage: boolean) {
-    try {
-      await db.conversations.bulkPut(convs);
-
-      if (isFirstPage) {
-        await this.hydrate();
-      } else {
-        useConversationStore.getState().appendConversations(convs);
-      }
-    } catch (error) {
-      console.error("Sync API data failed:", error);
+  public async appendConversations(convs: Conversation[], isFirstPage: boolean = false) {
+    if (isFirstPage) {
+      useConversationStore.getState().upsertConversations(convs);
+    } else {
+      useConversationStore.getState().appendConversations(convs);
     }
   }
 
   public async upsertConversations(convs: Conversation[]) {
-    try {
-      useConversationStore.getState().upsertConversations(convs);
-      await db.conversations.bulkPut(convs);
-    } catch (error) {
-      console.error("Upsert conversations failed:", error);
-    }
+    useConversationStore.getState().upsertConversations(convs);
   }
 
   public async updateConversation(id: string, updatedData: Partial<Conversation>) {
-    try {
-      useConversationStore.getState().updateConversation(id, updatedData);
-      const conv = await db.conversations.get(id);
-      if (!conv) return;
-
-      const updatedConv = { ...conv, ...updatedData };
-      await db.conversations.put(updatedConv);
-    } catch (error) {
-      console.error("Update conversation failed:", error);
-    }
+    useConversationStore.getState().updateConversation(id, updatedData);
   }
 
   public async addNewMessage(
@@ -245,7 +207,7 @@ export class ConversationManager {
     isFocusing: boolean = false,
   ) {
     try {
-      let conv = await db.conversations.get(convId);
+      let conv = this.getConversation(convId);
       const isMine = newMsg.senderId === userId;
       let wasUnread = false;
 
@@ -260,6 +222,7 @@ export class ConversationManager {
         wasUnread = false;
       }
 
+      conv = { ...conv };
       conv.lastMessage = newMsg;
       conv.lastActiveAt = new Date().toISOString();
 
@@ -293,7 +256,6 @@ export class ConversationManager {
         }
       }
 
-      await db.conversations.put(conv);
       useConversationStore.getState().pushConversationToTop(convId, conv);
 
       this.queryClient?.setQueryData(CONVERSATION_KEYS.detail(convId), conv);
@@ -304,20 +266,20 @@ export class ConversationManager {
 
   public async markAsSeen(convId: string, messageSeq: number) {
     try {
-      const conv = await db.conversations.get(convId);
+      const conv = this.getConversation(convId);
       if (!conv) return;
 
       const wasUnread = (conv.unreadMessageCount || 0) > 0;
 
-      conv.myLastSeenMessageSeq = messageSeq;
-      conv.unreadMessageCount = (conv.lastMessage?.sequenceNumber || 0) - messageSeq || 0;
-      if (conv.unreadMessageCount < 0) {
-        conv.unreadMessageCount = 0;
-      }
-      const isNowRead = conv.unreadMessageCount === 0;
+      const updatedConv = {
+        ...conv,
+        myLastSeenMessageSeq: messageSeq,
+        unreadMessageCount: Math.max((conv.lastMessage?.sequenceNumber || 0) - messageSeq, 0),
+      };
 
-      await db.conversations.put(conv);
+      const isNowRead = updatedConv.unreadMessageCount === 0;
 
+      useConversationStore.getState().updateConversation(convId, updatedConv);
       useConversationStore.getState().updateUserSeenSequence(convId, messageSeq);
 
       if (wasUnread && isNowRead) {
@@ -329,13 +291,11 @@ export class ConversationManager {
   }
 
   public async clearAll() {
-    await db.conversations.clear();
     useConversationStore.getState().setConversations([]);
   }
 
   // --- UNREAD COUNT MANAGEMENT ---
   public async setUnreadCount(count: number) {
-    await db.table("metadata").put({ key: "totalUnreadCount", value: count });
     useConversationStore.getState().setTotalUnreadCount(count);
   }
 
@@ -343,13 +303,12 @@ export class ConversationManager {
     const { updateTotalUnreadCount } = useConversationStore.getState();
     if (updateTotalUnreadCount) {
       updateTotalUnreadCount(action);
-      const newCount = useConversationStore.getState().totalUnreadCount;
-      await db.table("metadata").put({ key: "totalUnreadCount", value: newCount });
     }
   }
 
   public async getCursor(): Promise<string | undefined> {
-    const oldestConv = await db.conversations.orderBy("lastActiveAt").first();
+    const convs = useConversationStore.getState().conversations;
+    const oldestConv = convs[convs.length - 1];
     return oldestConv ? oldestConv.lastActiveAt : undefined;
   }
 }

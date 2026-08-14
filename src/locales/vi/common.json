@@ -114,12 +114,15 @@
   },
   "offline": {
     "message": "Bạn đang ngoại tuyến",
+    "fullTitle": "Mất kết nối Internet",
+    "fullDescription": "Fawe cần kết nối mạng để hoạt động. Vui lòng kiểm tra Wi-Fi hoặc dữ liệu di động của bạn để tiếp tục.",
     "retry": "Thử lại",
     "connecting": "Đang thử kết nối lại...",
+    "checking": "Đang kiểm tra kết nối...",
     "check_connection": "Không có kết nối Internet",
     "online_message": "Đã kết nối lại",
     "connected_back": "Đã khôi phục kết nối thành công",
-    "still_offline": "Vẫn chưa có kết nối internet"
+    "still_offline": "Vẫn chưa có kết nối Internet. Vui lòng thử lại sau."
   },
   "loadMore": "Xem thêm"
 }

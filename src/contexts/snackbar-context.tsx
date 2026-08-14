@@ -1,7 +1,13 @@
 import Transition, { AnimationLib } from "@/components/ui/utils/transition";
 import React, { createContext, useCallback, useMemo, useState } from "react";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faCircleCheck, faCircleXmark, faTriangleExclamation, faCircleInfo, faXmark } from "@fortawesome/free-solid-svg-icons";
+import {
+  faCheck,
+  faCircleXmark,
+  faTriangleExclamation,
+  faCircleInfo,
+  faXmark,
+} from "@fortawesome/free-solid-svg-icons";
 
 export type SnackbarType = "success" | "error" | "warning" | "info";
 
@@ -30,7 +36,7 @@ export const SnackbarProvider = React.memo(function SnackbarProvider({
   const [visibleSnackbar, setVisibleSnackbar] = useState<boolean>(false);
   const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
   const [displaySnackbar, setDisplaySnackbar] = useState<SnackbarItem | null>(null);
-  const durationAnim = 300;
+  const durationAnim = 250;
 
   const showSnackbar = useCallback(
     (message: string, type: SnackbarType = "info", duration: number = 3000) => {
@@ -58,18 +64,18 @@ export const SnackbarProvider = React.memo(function SnackbarProvider({
 
   const value = useMemo(() => ({ showSnackbar }), [showSnackbar]);
 
-  // Icon mapping
+  // Icon mapping - simple and harmonious with web theme
   const getIcon = (type: SnackbarType) => {
     switch (type) {
       case "success":
-        return <FontAwesomeIcon icon={faCircleCheck} className="text-green-500" />;
+        return <FontAwesomeIcon icon={faCheck} className="text-primary-500 text-sm flex-shrink-0" />;
       case "error":
-        return <FontAwesomeIcon icon={faCircleXmark} className="text-red-500" />;
+        return <FontAwesomeIcon icon={faCircleXmark} className="text-red-500 text-sm flex-shrink-0" />;
       case "warning":
-        return <FontAwesomeIcon icon={faTriangleExclamation} className="text-yellow-500" />;
+        return <FontAwesomeIcon icon={faTriangleExclamation} className="text-yellow-500 text-sm flex-shrink-0" />;
       case "info":
       default:
-        return <FontAwesomeIcon icon={faCircleInfo} className="text-blue-500" />;
+        return <FontAwesomeIcon icon={faCircleInfo} className="text-primary-500 text-sm flex-shrink-0" />;
     }
   };
 
@@ -77,24 +83,25 @@ export const SnackbarProvider = React.memo(function SnackbarProvider({
     <SnackbarContext.Provider value={value}>
       {children}
       <Transition
-        className="fixed bottom-6 right-6 z-50"
-        animation={AnimationLib.SlideRightToLeft}
+        className="fixed z-[9999] bottom-4 inset-x-4 sm:inset-x-auto sm:bottom-6 sm:right-6 flex justify-center sm:block pointer-events-none"
+        animation={AnimationLib.ToastSlideUp}
         show={visibleSnackbar}
         duration={durationAnim}
       >
         <div
-          className={`px-4 py-3 rounded-lg shadow-lg
-                     bg-bg-fourth 
-                     flex items-center gap-3
-                     min-w-[300px] max-w-[500px]`}
+          style={{ marginBottom: "env(safe-area-inset-bottom)" }}
+          className="px-4 py-3 rounded-xl shadow-lg border border-bg-fourth/80 bg-bg-fourth text-text-main flex items-center gap-3 w-full max-w-[440px] pointer-events-auto select-none"
         >
           {getIcon(displaySnackbar?.type ?? "info")}
-          <span className="text-text-main flex-1">{displaySnackbar?.message}</span>
+          <span className="text-sm font-medium text-text-main flex-1 break-words leading-snug">
+            {displaySnackbar?.message}
+          </span>
           <button
             onClick={() => setVisibleSnackbar(false)}
-            className="text-text-third hover:text-text-main transition-colors"
+            className="hidden sm:flex items-center justify-center w-6 h-6 rounded-md text-text-third hover:text-text-main hover:bg-bg-third/60 transition-colors ml-1 flex-shrink-0 cursor-pointer"
+            title="Close"
           >
-            <FontAwesomeIcon icon={faXmark} />
+            <FontAwesomeIcon icon={faXmark} className="text-xs" />
           </button>
         </div>
       </Transition>

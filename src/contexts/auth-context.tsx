@@ -115,8 +115,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({
           dispatch({ type: "LOGIN", payload });
           try {
             localStorage.setItem("fawe:user", JSON.stringify(payload));
-          } catch (e) {
-            /* ignore storage errors */
+          } catch (error) {
+            console.error("Failed to save user session to localStorage:", error);
           }
         },
       });
@@ -124,15 +124,15 @@ export const AuthProvider: FC<AuthProviderProps> = ({
   });
   const { fetch: logout } = useResultFetcher(authService.logout, {
     onSuccess: () => {
-      dispatch({ type: "LOGOUT" });
       try {
         localStorage.removeItem("fawe:user");
         convManager.clearAll();
-        // messageManager.clearAll();
-      } catch (e) {
-        /* ignore */
+      } catch (error) {
+        console.error("Failed to clear user data on logout:", error);
       }
       clearUserData();
+      dispatch({ type: "LOGOUT" });
+      navigate("/login", { replace: true });
     },
   });
 
@@ -151,8 +151,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({
             dispatch({ type: "LOGIN", payload });
             try {
               localStorage.setItem("fawe:user", JSON.stringify(payload));
-            } catch (e) {
-              /* ignore */
+            } catch (error) {
+              console.error("Failed to save user session to localStorage:", error);
             }
           },
         });
@@ -222,8 +222,8 @@ export const AuthProvider: FC<AuthProviderProps> = ({
             dispatch({ type: "LOGIN", payload });
           }
         }
-      } catch (e) {
-        /* ignore */
+      } catch (error) {
+        console.error("Failed to hydrate user session from localStorage:", error);
       }
     }
   }, []);

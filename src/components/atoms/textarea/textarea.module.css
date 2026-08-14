@@ -56,23 +56,25 @@
   transform: scale(1.01);
 }
 
-/* Tùy chỉnh thanh cuộn cho textarea */
-.custom-scrollbar::-webkit-scrollbar {
-  width: 6px; /* Thu hẹp thanh cuộn cho thanh lịch */
-}
+/* Tùy chỉnh thanh cuộn cho textarea trên desktop */
+@media (min-width: 769px) {
+  .custom-scrollbar::-webkit-scrollbar {
+    width: 6px; /* Thu hẹp thanh cuộn cho thanh lịch */
+  }
 
-.custom-scrollbar::-webkit-scrollbar-track {
-  background: transparent;
-  /* Đẩy track cách xa 2 chóp bo góc trên/dưới để không bị lòi */
-  margin-top: 10px;
-  margin-bottom: 10px;
-}
+  .custom-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+    /* Đẩy track cách xa 2 chóp bo góc trên/dưới để không bị lòi */
+    margin-top: 10px;
+    margin-bottom: 10px;
+  }
 
-.custom-scrollbar::-webkit-scrollbar-thumb {
-  background-color: rgba(255, 255, 255, 0.2); /* Màu của thanh trượt (chỉnh theo theme) */
-  border-radius: 10px; /* Bo góc chính cái thanh trượt */
-}
+  .custom-scrollbar::-webkit-scrollbar-thumb {
+    background-color: rgba(255, 255, 255, 0.2); /* Màu của thanh trượt (chỉnh theo theme) */
+    border-radius: 10px; /* Bo góc chính cái thanh trượt */
+  }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background-color: rgba(255, 255, 255, 0.4);
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover {
+    background-color: rgba(255, 255, 255, 0.4);
+  }
 }

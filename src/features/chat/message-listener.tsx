@@ -13,7 +13,6 @@ import { useChatStore } from "./hooks/use-floating-chat";
 import { convManager } from "./services/conversation-manager";
 import { useMessageCacheMutations } from "./hooks/use-message";
 import { useTypingStore } from "./hooks/use-typing-store";
-import { db } from "@/utils/database";
 
 export type MessageHubEvent = SocketMessage<MessageResponseDto | SeenDto | TypingDto>;
 
@@ -102,7 +101,7 @@ export function useMessageListenerHandler() {
           otherLastSeenMessageSeq: data.messageSeq,
         });
       } else {
-        const conv = await db.conversations.get(conversationId);
+        const conv = convManager.getConversation(conversationId);
         const wasUnread = conv && (conv.unreadMessageCount || 0) > 0;
 
         await convManager.updateConversation(conversationId, {

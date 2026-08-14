@@ -16,6 +16,7 @@ export enum AnimationName {
   SlideLeftToRightFull = "SlideLeftToRightFull",
   DropdownSlide = "DropdownSlide",
   SlideUp = "SlideUp",
+  ToastSlideUp = "ToastSlideUp",
   Opacity = "Opacity",
   SlideSnappy = "SlideSnappy",
   DialogZoom = "DialogZoom",
@@ -62,6 +63,11 @@ export const AnimationLib: Record<AnimationName, AnimationType> = {
     in: "animate-slide-up-in",
     out: "animate-slide-up-out",
     duration: 200,
+  },
+  ToastSlideUp: {
+    in: "animate-toast-slide-up-in",
+    out: "animate-toast-slide-up-out",
+    duration: 250,
   },
   Opacity: {
     in: "animate-opacity-in",
