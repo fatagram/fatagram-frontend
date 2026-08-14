@@ -98,7 +98,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
   return (
     <div
       className={clsx(
-        "relative flex flex-col items-center justify-center gap-3",
+        "relative flex flex-col items-center justify-center gap-5",
         "rounded-2xl",
         "animate-fade-in ",
         className,
@@ -113,7 +113,7 @@ export const RegisterForm: React.FC<RegisterFormProps> = ({
       >
         {t("auth:register.title")}
       </Text>
-      <div className="flex flex-col gap-3 w-full">
+      <div className="flex flex-col gap-4 w-full">
         <Textbox
           value={formik.values.username}
           sz="sm"

@@ -58,7 +58,9 @@ const NotificationIconWithBadge = () => {
 
 const DefaultLayout = () => {
   const { isAuthenticated } = useAuth();
-  const isAuthed = Boolean(isAuthenticated);
+  const isAuthed = isAuthenticated === true;
+  // isAuthenticated can be: null (loading/transitioning), true, or false
+  const isDefinitelyGuest = isAuthenticated === false;
   const { openDialog, closeDialog } = useDialog();
   const navigate = useNavigate();
   const { pathname } = useLocation();
@@ -148,13 +150,14 @@ const DefaultLayout = () => {
   useEffect(() => {
     if (isAuthed) {
       closeDialog();
-    } else {
+    } else if (isDefinitelyGuest) {
+      // Only open overlay when we're sure the user is NOT authenticated (not null/loading)
       if (isMobile) return;
       openLoginOverlay();
     }
 
     return () => closeDialog();
-  }, [isMobile, isAuthenticated, closeDialog, openLoginOverlay]);
+  }, [isMobile, isAuthenticated, isDefinitelyGuest, closeDialog, openLoginOverlay]);
 
   const handleGoToHome = useCallback(() => {
     if (isAuthed) {
@@ -241,7 +244,7 @@ const DefaultLayout = () => {
           </div>
         )}
       </Layout.Main>
-      {isMobile && !isAuthenticated && (
+      {isMobile && isDefinitelyGuest && (
         <div
           className={clsx(
             "flex flex-col fixed bottom-0 left-0 right-0 bg-bg-sixth/80 backdrop-blur-sm py-12 px-6 z-[9999]",

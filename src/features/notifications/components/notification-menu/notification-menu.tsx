@@ -29,7 +29,7 @@ type NotificationMenuProps = {
   ref?: React.RefObject<HTMLDivElement | null>;
 };
 
-const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) => {
+const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref, onClick }) => {
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
   const navigate = useNavigate();
   const { data, fetchNextPage, hasNextPage, isFetching, isPending } = useNotifications({
@@ -38,6 +38,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
   const { fetch: deleteAll } = useDeleteAllNotifications();
   const isInNotificationPage = useLocation().pathname === "/notifications";
 
+  const { isShowNotification, setShowNotification } = useNotificationUiState();
   const { unreadCount, setUnreadCount } = useUnreadCount();
   const { markAsReadInCache, markAllAsReadInCache, clearAllFromCache, invalidateNotifications } =
     useNotificationCacheMutations();
@@ -130,6 +131,10 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
                   <NotificationFactory
                     notificationDto={notification}
                     onClick={async () => {
+                      if (isShowNotification) {
+                        setShowNotification(false);
+                      }
+                      onClick?.();
                       markAsRead(notification.id, {
                         onSuccess: () => {
                           markAsReadInCache(notification.id);
@@ -161,7 +166,13 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref }) =
         <div className="flex justify-center border-t border-text-main/10 pt-2 pb-2 px-3">
           <button
             className="p-2 rounded-lg hover:bg-bg-fourth transition-colors cursor-pointer flex items-center gap-2"
-            onClick={() => navigate("/notifications")}
+            onClick={() => {
+              if (isShowNotification) {
+                setShowNotification(false);
+              }
+              onClick?.();
+              navigate("/notifications");
+            }}
             title={t("notifications:notifications.open-notifications")}
           >
             <Text sz="sm" color="secondary">

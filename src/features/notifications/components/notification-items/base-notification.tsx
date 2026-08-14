@@ -6,6 +6,8 @@ import { useTranslation } from "react-i18next";
 import clsx from "clsx";
 import { ClientTime } from "@/features/components/client-time";
 
+import { useNavigate } from "react-router-dom";
+
 interface BaseNotificationProps {
   notificationDto: NotificationDto;
   children?: React.ReactNode;
@@ -18,11 +20,19 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
   onClick,
 }) => {
   const { t } = useTranslation() as { t: (key: string, options?: any) => string };
+  const navigate = useNavigate();
 
   const content = getNotificationContent(notificationDto.type, notificationDto.content, t);
 
+  const handleClick = () => {
+    onClick?.();
+    if (notificationDto.link && notificationDto.link !== "/") {
+      navigate(notificationDto.link);
+    }
+  };
+
   return (
-    <div className="flex gap-2 select-none" onClick={onClick}>
+    <div className="flex gap-2 select-none" onClick={handleClick}>
       <div className="flex items-start">
         <Avatar src={notificationDto.actorImageUrl} alt="Avatar" sz="md" />
       </div>

@@ -194,6 +194,8 @@ export const useGetTotalUnreadCount = () => {
   return useSafeQueryResult({
     queryKey: ["conversation", "unread-count", userId],
     fn: async () => await conversationService.getUnreadCount(),
+    // Only fetch when authenticated — prevents 401 → refresh-token loop on guest pages
+    enabled: !!userId,
     options: {
       onSuccess: (data) => {
         convManager.setUnreadCount(data);

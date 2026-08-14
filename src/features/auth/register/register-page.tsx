@@ -11,7 +11,7 @@ function RegisterPage(): React.ReactElement {
   return (
     <div
       className={clsx(
-        "relative flex flex-col bg-bg-second flex-1 h-full lg:p-4",
+        "relative flex flex-col bg-bg-second flex-1 min-h-full lg:p-4 py-8",
         "justify-center items-center",
       )}
     >
@@ -19,7 +19,7 @@ function RegisterPage(): React.ReactElement {
       <div
         className={clsx(
           "relative flex bg-bg-second w-full ",
-          "flex-1 lg:w-[80%] lg:max-h-[800px]",
+          "flex-1 lg:w-[80%]",
           "lg:rounded-3xl rounded-none overflow-hidden",
         )}
       >
@@ -49,7 +49,7 @@ function RegisterPage(): React.ReactElement {
           </p>
         </div>
 
-        <div className="bg-bg-second px-[3rem] py-[1rem] flex-1 m-auto max-w-[500px] z-10 rounded-3xl lg:rounded-none">
+        <div className="bg-bg-second px-[3rem] py-[2.5rem] flex-1 m-auto max-w-[500px] z-10 rounded-3xl lg:rounded-none">
           <RegisterForm className="m-auto" />
         </div>
       </div>

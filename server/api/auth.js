@@ -17,7 +17,7 @@ export async function checkAuth(cookieHeader) {
     if (err.response?.status === 401) {
       try {
         const refreshRes = await axios.post(
-          `${process.env.VITE_API_URL}/api/v1/auth/refreshToken`,
+          `${process.env.VITE_API_URL}/api/v1/auth/refresh-token`,
           {},
           {
             headers: { Cookie: cookieHeader },

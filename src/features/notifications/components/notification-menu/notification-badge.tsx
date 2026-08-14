@@ -67,7 +67,7 @@ const NotificationBadge: React.FC<NotificationButtonProps> = ({}) => {
         )}
       >
         <NotificationMenu
-          onClick={() => setShowNotification(!isShowNotification)}
+          onClick={() => setShowNotification(false)}
           ref={menuRef}
         />
       </Transition>

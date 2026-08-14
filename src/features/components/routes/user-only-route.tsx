@@ -10,15 +10,15 @@ const UserOnlyRoute = ({ children }: { children: React.ReactNode }) => {
 
   // Client-side navigation redirect (useEffect only runs on client)
   useEffect(() => {
-    if (!user?.isAuthenticated) {
+    if (user?.isAuthenticated === false) {
       navigate("/login", { replace: true });
     }
   }, [user?.isAuthenticated, navigate]);
 
   // SSR: Server already redirected, so if we're rendering this,
   // user is authenticated. Just render children.
-  // Client: Return null while redirecting to prevent flash
-  if (!user?.isAuthenticated) {
+  // Client: Return null/loading while auth state is still resolving (null) or while redirecting (false)
+  if (user?.isAuthenticated !== true) {
     return <LoadingPage />;
   }
 
