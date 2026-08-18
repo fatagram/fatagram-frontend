@@ -24,7 +24,8 @@ const BaseNotification: React.FC<BaseNotificationProps> = ({
 
   const content = getNotificationContent(notificationDto.type, notificationDto.content, t);
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    if (e.defaultPrevented) return;
     onClick?.();
     if (notificationDto.link && notificationDto.link !== "/") {
       navigate(notificationDto.link);

@@ -17,6 +17,7 @@ import { convManager, useConversationStore } from "../../services/conversation-m
 import { useRef, useState, useEffect, useMemo } from "react";
 import {
   useGetConversation,
+  useTogglePinConversation,
   useUpdateConversationAvatar,
   useUpdateConversationBackground,
   useUpdateConversationName,
@@ -47,6 +48,7 @@ import {
   faUser,
   faChevronRight,
   faUserGroup,
+  faThumbtack,
 } from "@fortawesome/free-solid-svg-icons";
 
 interface ConversationPageProps extends ComponentProps {}
@@ -398,7 +400,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   const storeConv = useConversationStore((state) =>
     state.conversations.find((c) => c.id === conversationId),
   );
-  const conv = conversationData ?? storeConv;
+  const conv = storeConv ?? conversationData;
 
   const { theme: currentGlobalTheme } = useTheme();
   const isSystemDark =
@@ -437,6 +439,14 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   );
   const { fetch: updateTheme } = useUpdateConversationTheme(conversationId!);
   const { fetch: updateBackground } = useUpdateConversationBackground(conversationId!);
+  const { fetch: togglePin, isFetching: isTogglingPin } = useTogglePinConversation(conversationId!);
+
+  const isPinned = Boolean(conv?.isPinned || conv?.pinnedAt);
+
+  const handleTogglePin = async () => {
+    if (!conversationId || isTogglingPin) return;
+    await togglePin();
+  };
 
   const handleSaveThemeAndBackground = async (
     selectedThemeKey: string,
@@ -741,8 +751,8 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                     </div>
 
                     {conv.isGroup && (
-                      <div className="flex justify-center w-full gap-8 mt-6 px-4">
-                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                      <div className="flex justify-center w-full gap-4 sm:gap-6 mt-6 px-2">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
                           <MiniButton
                             sz="md"
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
@@ -754,7 +764,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             {t("common:conversations.settings.changeAvatar")}
                           </Text>
                         </div>
-                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
                           <MiniButton
                             sz="md"
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
@@ -766,7 +776,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             {t("common:conversations.settings.changeName")}
                           </Text>
                         </div>
-                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
                           <MiniButton
                             sz="md"
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
@@ -778,11 +788,34 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             {t("common:conversations.settings.changeTheme", "Chủ đề")}
                           </Text>
                         </div>
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
+                          <MiniButton
+                            sz="md"
+                            className={clsx(
+                              "rounded-full w-12 h-12 transition-colors",
+                              isPinned
+                                ? "bg-primary-500 text-white hover:bg-primary-600 shadow-sm"
+                                : "bg-bg-third hover:bg-bg-fourth",
+                            )}
+                            onClick={handleTogglePin}
+                            disabled={isTogglingPin}
+                          >
+                            <FontAwesomeIcon
+                              icon={faThumbtack}
+                              className={clsx(isPinned && "rotate-45")}
+                            />
+                          </MiniButton>
+                          <Text sz="xs" weight="medium" className="text-center">
+                            {isPinned
+                              ? t("common:conversations.settings.unpin", "Bỏ ghim")
+                              : t("common:conversations.settings.pin", "Ghim")}
+                          </Text>
+                        </div>
                       </div>
                     )}
                     {!conv.isGroup && conv.otherUserId && (
-                      <div className="flex justify-center w-full gap-10 mt-6 px-4">
-                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                      <div className="flex justify-center w-full gap-6 sm:gap-8 mt-6 px-2">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
                           <MiniButton
                             sz="md"
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
@@ -794,7 +827,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                             {t("common:conversations.settings.viewProfile")}
                           </Text>
                         </div>
-                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[80px]">
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
                           <MiniButton
                             sz="md"
                             className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
@@ -804,6 +837,29 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                           </MiniButton>
                           <Text sz="xs" weight="medium" className="text-center">
                             {t("common:conversations.settings.changeTheme", "Chủ đề")}
+                          </Text>
+                        </div>
+                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
+                          <MiniButton
+                            sz="md"
+                            className={clsx(
+                              "rounded-full w-12 h-12 transition-colors",
+                              isPinned
+                                ? "bg-primary-500 text-white hover:bg-primary-600 shadow-sm"
+                                : "bg-bg-third hover:bg-bg-fourth",
+                            )}
+                            onClick={handleTogglePin}
+                            disabled={isTogglingPin}
+                          >
+                            <FontAwesomeIcon
+                              icon={faThumbtack}
+                              className={clsx(isPinned && "rotate-45")}
+                            />
+                          </MiniButton>
+                          <Text sz="xs" weight="medium" className="text-center">
+                            {isPinned
+                              ? t("common:conversations.settings.unpin", "Bỏ ghim")
+                              : t("common:conversations.settings.pin", "Ghim")}
                           </Text>
                         </div>
                       </div>
@@ -821,6 +877,49 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                         onClick={openMembersFlow}
                       />
                     )}
+                    <MenuItem
+                      icon={
+                        <FontAwesomeIcon
+                          icon={faThumbtack}
+                          className={clsx(
+                            "text-sm transition-transform",
+                            isPinned ? "text-primary-500 rotate-45" : "text-text-secondary",
+                          )}
+                        />
+                      }
+                      title={
+                        isPinned
+                          ? t("common:conversations.settings.unpinConversation", "Bỏ ghim hội thoại")
+                          : t("common:conversations.settings.pinConversation", "Ghim hội thoại")
+                      }
+                      description={
+                        isPinned
+                          ? t(
+                              "common:conversations.settings.unpinConversationDescription",
+                              "Bỏ ghim cuộc trò chuyện này khỏi đầu danh sách",
+                            )
+                          : t(
+                              "common:conversations.settings.pinConversationDescription",
+                              "Giữ cuộc trò chuyện này luôn ở trên cùng danh sách",
+                            )
+                      }
+                      rightElement={
+                        <div className="flex items-center gap-2 shrink-0">
+                          <Text
+                            sz="xs"
+                            className={clsx(
+                              "px-2 py-0.5 rounded-full border text-[11px] font-medium",
+                              isPinned
+                                ? "text-primary-500 bg-primary-500/10 border-primary-500/30"
+                                : "text-text-third bg-bg-third border-border-main/50",
+                            )}
+                          >
+                            {isPinned ? "Đã ghim" : "Chưa ghim"}
+                          </Text>
+                        </div>
+                      }
+                      onClick={handleTogglePin}
+                    />
                     <MenuItem
                       icon={renderThemeIconCircle(activeThemeObj, isSystemDark)}
                       hideIconContainer={true}

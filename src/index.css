@@ -10,6 +10,7 @@
 :root {
   --header-height: 56px;
   --sidebar-width: 300px;
+  --chat-floating-height: min(520px, calc(100dvh - var(--header-height, 56px) - 20px));
 }
 
 html {

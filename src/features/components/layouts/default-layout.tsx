@@ -235,12 +235,12 @@ const DefaultLayout = () => {
           }
         />
       </Layout.Header>
-      <Layout.Main className="flex-1 flex flex-col overflow-x-hidden scrollbar-hide sm:scrollbar-default">
+      <Layout.Main className="w-full flex-1 flex flex-col min-h-0">
         <PageTransition />
 
         {!isMobile && (
-          <div className="fixed inset-0 pointer-events-none z-[90]">
-            <ChatLayer className="absolute bottom-0 right-4 pointer-events-auto" />
+          <div className="fixed bottom-0 right-4 pointer-events-none z-[90] max-h-[calc(100dvh-var(--header-height,56px))] flex items-end">
+            <ChatLayer className="pointer-events-auto" />
           </div>
         )}
       </Layout.Main>

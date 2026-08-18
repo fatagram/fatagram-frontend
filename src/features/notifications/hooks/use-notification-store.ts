@@ -156,6 +156,26 @@ export function useNotificationCacheMutations() {
     [queryClient, userId],
   );
 
+  const removeNotificationsFromCache = useCallback(
+    (notificationIds: string[]) => {
+      const idSet = new Set(notificationIds);
+      queryClient.setQueriesData<NotificationPages>(
+        { queryKey: ["notifications", userId] },
+        (oldData) => {
+          if (!oldData?.pages) return oldData;
+          return {
+            ...oldData,
+            pages: oldData.pages.map((page) => ({
+              ...page,
+              items: page.items.filter((n) => !idSet.has(n.id)),
+            })),
+          };
+        },
+      );
+    },
+    [queryClient, userId],
+  );
+
   const markAsReadInCache = useCallback(
     (notificationId: string) => {
       queryClient.setQueriesData<NotificationPages>(
@@ -214,6 +234,7 @@ export function useNotificationCacheMutations() {
   return {
     addNotificationToCache,
     removeNotificationFromCache,
+    removeNotificationsFromCache,
     markAsReadInCache,
     markAllAsReadInCache,
     clearAllFromCache,

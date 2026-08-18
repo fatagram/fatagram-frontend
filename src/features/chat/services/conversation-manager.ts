@@ -14,12 +14,33 @@ interface ConversationState {
   appendConversations: (conversations: Conversation[]) => void;
   upsertConversations: (conversations: Conversation[]) => void;
   updateConversation: (id: string, conversation: Partial<Conversation>) => void;
+  togglePinConversation: (id: string, isPinned: boolean) => void;
   pushConversationToTop: (id: string, updatedData?: Partial<Conversation>) => void;
   setTotalUnreadCount: (count: number) => void;
   updateTotalUnreadCount?: (action: "increment" | "decrement" | "reset") => void;
   updateLastMessageSequence: (conversationId: string, sequenceNumber: number) => void;
   updateUserSeenSequence: (conversationId: string, sequenceNumber: number) => void;
 }
+
+export const sortConversations = (conversations: Conversation[]): Conversation[] => {
+  return [...conversations].sort((a, b) => {
+    const aPinned = Boolean(a.isPinned || a.pinnedAt);
+    const bPinned = Boolean(b.isPinned || b.pinnedAt);
+
+    if (aPinned && !bPinned) return -1;
+    if (!aPinned && bPinned) return 1;
+
+    if (aPinned && bPinned && a.pinnedAt && b.pinnedAt) {
+      const pinTimeA = new Date(a.pinnedAt).getTime();
+      const pinTimeB = new Date(b.pinnedAt).getTime();
+      if (pinTimeA !== pinTimeB) return pinTimeB - pinTimeA;
+    }
+
+    const timeA = new Date(a.lastActiveAt || a.lastMessage?.createdAt || 0).getTime();
+    const timeB = new Date(b.lastActiveAt || b.lastMessage?.createdAt || 0).getTime();
+    return timeB - timeA;
+  });
+};
 
 export const useConversationStore = create<ConversationState>((set) => ({
   conversations: [],
@@ -40,7 +61,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
         }
       });
       return {
-        conversations,
+        conversations: sortConversations(conversations),
         lastMessageSequenceMap: newLastMessageMap,
         userSeenMap: newUserSeenMap,
       };
@@ -60,7 +81,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
         }
       });
       return {
-        conversations: [...state.conversations, ...newConversations],
+        conversations: sortConversations([...state.conversations, ...newConversations]),
         lastMessageSequenceMap: appendLastMessageMap,
         userSeenMap: appendUserSeenMap,
       };
@@ -83,15 +104,27 @@ export const useConversationStore = create<ConversationState>((set) => ({
       });
 
       return {
-        conversations: [...conversations, ...filteredExisting],
+        conversations: sortConversations([...conversations, ...filteredExisting]),
         lastMessageSequenceMap: newLastMessageMap,
         userSeenMap: newSeenMap,
       };
     }),
   updateConversation: (id, conversation) =>
     set((state) => ({
-      conversations: state.conversations.map((conv) =>
-        conv.id === id ? { ...conv, ...conversation } : conv,
+      conversations: sortConversations(
+        state.conversations.map((conv) =>
+          conv.id === id ? { ...conv, ...conversation } : conv,
+        ),
+      ),
+    })),
+  togglePinConversation: (id, isPinned) =>
+    set((state) => ({
+      conversations: sortConversations(
+        state.conversations.map((conv) =>
+          conv.id === id
+            ? { ...conv, isPinned, pinnedAt: isPinned ? new Date().toISOString() : null }
+            : conv,
+        ),
       ),
     })),
   updateLastMessageSequence: (conversationId, sequenceNumber) =>
@@ -121,7 +154,7 @@ export const useConversationStore = create<ConversationState>((set) => ({
       }
 
       return {
-        conversations: [targetConv, ...remaining],
+        conversations: sortConversations([targetConv, ...remaining]),
         lastMessageSequenceMap: newLastMessageSequenceMap,
       };
     }),
@@ -198,6 +231,10 @@ export class ConversationManager {
 
   public async updateConversation(id: string, updatedData: Partial<Conversation>) {
     useConversationStore.getState().updateConversation(id, updatedData);
+  }
+
+  public togglePin(id: string, isPinned: boolean) {
+    useConversationStore.getState().togglePinConversation(id, isPinned);
   }
 
   public async addNewMessage(

@@ -12,6 +12,19 @@
     "showMore": "Hiển thị thêm",
     "mark-all-read": "Đánh dấu tất cả đã đọc",
     "delete-all": "Xóa tất cả",
-    "open-notifications": "Mở thông báo"
+    "open-notifications": "Mở thông báo",
+    "select": "Chọn",
+    "exit-select": "Hủy",
+    "select-all": "Chọn tất cả",
+    "deselect-all": "Bỏ chọn",
+    "selected-count": "Đã chọn {{count}}",
+    "delete-selected": "Xóa ({{count}})",
+    "delete-selected-title": "Xóa thông báo đã chọn",
+    "delete-selected-confirm": "Bạn có chắc chắn muốn xóa {{count}} thông báo đã chọn không? Thao tác này không thể hoàn tác.",
+    "delete-single-title": "Xóa thông báo",
+    "delete-single-confirm": "Bạn có chắc chắn muốn xóa thông báo này không?",
+    "delete-confirm-btn": "Xóa",
+    "cancel-btn": "Hủy",
+    "delete-tooltip": "Xóa thông báo"
   }
 }

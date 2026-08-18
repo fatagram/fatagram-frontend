@@ -46,3 +46,15 @@ export const useDeleteNotification = () => {
     },
   });
 };
+
+export const useDeleteBatchNotifications = () => {
+  const qc = useQueryClient();
+  return useResultFetcher(
+    (notificationIds: string[]) => notificationService.deleteBatch(notificationIds),
+    {
+      onSuccess: () => {
+        qc.invalidateQueries({ queryKey: ["notifications"] });
+      },
+    },
+  );
+};

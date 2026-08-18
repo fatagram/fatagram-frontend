@@ -32,9 +32,8 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
   return (
     <div
       className={clsx(
-        "relative bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none",
+        "relative bg-bg-second shadow-xl rounded-xl flex flex-col gap-2 select-none min-h-0",
         "animate-dropdown-slide origin-top scrollbar-hide !w-[380px]",
-        "max-h-[650px]",
         className,
       )}
       ref={ref}
@@ -55,7 +54,7 @@ export const ChatMenu: React.FC<ChatMenuProps> = ({ className, onConversationCli
       )}
       {tab === "list" && (
         <ChatList
-          className="overflow-y-auto pt-0 h-full"
+          className="overflow-y-auto pt-0 flex-1 min-h-0"
           onConversationClick={handleSelectConversation}
         />
       )}

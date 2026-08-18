@@ -5,7 +5,7 @@ import clsx from "clsx";
 
 // CheckboxProps interface
 interface CheckboxProps extends ComponentProps {
-  label: React.ReactNode;
+  label?: React.ReactNode;
   checked?: boolean;
   onChange?: (e: React.ChangeEvent<HTMLInputElement>) => void;
   disabled?: boolean;
@@ -26,7 +26,12 @@ export const Checkbox: React.FC<CheckboxProps> = ({
   const checkmarkClass = styles["checkmark"];
 
   return (
-    <label className={clsx("relative inline-flex items-start gap-1 select-none", className)}>
+    <label
+      className={clsx(
+        "relative inline-flex items-center gap-1 select-none cursor-pointer",
+        className,
+      )}
+    >
       <input
         {...props}
         disabled={disabled}
@@ -51,7 +56,7 @@ export const Checkbox: React.FC<CheckboxProps> = ({
           "peer-checked:after:visible peer-checked:after:opacity-100",
         )}
       />
-      <span className={clsx("text-text-main text-sm", className)}>{label}</span>
+      {label && <span className={clsx("text-text-main text-sm", className)}>{label}</span>}
     </label>
   );
 };

@@ -16,6 +16,8 @@ export interface ConversationDto {
   otherUserId?: string | null;
   theme?: string | null;
   backgroundUrl?: string | null;
+  isPinned?: boolean;
+  pinnedAt?: string | null;
 }
 
 export interface UpdateConversationDto {

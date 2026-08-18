@@ -95,7 +95,13 @@
       "viewMembersDescription": "View list of members",
       "viewProfile": "View personal page",
       "messagePrivately": "Message privately",
-      "leaveGroup": "Leave group"
+      "leaveGroup": "Leave group",
+      "pin": "Pin",
+      "unpin": "Unpin",
+      "pinConversation": "Pin conversation",
+      "unpinConversation": "Unpin conversation",
+      "pinConversationDescription": "Keep this conversation at the top of your chat list",
+      "unpinConversationDescription": "Unpin this conversation from the top of your chat list"
     },
     "messageOptions": {
       "reply": "Reply",

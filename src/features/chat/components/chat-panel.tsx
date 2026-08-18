@@ -68,7 +68,7 @@ export const ChatPanel: React.FC<Props> = ({
   const storeConv = useConversationStore(
     useShallow((state) => state.conversations.find((c) => c.id === conversationId)),
   );
-  const conv = conversationData ?? storeConv;
+  const conv = storeConv ?? conversationData;
 
   const activeTheme = conv?.theme || undefined;
 

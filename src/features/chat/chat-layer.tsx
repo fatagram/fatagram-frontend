@@ -21,7 +21,7 @@ export const ChatLayer: React.FC<ChatLayerProps> = ({ className }) => {
   if (isFatalkPage) return null;
 
   return (
-    <div className={clsx("flex items-end gap-4", className)}>
+    <div className={clsx("flex items-end gap-4 max-h-[calc(100dvh-var(--header-height,56px)-8px)]", className)}>
       <GroupChatWindow />
       <BubbleChatList className="mb-5" />
     </div>

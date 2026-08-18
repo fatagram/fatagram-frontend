@@ -35,7 +35,22 @@ export function BottomSheet({
       <Drawer.Trigger asChild>{trigger}</Drawer.Trigger>
 
       <Drawer.Portal>
-        <Drawer.Overlay className="fixed inset-0 bg-black/40 z-[100]" />
+        <Drawer.Overlay
+          className="fixed inset-0 bg-black/40 z-[100] touch-none select-none cursor-pointer"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onOpenChange(false);
+          }}
+          onTouchStart={(e) => {
+            e.stopPropagation();
+          }}
+          onTouchEnd={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            onOpenChange(false);
+          }}
+        />
 
         <Drawer.Content
           className={clsx(
@@ -47,6 +62,7 @@ export function BottomSheet({
             maxHeight,
             className,
           )}
+          onClick={(e) => e.stopPropagation()}
         >
           <Drawer.Description className="sr-only">
             {description || title || "Dialog"}

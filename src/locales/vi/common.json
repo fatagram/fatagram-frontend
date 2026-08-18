@@ -93,7 +93,13 @@
       "viewMembersDescription": "Xem danh sách thành viên",
       "viewProfile": "Xem trang cá nhân",
       "messagePrivately": "Nhắn tin riêng",
-      "leaveGroup": "Rời khỏi nhóm"
+      "leaveGroup": "Rời khỏi nhóm",
+      "pin": "Ghim",
+      "unpin": "Bỏ ghim",
+      "pinConversation": "Ghim hội thoại",
+      "unpinConversation": "Bỏ ghim hội thoại",
+      "pinConversationDescription": "Giữ cuộc trò chuyện này luôn ở trên cùng danh sách",
+      "unpinConversationDescription": "Bỏ ghim cuộc trò chuyện này khỏi đầu danh sách"
     },
     "messageOptions": {
       "reply": "Phản hồi",

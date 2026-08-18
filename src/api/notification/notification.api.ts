@@ -28,6 +28,10 @@ export class NotificationService {
     return await apiDelete(`${PREFIX}/${notificationId}`);
   }
 
+  public async deleteBatch(notificationIds: string[]): Promise<Result<any>> {
+    return await apiPost(`${PREFIX}/batch-delete`, { notificationIds });
+  }
+
   public async deleteAll(): Promise<Result<any>> {
     return await apiDelete(`${PREFIX}`);
   }

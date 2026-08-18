@@ -12,6 +12,19 @@
     "showMore": "Show more",
     "mark-all-read": "Mark all as read",
     "delete-all": "Delete all",
-    "open-notifications": "Open notifications"
+    "open-notifications": "Open notifications",
+    "select": "Select",
+    "exit-select": "Done",
+    "select-all": "Select all",
+    "deselect-all": "Deselect",
+    "selected-count": "{{count}} selected",
+    "delete-selected": "Delete ({{count}})",
+    "delete-selected-title": "Delete selected notifications",
+    "delete-selected-confirm": "Are you sure you want to delete {{count}} selected notifications? This action cannot be undone.",
+    "delete-single-title": "Delete notification",
+    "delete-single-confirm": "Are you sure you want to delete this notification?",
+    "delete-confirm-btn": "Delete",
+    "cancel-btn": "Cancel",
+    "delete-tooltip": "Delete notification"
   }
 }

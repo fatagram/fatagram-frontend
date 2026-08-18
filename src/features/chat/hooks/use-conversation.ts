@@ -1,17 +1,16 @@
+
 import { conversationService } from "@/api/conversation/conversation.api";
-import { useAuth } from "@/contexts/auth-context";
 import {
   SafeQueryCallbacks,
   useSafeInfiniteQueryResult,
   useSafeQueryResult,
 } from "@/hooks/use-safe-query";
-import { CursorQuery } from "@/types/query";
 import { useResultFetcher } from "@/hooks/use-fetcher";
-import { useSnackbar } from "@/contexts";
-import { create } from "zustand";
+import { useAuth } from "@/contexts";
 import { convManager, useConversationStore } from "../services/conversation-manager";
-import { useEffect, useMemo, useState } from "react";
-import { useQueryClient } from "@tanstack/react-query";
+import { useSnackbar } from "@/contexts/snackbar-context";
+import { create } from "zustand";
+import { CursorQuery } from "@/types/query";
 
 export const CONVERSATION_KEYS = {
   list: (queryParams?: Omit<CursorQuery<string>, "cursor">) =>
@@ -35,15 +34,21 @@ export const useGetConversation = (
     queryKey: CONVERSATION_KEYS.detail(conversationId),
     fn: async () => await conversationService.getConversation(conversationId),
     enabled: enabled ?? false,
-    staleTime: 0,
+    staleTime: Infinity, // Data is managed via Zustand store; no auto-refetch needed
     options: {
       onSuccess: (data) => {
-        convManager.updateConversation(data.id, {
-          avatarUrl: data.avatarUrl,
-          name: data.name,
-          theme: data.theme,
-          backgroundUrl: data.backgroundUrl,
-        });
+        // Only hydrate store if the conversation is not already in memory
+        const existing = convManager.getConversation(data.id);
+        if (!existing) {
+          convManager.updateConversation(data.id, {
+            avatarUrl: data.avatarUrl,
+            name: data.name,
+            theme: data.theme,
+            backgroundUrl: data.backgroundUrl,
+            isPinned: data.isPinned,
+            pinnedAt: data.pinnedAt,
+          });
+        }
         config?.onSuccess?.(data);
       },
     },
@@ -74,9 +79,10 @@ export const useMarkConversationAsRead = () => {
 };
 
 export const useLocalMarkAsRead = () => {
-  return async (conversationId: string, messageSeq: number) => {
-    await convManager.markAsSeen(conversationId, messageSeq);
+  const markAsRead = (conversationId: string, messageSeq: number) => {
+    convManager.markAsRead(conversationId, messageSeq);
   };
+  return markAsRead;
 };
 
 export const useGetPariticipantsSeen = (conversationId: string) => {
@@ -92,6 +98,20 @@ export const useGetPariticipantsSeen = (conversationId: string) => {
       },
     },
     refetchOnMount: "always",
+  });
+};
+
+export const useGetTotalUnreadCount = () => {
+  const { userId } = useAuth();
+  return useSafeQueryResult({
+    queryKey: ["conversation", "totalUnreadCount"],
+    fn: async () => await conversationService.getUnreadCount(),
+    enabled: !!userId,
+    options: {
+      onSuccess: (data) => {
+        useConversationStore.getState().setTotalUnreadCount(data);
+      },
+    },
   });
 };
 
@@ -138,87 +158,123 @@ export const useGetDeltaConversations = () => {
   const fetcher = useResultFetcher(
     async (since: Date) => await conversationService.getDeltaConversations(since),
   );
-
-  const fetcherDelta = async () => {
-    const conversations = useConversationStore.getState().conversations;
-    const lastConv = conversations[0];
-    if (!lastConv) return;
-
-    const since = lastConv?.lastActiveAt ? new Date(lastConv.lastActiveAt) : new Date(0);
-    return await fetcher.fetch(since, {
-      onSuccess: (data) => {
-        if (!data || data?.length == 0) return;
-        convManager.appendConversations(data, true);
-      },
-    });
-  };
-
-  return { fetcherDelta };
+  return fetcher;
 };
 
-export const useGetTotalUnreadCount = () => {
-  const { userId } = useAuth();
-  return useSafeQueryResult({
-    queryKey: ["conversation", "unread-count", userId],
-    fn: async () => await conversationService.getUnreadCount(),
-    // Only fetch when authenticated — prevents 401 → refresh-token loop on guest pages
-    enabled: !!userId,
-    options: {
-      onSuccess: (data) => {
-        convManager.setUnreadCount(data);
-      },
+export const useGetMessages = (
+  conversationId: string,
+  queryParams?: Omit<CursorQuery<number>, "cursor">,
+) => {
+  return useSafeInfiniteQueryResult({
+    queryKey: ["conversation", conversationId, "messages", queryParams?.limit],
+    fn: async (cursor?: number) => {
+      return await conversationService.getMessages(conversationId, {
+        ...queryParams,
+        cursor,
+      });
     },
-    refetchOnReconnect: true,
+    enabled: !!conversationId,
+    staleTime: 0,
+    gcTime: 0,
+  });
+};
+
+export const useGetDeltaMessages = (conversationId: string) => {
+  return useSafeQueryResult({
+    queryKey: ["conversation", conversationId, "messages", "delta"],
+    fn: async () => await conversationService.getDeltaMessages(conversationId, 0),
+    enabled: !!conversationId,
+    staleTime: 1000 * 60 * 5,
   });
 };
 
 export const useUpdateConversationAvatar = (conversationId: string) => {
-  const queryClient = useQueryClient();
   return useResultFetcher(
-    async ({ file }: { file: File }) =>
-      await conversationService.updateConversationAvatar(conversationId, file),
+    async (params: File | { file: File }) => {
+      const file = params instanceof File ? params : params.file;
+      return await conversationService.updateConversationAvatar(conversationId, file);
+    },
     {
       onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
+        // Will be updated via local URL or SignalR event
       },
     },
   );
 };
 
 export const useUpdateConversationName = (conversationId: string) => {
-  const queryClient = useQueryClient();
   return useResultFetcher(
-    async ({ name }: { name: string }) =>
-      await conversationService.updateConversationName(conversationId, name),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
-      },
+    async (params: string | { name: string }) => {
+      const name = typeof params === "string" ? params : params.name;
+      const res = await conversationService.updateConversationName(conversationId, name);
+      if (res.success && conversationId && name) {
+        convManager.updateConversation(conversationId, { name });
+      }
+      return res;
     },
   );
 };
 
 export const useUpdateConversationTheme = (conversationId: string) => {
-  const queryClient = useQueryClient();
   return useResultFetcher(
-    async ({ theme }: { theme: string }) =>
-      await conversationService.updateConversationTheme(conversationId, theme),
-    {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
-      },
+    async (params: { theme: string | null } | string | null) => {
+      const theme =
+        params !== null && typeof params === "object" && "theme" in params
+          ? params.theme
+          : (params as string | null);
+      const res = await conversationService.updateConversationTheme(conversationId, theme);
+      if (res.success && conversationId) {
+        convManager.updateConversation(conversationId, { theme });
+      }
+      return res;
     },
   );
 };
 
 export const useUpdateConversationBackground = (conversationId: string) => {
-  const queryClient = useQueryClient();
   return useResultFetcher(
-    async ({ backgroundUrl }: { backgroundUrl: string | null }) =>
-      await conversationService.updateConversationBackground(conversationId, backgroundUrl),
+    async (params: { backgroundUrl: string | null } | string | null) => {
+      const backgroundUrl =
+        params !== null && typeof params === "object" && "backgroundUrl" in params
+          ? params.backgroundUrl
+          : (params as string | null);
+      const res = await conversationService.updateConversationBackground(
+        conversationId,
+        backgroundUrl,
+      );
+      if (res.success && conversationId) {
+        convManager.updateConversation(conversationId, { backgroundUrl });
+      }
+      return res;
+    },
+  );
+};
+
+export const useTogglePinConversation = (conversationId?: string) => {
+  return useResultFetcher(
+    async (targetConversationId?: string) => {
+      const id =
+        (typeof targetConversationId === "string" ? targetConversationId : null) || conversationId;
+      if (!id) throw new Error("Conversation ID is required to toggle pin");
+      const res = await conversationService.togglePin(id);
+      if (res.success && typeof res.data === "boolean") {
+        return {
+          ...res,
+          data: { isPinned: res.data, targetId: id },
+        };
+      }
+      return {
+        ...res,
+        data: { isPinned: false, targetId: id },
+      };
+    },
     {
-      onSuccess: () => {
-        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
+      onSuccess: (data) => {
+        const id = data?.targetId || conversationId;
+        const isPinned = data?.isPinned;
+        if (id && typeof isPinned === "boolean") {
+          convManager.togglePin(id, isPinned);
+        }
       },
     },
   );
@@ -236,129 +292,77 @@ interface MessageState {
   ) => void;
   setBulkParticipantsSeen: (
     conversationId: string,
-    data: Record<string, { sequenceNumber: number; seenAt: string }>,
+    participantsSeenInfo: Record<string, { sequenceNumber: number; seenAt: string }>,
   ) => void;
-}
-
-interface ViewerInfo {
-  userId: string;
-  seenAt: string;
 }
 
 export const useMessageStore = create<MessageState>((set) => ({
   lastMessageMap: {},
   messageUserSeenMap: {},
-  setLastMessage: (conversationId, messageSeq) =>
-    set((state) => ({
-      lastMessageMap: {
-        ...state.lastMessageMap,
-        [conversationId]: messageSeq,
-      },
-    })),
-  setBulkLastMessages: (data) =>
-    set((state) => ({
-      lastMessageMap: {
-        ...state.lastMessageMap,
-        ...Object.entries(data).reduce(
-          (acc, [convId, newSeq]) => {
-            const currentSeq = state.lastMessageMap[convId];
-            acc[convId] = currentSeq !== undefined ? Math.max(currentSeq, newSeq) : newSeq;
-            return acc;
-          },
-          {} as Record<string, number>,
-        ),
-      },
-    })),
-  setParticipantsSeen: (conversationId, userId, participantSeen) => {
+  setLastMessage: (conversationId, messageSeq) => {
     set((state) => {
-      const rawConvMap = state.messageUserSeenMap?.[conversationId] || {};
-      const newMsgSeq = participantSeen.sequenceNumber;
-
-      let previousSeq: number | undefined;
-      for (const [messageSeq, viewers] of Object.entries(rawConvMap)) {
-        if (viewers.some((viewer) => viewer.userId === userId)) {
-          previousSeq = Number(messageSeq);
-          break;
-        }
-      }
-
-      if (previousSeq === newMsgSeq) {
-        const existingAtNew = rawConvMap[newMsgSeq] || [];
-        const existingViewer = existingAtNew.find((viewer) => viewer.userId === userId);
-        if (existingViewer?.seenAt === participantSeen.seenAt) {
-          return state;
-        }
-      }
-
-      const nextConvMap: Record<number, ViewerInfo[]> = { ...rawConvMap };
-
-      if (previousSeq !== undefined) {
-        const reducedPrev = (rawConvMap[previousSeq] || []).filter(
-          (viewer) => viewer.userId !== userId,
-        );
-        if (reducedPrev.length > 0) {
-          nextConvMap[previousSeq] = reducedPrev;
-        } else {
-          delete nextConvMap[previousSeq];
-        }
-      }
-
-      const currentAtNew = nextConvMap[newMsgSeq] ? [...nextConvMap[newMsgSeq]] : [];
-      const existingIndex = currentAtNew.findIndex((viewer) => viewer.userId === userId);
-      if (existingIndex >= 0) {
-        currentAtNew[existingIndex] = { userId, seenAt: participantSeen.seenAt };
-      } else {
-        currentAtNew.push({ userId, seenAt: participantSeen.seenAt });
-      }
-      nextConvMap[newMsgSeq] = currentAtNew;
-
       return {
-        messageUserSeenMap: {
-          ...state.messageUserSeenMap,
-          [conversationId]: nextConvMap,
+        lastMessageMap: {
+          ...state.lastMessageMap,
+          [conversationId]: messageSeq,
         },
       };
     });
   },
-  setBulkParticipantsSeen: (conversationId, data) => {
+  setBulkLastMessages: (data) => {
     set((state) => {
-      if (!data) return state;
-
-      const currentConvMap = state.messageUserSeenMap?.[conversationId] || {};
-
-      const toTime = (value: string) => {
-        const t = new Date(value).getTime();
-        return Number.isFinite(t) ? t : 0;
+      return {
+        lastMessageMap: {
+          ...state.lastMessageMap,
+          ...data,
+        },
       };
+    });
+  },
+  setParticipantsSeen: (conversationId, userId, participantSeen) => {
+    set((state) => {
+      const convMap = state.messageUserSeenMap?.[conversationId] || {};
+      const sequenceNumber = participantSeen.sequenceNumber;
+      const seenAt = participantSeen.seenAt;
 
-      const mergedByUser: Record<string, { sequenceNumber: number; seenAt: string }> = {};
+      const newConvMap = { ...convMap };
 
-      Object.entries(currentConvMap).forEach(([messageSeq, viewers]) => {
-        viewers.forEach((viewer) => {
-          const existing = mergedByUser[viewer.userId];
-          if (!existing || toTime(viewer.seenAt) > toTime(existing.seenAt)) {
-            mergedByUser[viewer.userId] = {
-              sequenceNumber: Number(messageSeq),
-              seenAt: viewer.seenAt,
-            };
-          }
-        });
-      });
-
-      Object.entries(data).forEach(([userId, seenInfo]) => {
-        const existing = mergedByUser[userId];
-        if (!existing || toTime(seenInfo.seenAt) > toTime(existing.seenAt)) {
-          mergedByUser[userId] = {
-            sequenceNumber: Number(seenInfo.sequenceNumber),
-            seenAt: seenInfo.seenAt,
-          };
+      for (const [seq, list] of Object.entries(newConvMap)) {
+        const filteredList = list.filter((p) => p.userId !== userId);
+        if (filteredList.length === 0) {
+          delete newConvMap[Number(seq)];
+        } else {
+          newConvMap[Number(seq)] = filteredList;
         }
-      });
+      }
 
-      const newConvMap: Record<number, ViewerInfo[]> = {};
-      Object.entries(mergedByUser).forEach(([userId, seenInfo]) => {
-        if (!newConvMap[seenInfo.sequenceNumber]) newConvMap[seenInfo.sequenceNumber] = [];
-        newConvMap[seenInfo.sequenceNumber].push({ userId, seenAt: seenInfo.seenAt });
+      if (!newConvMap[sequenceNumber]) {
+        newConvMap[sequenceNumber] = [];
+      }
+
+      newConvMap[sequenceNumber] = [...newConvMap[sequenceNumber], { userId, seenAt }];
+
+      return {
+        messageUserSeenMap: {
+          ...state.messageUserSeenMap,
+          [conversationId]: newConvMap,
+        },
+      };
+    });
+  },
+  setBulkParticipantsSeen: (conversationId, participantsSeenInfo) => {
+    set((state) => {
+      const newConvMap: Record<number, { userId: string; seenAt: string }[]> = {};
+
+      Object.entries(participantsSeenInfo).forEach(([userId, seenInfo]) => {
+        const sequenceNumber = seenInfo.sequenceNumber;
+        const seenAt = seenInfo.seenAt;
+
+        if (!newConvMap[sequenceNumber]) {
+          newConvMap[sequenceNumber] = [];
+        }
+
+        newConvMap[sequenceNumber].push({ userId, seenAt });
       });
 
       return {

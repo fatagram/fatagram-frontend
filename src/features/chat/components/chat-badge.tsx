@@ -39,12 +39,15 @@ export const ChatBadge: React.FC<ChatBadgeProps> = () => {
         animation={AnimationLib.DropdownSlide}
         duration={150}
         className={clsx(
-          "!absolute max-h-[750px] z-10 min-w-[350px] min-h-[100px]",
-          "sm:top-[120%] sm:right-0 sm:w-auto sm:h-auto sm:p-2",
-          "top-[108%] -right-[70px] w-screen h-screen p-6",
+          "!absolute z-50 min-w-[340px] sm:w-[380px] max-h-[min(600px,calc(100dvh-var(--header-height,56px)-20px))] flex flex-col",
+          "top-[120%] right-0",
         )}
       >
-        <ChatMenu ref={menuRef} onConversationClick={handleConversationClick} />
+        <ChatMenu
+          className="w-full flex-1 shadow-2xl max-h-[min(580px,calc(100dvh-var(--header-height,56px)-28px))]"
+          ref={menuRef}
+          onConversationClick={handleConversationClick}
+        />
       </Transition>
     </div>
   );

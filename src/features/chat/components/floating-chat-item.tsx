@@ -38,7 +38,7 @@ export const FloatingChatItem: React.FC<FloatingChatItemProps> = ({
   return (
     <div
       onMouseDown={() => setFocusOn(id)}
-      className="relative flex-shrink-0 flex transition-[width,max-width] duration-200 ease-out"
+      className="relative flex-shrink-0 flex items-end transition-[width,max-width] duration-200 ease-out h-[var(--chat-floating-height)]"
       style={{
         width: isMenuOpen ? "602px" : "350px",
         maxWidth: isMenuOpen ? "602px" : "350px",
@@ -46,10 +46,10 @@ export const FloatingChatItem: React.FC<FloatingChatItemProps> = ({
       }}
     >
       <FloatingChatSidebar conversationId={id} onClose={() => setOpenMenuId(null)} isOpen={isMenuOpen} />
-      <div className={clsx("w-[350px]", shouldAnimate && "animate-chat-grow-in")}>
+      <div className={clsx("w-[350px] h-full", shouldAnimate && "animate-chat-grow-in")}>
         <ChatPanel
           conversationId={id}
-          className="h-[500px] w-[350px] rounded-t-xl border border-bg-fourth border-b-0 shadow-lg"
+          className="h-full w-[350px] rounded-t-xl border border-bg-fourth border-b-0 shadow-lg"
           headerRight={
             <div className="flex gap-2">
               <MiniButton sz="sm" onClick={() => setOpenMenuId(isMenuOpen ? null : id)}>

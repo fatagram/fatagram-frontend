@@ -61,11 +61,8 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
       <div
         className={clsx(
           "bg-bg-second border border-bg-fourth border-b-0 rounded-t-xl flex flex-col shrink-0 select-none shadow-lg transition-all duration-200 ease-out",
-          isOpen ? "w-[240px] opacity-100 mr-3" : "w-0 opacity-0 mr-0 border-none overflow-hidden"
+          isOpen ? "w-[240px] h-full opacity-100 mr-3" : "w-0 h-0 opacity-0 mr-0 border-none overflow-hidden"
         )}
-        style={{
-          height: isOpen ? "500px" : "0px",
-        }}
       >
         <div className="flex items-center gap-3 px-4 h-[60px] border-b border-bg-fourth shrink-0">
           <MiniButton sz="sm" onClick={onClose}>
@@ -228,11 +225,8 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
     <div
       className={clsx(
         "bg-bg-second border border-bg-fourth border-b-0 rounded-t-xl flex flex-col shrink-0 select-none shadow-lg transition-all duration-200 ease-out",
-        isOpen ? "w-[240px] opacity-100 mr-3" : "w-0 opacity-0 mr-0 border-none overflow-hidden"
+        isOpen ? "w-[240px] h-full opacity-100 mr-3" : "w-0 h-0 opacity-0 mr-0 border-none overflow-hidden"
       )}
-      style={{
-        height: isOpen ? "500px" : "0px",
-      }}
     >
       <input
         type="file"

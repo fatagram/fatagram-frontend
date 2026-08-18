@@ -124,6 +124,10 @@ export class ConversationService {
   ): Promise<Result<void>> {
     return await apiPatch(`${PREFIX}/${conversationId}/background`, { backgroundUrl });
   }
+
+  public async togglePin(conversationId: string): Promise<Result<boolean>> {
+    return await apiPost(`${PREFIX}/${conversationId}/toggle-pin`);
+  }
 }
 
 export const conversationService = new ConversationService();

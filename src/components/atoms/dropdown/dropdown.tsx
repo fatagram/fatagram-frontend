@@ -14,6 +14,7 @@ export interface DropdownProps {
   onSelect?: (item: DropdownItem) => void;
   showPolygon?: boolean;
   className?: string;
+  style?: React.CSSProperties;
   ref?: React.Ref<HTMLDivElement>;
 }
 
@@ -23,12 +24,19 @@ const Dropdown: React.FC<DropdownProps> = ({
   onSelect,
   showPolygon = true,
   className,
+  style,
   ref,
 }) => {
   if (!isShow) return null;
 
   return (
-    <div className={clsx("rounded-2xl p-2 bg-bg-seventh", className)} ref={ref}>
+    <div
+      className={clsx("rounded-2xl p-2 bg-bg-seventh", className)}
+      style={style}
+      ref={ref}
+      onClick={(e) => e.stopPropagation()}
+      onMouseDown={(e) => e.stopPropagation()}
+    >
       {showPolygon && (
         <div
           className={clsx(
@@ -43,7 +51,8 @@ const Dropdown: React.FC<DropdownProps> = ({
         {items.map((item, index) => (
           <li
             key={index}
-            onClick={() => {
+            onClick={(e) => {
+              e.stopPropagation();
               item.onClick?.();
               onSelect?.(item);
             }}
