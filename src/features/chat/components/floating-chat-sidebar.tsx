@@ -8,7 +8,9 @@ import {
   faCamera,
   faPalette,
   faUser,
+  faPhotoFilm,
 } from "@fortawesome/free-solid-svg-icons";
+import { ConversationMediaGallery } from "./conversation-media-gallery/conversation-media-gallery";
 import { useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import { useTranslation } from "react-i18next";
@@ -222,6 +224,19 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
     });
   };
 
+  const openMediaGalleryFlow = () => {
+    openDialog({
+      title: t("common:conversations.settings.mediaAndFiles", "File phương tiện & file"),
+      className:
+        "w-[calc(100vw-2rem)] sm:w-[560px] md:w-[680px] max-w-2xl h-[540px] max-h-[85vh] !px-4 !py-4 sm:!px-6 sm:!py-5 flex flex-col overflow-hidden",
+      content: (
+        <div className="flex-1 overflow-hidden h-full min-h-0 flex flex-col pt-1">
+          <ConversationMediaGallery conversationId={conversationId} />
+        </div>
+      ),
+    });
+  };
+
   return (
     <div
       className={clsx(
@@ -299,8 +314,16 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
         )}
 
         <button
+          onClick={openMediaGalleryFlow}
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-third transition-colors text-left w-full text-text-main cursor-pointer"
+        >
+          <FontAwesomeIcon icon={faPhotoFilm} className="text-primary-400 w-4 h-4 shrink-0" />
+          <Text sz="sm" weight="medium">File phương tiện & file</Text>
+        </button>
+
+        <button
           onClick={openThemePickerFlow}
-          className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-third transition-colors text-left w-full text-text-main"
+          className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-third transition-colors text-left w-full text-text-main cursor-pointer"
         >
           <FontAwesomeIcon icon={faPalette} className="text-primary-400 w-4 h-4 shrink-0" />
           <Text sz="sm" weight="medium">Thay đổi chủ đề</Text>

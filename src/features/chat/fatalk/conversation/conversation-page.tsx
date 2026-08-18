@@ -30,7 +30,13 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useDialog, useTheme } from "@/contexts";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ParticipantList } from "../../components/participant-list";
+import { ConversationMediaGallery } from "../../components/conversation-media-gallery/conversation-media-gallery";
 import { useRenderConversationContent } from "../../hooks/use-render-conversation-content";
+import { useConversationMedia } from "../../hooks/use-conversation-media";
+import { useMediaViewer } from "../../context/media-viewer-context";
+import { useMediaBlob } from "@/hooks/use-media-blob";
+import { MediaType } from "@/types/entities/message.type";
+import { MessageMediaDto } from "@/api/message/dto/message.dto";
 import { themeDetails } from "./chat-themes.config";
 import { dataURLtoFile } from "./chat-theme-utils";
 import { uploadService } from "@/api/upload/upload.api";
@@ -50,6 +56,8 @@ import {
   faUserGroup,
   faThumbtack,
   faPaperPlane,
+  faPhotoFilm,
+  faPlay,
 } from "@fortawesome/free-solid-svg-icons";
 
 interface ConversationPageProps extends ComponentProps {}
@@ -389,6 +397,137 @@ export const ChatThemeDialogContent: React.FC<{
   );
 };
 
+const RecentMediaThumbnail: React.FC<{
+  item: MessageMediaDto;
+  isLastWithMore?: boolean;
+  moreCount?: number;
+  onOpenViewer: () => void;
+  onOpenGallery: () => void;
+}> = ({ item, isLastWithMore, moreCount, onOpenViewer, onOpenGallery }) => {
+  const isVideo = item.type === MediaType.Video;
+  const displayUrl = isVideo ? item.url.replace(/\.[^/.]+$/, ".jpg") : item.url;
+  const { blobUrl } = useMediaBlob(displayUrl);
+  const [hasError, setHasError] = useState(false);
+
+  return (
+    <div
+      onClick={isLastWithMore ? onOpenGallery : onOpenViewer}
+      className="group relative aspect-square rounded-xl overflow-hidden bg-bg-fourth/40 border border-border-main/30 cursor-pointer shadow-xs select-none"
+    >
+      {hasError ? (
+        <div className="w-full h-full flex items-center justify-center bg-bg-third text-text-fourth">
+          <FontAwesomeIcon icon={isVideo ? faPlay : faImage} className="text-sm opacity-50" />
+        </div>
+      ) : (
+        <img
+          src={blobUrl || displayUrl}
+          alt="Recent media"
+          onError={() => setHasError(true)}
+          className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
+          loading="lazy"
+        />
+      )}
+
+      {/* Video badge if not overlay */}
+      {isVideo && !isLastWithMore && (
+        <div className="absolute bottom-1 left-1 z-10 flex items-center justify-center w-4 h-4 rounded-full bg-black/60 text-white text-[8px] pl-[1px]">
+          <FontAwesomeIcon icon={faPlay} />
+        </div>
+      )}
+
+      {/* Last item overlay: +N */}
+      {isLastWithMore ? (
+        <div className="absolute inset-0 bg-black/60 backdrop-blur-[2px] flex items-center justify-center text-white font-bold text-sm sm:text-base group-hover:bg-black/70 transition-colors">
+          +{moreCount}
+        </div>
+      ) : (
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors pointer-events-none" />
+      )}
+    </div>
+  );
+};
+
+const RecentMediaSection: React.FC<{
+  conversationId: string;
+  onOpenGallery: () => void;
+}> = ({ conversationId, onOpenGallery }) => {
+  const { t } = useTranslation();
+  const { onOpen: openMediaViewer } = useMediaViewer();
+  const mediaFilter = useMemo(() => [MediaType.Image, MediaType.Video, MediaType.Gif], []);
+  const { mediaList, isLoading } = useConversationMedia(conversationId, {
+    types: mediaFilter,
+    limit: 20,
+  });
+
+  if (isLoading) {
+    return (
+      <div className="px-4 py-3 border-t border-bg-fourth/60">
+        <div className="flex items-center justify-between mb-2">
+          <Skeleton className="w-32 h-4 rounded" />
+          <Skeleton className="w-16 h-3 rounded" />
+        </div>
+        <div className="grid grid-cols-4 gap-2">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <div key={i} className="aspect-square rounded-xl overflow-hidden">
+              <Skeleton className="w-full h-full" />
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  }
+
+  if (mediaList.length === 0) return null;
+
+  const displayItems = mediaList.slice(0, 4);
+  const totalCount = mediaList.length;
+  const hasMore = totalCount > 4;
+  const remainingCount = totalCount - 3;
+
+  return (
+    <div className="px-4 py-3 border-t border-bg-fourth/60 bg-bg-main/50">
+      <div className="flex items-center justify-between mb-2">
+        <Text sz="sm" weight="bold" className="text-text-main">
+          {t("common:conversations.settings.recentMedia", "Phương tiện gần đây")}
+        </Text>
+        <button
+          type="button"
+          onClick={onOpenGallery}
+          className="text-xs text-primary-500 hover:text-primary-600 font-medium hover:underline flex items-center gap-1 cursor-pointer transition-colors"
+        >
+          <span>{t("common:conversations.settings.seeAll", "Xem tất cả")}</span>
+          <FontAwesomeIcon icon={faChevronRight} className="text-[10px]" />
+        </button>
+      </div>
+
+      <div className="grid grid-cols-4 gap-2">
+        {displayItems.map((item, index) => {
+          const isLast = index === 3;
+          const isLastWithMore = isLast && hasMore;
+
+          return (
+            <RecentMediaThumbnail
+              key={item.id || item.url || index}
+              item={item}
+              isLastWithMore={isLastWithMore}
+              moreCount={remainingCount}
+              onOpenViewer={() => {
+                openMediaViewer({
+                  id: item.id || item.url,
+                  url: item.url,
+                  type: item.type,
+                  conversationId,
+                });
+              }}
+              onOpenGallery={onOpenGallery}
+            />
+          );
+        })}
+      </div>
+    </div>
+  );
+};
+
 export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   const navigate = useNavigate();
   const { conversationId } = useParams<{ conversationId: string }>();
@@ -447,7 +586,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   const { openDialog, closeDialog } = useDialog();
   const [isSaving, setIsSaving] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
-  const [viewMode, setViewMode] = useState<"main" | "members" | "theme">("main");
+  const [viewMode, setViewMode] = useState<"main" | "members" | "theme" | "media">("main");
   const mobileSelectedThemeRef = useRef<string>(conv?.theme || "default");
   const mobileSelectedBackgroundUrlRef = useRef<string | null>(conv?.backgroundUrl || null);
   const [newName, setNewName] = useState("");
@@ -550,6 +689,23 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
     }
   };
 
+  const openMediaGalleryFlow = () => {
+    if (isMobile) {
+      setViewMode("media");
+    } else {
+      openDialog({
+        title: t("common:conversations.settings.mediaAndFiles", "File phương tiện & file"),
+        className:
+          "w-[calc(100vw-2rem)] sm:w-[560px] md:w-[680px] max-w-2xl h-[560px] max-h-[85vh] !px-4 !py-4 sm:!px-6 sm:!py-5 flex flex-col overflow-hidden",
+        content: (
+          <div className="flex-1 overflow-hidden h-full min-h-0 flex flex-col pt-1">
+            <ConversationMediaGallery conversationId={conversationId!} />
+          </div>
+        ),
+      });
+    }
+  };
+
   const triggerFileInput = () => {
     fileInputRef.current?.click();
   };
@@ -622,7 +778,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   };
 
   const handleBackSetting = () => {
-    if (viewMode === "members" || viewMode === "theme") {
+    if (viewMode !== "main") {
       setViewMode("main");
     } else {
       setOpenSetting(false);
@@ -720,7 +876,9 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                 ? t("common:conversations.settings.viewMembers")
                 : viewMode === "theme"
                   ? t("common:conversations.settings.changeTheme", "Chủ đề đoạn chat")
-                  : t("common:conversations.settings.info")}
+                  : viewMode === "media"
+                    ? t("common:conversations.settings.mediaAndFiles", "File phương tiện & file")
+                    : t("common:conversations.settings.info")}
             </Text>
           </div>
 
@@ -883,6 +1041,11 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                     )}
                   </div>
 
+                  <RecentMediaSection
+                    conversationId={conversationId!}
+                    onOpenGallery={openMediaGalleryFlow}
+                  />
+
                   <div className="h-2 bg-bg-secondary w-full" />
 
                   <Menu className="p-2">
@@ -961,11 +1124,30 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                       }
                       onClick={openThemePickerFlow}
                     />
+                    <MenuItem
+                      icon={<FontAwesomeIcon icon={faPhotoFilm} />}
+                      title={t("common:conversations.settings.mediaAndFiles", "File phương tiện & file")}
+                      description={t(
+                        "common:conversations.settings.mediaAndFilesDescription",
+                        "Xem ảnh, video, tập tin và âm thanh trong đoạn chat",
+                      )}
+                      rightElement={
+                        <FontAwesomeIcon
+                          icon={faChevronRight}
+                          className="text-[10px] text-text-fourth"
+                        />
+                      }
+                      onClick={openMediaGalleryFlow}
+                    />
                   </Menu>
                 </div>
               ) : viewMode === "members" ? (
                 <div className="flex-1 overflow-hidden">
                   <ParticipantList conversationId={conversationId!} />
+                </div>
+              ) : viewMode === "media" ? (
+                <div className="flex-1 overflow-hidden p-3 sm:p-4 bg-bg-main flex flex-col">
+                  <ConversationMediaGallery conversationId={conversationId!} />
                 </div>
               ) : (
                 <div className="flex flex-col flex-1 overflow-hidden p-4 bg-bg-main">

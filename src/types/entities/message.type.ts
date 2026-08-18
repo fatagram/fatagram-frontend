@@ -30,6 +30,7 @@ export enum MediaType {
   Video = "Video",
   File = "File",
   Audio = "Audio",
+  Other = "Other",
   Gif = "Gif",
   Sticker = "Sticker",
 }

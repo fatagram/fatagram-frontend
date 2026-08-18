@@ -7,6 +7,9 @@ const apiClient: AxiosInstance = axios.create({
   baseURL: appConfig.apiUrl,
   headers: { "Content-Type": "application/json" },
   withCredentials: true,
+  paramsSerializer: {
+    indexes: null,
+  },
 });
 
 // Instance of axios for fetching data with FormData content type
@@ -14,6 +17,9 @@ const apiClientFormData: AxiosInstance = axios.create({
   baseURL: appConfig.apiUrl,
   headers: { "Content-Type": "multipart/form-data" },
   withCredentials: true,
+  paramsSerializer: {
+    indexes: null,
+  },
 });
 
 // Add Interceptors: apiClient

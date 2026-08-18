@@ -120,31 +120,22 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
     (m) => (m.id || m.url) === (activeMedia?.id || activeMedia?.url),
   );
 
-  // Detect left-prepend: if the array grew and the first item changed, items were prepended.
-  // Compensate Swiper's internal index so it stays on the same media.
+  // Keep Swiper's active slide index in sync with activeMedia whenever allMedia updates
+  // (e.g., when left/right media around anchor finish loading, or prefetch prepends items)
   useLayoutEffect(() => {
     const swiper = swiperRef.current;
-    if (!swiper || allMedia.length === 0) return;
+    if (!swiper || allMedia.length === 0 || !activeMedia) return;
 
-    const currentFirstId = allMedia[0]?.id || allMedia[0]?.url || null;
-    const prevLen = prevAllMediaLenRef.current;
-    const prevFirstId = prevFirstIdRef.current;
+    const targetIndex = allMedia.findIndex(
+      (m) =>
+        (m.id && activeMedia.id && m.id === activeMedia.id) ||
+        (m.url && activeMedia.url && m.url === activeMedia.url),
+    );
 
-    if (
-      prevLen > 0 &&
-      allMedia.length > prevLen &&
-      prevFirstId !== null &&
-      currentFirstId !== prevFirstId
-    ) {
-      // Items were prepended to the left — offset = how many new items appeared
-      const offset = allMedia.length - prevLen;
-      const correctedIndex = swiper.activeIndex + offset;
-      swiper.slideTo(correctedIndex, 0, false);
+    if (targetIndex !== -1 && swiper.activeIndex !== targetIndex) {
+      swiper.slideTo(targetIndex, 0, false);
     }
-
-    prevAllMediaLenRef.current = allMedia.length;
-    prevFirstIdRef.current = currentFirstId;
-  }, [allMedia]);
+  }, [allMedia, activeMedia]);
 
   const handleSlideChange = useCallback((swiper: SwiperType) => {
     // Use allMediaRef to always read the latest array, not a stale closure
@@ -215,7 +206,10 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
 
   useEffect(() => {
     setActiveMedia(media);
-  }, [media]);
+    setLeftMedia([]);
+    setRightMedia([]);
+    initializedAnchor.current = null;
+  }, [media?.id || media?.url]);
 
   useEffect(() => {
     if (!activeMedia) return;

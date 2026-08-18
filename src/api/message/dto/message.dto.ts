@@ -5,6 +5,8 @@ export interface MessageMediaDto {
   url: string;
   type: MediaType;
   metadata?: any;
+  messageSequence?: number;
+  createdAt?: string | Date;
 }
 
 export interface MessageMediaAroundAnchorDto {

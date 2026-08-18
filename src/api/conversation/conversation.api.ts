@@ -93,6 +93,17 @@ export class ConversationService {
     });
   }
 
+  public async getConversationMedia(
+    conversationId: string,
+    filter?: {
+      types?: MediaType[];
+      cursor?: number;
+      limit?: number;
+    },
+  ): Promise<Result<CursorResult<MessageMediaDto, number>>> {
+    return await apiGet(`${PREFIX}/${conversationId}/media`, filter);
+  }
+
   public async getMediaAroundAnchor(
     conversationId: string,
     mediaId: string,
