@@ -20,6 +20,9 @@ import { useChatStore } from "../hooks/use-floating-chat";
 import { TempChat } from "./temp-chat";
 import { useShallow } from "zustand/react/shallow";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faComments } from "@fortawesome/free-solid-svg-icons";
+
 interface Props extends ComponentProps {
   conversationId: string;
   onTurnback?: () => void;
@@ -190,7 +193,7 @@ export const ChatPanel: React.FC<Props> = ({
         )}
       >
         <NotFound
-          icon="fa-regular fa-comments text-3xl"
+          icon={<FontAwesomeIcon icon={faComments} className="text-3xl" />}
           title={t("common:conversations:notFound")}
           description={t("common:conversations:notFoundMessage")}
         />

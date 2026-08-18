@@ -12,6 +12,9 @@ import { useConversationStore } from "../services/conversation-manager";
 import { useDebounce } from "@/hooks/use-debounce";
 import { ChatSearchList } from "./chat-search-list";
 
+import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
+import { faComments } from "@fortawesome/free-solid-svg-icons";
+
 interface ChatListProps extends ComponentProps {
   onConversationClick?: (conversationId: string) => void;
 }
@@ -28,35 +31,29 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
   });
   const conversations = useConversationStore((state) => state.conversations);
 
-  const handleConversationClick = useCallback(
-    async (conversationId: string) => {
-      onConversationClick?.(conversationId);
-      openChat(conversationId);
-    },
-    [onConversationClick, openChat],
-  );
+  const handleSearch = useCallback((keyword: string) => {
+    setKeyword(keyword);
+  }, []);
 
   const scrollWrapperRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className={clsx("flex flex-col px-3 pb-3 pt-1 h-full", className)}>
+    <div className={clsx("flex flex-col gap-2 p-2 h-full", className)}>
       <Textbox
-        placeholder={t("common:conversations.search")}
-        sz="sm"
-        className="border-0 w-full"
-        type="search"
+        className="w-full"
+        placeholder={t("common:conversations.searchPlaceholder")}
+        onChange={(e) => handleSearch(e.target.value)}
         value={keyword}
-        onChange={(e) => setKeyword(e.target.value)}
-        wrapperClassName="pt-[6px] pb-[2px] px-[3px]"
+        type="search"
       />
       {debouncedKeyword ? (
         <ChatSearchList
-          keyword={debouncedKeyword}
           onConversationClick={onConversationClick}
-          className="w-full"
+          keyword={debouncedKeyword}
+          className="flex-1 min-h-0"
         />
       ) : (
-        <div ref={scrollWrapperRef} className="flex-1 overflow-y-auto mt-2 ">
+        <div className="flex-1 min-h-0" ref={scrollWrapperRef}>
           <InfiniteScrollFlex
             className="scrollbar-hide sm:scrollbar-default"
             items={conversations}
@@ -64,14 +61,21 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
             onLoadMore={fetchNextPage ?? (() => {})}
             hasMore={hasNextPage}
             itemTemplate={(item: any) => (
-              <ChatItem conversation={item} onClick={() => handleConversationClick(item.id)} />
+              <ChatItem
+                key={item.id}
+                conversation={item}
+                onClick={() => {
+                  openChat(item.id);
+                  onConversationClick?.(item.id);
+                }}
+              />
             )}
             itemKey={(item) => item.id}
             isLoading={isLoading || isFetchingNextPage}
             loadingSkeleton={
-              <div className={clsx("flex items-center my-8")}>
-                <Skeleton sz="md" variant="circle" />
-                <div className={clsx("flex flex-col w-full flex-1 gap-2 ml-2")}>
+              <div className="flex items-center gap-2 px-2 py-2">
+                <Skeleton variant="circle" sz="md" />
+                <div className="flex flex-col gap-2 w-full">
                   <Skeleton className={clsx("w-full")} sz="sm" />
                   <Skeleton className={clsx("!w-[50%]")} sz="sm" />
                 </div>
@@ -80,7 +84,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
             numberOfSkeletons={2}
             emptyComponent={
               <NotFound
-                icon="fa-regular fa-message"
+                icon={<FontAwesomeIcon icon={faComments} className="text-2xl" />}
                 title={t("common:conversations.noConversations")}
                 description={t("common:conversations.noConversationsMessage")}
                 className="py-5"

@@ -17,9 +17,9 @@ const NotificationsPage: React.FC<NotificationsPageProps> = () => {
   }, []);
 
   return (
-    <div className="flex items-start justify-center w-full flex-1 min-h-0 sm:py-3 px-0 sm:px-4 overflow-hidden">
+    <div className="flex flex-col items-center justify-start w-full flex-1 min-h-0 sm:py-3 px-0 sm:px-4 overflow-hidden h-full">
       <NotificationMenu
-        className="sm:max-w-[600px] w-full px-2 py-2 sm:mx-4 sm:!rounded-lg h-full sm:h-auto sm:max-h-[calc(100dvh-var(--header-height,56px)-24px)] !rounded-none"
+        className="sm:max-w-[600px] w-full px-2 py-2 sm:mx-4 sm:!rounded-lg h-full flex-1 sm:flex-initial sm:h-auto sm:max-h-[calc(100dvh-var(--header-height,56px)-24px)] !rounded-none border-0 sm:border-2"
       />
     </div>
   );

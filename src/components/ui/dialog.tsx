@@ -34,16 +34,25 @@ export const Dialog: React.FC<DialogBoxProps> = ({
         "relative flex flex-col gap-4 bg-bg-second",
         "px-5 py-5 sm:px-8 sm:py-7",
         "rounded-2xl shadow-lg",
-        "w-[calc(100vw-2rem)] max-w-md max-h-[80vh]",
+        "w-[calc(100vw-2rem)] max-w-md max-h-[85vh]",
         className,
       )}
     >
       {title && (
-        <Text weight="bold" sz="lg" className="shrink-0 pr-6">
+        <Text
+          weight="bold"
+          sz="lg"
+          wrap="whitespace-normal"
+          className="shrink-0 pr-6 text-base sm:text-lg leading-snug break-words"
+        >
           {title}
         </Text>
       )}
-      {content && <div className="flex-1 min-h-0 flex flex-col">{content}</div>}
+      {content && (
+        <div className="flex-1 min-h-0 flex flex-col overflow-y-auto text-sm sm:text-base leading-relaxed break-words whitespace-normal">
+          {content}
+        </div>
+      )}
       <div className="flex justify-end space-x-2 shrink-0">
         {tertiaryButton && (
           <Button onClick={tertiaryButton.onClick} variant="third" sz="sm">

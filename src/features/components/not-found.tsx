@@ -21,7 +21,7 @@ export const NotFound: React.FC<NotFoundProps> = ({ icon, title, description, cl
         {typeof icon === "string" ? (
           <i className={clsx("text-2xl", icon)}></i>
         ) : (
-          <div className="text-2xl">{icon}</div>
+          <div className="text-2xl flex items-center justify-center">{icon}</div>
         )}
       </div>
 

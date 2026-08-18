@@ -27,6 +27,7 @@ import {
   faArrowUpRightFromSquare,
   faXmark,
   faListCheck,
+  faBellSlash,
 } from "@fortawesome/free-solid-svg-icons";
 import { useDialog } from "@/contexts";
 import { useLongPress } from "@/hooks/use-long-press";
@@ -215,7 +216,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref, onC
     openDialog({
       title: t("notifications:notifications.delete-selected-title"),
       content: (
-        <Text sz="md" color="secondary" className="leading-relaxed">
+        <Text sz="md" wrap="whitespace-normal" className="leading-relaxed text-text-secondary text-sm sm:text-base break-words">
           {t("notifications:notifications.delete-selected-confirm", { count })}
         </Text>
       ),
@@ -375,7 +376,7 @@ const NotificationMenu: React.FC<NotificationMenuProps> = ({ className, ref, onC
             numberOfSkeletons={2}
             emptyComponent={
               <NotFound
-                icon="fa-regular fa-bell-slash"
+                icon={<FontAwesomeIcon icon={faBellSlash} className="text-2xl" />}
                 title={t("notifications:notifications.no-notifications")}
                 description="When you have new updates, they will appear here."
               />

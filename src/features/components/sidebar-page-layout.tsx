@@ -22,12 +22,16 @@ export const SidebarPageLayout: React.FC<SidebarPageLayoutProps> = ({
   return (
     <SidebarLayout
       title={title}
-      className={className}
+      className={clsx("bg-bg-main sm:bg-transparent", className)}
       navbar={navbar}
       showSidebar={showSidebar}
       setShowSidebar={setShowSidebar}
     >
-      <div className={clsx("flex items-start justify-center flex-1 min-h-0 overflow-y-auto")}>
+      <div
+        className={clsx(
+          "flex items-start justify-center flex-1 min-h-0 overflow-y-auto bg-bg-main sm:bg-transparent",
+        )}
+      >
         <div className="w-full sm:max-w-[800px] px-3 box-border py-2">{children}</div>
       </div>
     </SidebarLayout>
