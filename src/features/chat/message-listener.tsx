@@ -59,7 +59,7 @@ export function useMessageListenerHandler() {
         conversationId,
         userId!,
         data,
-        data.shouldIncreaseUnreadCount,
+        isFocusingThisConversation,
       );
 
       if (data.senderId && data.senderId !== userId) {
@@ -69,7 +69,7 @@ export function useMessageListenerHandler() {
 
       if (isFocusingThisConversation) {
         const messageSeq = data.sequenceNumber;
-        await markAsReadLocal(conversationId, messageSeq);
+        markAsReadLocal(conversationId, messageSeq);
         await markAsRead({ conversationId, messageSeq });
       }
     },

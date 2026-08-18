@@ -48,13 +48,9 @@ export const useDeleteNotification = () => {
 };
 
 export const useDeleteBatchNotifications = () => {
-  const qc = useQueryClient();
   return useResultFetcher(
     (notificationIds: string[]) => notificationService.deleteBatch(notificationIds),
-    {
-      onSuccess: () => {
-        qc.invalidateQueries({ queryKey: ["notifications"] });
-      },
-    },
+    // No onSuccess invalidation: optimistic removal in removeNotificationsFromCache
+    // handles the UI. Invalidation on error is handled at the call-site.
   );
 };

@@ -3,7 +3,6 @@ import clsx from "clsx";
 import { Button, Text } from "@/components/atoms";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faXmark } from "@fortawesome/free-solid-svg-icons";
-("@/components/atoms");
 
 interface ButtonProps {
   text: string;
@@ -32,8 +31,10 @@ export const Dialog: React.FC<DialogBoxProps> = ({
   return (
     <div
       className={clsx(
-        "relative flex flex-col gap-4 bg-bg-second px-8 py-7",
+        "relative flex flex-col gap-4 bg-bg-second",
+        "px-5 py-5 sm:px-8 sm:py-7",
         "rounded-2xl shadow-lg",
+        "w-[calc(100vw-2rem)] max-w-md max-h-[80vh]",
         className,
       )}
     >
