@@ -49,7 +49,7 @@ export const Dialog: React.FC<DialogBoxProps> = ({
         </Text>
       )}
       {content && (
-        <div className="flex-1 min-h-0 flex flex-col overflow-y-auto text-sm sm:text-base leading-relaxed break-words whitespace-normal">
+        <div className="flex-1 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden p-2 -m-2 text-sm sm:text-base leading-relaxed break-words whitespace-normal">
           {content}
         </div>
       )}

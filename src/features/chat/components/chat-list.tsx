@@ -53,7 +53,7 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
           className="flex-1 min-h-0"
         />
       ) : (
-        <div className="flex-1 min-h-0" ref={scrollWrapperRef}>
+        <div className="flex-1 min-h-0 overflow-y-auto" ref={scrollWrapperRef}>
           <InfiniteScrollFlex
             className="scrollbar-hide sm:scrollbar-default"
             items={conversations}

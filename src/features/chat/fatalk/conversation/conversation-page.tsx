@@ -49,6 +49,7 @@ import {
   faChevronRight,
   faUserGroup,
   faThumbtack,
+  faPaperPlane,
 } from "@fortawesome/free-solid-svg-icons";
 
 interface ConversationPageProps extends ComponentProps {}
@@ -95,7 +96,8 @@ const renderThemeIconCircle = (item: (typeof themeDetails)[0], isDark: boolean) 
 const ChatThemePicker: React.FC<{
   selectedTheme: string;
   onSelectTheme: (themeKey: string) => void;
-}> = ({ selectedTheme, onSelectTheme }) => {
+  className?: string;
+}> = ({ selectedTheme, onSelectTheme, className }) => {
   const { theme: currentGlobalTheme } = useTheme();
   const { t } = useTranslation();
   const isSystemDark =
@@ -116,78 +118,85 @@ const ChatThemePicker: React.FC<{
   }, []);
 
   return (
-    <div className="grid grid-cols-3 gap-3 w-full p-1 overflow-y-auto flex-1 min-h-[160px] scrollbar-thin">
-      {sortedThemes.map((item) => {
-        const isActive = selectedTheme === item.key;
-        return (
-          <button
-            key={item.key}
-            onClick={() => onSelectTheme(item.key)}
-            className={clsx(
-              "flex flex-col items-center justify-center gap-2 p-3 rounded-xl border-2 transition-all duration-155 w-full h-[106px] shrink-0",
-              "hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden",
-              isActive
-                ? "border-primary-500 bg-primary-500/[0.04] shadow-sm"
-                : "border-border-main/20 hover:border-border-main/50 bg-bg-third/10",
-            )}
-          >
-            <div className="w-12 h-12 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0 bg-cover bg-center relative">
-              {item.isDefault ? (
-                <svg viewBox="0 0 56 56" className="w-full h-full flex-shrink-0">
-                  <path d="M28,0 A28,28 0 0,0 28,56 Z" fill="#ffffff" />
-                  <path d="M28,0 A28,28 0 0,1 28,56 Z" fill="#1f2937" />
-                  <circle cx="28" cy="28" r="12" fill="#ff6b8b" />
-                </svg>
-              ) : (item as any).bgImage ? (
-                <div
-                  className="w-full h-full bg-cover bg-center"
-                  style={{ backgroundImage: `url(${(item as any).bgImage})` }}
-                />
-              ) : (
-                (() => {
-                  const colors = isSystemDark ? item.dark : item.light;
-                  if (!colors) return null;
-                  return (
-                    <>
-                      <div className={clsx("w-1/2 h-full", colors.gradient)} />
-                      <div className="w-1/2 h-full flex flex-col">
-                        <div className="flex-1 flex">
-                          <div
-                            className="flex-1"
-                            style={{ backgroundColor: colors.primaryLight }}
-                          />
-                          <div className="flex-1" style={{ backgroundColor: colors.primaryMain }} />
-                        </div>
-                        <div className="flex-1 flex">
-                          <div className="flex-1" style={{ backgroundColor: colors.bgMain }} />
-                          <div className="flex-1" style={{ backgroundColor: colors.bgSecond }} />
-                        </div>
-                      </div>
-                    </>
-                  );
-                })()
+    <div
+      className={clsx(
+        "overflow-y-auto overflow-x-hidden p-1 scrollbar-hide sm:scrollbar-default",
+        className,
+      )}
+    >
+      <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full">
+        {sortedThemes.map((item) => {
+          const isActive = selectedTheme === item.key;
+          return (
+            <button
+              key={item.key}
+              onClick={() => onSelectTheme(item.key)}
+              className={clsx(
+                "flex flex-col items-center justify-center gap-1.5 p-2 sm:p-2.5 rounded-xl border-2 transition-all duration-150 w-full h-[86px] sm:h-[98px] shrink-0",
+                "hover:scale-[1.02] active:scale-95 cursor-pointer relative overflow-hidden",
+                isActive
+                  ? "border-primary-500 bg-primary-500/[0.06] shadow-sm"
+                  : "border-border-main/20 hover:border-border-main/50 bg-bg-third/15",
               )}
-            </div>
-            <Text
-              sz="xs"
-              weight={isActive ? "bold" : "medium"}
-              className="text-center text-text-main"
             >
-              {t(`common:conversations.themes.${item.key.replace("chat-", "")}`, item.label)}
-            </Text>
-            {isActive && (
-              <div className="absolute top-1 right-1 bg-primary-500 text-white w-4 h-4 rounded-full flex items-center justify-center shadow-sm animate-fade-in">
-                <FontAwesomeIcon icon={faCheck} className="text-[9px]" />
+              <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0 bg-cover bg-center relative">
+                {item.isDefault ? (
+                  <svg viewBox="0 0 56 56" className="w-full h-full flex-shrink-0">
+                    <path d="M28,0 A28,28 0 0,0 28,56 Z" fill="#ffffff" />
+                    <path d="M28,0 A28,28 0 0,1 28,56 Z" fill="#1f2937" />
+                    <circle cx="28" cy="28" r="12" fill="#ff6b8b" />
+                  </svg>
+                ) : (item as any).bgImage ? (
+                  <div
+                    className="w-full h-full bg-cover bg-center"
+                    style={{ backgroundImage: `url(${(item as any).bgImage})` }}
+                  />
+                ) : (
+                  (() => {
+                    const colors = isSystemDark ? item.dark : item.light;
+                    if (!colors) return null;
+                    return (
+                      <>
+                        <div className={clsx("w-1/2 h-full", colors.gradient)} />
+                        <div className="w-1/2 h-full flex flex-col">
+                          <div className="flex-1 flex">
+                            <div
+                              className="flex-1"
+                              style={{ backgroundColor: colors.primaryLight }}
+                            />
+                            <div className="flex-1" style={{ backgroundColor: colors.primaryMain }} />
+                          </div>
+                          <div className="flex-1 flex">
+                            <div className="flex-1" style={{ backgroundColor: colors.bgMain }} />
+                            <div className="flex-1" style={{ backgroundColor: colors.bgSecond }} />
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()
+                )}
               </div>
-            )}
-            {(item as any).isEvent && (
-              <div className="absolute top-1 left-1 bg-secondary-500/10 text-secondary-600 dark:text-secondary-400 border border-secondary-500/20 text-[8px] font-bold px-1.5 py-0.5 rounded scale-90 origin-top-left uppercase tracking-wider">
-                Sự kiện
-              </div>
-            )}
-          </button>
-        );
-      })}
+              <Text
+                sz="xs"
+                weight={isActive ? "bold" : "medium"}
+                className="text-center text-text-main text-[11px] sm:text-xs truncate max-w-full px-1"
+              >
+                {t(`common:conversations.themes.${item.key.replace("chat-", "")}`, item.label)}
+              </Text>
+              {isActive && (
+                <div className="absolute top-1 right-1 bg-primary-500 text-white w-4 h-4 rounded-full flex items-center justify-center shadow-sm animate-fade-in">
+                  <FontAwesomeIcon icon={faCheck} className="text-[8px]" />
+                </div>
+              )}
+              {(item as any).isEvent && (
+                <div className="absolute top-1 left-1 bg-secondary-500/15 text-secondary-600 dark:text-secondary-400 border border-secondary-500/25 text-[7px] sm:text-[8px] font-bold px-1 py-0.2 rounded scale-90 origin-top-left uppercase tracking-wider">
+                  Sự kiện
+                </div>
+              )}
+            </button>
+          );
+        })}
+      </div>
     </div>
   );
 };
@@ -286,21 +295,14 @@ export const ChatThemeDialogContent: React.FC<{
   };
 
   return (
-    <div className="flex flex-col gap-4 w-full select-none flex-1 min-h-0">
-      <div className="flex flex-col gap-2 shrink-0">
-        <Text sz="sm" weight="bold" className="text-text-second pl-1">
-          Xem trước
-        </Text>
-        <div
-          data-chat-theme={selectedTheme === "default" ? undefined : selectedTheme}
-          className="relative flex flex-col bg-bg-main rounded-xl border border-border-main/60 shadow-inner overflow-hidden min-h-[240px] transition-colors duration-200"
-        >
-          <div
-            className={clsx(
-              "absolute top-2 right-2 z-30 flex items-center pointer-events-auto",
-              isMobile ? "gap-2" : "gap-1.5",
-            )}
-          >
+    <div className="flex flex-col md:flex-row gap-4 md:gap-6 w-full select-none flex-1 min-h-0 md:h-[350px]">
+      {/* Cột Trái / Top: Xem trước */}
+      <div className="flex flex-col gap-1.5 shrink-0 md:w-[320px] md:max-w-[340px] md:h-full">
+        <div className="flex items-center justify-between pl-1 shrink-0">
+          <Text sz="sm" weight="bold" className="text-text-second">
+            Xem trước
+          </Text>
+          <div className="flex items-center gap-1.5">
             <input
               type="file"
               ref={fileInputRef}
@@ -308,24 +310,33 @@ export const ChatThemeDialogContent: React.FC<{
               className="hidden"
               onChange={handleFileChange}
             />
-            <MiniButton
-              sz={isMobile ? "md" : "sm"}
-              variant="secondary"
-              className=" bg-black/40 hover:bg-black/60 text-white border-none shadow-md"
+            <button
+              type="button"
+              className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-bg-fourth hover:bg-bg-fifth text-text-main text-xs font-medium transition-colors cursor-pointer"
               onClick={() => fileInputRef.current?.click()}
+              title="Tải ảnh nền"
             >
-              <FontAwesomeIcon icon={faCloudArrowUp} className="text-xs" />
-            </MiniButton>
+              <FontAwesomeIcon icon={faCloudArrowUp} className="text-xs text-primary-500" />
+              <span>Ảnh nền</span>
+            </button>
             {backgroundUrl && (
-              <MiniButton
-                sz={isMobile ? "md" : "sm"}
-                className="bg-red-600/50 hover:bg-red-600/35 text-white border-none shadow-md animate-fade-in"
+              <button
+                type="button"
+                className="flex items-center gap-1 px-2 py-1 rounded-lg bg-red-500/10 hover:bg-red-500/20 text-red-500 text-xs font-medium transition-colors cursor-pointer animate-fade-in"
                 onClick={handleRemoveBackground}
+                title="Xóa ảnh nền"
               >
                 <FontAwesomeIcon icon={faTrashCan} className="text-xs" />
-              </MiniButton>
+                <span>Xóa</span>
+              </button>
             )}
           </div>
+        </div>
+
+        <div
+          data-chat-theme={selectedTheme === "default" ? undefined : selectedTheme}
+          className="relative flex flex-col bg-bg-main rounded-xl border border-border-main/60 shadow-inner overflow-hidden h-[215px] md:h-[318px] transition-colors duration-200"
+        >
           <div
             data-chat-scrollable="true"
             style={
@@ -333,7 +344,7 @@ export const ChatThemeDialogContent: React.FC<{
                 ? ({ "--chat-custom-bg": `url(${backgroundUrl})` } as React.CSSProperties)
                 : undefined
             }
-            className="flex-1 py-2 overflow-y-auto flex flex-col justify-end px-2 pb-4 pointer-events-none select-none"
+            className="flex-1 py-2 overflow-hidden flex flex-col justify-center px-2.5 pointer-events-none select-none gap-2"
           >
             <MessageRow
               message={mockMsg1 as any}
@@ -353,20 +364,26 @@ export const ChatThemeDialogContent: React.FC<{
               meta={mockMsg2Meta as any}
             />
           </div>
-          <div className="pointer-events-none opacity-90 border-t border-border-main/30 shrink-0">
-            <ChatInput
-              className="!bg-bg-main h-auto py-2 px-1 touch-none"
-              conversationId="mock-conv"
-            />
+          <div className="pointer-events-none px-2 py-1.5 border-t border-border-main/20 bg-bg-main/90 shrink-0">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-bg-fourth/60 rounded-full border border-border-main/30">
+              <FontAwesomeIcon icon={faImage} className="text-primary-500 text-xs shrink-0" />
+              <span className="text-xs text-text-third flex-1 truncate">Tin nhắn của bạn...</span>
+              <FontAwesomeIcon icon={faPaperPlane} className="text-primary-500 text-xs shrink-0" />
+            </div>
           </div>
         </div>
       </div>
 
-      <div className="flex flex-col gap-2 flex-1 min-h-0">
+      {/* Cột Phải / Bottom: Chọn chủ đề */}
+      <div className="flex flex-col gap-1.5 flex-1 min-h-0 md:h-[350px] overflow-hidden">
         <Text sz="sm" weight="bold" className="text-text-second pl-1 shrink-0">
           Chọn chủ đề
         </Text>
-        <ChatThemePicker selectedTheme={selectedTheme} onSelectTheme={handleSelectTheme} />
+        <ChatThemePicker
+          selectedTheme={selectedTheme}
+          onSelectTheme={handleSelectTheme}
+          className="flex-1 min-h-0 h-full max-h-[190px] md:max-h-[318px]"
+        />
       </div>
     </div>
   );
@@ -431,8 +448,8 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   const [isSaving, setIsSaving] = useState(false);
   const [isRenaming, setIsRenaming] = useState(false);
   const [viewMode, setViewMode] = useState<"main" | "members" | "theme">("main");
-  const mobileSelectedThemeRef = useRef<string>("default");
-  const mobileSelectedBackgroundUrlRef = useRef<string | null>(null);
+  const mobileSelectedThemeRef = useRef<string>(conv?.theme || "default");
+  const mobileSelectedBackgroundUrlRef = useRef<string | null>(conv?.backgroundUrl || null);
   const [newName, setNewName] = useState("");
   const { fetch: updateName, isFetching: isRenamingLoading } = useUpdateConversationName(
     conversationId!,
@@ -496,7 +513,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
       let selectedBackgroundUrl = originalBackgroundUrl;
       openDialog({
         title: t("common:conversations.settings.changeTheme", "Chủ đề đoạn chat"),
-        className: "w-[480px] max-h-[90vh] flex flex-col overflow-hidden",
+        className: "w-[calc(100vw-2rem)] md:w-[740px] max-w-3xl max-h-[90vh] flex flex-col overflow-hidden",
         content: (
           <ChatThemeDialogContent
             initialTheme={originalTheme}
@@ -577,7 +594,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
       openDialog({
         title: t("common:conversations.settings.changeName"),
         content: (
-          <div className="flex flex-col gap-4 min-w-[300px]">
+          <div className="flex flex-col gap-4 min-w-[300px] p-1">
             <Textbox
               ref={renameInputRef}
               defaultValue={currentName}

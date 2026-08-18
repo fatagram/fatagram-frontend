@@ -3,27 +3,24 @@
   border-style: solid;
   border-color: transparent;
 
-  /* Gradient border */
+  /* Subtle border in normal state */
   background:
     linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
-    var(--gradient-main) border-box;
-  background-size: 200% 100%;
-  background-position: 0 100%;
-  transition: all 0.3s ease-out;
-
-  /* Height should not override Tailwind classes */
+    linear-gradient(to right, rgb(var(--border-main) / 0.4), rgb(var(--border-main) / 0.4)) border-box;
+  transition: all 0.25s ease-out;
 }
 
 .my-textarea:hover {
-  background-position: 50% 100%;
-  box-shadow: 0 4px 12px rgba(43, 212, 139, 0.1);
+  background:
+    linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
+    linear-gradient(to right, rgb(var(--border-main) / 0.7), rgb(var(--border-main) / 0.7)) border-box;
 }
 
 .my-textarea:focus-within {
-  background-position: 100% 100%;
-  box-shadow:
-    0 0 0 3px rgb(var(--primary-500) / 0.2),
-    0 4px 20px rgb(var(--primary-500) / 0.3);
+  background:
+    linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
+    var(--gradient-main) border-box;
+  box-shadow: 0 0 0 3px rgb(var(--primary-500) / 0.15);
   transform: scale(1.01);
 }
 
@@ -36,42 +33,33 @@
   background:
     linear-gradient(rgb(var(--bg-fourth)), rgb(var(--bg-fourth))) padding-box,
     linear-gradient(135deg, rgb(var(--error)), #ff6b6b) border-box;
-  background-size: 200% 100%;
-  background-position: 0 100%;
-  transition: all 0.3s ease-out;
-
-  /* Height should not override Tailwind classes */
+  transition: all 0.25s ease-out;
 }
 
 .my-textarea-wrong:hover {
-  background-position: 50% 100%;
-  box-shadow: 0 4px 12px rgba(255, 75, 75, 0.15);
+  box-shadow: 0 2px 8px rgba(255, 75, 75, 0.15);
 }
 
 .my-textarea-wrong:focus-within {
-  background-position: 100% 100%;
-  box-shadow:
-    0 0 0 3px rgba(255, 75, 75, 0.2),
-    0 4px 20px rgba(255, 75, 75, 0.3);
+  box-shadow: 0 0 0 3px rgba(255, 75, 75, 0.2);
   transform: scale(1.01);
 }
 
-/* Tùy chỉnh thanh cuộn cho textarea trên desktop */
+/* Custom scrollbar on desktop */
 @media (min-width: 769px) {
   .custom-scrollbar::-webkit-scrollbar {
-    width: 6px; /* Thu hẹp thanh cuộn cho thanh lịch */
+    width: 6px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-track {
     background: transparent;
-    /* Đẩy track cách xa 2 chóp bo góc trên/dưới để không bị lòi */
     margin-top: 10px;
     margin-bottom: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb {
-    background-color: rgba(255, 255, 255, 0.2); /* Màu của thanh trượt (chỉnh theo theme) */
-    border-radius: 10px; /* Bo góc chính cái thanh trượt */
+    background-color: rgba(255, 255, 255, 0.2);
+    border-radius: 10px;
   }
 
   .custom-scrollbar::-webkit-scrollbar-thumb:hover {

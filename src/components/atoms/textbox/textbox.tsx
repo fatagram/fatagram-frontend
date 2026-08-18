@@ -86,7 +86,6 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
                 "pl-10": type === "search",
                 "pr-12": type === "password",
                 "bg-bg-main opacity-60 cursor-not-allowed": disabled,
-                "focus:bg-gradient-main-move": !disabled,
                 [styles["primary-textbox-wrong"]]: isWrong && !disabled,
                 [styles["primary-textbox"]]: !isWrong && !disabled,
               },

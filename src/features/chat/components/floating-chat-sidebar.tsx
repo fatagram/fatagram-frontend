@@ -116,7 +116,7 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
     openDialog({
       title: t("common:conversations.settings.changeName"),
       content: (
-        <div className="flex flex-col gap-4 min-w-[300px]">
+        <div className="flex flex-col gap-4 min-w-[300px] p-1">
           <Textbox
             ref={renameInputRef}
             defaultValue={currentName}
@@ -175,7 +175,8 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
     let selectedBackgroundUrl = originalBackgroundUrl;
     openDialog({
       title: t("common:conversations.settings.changeTheme", "Chủ đề đoạn chat"),
-      className: "w-[480px] max-h-[90vh] flex flex-col overflow-hidden",
+      className:
+        "w-[calc(100vw-2rem)] md:w-[740px] max-w-3xl max-h-[90vh] flex flex-col overflow-hidden",
       content: (
         <ChatThemeDialogContent
           initialTheme={originalTheme}

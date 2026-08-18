@@ -135,7 +135,6 @@ export const TextArea = forwardRef<HTMLTextAreaElement, TextAreaProps>(
           className={clsx(
             "w-full border-[2px] text-text-main",
             "font-normal rounded-xl transition-all duration-300 ease-out",
-            "focus-within:bg-gradient-main-move",
             {
               "bg-bg-main opacity-60 cursor-not-allowed": disabled,
               [styles["my-textarea-wrong"]]: isWrong && !disabled,
