@@ -80,7 +80,7 @@ export const useMarkConversationAsRead = () => {
 
 export const useLocalMarkAsRead = () => {
   const markAsRead = (conversationId: string, messageSeq: number) => {
-    convManager.markAsRead(conversationId, messageSeq);
+    convManager.markAsSeen(conversationId, messageSeq);
   };
   return markAsRead;
 };

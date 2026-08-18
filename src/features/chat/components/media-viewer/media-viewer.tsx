@@ -80,8 +80,11 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
   const initializedAnchor = useRef<string | null>(null);
   const thumbnailRefs = useRef<Record<string, HTMLDivElement | null>>({});
 
-  // Fix: track xem đã init swiper position chưa để tránh slideTo thừa
-  const hasInitialSlide = useRef(false);
+  // Track previous allMedia length to detect left-prepend and compensate Swiper index
+  const prevAllMediaLenRef = useRef(0);
+  const prevFirstIdRef = useRef<string | null>(null);
+  // Keep a ref to allMedia for use in Swiper callbacks (avoid stale closures)
+  const allMediaRef = useRef<ViewerMedia[]>([]);
 
   const { data: mediaAroundAnchor } = useMediaAroundAnchor(conversationId || "", media?.id || "");
   const { fetch: fetchMediaAround } = useMediaAround();
@@ -101,7 +104,6 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
       setCanFetchLeft(true);
       setCanFetchRight(true);
       initializedAnchor.current = media.id;
-      hasInitialSlide.current = false; // reset khi media anchor đổi
     }
   }, [mediaAroundAnchor, media?.id]);
 
@@ -111,16 +113,46 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
     return mergeUniqueMedia(combined);
   }, [leftMedia, media, mergeUniqueMedia, rightMedia]);
 
+  // Keep allMediaRef in sync so Swiper callbacks always see the latest array
+  allMediaRef.current = allMedia;
+
   const activeIndex = allMedia.findIndex(
     (m) => (m.id || m.url) === (activeMedia?.id || activeMedia?.url),
   );
 
-  const handleSlideChange = (swiper: SwiperType) => {
-    const currentMedia = allMedia[swiper.activeIndex];
+  // Detect left-prepend: if the array grew and the first item changed, items were prepended.
+  // Compensate Swiper's internal index so it stays on the same media.
+  useLayoutEffect(() => {
+    const swiper = swiperRef.current;
+    if (!swiper || allMedia.length === 0) return;
+
+    const currentFirstId = allMedia[0]?.id || allMedia[0]?.url || null;
+    const prevLen = prevAllMediaLenRef.current;
+    const prevFirstId = prevFirstIdRef.current;
+
+    if (
+      prevLen > 0 &&
+      allMedia.length > prevLen &&
+      prevFirstId !== null &&
+      currentFirstId !== prevFirstId
+    ) {
+      // Items were prepended to the left — offset = how many new items appeared
+      const offset = allMedia.length - prevLen;
+      const correctedIndex = swiper.activeIndex + offset;
+      swiper.slideTo(correctedIndex, 0, false);
+    }
+
+    prevAllMediaLenRef.current = allMedia.length;
+    prevFirstIdRef.current = currentFirstId;
+  }, [allMedia]);
+
+  const handleSlideChange = useCallback((swiper: SwiperType) => {
+    // Use allMediaRef to always read the latest array, not a stale closure
+    const currentMedia = allMediaRef.current[swiper.activeIndex];
     if (currentMedia) {
       setActiveMedia(currentMedia);
     }
-  };
+  }, []);
 
   const prefetchRight = useCallback(async () => {
     if (!conversationId || isFetchingRight.current || !canFetchRight || allMedia.length === 0)
@@ -196,13 +228,8 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [activeMedia, onClose]);
 
-  // Fix: chỉ slideTo khi chưa init, tránh jump mỗi lần fetch thêm media
-  useLayoutEffect(() => {
-    if (swiperRef.current && activeIndex !== -1 && !hasInitialSlide.current) {
-      swiperRef.current.slideTo(activeIndex, 0, false);
-      hasInitialSlide.current = true;
-    }
-  }, [allMedia.length, activeIndex]);
+  // No longer needed: initial positioning is handled by Swiper's `initialSlide` prop
+  // and left-prepend compensation is handled by the useLayoutEffect above.
 
   useEffect(() => {
     if (!activeMedia?.id) return;
@@ -330,23 +357,28 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
           ref={swiperContainerRef}
         >
           <Swiper
+            // Key on anchor media ID: when user opens a different media,
+            // Swiper re-mounts cleanly with the correct initialSlide
+            key={media?.id || media?.url}
             modules={[Zoom, Navigation, Mousewheel]}
             zoom={{ maxRatio: 3, minRatio: 1, toggle: true }}
-            onSwiper={(swiper) => (swiperRef.current = swiper)}
+            onSwiper={(swiper) => {
+              swiperRef.current = swiper;
+              // Reset tracking refs when Swiper re-mounts
+              prevAllMediaLenRef.current = allMedia.length;
+              prevFirstIdRef.current = allMedia[0]?.id || allMedia[0]?.url || null;
+            }}
             onSlideChange={handleSlideChange}
             mousewheel={{
               forceToAxis: true,
               sensitivity: 1,
-              // Fix: chỉ bật mousewheel navigation khi không đang zoom
               releaseOnEdges: true,
             }}
-            // Fix: thêm cssMode=false (mặc định) + virtualTranslate=false để dùng GPU transform
             cssMode={false}
-            initialSlide={activeIndex}
+            initialSlide={activeIndex >= 0 ? activeIndex : 0}
             spaceBetween={20}
             slidesPerView={1}
             className="w-full h-full"
-            // Fix: lazy load slides để tránh render tất cả video cùng lúc
             lazyPreloadPrevNext={1}
           >
             {allMedia.map((m, index) => {

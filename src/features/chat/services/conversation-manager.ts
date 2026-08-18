@@ -327,6 +327,10 @@ export class ConversationManager {
     }
   }
 
+  public async markAsRead(convId: string, messageSeq: number) {
+    return this.markAsSeen(convId, messageSeq);
+  }
+
   public async clearAll() {
     useConversationStore.getState().setConversations([]);
   }
