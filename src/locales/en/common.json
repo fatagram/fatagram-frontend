@@ -69,7 +69,8 @@
       "changeGroupAvatar": "{{actorName}} changed the group avatar",
       "renameGroup": "{{actorName}} changed the group name to \"{{newName}}\"",
       "changeTheme": "{{actorName}} changed the conversation theme to {{theme}}",
-      "changeBackgroundUrl": "{{actorName}} changed the conversation background"
+      "changeBackgroundUrl": "{{actorName}} changed the conversation background",
+      "addParticipant": "{{actorName}} added {{addedUserNames}} to the group"
     },
     "sentImageMessage": "Sent {{count}} images",
     "sentMediaMessage": "Sent a attached file",
@@ -85,6 +86,7 @@
     "settings": {
       "info": "Conversation Info",
       "members": "{{count}} members",
+      "addMembers": "Add members",
       "changeAvatar": "Avatar",
       "changeName": "Name",
       "changeNamePlaceholder": "Enter conversation name",
@@ -109,6 +111,11 @@
       "forward": "Forward",
       "delete": "Delete",
       "pin": "Pin"
+    },
+    "roles": {
+      "owner": "Owner",
+      "admin": "Admin",
+      "member": "Member"
     }
   },
   "chat": {

@@ -30,11 +30,13 @@ import { useMobile } from "@/hooks/use-mobile";
 import { useDialog, useTheme } from "@/contexts";
 import { BottomSheet } from "@/components/ui/bottom-sheet";
 import { ParticipantList } from "../../components/participant-list";
+import { AddMembersDialogContent } from "../../components/add-members-dialog-content";
 import { ConversationMediaGallery } from "../../components/conversation-media-gallery/conversation-media-gallery";
 import { useRenderConversationContent } from "../../hooks/use-render-conversation-content";
 import { useConversationMedia } from "../../hooks/use-conversation-media";
 import { useMediaViewer } from "../../context/media-viewer-context";
 import { useMediaBlob } from "@/hooks/use-media-blob";
+import { useConversationPermission } from "../../hooks/use-conversation-permission";
 import { MediaType } from "@/types/entities/message.type";
 import { MessageMediaDto } from "@/api/message/dto/message.dto";
 import { themeDetails } from "./chat-themes.config";
@@ -52,6 +54,7 @@ import {
   faPenToSquare,
   faPalette,
   faUser,
+  faUserPlus,
   faChevronRight,
   faUserGroup,
   faThumbtack,
@@ -303,9 +306,9 @@ export const ChatThemeDialogContent: React.FC<{
   };
 
   return (
-    <div className="flex flex-col md:flex-row gap-4 md:gap-6 w-full select-none flex-1 min-h-0 md:h-[350px]">
+    <div className="flex flex-col md:flex-row gap-4 md:gap-6 w-full select-none flex-1 min-h-0 h-full overflow-hidden">
       {/* Cột Trái / Top: Xem trước */}
-      <div className="flex flex-col gap-1.5 shrink-0 md:w-[320px] md:max-w-[340px] md:h-full">
+      <div className="flex flex-col gap-1.5 shrink-0 w-full md:w-[290px] md:h-full">
         <div className="flex items-center justify-between pl-1 shrink-0">
           <Text sz="sm" weight="bold" className="text-text-second">
             Xem trước
@@ -343,7 +346,7 @@ export const ChatThemeDialogContent: React.FC<{
 
         <div
           data-chat-theme={selectedTheme === "default" ? undefined : selectedTheme}
-          className="relative flex flex-col bg-bg-main rounded-xl border border-border-main/60 shadow-inner overflow-hidden h-[215px] md:h-[318px] transition-colors duration-200"
+          className="relative flex flex-col bg-bg-main rounded-xl border border-border-main/60 shadow-inner overflow-hidden h-[190px] md:flex-1 md:h-auto transition-colors duration-200"
         >
           <div
             data-chat-scrollable="true"
@@ -383,14 +386,14 @@ export const ChatThemeDialogContent: React.FC<{
       </div>
 
       {/* Cột Phải / Bottom: Chọn chủ đề */}
-      <div className="flex flex-col gap-1.5 flex-1 min-h-0 md:h-full overflow-hidden">
+      <div className="flex flex-col gap-1.5 flex-1 min-w-0 min-h-0 md:h-full overflow-hidden">
         <Text sz="sm" weight="bold" className="text-text-second pl-1 shrink-0">
           Chọn chủ đề
         </Text>
         <ChatThemePicker
           selectedTheme={selectedTheme}
           onSelectTheme={handleSelectTheme}
-          className="flex-1 min-h-0 h-full"
+          className="flex-1 min-h-0 h-full pr-1 overflow-y-auto"
         />
       </div>
     </div>
@@ -534,6 +537,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
   const [openSetting, setOpenSetting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const capabilities = useConversationPermission(conversationId || "");
 
   useEffect(() => {
     setOpenSetting(false);
@@ -652,7 +656,9 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
       let selectedBackgroundUrl = originalBackgroundUrl;
       openDialog({
         title: t("common:conversations.settings.changeTheme", "Chủ đề đoạn chat"),
-        className: "w-[calc(100vw-2rem)] md:w-[740px] max-w-3xl max-h-[90vh] flex flex-col overflow-hidden",
+        className:
+          "w-[calc(100vw-2rem)] md:w-[760px] max-w-3xl max-h-[90vh] md:h-[520px] flex flex-col overflow-hidden",
+        contentClassName: "overflow-hidden p-0 m-0 flex-1 flex flex-col min-h-0",
         content: (
           <ChatThemeDialogContent
             initialTheme={originalTheme}
@@ -777,6 +783,20 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
     setViewMode("members");
   };
 
+  const openAddMembersFlow = () => {
+    openDialog({
+      title: t("common:conversations.settings.addMembers", "Thêm thành viên"),
+      className: "w-[calc(100vw-2rem)] sm:w-[480px] max-w-md flex flex-col overflow-hidden",
+      content: (
+        <AddMembersDialogContent
+          conversationId={conversationId!}
+          onSuccess={() => closeDialog()}
+          onCancel={() => closeDialog()}
+        />
+      ),
+    });
+  };
+
   const handleBackSetting = () => {
     if (viewMode !== "main") {
       setViewMode("main");
@@ -898,7 +918,7 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
                       ) : (
                         <AvatarSkeletonLoading alt={""} />
                       )}
-                      {conv.isGroup && (
+                      {conv.isGroup && capabilities.canChangeAvatar && (
                         <button
                           onClick={triggerFileInput}
                           className="absolute bottom-1 right-1 w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center text-white shadow-md hover:scale-110 transition-transform active:scale-95"
@@ -927,30 +947,34 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
 
                     {conv.isGroup && (
                       <div className="flex justify-center w-full gap-4 sm:gap-6 mt-6 px-2">
-                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
-                          <MiniButton
-                            sz="md"
-                            className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
-                            onClick={triggerFileInput}
-                          >
-                            <FontAwesomeIcon icon={faImage} />
-                          </MiniButton>
-                          <Text sz="xs" weight="medium" className="text-center">
-                            {t("common:conversations.settings.changeAvatar")}
-                          </Text>
-                        </div>
-                        <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
-                          <MiniButton
-                            sz="md"
-                            className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
-                            onClick={openRenameFlow}
-                          >
-                            <FontAwesomeIcon icon={faPenToSquare} />
-                          </MiniButton>
-                          <Text sz="xs" weight="medium" className="text-center">
-                            {t("common:conversations.settings.changeName")}
-                          </Text>
-                        </div>
+                        {capabilities.canChangeAvatar && (
+                          <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
+                            <MiniButton
+                              sz="md"
+                              className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
+                              onClick={triggerFileInput}
+                            >
+                              <FontAwesomeIcon icon={faImage} />
+                            </MiniButton>
+                            <Text sz="xs" weight="medium" className="text-center">
+                              {t("common:conversations.settings.changeAvatar")}
+                            </Text>
+                          </div>
+                        )}
+                        {capabilities.canChangeName && (
+                          <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
+                            <MiniButton
+                              sz="md"
+                              className="bg-bg-third hover:bg-bg-fourth rounded-full w-12 h-12"
+                              onClick={openRenameFlow}
+                            >
+                              <FontAwesomeIcon icon={faPenToSquare} />
+                            </MiniButton>
+                            <Text sz="xs" weight="medium" className="text-center">
+                              {t("common:conversations.settings.changeName")}
+                            </Text>
+                          </div>
+                        )}
                         <div className="flex flex-col items-center gap-2 flex-1 max-w-[72px]">
                           <MiniButton
                             sz="md"

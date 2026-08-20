@@ -4,6 +4,7 @@ import {
   faArrowLeft,
   faArrowUpRightFromSquare,
   faUserGroup,
+  faUserPlus,
   faPenToSquare,
   faCamera,
   faPalette,
@@ -26,7 +27,9 @@ import { convManager, useConversationStore } from "../services/conversation-mana
 import { uploadService } from "@/api/upload/upload.api";
 import { dataURLtoFile } from "../fatalk/conversation/chat-theme-utils";
 import { ChatThemeDialogContent } from "../fatalk/conversation/conversation-page";
+import { useConversationPermission } from "../hooks/use-conversation-permission";
 import { ParticipantList } from "./participant-list";
+import { AddMembersDialogContent } from "./add-members-dialog-content";
 import clsx from "clsx";
 
 interface FloatingChatSidebarProps {
@@ -41,6 +44,7 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
   const { openDialog, closeDialog } = useDialog();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const renameInputRef = useRef<HTMLInputElement>(null);
+  const capabilities = useConversationPermission(conversationId);
 
   const { data: conversationData, isLoading: isLoadingConversation } = useGetConversation(
     conversationId,
@@ -123,7 +127,6 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
             ref={renameInputRef}
             defaultValue={currentName}
             placeholder={t("common:conversations.settings.changeNamePlaceholder")}
-            autoFocus
             sz="md"
             type="text"
           />
@@ -178,7 +181,8 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
     openDialog({
       title: t("common:conversations.settings.changeTheme", "Chủ đề đoạn chat"),
       className:
-        "w-[calc(100vw-2rem)] md:w-[740px] max-w-3xl max-h-[90vh] flex flex-col overflow-hidden",
+        "w-[calc(100vw-2rem)] md:w-[760px] max-w-3xl max-h-[90vh] md:h-[520px] flex flex-col overflow-hidden",
+      contentClassName: "overflow-hidden p-0 m-0 flex-1 flex flex-col min-h-0",
       content: (
         <ChatThemeDialogContent
           initialTheme={originalTheme}
@@ -220,6 +224,20 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
         <div className="flex-1 overflow-hidden h-full min-h-0">
           <ParticipantList conversationId={conversationId} />
         </div>
+      ),
+    });
+  };
+
+  const openAddMembersFlow = () => {
+    openDialog({
+      title: t("common:conversations.settings.addMembers", "Thêm thành viên"),
+      className: "w-[calc(100vw-2rem)] sm:w-[480px] max-w-md flex flex-col overflow-hidden",
+      content: (
+        <AddMembersDialogContent
+          conversationId={conversationId}
+          onSuccess={() => closeDialog()}
+          onCancel={() => closeDialog()}
+        />
       ),
     });
   };
@@ -281,22 +299,36 @@ export const FloatingChatSidebar: React.FC<FloatingChatSidebarProps> = ({ conver
               <Text sz="sm" weight="medium">Xem thành viên</Text>
             </button>
 
-            <button
-              onClick={openRenameFlow}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-third transition-colors text-left w-full text-text-main"
-            >
-              <FontAwesomeIcon icon={faPenToSquare} className="text-primary-400 w-4 h-4 shrink-0" />
-              <Text sz="sm" weight="medium">Đổi tên nhóm</Text>
-            </button>
+            {capabilities.canAddMember && (
+              <button
+                onClick={openAddMembersFlow}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-third transition-colors text-left w-full text-text-main"
+              >
+                <FontAwesomeIcon icon={faUserPlus} className="text-primary-400 w-4 h-4 shrink-0" />
+                <Text sz="sm" weight="medium">Thêm thành viên</Text>
+              </button>
+            )}
 
-            <button
-              onClick={() => fileInputRef.current?.click()}
-              disabled={isUpdatingAvatar}
-              className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-third transition-colors text-left w-full text-text-main disabled:opacity-50"
-            >
-              <FontAwesomeIcon icon={faCamera} className="text-primary-400 w-4 h-4 shrink-0" />
-              <Text sz="sm" weight="medium">Thay đổi ảnh đại diện</Text>
-            </button>
+            {capabilities.canChangeName && (
+              <button
+                onClick={openRenameFlow}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-third transition-colors text-left w-full text-text-main"
+              >
+                <FontAwesomeIcon icon={faPenToSquare} className="text-primary-400 w-4 h-4 shrink-0" />
+                <Text sz="sm" weight="medium">Đổi tên nhóm</Text>
+              </button>
+            )}
+
+            {capabilities.canChangeAvatar && (
+              <button
+                onClick={() => fileInputRef.current?.click()}
+                disabled={isUpdatingAvatar}
+                className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-bg-third transition-colors text-left w-full text-text-main disabled:opacity-50"
+              >
+                <FontAwesomeIcon icon={faCamera} className="text-primary-400 w-4 h-4 shrink-0" />
+                <Text sz="sm" weight="medium">Thay đổi ảnh đại diện</Text>
+              </button>
+            )}
           </>
         )}
 

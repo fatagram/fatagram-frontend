@@ -48,6 +48,15 @@ export const useRenderConversationContent = () => {
       const actor = userId === actorId ? t("common:conversations.you") : actorName || "Unknown";
       return t("common:conversations.systemMessage.changeBackgroundUrl", { actorName: actor });
     }
+    if (message.type === MessageType.AddParticipant) {
+      const { actorName, actorId, addedUserNames } = message.metadata || {};
+      const actor = userId === actorId ? t("common:conversations.you") : actorName || "Unknown";
+      const names = Array.isArray(addedUserNames) ? addedUserNames.join(", ") : (addedUserNames || "");
+      return t("common:conversations.systemMessage.addParticipant", {
+        actorName: actor,
+        addedUserNames: names,
+      });
+    }
     return message.content;
   };
 

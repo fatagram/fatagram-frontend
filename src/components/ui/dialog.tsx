@@ -17,6 +17,7 @@ export interface DialogBoxProps {
   tertiaryButton?: ButtonProps;
   onClose?: () => void;
   className?: string;
+  contentClassName?: string;
 }
 
 export const Dialog: React.FC<DialogBoxProps> = ({
@@ -27,14 +28,18 @@ export const Dialog: React.FC<DialogBoxProps> = ({
   tertiaryButton,
   onClose,
   className,
+  contentClassName,
 }) => {
+  const hasCustomMaxW = className?.includes("max-w-");
+
   return (
     <div
       className={clsx(
         "relative flex flex-col gap-4 bg-bg-second",
         "px-5 py-5 sm:px-8 sm:py-7",
         "rounded-2xl shadow-lg",
-        "w-[calc(100vw-2rem)] max-w-md max-h-[85vh]",
+        "w-[calc(100vw-2rem)] max-h-[85vh]",
+        !hasCustomMaxW && "max-w-md",
         className,
       )}
     >
@@ -49,7 +54,12 @@ export const Dialog: React.FC<DialogBoxProps> = ({
         </Text>
       )}
       {content && (
-        <div className="flex-1 min-h-0 flex flex-col overflow-y-auto overflow-x-hidden p-2 -m-2 text-sm sm:text-base leading-relaxed break-words whitespace-normal">
+        <div
+          className={clsx(
+            "flex-1 min-h-0 flex flex-col text-sm sm:text-base leading-relaxed break-words whitespace-normal",
+            contentClassName ?? "overflow-y-auto overflow-x-hidden p-2 -m-2",
+          )}
+        >
           {content}
         </div>
       )}

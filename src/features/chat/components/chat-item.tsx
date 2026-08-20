@@ -67,7 +67,7 @@ const TrailingStatus: React.FC<TrailingStatusProps> = ({
 
 const getItemBackgroundClass = (isCurrent: boolean, isUnread: boolean) => {
   if (isCurrent) {
-    return "bg-bg-third";
+    return "!bg-bg-fourth";
   }
   if (isUnread) {
     return "bg-primary-500/[0.04] hover:bg-bg-third/60";
@@ -216,9 +216,10 @@ const ChatItemDesktopMenu: React.FC<ChatItemDesktopMenuProps> = ({
   );
 };
 
-export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => {
+export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick, isActive }) => {
   const location = useLocation();
-  const currentConversationId = location.pathname.split("/").pop();
+  const match = location.pathname.match(/\/fatalk\/([^/?#]+)/);
+  const currentConversationId = match ? match[1] : location.pathname.split("/").pop();
 
   const { t } = useTranslation();
   const { renderConversationName, renderSystemMessage } = useRenderConversationContent();
@@ -234,11 +235,16 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
   const dropdownRef = useRef<HTMLDivElement>(null);
   const moreBtnRef = useRef<HTMLButtonElement>(null);
 
-  const unreadCount = conversation.unreadMessageCount || 0;
+  const lastSeq = conversation.lastMessage?.sequenceNumber ?? conversation.lastMessageNumber ?? 0;
+  const mySeenSeq = conversation.myLastSeenMessageSeq ?? 0;
+  const calculatedUnread = Math.max(0, lastSeq - mySeenSeq);
+  const unreadCount =
+    conversation.unreadMessageCount !== undefined && conversation.unreadMessageCount > 0
+      ? conversation.unreadMessageCount
+      : calculatedUnread;
   const isUnread = unreadCount > 0;
   const isPinned = Boolean(conversation.isPinned || conversation.pinnedAt);
   const otherSeq = conversation.otherLastSeenMessageSeq;
-  const lastSeq = conversation.lastMessage?.sequenceNumber;
   const isOtherUserRead = Boolean(otherSeq && lastSeq && otherSeq >= lastSeq);
   const unreadLabel = unreadCount > 99 ? "99+" : String(unreadCount);
 
@@ -320,7 +326,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
     },
   ];
 
-  const isCurrent = conversation.id === currentConversationId;
+  const isCurrent = Boolean(currentConversationId) && conversation.id === currentConversationId;
   const conversationTitle = renderConversationName(conversation);
 
   return (
@@ -329,8 +335,8 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
         type="button"
         key={conversation.id}
         className={clsx(
-          "group flex gap-3 p-3 pl-0 sm:pl-3 my-1 rounded-xl transition-all duration-300 ease-out",
-          "cursor-pointer select-none w-full text-left bg-transparent border-0 font-inherit",
+          "group flex gap-3 p-3 my-0.5 rounded-xl transition-colors duration-150",
+          "cursor-pointer select-none w-full text-left font-inherit",
           getItemBackgroundClass(isCurrent, isUnread),
         )}
         onClick={() => onClick()}
@@ -341,7 +347,7 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
             src={conversation.avatarUrl ?? ""}
             alt="Conversation Avatar"
             sz="md"
-            className="group-hover:scale-105 transition-transform duration-300 border border-bg-fourth/30"
+            className="group-hover:scale-105 transition-transform duration-200 border border-bg-fourth/30"
           />
         </div>
 

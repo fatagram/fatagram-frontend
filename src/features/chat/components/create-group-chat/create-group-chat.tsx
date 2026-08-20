@@ -8,6 +8,8 @@ import { useGetUserProfile } from "@/features/hooks/use-user-profile";
 import clsx from "clsx";
 import { useCallback, useRef, useState } from "react";
 import { t } from "i18next";
+import { User } from "@/types/entities/user.type";
+import { SearchUserDto } from "@/api/user/dto/search-user.dto";
 
 interface CreateGroupChatProps extends ComponentProps {
   onTurnBack?: () => void;
@@ -43,8 +45,8 @@ export const CreateGroupChat: React.FC<CreateGroupChatProps> = ({
 
   const options = users?.pages.flatMap((page) =>
     page.items
-      .filter((user) => user.id !== userId)
-      .map((user) => ({
+      .filter((user: User | SearchUserDto) => user.id && user.id !== userId)
+      .map((user: User | SearchUserDto) => ({
         item: { name: user.fullName, avatar: user.avatar },
         value: user.id,
       })),

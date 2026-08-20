@@ -67,7 +67,8 @@
       "changeGroupAvatar": "{{actorName}} đã thay đổi ảnh đại diện nhóm",
       "renameGroup": "{{actorName}} đã đổi tên nhóm thành \"{{newName}}\"",
       "changeTheme": "{{actorName}} đã đổi chủ đề cuộc trò chuyện thành {{theme}}",
-      "changeBackgroundUrl": "{{actorName}} đã cập nhật hình nền cuộc trò chuyện"
+      "changeBackgroundUrl": "{{actorName}} đã cập nhật hình nền cuộc trò chuyện",
+      "addParticipant": "{{actorName}} đã thêm {{addedUserNames}} vào nhóm"
     },
     "sentImageMessage": "Đã gửi {{count}} hình ảnh",
     "sentMediaMessage": "Đã gửi một tệp đính kèm",
@@ -83,6 +84,7 @@
     "settings": {
       "info": "Thông tin hội thoại",
       "members": "{{count}} thành viên",
+      "addMembers": "Thêm thành viên",
       "changeAvatar": "Ảnh",
       "changeName": "Tên",
       "changeNamePlaceholder": "Nhập tên cuộc trò chuyện",
@@ -107,6 +109,11 @@
       "forward": "Chuyển tiếp",
       "delete": "Xóa",
       "pin": "Ghim"
+    },
+    "roles": {
+      "owner": "Trưởng nhóm",
+      "admin": "Phó nhóm",
+      "member": "Thành viên"
     }
   },
   "chat": {

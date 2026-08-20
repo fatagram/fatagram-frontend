@@ -140,6 +140,13 @@ export class ConversationService {
   public async togglePin(conversationId: string): Promise<Result<boolean>> {
     return await apiPost(`${PREFIX}/${conversationId}/toggle-pin`);
   }
+
+  public async addParticipants(
+    conversationId: string,
+    participantIds: string[],
+  ): Promise<Result<void>> {
+    return await apiPost(`${PREFIX}/${conversationId}/participants`, { participantIds });
+  }
 }
 
 export const conversationService = new ConversationService();

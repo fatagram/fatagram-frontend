@@ -1,4 +1,6 @@
+import { ConversationRole } from "@/api/conversation/dto/participant.dto";
 import { Message } from "./message.type";
+import { ConversationCapabilitiesDto } from "@/api/conversation/dto/conversation.dto";
 
 export interface Conversation {
   id: string;
@@ -18,4 +20,6 @@ export interface Conversation {
   backgroundUrl?: string | null;
   isPinned?: boolean;
   pinnedAt?: string | null;
+  myRole?: ConversationRole | number | string;
+  capabilities?: ConversationCapabilitiesDto;
 }

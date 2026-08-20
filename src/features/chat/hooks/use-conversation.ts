@@ -1,4 +1,5 @@
 
+import { useQueryClient } from "@tanstack/react-query";
 import { conversationService } from "@/api/conversation/conversation.api";
 import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import {
@@ -38,22 +39,40 @@ export const useGetConversation = (
     staleTime: Infinity, // Data is managed via Zustand store; no auto-refetch needed
     options: {
       onSuccess: (data) => {
-        // Only hydrate store if the conversation is not already in memory
-        const existing = convManager.getConversation(data.id);
-        if (!existing) {
-          convManager.updateConversation(data.id, {
-            avatarUrl: data.avatarUrl,
-            name: data.name,
-            theme: data.theme,
-            backgroundUrl: data.backgroundUrl,
-            isPinned: data.isPinned,
-            pinnedAt: data.pinnedAt,
-          });
-        }
+        convManager.updateConversation(data.id, {
+          avatarUrl: data.avatarUrl,
+          name: data.name,
+          theme: data.theme,
+          backgroundUrl: data.backgroundUrl,
+          isPinned: data.isPinned,
+          pinnedAt: data.pinnedAt,
+          myRole: data.myRole,
+          capabilities: data.capabilities,
+        });
         config?.onSuccess?.(data);
       },
     },
   });
+};
+
+export const useAddParticipants = (conversationId: string) => {
+  const { showSnackbar } = useSnackbar();
+  const queryClient = useQueryClient();
+
+  return useResultFetcher(
+    async ({ participantIds }: { participantIds: string[] }) => {
+      return await conversationService.addParticipants(conversationId, participantIds);
+    },
+    {
+      onSuccess: () => {
+        queryClient.invalidateQueries({ queryKey: ["conversation", conversationId, "participants"] });
+        queryClient.invalidateQueries({ queryKey: CONVERSATION_KEYS.detail(conversationId) });
+      },
+      onError: (error) => {
+        showSnackbar(error?.code ?? "Thêm thành viên thất bại", "error");
+      },
+    },
+  );
 };
 
 export const useCreateGroupConversation = () => {

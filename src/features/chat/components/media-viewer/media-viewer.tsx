@@ -15,9 +15,16 @@ import { Zoom, Navigation, Mousewheel } from "swiper/modules";
 
 import "swiper/swiper-bundle.css";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faXmark, faChevronLeft, faChevronRight } from "@fortawesome/free-solid-svg-icons";
+import {
+  faPlay,
+  faXmark,
+  faChevronLeft,
+  faChevronRight,
+  faDownload,
+  faSpinner,
+} from "@fortawesome/free-solid-svg-icons";
 
-interface MediaViewerProps extends ComponentProps {}
+type MediaViewerProps = ComponentProps;
 
 const PREFETCH_DISTANCE = 3;
 const FETCH_BATCH_SIZE = 10;
@@ -32,22 +39,24 @@ const VideoThumbnail: React.FC<{ url: string; isNearActive: boolean }> = ({ url 
         className="h-full w-full object-cover"
         alt="Video Thumbnail"
       />
-      <FontAwesomeIcon icon={faPlay} className="text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/40"  />
+      <FontAwesomeIcon
+        icon={faPlay}
+        className="text-white text-[10px] absolute inset-0 flex items-center justify-center bg-black/40"
+      />
     </div>
   );
 };
 
-// Slide video không active: dùng ảnh thumbnail jpg do Cloudinary tạo
 const VideoSlideContent: React.FC<{ url: string; isActive: boolean; isAdjacent: boolean }> = ({
   url,
   isActive,
 }) => {
+  const thumbnailUrl = url.replace(/\.[^/.]+$/, ".jpg");
+  const { blobUrl } = useMediaBlob(!isActive ? thumbnailUrl : undefined);
+
   if (isActive) {
     return <VideoView url={url} className="max-h-full max-w-full rounded-md" />;
   }
-
-  const thumbnailUrl = url.replace(/\.[^/.]+$/, ".jpg");
-  const { blobUrl } = useMediaBlob(thumbnailUrl);
 
   return (
     <div className="relative max-h-full max-w-full aspect-video bg-black flex items-center justify-center overflow-hidden rounded-md">
@@ -56,7 +65,7 @@ const VideoSlideContent: React.FC<{ url: string; isActive: boolean; isAdjacent: 
         className="max-h-full max-w-full object-contain opacity-50 blur-[2px] pointer-events-none"
         alt="Thumbnail"
       />
-      <FontAwesomeIcon icon={faPlay} className="text-white text-6xl absolute z-10"  />
+      <FontAwesomeIcon icon={faPlay} className="text-white text-6xl absolute z-10" />
     </div>
   );
 };
@@ -78,7 +87,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
   const swiperRef = useRef<SwiperType | null>(null);
   const swiperContainerRef = useRef<HTMLDivElement>(null);
   const initializedAnchor = useRef<string | null>(null);
-  const thumbnailRefs = useRef<Record<string, HTMLDivElement | null>>({});
+  const thumbnailRefs = useRef<Record<string, HTMLButtonElement | null>>({});
 
   // Track previous allMedia length to detect left-prepend and compensate Swiper index
   const prevAllMediaLenRef = useRef(0);
@@ -300,19 +309,30 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
     }
   };
 
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "Escape") {
+        onClose?.();
+      }
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [onClose]);
+
   if (!activeMedia) return null;
 
   return (
-    <div
+    <dialog
+      open
+      aria-label="Media viewer"
+      tabIndex={-1}
       className={clsx(
-        "fixed inset-0 z-[9999] flex flex-col bg-black/95 backdrop-blur-md transition-opacity overscroll-none touch-none",
+        "fixed inset-0 z-[9999] flex flex-col bg-black/95 backdrop-blur-md transition-opacity overscroll-none touch-none border-none p-0 m-0 w-full h-full max-w-none max-h-none",
         className,
       )}
-      onClick={onClose}
     >
       <div
         className="flex h-16 w-full items-center justify-end px-6 shrink-0 bg-gradient-to-b from-black/60 to-transparent z-10"
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="flex items-center gap-4">
           <MiniButton
@@ -320,21 +340,21 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
             onClick={onDownload}
             disabled={isDownloading}
           >
-            <i
-              className={clsx(
-                "fa-solid text-xl",
-                isDownloading ? "fa-spinner fa-spin" : "fa-download",
-              )}
+            <FontAwesomeIcon
+              icon={isDownloading ? faSpinner : faDownload}
+              spin={isDownloading}
+              className="text-xl"
             />
           </MiniButton>
           <MiniButton className="!text-white/70 hover:!text-white" onClick={onClose}>
-            <FontAwesomeIcon icon={faXmark} className="text-2xl"  />
+            <FontAwesomeIcon icon={faXmark} className="text-2xl" />
           </MiniButton>
         </div>
       </div>
 
       <div className="relative flex flex-1 min-h-0 items-center justify-center overflow-hidden w-full">
         <button
+          type="button"
           className="absolute left-6 top-1/2 -translate-y-1/2 z-20 p-4 hidden md:block text-white/50 hover:text-white disabled:opacity-10"
           onClick={(e) => {
             e.stopPropagation();
@@ -342,12 +362,11 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
           }}
           disabled={activeIndex <= 0}
         >
-          <FontAwesomeIcon icon={faChevronLeft} className="text-3xl"  />
+          <FontAwesomeIcon icon={faChevronLeft} className="text-3xl" />
         </button>
 
         <div
           className="h-full w-full"
-          onClick={(e) => e.stopPropagation()}
           ref={swiperContainerRef}
         >
           <Swiper
@@ -404,6 +423,7 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
         </div>
 
         <button
+          type="button"
           className="absolute right-6 top-1/2 -translate-y-1/2 z-20 p-4 hidden md:block text-white/50 hover:text-white disabled:opacity-10"
           onClick={(e) => {
             e.stopPropagation();
@@ -411,13 +431,12 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
           }}
           disabled={activeIndex >= allMedia.length - 1}
         >
-          <FontAwesomeIcon icon={faChevronRight} className="text-3xl"  />
+          <FontAwesomeIcon icon={faChevronRight} className="text-3xl" />
         </button>
       </div>
 
       <div
         className="flex w-full shrink-0 items-center justify-center bg-black/40 px-4 z-10"
-        onClick={(e) => e.stopPropagation()}
       >
         <div className="w-full max-w-[960px] overflow-x-auto overflow-y-hidden py-4 scroll-smooth scrollbar-thin scrollbar-thumb-white/20">
           <div className="flex flex-nowrap items-center gap-2 px-2 min-w-max">
@@ -425,14 +444,15 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
               const isActive = (m.id || m.url) === (activeMedia?.id || activeMedia?.url);
               const isNearActive = Math.abs(index - activeIndex) <= 2;
               return (
-                <div
+                <button
+                  type="button"
                   key={m.id}
                   ref={(el) => {
                     thumbnailRefs.current[m.id!] = el;
                   }}
                   onClick={() => swiperRef.current?.slideTo(index)}
                   className={clsx(
-                    "relative h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded transition-all duration-200",
+                    "relative h-14 w-14 shrink-0 cursor-pointer overflow-hidden rounded transition-all duration-200 border-0 p-0 bg-transparent",
                     isActive
                       ? "ring-2 ring-primary-500 scale-110 opacity-100 shadow-lg"
                       : "opacity-40 hover:opacity-100 hover:scale-105",
@@ -448,12 +468,12 @@ export const MediaViewer: React.FC<MediaViewerProps> = ({ className }) => {
                   ) : (
                     <VideoThumbnail url={m.url} isNearActive={isNearActive} />
                   )}
-                </div>
+                </button>
               );
             })}
           </div>
         </div>
       </div>
-    </div>
+    </dialog>
   );
 };

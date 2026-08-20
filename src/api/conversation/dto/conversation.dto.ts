@@ -1,4 +1,16 @@
-import { MessageResponseDto } from "@/api/message/dto/message.dto";
+import { ConversationRole } from "./participant.dto";
+
+export interface ConversationCapabilitiesDto {
+  canSendMessage: boolean;
+  canChangeAvatar: boolean;
+  canChangeName: boolean;
+  canChangeTheme: boolean;
+  canChangeBackground: boolean;
+  canKickMember: boolean;
+  canAddMember: boolean;
+  canPinMessage: boolean;
+  canDeleteConversation: boolean;
+}
 
 export interface ConversationDto {
   id: string;
@@ -18,6 +30,8 @@ export interface ConversationDto {
   backgroundUrl?: string | null;
   isPinned?: boolean;
   pinnedAt?: string | null;
+  myRole?: ConversationRole | number | string;
+  capabilities?: ConversationCapabilitiesDto;
 }
 
 export interface UpdateConversationDto {
