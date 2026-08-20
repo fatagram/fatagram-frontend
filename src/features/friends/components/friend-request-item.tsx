@@ -40,13 +40,12 @@ const FriendRequestItem: React.FC<FriendRequestItemProps> = ({
         "hover:border-primary-500/40 transition-colors duration-300",
       )}
     >
-      <div className="w-full cursor-pointer" onClick={handleNavigate}>
+      <button type="button" className="w-full cursor-pointer" onClick={handleNavigate}>
         <Avatar src={avatar} alt="avatar" shape="rounded" className="w-full h-full" />
-      </div>
+      </button>
       <Text
         sz="md"
         weight="bold"
-        onClick={handleNavigate}
         className={clsx(
           "truncate overflow-hidden w-full mt-1 hover:text-primary-500 cursor-pointer",
         )}

@@ -6,8 +6,21 @@ import SearchUserItem, { SearchUserSkeleton } from "./components/search-user-ite
 import InfiniteScrollGrid from "@/components/ui/utils/infinite-scroll-grid";
 import { NotFound } from "@/features/components/not-found";
 import { useSearchUsers } from "@/features/hooks/use-user";
+import { SearchUserDto } from "@/api/user/dto/search-user.dto";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMagnifyingGlass } from "@fortawesome/free-solid-svg-icons";
+
+const renderSearchUserItem = (item: SearchUserDto) => (
+  <SearchUserItem
+    id={item.id}
+    name={item.fullName}
+    avatar={item.avatar}
+    status={item.status}
+    path={`/${item.id}`}
+  />
+);
+
+const getSearchUserKey = (item: SearchUserDto) => item.id;
 
 const AddFriendsPage: React.FC = () => {
   const { t } = useTranslation();
@@ -58,19 +71,11 @@ const AddFriendsPage: React.FC = () => {
             items={showSkeletons ? [] : users}
             onLoadMore={fetchNextPage}
             className="w-full gap-2 sm:gap-4 flex-1 h-full overflow-y-auto"
-            itemTemplate={(item: any) => (
-              <SearchUserItem
-                id={item.id}
-                name={item.fullName}
-                avatar={item.avatar}
-                status={item.status}
-                path={`/${item.id}`}
-              />
-            )}
+            itemTemplate={renderSearchUserItem}
             hasMore={!!hasNextPage}
             isLoading={showSkeletons || isFetchingNextPage}
             loadingSkeleton={<SearchUserSkeleton />}
-            itemKey={(item: any) => item.id}
+            itemKey={getSearchUserKey}
             emptyComponent={
               debouncedQuery ? (
                 <NotFound

@@ -1,9 +1,16 @@
 /// <reference types="vite/client" />
 
+interface Window {
+  __INITIAL_DATA__?: {
+    isAuthenticated?: boolean;
+    userData?: Record<string, unknown>;
+  };
+}
+
 declare namespace React {
-  declare namespace JSX {
+  namespace JSX {
     interface IntrinsicElements {
-      'vite-streaming-end': any
+      "vite-streaming-end": React.DetailedHTMLProps<React.HTMLAttributes<HTMLElement>, HTMLElement>;
     }
   }
 }

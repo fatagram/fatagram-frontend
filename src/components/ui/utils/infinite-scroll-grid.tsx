@@ -1,22 +1,23 @@
-import { useEffect, useRef } from "react";
+import { useEffect, useId, useMemo, useRef } from "react";
+import { useTranslation } from "react-i18next";
 
-interface InfiniteScrollGridProps {
+interface InfiniteScrollGridProps<ItemType> {
   itemMinWidth: number | string;
-  items: any[];
+  items: ItemType[];
   loadingSkeleton?: React.ReactNode;
   numberOfSkeletons?: number;
   className?: string;
   hasMore?: boolean;
   isLoading?: boolean;
-  itemTemplate?: (item: React.ReactNode, index: number) => React.ReactNode;
+  itemTemplate?: (item: ItemType, index: number) => React.ReactNode;
   onLoadMore: () => void;
-  rootMargin?: string;
+  // rootMargin?: string;
   isShowLastSeen?: boolean;
-  itemKey?: (item: any, index: number) => string | number;
+  itemKey?: (item: ItemType, index: number) => string | number;
   emptyComponent?: React.ReactNode;
 }
 
-export default function InfiniteScrollGrid({
+export default function InfiniteScrollGrid<ItemType>({
   itemMinWidth,
   items,
   loadingSkeleton,
@@ -29,17 +30,24 @@ export default function InfiniteScrollGrid({
   isShowLastSeen = false,
   itemKey,
   emptyComponent,
-}: InfiniteScrollGridProps) {
+}: Readonly<InfiniteScrollGridProps<ItemType>>) {
+  const { t } = useTranslation();
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const skeletonPrefix = useId();
+  const skeletonKeys = useMemo(
+    () => Array.from({ length: numberOfSkeletons }, (_, i) => `${skeletonPrefix}-skel-${i}`),
+    [numberOfSkeletons, skeletonPrefix],
+  );
 
   useEffect(() => {
     const sentinel = sentinelRef.current;
     if (!sentinel || !hasMore || isLoading) return;
 
     const observer = new IntersectionObserver(
-      async ([entry]) => {
+      ([entry]) => {
         if (entry.isIntersecting && !isLoading) {
-          await onLoadMore();
+          onLoadMore();
         }
       },
       {
@@ -61,19 +69,22 @@ export default function InfiniteScrollGrid({
         position: "relative",
       }}
     >
-      {items.map((item, index) => (
-        <div key={itemKey ? itemKey(item, index) : index} className="w-full">
-          {itemTemplate ? itemTemplate(item, index) : item}
-        </div>
-      ))}
+      {items.map((item, index) => {
+        const key = itemKey ? itemKey(item, index) : index;
+        const renderContent = itemTemplate
+          ? itemTemplate(item, index)
+          : (item as unknown as React.ReactNode);
+        return (
+          <div key={key} className="w-full">
+            {renderContent}
+          </div>
+        );
+      })}
 
-      {isLoading && (
-        <>
-          {Array.from({ length: numberOfSkeletons }).map((_, index) => (
-            <div key={`skeleton-${index}`}>{loadingSkeleton ?? "Loading..."}</div>
-          ))}
-        </>
-      )}
+      {isLoading &&
+        skeletonKeys.map((uniqueKey) => (
+          <div key={uniqueKey}>{loadingSkeleton ?? "Loading..."}</div>
+        ))}
 
       {hasMore && <div ref={sentinelRef} style={{ gridColumn: "1 / -1", height: "10px" }} />}
 
@@ -86,7 +97,7 @@ export default function InfiniteScrollGrid({
             color: "var(--text-third-color)",
           }}
         >
-          Đã xem hết kết quả.
+          {t("common:allResultsSeen", "Đã xem hết kết quả.")}
         </div>
       )}
       {items.length === 0 && !isLoading && emptyComponent != null && (

@@ -4,9 +4,7 @@ import { useTranslation } from "react-i18next";
 import FriendsNavbar from "@/features/friends/components/friends-navbar";
 import { SidebarPageLayout } from "../components/sidebar-page-layout";
 
-interface FriendsPageProps {}
-
-const FriendPage: React.FC<FriendsPageProps> = () => {
+const FriendPage: React.FC = () => {
   const [showSidebar, setShowSidebar] = useState(false);
   const { t } = useTranslation() as { t: (key: string) => string };
 

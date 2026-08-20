@@ -39,13 +39,15 @@ export const ChatList: React.FC<ChatListProps> = ({ className, onConversationCli
 
   return (
     <div className={clsx("flex flex-col gap-2 p-2 h-full", className)}>
-      <Textbox
-        className="w-full"
-        placeholder={t("common:conversations.searchPlaceholder")}
-        onChange={(e) => handleSearch(e.target.value)}
-        value={keyword}
-        type="search"
-      />
+      <div className="pt-0.5 px-0.5 shrink-0">
+        <Textbox
+          className="w-full"
+          placeholder={t("common:conversations.searchPlaceholder")}
+          onChange={(e) => handleSearch(e.target.value)}
+          value={keyword}
+          type="search"
+        />
+      </div>
       {debouncedKeyword ? (
         <ChatSearchList
           onConversationClick={onConversationClick}

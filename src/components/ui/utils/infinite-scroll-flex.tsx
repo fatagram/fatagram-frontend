@@ -1,15 +1,15 @@
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { RefObject, useCallback, useEffect, useRef } from "react";
+import { RefObject, useCallback, useEffect, useId, useMemo, useRef } from "react";
 
-interface InfiniteScrollFlexProps extends ComponentProps {
-  items: any[];
+interface InfiniteScrollFlexProps<T> extends ComponentProps {
+  items: T[];
   loadingSkeleton?: React.ReactNode;
   numberOfSkeletons?: number;
   hasMore?: boolean;
   isLoading?: boolean;
   itemTemplate?: (
-    item: any,
+    item: T,
     index: number,
     ref: RefObject<HTMLDivElement | null> | null,
   ) => React.ReactNode;
@@ -18,11 +18,11 @@ interface InfiniteScrollFlexProps extends ComponentProps {
   lastSeen?: React.ReactNode;
   gap?: string | number;
   parentRef?: RefObject<HTMLDivElement | null>;
-  itemKey: (item: any, index: number) => string | number;
+  itemKey: (item: T, index: number) => string | number;
   emptyComponent?: React.ReactNode;
 }
 
-export default function InfiniteScrollFlex({
+export default function InfiniteScrollFlex<T>({
   items,
   loadingSkeleton,
   numberOfSkeletons = 4,
@@ -37,9 +37,15 @@ export default function InfiniteScrollFlex({
   parentRef,
   itemKey,
   emptyComponent,
-}: InfiniteScrollFlexProps) {
+}: Readonly<InfiniteScrollFlexProps<T>>) {
   const containerRef = useRef<HTMLDivElement>(null);
   const sentinelRef = useRef<HTMLDivElement>(null);
+
+  const skeletonPrefix = useId();
+  const skeletonKeys = useMemo(
+    () => Array.from({ length: numberOfSkeletons }, (_, i) => `${skeletonPrefix}-skel-${i}`),
+    [numberOfSkeletons, skeletonPrefix],
+  );
 
   // Latest values are kept in refs so the IntersectionObserver below is created
   // exactly once (per mount / parentRef change) instead of being torn down and
@@ -115,19 +121,16 @@ export default function InfiniteScrollFlex({
     >
       {items.map((item, index) => (
         <div key={itemKey(item, index)}>
-          {itemTemplate ? itemTemplate(item, index, null) : item}
+          {itemTemplate ? itemTemplate(item, index, null) : (item as unknown as React.ReactNode)}
         </div>
       ))}
 
-      {isLoading && (
-        <div className="relative w-full" style={{ overflowAnchor: "none" }}>
-          {Array.from({ length: numberOfSkeletons }).map((_, index) => (
-            <div key={`skeleton-${index}`} className="relative">
-              {loadingSkeleton ?? "Loading..."}
-            </div>
-          ))}
-        </div>
-      )}
+      {isLoading &&
+        skeletonKeys.map((uniqueKey) => (
+          <div key={uniqueKey} className="relative w-full" style={{ overflowAnchor: "none" }}>
+            {loadingSkeleton ?? "Loading..."}
+          </div>
+        ))}
 
       {hasMore && (
         <div

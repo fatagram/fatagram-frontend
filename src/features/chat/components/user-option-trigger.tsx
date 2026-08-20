@@ -9,7 +9,7 @@ interface UserOptionTriggerProps {
   isGroup?: boolean;
   user: {
     userId: string;
-    fullName: string;
+    fullName?: string;
     avatarUrl?: string;
   };
 }

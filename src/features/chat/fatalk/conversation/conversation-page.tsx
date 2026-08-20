@@ -383,14 +383,14 @@ export const ChatThemeDialogContent: React.FC<{
       </div>
 
       {/* Cột Phải / Bottom: Chọn chủ đề */}
-      <div className="flex flex-col gap-1.5 flex-1 min-h-0 md:h-[350px] overflow-hidden">
+      <div className="flex flex-col gap-1.5 flex-1 min-h-0 md:h-full overflow-hidden">
         <Text sz="sm" weight="bold" className="text-text-second pl-1 shrink-0">
           Chọn chủ đề
         </Text>
         <ChatThemePicker
           selectedTheme={selectedTheme}
           onSelectTheme={handleSelectTheme}
-          className="flex-1 min-h-0 h-full max-h-[190px] md:max-h-[318px]"
+          className="flex-1 min-h-0 h-full"
         />
       </div>
     </div>

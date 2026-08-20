@@ -7,7 +7,7 @@ import { hydrateRoot, createRoot } from "react-dom/client";
 import { BrowserRouter } from "react-router-dom";
 import App from "./App";
 
-const initialData = (window as any).__INITIAL_DATA__ || {};
+const initialData = window.__INITIAL_DATA__ || {};
 
 const rootElement = document.getElementById("root");
 
@@ -44,12 +44,11 @@ if (hasSSRContent) {
 
 if (typeof window !== "undefined" && "serviceWorker" in navigator) {
   if (window.location.hostname !== "localhost") {
-    navigator.serviceWorker.register("/sw.js");
+    await navigator.serviceWorker.register("/sw.js");
   } else {
-    navigator.serviceWorker.getRegistrations().then((registrations) => {
-      for (let registration of registrations) {
-        registration.unregister();
-      }
-    });
+    const registrations = await navigator.serviceWorker.getRegistrations();
+    for (const registration of registrations) {
+      await registration.unregister();
+    }
   }
 }

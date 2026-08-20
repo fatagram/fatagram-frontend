@@ -84,7 +84,7 @@ export const useChatStore = create<ChatWindowState>((set) => ({
   openChat: (id: string, meta: ChatMeta) =>
     set((state) => {
       if (state.activeIds.includes(id)) return state;
-      let newActiveIds = [...state.activeIds, id];
+      const newActiveIds = [...state.activeIds, id];
       let newMinimizedIds = state.minimizedIds.filter((mid) => mid !== id);
 
       if (newActiveIds.length > 3) {
@@ -128,7 +128,7 @@ export const useChatStore = create<ChatWindowState>((set) => ({
           minimizedIds: newMinimizedIds,
         };
       }
-      let newActiveIds = [...state.activeIds, id];
+      const newActiveIds = [...state.activeIds, id];
       let newMinimizedIds = state.minimizedIds.filter((minimizedId) => minimizedId !== id);
 
       if (newActiveIds.length > 3) {

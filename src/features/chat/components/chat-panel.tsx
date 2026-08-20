@@ -39,17 +39,6 @@ export const ChatPanel: React.FC<Props> = ({
   onClickTitle,
   onTurnback,
 }) => {
-  if (conversationId.startsWith("temp-")) {
-    return (
-      <TempChat
-        conversationId={conversationId}
-        className={className}
-        onTurnBack={onTurnback}
-        headerRight={headerRight}
-        headerLeft={headerLeft}
-      />
-    );
-  }
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
   const { renderConversationName } = useRenderConversationContent();
@@ -89,17 +78,21 @@ export const ChatPanel: React.FC<Props> = ({
       setChatTitle(renderConversationName(conv));
       setChatAvatar(conv.avatarUrl ?? "");
     }
-  }, [conv]);
+  }, [conv, renderConversationName]);
+
+  const convRef = useRef(conv);
+  convRef.current = conv;
 
   useEffect(() => {
     if (!conv?.id) return;
 
-    const handleUserInteract = async () => {
-      if (!document.hasFocus()) return;
+    const markCurrentAsRead = async () => {
       setFocusOn(conv.id);
+      const currentConv = convRef.current;
       const lastMsgSeq =
         useConversationStore.getState().lastMessageSequenceMap[conv.id] ||
-        conversationData?.lastMessageNumber;
+        currentConv?.lastMessage?.sequenceNumber ||
+        currentConv?.lastMessageNumber;
       const myLastSeenSeq = useConversationStore.getState().userSeenMap[conv.id] || 0;
 
       if (!lastMsgSeq) return;
@@ -112,6 +105,11 @@ export const ChatPanel: React.FC<Props> = ({
       });
     };
 
+    const handleUserInteract = async () => {
+      if (!document.hasFocus()) return;
+      await markCurrentAsRead();
+    };
+
     const handleWindowFocus = async () => {
       if (!document.hasFocus()) return;
       const activeEl = document.activeElement;
@@ -121,21 +119,7 @@ export const ChatPanel: React.FC<Props> = ({
         (activeEl && scrollRef.current?.contains(activeEl));
       if (!insidePanel) return;
 
-      // same logic as handleUserInteract
-      setFocusOn(conv.id);
-      const lastMsgSeq =
-        useConversationStore.getState().lastMessageSequenceMap[conv.id] ||
-        conv.lastMessage?.sequenceNumber;
-      const myLastSeenSeq = useConversationStore.getState().userSeenMap[conv.id] || 0;
-
-      if (!lastMsgSeq) return;
-      if (lastMsgSeq <= myLastSeenSeq) return;
-
-      markAsReadLocal(conv.id, lastMsgSeq);
-      await markAsRead({
-        conversationId: conv.id,
-        messageSeq: lastMsgSeq,
-      });
+      await markCurrentAsRead();
     };
 
     const handleClickOutside = (event: MouseEvent) => {
@@ -181,7 +165,19 @@ export const ChatPanel: React.FC<Props> = ({
     return () => {
       invoke("LeaveConversation", conversationId);
     };
-  }, [conversationId, connectionState]);
+  }, [conversationId, connectionState, invoke]);
+
+  if (conversationId.startsWith("temp-")) {
+    return (
+      <TempChat
+        conversationId={conversationId}
+        className={className}
+        onTurnBack={onTurnback}
+        headerRight={headerRight}
+        headerLeft={headerLeft}
+      />
+    );
+  }
 
   if (!isLoadingConversation && !isFetchingConversation && !isPendingConversation && !conv) {
     return (

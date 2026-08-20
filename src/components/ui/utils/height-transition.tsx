@@ -12,7 +12,7 @@ export default function HeightTransition({
   children,
   duration = 150,
   fade = true,
-}: HeightTransitionProps) {
+}: Readonly<HeightTransitionProps>) {
   const mainRef = useRef<HTMLDivElement>(null);
   const [maxHeight, setMaxHeight] = useState<string>(show ? "none" : "0px");
   const [isVisible, setIsVisible] = useState<boolean>(show);
@@ -33,16 +33,24 @@ export default function HeightTransition({
     }
   }, [show]);
 
+  let opacity = 1;
+  let transform = "none";
+
+  if (fade) {
+    opacity = show ? 1 : 0.5;
+    transform = show ? "translateY(0)" : "translateY(-10px)";
+  }
+
   return (
     <div
       ref={mainRef}
       style={{
         overflow: "hidden",
         maxHeight: maxHeight,
-        transitionDuration: duration + "ms",
-        opacity: fade ? (show ? 1 : 0.5) : 1,
-        transform: fade ? (show ? "translateY(0)" : "translateY(-10px)") : "none",
-        transitionProperty: fade ? `max-height, opacity, transform` : `max-height`,
+        transitionDuration: `${duration}ms`,
+        opacity,
+        transform,
+        transitionProperty: fade ? "max-height, opacity, transform" : "max-height",
       }}
       aria-hidden={!isVisible}
     >

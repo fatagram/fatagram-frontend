@@ -23,14 +23,14 @@ const SearchUserItem: React.FC<SearchUserItemProps> = ({ id, avatar, name, statu
     <>
       {/* Mobile view (< sm): Instant CSS, eliminates reload flash */}
       <div className="flex sm:hidden items-center gap-3 p-3 bg-bg-second rounded-2xl w-full border border-bg-fourth">
-        <div className="cursor-pointer shrink-0" onClick={handleNavigate}>
+        <button type="button" className="cursor-pointer shrink-0" onClick={handleNavigate}>
           <Avatar
             src={avatar || undefined}
             alt="avatar"
             shape="rounded"
             className="w-14 h-14 object-cover"
           />
-        </div>
+        </button>
         <div className="flex-1 min-w-0">
           <Text
             sz="md"
@@ -56,14 +56,18 @@ const SearchUserItem: React.FC<SearchUserItemProps> = ({ id, avatar, name, statu
           "hover:border-primary-500/40 transition-colors duration-300",
         )}
       >
-        <div className="w-full cursor-pointer aspect-square mb-2" onClick={handleNavigate}>
+        <button
+          type="button"
+          className="w-full cursor-pointer aspect-square mb-2"
+          onClick={handleNavigate}
+        >
           <Avatar
             src={avatar || undefined}
             alt="avatar"
             shape="rounded"
             className="w-full h-full object-cover"
           />
-        </div>
+        </button>
         <Text
           sz="md"
           weight="bold"

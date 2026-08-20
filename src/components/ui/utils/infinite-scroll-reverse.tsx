@@ -7,7 +7,7 @@ import { mergeRefs } from "@/utils/merge-refs";
 interface Props<T> extends ComponentProps {
   items: T[];
   hasMore: boolean;
-  loadMore: () => Promise<any>;
+  loadMore: () => Promise<unknown>;
   renderItem: (item: T, index: number) => React.ReactNode;
   itemKey: (item: T) => string | number;
   estimateSize?: (item: T) => number;
@@ -27,7 +27,7 @@ export default function InfiniteScrollReverse<T>({
   end,
   spinner,
   scrollRef,
-}: Props<T>) {
+}: Readonly<Props<T>>) {
   const parentRef = useRef<HTMLDivElement | null>(null);
   const sentinelRef = useRef<HTMLDivElement | null>(null);
   const isFetchingRef = useRef(false);
@@ -42,9 +42,7 @@ export default function InfiniteScrollReverse<T>({
   const rowVirtualizer = useVirtualizer({
     count: reversedItems.length,
     getScrollElement: () => parentRef.current,
-    estimateSize: estimateSize
-      ? (index) => estimateSize(reversedItems[index])
-      : () => 70,
+    estimateSize: estimateSize ? (index) => estimateSize(reversedItems[index]) : () => 70,
     overscan: 8,
     getItemKey: (index) => itemKey(reversedItems[index]),
   });

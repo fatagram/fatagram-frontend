@@ -132,5 +132,6 @@
     "connected_back": "Connection successfully restored",
     "still_offline": "Still no internet connection. Please try again."
   },
-  "loadMore": "Load more"
+  "loadMore": "Load more",
+  "allResultsSeen": "You've seen all results."
 }

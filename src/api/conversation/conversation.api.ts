@@ -8,6 +8,7 @@ import {
   MessageMediaDto,
   MessageResponseDto,
 } from "../message/dto/message.dto";
+import { MediaType } from "@/types/entities/message.type";
 
 const PREFIX = buildApiPath("/conversation");
 

@@ -25,8 +25,198 @@ interface ChatItemProps extends ComponentProps {
   onClick: () => void;
 }
 
-export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => {
+interface TrailingStatusProps {
+  isUnread: boolean;
+  unreadLabel: string;
+  isGroup?: boolean;
+  isOtherUserRead: boolean;
+  avatarUrl?: string | null;
+}
+
+const TrailingStatus: React.FC<TrailingStatusProps> = ({
+  isUnread,
+  unreadLabel,
+  isGroup,
+  isOtherUserRead,
+  avatarUrl,
+}) => {
+  if (isUnread) {
+    return (
+      <div
+        aria-hidden
+        className="w-[18px] h-[18px] rounded-full bg-primary-500 flex items-center justify-center shadow-sm"
+      >
+        <span className="text-[10px] font-bold text-white leading-none">{unreadLabel}</span>
+      </div>
+    );
+  }
+
+  if (!isGroup && isOtherUserRead) {
+    return (
+      <Avatar
+        sz="xs"
+        src={avatarUrl || ""}
+        alt="seen"
+        className="opacity-80 border border-bg-fourth/50 shadow-sm"
+      />
+    );
+  }
+
+  return null;
+};
+
+const getItemBackgroundClass = (isCurrent: boolean, isUnread: boolean) => {
+  if (isCurrent) {
+    return "bg-bg-third";
+  }
+  if (isUnread) {
+    return "bg-primary-500/[0.04] hover:bg-bg-third/60";
+  }
+  return "hover:bg-bg-third/60";
+};
+
+const getMessagePreview = (
+  conversation: Conversation,
+  unreadCount: number,
+  unreadLabel: string,
+  userId: string | undefined,
+  t: (key: string, options?: Record<string, unknown>) => string,
+  renderSystemMessage: (message: NonNullable<Conversation["lastMessage"]>) => React.ReactNode,
+) => {
   const lastMessage = conversation.lastMessage;
+
+  if (unreadCount > 1) {
+    return `Bạn có ${unreadLabel} tin nhắn chưa đọc`;
+  }
+
+  if (!lastMessage) {
+    return t("common:conversations.noMessagesYet");
+  }
+
+  if (isSystemMessage(lastMessage.type || MessageType.System)) {
+    return renderSystemMessage(lastMessage);
+  }
+
+  const senderName =
+    userId === lastMessage.senderId ? t("common:conversations.you") : lastMessage.senderFullName;
+
+  if (lastMessage.type === MessageType.Text) {
+    return `${senderName}: ${lastMessage.content}`;
+  }
+
+  if (lastMessage.type === MessageType.Media) {
+    const hasImage = lastMessage.media?.some((m) => m.type === MediaType.Image);
+    if (hasImage) {
+      return `${senderName}: ${t("common:conversations.sentImageMessage", { count: lastMessage.media?.length })}`;
+    }
+    return `${senderName}: ${t("common:conversations.sentMediaMessage")}`;
+  }
+
+  return "";
+};
+
+interface ChatItemMobileMenuProps {
+  isMobile: boolean;
+  isOpen: boolean;
+  onOpenChange: (open: boolean) => void;
+  title?: string;
+  isPinned: boolean;
+  isTogglingPin: boolean;
+  onTogglePin: (e?: React.MouseEvent) => void;
+}
+
+const ChatItemMobileMenu: React.FC<ChatItemMobileMenuProps> = ({
+  isMobile,
+  isOpen,
+  onOpenChange,
+  title,
+  isPinned,
+  isTogglingPin,
+  onTogglePin,
+}) => {
+  const { t } = useTranslation();
+
+  if (!isMobile) {
+    return null;
+  }
+
+  const pinLabel = isPinned
+    ? t("common:conversations.settings.unpinConversation")
+    : t("common:conversations.settings.pinConversation");
+
+  const pinDescription = isPinned
+    ? t("common:conversations.settings.unpinConversationDescription")
+    : t("common:conversations.settings.pinConversationDescription");
+
+  return (
+    <BottomSheet
+      open={isOpen}
+      onOpenChange={onOpenChange}
+      trigger={<span className="hidden" />}
+      title={title}
+    >
+      <div className="flex flex-col w-full pb-6 px-3 gap-1">
+        <button
+          type="button"
+          onClick={onTogglePin}
+          disabled={isTogglingPin}
+          className="flex items-center gap-3.5 w-full p-3.5 rounded-xl hover:bg-bg-hover active:bg-bg-fourth transition-colors text-left cursor-pointer"
+        >
+          <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 shrink-0">
+            <Pin className={clsx("w-5 h-5", isPinned && "rotate-45 fill-primary-500/30")} />
+          </div>
+          <div className="flex flex-col">
+            <span className="font-semibold text-text-primary text-base">
+              {pinLabel}
+            </span>
+            <span className="text-xs text-text-secondary">
+              {pinDescription}
+            </span>
+          </div>
+        </button>
+      </div>
+    </BottomSheet>
+  );
+};
+
+interface ChatItemDesktopMenuProps {
+  isMobile: boolean;
+  isOpen: boolean;
+  coords: { top: number; right: number } | null;
+  dropdownRef: React.RefObject<HTMLDivElement | null>;
+  items: DropdownItem[];
+}
+
+const ChatItemDesktopMenu: React.FC<ChatItemDesktopMenuProps> = ({
+  isMobile,
+  isOpen,
+  coords,
+  dropdownRef,
+  items,
+}) => {
+  if (isMobile || !isOpen || !coords || typeof document === "undefined") {
+    return null;
+  }
+
+  return createPortal(
+    <Dropdown
+      ref={dropdownRef}
+      items={items}
+      isShow={isOpen}
+      showPolygon={false}
+      style={{
+        position: "fixed",
+        top: `${coords.top}px`,
+        right: `${coords.right}px`,
+        zIndex: 99999,
+      }}
+      className="w-48 shadow-2xl border border-border-main/30 bg-bg-card animate-dropdown-slide"
+    />,
+    document.body,
+  );
+};
+
+export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => {
   const location = useLocation();
   const currentConversationId = location.pathname.split("/").pop();
 
@@ -47,10 +237,9 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
   const unreadCount = conversation.unreadMessageCount || 0;
   const isUnread = unreadCount > 0;
   const isPinned = Boolean(conversation.isPinned || conversation.pinnedAt);
-  const isOtherUserRead =
-    conversation.otherLastSeenMessageSeq &&
-    conversation.lastMessage?.sequenceNumber &&
-    conversation.otherLastSeenMessageSeq >= conversation.lastMessage.sequenceNumber;
+  const otherSeq = conversation.otherLastSeenMessageSeq;
+  const lastSeq = conversation.lastMessage?.sequenceNumber;
+  const isOtherUserRead = Boolean(otherSeq && lastSeq && otherSeq >= lastSeq);
   const unreadLabel = unreadCount > 99 ? "99+" : String(unreadCount);
 
   const { userId } = useAuth();
@@ -66,16 +255,17 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
   // Position portal dropdown when opened
   const handleOpenDropdown = (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!isDropdownOpen && moreBtnRef.current) {
-      const rect = moreBtnRef.current.getBoundingClientRect();
-      setDropdownCoords({
-        top: rect.bottom + 6,
-        right: window.innerWidth - rect.right,
-      });
-      setIsDropdownOpen(true);
-    } else {
+    if (isDropdownOpen || !moreBtnRef.current) {
       setIsDropdownOpen(false);
+      return;
     }
+
+    const rect = moreBtnRef.current.getBoundingClientRect();
+    setDropdownCoords({
+      top: rect.bottom + 6,
+      right: window.innerWidth - rect.right,
+    });
+    setIsDropdownOpen(true);
   };
 
   // Close dropdown on scroll or resize
@@ -103,44 +293,15 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
 
   // Long press for mobile to open system BottomSheet
   const handleLongPress = useCallback(() => {
-    if (isMobile) {
-      if (typeof navigator !== "undefined" && navigator.vibrate) {
-        navigator.vibrate(50);
-      }
-      setIsBottomSheetOpen(true);
+    if (!isMobile) return;
+    if (typeof navigator !== "undefined" && navigator.vibrate) {
+      navigator.vibrate(50);
     }
+    setIsBottomSheetOpen(true);
   }, [isMobile]);
 
   const longPressHandlers = useLongPress(handleLongPress, 500);
-
-  const renderMessagePreview = () => {
-    if (unreadCount > 1) {
-      return `Bạn có ${unreadLabel} tin nhắn chưa đọc`;
-    }
-
-    if (!lastMessage) {
-      return t("common:conversations.noMessagesYet");
-    }
-
-    if (isSystemMessage(lastMessage.type || MessageType.System)) {
-      return renderSystemMessage(lastMessage);
-    }
-
-    const senderName =
-      userId === lastMessage.senderId ? t("common:conversations.you") : lastMessage.senderFullName;
-
-    switch (lastMessage.type) {
-      case MessageType.Text:
-        return `${senderName}: ${lastMessage.content}`;
-      case MessageType.Media:
-        if (lastMessage.media && lastMessage.media.some((m) => m.type === MediaType.Image)) {
-          return `${senderName}: ${t("common:conversations.sentImageMessage", { count: lastMessage.media.length })}`;
-        }
-        return `${senderName}: ${t("common:conversations.sentMediaMessage")}`;
-      default:
-        return "";
-    }
-  };
+  const pressHandlers = isMobile ? longPressHandlers : {};
 
   const dropdownItems: DropdownItem[] = [
     {
@@ -159,173 +320,126 @@ export const ChatItem: React.FC<ChatItemProps> = ({ conversation, onClick }) => 
     },
   ];
 
-  return (
-    <div
-      key={conversation.id}
-      className={clsx(
-        "group flex gap-3 p-3 pl-0 sm:pl-3 my-1 rounded-xl transition-all duration-300 ease-out",
-        "cursor-pointer select-none",
-        conversation.id === currentConversationId
-          ? "bg-bg-third"
-          : isUnread
-            ? "bg-primary-500/[0.04] hover:bg-bg-third/60"
-            : "hover:bg-bg-third/60",
-      )}
-      onClick={() => onClick()}
-      onMouseDown={isMobile ? longPressHandlers.onMouseDown : undefined}
-      onMouseMove={isMobile ? longPressHandlers.onMouseMove : undefined}
-      onMouseUp={isMobile ? longPressHandlers.onMouseUp : undefined}
-      onMouseLeave={isMobile ? longPressHandlers.onMouseLeave : undefined}
-      onTouchStart={isMobile ? longPressHandlers.onTouchStart : undefined}
-      onTouchMove={isMobile ? longPressHandlers.onTouchMove : undefined}
-      onTouchEnd={isMobile ? longPressHandlers.onTouchEnd : undefined}
-    >
-      <div className="relative shrink-0">
-        <Avatar
-          src={conversation.avatarUrl ?? ""}
-          alt="Conversation Avatar"
-          sz="md"
-          className="group-hover:scale-105 transition-transform duration-300 border border-bg-fourth/30"
-        />
-      </div>
+  const isCurrent = conversation.id === currentConversationId;
+  const conversationTitle = renderConversationName(conversation);
 
-      <div className="flex flex-col flex-1 min-w-0 justify-between py-[2px]">
-        <div className="flex justify-between items-baseline gap-2">
-          <Text
-            sz="sm"
-            weight={isUnread ? "bold" : "medium"}
-            className={clsx(
-              "line-clamp-1 truncate max-w-full font-semibold",
-              isUnread ? "text-text-main" : "text-text-main/90",
-            )}
-          >
-            {renderConversationName(conversation)}
-          </Text>
-          <div className="flex items-center gap-1.5 shrink-0">
-            {isPinned && (
-              <Pin className="w-3.5 h-3.5 text-primary-500 fill-primary-500/20 rotate-45" />
-            )}
-            <span
-              className={clsx(
-                "text-xs shrink-0 font-normal",
-                isUnread ? "text-primary-500 font-semibold" : "text-text-secondary",
-              )}
-            >
-              {formatTime(conversation.lastMessage?.createdAt ?? "")}
-            </span>
-          </div>
+  return (
+    <>
+      <button
+        type="button"
+        key={conversation.id}
+        className={clsx(
+          "group flex gap-3 p-3 pl-0 sm:pl-3 my-1 rounded-xl transition-all duration-300 ease-out",
+          "cursor-pointer select-none w-full text-left bg-transparent border-0 font-inherit",
+          getItemBackgroundClass(isCurrent, isUnread),
+        )}
+        onClick={() => onClick()}
+        {...pressHandlers}
+      >
+        <div className="relative shrink-0">
+          <Avatar
+            src={conversation.avatarUrl ?? ""}
+            alt="Conversation Avatar"
+            sz="md"
+            className="group-hover:scale-105 transition-transform duration-300 border border-bg-fourth/30"
+          />
         </div>
 
-        <div className="flex justify-between items-center gap-2 mt-1">
-          <Text
-            sz="xs"
-            className={clsx(
-              "truncate max-w-full leading-normal",
-              isUnread ? "text-text-main font-semibold" : "text-text-third",
-            )}
-          >
-            {renderMessagePreview()}
-          </Text>
-
-          <div className="shrink-0 flex items-center justify-end min-w-[20px] gap-1">
-            {Boolean(isUnread) === true ? (
-              <div
-                aria-hidden
+        <div className="flex flex-col flex-1 min-w-0 justify-between py-[2px]">
+          <div className="flex justify-between items-baseline gap-2">
+            <Text
+              sz="sm"
+              weight={isUnread ? "bold" : "medium"}
+              className={clsx(
+                "line-clamp-1 truncate max-w-full font-semibold",
+                isUnread ? "text-text-main" : "text-text-main/90",
+              )}
+            >
+              {conversationTitle}
+            </Text>
+            <div className="flex items-center gap-1.5 shrink-0">
+              {isPinned && (
+                <Pin className="w-3.5 h-3.5 text-primary-500 fill-primary-500/20 rotate-45" />
+              )}
+              <span
                 className={clsx(
-                  "w-[18px] h-[18px] rounded-full bg-primary-500 flex items-center justify-center shadow-sm",
+                  "text-xs shrink-0 font-normal",
+                  isUnread ? "text-primary-500 font-semibold" : "text-text-secondary",
                 )}
               >
-                <span className="text-[10px] font-bold text-white leading-none">{unreadLabel}</span>
-              </div>
-            ) : !conversation.isGroup && isOtherUserRead && !isUnread ? (
-              <Avatar
-                sz="xs"
-                src={conversation.avatarUrl || ""}
-                alt="seen"
-                className="opacity-80 border border-bg-fourth/50 shadow-sm"
+                {formatTime(conversation.lastMessage?.createdAt ?? "")}
+              </span>
+            </div>
+          </div>
+
+          <div className="flex justify-between items-center gap-2 mt-1">
+            <Text
+              sz="xs"
+              className={clsx(
+                "truncate max-w-full leading-normal",
+                isUnread ? "text-text-main font-semibold" : "text-text-third",
+              )}
+            >
+              {getMessagePreview(
+                conversation,
+                unreadCount,
+                unreadLabel,
+                userId,
+                t,
+                renderSystemMessage,
+              )}
+            </Text>
+
+            <div className="shrink-0 flex items-center justify-end min-w-[20px] gap-1">
+              <TrailingStatus
+                isUnread={isUnread}
+                unreadLabel={unreadLabel}
+                isGroup={conversation.isGroup}
+                isOtherUserRead={Boolean(isOtherUserRead)}
+                avatarUrl={conversation.avatarUrl}
               />
-            ) : null}
 
-            {/* Desktop '...' Button on hover */}
-            <div className="hidden sm:block">
-              <button
-                ref={moreBtnRef}
-                aria-label="More options"
-                onClick={handleOpenDropdown}
-                className={clsx(
-                  "w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200",
-                  "hover:bg-bg-fourth active:scale-95 text-text-secondary hover:text-text-main",
-                  isDropdownOpen ? "opacity-100 bg-bg-fourth" : "opacity-0 group-hover:opacity-100",
-                )}
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
+              {/* Desktop '...' Button on hover */}
+              <div className="hidden sm:block">
+                <button
+                  type="button"
+                  ref={moreBtnRef}
+                  aria-label="More options"
+                  onClick={handleOpenDropdown}
+                  className={clsx(
+                    "w-7 h-7 rounded-full flex items-center justify-center transition-all duration-200",
+                    "hover:bg-bg-fourth active:scale-95 text-text-secondary hover:text-text-main",
+                    isDropdownOpen ? "opacity-100 bg-bg-fourth" : "opacity-0 group-hover:opacity-100",
+                  )}
+                >
+                  <MoreVertical className="w-4 h-4" />
+                </button>
+              </div>
             </div>
           </div>
         </div>
-      </div>
+      </button>
 
-      {/* Desktop Portal Dropdown so it floats on top of all items and never gets clipped */}
-      {!isMobile &&
-        isDropdownOpen &&
-        dropdownCoords &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <Dropdown
-            ref={dropdownRef}
-            items={dropdownItems}
-            isShow={isDropdownOpen}
-            showPolygon={false}
-            style={{
-              position: "fixed",
-              top: `${dropdownCoords.top}px`,
-              right: `${dropdownCoords.right}px`,
-              zIndex: 99999,
-            }}
-            className="w-48 shadow-2xl border border-border-main/30 bg-bg-card animate-dropdown-slide"
-          />,
-          document.body,
-        )}
+      {/* Desktop Portal Dropdown */}
+      <ChatItemDesktopMenu
+        isMobile={isMobile}
+        isOpen={isDropdownOpen}
+        coords={dropdownCoords}
+        dropdownRef={dropdownRef}
+        items={dropdownItems}
+      />
 
       {/* Mobile Long Press Bottom Sheet */}
-      {isMobile && (
-        <BottomSheet
-          open={isBottomSheetOpen}
-          onOpenChange={setIsBottomSheetOpen}
-          trigger={<span className="hidden" />}
-          title={renderConversationName(conversation)}
-        >
-          <div
-            className="flex flex-col w-full pb-6 px-3 gap-1"
-            onClick={(e) => e.stopPropagation()}
-            onMouseDown={(e) => e.stopPropagation()}
-            onTouchStart={(e) => e.stopPropagation()}
-          >
-            <button
-              onClick={handleTogglePin}
-              disabled={isTogglingPin}
-              className="flex items-center gap-3.5 w-full p-3.5 rounded-xl hover:bg-bg-hover active:bg-bg-fourth transition-colors text-left cursor-pointer"
-            >
-              <div className="w-10 h-10 rounded-full bg-primary-500/10 flex items-center justify-center text-primary-500 shrink-0">
-                <Pin className={clsx("w-5 h-5", isPinned && "rotate-45 fill-primary-500/30")} />
-              </div>
-              <div className="flex flex-col">
-                <span className="font-semibold text-text-primary text-base">
-                  {isPinned
-                    ? t("common:conversations.settings.unpinConversation")
-                    : t("common:conversations.settings.pinConversation")}
-                </span>
-                <span className="text-xs text-text-secondary">
-                  {isPinned
-                    ? t("common:conversations.settings.unpinConversationDescription")
-                    : t("common:conversations.settings.pinConversationDescription")}
-                </span>
-              </div>
-            </button>
-          </div>
-        </BottomSheet>
-      )}
-    </div>
+      <ChatItemMobileMenu
+        isMobile={isMobile}
+        isOpen={isBottomSheetOpen}
+        onOpenChange={setIsBottomSheetOpen}
+        title={conversationTitle}
+        isPinned={isPinned}
+        isTogglingPin={isTogglingPin}
+        onTogglePin={handleTogglePin}
+      />
+    </>
   );
 };
 

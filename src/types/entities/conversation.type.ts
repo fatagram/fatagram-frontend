@@ -5,6 +5,7 @@ export interface Conversation {
   name?: string | null;
   avatarUrl?: string | null;
   lastMessage?: Message;
+  lastMessageNumber?: number;
   unreadMessageCount: number;
   lastActiveAt: string;
   isGroup: boolean;

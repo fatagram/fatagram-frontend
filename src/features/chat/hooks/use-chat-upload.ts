@@ -1,4 +1,4 @@
-import { uploadService } from "@/api/upload/upload.api";
+import { UploadMediaResult, uploadService } from "@/api/upload/upload.api";
 import { getCloudinaryResourceTypeFromFileType } from "@/utils/file";
 import { useState } from "react";
 
@@ -8,7 +8,7 @@ export const useChatUpload = () => {
 
   const upload = async (
     files: File[],
-  ): Promise<{ url: string; type: string; original_filename: string; bytes: number }[]> => {
+  ): Promise<UploadMediaResult[]> => {
     setLoading(true);
     setError(null);
 
@@ -26,8 +26,8 @@ export const useChatUpload = () => {
       const results = await Promise.all(uploadPromises);
       setLoading(false);
       return results;
-    } catch (err: any) {
-      setError(err);
+    } catch (err: unknown) {
+      setError(err instanceof Error ? err : new Error(String(err)));
       setLoading(false);
       return [];
     }

@@ -1,5 +1,5 @@
 import { HubConnection, HubConnectionState } from "@microsoft/signalr";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { authEvents } from "@/events/auth-event";
 import { useAuth } from "@/contexts";
 import { createSignalRConnection } from "../../api/socket/app-hub-client";
@@ -146,7 +146,7 @@ export function useAppHub<T>(
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
-  const invoke = async (methodName: string, ...args: any[]) => {
+  const invoke = useCallback(async (methodName: string, ...args: any[]) => {
     const conn = _sharedConnection;
     if (conn && conn.state === HubConnectionState.Connected) {
       try {
@@ -157,7 +157,7 @@ export function useAppHub<T>(
     } else {
       console.warn("SignalR: Connection is not in Connected state.");
     }
-  };
+  }, []);
 
   return {
     invoke,

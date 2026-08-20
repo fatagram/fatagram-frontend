@@ -1,5 +1,6 @@
 import { ComponentProps } from "@/components/common/component-type";
 import { MediaType, Message, MessageRenderType } from "@/types/entities/message.type";
+import { User } from "@/types/entities/user.type";
 import { Avatar, MiniButton, Text, Tooltip } from "@/components/atoms";
 import clsx from "clsx";
 import { useTranslation } from "react-i18next";
@@ -8,14 +9,14 @@ import { useFormatTime } from "@/utils/time";
 import { useRenderConversationContent } from "../hooks/use-render-conversation-content";
 import { useMessageStore } from "@/features/chat/hooks/use-conversation";
 import {
-  renderAudioMessage,
-  renderFileMessage,
-  renderGifMessage,
-  renderImageStackMessage,
-  renderOnlyEmojiMessage,
-  renderSingleImageMessage,
-  renderTextMessage,
-  renderVideoMessage,
+  TextMessageItem,
+  OnlyEmojiMessageItem,
+  FileMessageItem,
+  VideoMessageItem,
+  AudioMessageItem,
+  ImageStackMessageItem,
+  SingleImageMessageItem,
+  GifMessageItem,
 } from "./messages/render";
 import { useShallow } from "zustand/react/shallow";
 import { useMobile } from "@/hooks/use-mobile";
@@ -34,31 +35,287 @@ import {
 
 const EMPTY_VIEWERS: Array<{ userId: string; seenAt: string }> = [];
 
+export interface MessageMeta {
+  _isFirstInGroup: boolean;
+  _isLastInGroup: boolean;
+  _isOnlyOneInGroup: boolean;
+  _isLastMessage: boolean;
+  _isShowTime: boolean;
+  _isShowAvatar: boolean;
+  _isMyMessage: boolean;
+  _messageBubbleShapeClass: string;
+  _isOnlyEmoji: boolean;
+  _type: MessageRenderType;
+  _isShowName: boolean;
+  _isOlderThanOneMinute: boolean;
+  _shouldAnimate: boolean;
+}
+
 interface MessageProps extends ComponentProps {
   message: Message;
   userId?: string;
   conversationId?: string;
   isGroup?: boolean;
-  userInfo?: any;
-  userProfileMap?: Record<string, any>;
-  meta: {
-    _isFirstInGroup: boolean;
-    _isLastInGroup: boolean;
-    _isOnlyOneInGroup: boolean;
-    _isLastMessage: boolean;
-    _isShowTime: boolean;
-    _isShowAvatar: boolean;
-    _isMyMessage: boolean;
-    _messageBubbleShapeClass: string;
-    _isOnlyEmoji: boolean;
-    _type: MessageRenderType;
-    _isShowName: boolean;
-    _isOlderThanOneMinute: boolean;
-    _shouldAnimate: boolean;
-  };
+  userInfo?: User;
+  userProfileMap?: Record<string, User>;
+  meta: MessageMeta;
 }
 
-const MessageRowComponent: React.FC<MessageProps> = ({
+interface MessageOptionsContentProps {
+  messageContent?: string;
+  isSheet?: boolean;
+  onClose: () => void;
+}
+
+const MessageOptionsContent = memo(function MessageOptionsContent({
+  messageContent,
+  isSheet = false,
+  onClose,
+}: MessageOptionsContentProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div className={clsx("flex flex-col", isSheet ? "gap-2 pb-10 px-4" : "gap-2 min-w-[220px]")}>
+      <Menu>
+        <MenuItem
+          icon={<FontAwesomeIcon icon={faCopy} />}
+          title={t("common:conversations.messageOptions.copy")}
+          rightElement={<div />}
+          onClick={() => {
+            navigator.clipboard.writeText(messageContent || "");
+            onClose();
+          }}
+        />
+      </Menu>
+    </div>
+  );
+});
+
+interface MessageContentProps {
+  message: Message;
+  meta: MessageMeta;
+  conversationId?: string;
+  hasDelayed: boolean;
+  isFailed: boolean;
+}
+
+const MessageContent = memo(function MessageContent({
+  message,
+  meta,
+  conversationId,
+  hasDelayed,
+  isFailed,
+}: MessageContentProps) {
+  const stackImage = useMemo(
+    () => message.media?.filter((m) => m.type === MediaType.Image) ?? [],
+    [message.media],
+  );
+
+  if (meta._isOnlyEmoji) {
+    return <OnlyEmojiMessageItem isMyMessage={meta._isMyMessage} content={message.content} />;
+  }
+
+  if (meta._type === MessageRenderType.Text) {
+    return (
+      <TextMessageItem
+        isMyMessage={meta._isMyMessage}
+        isFailed={isFailed}
+        messageBubbleShapeClass={meta._messageBubbleShapeClass}
+        content={message.content}
+        hasDelayed={hasDelayed}
+      />
+    );
+  }
+
+  if (meta._type === MessageRenderType.File) {
+    return (
+      <FileMessageItem
+        isMyMessage={meta._isMyMessage}
+        isFailed={isFailed}
+        media={{
+          url: message.media?.[0]?.url || "",
+          metadata: {
+            name: message.media?.[0]?.metadata?.filename,
+            size: message.media?.[0]?.metadata?.size,
+            mimeType: message.media?.[0]?.metadata?.mimeType,
+          },
+        }}
+        messageBubbleShapeClass={meta._messageBubbleShapeClass}
+        hasDelayed={hasDelayed}
+      />
+    );
+  }
+
+  if (meta._type === MessageRenderType.Video) {
+    return (
+      <VideoMessageItem
+        media={{
+          id: message.media?.[0]?.id || "",
+          url: message.media?.[0]?.url || "",
+        }}
+        conversationId={conversationId!}
+        messageBubbleShapeClass={meta._messageBubbleShapeClass}
+      />
+    );
+  }
+
+  if (meta._type === MessageRenderType.Audio) {
+    return (
+      <AudioMessageItem
+        isMyMessage={meta._isMyMessage}
+        isFailed={isFailed}
+        media={{
+          url: message.media?.[0]?.url || "",
+        }}
+        messageBubbleShapeClass={meta._messageBubbleShapeClass}
+      />
+    );
+  }
+
+  if (meta._type === MessageRenderType.Image) {
+    if (stackImage.length > 1) {
+      return (
+        <ImageStackMessageItem
+          isMyMessage={meta._isMyMessage}
+          messageBubbleShapeClass={meta._messageBubbleShapeClass}
+          stackImage={message.media}
+          conversationId={conversationId!}
+          hasDelayed={hasDelayed}
+        />
+      );
+    }
+    if (stackImage.length === 1) {
+      return (
+        <SingleImageMessageItem
+          image={{
+            id: stackImage[0].id || "",
+            url: stackImage[0].url || "",
+            width: stackImage[0].metadata?.width,
+            height: stackImage[0].metadata?.height,
+          }}
+          messageBubbleShapeClass={meta._messageBubbleShapeClass}
+          conversationId={conversationId!}
+          hasDelayed={hasDelayed}
+        />
+      );
+    }
+    return null;
+  }
+
+  if (meta._type === MessageRenderType.Gif) {
+    return (
+      <GifMessageItem
+        gif={{
+          id: message.media?.[0]?.id || "",
+          url: message.media?.[0]?.url || "",
+        }}
+        messageBubbleShapeClass={meta._messageBubbleShapeClass}
+        conversationId={conversationId!}
+        hasDelayed={hasDelayed}
+      />
+    );
+  }
+
+  return null;
+});
+
+interface MessageActionsProps {
+  isMyMessage: boolean;
+  copied: boolean;
+  onCopy: () => void;
+  onShowOptions: () => void;
+}
+
+const MessageActions = memo(function MessageActions({
+  isMyMessage,
+  copied,
+  onCopy,
+  onShowOptions,
+}: MessageActionsProps) {
+  const { t } = useTranslation();
+
+  return (
+    <div
+      className={clsx(
+        "opacity-0 group-hover:opacity-100 transition-opacity flex items-center px-1 gap-1",
+        isMyMessage ? "mr-1" : "ml-1",
+      )}
+    >
+      <MiniButton
+        sz="sm"
+        className="!w-7 !h-7 !min-w-0 !p-0 bg-bg-second hover:bg-bg-third shadow-sm"
+        onClick={onCopy}
+        title={t("common:conversations.messageOptions.copy")}
+      >
+        <FontAwesomeIcon
+          icon={copied ? faCheck : faCopy}
+          className={clsx(
+            "text-[10px] transition-all duration-200",
+            copied ? "text-primary-500 scale-125 opacity-100" : "opacity-60",
+          )}
+        />
+      </MiniButton>
+
+      <MiniButton
+        sz="sm"
+        className="!w-7 !h-7 !min-w-0 !p-0 bg-bg-second hover:bg-bg-third shadow-sm"
+        onClick={onShowOptions}
+      >
+        <FontAwesomeIcon icon={faEllipsis} className="text-[10px] opacity-60" />
+      </MiniButton>
+    </div>
+  );
+});
+
+interface MessageSeenFooterProps {
+  message: Message;
+  meta: MessageMeta;
+  userId?: string;
+  seenBy: Array<{ userId: string; seenAt: string }>;
+  userProfileMap?: Record<string, User>;
+}
+
+const MessageSeenFooter = memo(function MessageSeenFooter({
+  message,
+  meta,
+  userId,
+  seenBy,
+  userProfileMap,
+}: MessageSeenFooterProps) {
+  const { t } = useTranslation();
+  const { formatTime } = useFormatTime();
+  const isFooterVisible = meta._isLastMessage && meta._isMyMessage;
+  const hasSeenByOther =
+    seenBy.length > 1 || (seenBy.length === 1 && seenBy[0].userId !== userId);
+
+  if (!isFooterVisible && !hasSeenByOther) {
+    return null;
+  }
+
+  return (
+    <div className="flex justify-end items-center gap-1 m-1">
+      {!hasSeenByOther && (
+        <Text sz="xs">
+          {t("conversations.sent")}{" "}
+          {meta._isOlderThanOneMinute && <Text sz="xs">{formatTime(message.createdAt)}</Text>}
+        </Text>
+      )}
+      {seenBy.map((seenInfo) => {
+        if (seenInfo.userId === userId) return null;
+        return (
+          <MiniAvatar
+            key={seenInfo.userId}
+            uid={seenInfo.userId}
+            seenAt={seenInfo.seenAt}
+            userInfo={userProfileMap?.[seenInfo.userId]}
+          />
+        );
+      })}
+    </div>
+  );
+});
+
+function MessageRowComponent({
   message,
   userId,
   conversationId,
@@ -67,7 +324,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
   userInfo,
   userProfileMap,
   meta,
-}) => {
+}: Readonly<MessageProps>) {
   const { t } = useTranslation();
   const isMobile = useMobile();
   const { openDialog, closeDialog } = useDialog();
@@ -88,14 +345,6 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     ),
   );
 
-  const isFooterVisible = meta._isLastMessage && meta._isMyMessage;
-  const isTextMessage = meta._type === MessageRenderType.Text;
-  const stackImage = useMemo(
-    () => message.media?.filter((m) => m.type === MediaType.Image) ?? [],
-    [message.media],
-  );
-  const hasSeenByOther = seenBy?.length > 1 || (seenBy.length === 1 && seenBy[0].userId !== userId);
-
   useEffect(() => {
     if (!isPending) {
       setHasDelayed(false);
@@ -114,29 +363,18 @@ const MessageRowComponent: React.FC<MessageProps> = ({
     };
   }, [isPending]);
 
-  const MessageOptionsContent = ({ isSheet = false }: { isSheet?: boolean }) => (
-    <div className={clsx("flex flex-col", isSheet ? "gap-2 pb-10 px-4" : "gap-2 min-w-[220px]")}>
-      <Menu>
-        <MenuItem
-          icon={<FontAwesomeIcon icon={faCopy} />}
-          title={t("common:conversations.messageOptions.copy")}
-          rightElement={<div />}
-          onClick={() => {
-            navigator.clipboard.writeText(message.content || "");
-            isSheet ? setShowOptionsSheet(false) : closeDialog();
-          }}
-        />
-      </Menu>
-    </div>
-  );
-
   const handleShowOptions = () => {
     if (isMobile) {
       setShowOptionsSheet(true);
     } else {
       openDialog({
         title: t("common:conversations.messageOptions.title", "Tùy chọn"),
-        content: <MessageOptionsContent />,
+        content: (
+          <MessageOptionsContent
+            messageContent={message.content}
+            onClose={closeDialog}
+          />
+        ),
       });
     }
   };
@@ -187,7 +425,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               isGroup={isGroup}
               user={{
                 userId: message.senderId!,
-                fullName: userInfo?.fullName,
+                fullName: userInfo?.fullName || "",
                 avatarUrl: message.senderAvatarUrl,
               }}
             >
@@ -203,9 +441,10 @@ const MessageRowComponent: React.FC<MessageProps> = ({
             </UserOptionTrigger>
           </div>
         )}
-        <div
+        <button
+          type="button"
           className={clsx(
-            "flex flex-col select-none",
+            "flex flex-col select-none text-left bg-transparent border-0 p-0",
             "max-w-[75%] active:scale-[0.98] transition-transform cursor-pointer",
             meta._shouldAnimate && "bubble",
             meta._isMyMessage ? "me items-end" : "them items-start",
@@ -219,7 +458,7 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               isGroup={isGroup}
               user={{
                 userId: message.senderId!,
-                fullName: userInfo?.fullName,
+                fullName: userInfo?.fullName || "",
                 avatarUrl: message.senderAvatarUrl,
               }}
             >
@@ -240,82 +479,19 @@ const MessageRowComponent: React.FC<MessageProps> = ({
             title={t("common:conversations.messageOptions.copy")}
             trigger={<div className="hidden" />}
           >
-            <MessageOptionsContent isSheet />
+            <MessageOptionsContent
+              isSheet
+              messageContent={message.content}
+              onClose={() => setShowOptionsSheet(false)}
+            />
           </BottomSheet>
-          {meta._isOnlyEmoji ? renderOnlyEmojiMessage(meta._isMyMessage, message.content) : null}
-          {isTextMessage &&
-            !meta._isOnlyEmoji &&
-            renderTextMessage(
-              meta._isMyMessage,
-              isFailed,
-              meta._messageBubbleShapeClass,
-              message.content,
-              hasDelayed,
-            )}
-          {meta._type === MessageRenderType.File &&
-            renderFileMessage(
-              meta._isMyMessage,
-              isFailed,
-              {
-                url: message.media?.[0]?.url || "",
-                metadata: {
-                  name: message.media?.[0]?.metadata?.filename,
-                  size: message.media?.[0]?.metadata?.size,
-                },
-              },
-              meta._messageBubbleShapeClass,
-              hasDelayed,
-            )}
-          {meta._type === MessageRenderType.Video &&
-            renderVideoMessage(
-              {
-                id: message.media?.[0]?.id || "",
-                url: message.media?.[0]?.url || "",
-              },
-              conversationId!,
-              meta._messageBubbleShapeClass,
-            )}
-          {meta._type === MessageRenderType.Audio &&
-            renderAudioMessage(
-              meta._isMyMessage,
-              isFailed,
-              {
-                url: message.media?.[0]?.url || "",
-              },
-              meta._messageBubbleShapeClass,
-            )}
-          {meta._type === MessageRenderType.Image &&
-            stackImage.length > 1 &&
-            renderImageStackMessage(
-              meta._isMyMessage,
-              meta._messageBubbleShapeClass,
-              message.media,
-              conversationId!,
-              hasDelayed,
-            )}
-          {meta._type === MessageRenderType.Image &&
-            stackImage.length === 1 &&
-            renderSingleImageMessage(
-              {
-                id: stackImage[0].id || "",
-                url: stackImage[0].url || "",
-                width: stackImage[0].metadata?.width,
-                height: stackImage[0].metadata?.height,
-              },
-              meta._messageBubbleShapeClass,
-              conversationId!,
-              hasDelayed,
-            )}
-          {meta._type === MessageRenderType.Gif &&
-            renderGifMessage(
-              {
-                id: message.media?.[0]?.id || "",
-                url: message.media?.[0]?.url || "",
-              },
-              meta._messageBubbleShapeClass,
-              conversationId!,
-              hasDelayed,
-            )}
+          <MessageContent
+            message={message}
+            meta={meta}
+            conversationId={conversationId}
+            hasDelayed={hasDelayed}
+            isFailed={isFailed}
+          />
           {showTimestamp && (
             <div
               className={clsx(
@@ -326,38 +502,15 @@ const MessageRowComponent: React.FC<MessageProps> = ({
               {formatTime(message.createdAt)}
             </div>
           )}
-        </div>
+        </button>
 
         {!isMobile && (
-          <div
-            className={clsx(
-              "opacity-0 group-hover:opacity-100 transition-opacity flex items-center px-1 gap-1",
-              meta._isMyMessage ? "mr-1" : "ml-1",
-            )}
-          >
-            <MiniButton
-              sz="sm"
-              className="!w-7 !h-7 !min-w-0 !p-0 bg-bg-second hover:bg-bg-third shadow-sm"
-              onClick={handleCopy}
-              title={t("common:conversations.messageOptions.copy")}
-            >
-              <FontAwesomeIcon
-                icon={copied ? faCheck : faCopy}
-                className={clsx(
-                  "text-[10px] transition-all duration-200",
-                  copied ? "text-primary-500 scale-125 opacity-100" : "opacity-60",
-                )}
-              />
-            </MiniButton>
-
-            <MiniButton
-              sz="sm"
-              className="!w-7 !h-7 !min-w-0 !p-0 bg-bg-second hover:bg-bg-third shadow-sm"
-              onClick={handleShowOptions}
-            >
-              <FontAwesomeIcon icon={faEllipsis} className="text-[10px] opacity-60" />
-            </MiniButton>
-          </div>
+          <MessageActions
+            isMyMessage={meta._isMyMessage}
+            copied={copied}
+            onCopy={handleCopy}
+            onShowOptions={handleShowOptions}
+          />
         )}
 
         {isFailed && (
@@ -366,56 +519,44 @@ const MessageRowComponent: React.FC<MessageProps> = ({
           </div>
         )}
       </div>
-      {(isFooterVisible || hasSeenByOther) && (
-        <div className="flex justify-end items-center gap-1 m-1">
-          {!hasSeenByOther && (
-            <Text sz="xs">
-              {t("conversations.sent")}{" "}
-              {meta._isOlderThanOneMinute && <Text sz="xs">{formatTime(message.createdAt)}</Text>}
-            </Text>
-          )}
-          {seenBy.map((seenInfo) => {
-            if (seenInfo.userId === userId) return null;
-            return (
-              <MiniAvatar
-                key={seenInfo.userId}
-                uid={seenInfo.userId}
-                seenAt={seenInfo.seenAt}
-                userInfo={userProfileMap?.[seenInfo.userId]}
-              />
-            );
-          })}
-        </div>
-      )}
+      <MessageSeenFooter
+        message={message}
+        meta={meta}
+        userId={userId}
+        seenBy={seenBy}
+        userProfileMap={userProfileMap}
+      />
     </div>
   );
-};
+}
 
-export const SystemMessageRow = memo(({ message, meta }: { message: Message; meta: any }) => {
-  const { renderSystemMessage } = useRenderConversationContent();
-  const { formatSmartTimestamp } = useFormatTime();
-  return (
-    <div className="flex flex-col items-center w-full my-3">
-      {meta?._isShowTime && (
-        <div className="flex items-center justify-center w-full my-4 select-none">
-          <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent to-text-main/10" />
-          <span className="mx-3 px-3 py-1 bg-bg-third/40 border border-bg-fourth/30 rounded-full text-[10px] font-medium tracking-wide text-text-secondary uppercase">
-            {formatSmartTimestamp(message.createdAt)}
+export const SystemMessageRow = memo(
+  ({ message, meta }: { message: Message; meta: MessageMeta }) => {
+    const { renderSystemMessage } = useRenderConversationContent();
+    const { formatSmartTimestamp } = useFormatTime();
+    return (
+      <div className="flex flex-col items-center w-full my-3">
+        {meta?._isShowTime && (
+          <div className="flex items-center justify-center w-full my-4 select-none">
+            <div className="flex-1 h-[1px] bg-gradient-to-r from-transparent to-text-main/10" />
+            <span className="mx-3 px-3 py-1 bg-bg-third/40 border border-bg-fourth/30 rounded-full text-[10px] font-medium tracking-wide text-text-secondary uppercase">
+              {formatSmartTimestamp(message.createdAt)}
+            </span>
+            <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent to-text-main/10" />
+          </div>
+        )}
+        <div className="flex justify-center w-full my-1">
+          <span className="inline-flex items-center justify-center px-4 py-1.5 bg-bg-third/20 border border-bg-fourth/10 backdrop-blur-sm rounded-full text-center text-xs text-text-secondary max-w-[80%] break-words shadow-sm">
+            {renderSystemMessage(message)}
           </span>
-          <div className="flex-1 h-[1px] bg-gradient-to-l from-transparent to-text-main/10" />
         </div>
-      )}
-      <div className="flex justify-center w-full my-1">
-        <span className="inline-flex items-center justify-center px-4 py-1.5 bg-bg-third/20 border border-bg-fourth/10 backdrop-blur-sm rounded-full text-center text-xs text-text-secondary max-w-[80%] break-words shadow-sm">
-          {renderSystemMessage(message)}
-        </span>
       </div>
-    </div>
-  );
-});
+    );
+  },
+);
 
 export const MiniAvatar = memo(
-  ({ uid, seenAt, userInfo }: { uid: string; seenAt: string; userInfo?: any }) => {
+  ({ uid, seenAt, userInfo }: { uid: string; seenAt: string; userInfo?: User }) => {
     const { formatSmartTimestamp } = useFormatTime();
 
     const tooltipContent = (
@@ -429,7 +570,7 @@ export const MiniAvatar = memo(
 
     return (
       <Tooltip position="left" content={tooltipContent}>
-        <Avatar sz="xs" src={userInfo?.avatar} alt="mini" />
+        <Avatar sz="xs" src={userInfo?.avatar || ""} alt="mini" />
       </Tooltip>
     );
   },

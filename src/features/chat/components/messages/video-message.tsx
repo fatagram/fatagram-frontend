@@ -241,7 +241,9 @@ export const VideoMessage: React.FC<VideoMessageProps> = ({
         onDurationChange={updateProgress}
         onProgress={updateProgress}
         playsInline
-      />
+      >
+        <track kind="captions" />
+      </video>
 
       {!hasStarted && (
         <Button

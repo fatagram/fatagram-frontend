@@ -11,7 +11,7 @@ import { faCommentDots, faUser } from "@fortawesome/free-solid-svg-icons";
 
 interface UserOptionsMenuProps {
   userId: string;
-  fullName: string;
+  fullName?: string;
   avatarUrl?: string;
   isSheet?: boolean;
   showMessagePrivately?: boolean;

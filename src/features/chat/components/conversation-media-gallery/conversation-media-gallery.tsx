@@ -5,123 +5,25 @@ import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
   faPhotoFilm,
   faFileLines,
-  faPlay,
-  faDownload,
-  faFilePdf,
-  faFileWord,
-  faFileExcel,
-  faFileZipper,
-  faFileCode,
-  faFileAudio,
-  faFile,
-  faArrowUpRightFromSquare,
   faHeadphones,
   faSpinner,
-  faImage,
 } from "@fortawesome/free-solid-svg-icons";
-import { Text, Skeleton } from "@/components/atoms";
+import { Skeleton } from "@/components/atoms";
 import { NotFound } from "@/features/components/not-found";
 import { MediaType } from "@/types/entities/message.type";
-import { MessageMediaDto } from "@/api/message/dto/message.dto";
 import { useConversationMedia } from "../../hooks/use-conversation-media";
 import { useMediaViewer } from "../../context/media-viewer-context";
-import { useMediaBlob } from "@/hooks/use-media-blob";
-import { formatFileSize } from "@/utils/file";
+import { GalleryImageItem } from "./gallery-image-item";
+import { GalleryFileItem } from "./gallery-file-item";
+import { GalleryAudioItem } from "./gallery-audio-item";
 
 type TabType = "media" | "files" | "audio";
 
-interface ConversationMediaGalleryProps {
+export interface ConversationMediaGalleryProps {
   conversationId: string;
   className?: string;
   initialTab?: TabType;
 }
-
-const getFileIcon = (fileName: string, mimeType?: string) => {
-  const ext = fileName.split(".").pop()?.toLowerCase() || "";
-
-  if (["pdf"].includes(ext) || mimeType?.includes("pdf")) {
-    return { icon: faFilePdf, color: "text-red-500 bg-red-500/10" };
-  }
-  if (["doc", "docx"].includes(ext) || mimeType?.includes("word")) {
-    return { icon: faFileWord, color: "text-blue-500 bg-blue-500/10" };
-  }
-  if (
-    ["xls", "xlsx", "csv"].includes(ext) ||
-    mimeType?.includes("sheet") ||
-    mimeType?.includes("excel")
-  ) {
-    return { icon: faFileExcel, color: "text-emerald-500 bg-emerald-500/10" };
-  }
-  if (
-    ["zip", "rar", "7z", "tar", "gz"].includes(ext) ||
-    mimeType?.includes("zip") ||
-    mimeType?.includes("compressed")
-  ) {
-    return { icon: faFileZipper, color: "text-amber-500 bg-amber-500/10" };
-  }
-  if (["js", "ts", "jsx", "tsx", "html", "css", "json", "py", "cpp", "cs", "java"].includes(ext)) {
-    return { icon: faFileCode, color: "text-purple-500 bg-purple-500/10" };
-  }
-  if (["mp3", "wav", "ogg", "m4a", "aac", "flac"].includes(ext) || mimeType?.includes("audio")) {
-    return { icon: faFileAudio, color: "text-pink-500 bg-pink-500/10" };
-  }
-  return { icon: faFile, color: "text-text-third bg-bg-fourth" };
-};
-
-const getFileName = (item: MessageMediaDto) => {
-  if (item.metadata?.name) return item.metadata.name;
-  try {
-    const parts = item.url.split("/");
-    const rawName = parts[parts.length - 1] || "Tập tin";
-    return decodeURIComponent(rawName.split("?")[0]);
-  } catch {
-    return "Tập tin";
-  }
-};
-
-const GalleryImageItem: React.FC<{
-  item: MessageMediaDto;
-  onClick: () => void;
-}> = ({ item, onClick }) => {
-  const isVideo = item.type === MediaType.Video;
-  const displayUrl = isVideo ? item.url.replace(/\.[^/.]+$/, ".jpg") : item.url;
-  const { blobUrl } = useMediaBlob(displayUrl);
-  const [hasError, setHasError] = useState(false);
-
-  return (
-    <div
-      className="group relative aspect-square rounded-xl overflow-hidden bg-bg-fourth/40 border border-border-main/30 cursor-pointer shadow-xs select-none"
-      onClick={onClick}
-    >
-      {hasError ? (
-        <div className="w-full h-full flex flex-col items-center justify-center bg-bg-third text-text-fourth p-2 text-center">
-          <FontAwesomeIcon icon={isVideo ? faPlay : faImage} className="text-xl mb-1 opacity-50" />
-          <span className="text-[10px] truncate max-w-full text-text-third">
-            {isVideo ? "Video" : "Hình ảnh"}
-          </span>
-        </div>
-      ) : (
-        <img
-          src={blobUrl || displayUrl}
-          alt="Media item"
-          onError={() => setHasError(true)}
-          className="w-full h-full object-cover transition-transform duration-200 group-hover:scale-105"
-          loading="lazy"
-        />
-      )}
-
-      {/* Gradient overlay on hover */}
-      <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-150 pointer-events-none" />
-
-      {/* Video badge */}
-      {isVideo && (
-        <div className="absolute bottom-1.5 left-1.5 z-10 flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full bg-black/60 backdrop-blur-xs text-white shadow-sm">
-          <FontAwesomeIcon icon={faPlay} className="text-[9px] sm:text-[10px] pl-[1px]" />
-        </div>
-      )}
-    </div>
-  );
-};
 
 export const ConversationMediaGallery: React.FC<ConversationMediaGalleryProps> = ({
   conversationId,
@@ -257,70 +159,9 @@ export const ConversationMediaGallery: React.FC<ConversationMediaGalleryProps> =
 
     return (
       <div className="flex flex-col gap-2">
-        {fileItems.map((item) => {
-          const fileName = getFileName(item);
-          const fileSize = item.metadata?.size
-            ? formatFileSize(item.metadata.size)
-            : null;
-          const { icon, color } = getFileIcon(fileName, item.metadata?.mimeType);
-
-          return (
-            <div
-              key={item.id || item.url}
-              className="group flex items-center justify-between gap-2.5 sm:gap-3 p-2.5 sm:p-3 rounded-xl bg-bg-third/30 hover:bg-bg-third/60 border border-border-main/20 hover:border-border-main/50 transition-all duration-150 min-w-0"
-            >
-              <div className="flex items-center gap-2.5 sm:gap-3 min-w-0 flex-1">
-                <div
-                  className={clsx(
-                    "w-9 h-9 sm:w-10 sm:h-10 rounded-xl flex items-center justify-center shrink-0 shadow-xs",
-                    color,
-                  )}
-                >
-                  <FontAwesomeIcon icon={icon} className="text-base sm:text-lg" />
-                </div>
-                <div className="flex flex-col min-w-0 flex-1">
-                  <Text
-                    sz="sm"
-                    weight="medium"
-                    className="text-text-main truncate group-hover:text-primary-500 transition-colors"
-                    title={fileName}
-                  >
-                    {fileName}
-                  </Text>
-                  <div className="flex items-center gap-2 text-text-third text-xs mt-0.5 truncate">
-                    {fileSize && <span>{fileSize}</span>}
-                    {item.createdAt && (
-                      <>
-                        {fileSize && <span>•</span>}
-                        <span>{new Date(item.createdAt).toLocaleDateString()}</span>
-                      </>
-                    )}
-                  </div>
-                </div>
-              </div>
-
-              <div className="flex items-center gap-1 shrink-0">
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-bg-fourth/80 hover:bg-primary-500 hover:text-white text-text-third transition-colors cursor-pointer"
-                  title="Mở trong tab mới"
-                >
-                  <FontAwesomeIcon icon={faArrowUpRightFromSquare} className="text-xs" />
-                </a>
-                <a
-                  href={item.url}
-                  download={fileName}
-                  className="w-7 h-7 sm:w-8 sm:h-8 rounded-lg flex items-center justify-center bg-primary-500/10 hover:bg-primary-500 hover:text-white text-primary-500 transition-colors cursor-pointer"
-                  title="Tải xuống"
-                >
-                  <FontAwesomeIcon icon={faDownload} className="text-xs" />
-                </a>
-              </div>
-            </div>
-          );
-        })}
+        {fileItems.map((item) => (
+          <GalleryFileItem key={item.id || item.url} item={item} />
+        ))}
       </div>
     );
   };
@@ -358,39 +199,7 @@ export const ConversationMediaGallery: React.FC<ConversationMediaGalleryProps> =
     return (
       <div className="flex flex-col gap-2.5">
         {audioItems.map((item) => (
-          <div
-            key={item.id || item.url}
-            className="p-2.5 sm:p-3 rounded-xl bg-bg-third/30 border border-border-main/20 flex flex-col gap-2 overflow-hidden w-full min-w-0"
-          >
-            <div className="flex items-center justify-between gap-2 min-w-0">
-              <div className="flex items-center gap-2 min-w-0 flex-1">
-                <div className="w-7 h-7 rounded-full bg-pink-500/10 text-pink-500 flex items-center justify-center text-xs shrink-0">
-                  <FontAwesomeIcon icon={faHeadphones} />
-                </div>
-                <Text
-                  sz="xs"
-                  weight="medium"
-                  className="text-text-second truncate"
-                  title={item.metadata?.name || "Đoạn ghi âm"}
-                >
-                  {item.metadata?.name || "Đoạn ghi âm"}
-                </Text>
-              </div>
-              {item.createdAt && (
-                <span className="text-[11px] text-text-third shrink-0">
-                  {new Date(item.createdAt).toLocaleDateString()}
-                </span>
-              )}
-            </div>
-            <div className="w-full min-w-0 overflow-hidden rounded-lg bg-bg-fourth/40">
-              <audio
-                src={item.url}
-                controls
-                controlsList="nodownload"
-                className="w-full max-w-full h-8 block"
-              />
-            </div>
-          </div>
+          <GalleryAudioItem key={item.id || item.url} item={item} />
         ))}
       </div>
     );

@@ -3,7 +3,7 @@ import { ComponentProps } from "@/components/common/component-type";
 import { useAuth, useSnackbar, useTheme } from "@/contexts";
 import { MediaType, MessageType } from "@/types/entities/message.type";
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { Theme as EmojiTheme } from "emoji-picker-react";
 import { getMediaTypeFromFileType, MAX_FILE_SIZE, validateFileSize } from "@/utils/file";
@@ -16,6 +16,13 @@ import { useTyping } from "../hooks/use-typing";
 import { useAppHub } from "@/features/hub/use-app-hub";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faVideo, faMicrophone, faFileLines, faPaperclip, faImage, faXmark, faFaceSmile, faPaperPlane } from "@fortawesome/free-solid-svg-icons";
+
+interface AttachedFile {
+  url: string;
+  file: File;
+  width?: number;
+  height?: number;
+}
 
 interface ChatInputProps extends ComponentProps {
   conversationId?: string;
@@ -35,9 +42,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
 }) => {
   const [hasInput, setHasInput] = useState(false);
   const [content, setContent] = useState("");
-  const [fileUrls, setFileUrls] = useState<
-    { url: string; file: File; width?: number; height?: number }[]
-  >([]);
+  const [fileUrls, setFileUrls] = useState<AttachedFile[]>([]);
   const textboxRef = useRef<HTMLTextAreaElement | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
   const imageInputRef = useRef<HTMLInputElement | null>(null);
@@ -83,14 +88,14 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     }
   };
 
-  const closePicker = () => {
+  const closePicker = useCallback(() => {
     if (showEmojiPicker) {
       setShowEmojiPicker(false);
       if (window.history.state?.pickerOpen) {
         window.history.back();
       }
     }
-  };
+  }, [showEmojiPicker]);
 
   const togglePicker = () => {
     if (showEmojiPicker) {
@@ -136,7 +141,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       document.removeEventListener("mousedown", handleClickOutside);
       document.removeEventListener("touchstart", handleClickOutside);
     };
-  }, [showEmojiPicker]);
+  }, [showEmojiPicker, closePicker]);
 
   const handleSendGif = async (gifUrl: string) => {
     const tempId = crypto.randomUUID();
@@ -144,6 +149,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       conversationId: conversationId || "",
       senderId: userId,
       status: "pending" as const,
+      content: "",
       createdAt: new Date(),
       sequenceNumber: -1,
       isGroup: false,
@@ -169,7 +175,7 @@ export const ChatInput: React.FC<ChatInputProps> = ({
           type: MediaType.Gif,
         },
       ],
-    } as any);
+    });
 
     closePicker();
 
@@ -369,79 +375,97 @@ export const ChatInput: React.FC<ChatInputProps> = ({
     setFileUrls([]);
   };
 
-  const handleSelectFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const files = e.target.files;
-    if (files && files.length > 0) {
-      const fileArray = Array.from(files);
-      const newItems: { url: string; file: File }[] = [];
-
-      for (const file of fileArray) {
-        const sizeValidation = validateFileSize(file, MAX_FILE_SIZE);
-        if (!sizeValidation.valid) {
-          showSnackbar(
-            t("chat.upload.fileTooLarge", {
-              fileName: file.name,
-              maxSize: "50MB",
-            }),
-            "error",
-          );
-          continue;
-        }
-
-        let fileToAdd = file;
-        if (file.type.startsWith("image/")) {
-          try {
-            fileToAdd = await compressImage(file, 1920, 1920, 0.8);
-          } catch (error) {
-            console.error("Error compressing image:", error);
-            showSnackbar(t("chat.upload.compressionError", { fileName: file.name }), "error");
-            continue;
-          }
-        } else if (file.type.startsWith("video/")) {
-          try {
-            fileToAdd = await compressVideo(file, {
-              maxWidth: 1280,
-              maxHeight: 720,
-              videoBitsPerSecond: 900_000,
-            });
-          } catch (error) {
-            console.error("Error compressing video:", error);
-            showSnackbar(t("chat.upload.compressionError", { fileName: file.name }), "error");
-          }
-        }
-
-        const blobUrl = URL.createObjectURL(fileToAdd);
-        let width: number | undefined;
-        let height: number | undefined;
-        if (fileToAdd.type.startsWith("image/")) {
-          await new Promise<void>((resolve) => {
-            const img = new Image();
-            img.onload = () => {
-              width = img.naturalWidth;
-              height = img.naturalHeight;
-              resolve();
-            };
-            img.onerror = () => resolve();
-            img.src = blobUrl;
-          });
-        }
-        newItems.push({ url: blobUrl, file: fileToAdd, width, height });
-      }
-
-      if (newItems.length > 0) {
-        setFileUrls((prev) => [...prev, ...newItems]);
-      }
-
-      if (fileInputRef.current) {
-        fileInputRef.current.value = "";
-      }
-      if (imageInputRef.current) {
-        imageInputRef.current.value = "";
-      }
+  const resetFileInputs = () => {
+    if (fileInputRef.current) {
+      fileInputRef.current.value = "";
+    }
+    if (imageInputRef.current) {
+      imageInputRef.current.value = "";
     }
   };
 
-  const renderFilePreview = (it: { url: string; file: File }) => {
+  const compressMediaFile = async (file: File): Promise<File | null> => {
+    if (file.type.startsWith("image/")) {
+      try {
+        return await compressImage(file, 1920, 1920, 0.8);
+      } catch (error) {
+        console.error("Error compressing image:", error);
+        showSnackbar(t("chat.upload.compressionError", { fileName: file.name }), "error");
+        return null;
+      }
+    }
+
+    if (file.type.startsWith("video/")) {
+      try {
+        return await compressVideo(file, {
+          maxWidth: 1280,
+          maxHeight: 720,
+          videoBitsPerSecond: 900_000,
+        });
+      } catch (error) {
+        console.error("Error compressing video:", error);
+        showSnackbar(t("chat.upload.compressionError", { fileName: file.name }), "error");
+      }
+    }
+
+    return file;
+  };
+
+  const getImageDimensions = (blobUrl: string): Promise<{ width?: number; height?: number }> => {
+    return new Promise((resolve) => {
+      const img = new Image();
+      img.onload = () => {
+        resolve({ width: img.naturalWidth, height: img.naturalHeight });
+      };
+      img.onerror = () => resolve({});
+      img.src = blobUrl;
+    });
+  };
+
+  const processSelectedFile = async (file: File): Promise<AttachedFile | null> => {
+    const sizeValidation = validateFileSize(file, MAX_FILE_SIZE);
+    if (!sizeValidation.valid) {
+      showSnackbar(
+        t("chat.upload.fileTooLarge", {
+          fileName: file.name,
+          maxSize: "50MB",
+        }),
+        "error",
+      );
+      return null;
+    }
+
+    const fileToAdd = await compressMediaFile(file);
+    if (!fileToAdd) return null;
+
+    const blobUrl = URL.createObjectURL(fileToAdd);
+    const dimensions = fileToAdd.type.startsWith("image/")
+      ? await getImageDimensions(blobUrl)
+      : {};
+
+    return {
+      url: blobUrl,
+      file: fileToAdd,
+      ...dimensions,
+    };
+  };
+
+  const handleSelectFiles = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (!files || files.length === 0) return;
+
+    const fileArray = Array.from(files);
+    const results = await Promise.all(fileArray.map(processSelectedFile));
+    const newItems = results.filter((item): item is AttachedFile => item !== null);
+
+    if (newItems.length > 0) {
+      setFileUrls((prev) => [...prev, ...newItems]);
+    }
+
+    resetFileInputs();
+  };
+
+  const renderFilePreview = (it: AttachedFile) => {
     const type = getMediaTypeFromFileType(it.file.type);
 
     switch (type) {
@@ -453,8 +477,11 @@ export const ChatInput: React.FC<ChatInputProps> = ({
             <FontAwesomeIcon icon={faVideo} className="text-white/50 text-xl" />
             <video
               src={it.url}
+              muted
               className="absolute inset-0 h-full w-full object-cover opacity-30 rounded-xl"
-            />
+            >
+              <track kind="captions" />
+            </video>
           </div>
         );
       case MediaType.Audio:
@@ -480,7 +507,12 @@ export const ChatInput: React.FC<ChatInputProps> = ({
       ref={containerRef}
     >
       {showEmojiPicker && !isMobile && (
-        <div className="fixed inset-0 z-40" onClick={() => setShowEmojiPicker(false)} />
+        <button
+          type="button"
+          aria-label="Close emoji picker"
+          className="fixed inset-0 z-40 bg-transparent border-none cursor-default"
+          onClick={() => setShowEmojiPicker(false)}
+        />
       )}
 
       <div className="w-full flex items-end gap-1 relative z-50">

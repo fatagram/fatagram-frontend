@@ -64,10 +64,6 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
         )}
 
         <div className="relative w-full">
-          {type === "search" && (
-            <FontAwesomeIcon icon={faMagnifyingGlass} className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-500 z-10"  />
-          )}
-
           <input
             id={inputId}
             type={typeOfText}
@@ -78,7 +74,7 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
             onChange={onChange}
             autoComplete={autoComplete}
             className={clsx(
-              "w-full border-[2px] text-text-main",
+              "peer w-full border-[2px] text-text-main",
               "font-normal rounded-xl outline-none caret-primary-500",
               "transition-all duration-300 ease-out",
               sizeClasses[sz].mainText,
@@ -94,11 +90,18 @@ export const Textbox = forwardRef<HTMLInputElement, TextboxProps>(
             {...props}
           />
 
+          {type === "search" && (
+            <FontAwesomeIcon
+              icon={faMagnifyingGlass}
+              className="absolute left-4 top-1/2 -translate-y-1/2 text-primary-500 z-10 pointer-events-none transition-transform duration-300 ease-out peer-focus:scale-110"
+            />
+          )}
+
           {type === "password" && (
             <button
               type="button"
               tabIndex={-1}
-              className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center p-1"
+              className="absolute right-4 top-1/2 -translate-y-1/2 flex items-center justify-center p-1 transition-transform duration-300 ease-out peer-focus:scale-110"
               onClick={() => setShowPassword(!showPassword)}
             >
               <i

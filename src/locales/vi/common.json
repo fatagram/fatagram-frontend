@@ -130,5 +130,6 @@
     "connected_back": "Đã khôi phục kết nối thành công",
     "still_offline": "Vẫn chưa có kết nối Internet. Vui lòng thử lại sau."
   },
-  "loadMore": "Xem thêm"
+  "loadMore": "Xem thêm",
+  "allResultsSeen": "Đã xem hết kết quả."
 }

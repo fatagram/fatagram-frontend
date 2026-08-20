@@ -94,7 +94,9 @@ export const AudioMessage: React.FC<AudioMessageProps> = ({ url, className, isMy
         onPause={() => setPlaying(false)}
         onTimeUpdate={() => setCurrent(audioRef.current?.currentTime || 0)}
         onLoadedMetadata={() => setDuration(audioRef.current?.duration || 0)}
-      />
+      >
+        <track kind="captions" />
+      </audio>
     </div>
   );
 };

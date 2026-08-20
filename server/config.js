@@ -5,5 +5,5 @@ export const base = process.env.BASE || "/";
 export const ABORT_DELAY = 10000;
 
 // Route definitions
-export const protectedRoutes = ["notifications", "settings", "friends"];
+export const protectedRoutes = ["notifications", "settings", "friends", "fatalk"];
 export const authRoutes = ["login", "register", "auth/google/callback"];

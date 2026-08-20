@@ -47,7 +47,7 @@ export const FatalkSidebar: React.FC<FatalkSidebarProps> = ({ className, onConve
     >
       {tab === "list" && (
         <div className="flex flex-col px-2 h-full overflow-hidden">
-          <ChatList className="pt-0 h-full" onConversationClick={handleSelectConversation} />
+          <ChatList className="pt-1 h-full" onConversationClick={handleSelectConversation} />
         </div>
       )}
       {tab === "create" && (

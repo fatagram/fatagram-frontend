@@ -69,17 +69,17 @@ export const mainRoutes: RouteType[] = [
       },
       {
         path: "/fatalk",
-        element: <FatalkPage />,
+        element: withContentFallback(<FatalkPage />),
         type: "private",
         children: [
           {
             path: ":conversationId",
-            element: <ConversationPage />,
+            element: withContentFallback(<ConversationPage />),
             type: "private",
           },
           {
             path: "temp",
-            element: <TempConversation />,
+            element: withContentFallback(<TempConversation />),
             type: "private",
           },
         ],

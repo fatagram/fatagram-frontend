@@ -1,5 +1,6 @@
 
 import { conversationService } from "@/api/conversation/conversation.api";
+import { ConversationDto } from "@/api/conversation/dto/conversation.dto";
 import {
   SafeQueryCallbacks,
   useSafeInfiniteQueryResult,
@@ -27,7 +28,7 @@ export const useFetchConversationWith = () => {
 
 export const useGetConversation = (
   conversationId: string,
-  config?: SafeQueryCallbacks<any>,
+  config?: SafeQueryCallbacks<ConversationDto>,
   enabled?: boolean,
 ) => {
   return useSafeQueryResult({
@@ -72,7 +73,7 @@ export const useCreateGroupConversation = () => {
 export const useMarkConversationAsRead = () => {
   return useResultFetcher(
     async ({ conversationId, messageSeq }: { conversationId: string; messageSeq: number }) => {
-      var r = await conversationService.markAsSeen(conversationId, messageSeq);
+      const r = await conversationService.markAsSeen(conversationId, messageSeq);
       return r;
     },
   );

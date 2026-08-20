@@ -1,6 +1,6 @@
 import clsx from "clsx";
 import { Text, Skeleton } from "@/components/atoms";
-import { useState } from "react";
+import React, { useState } from "react";
 import PendingIndicator from "./pending-indicator";
 import { VideoMessage } from "./video-message";
 import { useMediaViewer } from "../../context/media-viewer-context";
@@ -10,34 +10,58 @@ import { formatFileSize } from "@/utils/file";
 import { AudioMessage } from "./audio-message";
 import { useMediaBlob } from "@/hooks/use-media-blob";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlay, faFile, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { faPlay, faDownload } from "@fortawesome/free-solid-svg-icons";
+import { getFileIcon, getMediaFileName } from "@/utils/file-icon";
 
-export const MediaBlobImage = ({ url, className, alt, onClick, onLoad, style }: any) => {
+export const MediaBlobImage: React.FC<{
+  url: string;
+  className?: string;
+  alt?: string;
+  onClick?: () => void;
+  onLoad?: () => void;
+  style?: React.CSSProperties;
+}> = ({ url, className, alt = "", onClick, onLoad, style }) => {
   const { blobUrl } = useMediaBlob(url);
-  return (
-    <img
-      src={blobUrl || url}
-      className={className}
-      alt={alt}
-      onClick={onClick}
-      onLoad={onLoad}
-      style={style}
-    />
+  const imgElememt = (
+    <img src={blobUrl || url} className={className} alt={alt} onLoad={onLoad} style={style} />
   );
+
+  if (onClick) {
+    return (
+      <button
+        type="button"
+        onClick={onClick}
+        className={className}
+        style={{
+          background: "none",
+          border: "none",
+          padding: 0,
+          cursor: "pointer",
+          display: "inline-block",
+          ...style,
+        }}
+      >
+        {imgElememt}
+      </button>
+    );
+  }
+
+  return imgElememt;
 };
 
-export const renderTextMessage = (
-  isMyMessage: boolean,
-  isFailed: boolean,
-  messageBubbleShapeClass: string,
-  content: string,
-  hasDelayed: boolean,
-) => {
+export const TextMessageItem: React.FC<{
+  isMyMessage: boolean;
+  isFailed: boolean;
+  messageBubbleShapeClass: string;
+  content: string;
+  hasDelayed: boolean;
+}> = ({ isMyMessage, isFailed, messageBubbleShapeClass, content, hasDelayed }) => {
+  const colorBgPrimary = isFailed ? "bg-primary-800" : "bg-primary-600";
   return (
     <div
       className={clsx(
         "px-3 py-2 break-words rounded-xl shadow-sm relative max-w-full",
-        isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
+        isMyMessage ? colorBgPrimary : "bg-bg-fourth",
         isFailed && "border-red-500 border-2 opacity-50",
         messageBubbleShapeClass,
       )}
@@ -55,14 +79,14 @@ export const renderTextMessage = (
   );
 };
 
-export const renderVideoMessage = (
+export const VideoMessageItem: React.FC<{
   media: {
     id: string;
     url: string;
-  },
-  conversationId: string,
-  messageBubbleShapeClass: string,
-) => {
+  };
+  conversationId: string;
+  messageBubbleShapeClass: string;
+}> = ({ media, conversationId, messageBubbleShapeClass }) => {
   const { onOpen: openMediaViewer } = useMediaViewer();
   const [isLoaded, setIsLoaded] = useState(false);
   const [isInlinePlaying, setIsInlinePlaying] = useState(false);
@@ -94,20 +118,30 @@ export const renderVideoMessage = (
 
   const thumbnailUrl = media.url.replace(/\.[^/.]+$/, ".jpg");
 
+  const handleOpenViewer = () => {
+    openMediaViewer({
+      id: media.id,
+      url: media.url,
+      type: MediaType.Video,
+      conversationId: conversationId,
+    });
+  };
+
   return (
-    <div
+    <button
+      type="button"
+      tabIndex={0}
       className={clsx(
         "relative rounded-2xl overflow-hidden bg-bg-fourth/50 cursor-pointer",
         "select-none w-full max-w-[280px] h-[200px]",
         messageBubbleShapeClass,
       )}
-      onClick={() => {
-        openMediaViewer({
-          id: media.id,
-          url: media.url,
-          type: MediaType.Video,
-          conversationId: conversationId,
-        });
+      onClick={handleOpenViewer}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleOpenViewer();
+        }
       }}
     >
       {!isLoaded && (
@@ -124,7 +158,9 @@ export const renderVideoMessage = (
       />
       {isLoaded && (
         <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-auto">
-          <div
+          <button
+            type="button"
+            aria-label="Play video"
             className="w-12 h-12 rounded-full bg-black/50 text-white flex items-center justify-center backdrop-blur-sm shadow-md hover:bg-primary-500/80 transition-colors"
             onClick={(e) => {
               e.stopPropagation();
@@ -132,55 +168,64 @@ export const renderVideoMessage = (
             }}
           >
             <FontAwesomeIcon icon={faPlay} className="text-xl pl-[3px]" />
-          </div>
+          </button>
         </div>
       )}
-    </div>
+    </button>
   );
 };
 
-export const renderFileMessage = (
-  isMyMessage: boolean,
-  isFailed: boolean,
+export const FileMessageItem: React.FC<{
+  isMyMessage: boolean;
+  isFailed: boolean;
   media: {
     url: string;
     metadata?: {
       name?: string;
       size?: number;
+      mimeType?: string;
     };
-  },
-  messageBubbleShapeClass: string,
-  hasDelayed: boolean,
-) => {
+  };
+  messageBubbleShapeClass: string;
+  hasDelayed: boolean;
+}> = ({ isMyMessage, isFailed, media, messageBubbleShapeClass, hasDelayed }) => {
   const { t } = useTranslation();
+  const fileName = getMediaFileName(
+    media.url,
+    media.metadata?.name,
+    t("conversations.file", "Tập tin"),
+  );
+  const { icon } = getFileIcon(fileName, media.metadata?.mimeType);
+  const colorBgPrimary = isFailed ? "bg-primary-800" : "bg-primary-600";
 
   return (
     <div
       className={clsx(
         "relative flex px-4 py-3 rounded-xl items-center gap-3",
         "max-w-full",
-        isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
+        isMyMessage ? colorBgPrimary : "bg-bg-fourth",
         messageBubbleShapeClass,
       )}
     >
       <div className="flex-shrink-0">
         <FontAwesomeIcon
-          icon={faFile}
+          icon={icon}
           className={clsx("text-2xl", isMyMessage ? "text-text-reverse-main" : "text-text-main")}
         />
       </div>
 
       <div className="flex flex-col min-w-0 flex-1">
-        <Text
+        <a
+          href={media.url}
+          target="_blank"
+          rel="noopener noreferrer"
           className={clsx(
-            "underline cursor-pointer break-all leading-tight",
+            "underline cursor-pointer break-all leading-tight text-sm font-medium",
             isMyMessage ? "text-text-reverse-main" : "text-text-main",
           )}
-          onClick={() => window.open(media.url, "_blank")}
-          wrap="whitespace-pre-wrap"
         >
-          {media.metadata?.name || t("conversations.file")}
-        </Text>
+          {fileName}
+        </a>
         <Text
           className={clsx(
             "text-[10px] text-muted-foreground mt-1",
@@ -191,14 +236,16 @@ export const renderFileMessage = (
         </Text>
       </div>
       <button
+        type="button"
+        aria-label="Download file"
         className="flex-shrink-0 hover:text-primary transition-colors ml-1"
         onClick={() => {
           const anchor = document.createElement("a");
           anchor.href = media.url || "";
-          anchor.download = media.metadata?.name || "file";
+          anchor.download = fileName;
           document.body.appendChild(anchor);
           anchor.click();
-          document.body.removeChild(anchor);
+          anchor.remove();
         }}
       >
         <FontAwesomeIcon
@@ -212,7 +259,10 @@ export const renderFileMessage = (
   );
 };
 
-export const renderOnlyEmojiMessage = (isMyMessage: boolean, content: string) => (
+export const OnlyEmojiMessageItem: React.FC<{
+  isMyMessage: boolean;
+  content: string;
+}> = ({ isMyMessage, content }) => (
   <div
     className={clsx(
       "text-4xl break-words select-text w-full",
@@ -223,36 +273,48 @@ export const renderOnlyEmojiMessage = (isMyMessage: boolean, content: string) =>
   </div>
 );
 
-export const renderAudioMessage = (
-  isMyMessage: boolean,
-  isFailed: boolean,
+export const AudioMessageItem: React.FC<{
+  isMyMessage: boolean;
+  isFailed: boolean;
   media: {
     url: string;
-  },
-  messageBubbleShapeClass: string,
-) => (
-  <AudioMessage
-    className={clsx(
-      isMyMessage ? (isFailed ? "bg-primary-800" : "bg-primary-600") : "bg-bg-fourth",
-      messageBubbleShapeClass,
-    )}
-    url={media.url}
-    isMyMessage={isMyMessage}
-  />
-);
-
-export const renderImageStackMessage = (
-  isMyMessage: boolean,
-  messageBubbleShapeClass: string,
-  stackImage: MessageMedia[] | undefined,
-  conversationId: string,
-  hasDelayed: boolean,
-) => {
-  const { onOpen: openMediaViewer } = useMediaViewer();
-  if (!stackImage) throw new Error("Stack image is required for rendering image stack message");
+  };
+  messageBubbleShapeClass: string;
+}> = ({ isMyMessage, isFailed, media, messageBubbleShapeClass }) => {
+  const colorBgPrimary = isFailed ? "bg-primary-800" : "bg-primary-600";
 
   return (
-    <div
+    <AudioMessage
+      className={clsx(isMyMessage ? colorBgPrimary : "bg-bg-fourth", messageBubbleShapeClass)}
+      url={media.url}
+      isMyMessage={isMyMessage}
+    />
+  );
+};
+
+export const ImageStackMessageItem: React.FC<{
+  isMyMessage: boolean;
+  messageBubbleShapeClass: string;
+  stackImage: MessageMedia[] | undefined;
+  conversationId: string;
+  hasDelayed: boolean;
+}> = ({ isMyMessage, messageBubbleShapeClass, stackImage, conversationId, hasDelayed }) => {
+  const { onOpen: openMediaViewer } = useMediaViewer();
+  if (!stackImage) return null;
+
+  const handleOpenViewer = () => {
+    openMediaViewer({
+      id: stackImage.at(-1)?.id || "",
+      url: stackImage.at(-1)?.url || "",
+      type: MediaType.Image,
+      conversationId: conversationId,
+    });
+  };
+
+  return (
+    <button
+      type="button"
+      tabIndex={0}
       className={clsx(
         "relative h-[200px] w-[110px] flex items-center justify-center cursor-pointer",
         isMyMessage ? "self-end mr-4" : "self-start ml-4",
@@ -262,13 +324,12 @@ export const renderImageStackMessage = (
         "[&>img:nth-last-child(3)]:opacity-60",
         "select-none",
       )}
-      onClick={() => {
-        openMediaViewer({
-          id: stackImage[stackImage.length - 1].id || "",
-          url: stackImage[stackImage.length - 1].url,
-          type: MediaType.Image,
-          conversationId: conversationId!,
-        });
+      onClick={handleOpenViewer}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleOpenViewer();
+        }
       }}
     >
       {stackImage[0] && (
@@ -304,21 +365,21 @@ export const renderImageStackMessage = (
         />
       )}
       {hasDelayed && <PendingIndicator />}
-    </div>
+    </button>
   );
 };
 
-export const renderSingleImageMessage = (
+export const SingleImageMessageItem: React.FC<{
   image: {
     id: string;
     url: string;
     width?: number;
     height?: number;
-  },
-  messageBubbleShapeClass: string,
-  conversationId: string,
-  hasDelayed: boolean,
-) => {
+  };
+  messageBubbleShapeClass: string;
+  conversationId: string;
+  hasDelayed: boolean;
+}> = ({ image, messageBubbleShapeClass, conversationId, hasDelayed }) => {
   const { onOpen: openMediaViewer } = useMediaViewer();
   const [isLoaded, setIsLoaded] = useState(false);
 
@@ -327,21 +388,31 @@ export const renderSingleImageMessage = (
     ? { aspectRatio: `${image.width}/${image.height}`, maxWidth: "300px", width: "100%" }
     : { width: "240px", height: "200px" };
 
+  const handleOpenViewer = () => {
+    openMediaViewer({
+      id: image.id || "",
+      url: image.url,
+      type: MediaType.Image,
+      conversationId: conversationId,
+    });
+  };
+
   return (
-    <div
+    <button
+      type="button"
+      tabIndex={0}
       className={clsx(
         "relative rounded-2xl overflow-hidden bg-bg-fourth/50",
         "select-none cursor-pointer",
         messageBubbleShapeClass,
       )}
       style={containerStyle}
-      onClick={() => {
-        openMediaViewer({
-          id: image.id || "",
-          url: image.url,
-          type: MediaType.Image,
-          conversationId: conversationId!,
-        });
+      onClick={handleOpenViewer}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleOpenViewer();
+        }
       }}
     >
       {!isLoaded && (
@@ -357,33 +428,43 @@ export const renderSingleImageMessage = (
         style={{ opacity: isLoaded ? 1 : 0, transition: "opacity 0.2s" }}
       />
       {hasDelayed && <PendingIndicator />}
-    </div>
+    </button>
   );
 };
 
-export const renderGifMessage = (
-  gif: { id?: string; url: string },
-  messageBubbleShapeClass: string,
-  conversationId: string,
-  hasDelayed: boolean,
-) => {
+export const GifMessageItem: React.FC<{
+  gif: { id?: string; url: string };
+  messageBubbleShapeClass: string;
+  conversationId: string;
+  hasDelayed: boolean;
+}> = ({ gif, messageBubbleShapeClass, conversationId, hasDelayed }) => {
   const { onOpen: openMediaViewer } = useMediaViewer();
   const [isLoaded, setIsLoaded] = useState(false);
 
+  const handleOpenViewer = () => {
+    openMediaViewer({
+      id: gif.id || "",
+      url: gif.url,
+      type: MediaType.Gif,
+      conversationId: conversationId,
+    });
+  };
+
   return (
-    <div
+    <button
+      type="button"
+      tabIndex={0}
       className={clsx(
         "relative rounded-2xl overflow-hidden bg-bg-fourth/50",
         "select-none w-full max-w-[280px] h-[200px] cursor-pointer",
         messageBubbleShapeClass,
       )}
-      onClick={() => {
-        openMediaViewer({
-          id: gif.id || "",
-          url: gif.url,
-          type: MediaType.Gif,
-          conversationId: conversationId!,
-        });
+      onClick={handleOpenViewer}
+      onKeyDown={(e) => {
+        if (e.key === "Enter" || e.key === " ") {
+          e.preventDefault();
+          handleOpenViewer();
+        }
       }}
     >
       {!isLoaded && (
@@ -399,6 +480,8 @@ export const renderGifMessage = (
         style={{ opacity: isLoaded ? 1 : 0, transition: "opacity 0.2s" }}
       />
       {hasDelayed && <PendingIndicator />}
-    </div>
+    </button>
   );
 };
+
+

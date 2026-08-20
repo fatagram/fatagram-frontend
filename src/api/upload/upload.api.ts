@@ -3,6 +3,15 @@ import { buildApiPath, apiGet } from "../common/api-helpers";
 
 const PREFIX = buildApiPath("/upload");
 
+export interface UploadMediaResult {
+  url: string;
+  type: string;
+  original_filename: string;
+  bytes: number;
+  width?: number;
+  height?: number;
+}
+
 export class UploadService {
   public async getSignature(
     folder: string,
@@ -24,16 +33,7 @@ export class UploadService {
   public async upload(
     file: File,
     resourceType: string,
-  ): Promise<
-    Result<{
-      url: string;
-      type: string;
-      original_filename: string;
-      bytes: number;
-      width?: number;
-      height?: number;
-    }>
-  > {
+  ): Promise<Result<UploadMediaResult>> {
     const signatureData = (await this.getSignature("chat-messages", resourceType)).data;
     if (!signatureData) {
       return {

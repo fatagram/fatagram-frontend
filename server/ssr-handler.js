@@ -78,7 +78,11 @@ export async function handleSSR(req, res, vite, templateHtml) {
       console.error("SSR Error:", error);
       res.status(500);
       res.set({ "Content-Type": "text/html" });
-      res.send("<h1>Something went wrong</h1>");
+      if (!isProduction) {
+        res.send(`<pre style="color:red;white-space:pre-wrap;">${error?.stack || error?.message || error}</pre>`);
+      } else {
+        res.send("<h1>Something went wrong</h1>");
+      }
     }
   } catch (e) {
     vite?.ssrFixStacktrace(e);
