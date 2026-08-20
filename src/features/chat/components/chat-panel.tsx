@@ -1,7 +1,7 @@
 import { Text, Avatar, Skeleton, Button } from "@/components/atoms";
 import { ComponentProps } from "@/components/common/component-type";
 import clsx from "clsx";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   useGetConversation,
   useLocalMarkAsRead,
@@ -19,6 +19,9 @@ import { ChatInput } from "./chat-input";
 import { useChatStore } from "../hooks/use-floating-chat";
 import { TempChat } from "./temp-chat";
 import { useShallow } from "zustand/react/shallow";
+import { useTheme } from "@/contexts";
+import { useGetChatThemeByKey } from "../hooks/use-chat-theme";
+import { getThemeCssVariables } from "../fatalk/conversation/chat-theme-utils";
 
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faComments } from "@fortawesome/free-solid-svg-icons";
@@ -41,8 +44,9 @@ export const ChatPanel: React.FC<Props> = ({
 }) => {
   const [chatTitle, setChatTitle] = useState("");
   const [chatAvatar, setChatAvatar] = useState("");
-  const { renderConversationName } = useRenderConversationContent();
   const { t } = useTranslation();
+  const { theme: currentGlobalTheme } = useTheme();
+  const { renderConversationName } = useRenderConversationContent();
 
   const { fetch: markAsRead } = useMarkConversationAsRead();
   const markAsReadLocal = useLocalMarkAsRead();
@@ -63,6 +67,16 @@ export const ChatPanel: React.FC<Props> = ({
   const conv = storeConv ?? conversationData;
 
   const activeTheme = conv?.theme || undefined;
+  const { data: serverTheme } = useGetChatThemeByKey(activeTheme);
+
+  const isSystemDark =
+    currentGlobalTheme === "system"
+      ? typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+      : currentGlobalTheme === "dark" || currentGlobalTheme === "dark-old";
+
+  const dynamicThemeStyle = useMemo(() => {
+    return getThemeCssVariables(serverTheme, isSystemDark);
+  }, [serverTheme, isSystemDark]);
 
   const navigate = useNavigate();
 
@@ -208,6 +222,7 @@ export const ChatPanel: React.FC<Props> = ({
       )}
       ref={panelRef}
       data-chat-theme={activeTheme}
+      style={dynamicThemeStyle}
     >
       <div
         className={clsx(
@@ -241,61 +256,68 @@ export const ChatPanel: React.FC<Props> = ({
         )}
       </div>
 
-      <div
-        className="flex-1 py-2 bg-bg-main min-h-0"
-        ref={scrollRef}
-        data-chat-scrollable="true"
-        style={
-          conv?.backgroundUrl
-            ? ({
-                "--chat-custom-bg": `url(${conv.backgroundUrl})`,
-              } as React.CSSProperties)
-            : undefined
-        }
-      >
-        <MessageList
-          ref={messageListRef}
-          key={conversationId}
-          conversationId={conversationId}
-          parentRef={scrollRef}
-          isGroup={conv?.isGroup}
-          lastSeen={
-            <div className="flex flex-col justify-center items-center h-full text-center px-4">
-              {isLoadingHeader ? (
-                <>
-                  <div className="relative mb-4">
-                    <Skeleton variant="circle" sz="md" />
-                  </div>
-                  <Skeleton sz="sm" className="w-[150px] mb-2" />
-                  <Skeleton sz="sm" className="w-[200px]" />
-                </>
-              ) : (
-                <>
-                  <div className="relative mb-4">
-                    <Avatar src={conv?.avatarUrl || ""} alt="Avatar" sz="md" />
-                  </div>
-                  <Text sz="sm" weight="bold">
-                    {chatTitle}
-                  </Text>
-                  <Text sz="xs" wrap="whitespace-normal">
-                    {t("common:conversations.privacyDescription")}
-                  </Text>
-                  {!conv?.isGroup && conv?.otherUserId && (
-                    <Button
-                      sz="sm"
-                      variant="third"
-                      className="mt-4"
-                      onClick={() => navigate(`/${conv.otherUserId}`)}
-                    >
-                      {t("common:conversations.settings.viewProfile")}
-                    </Button>
+      {(() => {
+        const effectiveBgImage = conv?.backgroundUrl || serverTheme?.bgImage || null;
+        const customBgStyle = effectiveBgImage
+          ? ({
+              "--chat-custom-bg": effectiveBgImage.startsWith("url(")
+                ? effectiveBgImage
+                : `url(${effectiveBgImage})`,
+            } as React.CSSProperties)
+          : undefined;
+
+        return (
+          <div
+            className="flex-1 py-2 bg-bg-main min-h-0"
+            ref={scrollRef}
+            data-chat-scrollable="true"
+            style={customBgStyle}
+          >
+            <MessageList
+              ref={messageListRef}
+              key={conversationId}
+              conversationId={conversationId}
+              parentRef={scrollRef}
+              isGroup={conv?.isGroup}
+              lastSeen={
+                <div className="flex flex-col justify-center items-center h-full text-center px-4">
+                  {isLoadingHeader ? (
+                    <>
+                      <div className="relative mb-4">
+                        <Skeleton variant="circle" sz="md" />
+                      </div>
+                      <Skeleton sz="sm" className="w-[150px] mb-2" />
+                      <Skeleton sz="sm" className="w-[200px]" />
+                    </>
+                  ) : (
+                    <>
+                      <div className="relative mb-4">
+                        <Avatar src={conv?.avatarUrl || ""} alt="Avatar" sz="md" />
+                      </div>
+                      <Text sz="sm" weight="bold">
+                        {chatTitle}
+                      </Text>
+                      <Text sz="xs" wrap="whitespace-normal">
+                        {t("common:conversations.privacyDescription")}
+                      </Text>
+                      {!conv?.isGroup && conv?.otherUserId && (
+                        <Button
+                          sz="sm"
+                          variant="third"
+                          className="mt-4"
+                          onClick={() => navigate(`/${conv.otherUserId}`)}
+                        >
+                          {t("common:conversations.settings.viewProfile")}
+                        </Button>
+                      )}
+                    </>
                   )}
-                </>
-              )}
-            </div>
-          }
-        />
-      </div>
+                </div>
+              }
+            />
+          </div>
+        );
+      })()}
 
       <TypingIndicator conversationId={conversationId} />
 

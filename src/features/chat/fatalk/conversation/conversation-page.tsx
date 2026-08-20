@@ -38,9 +38,9 @@ import { useMediaViewer } from "../../context/media-viewer-context";
 import { useMediaBlob } from "@/hooks/use-media-blob";
 import { useConversationPermission } from "../../hooks/use-conversation-permission";
 import { MediaType } from "@/types/entities/message.type";
-import { MessageMediaDto } from "@/api/message/dto/message.dto";
-import { themeDetails } from "./chat-themes.config";
-import { dataURLtoFile } from "./chat-theme-utils";
+import { DEFAULT_CHAT_THEME } from "./chat-themes.config";
+import { dataURLtoFile, getThemeCssVariables, parseGradientToCss } from "./chat-theme-utils";
+import { useGetActiveChatThemes } from "../../hooks/use-chat-theme";
 import { uploadService } from "@/api/upload/upload.api";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import {
@@ -65,8 +65,18 @@ import {
 
 interface ConversationPageProps extends ComponentProps {}
 
-const renderThemeIconCircle = (item: (typeof themeDetails)[0], isDark: boolean) => {
-  if (item.isDefault) {
+const renderThemeIconCircle = (
+  item: {
+    key: string;
+    label?: string;
+    isDefault?: boolean;
+    bgImage?: string | null;
+    light?: any;
+    dark?: any;
+  },
+  isDark: boolean,
+) => {
+  if (item.isDefault || item.key === "default") {
     return (
       <div className="w-10 h-10 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0">
         <svg viewBox="0 0 56 56" className="w-full h-full flex-shrink-0">
@@ -77,19 +87,23 @@ const renderThemeIconCircle = (item: (typeof themeDetails)[0], isDark: boolean) 
       </div>
     );
   }
-  if ((item as any).bgImage) {
+  if (item.bgImage) {
     return (
       <div
         className="w-10 h-10 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0 bg-cover bg-center"
-        style={{ backgroundImage: `url(${(item as any).bgImage})` }}
+        style={{ backgroundImage: `url(${item.bgImage})` }}
       />
     );
   }
   const colors = isDark ? item.dark : item.light;
   if (!colors) return null;
+  const gradientCss =
+    parseGradientToCss(colors.gradient) ||
+    `linear-gradient(135deg, ${colors.primaryMain || "#107a51"} 0%, ${colors.primaryLight || "#85e3ad"} 100%)`;
+
   return (
     <div className="w-10 h-10 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0">
-      <div className={clsx("w-1/2 h-full", colors.gradient)} />
+      <div className="w-1/2 h-full" style={{ background: gradientCss }} />
       <div className="w-1/2 h-full flex flex-col">
         <div className="flex-1 flex">
           <div className="flex-1" style={{ backgroundColor: colors.primaryLight }} />
@@ -111,22 +125,35 @@ const ChatThemePicker: React.FC<{
 }> = ({ selectedTheme, onSelectTheme, className }) => {
   const { theme: currentGlobalTheme } = useTheme();
   const { t } = useTranslation();
+  const { data: serverThemes } = useGetActiveChatThemes();
+
   const isSystemDark =
     currentGlobalTheme === "system"
       ? typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
       : currentGlobalTheme === "dark" || currentGlobalTheme === "dark-old";
 
+  const allThemes = useMemo(() => {
+    if (serverThemes && serverThemes.length > 0) {
+      const hasDefault = serverThemes.some((t) => t.isDefault || t.key === "default");
+      if (!hasDefault) {
+        return [DEFAULT_CHAT_THEME, ...serverThemes];
+      }
+      return serverThemes;
+    }
+    return [DEFAULT_CHAT_THEME];
+  }, [serverThemes]);
+
   const sortedThemes = useMemo(() => {
-    const defaultTheme = themeDetails.filter((t) => t.isDefault);
-    const eventThemes = themeDetails.filter((t) => !t.isDefault && (t as any).isEvent);
-    const hasBgThemes = themeDetails.filter(
-      (t) => !t.isDefault && !(t as any).isEvent && (t as any).bgImage,
+    const defaultTheme = allThemes.filter((t) => t.isDefault || t.key === "default");
+    const eventThemes = allThemes.filter((t) => !t.isDefault && t.key !== "default" && t.isEvent);
+    const hasBgThemes = allThemes.filter(
+      (t) => !t.isDefault && t.key !== "default" && !t.isEvent && t.bgImage,
     );
-    const normalThemes = themeDetails.filter(
-      (t) => !t.isDefault && !(t as any).isEvent && !(t as any).bgImage,
+    const normalThemes = allThemes.filter(
+      (t) => !t.isDefault && t.key !== "default" && !t.isEvent && !t.bgImage,
     );
     return [...defaultTheme, ...eventThemes, ...hasBgThemes, ...normalThemes];
-  }, []);
+  }, [allThemes]);
 
   return (
     <div
@@ -138,6 +165,13 @@ const ChatThemePicker: React.FC<{
       <div className="grid grid-cols-3 gap-2 sm:gap-2.5 w-full">
         {sortedThemes.map((item) => {
           const isActive = selectedTheme === item.key;
+          const colors = isSystemDark ? item.dark : item.light;
+          const gradientCss =
+            colors
+              ? parseGradientToCss(colors.gradient) ||
+                `linear-gradient(135deg, ${colors.primaryMain || "#107a51"} 0%, ${colors.primaryLight || "#85e3ad"} 100%)`
+              : "";
+
           return (
             <button
               key={item.key}
@@ -151,41 +185,35 @@ const ChatThemePicker: React.FC<{
               )}
             >
               <div className="w-9 h-9 sm:w-11 sm:h-11 rounded-full overflow-hidden flex border border-border-main/30 shadow-sm shrink-0 bg-cover bg-center relative">
-                {item.isDefault ? (
+                {item.isDefault || item.key === "default" ? (
                   <svg viewBox="0 0 56 56" className="w-full h-full flex-shrink-0">
                     <path d="M28,0 A28,28 0 0,0 28,56 Z" fill="#ffffff" />
                     <path d="M28,0 A28,28 0 0,1 28,56 Z" fill="#1f2937" />
                     <circle cx="28" cy="28" r="12" fill="#ff6b8b" />
                   </svg>
-                ) : (item as any).bgImage ? (
+                ) : item.bgImage ? (
                   <div
                     className="w-full h-full bg-cover bg-center"
-                    style={{ backgroundImage: `url(${(item as any).bgImage})` }}
+                    style={{ backgroundImage: `url(${item.bgImage})` }}
                   />
-                ) : (
-                  (() => {
-                    const colors = isSystemDark ? item.dark : item.light;
-                    if (!colors) return null;
-                    return (
-                      <>
-                        <div className={clsx("w-1/2 h-full", colors.gradient)} />
-                        <div className="w-1/2 h-full flex flex-col">
-                          <div className="flex-1 flex">
-                            <div
-                              className="flex-1"
-                              style={{ backgroundColor: colors.primaryLight }}
-                            />
-                            <div className="flex-1" style={{ backgroundColor: colors.primaryMain }} />
-                          </div>
-                          <div className="flex-1 flex">
-                            <div className="flex-1" style={{ backgroundColor: colors.bgMain }} />
-                            <div className="flex-1" style={{ backgroundColor: colors.bgSecond }} />
-                          </div>
-                        </div>
-                      </>
-                    );
-                  })()
-                )}
+                ) : colors ? (
+                  <>
+                    <div className="w-1/2 h-full" style={{ background: gradientCss }} />
+                    <div className="w-1/2 h-full flex flex-col">
+                      <div className="flex-1 flex">
+                        <div
+                          className="flex-1"
+                          style={{ backgroundColor: colors.primaryLight }}
+                        />
+                        <div className="flex-1" style={{ backgroundColor: colors.primaryMain }} />
+                      </div>
+                      <div className="flex-1 flex">
+                        <div className="flex-1" style={{ backgroundColor: colors.bgMain }} />
+                        <div className="flex-1" style={{ backgroundColor: colors.bgSecond }} />
+                      </div>
+                    </div>
+                  </>
+                ) : null}
               </div>
               <Text
                 sz="xs"
@@ -199,7 +227,7 @@ const ChatThemePicker: React.FC<{
                   <FontAwesomeIcon icon={faCheck} className="text-[8px]" />
                 </div>
               )}
-              {(item as any).isEvent && (
+              {item.isEvent && (
                 <div className="absolute top-1 left-1 bg-secondary-500/15 text-secondary-600 dark:text-secondary-400 border border-secondary-500/25 text-[7px] sm:text-[8px] font-bold px-1 py-0.2 rounded scale-90 origin-top-left uppercase tracking-wider">
                   Sự kiện
                 </div>
@@ -223,6 +251,24 @@ export const ChatThemeDialogContent: React.FC<{
   const [backgroundUrl, setBackgroundUrl] = useState<string | null>(initialBackgroundUrl);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const isMobile = useMobile();
+  const { theme: currentGlobalTheme } = useTheme();
+  const { data: serverThemes } = useGetActiveChatThemes();
+
+  const isSystemDark =
+    currentGlobalTheme === "system"
+      ? typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
+      : currentGlobalTheme === "dark" || currentGlobalTheme === "dark-old";
+
+  const selectedThemeObj = useMemo(() => {
+    if (selectedTheme === "default") return null;
+    return serverThemes?.find((t) => t.key === selectedTheme) || null;
+  }, [serverThemes, selectedTheme]);
+
+  const dynamicPreviewStyle = useMemo(() => {
+    return getThemeCssVariables(selectedThemeObj, isSystemDark);
+  }, [selectedThemeObj, isSystemDark]);
+
+  const effectiveBgImage = backgroundUrl || selectedThemeObj?.bgImage || null;
 
   const handleSelectTheme = (themeName: string) => {
     setSelectedTheme(themeName);
@@ -346,13 +392,14 @@ export const ChatThemeDialogContent: React.FC<{
 
         <div
           data-chat-theme={selectedTheme === "default" ? undefined : selectedTheme}
+          style={dynamicPreviewStyle}
           className="relative flex flex-col bg-bg-main rounded-xl border border-border-main/60 shadow-inner overflow-hidden h-[190px] md:flex-1 md:h-auto transition-colors duration-200"
         >
           <div
             data-chat-scrollable="true"
             style={
-              backgroundUrl
-                ? ({ "--chat-custom-bg": `url(${backgroundUrl})` } as React.CSSProperties)
+              effectiveBgImage
+                ? ({ "--chat-custom-bg": `url(${effectiveBgImage})` } as React.CSSProperties)
                 : undefined
             }
             className="flex-1 py-2 overflow-hidden flex flex-col justify-center px-2.5 pointer-events-none select-none gap-2"
@@ -568,24 +615,18 @@ export const ConversationPage: React.FC<ConversationPageProps> = ({}) => {
       ? typeof window !== "undefined" && window.matchMedia("(prefers-color-scheme: dark)").matches
       : currentGlobalTheme === "dark" || currentGlobalTheme === "dark-old";
 
-  const themeLabels: Record<string, string> = {
-    default: "Mặc định",
-    "chat-emerald": "Emerald",
-    "chat-sunset": "Sunset",
-    "chat-cyberpunk": "Cyberpunk",
-    "chat-lavender": "Lavender",
-    "chat-ocean": "Ocean Deep",
-    "chat-bubblegum": "Bubblegum",
-    "chat-worldcup": "World Cup",
-    "chat-vietnam": "Việt Nam",
-    "chat-vutru": "Vũ trụ",
-  };
+  const { data: serverThemes } = useGetActiveChatThemes();
   const activeThemeKey = conv?.theme || "default";
-  const currentThemeLabel = t(
-    `common:conversations.themes.${activeThemeKey.replace("chat-", "")}`,
-    themeLabels[activeThemeKey] || "Mặc định",
-  );
-  const activeThemeObj = themeDetails.find((t) => t.key === activeThemeKey) || themeDetails[0];
+  const activeThemeObj = useMemo(() => {
+    if (activeThemeKey === "default") return DEFAULT_CHAT_THEME;
+    return serverThemes?.find((t) => t.key === activeThemeKey) || DEFAULT_CHAT_THEME;
+  }, [serverThemes, activeThemeKey]);
+
+  const currentThemeLabel =
+    activeThemeObj.label ||
+    (activeThemeKey === "default"
+      ? t("common:conversations.themes.default", "Mặc định")
+      : activeThemeKey.replace("chat-", ""));
 
   const { openDialog, closeDialog } = useDialog();
   const [isSaving, setIsSaving] = useState(false);

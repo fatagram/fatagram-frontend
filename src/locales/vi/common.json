@@ -138,5 +138,19 @@
     "still_offline": "Vẫn chưa có kết nối Internet. Vui lòng thử lại sau."
   },
   "loadMore": "Xem thêm",
-  "allResultsSeen": "Đã xem hết kết quả."
+  "allResultsSeen": "Đã xem hết kết quả.",
+  "admin": {
+    "themes": {
+      "title": "Quản Lý Chủ Đề Đoạn Chat",
+      "createSuccess": "Tạo theme thành công",
+      "createError": "Lỗi khi tạo theme",
+      "updateSuccess": "Cập nhật theme thành công",
+      "updateError": "Lỗi khi cập nhật theme",
+      "deleteSuccess": "Đã xóa theme thành công",
+      "deleteError": "Lỗi khi xóa theme",
+      "activated": "Đã kích hoạt theme",
+      "deactivated": "Đã ẩn theme",
+      "toggleError": "Lỗi khi đổi trạng thái theme"
+    }
+  }
 }

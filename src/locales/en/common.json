@@ -140,5 +140,19 @@
     "still_offline": "Still no internet connection. Please try again."
   },
   "loadMore": "Load more",
-  "allResultsSeen": "You've seen all results."
+  "allResultsSeen": "You've seen all results.",
+  "admin": {
+    "themes": {
+      "title": "Chat Theme Management",
+      "createSuccess": "Theme created successfully",
+      "createError": "Failed to create theme",
+      "updateSuccess": "Theme updated successfully",
+      "updateError": "Failed to update theme",
+      "deleteSuccess": "Theme deleted successfully",
+      "deleteError": "Failed to delete theme",
+      "activated": "Theme activated",
+      "deactivated": "Theme hidden",
+      "toggleError": "Failed to toggle theme status"
+    }
+  }
 }
